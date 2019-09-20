@@ -6,7 +6,7 @@
     <data>
         <instance id="companyDc"
                   class="com.company.itpearls.entity.Company"
-                  view="company-view-ownership">
+                  view="company-view">
             <loader/>
         </instance>
         <collection id="companyOwnershipsDc" class="com.company.itpearls.entity.Ownershup" view="_minimal">
@@ -16,14 +16,28 @@
                 </query>
             </loader>
         </collection>
+        <collection id="companyDirectorsDc" class="com.company.itpearls.entity.Person" view="_minimal">
+            <loader id="companyDirectorsLc">
+                <query>
+                    <![CDATA[select e from itpearls_Person e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="companyDc">
             <column width="250px">
+                <checkBox id="companyOurClientField" property="companyOurClient"/>
                 <lookupPickerField id="companyOwnershipField" optionsContainer="companyOwnershipsDc"
                                    property="companyOwnership">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="companyDirectorField" optionsContainer="companyDirectorsDc"
+                                   property="companyDirector">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>

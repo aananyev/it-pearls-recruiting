@@ -1,48 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="regionsTable"
-        messagesPack="com.company.itpearls.web.screens.region">
+        focusComponent="skillsTable"
+        messagesPack="com.company.itpearls.web.screens.skill">
     <data readOnly="true">
-        <collection id="regionsDc"
-                    class="com.company.itpearls.entity.Region"
-                    view="region-view_1">
-            <loader id="regionsDl">
+        <collection id="skillsDc"
+                    class="com.company.itpearls.entity.Skill"
+                    view="skill-view">
+            <loader id="skillsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Region e]]>
+                    <![CDATA[select e from itpearls_Skill e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="regionsTable"
+    <layout expand="skillsTable"
             spacing="true">
         <filter id="filter"
-                applyTo="regionsTable"
-                dataLoader="regionsDl">
+                applyTo="skillsTable"
+                dataLoader="skillsDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="regionsTable"
+        <groupTable id="skillsTable"
                     width="100%"
-                    dataContainer="regionsDc">
+                    dataContainer="skillsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="regionRuName"/>
-                <column id="regionCountry"/>
-                <column id="regionEnName"/>
-                <column id="regionCode"/>
+                <column id="skillName"/>
+                <column id="skillType"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="regionsTable.create"/>
-                <button id="editBtn" action="regionsTable.edit"/>
-                <button id="removeBtn" action="regionsTable.remove"/>
+                <button id="createBtn" action="skillsTable.create"/>
+                <button id="editBtn" action="skillsTable.edit"/>
+                <button id="removeBtn" action="skillsTable.remove"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

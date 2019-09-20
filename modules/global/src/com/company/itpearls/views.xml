@@ -12,7 +12,16 @@
     <view entity="itpearls_City" name="city-view" extends="_local">
         <property name="cityRegion" view="_minimal"/>
     </view>
-    <view entity="itpearls_Company" name="company-view-ownership" extends="_local">
+    <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" view="_minimal"/>
+        <property name="companyDirector" view="_minimal"/>
+    </view>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
+        <property name="companyName" view="_minimal"/>
+        <property name="departamentHrDirector" view="_minimal"/>
+        <property name="departamentDirector" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Skill" name="skill-view" extends="_local">
+        <property name="skillType" view="_minimal"/>
     </view>
 </views>

@@ -1,0 +1,1 @@
+drop table ITPEARLS_SPECIALISATION__U99782 if exists cascade ;

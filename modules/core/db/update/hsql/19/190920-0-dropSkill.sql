@@ -1,0 +1,1 @@
+alter table ITPEARLS_SKILL rename to ITPEARLS_SKILL__U65193 ;

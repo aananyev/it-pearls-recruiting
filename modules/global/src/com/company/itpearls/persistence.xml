@@ -9,5 +9,8 @@
         <class>com.company.itpearls.entity.Region</class>
         <class>com.company.itpearls.entity.Ownershup</class>
         <class>com.company.itpearls.entity.Company</class>
+        <class>com.company.itpearls.entity.CompanyDepartament</class>
+        <class>com.company.itpearls.entity.Specialisation</class>
+        <class>com.company.itpearls.entity.Skill</class>
     </persistence-unit>
 </persistence>

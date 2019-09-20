@@ -1,51 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="companiesTable"
-        messagesPack="com.company.itpearls.web.screens.company">
+        focusComponent="specialisationsTable"
+        messagesPack="com.company.itpearls.web.screens.specialisation">
     <data readOnly="true">
-        <collection id="companiesDc"
-                    class="com.company.itpearls.entity.Company"
-                    view="company-view">
-            <loader id="companiesDl">
+        <collection id="specialisationsDc"
+                    class="com.company.itpearls.entity.Specialisation"
+                    view="_local">
+            <loader id="specialisationsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Company e]]>
+                    <![CDATA[select e from itpearls_Specialisation e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="companiesTable"
+    <layout expand="specialisationsTable"
             spacing="true">
         <filter id="filter"
-                applyTo="companiesTable"
-                dataLoader="companiesDl">
+                applyTo="specialisationsTable"
+                dataLoader="specialisationsDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="companiesTable"
+        <groupTable id="specialisationsTable"
                     width="100%"
-                    dataContainer="companiesDc">
+                    dataContainer="specialisationsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="companyOurClient"/>
-                <column id="companyOwnership"/>
-                <column id="companyDirector"/>
-                <column id="comanyName"/>
-                <column id="companyShortName"/>
-                <column id="companyEnName"/>
-                <column id="companyEnShortName"/>
+                <column id="specRuName"/>
+                <column id="specEnName"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="companiesTable.create"/>
-                <button id="editBtn" action="companiesTable.edit"/>
-                <button id="removeBtn" action="companiesTable.remove"/>
+                <button id="createBtn" action="specialisationsTable.create"/>
+                <button id="editBtn" action="specialisationsTable.edit"/>
+                <button id="removeBtn" action="specialisationsTable.remove"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

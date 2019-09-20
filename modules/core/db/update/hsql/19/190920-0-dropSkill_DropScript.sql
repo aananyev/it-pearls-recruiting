@@ -1,0 +1,1 @@
+drop table ITPEARLS_SKILL__U65193 if exists cascade ;

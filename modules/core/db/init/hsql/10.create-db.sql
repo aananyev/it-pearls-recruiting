@@ -129,7 +129,9 @@ create table ITPEARLS_COMPANY (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    COMPANY_OUR_CLIENT boolean,
     COMPANY_OWNERSHIP_ID varchar(36),
+    COMPANY_DIRECTOR_ID varchar(36),
     COMANY_NAME varchar(80) not null,
     COMPANY_SHORT_NAME varchar(30),
     COMPANY_EN_NAME varchar(80),
@@ -138,3 +140,59 @@ create table ITPEARLS_COMPANY (
     primary key (ID)
 )^
 -- end ITPEARLS_COMPANY
+-- begin ITPEARLS_COMPANY_DEPARTAMENT
+create table ITPEARLS_COMPANY_DEPARTAMENT (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    DEPARTAMENT_RU_NAME varchar(80) not null,
+    DEPARTAMENT_EN_NAME varchar(80),
+    COMPANY_NAME_ID varchar(36),
+    DEPARTAMENT_HR_DIRECTOR_ID varchar(36),
+    DEPARTAMENT_DIRECTOR_ID varchar(36),
+    DEPARTAMENT_DESCRIPTION longvarchar,
+    DEPARTAMENT_NUMBER_OF_PROGRAMMERS integer,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_COMPANY_DEPARTAMENT
+-- begin ITPEARLS_SPECIALISATION
+create table ITPEARLS_SPECIALISATION (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    SPEC_RU_NAME varchar(80),
+    SPEC_EN_NAME varchar(80),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SPECIALISATION
+-- begin ITPEARLS_SKILL
+create table ITPEARLS_SKILL (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    SKILL_NAME varchar(80) not null,
+    SKILL_TYPE_ID varchar(36),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SKILL
