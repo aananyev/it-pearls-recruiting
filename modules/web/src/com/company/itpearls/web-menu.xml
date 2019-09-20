@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <menu id="application-itpearls" insertBefore="administration">
-        <item screen="itpearls_Position.browse"/>
-        <item screen="itpearls_Country.browse"/>
-        <item screen="itpearls_City.browse"/>
         <item screen="itpearls_Ownershup.browse"/>
-        <item screen="itpearls_Person.browse"/>
         <item screen="itpearls_Company.browse"/>
         <item screen="itpearls_CompanyDepartament.browse"/>
-        <item screen="itpearls_Specialisation.browse"/>
         <item screen="itpearls_Skill.browse"/>
+    </menu>
+    <menu id="application-person" insertAfter="application-itpearls">
+        <item screen="itpearls_Person.browse"/>
+        <item screen="itpearls_Specialisation.browse"/>
+        <item screen="itpearls_Position.browse"/>
+    </menu>
+    <menu id="application-hadbook" insertBefore="administration">
+        <item screen="itpearls_City.browse"/>
+        <item screen="itpearls_Country.browse"/>
     </menu>
 </menu-config>
