@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.openposition">
+    <data>
+        <instance id="openPositionDc"
+                  class="com.company.itpearls.entity.OpenPosition"
+                  view="openPosition-view">
+            <loader/>
+        </instance>
+        <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_minimal">
+            <loader id="projectNamesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Project e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
+            <loader id="companyNamesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Company e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="projectsDc" class="com.company.itpearls.entity.Project" view="_minimal">
+            <loader id="projectsLc">
+                <query>
+                    <![CDATA[select e from itpearls_Project e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="openPositionDc">
+            <column width="250px">
+                <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc" property="projectName">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" property="companyName">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="projectField" optionsContainer="projectsDc" property="project">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <textField id="numberPositionField" property="numberPosition"/>
+                <textArea id="commentField" property="comment" rows="5"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

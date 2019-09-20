@@ -227,8 +227,10 @@ create table ITPEARLS_OPEN_POSITION (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    PROJECT_NAME_ID varchar(36),
-    COMPANY_NAME_ID varchar(36),
+    PROJECT_NAME_ID varchar(36) not null,
+    COMPANY_NAME_ID varchar(36) not null,
+    PROJECT_ID varchar(36) not null,
+    NUMBER_POSITION integer not null,
     COMMENT_ longvarchar,
     --
     primary key (ID)

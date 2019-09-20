@@ -28,4 +28,9 @@
         <property name="projectCompany" view="_minimal"/>
         <property name="projectDepartment" view="_minimal"/>
     </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local">
+        <property name="projectName" view="_minimal"/>
+        <property name="companyName" view="_minimal"/>
+        <property name="project" view="_minimal"/>
+    </view>
 </views>

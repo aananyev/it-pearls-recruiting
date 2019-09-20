@@ -5,7 +5,7 @@
         <item screen="itpearls_Company.browse"/>
         <item screen="itpearls_CompanyDepartament.browse"/>
         <item screen="itpearls_Skill.browse"/>
-        <item screen="itpearls_Project.browse"/>
+        <item screen="itpearls_OpenPosition.browse"/>
     </menu>
     <menu id="application-person" insertAfter="application-itpearls">
         <item screen="itpearls_Person.browse"/>
@@ -15,5 +15,8 @@
     <menu id="application-hadbook" insertBefore="administration">
         <item screen="itpearls_City.browse"/>
         <item screen="itpearls_Country.browse"/>
+    </menu>
+    <menu id="application-project">
+        <item screen="itpearls_Project.browse"/>
     </menu>
 </menu-config>
