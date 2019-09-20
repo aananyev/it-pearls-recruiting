@@ -5,6 +5,7 @@
         <item screen="itpearls_Company.browse"/>
         <item screen="itpearls_CompanyDepartament.browse"/>
         <item screen="itpearls_Skill.browse"/>
+        <item screen="itpearls_Project.browse"/>
     </menu>
     <menu id="application-person" insertAfter="application-itpearls">
         <item screen="itpearls_Person.browse"/>

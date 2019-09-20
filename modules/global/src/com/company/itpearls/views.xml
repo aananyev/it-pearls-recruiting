@@ -24,4 +24,8 @@
     <view entity="itpearls_Skill" name="skill-view" extends="_local">
         <property name="skillType" view="_minimal"/>
     </view>
+    <view entity="itpearls_Project" name="project-view" extends="_local">
+        <property name="projectCompany" view="_minimal"/>
+        <property name="projectDepartment" view="_minimal"/>
+    </view>
 </views>

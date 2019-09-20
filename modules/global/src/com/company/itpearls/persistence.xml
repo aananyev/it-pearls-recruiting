@@ -12,5 +12,7 @@
         <class>com.company.itpearls.entity.CompanyDepartament</class>
         <class>com.company.itpearls.entity.Specialisation</class>
         <class>com.company.itpearls.entity.Skill</class>
+        <class>com.company.itpearls.entity.OpenPosition</class>
+        <class>com.company.itpearls.entity.Project</class>
     </persistence-unit>
 </persistence>

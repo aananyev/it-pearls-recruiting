@@ -196,3 +196,41 @@ create table ITPEARLS_SKILL (
     primary key (ID)
 )^
 -- end ITPEARLS_SKILL
+-- begin ITPEARLS_PROJECT
+create table ITPEARLS_PROJECT (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    PROJECT_NAME varchar(80),
+    START_PROJECT_DATE date,
+    END_PROJECT_DATE date,
+    PROJECT_COMPANY_ID varchar(36) not null,
+    PROJECT_DEPARTMENT_ID varchar(36) not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_PROJECT
+-- begin ITPEARLS_OPEN_POSITION
+create table ITPEARLS_OPEN_POSITION (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    PROJECT_NAME_ID varchar(36),
+    COMPANY_NAME_ID varchar(36),
+    COMMENT_ longvarchar,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_OPEN_POSITION
