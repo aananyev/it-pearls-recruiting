@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.company">
+    <data>
+        <instance id="companyDc"
+                  class="com.company.itpearls.entity.Company"
+                  view="company-view-ownership">
+            <loader/>
+        </instance>
+        <collection id="companyOwnershipsDc" class="com.company.itpearls.entity.Ownershup" view="_minimal">
+            <loader id="companyOwnershipsLc">
+                <query>
+                    <![CDATA[select e from itpearls_Ownershup e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="companyDc">
+            <column width="250px">
+                <lookupPickerField id="companyOwnershipField" optionsContainer="companyOwnershipsDc"
+                                   property="companyOwnership">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <textField id="comanyNameField" property="comanyName"/>
+                <textField id="companyShortNameField" property="companyShortName"/>
+                <textField id="companyEnNameField" property="companyEnName"/>
+                <textField id="companyEnShortNameField" property="companyEnShortName"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.Column;
@@ -7,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+@NamePattern("%s|shortType")
 @Table(name = "ITPEARLS_OWNERSHUP")
 @Entity(name = "itpearls_Ownershup")
 public class Ownershup extends StandardEntity {
@@ -17,7 +19,7 @@ public class Ownershup extends StandardEntity {
     protected String shortType;
 
     @NotNull
-    @Column(name = "LONG_TYPE", nullable = false, unique = true, length = 30)
+    @Column(name = "LONG_TYPE", nullable = false, unique = true, length = 50)
     protected String longType;
 
     public String getShortType() {

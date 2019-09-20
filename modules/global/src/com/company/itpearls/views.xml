@@ -12,4 +12,7 @@
     <view entity="itpearls_City" name="city-view" extends="_local">
         <property name="cityRegion" view="_minimal"/>
     </view>
+    <view entity="itpearls_Company" name="company-view-ownership" extends="_local">
+        <property name="companyOwnership" view="_minimal"/>
+    </view>
 </views>

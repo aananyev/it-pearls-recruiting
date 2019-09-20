@@ -8,5 +8,6 @@
         <class>com.company.itpearls.entity.City</class>
         <class>com.company.itpearls.entity.Region</class>
         <class>com.company.itpearls.entity.Ownershup</class>
+        <class>com.company.itpearls.entity.Company</class>
     </persistence-unit>
 </persistence>

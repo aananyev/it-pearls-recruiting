@@ -8,5 +8,6 @@
         <item screen="itpearls_City.browse"/>
         <item screen="itpearls_Firma.browse"/>
         <item screen="itpearls_Ownershup.browse"/>
+        <item screen="itpearls_Company.browse"/>
     </menu>
 </menu-config>
