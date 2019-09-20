@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.city">
+    <data>
+        <instance id="cityDc"
+                  class="com.company.itpearls.entity.City"
+                  view="city-view">
+            <loader/>
+        </instance>
+        <collection id="cityRegionsDc" class="com.company.itpearls.entity.Region" view="_minimal">
+            <loader id="cityRegionsLc">
+                <query>
+                    <![CDATA[select e from itpearls_Region e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="cityDc">
+            <column width="250px">
+                <textField id="cityRuNameField" property="cityRuName"/>
+                <textField id="cityEnNameField" property="cityEnName"/>
+                <textField id="cityPhoneCodeField" property="cityPhoneCode"/>
+                <lookupPickerField id="cityRegionField" optionsContainer="cityRegionsDc" property="cityRegion">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

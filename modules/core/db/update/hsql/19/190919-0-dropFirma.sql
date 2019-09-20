@@ -1,0 +1,1 @@
+alter table ITPEARLS_FIRMA rename to ITPEARLS_FIRMA__U51667 ;

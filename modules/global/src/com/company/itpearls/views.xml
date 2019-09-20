@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
+
+    <view entity="itpearls_Person" name="person-view" extends="_local">
+        <property name="positionCountry" view="_minimal"/>
+        <property name="personPosition" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Region" name="region-view" extends="_local"/>
+    <view entity="itpearls_Region" name="region-view_1" extends="_local">
+        <property name="regionCountry" view="_minimal"/>
+    </view>
+    <view entity="itpearls_City" name="city-view" extends="_local">
+        <property name="cityRegion" view="_minimal"/>
+    </view>
+</views>

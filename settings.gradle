@@ -1,0 +1,8 @@
+rootProject.name = 'IT-Pearls'
+def modulePrefix = 'app'
+include(":${modulePrefix}-global", ":${modulePrefix}-core", ":${modulePrefix}-web", ":${modulePrefix}-gui", ":${modulePrefix}-web-toolkit")
+project(":${modulePrefix}-global").projectDir = new File(settingsDir, 'modules/global')
+project(":${modulePrefix}-core").projectDir = new File(settingsDir, 'modules/core')
+project(":${modulePrefix}-web").projectDir = new File(settingsDir, 'modules/web')
+project(":${modulePrefix}-gui").projectDir = new File(settingsDir, 'modules/gui')
+project(":${modulePrefix}-web-toolkit").projectDir = new File(settingsDir, 'modules/web-toolkit')

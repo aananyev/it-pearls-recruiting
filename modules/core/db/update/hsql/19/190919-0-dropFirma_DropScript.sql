@@ -1,0 +1,1 @@
+drop table ITPEARLS_FIRMA__U51667 if exists cascade ;
