@@ -14,5 +14,6 @@
         <class>com.company.itpearls.entity.Skill</class>
         <class>com.company.itpearls.entity.OpenPosition</class>
         <class>com.company.itpearls.entity.Project</class>
+        <class>com.company.itpearls.entity.CompanyGroup</class>
     </persistence-unit>
 </persistence>

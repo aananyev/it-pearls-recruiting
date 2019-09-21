@@ -39,6 +39,7 @@
                 <column id="companyShortName"/>
                 <column id="companyEnName"/>
                 <column id="companyEnShortName"/>
+                <column id="companyGroup"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

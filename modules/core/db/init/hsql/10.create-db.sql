@@ -136,6 +136,7 @@ create table ITPEARLS_COMPANY (
     COMPANY_SHORT_NAME varchar(30),
     COMPANY_EN_NAME varchar(80),
     COMPANY_EN_SHORT_NAME varchar(30),
+    COMPANY_GROUP_ID varchar(36),
     --
     primary key (ID)
 )^
@@ -236,3 +237,20 @@ create table ITPEARLS_OPEN_POSITION (
     primary key (ID)
 )^
 -- end ITPEARLS_OPEN_POSITION
+-- begin ITPEARLS_COMPANY_GROUP
+create table ITPEARLS_COMPANY_GROUP (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    COMPANY_RU_GROUP_NAME varchar(80) not null,
+    COMPANY_EN_GROUP_NAME varchar(80) not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_COMPANY_GROUP

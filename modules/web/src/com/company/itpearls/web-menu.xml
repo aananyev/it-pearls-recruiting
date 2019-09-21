@@ -2,10 +2,11 @@
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <menu id="application-itpearls" insertBefore="administration">
         <item screen="itpearls_Ownershup.browse"/>
-        <item screen="itpearls_Company.browse"/>
         <item screen="itpearls_CompanyDepartament.browse"/>
         <item screen="itpearls_Skill.browse"/>
         <item screen="itpearls_OpenPosition.browse"/>
+        <item screen="itpearls_CompanyGroup.browse"/>
+        <item screen="itpearls_Company.browse"/>
     </menu>
     <menu id="application-person" insertAfter="application-itpearls">
         <item screen="itpearls_Person.browse"/>

@@ -22,11 +22,6 @@ public class Company extends StandardEntity {
     @JoinColumn(name = "COMPANY_OWNERSHIP_ID")
     protected Ownershup companyOwnership;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "COMPANY_DIRECTOR_ID")
-    protected Person companyDirector;
-
     @NotNull
     @Column(name = "COMANY_NAME", nullable = false, unique = true, length = 80)
     protected String comanyName;
@@ -39,6 +34,24 @@ public class Company extends StandardEntity {
 
     @Column(name = "COMPANY_EN_SHORT_NAME", unique = true, length = 30)
     protected String companyEnShortName;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMPANY_DIRECTOR_ID")
+    protected Person companyDirector;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMPANY_GROUP_ID")
+    protected CompanyGroup companyGroup;
+
+    public CompanyGroup getCompanyGroup() {
+        return companyGroup;
+    }
+
+    public void setCompanyGroup(CompanyGroup companyGroup) {
+        this.companyGroup = companyGroup;
+    }
 
     public Boolean getCompanyOurClient() {
         return companyOurClient;

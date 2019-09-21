@@ -23,6 +23,13 @@
                 </query>
             </loader>
         </collection>
+        <collection id="companyGroupsDc" class="com.company.itpearls.entity.CompanyGroup" view="_minimal">
+            <loader id="companyGroupsLc">
+                <query>
+                    <![CDATA[select e from itpearls_CompanyGroup e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -46,6 +53,11 @@
                 <textField id="companyShortNameField" property="companyShortName"/>
                 <textField id="companyEnNameField" property="companyEnName"/>
                 <textField id="companyEnShortNameField" property="companyEnShortName"/>
+                <lookupPickerField id="companyGroupField" optionsContainer="companyGroupsDc" property="companyGroup">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
             </column>
         </form>
         <hbox id="editActions" spacing="true">
