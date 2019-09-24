@@ -23,13 +23,6 @@
                 </query>
             </loader>
         </collection>
-        <collection id="projectsDc" class="com.company.itpearls.entity.Project" view="_minimal">
-            <loader id="projectsLc">
-                <query>
-                    <![CDATA[select e from itpearls_Project e]]>
-                </query>
-            </loader>
-        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -42,11 +35,6 @@
                     </actions>
                 </lookupPickerField>
                 <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" property="companyName">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="projectField" optionsContainer="projectsDc" property="project">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>

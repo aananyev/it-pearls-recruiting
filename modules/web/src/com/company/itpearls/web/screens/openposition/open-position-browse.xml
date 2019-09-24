@@ -34,7 +34,6 @@
             <columns>
                 <column id="projectName"/>
                 <column id="companyName"/>
-                <column id="project"/>
                 <column id="numberPosition"/>
                 <column id="comment"/>
             </columns>

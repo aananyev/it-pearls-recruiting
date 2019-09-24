@@ -25,12 +25,6 @@ public class OpenPosition extends StandardEntity {
     protected Company companyName;
 
     @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "PROJECT_ID")
-    protected Project project;
-
-    @NotNull
     @Column(name = "NUMBER_POSITION", nullable = false)
     protected Integer numberPosition;
 
@@ -44,14 +38,6 @@ public class OpenPosition extends StandardEntity {
 
     public void setNumberPosition(Integer numberPosition) {
         this.numberPosition = numberPosition;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     public Company getCompanyName() {

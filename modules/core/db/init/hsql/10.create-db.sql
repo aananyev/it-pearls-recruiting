@@ -230,7 +230,6 @@ create table ITPEARLS_OPEN_POSITION (
     --
     PROJECT_NAME_ID varchar(36) not null,
     COMPANY_NAME_ID varchar(36) not null,
-    PROJECT_ID varchar(36) not null,
     NUMBER_POSITION integer not null,
     COMMENT_ longvarchar,
     --
