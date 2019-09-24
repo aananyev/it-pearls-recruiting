@@ -265,7 +265,7 @@ create table ITPEARLS_MAIN_LIST (
     DELETED_BY varchar(50),
     --
     NUMBER_LIST integer not null,
-    CONTACT_NAME_ID varchar(36) not null,
+    CONTACT_NAME_ID varchar(36),
     PERSON_CURRENT_POSITION_ID varchar(36),
     PROJECT_NAME_ID varchar(36) not null,
     OPEN_POSITION_ID varchar(36),
@@ -294,3 +294,30 @@ create table ITPEARLS_ITERACTION (
     primary key (ID)
 )^
 -- end ITPEARLS_ITERACTION
+-- begin ITPEARLS_JOB_CANDIDATE
+create table ITPEARLS_JOB_CANDIDATE (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    FIRST_NAME varchar(80) not null,
+    MIDDLE_NAME varchar(80) not null,
+    SECOND_NAME varchar(80) not null,
+    BIRDH_DATE date not null,
+    EMAIL varchar(30),
+    PHONE varchar(10),
+    SKYPE_NAME varchar(30),
+    TELEGRAM_NAME varchar(30),
+    WIBER_NAME varchar(30),
+    WHATSUP_NAME varchar(30),
+    POSITION_COUNTRY_ID varchar(36),
+    PERSON_POSITION_ID varchar(36),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_JOB_CANDIDATE

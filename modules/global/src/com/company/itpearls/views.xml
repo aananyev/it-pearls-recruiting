@@ -29,6 +29,14 @@
         <property name="companyDirector" view="_minimal"/>
         <property name="companyGroup" view="_minimal"/>
     </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local">
+        <property name="projectName" view="_minimal"/>
+        <property name="companyName" view="_minimal"/>
+    </view>
+    <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local">
+        <property name="positionCountry" view="_minimal"/>
+        <property name="personPosition" view="_minimal"/>
+    </view>
     <view entity="itpearls_MainList" name="mainList-view" extends="_local">
         <property name="contactName" view="_minimal"/>
         <property name="personCurrentPosition" view="_minimal"/>
@@ -36,9 +44,5 @@
         <property name="openPosition" view="_minimal"/>
         <property name="iteractionName" view="_minimal"/>
         <property name="userFromCompany" view="_minimal"/>
-    </view>
-    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local">
-        <property name="projectName" view="_minimal"/>
-        <property name="companyName" view="_minimal"/>
     </view>
 </views>

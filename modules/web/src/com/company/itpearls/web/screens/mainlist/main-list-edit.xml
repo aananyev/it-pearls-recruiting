@@ -9,10 +9,10 @@
                   view="mainList-view">
             <loader/>
         </instance>
-        <collection id="contactNamesDc" class="com.company.itpearls.entity.Person" view="_minimal">
+        <collection id="contactNamesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
             <loader id="contactNamesLc">
                 <query>
-                    <![CDATA[select e from itpearls_Person e]]>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
                 </query>
             </loader>
         </collection>

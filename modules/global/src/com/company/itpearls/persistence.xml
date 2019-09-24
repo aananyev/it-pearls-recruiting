@@ -17,5 +17,6 @@
         <class>com.company.itpearls.entity.CompanyGroup</class>
         <class>com.company.itpearls.entity.MainList</class>
         <class>com.company.itpearls.entity.Iteraction</class>
+        <class>com.company.itpearls.entity.JobCandidate</class>
     </persistence-unit>
 </persistence>
