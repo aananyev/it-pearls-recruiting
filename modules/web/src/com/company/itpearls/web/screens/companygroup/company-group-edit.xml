@@ -6,7 +6,7 @@
     <data>
         <instance id="companyGroupDc"
                   class="com.company.itpearls.entity.CompanyGroup"
-                  view="_local">
+                  view="companyGroup-view">
             <loader/>
         </instance>
     </data>

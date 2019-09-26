@@ -34,11 +34,11 @@
             <columns>
                 <column id="companyOurClient"/>
                 <column id="companyOwnership"/>
-                <column id="companyDirector"/>
                 <column id="comanyName"/>
                 <column id="companyShortName"/>
                 <column id="companyEnName"/>
                 <column id="companyEnShortName"/>
+                <column id="companyDirector"/>
                 <column id="companyGroup"/>
             </columns>
             <rowsCount/>

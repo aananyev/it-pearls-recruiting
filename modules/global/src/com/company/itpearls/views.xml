@@ -1,38 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
 
-    <view entity="itpearls_Person" name="person-view" extends="_local">
-        <property name="positionCountry" view="_minimal"/>
-        <property name="personPosition" view="_minimal"/>
-    </view>
-    <view entity="itpearls_Region" name="region-view" extends="_local"/>
-    <view entity="itpearls_Region" name="region-view_1" extends="_local">
-        <property name="regionCountry" view="_minimal"/>
-    </view>
     <view entity="itpearls_City" name="city-view" extends="_local">
         <property name="cityRegion" view="_minimal"/>
-    </view>
-    <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
-        <property name="companyName" view="_minimal"/>
-        <property name="departamentHrDirector" view="_minimal"/>
-        <property name="departamentDirector" view="_minimal"/>
-    </view>
-    <view entity="itpearls_Skill" name="skill-view" extends="_local">
-        <property name="skillType" view="_minimal"/>
-    </view>
-    <view entity="itpearls_Project" name="project-view" extends="_local">
-        <property name="projectCompany" view="_minimal"/>
-        <property name="projectDepartment" view="_minimal"/>
     </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" view="_minimal"/>
         <property name="companyDirector" view="_minimal"/>
         <property name="companyGroup" view="_minimal"/>
     </view>
-    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local">
-        <property name="projectName" view="_minimal"/>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
         <property name="companyName" view="_minimal"/>
+        <property name="departamentHrDirector" view="_minimal"/>
+        <property name="departamentDirector" view="_minimal"/>
     </view>
+    <view entity="itpearls_CompanyGroup" name="companyGroup-view" extends="_local"/>
+    <view entity="itpearls_Country" name="country-view" extends="_local"/>
+    <view entity="itpearls_Iteraction" name="iteraction-view" extends="_local"/>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local">
         <property name="positionCountry" view="_minimal"/>
         <property name="personPosition" view="_minimal"/>
@@ -45,4 +29,25 @@
         <property name="iteractionName" view="_minimal"/>
         <property name="userFromCompany" view="_minimal"/>
     </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local">
+        <property name="projectName" view="_minimal"/>
+        <property name="companyName" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Ownershup" name="ownershup-view" extends="_local"/>
+    <view entity="itpearls_Person" name="person-view" extends="_local">
+        <property name="positionCountry" view="_minimal"/>
+        <property name="personPosition" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Position" name="position-view" extends="_local"/>
+    <view entity="itpearls_Project" name="project-view" extends="_local">
+        <property name="projectCompany" view="_minimal"/>
+        <property name="projectDepartment" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Region" name="region-view" extends="_local">
+        <property name="regionCountry" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Skill" name="skill-view" extends="_local">
+        <property name="skillType" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local"/>
 </views>

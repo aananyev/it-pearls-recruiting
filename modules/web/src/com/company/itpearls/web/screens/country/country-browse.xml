@@ -6,7 +6,7 @@
     <data readOnly="true">
         <collection id="countriesDc"
                     class="com.company.itpearls.entity.Country"
-                    view="_local">
+                    view="country-view">
             <loader id="countriesDl">
                 <query>
                     <![CDATA[select e from itpearls_Country e]]>

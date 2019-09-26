@@ -1,46 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="companyGroupsTable"
-        messagesPack="com.company.itpearls.web.screens.companygroup">
+        focusComponent="regionsTable"
+        messagesPack="com.company.itpearls.web.screens.region">
     <data readOnly="true">
-        <collection id="companyGroupsDc"
-                    class="com.company.itpearls.entity.CompanyGroup"
-                    view="companyGroup-view">
-            <loader id="companyGroupsDl">
+        <collection id="regionsDc"
+                    class="com.company.itpearls.entity.Region"
+                    view="region-view">
+            <loader id="regionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_CompanyGroup e]]>
+                    <![CDATA[select e from itpearls_Region e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="companyGroupsTable"
+    <layout expand="regionsTable"
             spacing="true">
         <filter id="filter"
-                applyTo="companyGroupsTable"
-                dataLoader="companyGroupsDl">
+                applyTo="regionsTable"
+                dataLoader="regionsDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="companyGroupsTable"
+        <groupTable id="regionsTable"
                     width="100%"
-                    dataContainer="companyGroupsDc">
+                    dataContainer="regionsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="companyRuGroupName"/>
-                <column id="companyEnGroupName"/>
+                <column id="regionRuName"/>
+                <column id="regionEnName"/>
+                <column id="regionCountry"/>
+                <column id="regionCode"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="companyGroupsTable.create"/>
-                <button id="editBtn" action="companyGroupsTable.edit"/>
-                <button id="removeBtn" action="companyGroupsTable.remove"/>
+                <button id="createBtn" action="regionsTable.create"/>
+                <button id="editBtn" action="regionsTable.edit"/>
+                <button id="removeBtn" action="regionsTable.remove"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

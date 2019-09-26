@@ -6,7 +6,7 @@
     <data>
         <instance id="countryDc"
                   class="com.company.itpearls.entity.Country"
-                  view="_local">
+                  view="country-view">
             <loader/>
         </instance>
     </data>
