@@ -50,4 +50,5 @@
         <property name="skillType" view="_minimal"/>
     </view>
     <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local"/>
+    <view entity="itpearls_RequiredParameters" name="requiredParameters-view" extends="_local"/>
 </views>

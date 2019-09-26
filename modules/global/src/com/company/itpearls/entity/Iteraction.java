@@ -15,8 +15,20 @@ public class Iteraction extends StandardEntity {
     private static final long serialVersionUID = -3287484760093673466L;
 
     @NotNull
+    @Column(name = "NUMBER_", nullable = false, unique = true)
+    protected Integer number;
+
+    @NotNull
     @Column(name = "ITERATION_NAME", nullable = false, unique = true, length = 80)
     protected String iterationName;
+
+    public Integer getNumber() {
+        return number;
+    }
+
+    public void setNumber(Integer number) {
+        this.number = number;
+    }
 
     public String getIterationName() {
         return iterationName;

@@ -18,5 +18,6 @@
         <class>com.company.itpearls.entity.MainList</class>
         <class>com.company.itpearls.entity.Iteraction</class>
         <class>com.company.itpearls.entity.JobCandidate</class>
+        <class>com.company.itpearls.entity.RequiredParameters</class>
     </persistence-unit>
 </persistence>

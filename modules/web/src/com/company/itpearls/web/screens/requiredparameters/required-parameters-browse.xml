@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="iteractionsTable"
-        messagesPack="com.company.itpearls.web.screens.iteraction">
+        focusComponent="requiredParametersesTable"
+        messagesPack="com.company.itpearls.web.screens.requiredparameters">
     <data readOnly="true">
-        <collection id="iteractionsDc"
-                    class="com.company.itpearls.entity.Iteraction"
-                    view="iteraction-view">
-            <loader id="iteractionsDl">
-                <query><![CDATA[select e from itpearls_Iteraction e
+        <collection id="requiredParametersesDc"
+                    class="com.company.itpearls.entity.RequiredParameters"
+                    view="requiredParameters-view">
+            <loader id="requiredParametersesDl">
+                <query><![CDATA[select e from itpearls_RequiredParameters e
 order by e.number]]></query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="iteractionsTable"
+    <layout expand="requiredParametersesTable"
             spacing="true">
         <filter id="filter"
-                applyTo="iteractionsTable"
-                dataLoader="iteractionsDl">
+                applyTo="requiredParametersesTable"
+                dataLoader="requiredParametersesDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="iteractionsTable"
+        <groupTable id="requiredParametersesTable"
                     width="100%"
-                    dataContainer="iteractionsDc">
+                    dataContainer="requiredParametersesDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="parameterName"/>
                 <column id="number"/>
-                <column id="iterationName"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="iteractionsTable.create"/>
-                <button id="editBtn" action="iteractionsTable.edit"/>
-                <button id="removeBtn" action="iteractionsTable.remove"/>
+                <button id="createBtn" action="requiredParametersesTable.create"/>
+                <button id="editBtn" action="requiredParametersesTable.edit"/>
+                <button id="removeBtn" action="requiredParametersesTable.remove"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

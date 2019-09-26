@@ -2,21 +2,21 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
-        messagesPack="com.company.itpearls.web.screens.iteraction">
+        messagesPack="com.company.itpearls.web.screens.requiredparameters">
     <data>
-        <instance id="iteractionDc"
-                  class="com.company.itpearls.entity.Iteraction"
-                  view="iteraction-view">
+        <instance id="requiredParametersDc"
+                  class="com.company.itpearls.entity.RequiredParameters"
+                  view="requiredParameters-view">
             <loader/>
         </instance>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="iteractionDc">
+        <form id="form" dataContainer="requiredParametersDc">
             <column width="250px">
+                <textField id="parameterNameField" property="parameterName"/>
                 <textField id="numberField" property="number"/>
-                <textField id="iterationNameField" property="iterationName"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">
