@@ -7,8 +7,13 @@
         <instance id="specialisationDc"
                   class="com.company.itpearls.entity.Specialisation"
                   view="specialisation-view">
-            <loader/>
+            <loader id="specialisationDl"/>
         </instance>
+        <collection id="skillsDc" class="com.company.itpearls.entity.Skill" view="_local">
+            <loader id="skillDl">
+                <query><![CDATA[select e from itpearls_Skill e]]></query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -17,6 +22,13 @@
             <column width="250px">
                 <textField id="specRuNameField" property="specRuName"/>
                 <textField id="specEnNameField" property="specEnName"/>
+                <groupBox caption="Skills">
+                    <table height="100px" width="100%" dataContainer="skillsDc">
+                        <columns>
+                            <column id="skillName"/>
+                        </columns>
+                    </table>
+                </groupBox>
             </column>
         </form>
         <hbox id="editActions" spacing="true">
