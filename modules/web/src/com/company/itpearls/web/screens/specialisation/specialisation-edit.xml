@@ -11,7 +11,8 @@
         </instance>
         <collection id="skillsDc" class="com.company.itpearls.entity.Skill" view="_local">
             <loader id="skillDl">
-                <query><![CDATA[select e from itpearls_Skill e]]></query>
+                <query><![CDATA[select e from itpearls_Skill e
+where e.skillType = :Specialisation]]></query>
             </loader>
         </collection>
     </data>
