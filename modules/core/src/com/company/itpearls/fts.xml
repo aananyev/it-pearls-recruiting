@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fts-config xmlns="http://schemas.haulmont.com/cuba/fts.xsd">
+    <entities>
+        <entity class="com.company.itpearls.entity.Skill">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.MainList">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.JobCandidate">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.CompanyDepartament">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Company">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Region">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Iteraction">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Country">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Project">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Position">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Person">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.City">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Ownershup">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Specialisation">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.CompanyGroup">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.RequiredParameters">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.OpenPosition">
+            <include re=".*"/>
+        </entity>
+    </entities>
+</fts-config>
