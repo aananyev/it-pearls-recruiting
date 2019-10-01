@@ -1,0 +1,1 @@
+alter table ITPEARLS_COMPANY_DEPARTAMENT drop column DEPARTAMENT_EN_NAME__U05989 cascade ;

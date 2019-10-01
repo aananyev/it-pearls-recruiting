@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -7,6 +8,7 @@ import com.haulmont.cuba.core.entity.annotation.LookupType;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+@NamePattern("%s|cityRuName")
 @Table(name = "ITPEARLS_CITY")
 @Entity(name = "itpearls_City")
 public class City extends StandardEntity {
@@ -15,9 +17,6 @@ public class City extends StandardEntity {
     @NotNull
     @Column(name = "CITY_RU_NAME", nullable = false, unique = true, length = 50)
     protected String cityRuName;
-
-    @Column(name = "CITY_EN_NAME", unique = true, length = 50)
-    protected String cityEnName;
 
     @Column(name = "CITY_PHONE_CODE", unique = true, length = 5)
     protected String cityPhoneCode;
@@ -41,14 +40,6 @@ public class City extends StandardEntity {
 
     public void setCityPhoneCode(String cityPhoneCode) {
         this.cityPhoneCode = cityPhoneCode;
-    }
-
-    public String getCityEnName() {
-        return cityEnName;
-    }
-
-    public void setCityEnName(String cityEnName) {
-        this.cityEnName = cityEnName;
     }
 
     public String getCityRuName() {

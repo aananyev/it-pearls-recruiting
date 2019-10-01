@@ -23,7 +23,6 @@
         <form id="form" dataContainer="cityDc">
             <column width="250px">
                 <textField id="cityRuNameField" property="cityRuName"/>
-                <textField id="cityEnNameField" property="cityEnName"/>
                 <textField id="cityPhoneCodeField" property="cityPhoneCode"/>
                 <lookupPickerField id="cityRegionField" optionsContainer="cityRegionsDc" property="cityRegion">
                     <actions>

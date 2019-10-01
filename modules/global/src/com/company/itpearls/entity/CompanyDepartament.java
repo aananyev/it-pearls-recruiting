@@ -18,9 +18,6 @@ public class CompanyDepartament extends StandardEntity {
     @Column(name = "DEPARTAMENT_RU_NAME", nullable = false, length = 80)
     protected String departamentRuName;
 
-    @Column(name = "DEPARTAMENT_EN_NAME", length = 80)
-    protected String departamentEnName;
-
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_NAME_ID")
@@ -81,14 +78,6 @@ public class CompanyDepartament extends StandardEntity {
 
     public void setCompanyName(Company companyName) {
         this.companyName = companyName;
-    }
-
-    public String getDepartamentEnName() {
-        return departamentEnName;
-    }
-
-    public void setDepartamentEnName(String departamentEnName) {
-        this.departamentEnName = departamentEnName;
     }
 
     public String getDepartamentRuName() {

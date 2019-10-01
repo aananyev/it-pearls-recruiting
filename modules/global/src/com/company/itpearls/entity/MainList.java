@@ -20,11 +20,6 @@ public class MainList extends StandardEntity {
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CONTACT_NAME_ID")
-    protected JobCandidate contactName;
-
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PERSON_CURRENT_POSITION_ID")
     protected Position personCurrentPosition;
 
@@ -63,12 +58,12 @@ public class MainList extends StandardEntity {
     @Column(name = "DATA_CONTACT")
     protected Date dataContact;
 
-    public JobCandidate getContactName() {
-        return contactName;
+    public void setPersonCurrentPosition(Position personCurrentPosition) {
+        this.personCurrentPosition = personCurrentPosition;
     }
 
-    public void setContactName(JobCandidate contactName) {
-        this.contactName = contactName;
+    public void setNumberList(Integer numberList) {
+        this.numberList = numberList;
     }
 
     public Position getPersonCurrentPosition() {

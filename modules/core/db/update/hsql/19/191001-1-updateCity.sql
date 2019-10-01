@@ -1,0 +1,1 @@
+drop index IDX_ITPEARLS_CITY_UNIQ_CITY_EN_NAME ;

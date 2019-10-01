@@ -8,6 +8,7 @@
                   class="com.company.itpearls.entity.Country"
                   view="country-view">
             <loader/>
+            <collection id="countryCountryOfRegionsDc" property="countryOfRegion"/>
         </instance>
     </data>
     <dialogMode height="600"
@@ -16,9 +17,24 @@
         <form id="form" dataContainer="countryDc">
             <column width="250px">
                 <textField id="countryRuNameField" property="countryRuName"/>
-                <textField id="countryEnNameField" property="countryEnName"/>
                 <textField id="countryShortNameField" property="countryShortName"/>
                 <textField id="phoneCodeField" property="phoneCode"/>
+                <table id="countryCountryOfRegionTable" height="200px" width="400px" dataContainer="countryCountryOfRegionsDc">
+                    <columns>
+                        <column id="regionRuName"/>
+                        <column id="regionCode"/>
+                    </columns>
+                    <actions>
+                        <action id="add" type="add"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
+                    <buttonsPanel>
+                        <button action="countryCountryOfRegionTable.add"/>
+                        <button action="countryCountryOfRegionTable.edit"/>
+                        <button action="countryCountryOfRegionTable.remove"/>
+                    </buttonsPanel>
+                </table>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

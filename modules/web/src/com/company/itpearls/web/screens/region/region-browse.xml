@@ -33,7 +33,6 @@
             </actions>
             <columns>
                 <column id="regionRuName"/>
-                <column id="regionEnName"/>
                 <column id="regionCountry"/>
                 <column id="regionCode"/>
             </columns>

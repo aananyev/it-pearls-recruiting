@@ -33,7 +33,6 @@
             </actions>
             <columns>
                 <column id="cityRuName"/>
-                <column id="cityEnName"/>
                 <column id="cityPhoneCode"/>
                 <column id="cityRegion"/>
             </columns>

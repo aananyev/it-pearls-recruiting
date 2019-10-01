@@ -8,6 +8,7 @@
                   class="com.company.itpearls.entity.CompanyGroup"
                   view="companyGroup-view">
             <loader/>
+            <collection id="groupOfCompanyDc" property="groupOfCompany"/>
         </instance>
     </data>
     <dialogMode height="600"
@@ -16,7 +17,13 @@
         <form id="form" dataContainer="companyGroupDc">
             <column width="250px">
                 <textField id="companyRuGroupNameField" property="companyRuGroupName"/>
-                <textField id="companyEnGroupNameField" property="companyEnGroupName"/>
+                <table dataContainer="groupOfCompanyDc" height="200px" width="400px">
+                    <columns>
+                        <column id="companyOurClient"/>
+                        <column id="comanyName"/>
+                        <column id="companyShortName"/>
+                    </columns>
+                </table>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

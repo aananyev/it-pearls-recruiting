@@ -1,14 +1,19 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
-@NamePattern("%s %s|countryEnName,countryRuName")
+@NamePattern("%s|countryRuName")
 @Table(name = "ITPEARLS_COUNTRY")
 @Entity(name = "itpearls_Country")
 public class Country extends StandardEntity {
@@ -18,15 +23,24 @@ public class Country extends StandardEntity {
     @Column(name = "COUNTRY_RU_NAME", nullable = false, unique = true, length = 50)
     protected String countryRuName;
 
-    @NotNull
-    @Column(name = "COUNTRY_EN_NAME", nullable = false, unique = true, length = 50)
-    protected String countryEnName;
-
     @Column(name = "COUNTRY_SHORT_NAME", unique = true, length = 2)
     protected String countryShortName;
 
     @Column(name = "PHONE_CODE", unique = true)
     protected Integer phoneCode;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "regionCountry")
+    protected List<Region> countryOfRegion;
+
+    public List<Region> getCountryOfRegion() {
+        return countryOfRegion;
+    }
+
+    public void setCountryOfRegion(List<Region> countryOfRegion) {
+        this.countryOfRegion = countryOfRegion;
+    }
 
     public Integer getPhoneCode() {
         return phoneCode;
@@ -42,14 +56,6 @@ public class Country extends StandardEntity {
 
     public void setCountryShortName(String countryShortName) {
         this.countryShortName = countryShortName;
-    }
-
-    public String getCountryEnName() {
-        return countryEnName;
-    }
-
-    public void setCountryEnName(String countryEnName) {
-        this.countryEnName = countryEnName;
     }
 
     public String getCountryRuName() {

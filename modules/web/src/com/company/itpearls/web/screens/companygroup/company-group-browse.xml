@@ -33,7 +33,6 @@
             </actions>
             <columns>
                 <column id="companyRuGroupName"/>
-                <column id="companyEnGroupName"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

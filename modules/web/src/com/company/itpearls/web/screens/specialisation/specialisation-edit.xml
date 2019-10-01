@@ -7,14 +7,9 @@
         <instance id="specialisationDc"
                   class="com.company.itpearls.entity.Specialisation"
                   view="specialisation-view">
-            <loader id="specialisationDl"/>
+            <loader/>
+            <collection id="skillDc" property="skill"/>
         </instance>
-        <collection id="skillsDc" class="com.company.itpearls.entity.Skill" view="_local">
-            <loader id="skillDl">
-                <query><![CDATA[select e from itpearls_Skill e
-where e.skillType = :Specialisation]]></query>
-            </loader>
-        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -22,16 +17,25 @@ where e.skillType = :Specialisation]]></query>
         <form id="form" dataContainer="specialisationDc">
             <column width="250px">
                 <textField id="specRuNameField" property="specRuName"/>
-                <textField id="specEnNameField" property="specEnName"/>
-                <groupBox caption="Skills">
-                    <table height="100px" width="100%" dataContainer="skillsDc">
-                        <columns>
-                            <column id="skillName"/>
-                        </columns>
-                    </table>
-                </groupBox>
             </column>
         </form>
+        <groupBox id="skillBox" caption="msg://com.company.itpearls.entity/Specialisation.skill">
+            <table id="skillTable" dataContainer="skillDc" width="100%" height="200px">
+                <actions>
+                    <action id="create" type="create"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                </actions>
+                <columns>
+                    <column id="skillName"/>
+                </columns>
+                <buttonsPanel>
+                    <button action="skillTable.create"/>
+                    <button action="skillTable.edit"/>
+                    <button action="skillTable.remove"/>
+                </buttonsPanel>
+            </table>
+        </groupBox>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

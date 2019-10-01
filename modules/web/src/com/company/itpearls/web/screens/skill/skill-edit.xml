@@ -6,16 +6,29 @@
     <data>
         <instance id="skillDc"
                   class="com.company.itpearls.entity.Skill"
-                  view="_local">
+                  view="skill-view">
             <loader/>
         </instance>
+        <collection id="skillTypesDc" class="com.company.itpearls.entity.Specialisation" view="specialisation-view">
+            <loader id="skillTypesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Specialisation e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="skillDc">
             <column width="250px">
-                <textField id="skillNameField" property="skillName"/>
+                <textField id="skillNameField" dataContainer="skillDc" property="skillName"/>
+                <lookupPickerField id="skillTypeField"
+                                   dataContainer="skillDc" property="skillType">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

@@ -1,0 +1,1 @@
+alter table ITPEARLS_SPECIALISATION alter column SPEC_EN_NAME rename to SPEC_EN_NAME__U74385 ^

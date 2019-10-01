@@ -1,16 +1,20 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
-@NamePattern("%s|firstName")
+@NamePattern("%s %s %s|secondName,middleName,firstName")
 @Table(name = "ITPEARLS_JOB_CANDIDATE")
 @Entity(name = "itpearls_JobCandidate")
 public class JobCandidate extends StandardEntity {

@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
@@ -7,6 +8,7 @@ import com.haulmont.cuba.core.entity.annotation.LookupType;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @NamePattern("%s|regionRuName")
 @Table(name = "ITPEARLS_REGION")
@@ -18,16 +20,25 @@ public class Region extends StandardEntity {
     @Column(name = "REGION_RU_NAME", nullable = false, unique = true, length = 50)
     protected String regionRuName;
 
-    @Column(name = "REGION_EN_NAME", unique = true)
-    protected String regionEnName;
-
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REGION_COUNTRY_ID")
     protected Country regionCountry;
 
+    @Composition
+    @OneToMany(mappedBy = "cityRegion")
+    protected List<City> regionOfCity;
+
     @Column(name = "REGION_CODE", unique = true)
     protected Integer regionCode;
+
+    public List<City> getRegionOfCity() {
+        return regionOfCity;
+    }
+
+    public void setRegionOfCity(List<City> regionOfCity) {
+        this.regionOfCity = regionOfCity;
+    }
 
     public Country getRegionCountry() {
         return regionCountry;
@@ -43,14 +54,6 @@ public class Region extends StandardEntity {
 
     public void setRegionCode(Integer regionCode) {
         this.regionCode = regionCode;
-    }
-
-    public String getRegionEnName() {
-        return regionEnName;
-    }
-
-    public void setRegionEnName(String regionEnName) {
-        this.regionEnName = regionEnName;
     }
 
     public String getRegionRuName() {

@@ -1,13 +1,18 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.List;
 
-@NamePattern("%s|specEnName")
+@NamePattern("%s|specRuName")
 @Table(name = "ITPEARLS_SPECIALISATION")
 @Entity(name = "itpearls_Specialisation")
 public class Specialisation extends StandardEntity {
@@ -16,15 +21,17 @@ public class Specialisation extends StandardEntity {
     @Column(name = "SPEC_RU_NAME", unique = true, length = 80)
     protected String specRuName;
 
-    @Column(name = "SPEC_EN_NAME", unique = true, length = 80)
-    protected String specEnName;
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "skillType")
+    protected List<Skill> skill;
 
-    public String getSpecEnName() {
-        return specEnName;
+    public List<Skill> getSkill() {
+        return skill;
     }
 
-    public void setSpecEnName(String specEnName) {
-        this.specEnName = specEnName;
+    public void setSkill(List<Skill> skill) {
+        this.skill = skill;
     }
 
     public String getSpecRuName() {

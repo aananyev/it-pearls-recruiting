@@ -8,9 +8,8 @@
                     class="com.company.itpearls.entity.Skill"
                     view="skill-view">
             <loader id="skillsDl">
-                <query>
-                    <![CDATA[select e from itpearls_Skill e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Skill e
+order by e.skillName]]></query>
             </loader>
         </collection>
     </data>

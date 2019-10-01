@@ -1,26 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <menu id="application-hunting" insertBefore="application-hadbook">
-        <item screen="itpearls_JobCandidate.browse"/>
-        <item screen="itpearls_MainList.browse"/>
-        <item screen="itpearls_OpenPosition.browse"/>
-        <item screen="itpearls_RequiredParameters.browse"/>
-        <item screen="itpearls_Iteraction.browse"/>
-    </menu>
-    <menu id="application-hadbook" insertBefore="application-project">
-        <item screen="itpearls_City.browse"/>
-        <item screen="itpearls_Country.browse"/>
-        <item screen="itpearls_Ownershup.browse"/>
-        <item screen="itpearls_Region.browse"/>
         <item screen="itpearls_Skill.browse"/>
         <item screen="itpearls_Specialisation.browse"/>
-        <item screen="itpearls_Position.browse"/>
+        <item screen="itpearls_City.browse"/>
+        <item screen="itpearls_Region.browse"/>
+        <item screen="itpearls_Country.browse"/>
+        <item screen="itpearls_CompanyGroup.browse"/>
+        <item screen="itpearls_Company.browse"/>
+    </menu>
+    <menu id="application-hadbook" insertBefore="application-project">
     </menu>
     <menu id="application-project">
-        <item screen="itpearls_Company.browse"/>
-        <item screen="itpearls_CompanyDepartament.browse"/>
-        <item screen="itpearls_CompanyGroup.browse"/>
-        <item screen="itpearls_Person.browse"/>
-        <item screen="itpearls_Project.browse"/>
     </menu>
 </menu-config>

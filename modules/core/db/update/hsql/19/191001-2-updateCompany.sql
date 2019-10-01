@@ -1,0 +1,2 @@
+alter table ITPEARLS_COMPANY alter column COMPANY_EN_SHORT_NAME rename to COMPANY_EN_SHORT_NAME__U29570 ^
+alter table ITPEARLS_COMPANY alter column COMPANY_EN_NAME rename to COMPANY_EN_NAME__U04286 ^

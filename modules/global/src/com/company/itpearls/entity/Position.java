@@ -8,7 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-@NamePattern("%s %s|positionEnName,positionRuName")
+@NamePattern("%s|positionRuName")
 @Table(name = "ITPEARLS_POSITION")
 @Entity(name = "itpearls_Position")
 public class Position extends StandardEntity {
@@ -17,18 +17,6 @@ public class Position extends StandardEntity {
     @NotNull
     @Column(name = "POSITION_RU_NAME", nullable = false, unique = true, length = 80)
     protected String positionRuName;
-
-    @NotNull
-    @Column(name = "POSITION_EN_NAME", nullable = false, unique = true, length = 80)
-    protected String positionEnName;
-
-    public String getPositionEnName() {
-        return positionEnName;
-    }
-
-    public void setPositionEnName(String positionEnName) {
-        this.positionEnName = positionEnName;
-    }
 
     public String getPositionRuName() {
         return positionRuName;

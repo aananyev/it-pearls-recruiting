@@ -1,12 +1,16 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @NamePattern("%s %s|comanyName,companyOwnership")
 @Table(name = "ITPEARLS_COMPANY")
@@ -29,12 +33,6 @@ public class Company extends StandardEntity {
     @Column(name = "COMPANY_SHORT_NAME", unique = true, length = 30)
     protected String companyShortName;
 
-    @Column(name = "COMPANY_EN_NAME", unique = true, length = 80)
-    protected String companyEnName;
-
-    @Column(name = "COMPANY_EN_SHORT_NAME", unique = true, length = 30)
-    protected String companyEnShortName;
-
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_DIRECTOR_ID")
@@ -44,6 +42,19 @@ public class Company extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_GROUP_ID")
     protected CompanyGroup companyGroup;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "companyName")
+    protected List<CompanyDepartament> departmentOfCompany;
+
+    public List<CompanyDepartament> getDepartmentOfCompany() {
+        return departmentOfCompany;
+    }
+
+    public void setDepartmentOfCompany(List<CompanyDepartament> departmentOfCompany) {
+        this.departmentOfCompany = departmentOfCompany;
+    }
 
     public CompanyGroup getCompanyGroup() {
         return companyGroup;
@@ -67,22 +78,6 @@ public class Company extends StandardEntity {
 
     public void setCompanyDirector(Person companyDirector) {
         this.companyDirector = companyDirector;
-    }
-
-    public String getCompanyEnShortName() {
-        return companyEnShortName;
-    }
-
-    public void setCompanyEnShortName(String companyEnShortName) {
-        this.companyEnShortName = companyEnShortName;
-    }
-
-    public String getCompanyEnName() {
-        return companyEnName;
-    }
-
-    public void setCompanyEnName(String companyEnName) {
-        this.companyEnName = companyEnName;
     }
 
     public String getCompanyShortName() {

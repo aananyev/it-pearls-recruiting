@@ -1,14 +1,17 @@
 package com.company.itpearls.entity;
 
-import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
-@NamePattern("%s|companyEnGroupName")
 @Table(name = "ITPEARLS_COMPANY_GROUP")
 @Entity(name = "itpearls_CompanyGroup")
 public class CompanyGroup extends StandardEntity {
@@ -18,16 +21,17 @@ public class CompanyGroup extends StandardEntity {
     @Column(name = "COMPANY_RU_GROUP_NAME", nullable = false, unique = true, length = 80)
     protected String companyRuGroupName;
 
-    @NotNull
-    @Column(name = "COMPANY_EN_GROUP_NAME", nullable = false, unique = true, length = 80)
-    protected String companyEnGroupName;
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "companyGroup")
+    protected List<Company> groupOfCompany;
 
-    public String getCompanyEnGroupName() {
-        return companyEnGroupName;
+    public List<Company> getGroupOfCompany() {
+        return groupOfCompany;
     }
 
-    public void setCompanyEnGroupName(String companyEnGroupName) {
-        this.companyEnGroupName = companyEnGroupName;
+    public void setGroupOfCompany(List<Company> groupOfCompany) {
+        this.groupOfCompany = groupOfCompany;
     }
 
     public String getCompanyRuGroupName() {

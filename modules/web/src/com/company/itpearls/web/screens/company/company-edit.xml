@@ -8,6 +8,7 @@
                   class="com.company.itpearls.entity.Company"
                   view="company-view">
             <loader/>
+            <collection id="departmentOfCompanyDc" property="departmentOfCompany"/>
         </instance>
         <collection id="companyOwnershipsDc" class="com.company.itpearls.entity.Ownershup" view="_minimal">
             <loader id="companyOwnershipsLc">
@@ -45,8 +46,6 @@
                 </lookupPickerField>
                 <textField id="comanyNameField" property="comanyName"/>
                 <textField id="companyShortNameField" property="companyShortName"/>
-                <textField id="companyEnNameField" property="companyEnName"/>
-                <textField id="companyEnShortNameField" property="companyEnShortName"/>
                 <lookupPickerField id="companyDirectorField" optionsContainer="companyDirectorsDc"
                                    property="companyDirector">
                     <actions>
@@ -60,6 +59,25 @@
                 </lookupPickerField>
             </column>
         </form>
+        <groupBox id="departmentOfCompanyBox" caption="msg://com.company.itpearls.entity/Company.departmentOfCompany">
+            <table id="departmentOfCompanyTable" dataContainer="departmentOfCompanyDc" width="100%" height="200px">
+                <actions>
+                    <action id="create" type="create"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                </actions>
+                <columns>
+                    <column id="departamentRuName"/>
+                    <column id="departamentDescription"/>
+                    <column id="departamentNumberOfProgrammers"/>
+                </columns>
+                <buttonsPanel>
+                    <button action="departmentOfCompanyTable.create"/>
+                    <button action="departmentOfCompanyTable.edit"/>
+                    <button action="departmentOfCompanyTable.remove"/>
+                </buttonsPanel>
+            </table>
+        </groupBox>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

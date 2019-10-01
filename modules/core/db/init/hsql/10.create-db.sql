@@ -10,7 +10,6 @@ create table ITPEARLS_COUNTRY (
     DELETED_BY varchar(50),
     --
     COUNTRY_RU_NAME varchar(50) not null,
-    COUNTRY_EN_NAME varchar(50) not null,
     COUNTRY_SHORT_NAME varchar(2),
     PHONE_CODE integer,
     --
@@ -29,7 +28,6 @@ create table ITPEARLS_POSITION (
     DELETED_BY varchar(50),
     --
     POSITION_RU_NAME varchar(80) not null,
-    POSITION_EN_NAME varchar(80) not null,
     --
     primary key (ID)
 )^
@@ -76,7 +74,6 @@ create table ITPEARLS_REGION (
     --
     REGION_RU_NAME varchar(50) not null,
     REGION_COUNTRY_ID varchar(36),
-    REGION_EN_NAME varchar(255),
     REGION_CODE integer,
     --
     primary key (ID)
@@ -94,7 +91,6 @@ create table ITPEARLS_CITY (
     DELETED_BY varchar(50),
     --
     CITY_RU_NAME varchar(50) not null,
-    CITY_EN_NAME varchar(50),
     CITY_PHONE_CODE varchar(5),
     CITY_REGION_ID varchar(36),
     --
@@ -131,11 +127,9 @@ create table ITPEARLS_COMPANY (
     --
     COMPANY_OUR_CLIENT boolean,
     COMPANY_OWNERSHIP_ID varchar(36),
-    COMPANY_DIRECTOR_ID varchar(36),
     COMANY_NAME varchar(80) not null,
     COMPANY_SHORT_NAME varchar(30),
-    COMPANY_EN_NAME varchar(80),
-    COMPANY_EN_SHORT_NAME varchar(30),
+    COMPANY_DIRECTOR_ID varchar(36),
     COMPANY_GROUP_ID varchar(36),
     --
     primary key (ID)
@@ -153,7 +147,6 @@ create table ITPEARLS_COMPANY_DEPARTAMENT (
     DELETED_BY varchar(50),
     --
     DEPARTAMENT_RU_NAME varchar(80) not null,
-    DEPARTAMENT_EN_NAME varchar(80),
     COMPANY_NAME_ID varchar(36),
     DEPARTAMENT_HR_DIRECTOR_ID varchar(36),
     DEPARTAMENT_DIRECTOR_ID varchar(36),
@@ -175,7 +168,6 @@ create table ITPEARLS_SPECIALISATION (
     DELETED_BY varchar(50),
     --
     SPEC_RU_NAME varchar(80),
-    SPEC_EN_NAME varchar(80),
     --
     primary key (ID)
 )^
@@ -192,7 +184,7 @@ create table ITPEARLS_SKILL (
     DELETED_BY varchar(50),
     --
     SKILL_NAME varchar(80) not null,
-    SKILL_TYPE_ID varchar(36),
+    SKILL_TYPE_ID varchar(36) not null,
     --
     primary key (ID)
 )^
@@ -211,7 +203,6 @@ create table ITPEARLS_PROJECT (
     PROJECT_NAME varchar(80),
     START_PROJECT_DATE date,
     END_PROJECT_DATE date,
-    PROJECT_COMPANY_ID varchar(36) not null,
     PROJECT_DEPARTMENT_ID varchar(36) not null,
     --
     primary key (ID)
@@ -248,7 +239,6 @@ create table ITPEARLS_COMPANY_GROUP (
     DELETED_BY varchar(50),
     --
     COMPANY_RU_GROUP_NAME varchar(80) not null,
-    COMPANY_EN_GROUP_NAME varchar(80) not null,
     --
     primary key (ID)
 )^
@@ -265,7 +255,6 @@ create table ITPEARLS_MAIN_LIST (
     DELETED_BY varchar(50),
     --
     NUMBER_LIST integer not null,
-    CONTACT_NAME_ID varchar(36),
     PERSON_CURRENT_POSITION_ID varchar(36),
     PROJECT_NAME_ID varchar(36) not null,
     OPEN_POSITION_ID varchar(36),

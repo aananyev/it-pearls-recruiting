@@ -33,7 +33,6 @@
             </actions>
             <columns>
                 <column id="countryRuName"/>
-                <column id="countryEnName"/>
                 <column id="countryShortName"/>
                 <column id="phoneCode"/>
             </columns>

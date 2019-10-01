@@ -29,12 +29,6 @@ public class Project extends StandardEntity {
     @NotNull
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "PROJECT_COMPANY_ID")
-    protected Company projectCompany;
-
-    @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "PROJECT_DEPARTMENT_ID")
     protected CompanyDepartament projectDepartment;
 
@@ -44,14 +38,6 @@ public class Project extends StandardEntity {
 
     public void setProjectDepartment(CompanyDepartament projectDepartment) {
         this.projectDepartment = projectDepartment;
-    }
-
-    public Company getProjectCompany() {
-        return projectCompany;
-    }
-
-    public void setProjectCompany(Company projectCompany) {
-        this.projectCompany = projectCompany;
     }
 
     public Date getEndProjectDate() {
