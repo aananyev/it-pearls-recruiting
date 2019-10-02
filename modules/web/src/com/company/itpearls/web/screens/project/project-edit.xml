@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.project">
+    <data>
+        <instance id="projectDc"
+                  class="com.company.itpearls.entity.Project"
+                  view="project-view">
+            <loader/>
+        </instance>
+        <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
+            <loader id="projectDepartmentsLc">
+                <query>
+                    <![CDATA[select e from itpearls_CompanyDepartament e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="projectDc">
+            <column width="250px">
+                <textField id="projectNameField" property="projectName"/>
+                <dateField id="startProjectDateField" property="startProjectDate"/>
+                <dateField id="endProjectDateField" property="endProjectDate"/>
+                <lookupPickerField id="projectDepartmentField" optionsContainer="projectDepartmentsDc"
+                                   property="projectDepartment">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

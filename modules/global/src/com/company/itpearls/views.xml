@@ -28,4 +28,7 @@
         <property name="departamentDirector" view="_minimal"/>
         <property name="projectOfDepartment" view="_local"/>
     </view>
+    <view entity="itpearls_Project" name="project-view" extends="_local">
+        <property name="projectDepartment" view="_minimal"/>
+    </view>
 </views>

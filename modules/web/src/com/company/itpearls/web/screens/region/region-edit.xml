@@ -31,24 +31,26 @@
                     </actions>
                 </lookupPickerField>
                 <textField id="regionCodeField" property="regionCode"/>
-                <table id="regionRegionOfCityTable" dataContainer="regionRegionOfCitiesDc" height="200px" width="400px">
-                    <columns>
-                        <column id="cityRuName"/>
-                        <column id="cityPhoneCode"/>
-                    </columns>
-                    <buttonsPanel>
-                        <button id="button" action="regionRegionOfCityTable.add"/>
-                        <button action="regionRegionOfCityTable.edit"/>
-                        <button action="regionRegionOfCityTable.remove"/>
-                    </buttonsPanel>
-                    <actions>
-                        <action id="add" type="add"/>
-                        <action id="edit" type="edit"/>
-                        <action id="remove" type="remove"/>
-                    </actions>
-                </table>
             </column>
         </form>
+        <groupBox spacing="true">
+            <table id="regionRegionOfCityTable" dataContainer="regionRegionOfCitiesDc" height="200px" width="100%">
+                <columns>
+                    <column id="cityRuName"/>
+                    <column id="cityPhoneCode"/>
+                </columns>
+                <buttonsPanel>
+                    <button id="button" action="regionRegionOfCityTable.add"/>
+                    <button action="regionRegionOfCityTable.edit"/>
+                    <button action="regionRegionOfCityTable.remove"/>
+                </buttonsPanel>
+                <actions>
+                    <action id="add" type="add"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                </actions>
+            </table>
+        </groupBox>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

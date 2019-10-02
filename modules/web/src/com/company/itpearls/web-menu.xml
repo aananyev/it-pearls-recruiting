@@ -9,6 +9,7 @@
         <item screen="itpearls_CompanyGroup.browse"/>
         <item screen="itpearls_Company.browse"/>
         <item screen="itpearls_CompanyDepartament.browse"/>
+        <item screen="itpearls_Project.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
     </menu>
