@@ -8,6 +8,7 @@
         <item screen="itpearls_Country.browse"/>
         <item screen="itpearls_CompanyGroup.browse"/>
         <item screen="itpearls_Company.browse"/>
+        <item screen="itpearls_CompanyDepartament.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
     </menu>

@@ -22,4 +22,10 @@
         <property name="companyDirector" view="_minimal"/>
         <property name="departmentOfCompany" view="_local"/>
     </view>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
+        <property name="companyName" view="_minimal"/>
+        <property name="departamentHrDirector" view="_minimal"/>
+        <property name="departamentDirector" view="_minimal"/>
+        <property name="projectOfDepartment" view="_local"/>
+    </view>
 </views>

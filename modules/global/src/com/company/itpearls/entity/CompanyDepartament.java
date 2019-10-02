@@ -1,12 +1,16 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @NamePattern("%s|departamentRuName")
 @Table(name = "ITPEARLS_COMPANY_DEPARTAMENT")
@@ -39,6 +43,19 @@ public class CompanyDepartament extends StandardEntity {
 
     @Column(name = "DEPARTAMENT_NUMBER_OF_PROGRAMMERS")
     protected Integer departamentNumberOfProgrammers;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "projectDepartment")
+    protected List<Project> projectOfDepartment;
+
+    public List<Project> getProjectOfDepartment() {
+        return projectOfDepartment;
+    }
+
+    public void setProjectOfDepartment(List<Project> projectOfDepartment) {
+        this.projectOfDepartment = projectOfDepartment;
+    }
 
     public Integer getDepartamentNumberOfProgrammers() {
         return departamentNumberOfProgrammers;
