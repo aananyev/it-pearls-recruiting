@@ -17,13 +17,9 @@
     <view entity="itpearls_Country" name="country-view" extends="_local">
         <property name="countryOfRegion" view="_local"/>
     </view>
-    <view entity="itpearls_CompanyGroup" name="companyGroup-view" extends="_local">
-        <property name="groupOfCompany" view="_local"/>
-    </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" view="_minimal"/>
         <property name="companyDirector" view="_minimal"/>
-        <property name="companyGroup" view="_local"/>
         <property name="departmentOfCompany" view="_local"/>
     </view>
 </views>

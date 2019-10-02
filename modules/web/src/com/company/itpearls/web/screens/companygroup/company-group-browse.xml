@@ -6,7 +6,7 @@
     <data readOnly="true">
         <collection id="companyGroupsDc"
                     class="com.company.itpearls.entity.CompanyGroup"
-                    view="companyGroup-view">
+                    view="_local">
             <loader id="companyGroupsDl">
                 <query>
                     <![CDATA[select e from itpearls_CompanyGroup e]]>

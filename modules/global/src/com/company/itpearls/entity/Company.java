@@ -12,7 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@NamePattern("%s %s|comanyName,companyOwnership")
+@NamePattern("%s|comanyName")
 @Table(name = "ITPEARLS_COMPANY")
 @Entity(name = "itpearls_Company")
 public class Company extends StandardEntity {
@@ -38,11 +38,6 @@ public class Company extends StandardEntity {
     @JoinColumn(name = "COMPANY_DIRECTOR_ID")
     protected Person companyDirector;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "COMPANY_GROUP_ID")
-    protected CompanyGroup companyGroup;
-
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "companyName")
@@ -54,14 +49,6 @@ public class Company extends StandardEntity {
 
     public void setDepartmentOfCompany(List<CompanyDepartament> departmentOfCompany) {
         this.departmentOfCompany = departmentOfCompany;
-    }
-
-    public CompanyGroup getCompanyGroup() {
-        return companyGroup;
-    }
-
-    public void setCompanyGroup(CompanyGroup companyGroup) {
-        this.companyGroup = companyGroup;
     }
 
     public Boolean getCompanyOurClient() {

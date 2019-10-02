@@ -130,7 +130,6 @@ create table ITPEARLS_COMPANY (
     COMANY_NAME varchar(80) not null,
     COMPANY_SHORT_NAME varchar(30),
     COMPANY_DIRECTOR_ID varchar(36),
-    COMPANY_GROUP_ID varchar(36),
     --
     primary key (ID)
 )^
