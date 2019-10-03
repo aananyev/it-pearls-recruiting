@@ -35,48 +35,67 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
+        <tabSheet id="tabSheetDepartment">
+            <tab id="tabEditProject" caption="msg://TabProject" margin="true,false,false,false" spacing="true">
+                <groupBox spacing="true" height="80%">
+                    <textField id="departamentRuNameField" width="50%"
+                               caption="msg://msgDepartamentName" dataContainer="companyDepartamentDc"
+                               property="departamentRuName"/>
+                    <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc"
+                                       width="50%" caption="msg://msgCompanyName" dataContainer="companyDepartamentDc"
+                                       property="companyName">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="departamentHrDirectorField" optionsContainer="departamentHrDirectorsDc"
+                                       width="50%"
+                                       caption="msg://msgHrDirectorOfDepartament" dataContainer="companyDepartamentDc"
+                                       property="departamentHrDirector">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="departamentDirectorField" optionsContainer="departamentDirectorsDc"
+                                       width="50%" caption="msg://msdDirectorName"
+                                       dataContainer="companyDepartamentDc" property="departamentDirector">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <textField id="departamentNumberOfProgrammersField"
+                               width="50%" caption="msg://msgNumberOfPosition" dataContainer="companyDepartamentDc"
+                               property="departamentNumberOfProgrammers"/>
+                    <textArea id="departamentDescriptionField" property="departamentDescription" rows="5" width="100%"/>
+                </groupBox>
+            </tab>
+            <tab id="tabOpenPosition" caption="msg://TabOpenPosition" margin="true,false,false,false" spacing="true">
+                <groupBox spacing="true" height="80%">
+                    <table id="companyDepartamentTable" dataContainer="companyDepartamentProjectOfDepartmentsDc" height="200px" width="100%">
+                        <columns>
+                            <column id="projectName"/>
+                            <column id="startProjectDate"/>
+                            <column id="endProjectDate"/>
+                        </columns>
+                        <buttonsPanel>
+                            <button id="addButton" action="companyDepartamentTable.add"/>
+                            <button id="editButton" action="companyDepartamentTable.edit"/>
+                            <button id="removeButton" action="companyDepartamentTable.remove"/>
+                        </buttonsPanel>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                    </table>
+                </groupBox>
+            </tab>
+        </tabSheet>
         <form id="form" dataContainer="companyDepartamentDc">
             <column width="250px">
-                <textField id="departamentRuNameField" property="departamentRuName"/>
-                <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" property="companyName">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="departamentHrDirectorField" optionsContainer="departamentHrDirectorsDc"
-                                   property="departamentHrDirector">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="departamentDirectorField" optionsContainer="departamentDirectorsDc"
-                                   property="departamentDirector">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <textArea id="departamentDescriptionField" property="departamentDescription" rows="5"/>
-                <textField id="departamentNumberOfProgrammersField" property="departamentNumberOfProgrammers"/>
-                <table id="companyDepartamentTable" dataContainer="companyDepartamentProjectOfDepartmentsDc" height="200px" width="400px">
-                    <columns>
-                        <column id="projectName"/>
-                        <column id="startProjectDate"/>
-                        <column id="endProjectDate"/>
-                    </columns>
-                    <buttonsPanel>
-                        <button id="addButton" action="companyDepartamentTable.add"/>
-                        <button id="editButton" action="companyDepartamentTable.edit"/>
-                        <button id="removeButton" action="companyDepartamentTable.remove"/>
-                    </buttonsPanel>
-                    <actions>
-                        <action id="add" type="add"/>
-                        <action id="edit" type="edit"/>
-                        <action id="remove" type="remove"/>
-                    </actions>
-                </table>
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

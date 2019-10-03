@@ -34,41 +34,40 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="scrollBox" spacing="true">
-        <scrollBox id="scrollBox" spacing="true">
-            <form id="form" dataContainer="jobCandidateDc">
-                <column width="250px">
-                    <textField id="firstNameField" property="firstName"/>
-                    <textField id="middleNameField" property="middleName"/>
-                    <textField id="secondNameField" property="secondName"/>
-                    <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
-                                       property="personPosition">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
-                                       property="currentCompany">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <dateField id="birdhDateField" property="birdhDate"/>
-                    <textField id="emailField" property="email"/>
-                    <textField id="phoneField" property="phone"/>
-                    <textField id="skypeNameField" property="skypeName"/>
-                    <textField id="telegramNameField" property="telegramName"/>
-                    <textField id="wiberNameField" property="wiberName"/>
-                    <textField id="whatsupNameField" property="whatsupName"/>
-                    <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
-                                       property="positionCountry">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                </column>
-            </form>
-        </scrollBox>
+    <tabSheet/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="jobCandidateDc">
+            <column width="250px">
+                <textField id="firstNameField" property="firstName"/>
+                <textField id="middleNameField" property="middleName"/>
+                <textField id="secondNameField" property="secondName"/>
+                <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
+                                   property="personPosition">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
+                                   property="currentCompany">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <dateField id="birdhDateField" property="birdhDate"/>
+                <textField id="emailField" property="email"/>
+                <textField id="phoneField" property="phone"/>
+                <textField id="skypeNameField" property="skypeName"/>
+                <textField id="telegramNameField" property="telegramName"/>
+                <textField id="wiberNameField" property="wiberName"/>
+                <textField id="whatsupNameField" property="whatsupName"/>
+                <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
+                                   property="positionCountry">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+            </column>
+        </form>
         <groupBox spacing="true">
             <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
                    width="100%">
