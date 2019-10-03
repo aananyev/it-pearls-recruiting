@@ -14,11 +14,16 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
+        <groupBox spacing="true">
+            <textField id="countryRuNameField" width="50%" dataContainer="countryDc" property="countryRuName"
+                       caption="msg://msgCountry"/>
+            <textField id="countryShortNameField" width="50%"
+                       dataContainer="countryDc" property="countryShortName" caption="msg://msgCountryShortName"/>
+            <textField id="phoneCodeField" width="50%" dataContainer="countryDc" property="phoneCode"
+                       caption="msg://msgPhoneCode"/>
+        </groupBox>
         <form id="form" dataContainer="countryDc">
             <column width="250px">
-                <textField id="countryRuNameField" property="countryRuName"/>
-                <textField id="countryShortNameField" property="countryShortName"/>
-                <textField id="phoneCodeField" property="phoneCode"/>
             </column>
         </form>
         <groupBox spacing="true">
