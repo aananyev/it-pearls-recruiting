@@ -1,18 +1,14 @@
 package com.company.itpearls.entity;
 
-import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.core.entity.annotation.OnDelete;
-import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.List;
 
 @NamePattern("%s %s %s|secondName,middleName,firstName")
 @Table(name = "ITPEARLS_JOB_CANDIDATE")
@@ -31,6 +27,16 @@ public class JobCandidate extends StandardEntity {
     @NotNull
     @Column(name = "SECOND_NAME", nullable = false, length = 80)
     protected String secondName;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PERSON_POSITION_ID")
+    protected Position personPosition;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CURRENT_COMPANY_ID")
+    protected Company currentCompany;
 
     @Temporal(TemporalType.DATE)
     @NotNull
@@ -61,10 +67,13 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "POSITION_COUNTRY_ID")
     protected Country positionCountry;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PERSON_POSITION_ID")
-    protected Position personPosition;
+    public Company getCurrentCompany() {
+        return currentCompany;
+    }
+
+    public void setCurrentCompany(Company currentCompany) {
+        this.currentCompany = currentCompany;
+    }
 
     public Position getPersonPosition() {
         return personPosition;

@@ -49,6 +49,11 @@
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
+                <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc" property="projectName">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
                 <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" property="companyName">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
@@ -60,17 +65,10 @@
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc" property="projectName">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
                 <textField id="numberPositionField" property="numberPosition"/>
+                <textArea id="commentField" property="comment" rows="5"/>
             </column>
         </form>
-        <groupBox id="groupBoxOfComment" spacing="true" height="250pt">
-            <textArea id="commentField" property="comment" rows="5" width="100%"/>
-        </groupBox>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

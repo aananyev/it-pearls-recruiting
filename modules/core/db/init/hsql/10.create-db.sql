@@ -300,6 +300,8 @@ create table ITPEARLS_JOB_CANDIDATE (
     FIRST_NAME varchar(80) not null,
     MIDDLE_NAME varchar(80) not null,
     SECOND_NAME varchar(80) not null,
+    PERSON_POSITION_ID varchar(36),
+    CURRENT_COMPANY_ID varchar(36),
     BIRDH_DATE date not null,
     EMAIL varchar(30),
     PHONE varchar(10),
@@ -308,7 +310,6 @@ create table ITPEARLS_JOB_CANDIDATE (
     WIBER_NAME varchar(30),
     WHATSUP_NAME varchar(30),
     POSITION_COUNTRY_ID varchar(36),
-    PERSON_POSITION_ID varchar(36),
     --
     primary key (ID)
 )^

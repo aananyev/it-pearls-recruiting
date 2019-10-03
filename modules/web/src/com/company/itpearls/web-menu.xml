@@ -4,6 +4,7 @@
         <item screen="itpearls_Specialisation.browse"/>
         <item screen="itpearls_Skill.browse"/>
         <item screen="itpearls_OpenPosition.browse"/>
+        <item screen="itpearls_JobCandidate.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
         <item screen="itpearls_Country.browse"/>

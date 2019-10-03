@@ -43,4 +43,9 @@
         <property name="companyName" view="_local"/>
         <property name="companyDepartament" view="_local"/>
     </view>
+    <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local">
+        <property name="personPosition" view="_local"/>
+        <property name="currentCompany" view="_local"/>
+        <property name="positionCountry" view="_local"/>
+    </view>
 </views>
