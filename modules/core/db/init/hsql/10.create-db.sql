@@ -275,11 +275,11 @@ create table ITPEARLS_JOB_CANDIDATE (
     DELETED_BY varchar(50),
     --
     FIRST_NAME varchar(80) not null,
-    MIDDLE_NAME varchar(80) not null,
+    MIDDLE_NAME varchar(80),
     SECOND_NAME varchar(80) not null,
     PERSON_POSITION_ID varchar(36),
     CURRENT_COMPANY_ID varchar(36),
-    BIRDH_DATE date not null,
+    BIRDH_DATE date,
     EMAIL varchar(30),
     PHONE varchar(10),
     SKYPE_NAME varchar(30),
@@ -316,3 +316,20 @@ create table ITPEARLS_ITERACTION_LIST (
     primary key (ID)
 )^
 -- end ITPEARLS_ITERACTION_LIST
+-- begin ITPEARLS_SOCIAL_NETWORK_UR_LS
+create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NETWORK_NAME varchar(80) not null,
+    NETWORK_URLS varchar(80) not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SOCIAL_NETWORK_UR_LS

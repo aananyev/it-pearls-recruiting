@@ -9,6 +9,7 @@
         <item screen="itpearls_IteractionList.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
+        <item screen="itpearls_SocialNetworkURLs.browse"/>
         <item screen="itpearls_Country.browse"/>
         <item screen="itpearls_City.browse"/>
         <item screen="itpearls_Region.browse"/>

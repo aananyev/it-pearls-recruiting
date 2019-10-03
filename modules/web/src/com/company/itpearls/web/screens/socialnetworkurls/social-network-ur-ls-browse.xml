@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="socialNetworkURLsesTable"
+        messagesPack="com.company.itpearls.web.screens.socialnetworkurls">
+    <data readOnly="true">
+        <collection id="socialNetworkURLsesDc"
+                    class="com.company.itpearls.entity.SocialNetworkURLs"
+                    view="socialNetworkURLs-view">
+            <loader id="socialNetworkURLsesDl">
+                <query>
+                    <![CDATA[select e from itpearls_SocialNetworkURLs e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="socialNetworkURLsesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="socialNetworkURLsesTable"
+                dataLoader="socialNetworkURLsesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="socialNetworkURLsesTable"
+                    width="100%"
+                    dataContainer="socialNetworkURLsesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="networkName"/>
+                <column id="networkURLS"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="socialNetworkURLsesTable.create"/>
+                <button id="editBtn" action="socialNetworkURLsesTable.edit"/>
+                <button id="removeBtn" action="socialNetworkURLsesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

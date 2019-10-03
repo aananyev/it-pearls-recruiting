@@ -24,8 +24,7 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "FIRST_NAME", nullable = false, length = 80)
     protected String firstName;
 
-    @NotNull
-    @Column(name = "MIDDLE_NAME", nullable = false, length = 80)
+    @Column(name = "MIDDLE_NAME", length = 80)
     protected String middleName;
 
     @NotNull
@@ -43,8 +42,7 @@ public class JobCandidate extends StandardEntity {
     protected Company currentCompany;
 
     @Temporal(TemporalType.DATE)
-    @NotNull
-    @Column(name = "BIRDH_DATE", nullable = false)
+    @Column(name = "BIRDH_DATE")
     protected Date birdhDate;
 
     @Email

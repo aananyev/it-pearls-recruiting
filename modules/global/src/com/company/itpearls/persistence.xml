@@ -18,5 +18,6 @@
         <class>com.company.itpearls.entity.Iteraction</class>
         <class>com.company.itpearls.entity.JobCandidate</class>
         <class>com.company.itpearls.entity.IteractionList</class>
+        <class>com.company.itpearls.entity.SocialNetworkURLs</class>
     </persistence-unit>
 </persistence>

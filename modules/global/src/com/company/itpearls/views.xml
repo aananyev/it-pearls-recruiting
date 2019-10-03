@@ -59,4 +59,5 @@
         <property name="iteractionType" view="_local"/>
         <property name="recrutier" view="_local"/>
     </view>
+    <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local"/>
 </views>

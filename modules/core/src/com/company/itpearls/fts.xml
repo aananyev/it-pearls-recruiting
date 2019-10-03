@@ -49,5 +49,8 @@
         <entity class="com.company.itpearls.entity.IteractionList">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.SocialNetworkURLs">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>
