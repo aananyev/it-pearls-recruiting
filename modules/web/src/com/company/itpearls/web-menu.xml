@@ -5,6 +5,8 @@
         <item screen="itpearls_Skill.browse"/>
         <item screen="itpearls_OpenPosition.browse"/>
         <item screen="itpearls_JobCandidate.browse"/>
+        <item screen="itpearls_Iteraction.browse"/>
+        <item screen="itpearls_IteractionList.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
         <item screen="itpearls_Country.browse"/>

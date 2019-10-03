@@ -8,6 +8,8 @@
                   class="com.company.itpearls.entity.Project"
                   view="project-view">
             <loader/>
+            <collection id="projectOpenPositionsDc" property="openPosition"/>
+            <collection id="projectJobCandidatesDc" property="jobCandidate"/>
         </instance>
         <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="projectDepartmentsLc">
@@ -45,6 +47,25 @@
                 </lookupPickerField>
             </column>
         </form>
+        <groupBox id="groupBoxVacancy" spacing="true">
+            <table id="projectOpenPositionTable" height="100px" width="100%" dataContainer="projectOpenPositionsDc">
+                <columns>
+                    <column id="vacansyName"/>
+                    <column id="numberPosition"/>
+                    <column id="comment"/>
+                </columns>
+            </table>
+        </groupBox>
+        <groupBox id="groupBoxIteraction" spacing="true">
+            <table id="projectJobCandidateTable" height="100px" width="100%" dataContainer="projectJobCandidatesDc">
+                <columns>
+                    <column id="numberIteraction"/>
+                    <column id="dateIteraction"/>
+                    <column id="communicationMethod"/>
+                    <column id="comment"/>
+                </columns>
+            </table>
+        </groupBox>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

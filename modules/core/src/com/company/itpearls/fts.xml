@@ -4,9 +4,6 @@
         <entity class="com.company.itpearls.entity.Skill">
             <include re=".*"/>
         </entity>
-        <entity class="com.company.itpearls.entity.MainList">
-            <include re=".*"/>
-        </entity>
         <entity class="com.company.itpearls.entity.JobCandidate">
             <include re=".*"/>
         </entity>
@@ -46,10 +43,10 @@
         <entity class="com.company.itpearls.entity.CompanyGroup">
             <include re=".*"/>
         </entity>
-        <entity class="com.company.itpearls.entity.RequiredParameters">
+        <entity class="com.company.itpearls.entity.OpenPosition">
             <include re=".*"/>
         </entity>
-        <entity class="com.company.itpearls.entity.OpenPosition">
+        <entity class="com.company.itpearls.entity.IteractionList">
             <include re=".*"/>
         </entity>
     </entities>

@@ -245,30 +245,7 @@ create table ITPEARLS_COMPANY_GROUP (
     primary key (ID)
 )^
 -- end ITPEARLS_COMPANY_GROUP
--- begin ITPEARLS_MAIN_LIST
-create table ITPEARLS_MAIN_LIST (
-    ID varchar(36) not null,
-    VERSION integer not null,
-    CREATE_TS timestamp,
-    CREATED_BY varchar(50),
-    UPDATE_TS timestamp,
-    UPDATED_BY varchar(50),
-    DELETE_TS timestamp,
-    DELETED_BY varchar(50),
-    --
-    NUMBER_LIST integer not null,
-    PERSON_CURRENT_POSITION_ID varchar(36),
-    PROJECT_NAME_ID varchar(36) not null,
-    OPEN_POSITION_ID varchar(36),
-    ITERACTION_NAME_ID varchar(36) not null,
-    COMMUNICATION_METHOD varchar(20) not null,
-    ITERACTION_COMMENT longvarchar,
-    USER_FROM_COMPANY_ID varchar(36) not null,
-    DATA_CONTACT timestamp,
-    --
-    primary key (ID)
-)^
--- end ITPEARLS_MAIN_LIST
+
 -- begin ITPEARLS_ITERACTION
 create table ITPEARLS_ITERACTION (
     ID varchar(36) not null,
@@ -314,8 +291,8 @@ create table ITPEARLS_JOB_CANDIDATE (
     primary key (ID)
 )^
 -- end ITPEARLS_JOB_CANDIDATE
--- begin ITPEARLS_REQUIRED_PARAMETERS
-create table ITPEARLS_REQUIRED_PARAMETERS (
+-- begin ITPEARLS_ITERACTION_LIST
+create table ITPEARLS_ITERACTION_LIST (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -325,9 +302,17 @@ create table ITPEARLS_REQUIRED_PARAMETERS (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    PARAMETER_NAME varchar(80) not null,
-    NUMBER_ integer not null,
+    NUMBER_ITERACTION integer,
+    DATE_ITERACTION timestamp,
+    CANDIDATE_ID varchar(36) not null,
+    CURRENT_JOB_POSITION_ID varchar(36),
+    PROJECT_ID varchar(36),
+    COMPANY_DEPARTMENT_ID varchar(36) not null,
+    ITERACTION_TYPE_ID varchar(36) not null,
+    RECRUTIER_ID varchar(36) not null,
+    COMMUNICATION_METHOD varchar(80),
+    COMMENT_ longvarchar,
     --
     primary key (ID)
 )^
--- end ITPEARLS_REQUIRED_PARAMETERS
+-- end ITPEARLS_ITERACTION_LIST

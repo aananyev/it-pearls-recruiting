@@ -8,6 +8,7 @@
                   class="com.company.itpearls.entity.JobCandidate"
                   view="jobCandidate-view">
             <loader/>
+            <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="personPositionsLc">
@@ -68,6 +69,27 @@
                 </column>
             </form>
         </scrollBox>
+        <groupBox spacing="true">
+            <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
+                   width="100%">
+                <columns>
+                    <column id="numberIteraction"/>
+                    <column id="dateIteraction"/>
+                    <column id="communicationMethod"/>
+                    <column id="comment"/>
+                </columns>
+                <actions>
+                    <action id="add" type="add"/>
+                    <action id="edit" type="edit"/>
+                    <action id="remove" type="remove"/>
+                </actions>
+                <buttonsPanel>
+                    <button id="addButton" action="jobCandidateIteractionListTable.add"/>
+                    <button id="editButton" action="jobCandidateIteractionListTable.edit"/>
+                    <button id="removeButton" action="jobCandidateIteractionListTable.remove"/>
+                </buttonsPanel>
+            </table>
+        </groupBox>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

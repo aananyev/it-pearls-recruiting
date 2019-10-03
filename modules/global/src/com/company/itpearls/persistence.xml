@@ -15,9 +15,8 @@
         <class>com.company.itpearls.entity.OpenPosition</class>
         <class>com.company.itpearls.entity.Project</class>
         <class>com.company.itpearls.entity.CompanyGroup</class>
-        <class>com.company.itpearls.entity.MainList</class>
         <class>com.company.itpearls.entity.Iteraction</class>
         <class>com.company.itpearls.entity.JobCandidate</class>
-        <class>com.company.itpearls.entity.RequiredParameters</class>
+        <class>com.company.itpearls.entity.IteractionList</class>
     </persistence-unit>
 </persistence>

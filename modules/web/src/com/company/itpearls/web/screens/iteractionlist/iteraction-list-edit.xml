@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.iteractionlist">
+    <data>
+        <instance id="iteractionListDc"
+                  class="com.company.itpearls.entity.IteractionList"
+                  view="iteractionList-view">
+            <loader/>
+        </instance>
+        <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+            <loader id="candidatesLc">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="projectsDc" class="com.company.itpearls.entity.Project" view="_minimal">
+            <loader id="projectsLc">
+                <query>
+                    <![CDATA[select e from itpearls_Project e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="companyDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
+            <loader id="companyDepartmentsLc">
+                <query>
+                    <![CDATA[select e from itpearls_CompanyDepartament e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="_minimal">
+            <loader id="iteractionTypesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Iteraction e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="recrutiersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
+            <loader id="recrutiersLc">
+                <query>
+                    <![CDATA[select e from sec$User e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="iteractionListDc">
+            <column width="250px">
+                <textField id="numberIteractionField" property="numberIteraction"/>
+                <dateField id="dateIteractionField" property="dateIteraction"/>
+                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <pickerField id="currentJobPositionField" property="currentJobPosition">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="clear" type="picker_clear"/>
+                    </actions>
+                </pickerField>
+                <lookupPickerField id="projectField" optionsContainer="projectsDc" property="project">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="companyDepartmentField" optionsContainer="companyDepartmentsDc"
+                                   property="companyDepartment">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="iteractionTypeField" optionsContainer="iteractionTypesDc"
+                                   property="iteractionType">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="recrutierField" optionsContainer="recrutiersDc" property="recrutier">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <textField id="communicationMethodField" property="communicationMethod"/>
+                <textArea id="commentField" property="comment" rows="5"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

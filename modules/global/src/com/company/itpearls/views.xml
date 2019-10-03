@@ -31,6 +31,8 @@
     <view entity="itpearls_Project" name="project-view" extends="_local">
         <property name="projectDepartment" view="_minimal"/>
         <property name="projectOwner" view="_local"/>
+        <property name="openPosition" view="_local"/>
+        <property name="jobCandidate" view="_local"/>
     </view>
     <view entity="itpearls_Person" name="person-view" extends="_local">
         <property name="positionCountry" view="_minimal"/>
@@ -47,5 +49,14 @@
         <property name="personPosition" view="_local"/>
         <property name="currentCompany" view="_local"/>
         <property name="positionCountry" view="_local"/>
+        <property name="iteractionList" view="_local"/>
+    </view>
+    <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local">
+        <property name="candidate" view="_local"/>
+        <property name="currentJobPosition" view="_local"/>
+        <property name="project" view="_local"/>
+        <property name="companyDepartment" view="_local"/>
+        <property name="iteractionType" view="_local"/>
+        <property name="recrutier" view="_local"/>
     </view>
 </views>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="iteractionListsTable"
+        messagesPack="com.company.itpearls.web.screens.iteractionlist">
+    <data readOnly="true">
+        <collection id="iteractionListsDc"
+                    class="com.company.itpearls.entity.IteractionList"
+                    view="iteractionList-view">
+            <loader id="iteractionListsDl">
+                <query>
+                    <![CDATA[select e from itpearls_IteractionList e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="iteractionListsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="iteractionListsTable"
+                dataLoader="iteractionListsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="iteractionListsTable"
+                    width="100%"
+                    dataContainer="iteractionListsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="numberIteraction"/>
+                <column id="dateIteraction"/>
+                <column id="candidate"/>
+                <column id="currentJobPosition"/>
+                <column id="project"/>
+                <column id="companyDepartment"/>
+                <column id="iteractionType"/>
+                <column id="recrutier"/>
+                <column id="communicationMethod"/>
+                <column id="comment"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="iteractionListsTable.create"/>
+                <button id="editBtn" action="iteractionListsTable.edit"/>
+                <button id="removeBtn" action="iteractionListsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>
