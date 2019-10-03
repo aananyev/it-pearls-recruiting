@@ -32,6 +32,19 @@ public class Project extends StandardEntity {
     @JoinColumn(name = "PROJECT_DEPARTMENT_ID")
     protected CompanyDepartament projectDepartment;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PROJECT_OWNER_ID")
+    protected Person projectOwner;
+
+    public Person getProjectOwner() {
+        return projectOwner;
+    }
+
+    public void setProjectOwner(Person projectOwner) {
+        this.projectOwner = projectOwner;
+    }
+
     public CompanyDepartament getProjectDepartment() {
         return projectDepartment;
     }

@@ -43,7 +43,6 @@ create table ITPEARLS_PERSON (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    CANDIDATE boolean,
     FIRST_NAME varchar(80),
     MIDDLE_NAME varchar(80),
     SECOND_NAME varchar(80),
@@ -203,6 +202,7 @@ create table ITPEARLS_PROJECT (
     START_PROJECT_DATE date,
     END_PROJECT_DATE date,
     PROJECT_DEPARTMENT_ID varchar(36) not null,
+    PROJECT_OWNER_ID varchar(36),
     --
     primary key (ID)
 )^
@@ -218,8 +218,11 @@ create table ITPEARLS_OPEN_POSITION (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    VACANSY_NAME varchar(80) not null,
+    POSITION_TYPE_ID varchar(36),
     PROJECT_NAME_ID varchar(36) not null,
     COMPANY_NAME_ID varchar(36) not null,
+    COMPANY_DEPARTAMENT_ID varchar(36),
     NUMBER_POSITION integer not null,
     COMMENT_ longvarchar,
     --

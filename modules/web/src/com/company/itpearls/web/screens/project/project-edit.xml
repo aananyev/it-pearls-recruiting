@@ -16,6 +16,13 @@
                 </query>
             </loader>
         </collection>
+        <collection id="projectOwnersDc" class="com.company.itpearls.entity.Person" view="_minimal">
+            <loader id="projectOwnersLc">
+                <query>
+                    <![CDATA[select e from itpearls_Person e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -27,6 +34,11 @@
                 <dateField id="endProjectDateField" property="endProjectDate"/>
                 <lookupPickerField id="projectDepartmentField" optionsContainer="projectDepartmentsDc"
                                    property="projectDepartment">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="projectOwnerField" optionsContainer="projectOwnersDc" property="projectOwner">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>

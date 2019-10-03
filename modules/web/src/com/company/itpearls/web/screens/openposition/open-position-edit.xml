@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.openposition">
+    <data>
+        <instance id="openPositionDc"
+                  class="com.company.itpearls.entity.OpenPosition"
+                  view="openPosition-view">
+            <loader/>
+        </instance>
+        <collection id="positionTypesDc" class="com.company.itpearls.entity.Position" view="_minimal">
+            <loader id="positionTypesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Position e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_minimal">
+            <loader id="projectNamesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Project e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
+            <loader id="companyNamesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Company e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="companyDepartamentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
+            <loader id="companyDepartamentsLc">
+                <query>
+                    <![CDATA[select e from itpearls_CompanyDepartament e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="openPositionDc">
+            <column width="250px">
+                <textField id="vacansyNameField" property="vacansyName"/>
+                <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc" property="positionType">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" property="companyName">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="companyDepartamentField" optionsContainer="companyDepartamentsDc"
+                                   property="companyDepartament">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc" property="projectName">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <textField id="numberPositionField" property="numberPosition"/>
+            </column>
+        </form>
+        <groupBox id="groupBoxOfComment" spacing="true" height="250pt">
+            <textArea id="commentField" property="comment" rows="5" width="100%"/>
+        </groupBox>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

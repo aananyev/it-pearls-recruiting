@@ -30,5 +30,17 @@
     </view>
     <view entity="itpearls_Project" name="project-view" extends="_local">
         <property name="projectDepartment" view="_minimal"/>
+        <property name="projectOwner" view="_local"/>
+    </view>
+    <view entity="itpearls_Person" name="person-view" extends="_local">
+        <property name="positionCountry" view="_minimal"/>
+        <property name="personPosition" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Position" name="position-view" extends="_local"/>
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local">
+        <property name="positionType" view="_local"/>
+        <property name="projectName" view="_local"/>
+        <property name="companyName" view="_local"/>
+        <property name="companyDepartament" view="_local"/>
     </view>
 </views>

@@ -17,9 +17,6 @@ import java.util.Date;
 public class Person extends StandardEntity {
     private static final long serialVersionUID = 5184615102344376058L;
 
-    @Column(name = "CANDIDATE")
-    protected Boolean candidate;
-
     @Column(name = "FIRST_NAME", length = 80)
     protected String firstName;
 
@@ -63,14 +60,6 @@ public class Person extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
-
-    public Boolean getCandidate() {
-        return candidate;
-    }
-
-    public void setCandidate(Boolean candidate) {
-        this.candidate = candidate;
-    }
 
     public String getWatsupName() {
         return watsupName;

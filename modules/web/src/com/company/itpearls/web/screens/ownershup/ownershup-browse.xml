@@ -1,49 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="projectsTable"
-        messagesPack="com.company.itpearls.web.screens.project">
+        focusComponent="ownershupsTable"
+        messagesPack="com.company.itpearls.web.screens.ownershup">
     <data readOnly="true">
-        <collection id="projectsDc"
-                    class="com.company.itpearls.entity.Project"
-                    view="project-view">
-            <loader id="projectsDl">
+        <collection id="ownershupsDc"
+                    class="com.company.itpearls.entity.Ownershup"
+                    view="_local">
+            <loader id="ownershupsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Project e]]>
+                    <![CDATA[select e from itpearls_Ownershup e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="projectsTable"
+    <layout expand="ownershupsTable"
             spacing="true">
         <filter id="filter"
-                applyTo="projectsTable"
-                dataLoader="projectsDl">
+                applyTo="ownershupsTable"
+                dataLoader="ownershupsDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="projectsTable"
+        <groupTable id="ownershupsTable"
                     width="100%"
-                    dataContainer="projectsDc">
+                    dataContainer="ownershupsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="projectName"/>
-                <column id="startProjectDate"/>
-                <column id="endProjectDate"/>
-                <column id="projectDepartment"/>
-                <column id="projectOwner"/>
+                <column id="shortType"/>
+                <column id="longType"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="projectsTable.create"/>
-                <button id="editBtn" action="projectsTable.edit"/>
-                <button id="removeBtn" action="projectsTable.remove"/>
+                <button id="createBtn" action="ownershupsTable.create"/>
+                <button id="editBtn" action="ownershupsTable.edit"/>
+                <button id="removeBtn" action="ownershupsTable.remove"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

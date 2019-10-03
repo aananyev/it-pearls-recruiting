@@ -1,49 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="projectsTable"
-        messagesPack="com.company.itpearls.web.screens.project">
+        focusComponent="openPositionsTable"
+        messagesPack="com.company.itpearls.web.screens.openposition">
     <data readOnly="true">
-        <collection id="projectsDc"
-                    class="com.company.itpearls.entity.Project"
-                    view="project-view">
-            <loader id="projectsDl">
+        <collection id="openPositionsDc"
+                    class="com.company.itpearls.entity.OpenPosition"
+                    view="openPosition-view">
+            <loader id="openPositionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Project e]]>
+                    <![CDATA[select e from itpearls_OpenPosition e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="projectsTable"
+    <layout expand="openPositionsTable"
             spacing="true">
         <filter id="filter"
-                applyTo="projectsTable"
-                dataLoader="projectsDl">
+                applyTo="openPositionsTable"
+                dataLoader="openPositionsDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="projectsTable"
+        <groupTable id="openPositionsTable"
                     width="100%"
-                    dataContainer="projectsDc">
+                    dataContainer="openPositionsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="vacansyName"/>
+                <column id="positionType"/>
                 <column id="projectName"/>
-                <column id="startProjectDate"/>
-                <column id="endProjectDate"/>
-                <column id="projectDepartment"/>
-                <column id="projectOwner"/>
+                <column id="companyName"/>
+                <column id="companyDepartament"/>
+                <column id="numberPosition"/>
+                <column id="comment"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="projectsTable.create"/>
-                <button id="editBtn" action="projectsTable.edit"/>
-                <button id="removeBtn" action="projectsTable.remove"/>
+                <button id="createBtn" action="openPositionsTable.create"/>
+                <button id="editBtn" action="openPositionsTable.edit"/>
+                <button id="removeBtn" action="openPositionsTable.remove"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

@@ -15,7 +15,7 @@
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="specialisationDc">
-            <column width="250px">
+            <column width="250pt">
                 <textField id="specRuNameField" property="specRuName"/>
             </column>
         </form>
