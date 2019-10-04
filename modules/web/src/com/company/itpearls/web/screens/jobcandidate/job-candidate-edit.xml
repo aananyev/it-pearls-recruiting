@@ -9,6 +9,7 @@
                   view="jobCandidate-view">
             <loader/>
             <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
+            <collection id="jobCandidateSkillListsDc" property="skillList"/>
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="personPositionsLc">
@@ -97,6 +98,34 @@
                             <button id="removeButton" action="jobCandidateIteractionListTable.remove"/>
                         </buttonsPanel>
                     </table>
+                </groupBox>
+            </tab>
+            <tab id="tabSkills" caption="msg://msgSkills" margin="true,false,false,false" spacing="true">
+                <groupBox spacing="true">
+                    <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc" property="specialisation"
+                                       caption="msg://msgSpecialisation" width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                        </actions>
+                    </lookupPickerField>
+                    <groupBox spacing="true">
+                        <groupTable id="jobCandidateSkillListTable" height="200px" width="400px" dataContainer="jobCandidateSkillListsDc">
+                            <columns>
+                                <column id="skillName"/>
+                            </columns>
+                            <actions>
+                                <action id="add" type="add"/>
+                                <action id="edit" type="edit"/>
+                                <action id="remove" type="remove"/>
+                            </actions>
+                            <buttonsPanel>
+                                <button id="addButton_1" action="jobCandidateIteractionListTable.add"/>
+                                <button id="editButton_1" action="jobCandidateIteractionListTable.edit"/>
+                                <button id="removeButton_1" action="jobCandidateIteractionListTable.remove"/>
+                            </buttonsPanel>
+                        </groupTable>
+                    </groupBox>
                 </groupBox>
             </tab>
         </tabSheet>

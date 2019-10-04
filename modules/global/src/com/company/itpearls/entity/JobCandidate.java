@@ -74,6 +74,32 @@ public class JobCandidate extends StandardEntity {
     @OneToMany(mappedBy = "candidate")
     protected List<IteractionList> iteractionList;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SPECIALISATION_ID")
+    protected Specialisation specialisation;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "jobCandidate")
+    protected List<SkillTree> skillList;
+
+    public List<SkillTree> getSkillList() {
+        return skillList;
+    }
+
+    public void setSkillList(List<SkillTree> skillList) {
+        this.skillList = skillList;
+    }
+
+    public Specialisation getSpecialisation() {
+        return specialisation;
+    }
+
+    public void setSpecialisation(Specialisation specialisation) {
+        this.specialisation = specialisation;
+    }
+
     public List<IteractionList> getIteractionList() {
         return iteractionList;
     }

@@ -44,6 +44,8 @@
         <property name="currentCompany" view="_local"/>
         <property name="positionCountry" view="_local"/>
         <property name="iteractionList" view="_local"/>
+        <property name="specialisation" view="_local"/>
+        <property name="skillList" view="_minimal"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local">
         <property name="candidate" view="_local"/>
@@ -57,4 +59,5 @@
     <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
         <property name="skillTree" view="_local"/>
     </view>
+    <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local"/>
 </views>

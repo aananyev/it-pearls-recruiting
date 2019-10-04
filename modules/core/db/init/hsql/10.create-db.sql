@@ -271,6 +271,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     WIBER_NAME varchar(30),
     WHATSUP_NAME varchar(30),
     POSITION_COUNTRY_ID varchar(36),
+    SPECIALISATION_ID varchar(36),
     --
     primary key (ID)
 )^
@@ -330,6 +331,7 @@ create table ITPEARLS_SKILL_TREE (
     --
     SKILL_NAME varchar(80) not null,
     SKILL_TREE_ID varchar(36),
+    JOB_CANDIDATE_ID varchar(36),
     --
     primary key (ID)
 )^
