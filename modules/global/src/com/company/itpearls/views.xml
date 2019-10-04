@@ -38,6 +38,7 @@
         <property name="projectName" view="_local"/>
         <property name="companyName" view="_local"/>
         <property name="companyDepartament" view="_local"/>
+        <property name="skillsList" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local">
         <property name="personPosition" view="_local"/>

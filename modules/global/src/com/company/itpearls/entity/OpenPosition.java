@@ -1,12 +1,16 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @NamePattern("%s|projectName")
 @Table(name = "ITPEARLS_OPEN_POSITION")
@@ -47,6 +51,19 @@ public class OpenPosition extends StandardEntity {
     @Lob
     @Column(name = "COMMENT_")
     protected String comment;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "openPosition")
+    protected List<SkillTree> skillsList;
+
+    public List<SkillTree> getSkillsList() {
+        return skillsList;
+    }
+
+    public void setSkillsList(List<SkillTree> skillsList) {
+        this.skillsList = skillsList;
+    }
 
     public Position getPositionType() {
         return positionType;

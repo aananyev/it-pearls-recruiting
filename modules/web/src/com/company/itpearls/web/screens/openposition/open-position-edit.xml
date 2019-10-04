@@ -8,6 +8,7 @@
                   class="com.company.itpearls.entity.OpenPosition"
                   view="openPosition-view">
             <loader/>
+            <collection id="openPositionSkillsListsDc" property="skillsList"/>
         </instance>
         <collection id="positionTypesDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="positionTypesLc">
@@ -41,35 +42,63 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="openPositionDc">
-            <column width="250px">
-                <textField id="vacansyNameField" property="vacansyName"/>
-                <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc" property="positionType">
+        <tabSheet>
+            <tab id="tabOpenPosition" caption="msg://msgNamePosition" margin="true,false,false,false" spacing="true">
+                <textField id="vacansyNameField" dataContainer="openPositionDc" property="vacansyName"
+                           caption="msg://msgVacansy"/>
+                <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc"
+                                   dataContainer="openPositionDc" property="positionType"
+                                   caption="msg://msgNamePosition">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc" property="projectName">
+                <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc"
+                                   dataContainer="openPositionDc" property="projectName"
+                                   caption="msg://msgNamePosition">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" property="companyName">
+                <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc"
+                                   dataContainer="openPositionDc" property="companyName" caption="msg://msgProject">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
                 <lookupPickerField id="companyDepartamentField" optionsContainer="companyDepartamentsDc"
-                                   property="companyDepartament">
+                                   dataContainer="openPositionDc" property="companyDepartament"
+                                   caption="msg://msgDepartment">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <textField id="numberPositionField" property="numberPosition"/>
-                <textArea id="commentField" property="comment" rows="5"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
+                <textField id="numberPositionField" dataContainer="openPositionDc" property="numberPosition"
+                           caption="msg://msgNumberOpenPosition"/>
+                <textArea id="commentField" rows="5" dataContainer="openPositionDc" property="comment"
+                          caption="msg://msgComment"/>
+            </tab>
+            <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true">
+                <groupBox spacing="true">
+                    <table id="openPositionSkillsListTable" height="200px" width="400px" dataContainer="openPositionSkillsListsDc">
+                        <columns>
+                            <column id="skillName"/>
+                        </columns>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                        <buttonsPanel>
+                            <button action="openPositionSkillsListTable.add"/>
+                            <button action="openPositionSkillsListTable.edit"/>
+                            <button action="openPositionSkillsListTable.remove"/>
+                        </buttonsPanel>
+                    </table>
+                </groupBox>
+            </tab>
+        </tabSheet>
+        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

@@ -332,6 +332,7 @@ create table ITPEARLS_SKILL_TREE (
     SKILL_NAME varchar(80) not null,
     SKILL_TREE_ID varchar(36),
     JOB_CANDIDATE_ID varchar(36),
+    OPEN_POSITION_ID varchar(36),
     --
     primary key (ID)
 )^
