@@ -29,44 +29,56 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="projectDc">
-            <column width="250px">
-                <textField id="projectNameField" property="projectName"/>
-                <dateField id="startProjectDateField" property="startProjectDate"/>
-                <dateField id="endProjectDateField" property="endProjectDate"/>
-                <lookupPickerField id="projectDepartmentField" optionsContainer="projectDepartmentsDc"
-                                   property="projectDepartment">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="projectOwnerField" optionsContainer="projectOwnersDc" property="projectOwner">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-            </column>
-        </form>
-        <groupBox id="groupBoxVacancy" spacing="true">
-            <table id="projectOpenPositionTable" height="100px" width="100%" dataContainer="projectOpenPositionsDc">
-                <columns>
-                    <column id="vacansyName"/>
-                    <column id="numberPosition"/>
-                    <column id="comment"/>
-                </columns>
-            </table>
-        </groupBox>
-        <groupBox id="groupBoxIteraction" spacing="true">
-            <table id="projectJobCandidateTable" height="100px" width="100%" dataContainer="projectJobCandidatesDc">
-                <columns>
-                    <column id="numberIteraction"/>
-                    <column id="dateIteraction"/>
-                    <column id="communicationMethod"/>
-                    <column id="comment"/>
-                </columns>
-            </table>
-        </groupBox>
-        <hbox id="editActions" spacing="true">
+        <tabSheet caption="msg://msgTabProject">
+            <tab caption="Tab" margin="true,false,false,false" spacing="true" id="tabProject">
+                <groupBox spacing="true">
+                    <textField id="projectNameField" dataContainer="projectDc" property="projectName"
+                               caption="msg://msgProjectName"/>
+                    <dateField id="startProjectDateField" dataContainer="projectDc" property="startProjectDate"
+                               caption="msg://msgProjectStartDate"/>
+                    <dateField id="endProjectDateField" dataContainer="projectDc" property="endProjectDate"
+                               caption="msg://msgProjectEndDate"/>
+                    <lookupPickerField id="projectDepartmentField" optionsContainer="projectDepartmentsDc"
+                                       dataContainer="projectDc" property="projectDepartment"
+                                       caption="msg://msgProjectDepartament">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="projectOwnerField" optionsContainer="projectOwnersDc"
+                                       dataContainer="projectDc" property="projectOwner"
+                                       caption="msg://msgProjectOwner">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                </groupBox>
+            </tab>
+            <tab id="tabVacansy" margin="true,false,false,false" spacing="true" caption="msg://msgTabVacancy">
+                <groupBox id="groupBoxVacancy" spacing="true">
+                    <table id="projectOpenPositionTable" height="100px" width="100%" dataContainer="projectOpenPositionsDc">
+                        <columns>
+                            <column id="vacansyName"/>
+                            <column id="numberPosition"/>
+                            <column id="comment"/>
+                        </columns>
+                    </table>
+                </groupBox>
+            </tab>
+            <tab id="tabIteraction" caption="msg://msgTabIteraction" margin="true,false,false,false" spacing="true">
+                <groupBox id="groupBoxIteraction" spacing="true">
+                    <table id="projectJobCandidateTable" height="100px" width="100%" dataContainer="projectJobCandidatesDc">
+                        <columns>
+                            <column id="numberIteraction"/>
+                            <column id="dateIteraction"/>
+                            <column id="communicationMethod"/>
+                            <column id="comment"/>
+                        </columns>
+                    </table>
+                </groupBox>
+            </tab>
+        </tabSheet>
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

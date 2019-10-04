@@ -36,60 +36,75 @@
                 width="800"/>
     <tabSheet/>
     <layout expand="editActions" spacing="true">
+        <tabSheet>
+            <tab id="tab" caption="msg://candidate" margin="true,false,false,false" spacing="true">
+                <groupBox spacing="true">
+                    <textField id="firstNameField" dataContainer="jobCandidateDc" property="firstName" width="50%"
+                               caption="msg://msgFirstName"/>
+                    <textField id="middleNameField" dataContainer="jobCandidateDc" property="middleName" width="50%"
+                               caption="msg://msgMiddleName"/>
+                    <textField id="secondNameField" dataContainer="jobCandidateDc" property="secondName" width="50%"
+                               caption="msg://msgSecondName"/>
+                    <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
+                                       dataContainer="jobCandidateDc" property="personPosition" width="50%"
+                                       caption="msg://msgPersonPosition">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
+                                       dataContainer="jobCandidateDc" property="currentCompany" width="50%"
+                                       caption="msg://msgCorrentCompany">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="50%"
+                               caption="msg://msgBirthDate"/>
+                    <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="50%"/>
+                    <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="50%"/>
+                    <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName" width="50%"/>
+                    <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
+                               width="50%"/>
+                    <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName" width="50%"/>
+                    <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName" width="50%"/>
+                    <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
+                                       dataContainer="jobCandidateDc" property="positionCountry" width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                </groupBox>
+            </tab>
+            <tab caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
+                <groupBox spacing="true">
+                    <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
+                           width="100%">
+                        <columns>
+                            <column id="numberIteraction"/>
+                            <column id="dateIteraction"/>
+                            <column id="communicationMethod"/>
+                            <column id="comment"/>
+                        </columns>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                        <buttonsPanel>
+                            <button id="addButton" action="jobCandidateIteractionListTable.add"/>
+                            <button id="editButton" action="jobCandidateIteractionListTable.edit"/>
+                            <button id="removeButton" action="jobCandidateIteractionListTable.remove"/>
+                        </buttonsPanel>
+                    </table>
+                </groupBox>
+            </tab>
+        </tabSheet>
         <form id="form" dataContainer="jobCandidateDc">
             <column width="250px">
-                <textField id="firstNameField" property="firstName"/>
-                <textField id="middleNameField" property="middleName"/>
-                <textField id="secondNameField" property="secondName"/>
-                <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
-                                   property="personPosition">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
-                                   property="currentCompany">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <dateField id="birdhDateField" property="birdhDate"/>
-                <textField id="emailField" property="email"/>
-                <textField id="phoneField" property="phone"/>
-                <textField id="skypeNameField" property="skypeName"/>
-                <textField id="telegramNameField" property="telegramName"/>
-                <textField id="wiberNameField" property="wiberName"/>
-                <textField id="whatsupNameField" property="whatsupName"/>
-                <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
-                                   property="positionCountry">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
             </column>
         </form>
-        <groupBox spacing="true">
-            <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
-                   width="100%">
-                <columns>
-                    <column id="numberIteraction"/>
-                    <column id="dateIteraction"/>
-                    <column id="communicationMethod"/>
-                    <column id="comment"/>
-                </columns>
-                <actions>
-                    <action id="add" type="add"/>
-                    <action id="edit" type="edit"/>
-                    <action id="remove" type="remove"/>
-                </actions>
-                <buttonsPanel>
-                    <button id="addButton" action="jobCandidateIteractionListTable.add"/>
-                    <button id="editButton" action="jobCandidateIteractionListTable.edit"/>
-                    <button id="removeButton" action="jobCandidateIteractionListTable.remove"/>
-                </buttonsPanel>
-            </table>
-        </groupBox>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

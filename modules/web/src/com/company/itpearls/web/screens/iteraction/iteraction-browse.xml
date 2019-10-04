@@ -8,9 +8,8 @@
                     class="com.company.itpearls.entity.Iteraction"
                     view="_local">
             <loader id="iteractionsDl">
-                <query>
-                    <![CDATA[select e from itpearls_Iteraction e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Iteraction e
+order by e.number]]></query>
             </loader>
         </collection>
     </data>
@@ -32,7 +31,7 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="number"/>
+                <column id="number" generator="generateNumberCell"/>
                 <column id="iterationName"/>
             </columns>
             <rowsCount/>

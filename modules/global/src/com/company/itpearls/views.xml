@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
 
-    <view entity="itpearls_Skill" name="skill-view" extends="_local">
-        <property name="skillType" view="_minimal"/>
-    </view>
-    <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local">
-        <property name="skill" view="_minimal"/>
-    </view>
     <view entity="itpearls_City" name="city-view" extends="_local">
         <property name="cityRegion" view="_minimal"/>
     </view>
@@ -60,4 +54,7 @@
         <property name="recrutier" view="_local"/>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local"/>
+    <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
+        <property name="skillTree" view="_local"/>
+    </view>
 </views>

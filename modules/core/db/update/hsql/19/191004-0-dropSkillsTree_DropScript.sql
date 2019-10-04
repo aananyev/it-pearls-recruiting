@@ -1,0 +1,1 @@
+drop table ITPEARLS_SKILLS_TREE__U91675 if exists cascade ;

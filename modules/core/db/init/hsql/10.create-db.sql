@@ -170,23 +170,7 @@ create table ITPEARLS_SPECIALISATION (
     primary key (ID)
 )^
 -- end ITPEARLS_SPECIALISATION
--- begin ITPEARLS_SKILL
-create table ITPEARLS_SKILL (
-    ID varchar(36) not null,
-    VERSION integer not null,
-    CREATE_TS timestamp,
-    CREATED_BY varchar(50),
-    UPDATE_TS timestamp,
-    UPDATED_BY varchar(50),
-    DELETE_TS timestamp,
-    DELETED_BY varchar(50),
-    --
-    SKILL_NAME varchar(80) not null,
-    SKILL_TYPE_ID varchar(36) not null,
-    --
-    primary key (ID)
-)^
--- end ITPEARLS_SKILL
+
 -- begin ITPEARLS_PROJECT
 create table ITPEARLS_PROJECT (
     ID varchar(36) not null,
@@ -333,3 +317,20 @@ create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
     primary key (ID)
 )^
 -- end ITPEARLS_SOCIAL_NETWORK_UR_LS
+-- begin ITPEARLS_SKILL_TREE
+create table ITPEARLS_SKILL_TREE (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    SKILL_NAME varchar(80) not null,
+    SKILL_TREE_ID varchar(36),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SKILL_TREE

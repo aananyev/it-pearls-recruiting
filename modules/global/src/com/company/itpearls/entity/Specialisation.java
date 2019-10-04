@@ -21,19 +21,6 @@ public class Specialisation extends StandardEntity {
     @Column(name = "SPEC_RU_NAME", unique = true, length = 80)
     protected String specRuName;
 
-    @Composition
-    @OnDelete(DeletePolicy.CASCADE)
-    @OneToMany(mappedBy = "skillType")
-    protected List<Skill> skill;
-
-    public List<Skill> getSkill() {
-        return skill;
-    }
-
-    public void setSkill(List<Skill> skill) {
-        this.skill = skill;
-    }
-
     public String getSpecRuName() {
         return specRuName;
     }

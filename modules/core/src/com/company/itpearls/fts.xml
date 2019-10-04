@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fts-config xmlns="http://schemas.haulmont.com/cuba/fts.xsd">
     <entities>
-        <entity class="com.company.itpearls.entity.Skill">
-            <include re=".*"/>
-        </entity>
         <entity class="com.company.itpearls.entity.JobCandidate">
             <include re=".*"/>
         </entity>
@@ -50,6 +47,9 @@
             <include re=".*"/>
         </entity>
         <entity class="com.company.itpearls.entity.SocialNetworkURLs">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.SkillTree">
             <include re=".*"/>
         </entity>
     </entities>

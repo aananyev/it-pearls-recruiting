@@ -1,47 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="specialisationsTable"
-        messagesPack="com.company.itpearls.web.screens.specialisation">
+        focusComponent="skillTreesTable"
+        messagesPack="com.company.itpearls.web.screens.skilltree">
     <data readOnly="true">
-        <collection id="specialisationsDc"
-                    class="com.company.itpearls.entity.Specialisation"
-                    view="specialisation-view">
-            <loader id="specialisationsDl">
+        <collection id="skillTreesDc"
+                    class="com.company.itpearls.entity.SkillTree"
+                    view="skillTree-view">
+            <loader id="skillTreesDl">
                 <query>
-                    <![CDATA[select e from itpearls_Specialisation e]]>
+                    <![CDATA[select e from itpearls_SkillTree e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="specialisationsTable"
+    <layout expand="skillTreesTable"
             spacing="true">
         <filter id="filter"
-                applyTo="specialisationsTable"
-                dataLoader="specialisationsDl">
+                applyTo="skillTreesTable"
+                dataLoader="skillTreesDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="specialisationsTable"
-                    width="100%"
-                    dataContainer="specialisationsDc">
+        <treeTable id="skillTreesTable"
+                   width="100%"
+                   dataContainer="skillTreesDc"
+                   hierarchyProperty="skillTree">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="specRuName"/>
+                <column id="skillName"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="specialisationsTable.create"/>
-                <button id="editBtn" action="specialisationsTable.edit"/>
-                <button id="removeBtn" action="specialisationsTable.remove"/>
+                <button id="createBtn" action="skillTreesTable.create"/>
+                <button id="editBtn" action="skillTreesTable.edit"/>
+                <button id="removeBtn" action="skillTreesTable.remove"/>
             </buttonsPanel>
-        </groupTable>
+        </treeTable>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

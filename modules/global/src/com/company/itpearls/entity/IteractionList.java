@@ -61,6 +61,10 @@ public class IteractionList extends StandardEntity {
     @Column(name = "COMMENT_")
     protected String comment;
 
+    public void setNumberIteraction(Integer numberIteraction) {
+        this.numberIteraction = numberIteraction;
+    }
+
     public String getComment() {
         return comment;
     }
