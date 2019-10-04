@@ -48,7 +48,7 @@
                            caption="msg://msgVacansy"/>
                 <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc"
                                    dataContainer="openPositionDc" property="positionType"
-                                   caption="msg://msgNamePosition">
+                                   caption="msg://msgPositionType">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
@@ -61,7 +61,7 @@
                     </actions>
                 </lookupPickerField>
                 <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc"
-                                   dataContainer="openPositionDc" property="companyName" caption="msg://msgProject">
+                                   dataContainer="openPositionDc" property="companyName" caption="msg://msgCompanyName">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
@@ -80,7 +80,7 @@
             </tab>
             <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
-                    <table id="openPositionSkillsListTable" height="200px" width="400px" dataContainer="openPositionSkillsListsDc">
+                    <table id="openPositionSkillsListTable" height="200px" width="100%" dataContainer="openPositionSkillsListsDc">
                         <columns>
                             <column id="skillName"/>
                         </columns>
