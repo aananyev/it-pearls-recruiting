@@ -58,7 +58,7 @@
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local"/>
     <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
-        <property name="skillTree" view="_local"/>
+        <property name="skillTree" view="_minimal"/>
         <property name="jobCandidate" view="_minimal"/>
         <property name="openPosition" view="_minimal"/>
     </view>

@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -7,6 +8,7 @@ import com.haulmont.cuba.core.entity.annotation.LookupType;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+@NamePattern("%s|skillName")
 @Table(name = "ITPEARLS_SKILL_TREE")
 @Entity(name = "itpearls_SkillTree")
 public class SkillTree extends StandardEntity {
@@ -20,9 +22,11 @@ public class SkillTree extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SKILL_TREE_ID")
     protected SkillTree skillTree;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_CANDIDATE_ID")
     protected JobCandidate jobCandidate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     protected OpenPosition openPosition;
