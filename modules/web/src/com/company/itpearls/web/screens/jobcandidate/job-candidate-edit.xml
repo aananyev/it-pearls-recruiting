@@ -41,58 +41,82 @@
         <tabSheet>
             <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
-                    <textField id="firstNameField" dataContainer="jobCandidateDc" property="firstName" width="50%"
-                               caption="msg://msgFirstName"/>
-                    <textField id="middleNameField" dataContainer="jobCandidateDc" property="middleName" width="50%"
-                               caption="msg://msgMiddleName"/>
-                    <textField id="secondNameField" dataContainer="jobCandidateDc" property="secondName" width="50%"
-                               caption="msg://msgSecondName"/>
-                    <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
-                                       dataContainer="jobCandidateDc" property="personPosition" width="50%"
-                                       caption="msg://msgPersonPosition">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
-                                       dataContainer="jobCandidateDc" property="currentCompany" width="50%"
-                                       caption="msg://msgCorrentCompany">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="jobCandidateField" dataContainer="jobCandidateDc" property="cityOfResidence" width="50%"
-                                       caption="msg://msgCityOfResidence">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="open" type="picker_open"/>
-                        </actions>
-                    </lookupPickerField>
-                    <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="50%"
-                               caption="msg://msgBirthDate"/>
-                    <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
-                                       dataContainer="jobCandidateDc" property="positionCountry" width="50%"
-                                       caption="msg://msgPositionCountry">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
+                    <grid spacing="true" width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row>
+                                <textField id="firstNameField" dataContainer="jobCandidateDc" property="firstName" width="100%"
+                                           caption="msg://msgFirstName" rowspan="1" colspan="1"/>
+                                <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
+                                                   dataContainer="jobCandidateDc" property="currentCompany" width="100%"
+                                                   caption="msg://msgCorrentCompany">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                            <row>
+                                <textField id="middleNameField" dataContainer="jobCandidateDc" property="middleName" width="100%"
+                                           caption="msg://msgMiddleName"/>
+                                <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
+                                                   dataContainer="jobCandidateDc" property="personPosition" width="100%"
+                                                   caption="msg://msgPersonPosition">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                            <row>
+                                <textField id="secondNameField" dataContainer="jobCandidateDc" property="secondName" width="100%"
+                                           caption="msg://msgSecondName"/>
+                                <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
+                                                   dataContainer="jobCandidateDc" property="positionCountry" width="100%"
+                                                   caption="msg://msgPositionCountry">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                            <row>
+                                <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="100%"
+                                           caption="msg://msgBirthDate"/>
+                                <lookupPickerField id="jobCandidateField" dataContainer="jobCandidateDc" property="cityOfResidence" width="100%"
+                                                   caption="msg://msgCityOfResidence">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                        </rows>
+                    </grid>
                 </groupBox>
             </tab>
             <tab id="tabContactInfo" caption="msg://msgTabContactInfo" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
-                    <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="50%"
-                               caption="msg://msgEmail"/>
-                    <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="50%"
-                               caption="msg://msgPhone"/>
-                    <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName" width="50%"
-                               caption="msg://msgSkypeAccaunt"/>
-                    <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
-                               width="50%" caption="msg://msgTelegramAccount"/>
-                    <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName" width="50%"
-                               caption="msg://msgViberAccount"/>
-                    <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName" width="50%"
-                               caption="msg://msgWhatsAppAccount"/>
+                    <grid spacing="true" width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row>
+                                <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="100%"
+                                           caption="msg://msgEmail"/>
+                                <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
+                                           width="100%" caption="msg://msgTelegramAccount"/>
+                            </row>
+                            <row>
+                                <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="100%"
+                                           caption="msg://msgPhone"/>
+                                <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName" width="100%"
+                                           caption="msg://msgViberAccount"/>
+                            </row>
+                            <row>
+                                <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName" width="100%"
+                                           caption="msg://msgSkypeAccaunt"/>
+                                <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName" width="100%"
+                                           caption="msg://msgWhatsAppAccount"/>
+                            </row>
+                        </rows>
+                    </grid>
                 </groupBox>
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
