@@ -32,16 +32,16 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="secondName"/>
                 <column id="firstName"/>
                 <column id="middleName"/>
-                <column id="secondName"/>
                 <column id="personPosition"/>
                 <column id="currentCompany"/>
+                <column id="positionCountry"/>
                 <column id="cityOfResidence"/>
                 <column id="email"/>
                 <column id="phone"/>
                 <column id="skypeName"/>
-                <column id="positionCountry"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

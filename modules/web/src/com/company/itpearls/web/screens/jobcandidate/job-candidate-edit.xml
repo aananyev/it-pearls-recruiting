@@ -61,7 +61,8 @@
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <lookupPickerField dataContainer="jobCandidateDc" property="cityOfResidence" width="50%">
+                    <lookupPickerField id="jobCandidateField" dataContainer="jobCandidateDc" property="cityOfResidence" width="50%"
+                                       caption="msg://msgCityOfResidence">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                             <action id="open" type="picker_open"/>
@@ -69,19 +70,29 @@
                     </lookupPickerField>
                     <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="50%"
                                caption="msg://msgBirthDate"/>
-                    <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="50%"/>
-                    <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="50%"/>
-                    <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName" width="50%"/>
-                    <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
-                               width="50%"/>
-                    <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName" width="50%"/>
-                    <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName" width="50%"/>
                     <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
-                                       dataContainer="jobCandidateDc" property="positionCountry" width="50%">
+                                       dataContainer="jobCandidateDc" property="positionCountry" width="50%"
+                                       caption="msg://msgPositionCountry">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
+                </groupBox>
+            </tab>
+            <tab id="tabContactInfo" caption="msg://msgTabContactInfo" margin="true,false,false,false" spacing="true">
+                <groupBox spacing="true">
+                    <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="50%"
+                               caption="msg://msgEmail"/>
+                    <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="50%"
+                               caption="msg://msgPhone"/>
+                    <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName" width="50%"
+                               caption="msg://msgSkypeAccaunt"/>
+                    <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
+                               width="50%" caption="msg://msgTelegramAccount"/>
+                    <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName" width="50%"
+                               caption="msg://msgViberAccount"/>
+                    <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName" width="50%"
+                               caption="msg://msgWhatsAppAccount"/>
                 </groupBox>
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
@@ -139,9 +150,9 @@
                 <groupBox spacing="true">
                     <table id="jobCandidateJobHistoryTable" height="200px" width="100%" dataContainer="jobCandidateJobHistoriesDc">
                         <columns>
-                            <column id="currentCompany"/>
-                            <column id="currentPosition"/>
-                            <column id="dateNewsPosition"/>
+                            <column id="dateNewsPosition" caption="msg://msgDatePosition"/>
+                            <column id="currentCompany" caption="msg://msgCompany"/>
+                            <column id="currentPosition" caption="msg://msgPosition"/>
                         </columns>
                         <actions>
                             <action id="add" type="add"/>
