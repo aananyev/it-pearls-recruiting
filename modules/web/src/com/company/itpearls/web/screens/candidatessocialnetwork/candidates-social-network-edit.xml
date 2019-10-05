@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.candidatessocialnetwork">
+    <data>
+        <instance id="candidatesSocialNetworkDc"
+                  class="com.company.itpearls.entity.CandidatesSocialNetwork"
+                  view="candidatesSocialNetwork-view">
+            <loader/>
+        </instance>
+        <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+            <loader id="candidatesLc">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="socialNetworksDc" class="com.company.itpearls.entity.SocialNetworkURLs" view="_minimal">
+            <loader id="socialNetworksLc">
+                <query>
+                    <![CDATA[select e from itpearls_SocialNetworkURLs e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="candidatesSocialNetworkDc">
+            <column width="250px">
+                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="socialNetworkField" optionsContainer="socialNetworksDc" property="socialNetwork">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <textField id="socialNetworkUPLField" property="socialNetworkUPL"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

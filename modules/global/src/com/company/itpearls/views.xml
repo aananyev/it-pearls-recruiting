@@ -70,4 +70,8 @@
         <property name="currentPosition" view="_local"/>
         <property name="currentCompany" view="_local"/>
     </view>
+    <view entity="itpearls_CandidatesSocialNetwork" name="candidatesSocialNetwork-view" extends="_local">
+        <property name="candidate" view="_local"/>
+        <property name="socialNetwork" view="_local"/>
+    </view>
 </views>
