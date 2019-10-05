@@ -10,6 +10,7 @@
             <loader/>
             <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
             <collection id="jobCandidateSkillListsDc" property="skillList"/>
+            <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="personPositionsLc">
@@ -38,7 +39,7 @@
     <tabSheet/>
     <layout expand="editActions" spacing="true">
         <tabSheet>
-            <tab id="tab" caption="msg://candidate" margin="true,false,false,false" spacing="true">
+            <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
                     <textField id="firstNameField" dataContainer="jobCandidateDc" property="firstName" width="50%"
                                caption="msg://msgFirstName"/>
@@ -60,6 +61,12 @@
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
+                    <lookupPickerField dataContainer="jobCandidateDc" property="cityOfResidence" width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                        </actions>
+                    </lookupPickerField>
                     <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="50%"
                                caption="msg://msgBirthDate"/>
                     <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="50%"/>
@@ -77,7 +84,7 @@
                     </lookupPickerField>
                 </groupBox>
             </tab>
-            <tab caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
+            <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
                     <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
                            width="100%">
@@ -110,7 +117,7 @@
                         </actions>
                     </lookupPickerField>
                     <groupBox spacing="true">
-                        <groupTable id="jobCandidateSkillListTable" height="200px" width="400px" dataContainer="jobCandidateSkillListsDc">
+                        <groupTable id="jobCandidateSkillListTable" height="200px" width="100%" dataContainer="jobCandidateSkillListsDc">
                             <columns>
                                 <column id="skillName"/>
                             </columns>
@@ -120,12 +127,33 @@
                                 <action id="remove" type="remove"/>
                             </actions>
                             <buttonsPanel>
-                                <button id="addButton_1" action="jobCandidateIteractionListTable.add"/>
-                                <button id="editButton_1" action="jobCandidateIteractionListTable.edit"/>
-                                <button id="removeButton_1" action="jobCandidateIteractionListTable.remove"/>
+                                <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
+                                <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
+                                <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
                             </buttonsPanel>
                         </groupTable>
                     </groupBox>
+                </groupBox>
+            </tab>
+            <tab id="tabJobHistory" caption="msg://msgTabJobHistory" margin="true,false,false,false" spacing="true">
+                <groupBox spacing="true">
+                    <table id="jobCandidateJobHistoryTable" height="200px" width="100%" dataContainer="jobCandidateJobHistoriesDc">
+                        <columns>
+                            <column id="currentCompany"/>
+                            <column id="currentPosition"/>
+                            <column id="dateNewsPosition"/>
+                        </columns>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                        <buttonsPanel>
+                            <button id="addHistoryButton" action="jobCandidateJobHistoryTable.add"/>
+                            <button id="editHistoryButton" action="jobCandidateJobHistoryTable.edit"/>
+                            <button id="removeHistoryButton" action="jobCandidateJobHistoryTable.remove"/>
+                        </buttonsPanel>
+                    </table>
                 </groupBox>
             </tab>
         </tabSheet>

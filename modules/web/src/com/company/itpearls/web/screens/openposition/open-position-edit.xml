@@ -44,39 +44,42 @@
     <layout expand="editActions" spacing="true">
         <tabSheet>
             <tab id="tabOpenPosition" caption="msg://msgNamePosition" margin="true,false,false,false" spacing="true">
-                <textField id="vacansyNameField" dataContainer="openPositionDc" property="vacansyName"
-                           caption="msg://msgVacansy"/>
-                <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc"
-                                   dataContainer="openPositionDc" property="positionType"
-                                   caption="msg://msgPositionType">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc"
-                                   dataContainer="openPositionDc" property="projectName"
-                                   caption="msg://msgNamePosition">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc"
-                                   dataContainer="openPositionDc" property="companyName" caption="msg://msgCompanyName">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="companyDepartamentField" optionsContainer="companyDepartamentsDc"
-                                   dataContainer="openPositionDc" property="companyDepartament"
-                                   caption="msg://msgDepartment">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <textField id="numberPositionField" dataContainer="openPositionDc" property="numberPosition"
-                           caption="msg://msgNumberOpenPosition"/>
-                <textArea id="commentField" rows="5" dataContainer="openPositionDc" property="comment"
-                          caption="msg://msgComment"/>
+                <groupBox id="groupBoxOpenPosition" spacing="true">
+                    <textField id="vacansyNameField" dataContainer="openPositionDc" property="vacansyName"
+                               caption="msg://msgVacansy" width="50%"/>
+                    <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc"
+                                       dataContainer="openPositionDc" property="positionType"
+                                       caption="msg://msgPositionType" width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc"
+                                       dataContainer="openPositionDc" property="projectName"
+                                       caption="msg://msgNamePosition" width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc"
+                                       dataContainer="openPositionDc" property="companyName" caption="msg://msgCompanyName"
+                                       width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="companyDepartamentField" optionsContainer="companyDepartamentsDc"
+                                       dataContainer="openPositionDc" property="companyDepartament"
+                                       caption="msg://msgDepartment" width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <textField id="numberPositionField" dataContainer="openPositionDc" property="numberPosition"
+                               caption="msg://msgNumberOpenPosition" width="50%"/>
+                    <textArea id="commentField" rows="5" dataContainer="openPositionDc" property="comment"
+                              caption="msg://msgComment" width="100%"/>
+                </groupBox>
             </tab>
             <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">

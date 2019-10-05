@@ -7,6 +7,7 @@
         <item screen="itpearls_IteractionList.browse"/>
         <item screen="itpearls_SkillTree.browse"/>
         <item screen="itpearls_Specialisation.browse"/>
+        <item screen="itpearls_JobHistory.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
         <item screen="itpearls_SocialNetworkURLs.browse"/>

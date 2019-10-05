@@ -69,6 +69,11 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "POSITION_COUNTRY_ID")
     protected Country positionCountry;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CITY_OF_RESIDENCE_ID")
+    protected City cityOfResidence;
+
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
@@ -83,6 +88,27 @@ public class JobCandidate extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "jobCandidate")
     protected List<SkillTree> skillList;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "candidate")
+    protected List<JobHistory> jobHistory;
+
+    public List<JobHistory> getJobHistory() {
+        return jobHistory;
+    }
+
+    public void setJobHistory(List<JobHistory> jobHistory) {
+        this.jobHistory = jobHistory;
+    }
+
+    public City getCityOfResidence() {
+        return cityOfResidence;
+    }
+
+    public void setCityOfResidence(City cityOfResidence) {
+        this.cityOfResidence = cityOfResidence;
+    }
 
     public List<SkillTree> getSkillList() {
         return skillList;

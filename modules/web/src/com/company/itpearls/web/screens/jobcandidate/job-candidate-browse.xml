@@ -37,13 +37,10 @@
                 <column id="secondName"/>
                 <column id="personPosition"/>
                 <column id="currentCompany"/>
-                <column id="birdhDate"/>
+                <column id="cityOfResidence"/>
                 <column id="email"/>
                 <column id="phone"/>
                 <column id="skypeName"/>
-                <column id="telegramName"/>
-                <column id="wiberName"/>
-                <column id="whatsupName"/>
                 <column id="positionCountry"/>
             </columns>
             <rowsCount/>

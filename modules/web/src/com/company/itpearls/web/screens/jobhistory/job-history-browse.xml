@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="jobHistoriesTable"
+        messagesPack="com.company.itpearls.web.screens.jobhistory">
+    <data readOnly="true">
+        <collection id="jobHistoriesDc"
+                    class="com.company.itpearls.entity.JobHistory"
+                    view="jobHistory-view">
+            <loader id="jobHistoriesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobHistory e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="jobHistoriesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="jobHistoriesTable"
+                dataLoader="jobHistoriesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="jobHistoriesTable"
+                    width="100%"
+                    dataContainer="jobHistoriesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="candidate"/>
+                <column id="currentPosition"/>
+                <column id="currentCompany"/>
+                <column id="dateNewsPosition"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="jobHistoriesTable.create"/>
+                <button id="editBtn" action="jobHistoriesTable.edit"/>
+                <button id="removeBtn" action="jobHistoriesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

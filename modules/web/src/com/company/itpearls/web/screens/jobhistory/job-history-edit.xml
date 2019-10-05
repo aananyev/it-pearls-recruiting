@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.jobhistory">
+    <data>
+        <instance id="jobHistoryDc"
+                  class="com.company.itpearls.entity.JobHistory"
+                  view="jobHistory-view">
+            <loader/>
+        </instance>
+        <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+            <loader id="candidatesLc">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="currentPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
+            <loader id="currentPositionsLc">
+                <query>
+                    <![CDATA[select e from itpearls_Position e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="currentCompaniesDc" class="com.company.itpearls.entity.Company" view="_minimal">
+            <loader id="currentCompaniesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Company e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="jobHistoryDc">
+            <column width="250px">
+                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="currentPositionField" optionsContainer="currentPositionsDc"
+                                   property="currentPosition">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
+                                   property="currentCompany">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <dateField id="dateNewsPositionField" property="dateNewsPosition"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

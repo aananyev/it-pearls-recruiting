@@ -271,6 +271,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     WIBER_NAME varchar(30),
     WHATSUP_NAME varchar(30),
     POSITION_COUNTRY_ID varchar(36),
+    CITY_OF_RESIDENCE_ID varchar(36),
     SPECIALISATION_ID varchar(36),
     --
     primary key (ID)
@@ -337,3 +338,22 @@ create table ITPEARLS_SKILL_TREE (
     primary key (ID)
 )^
 -- end ITPEARLS_SKILL_TREE
+-- begin ITPEARLS_JOB_HISTORY
+create table ITPEARLS_JOB_HISTORY (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    CANDIDATE_ID varchar(36) not null,
+    CURRENT_POSITION_ID varchar(36) not null,
+    CURRENT_COMPANY_ID varchar(36) not null,
+    DATE_NEWS_POSITION date,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_JOB_HISTORY

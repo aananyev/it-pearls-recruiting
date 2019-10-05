@@ -52,5 +52,8 @@
         <entity class="com.company.itpearls.entity.SkillTree">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.JobHistory">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

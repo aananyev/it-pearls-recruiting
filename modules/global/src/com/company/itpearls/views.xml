@@ -44,9 +44,11 @@
         <property name="personPosition" view="_local"/>
         <property name="currentCompany" view="_local"/>
         <property name="positionCountry" view="_local"/>
+        <property name="cityOfResidence" view="_local"/>
         <property name="iteractionList" view="_local"/>
         <property name="specialisation" view="_local"/>
         <property name="skillList" view="_minimal"/>
+        <property name="jobHistory" view="jobHistory-view"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local">
         <property name="candidate" view="_local"/>
@@ -63,4 +65,9 @@
         <property name="openPosition" view="_minimal"/>
     </view>
     <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local"/>
+    <view entity="itpearls_JobHistory" name="jobHistory-view" extends="_local">
+        <property name="candidate" view="_local"/>
+        <property name="currentPosition" view="_local"/>
+        <property name="currentCompany" view="_local"/>
+    </view>
 </views>

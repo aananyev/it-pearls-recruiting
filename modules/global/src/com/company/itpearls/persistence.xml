@@ -19,5 +19,6 @@
         <class>com.company.itpearls.entity.IteractionList</class>
         <class>com.company.itpearls.entity.SocialNetworkURLs</class>
         <class>com.company.itpearls.entity.SkillTree</class>
+        <class>com.company.itpearls.entity.JobHistory</class>
     </persistence-unit>
 </persistence>
