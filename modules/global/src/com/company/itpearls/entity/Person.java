@@ -34,8 +34,11 @@ public class Person extends StandardEntity {
     @Column(name = "EMAIL", length = 40)
     protected String email;
 
-    @Column(name = "PHONE", length = 10)
+    @Column(name = "PHONE", length = 20)
     protected String phone;
+
+    @Column(name = "MOB_PHONE", unique = true, length = 20)
+    protected String mobPhone;
 
     @CaseConversion(type = ConversionType.LOWER)
     @Column(name = "SKYPE_NAME", unique = true, length = 15)
@@ -60,6 +63,14 @@ public class Person extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
+
+    public String getMobPhone() {
+        return mobPhone;
+    }
+
+    public void setMobPhone(String mobPhone) {
+        this.mobPhone = mobPhone;
+    }
 
     public String getWatsupName() {
         return watsupName;

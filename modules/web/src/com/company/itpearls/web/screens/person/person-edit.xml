@@ -36,6 +36,8 @@
                     <dateField id="birdhDateField" property="birdhDate"/>
                     <textField id="emailField" property="email"/>
                     <textField id="phoneField" property="phone"/>
+                    <textField id="mobilePhoneField" caption="msg://msgMobPhone" dataContainer="personDc"
+                               property="mobPhone"/>
                     <textField id="skypeNameField" property="skypeName"/>
                     <textField id="telegramNameField" property="telegramName"/>
                     <textField id="wiberNameField" property="wiberName"/>

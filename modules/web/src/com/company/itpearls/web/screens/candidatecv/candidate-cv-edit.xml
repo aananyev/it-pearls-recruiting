@@ -27,25 +27,35 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="candidateCVDc">
-            <column width="250px">
-                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate">
+        <form id="form" dataContainer="candidateCVDc" width="100%">
+            <column width="100%">
+                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate" width="50%">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
                 <lookupPickerField id="resumePositionField" optionsContainer="resumePositionsDc"
-                                   property="resumePosition">
+                                   property="resumePosition" width="50%">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <textArea id="textCVField" property="textCV" rows="5"/>
-                <textField id="lintToCloudFileField" property="lintToCloudFile"/>
+                <tabSheet height="50%">
+                    <tab id="tabCV" caption="msg://msgCV" margin="true,false,false,false" spacing="true">
+                        <richTextArea id="candidateCVRichTextArea" dataContainer="candidateCVDc" property="textCV"
+                                      width="100%" height="70%"/>
+                    </tab>
+                    <tab id="tabLetter" caption="msg://msgLetter" margin="true,false,false,false" spacing="true">
+                        <richTextArea id="candidateLetterRichTextArea" dataContainer="candidateCVDc" property="letter"
+                                      width="100%"
+                                      height="70%"/>
+                    </tab>
+                </tabSheet>
+                <textField id="lintToCloudFileField" property="lintToCloudFile" width="100%"/>
                 <dateField id="datePostField" property="datePost"/>
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

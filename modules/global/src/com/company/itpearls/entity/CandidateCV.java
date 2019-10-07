@@ -33,6 +33,10 @@ public class CandidateCV extends StandardEntity {
     @Column(name = "TEXT_CV")
     protected String textCV;
 
+    @Lob
+    @Column(name = "LETTER")
+    protected String letter;
+
     @Transient
     @MetaProperty
     @CaseConversion(type = ConversionType.LOWER)
@@ -42,6 +46,14 @@ public class CandidateCV extends StandardEntity {
     @NotNull
     @Column(name = "DATE_POST", nullable = false)
     protected Date datePost;
+
+    public String getLetter() {
+        return letter;
+    }
+
+    public void setLetter(String letter) {
+        this.letter = letter;
+    }
 
     public Position getResumePosition() {
         return resumePosition;

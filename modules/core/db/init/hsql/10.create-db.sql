@@ -48,7 +48,8 @@ create table ITPEARLS_PERSON (
     SECOND_NAME varchar(80),
     BIRDH_DATE date,
     EMAIL varchar(40),
-    PHONE varchar(10),
+    PHONE varchar(20),
+    MOB_PHONE varchar(20),
     SKYPE_NAME varchar(15),
     TELEGRAM_NAME varchar(15),
     WIBER_NAME varchar(15),
@@ -393,6 +394,7 @@ create table ITPEARLS_CANDIDATE_CV (
     CANDIDATE_ID varchar(36) not null,
     RESUME_POSITION_ID varchar(36),
     TEXT_CV longvarchar,
+    LETTER longvarchar,
     DATE_POST date not null,
     --
     primary key (ID)
