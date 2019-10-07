@@ -33,6 +33,7 @@
         <property name="skillsList" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local">
+        <property name="candidateCv" view="candidateCV-view"/>
         <property name="personPosition" view="_local"/>
         <property name="currentCompany" view="_local"/>
         <property name="positionCountry" view="_local"/>
@@ -66,9 +67,6 @@
         <property name="candidate" view="_local"/>
         <property name="socialNetwork" view="_local"/>
     </view>
-    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
-        <property name="candidate" view="_minimal"/>
-    </view>
     <view entity="itpearls_City" name="city-view" extends="_local">
         <property name="cityRegion" view="_minimal"/>
     </view>
@@ -79,5 +77,10 @@
         <property name="cityOfCompany" view="_minimal"/>
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
+    </view>
+    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
+        <property name="candidate" view="_minimal"/>
+        <property name="resumePosition" view="_minimal"/>
+        <property name="lintToCloudFile"/>
     </view>
 </views>

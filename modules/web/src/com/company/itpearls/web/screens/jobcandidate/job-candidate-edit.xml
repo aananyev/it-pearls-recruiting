@@ -11,6 +11,7 @@
             <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
             <collection id="jobCandidateSkillListsDc" property="skillList"/>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
+            <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="personPositionsLc">
@@ -143,7 +144,7 @@
                 </groupBox>
             </tab>
             <tab id="tabSkills" caption="msg://msgSkills" margin="true,false,false,false" spacing="true">
-                <groupBox spacing="true">
+                <groupBox id="groupBoxSpecialistion" spacing="true">
                     <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc" property="specialisation"
                                        caption="msg://msgSpecialisation" width="50%">
                         <actions>
@@ -171,7 +172,7 @@
                 </groupBox>
             </tab>
             <tab id="tabJobHistory" caption="msg://msgTabJobHistory" margin="true,false,false,false" spacing="true">
-                <groupBox spacing="true">
+                <groupBox id="groupBoxHistory" spacing="true">
                     <table id="jobCandidateJobHistoryTable" height="200px" width="100%" dataContainer="jobCandidateJobHistoriesDc">
                         <columns>
                             <column id="dateNewsPosition" caption="msg://msgDatePosition"/>
@@ -187,6 +188,27 @@
                             <button id="addHistoryButton" action="jobCandidateJobHistoryTable.add"/>
                             <button id="editHistoryButton" action="jobCandidateJobHistoryTable.edit"/>
                             <button id="removeHistoryButton" action="jobCandidateJobHistoryTable.remove"/>
+                        </buttonsPanel>
+                    </table>
+                </groupBox>
+            </tab>
+            <tab id="tabResume" caption="msg://msgResume" margin="true,false,false,false" spacing="true">
+                <groupBox id="groupBoxCV" spacing="true">
+                    <table id="jobCandidateCandidateCvTable" height="250px" width="100%" dataContainer="jobCandidateCandidateCvsDc">
+                        <columns>
+                            <column id="datePost" caption="msg://msgDatePost"/>
+                            <column id="resumePosition"/>
+                            <column id="textCV" caption="msg://msgTextCV"/>
+                        </columns>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                        <buttonsPanel>
+                            <button id="addButtonCV" action="jobCandidateCandidateCvTable.add"/>
+                            <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
+                            <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
                         </buttonsPanel>
                     </table>
                 </groupBox>

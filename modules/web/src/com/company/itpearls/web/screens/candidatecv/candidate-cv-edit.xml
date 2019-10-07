@@ -16,24 +16,36 @@
                 </query>
             </loader>
         </collection>
+        <collection id="resumePositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
+            <loader id="resumePositionsLc">
+                <query>
+                    <![CDATA[select e from itpearls_Position e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="candidateCVDc" width="100%">
-            <column width="100%">
-                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate" width="50%">
+        <form id="form" dataContainer="candidateCVDc">
+            <column width="250px">
+                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <dateField id="datePostField" property="datePost" width="50%"/>
-                <textArea id="textCVField" property="textCV" rows="5" width="100%" height="50%"/>
-                <textArea id="candidateCVTextArea" dataContainer="candidateCVDc" property="lintToCloudFile" width="100%" height="10%"
-                          caption="msg://msgUrlCv"/>
+                <lookupPickerField id="resumePositionField" optionsContainer="resumePositionsDc"
+                                   property="resumePosition">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <textArea id="textCVField" property="textCV" rows="5"/>
+                <textField id="lintToCloudFileField" property="lintToCloudFile"/>
+                <dateField id="datePostField" property="datePost"/>
             </column>
         </form>
-        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+        <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

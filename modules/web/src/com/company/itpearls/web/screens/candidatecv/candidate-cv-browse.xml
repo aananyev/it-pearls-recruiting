@@ -33,6 +33,9 @@
             </actions>
             <columns>
                 <column id="candidate"/>
+                <column id="resumePosition"/>
+                <column id="textCV"/>
+                <column id="lintToCloudFile"/>
                 <column id="datePost"/>
             </columns>
             <rowsCount/>

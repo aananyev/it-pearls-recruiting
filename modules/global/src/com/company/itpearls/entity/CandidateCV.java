@@ -24,6 +24,11 @@ public class CandidateCV extends StandardEntity {
     @JoinColumn(name = "CANDIDATE_ID")
     protected JobCandidate candidate;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RESUME_POSITION_ID")
+    protected Position resumePosition;
+
     @Lob
     @Column(name = "TEXT_CV")
     protected String textCV;
@@ -37,6 +42,14 @@ public class CandidateCV extends StandardEntity {
     @NotNull
     @Column(name = "DATE_POST", nullable = false)
     protected Date datePost;
+
+    public Position getResumePosition() {
+        return resumePosition;
+    }
+
+    public void setResumePosition(Position resumePosition) {
+        this.resumePosition = resumePosition;
+    }
 
     public String getLintToCloudFile() {
         return lintToCloudFile;

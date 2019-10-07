@@ -390,6 +390,7 @@ create table ITPEARLS_CANDIDATE_CV (
     DELETED_BY varchar(50),
     --
     CANDIDATE_ID varchar(36) not null,
+    RESUME_POSITION_ID varchar(36),
     TEXT_CV longvarchar,
     DATE_POST date not null,
     --

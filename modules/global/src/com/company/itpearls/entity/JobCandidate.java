@@ -24,6 +24,11 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "FIRST_NAME", nullable = false, length = 80)
     protected String firstName;
 
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "candidate")
+    protected List<CandidateCV> candidateCv;
+
     @Column(name = "MIDDLE_NAME", length = 80)
     protected String middleName;
 
@@ -93,6 +98,14 @@ public class JobCandidate extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
     protected List<JobHistory> jobHistory;
+
+    public List<CandidateCV> getCandidateCv() {
+        return candidateCv;
+    }
+
+    public void setCandidateCv(List<CandidateCV> candidateCv) {
+        this.candidateCv = candidateCv;
+    }
 
     public List<JobHistory> getJobHistory() {
         return jobHistory;
