@@ -6,7 +6,7 @@
     <data>
         <instance id="iteractionDc"
                   class="com.company.itpearls.entity.Iteraction"
-                  view="_local">
+                  view="iteraction-view">
             <loader/>
         </instance>
     </data>

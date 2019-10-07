@@ -3,9 +3,7 @@ package com.company.itpearls.entity;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|networkName")
@@ -21,6 +19,17 @@ public class SocialNetworkURLs extends StandardEntity {
     @NotNull
     @Column(name = "NETWORK_URLS", nullable = false, unique = true, length = 80)
     protected String networkURLS;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_CANDIDATE_ID")
+    protected JobCandidate jobCandidate;
+
+    public JobCandidate getJobCandidate() {
+        return jobCandidate;
+    }
+
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
+    }
 
     public String getNetworkURLS() {
         return networkURLS;

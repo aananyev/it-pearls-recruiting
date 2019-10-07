@@ -6,10 +6,11 @@
     <data readOnly="true">
         <collection id="iteractionsDc"
                     class="com.company.itpearls.entity.Iteraction"
-                    view="_local">
+                    view="iteraction-view">
             <loader id="iteractionsDl">
-                <query><![CDATA[select e from itpearls_Iteraction e
-order by e.number]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_Iteraction e]]>
+                </query>
             </loader>
         </collection>
     </data>
@@ -31,7 +32,7 @@ order by e.number]]></query>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="number" generator="generateNumberCell"/>
+                <column id="number"/>
                 <column id="iterationName"/>
             </columns>
             <rowsCount/>

@@ -12,6 +12,7 @@
             <collection id="jobCandidateSkillListsDc" property="skillList"/>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
+            <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="personPositionsLc">
@@ -94,7 +95,7 @@
                 </groupBox>
             </tab>
             <tab id="tabContactInfo" caption="msg://msgTabContactInfo" margin="true,false,false,false" spacing="true">
-                <groupBox spacing="true">
+                <groupBox spacing="true" caption="msg://msgContactInfo">
                     <grid spacing="true" width="100%">
                         <columns count="2"/>
                         <rows>
@@ -119,16 +120,38 @@
                         </rows>
                     </grid>
                 </groupBox>
+                <groupBox spacing="true" caption="msg://msgSocialNetwork">
+                    <table id="jobCandidateSocialNetworkTable" height="200px" width="100%" dataContainer="jobCandidateSocialNetworksDc">
+                        <columns>
+                            <column id="networkName"/>
+                            <column id="networkURLS"/>
+                        </columns>
+                        <buttonsPanel>
+                            <button id="addButtonSN" action="jobCandidateSocialNetworkTable.add"/>
+                            <button id="editButtonSN" action="jobCandidateSocialNetworkTable.edit"/>
+                            <button id="removeButtonSN" action="jobCandidateSocialNetworkTable.remove"/>
+                        </buttonsPanel>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                    </table>
+                </groupBox>
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
                     <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
                            width="100%">
                         <columns>
-                            <column id="numberIteraction"/>
-                            <column id="dateIteraction"/>
-                            <column id="communicationMethod"/>
-                            <column id="comment"/>
+                            <column id="numberIteraction" caption="msg://msgNumber"/>
+                            <column id="dateIteraction" caption="msg://msgDate"/>
+                            <column id="companyDepartment" caption="msg://msgDepartament"/>
+                            <column id="project" caption="msg://msgProject"/>
+                            <column id="iteractionType" caption="msg://msgIteraction"/>
+                            <column id="communicationMethod" caption="msg://msgCommunicationMethod"/>
+                            <column id="recrutier" caption="msg://msgRecrutier"/>
+                            <column id="comment" caption="msg://msgComment"/>
                         </columns>
                         <actions>
                             <action id="add" type="add"/>

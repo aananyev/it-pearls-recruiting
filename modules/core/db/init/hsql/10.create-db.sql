@@ -318,6 +318,7 @@ create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
     --
     NETWORK_NAME varchar(80) not null,
     NETWORK_URLS varchar(80) not null,
+    JOB_CANDIDATE_ID varchar(36),
     --
     primary key (ID)
 )^

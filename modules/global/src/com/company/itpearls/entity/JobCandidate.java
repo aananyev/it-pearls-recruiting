@@ -99,6 +99,19 @@ public class JobCandidate extends StandardEntity {
     @OneToMany(mappedBy = "candidate")
     protected List<JobHistory> jobHistory;
 
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "jobCandidate")
+    protected List<SocialNetworkURLs> socialNetwork;
+
+    public List<SocialNetworkURLs> getSocialNetwork() {
+        return socialNetwork;
+    }
+
+    public void setSocialNetwork(List<SocialNetworkURLs> socialNetwork) {
+        this.socialNetwork = socialNetwork;
+    }
+
     public List<CandidateCV> getCandidateCv() {
         return candidateCv;
     }
