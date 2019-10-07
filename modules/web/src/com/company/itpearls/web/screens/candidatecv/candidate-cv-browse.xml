@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="candidateCVsTable"
+        messagesPack="com.company.itpearls.web.screens.candidatecv">
+    <data readOnly="true">
+        <collection id="candidateCVsDc"
+                    class="com.company.itpearls.entity.CandidateCV"
+                    view="candidateCV-view">
+            <loader id="candidateCVsDl">
+                <query>
+                    <![CDATA[select e from itpearls_CandidateCV e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="candidateCVsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="candidateCVsTable"
+                dataLoader="candidateCVsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="candidateCVsTable"
+                    width="100%"
+                    dataContainer="candidateCVsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="candidate"/>
+                <column id="textCV"/>
+                <column id="datePost"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="candidateCVsTable.create"/>
+                <button id="editBtn" action="candidateCVsTable.edit"/>
+                <button id="removeBtn" action="candidateCVsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

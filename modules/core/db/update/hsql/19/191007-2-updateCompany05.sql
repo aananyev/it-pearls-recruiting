@@ -1,0 +1,1 @@
+alter table ITPEARLS_COMPANY alter column COMPANY_OUR_CLIENT rename to COMPANY_OUR_CLIENT__U61199 ^

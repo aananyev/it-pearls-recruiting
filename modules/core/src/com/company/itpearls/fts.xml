@@ -58,5 +58,8 @@
         <entity class="com.company.itpearls.entity.CandidatesSocialNetwork">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.CandidateCV">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

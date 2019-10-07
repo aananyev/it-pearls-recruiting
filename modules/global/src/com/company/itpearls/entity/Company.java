@@ -18,9 +18,6 @@ import java.util.List;
 public class Company extends StandardEntity {
     private static final long serialVersionUID = 7912366724901851184L;
 
-    @Column(name = "COMPANY_OUR_CLIENT")
-    protected Boolean companyOurClient;
-
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_OWNERSHIP_ID")
@@ -43,20 +40,63 @@ public class Company extends StandardEntity {
     @OneToMany(mappedBy = "companyName")
     protected List<CompanyDepartament> departmentOfCompany;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CITY_OF_COMPANY_ID")
+    protected City cityOfCompany;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "REGION_OF_COMPANY_ID")
+    protected Region regionOfCompany;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COUNTRY_OF_COMPANY_ID")
+    protected Country countryOfCompany;
+
+    @Lob
+    @Column(name = "ADDRESS_OF_COMPANY")
+    protected String addressOfCompany;
+
+    public Region getRegionOfCompany() {
+        return regionOfCompany;
+    }
+
+    public void setRegionOfCompany(Region regionOfCompany) {
+        this.regionOfCompany = regionOfCompany;
+    }
+
+    public String getAddressOfCompany() {
+        return addressOfCompany;
+    }
+
+    public void setAddressOfCompany(String addressOfCompany) {
+        this.addressOfCompany = addressOfCompany;
+    }
+
+    public Country getCountryOfCompany() {
+        return countryOfCompany;
+    }
+
+    public void setCountryOfCompany(Country countryOfCompany) {
+        this.countryOfCompany = countryOfCompany;
+    }
+
+    public City getCityOfCompany() {
+        return cityOfCompany;
+    }
+
+    public void setCityOfCompany(City cityOfCompany) {
+        this.cityOfCompany = cityOfCompany;
+    }
+
     public List<CompanyDepartament> getDepartmentOfCompany() {
         return departmentOfCompany;
     }
 
     public void setDepartmentOfCompany(List<CompanyDepartament> departmentOfCompany) {
         this.departmentOfCompany = departmentOfCompany;
-    }
-
-    public Boolean getCompanyOurClient() {
-        return companyOurClient;
-    }
-
-    public void setCompanyOurClient(Boolean companyOurClient) {
-        this.companyOurClient = companyOurClient;
     }
 
     public Person getCompanyDirector() {

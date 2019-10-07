@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
 
-    <view entity="itpearls_City" name="city-view" extends="_local">
-        <property name="cityRegion" view="_minimal"/>
-    </view>
     <view entity="itpearls_Region" name="region-view" extends="_local">
         <property name="regionCountry" view="_minimal"/>
         <property name="regionOfCity" view="_local"/>
     </view>
     <view entity="itpearls_Country" name="country-view" extends="_local">
         <property name="countryOfRegion" view="_local"/>
-    </view>
-    <view entity="itpearls_Company" name="company-view" extends="_local">
-        <property name="companyOwnership" view="_minimal"/>
-        <property name="companyDirector" view="_minimal"/>
-        <property name="departmentOfCompany" view="_local"/>
     </view>
     <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
         <property name="companyName" view="_minimal"/>
@@ -73,5 +65,19 @@
     <view entity="itpearls_CandidatesSocialNetwork" name="candidatesSocialNetwork-view" extends="_local">
         <property name="candidate" view="_local"/>
         <property name="socialNetwork" view="_local"/>
+    </view>
+    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
+        <property name="candidate" view="_minimal"/>
+    </view>
+    <view entity="itpearls_City" name="city-view" extends="_local">
+        <property name="cityRegion" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Company" name="company-view" extends="_local">
+        <property name="companyOwnership" view="_minimal"/>
+        <property name="companyDirector" view="_minimal"/>
+        <property name="departmentOfCompany" view="_minimal"/>
+        <property name="cityOfCompany" view="_minimal"/>
+        <property name="regionOfCompany" view="_minimal"/>
+        <property name="countryOfCompany" view="_minimal"/>
     </view>
 </views>

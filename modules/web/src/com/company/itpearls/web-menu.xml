@@ -9,6 +9,7 @@
         <item screen="itpearls_Specialisation.browse"/>
         <item screen="itpearls_JobHistory.browse"/>
         <item screen="itpearls_CandidatesSocialNetwork.browse"/>
+        <item screen="itpearls_CandidateCV.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
         <item screen="itpearls_SocialNetworkURLs.browse"/>
@@ -20,9 +21,9 @@
     <menu id="application-project">
         <item screen="itpearls_Person.browse"/>
         <item screen="itpearls_CompanyGroup.browse"/>
-        <item screen="itpearls_Company.browse"/>
         <item screen="itpearls_CompanyDepartament.browse"/>
         <item screen="itpearls_Project.browse"/>
         <item screen="itpearls_Position.browse"/>
+        <item screen="itpearls_Company.browse"/>
     </menu>
 </menu-config>

@@ -24,13 +24,33 @@
                 </query>
             </loader>
         </collection>
+        <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="_minimal">
+            <loader id="cityOfCompaniesLc">
+                <query>
+                    <![CDATA[select e from itpearls_City e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="regionOfCompaniesDc" class="com.company.itpearls.entity.Region" view="_minimal">
+            <loader id="regionOfCompaniesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Region e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="countryOfCompaniesDc" class="com.company.itpearls.entity.Country" view="_minimal">
+            <loader id="countryOfCompaniesLc">
+                <query>
+                    <![CDATA[select e from itpearls_Country e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="companyDc">
             <column width="250px">
-                <checkBox id="companyOurClientField" property="companyOurClient"/>
                 <lookupPickerField id="companyOwnershipField" optionsContainer="companyOwnershipsDc"
                                    property="companyOwnership">
                     <actions>
@@ -45,6 +65,25 @@
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
+                <lookupPickerField id="cityOfCompanyField" optionsContainer="cityOfCompaniesDc"
+                                   property="cityOfCompany">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="regionOfCompanyField" optionsContainer="regionOfCompaniesDc"
+                                   property="regionOfCompany">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="countryOfCompanyField" optionsContainer="countryOfCompaniesDc"
+                                   property="countryOfCompany">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <textArea id="addressOfCompanyField" property="addressOfCompany" rows="5"/>
             </column>
         </form>
         <groupBox id="departmentOfCompanyBox" caption="msg://com.company.itpearls.entity/Company.departmentOfCompany">
@@ -56,8 +95,6 @@
                 </actions>
                 <columns>
                     <column id="departamentRuName"/>
-                    <column id="departamentDescription"/>
-                    <column id="departamentNumberOfProgrammers"/>
                 </columns>
                 <buttonsPanel>
                     <button action="departmentOfCompanyTable.create"/>

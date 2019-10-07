@@ -124,11 +124,14 @@ create table ITPEARLS_COMPANY (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    COMPANY_OUR_CLIENT boolean,
     COMPANY_OWNERSHIP_ID varchar(36),
     COMANY_NAME varchar(80) not null,
     COMPANY_SHORT_NAME varchar(30),
     COMPANY_DIRECTOR_ID varchar(36),
+    CITY_OF_COMPANY_ID varchar(36),
+    REGION_OF_COMPANY_ID varchar(36),
+    COUNTRY_OF_COMPANY_ID varchar(36),
+    ADDRESS_OF_COMPANY longvarchar,
     --
     primary key (ID)
 )^
@@ -375,3 +378,21 @@ create table ITPEARLS_CANDIDATES_SOCIAL_NETWORK (
     primary key (ID)
 )^
 -- end ITPEARLS_CANDIDATES_SOCIAL_NETWORK
+-- begin ITPEARLS_CANDIDATE_CV
+create table ITPEARLS_CANDIDATE_CV (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    CANDIDATE_ID varchar(36) not null,
+    TEXT_CV longvarchar,
+    DATE_POST date not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_CANDIDATE_CV
