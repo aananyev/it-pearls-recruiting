@@ -20,18 +20,20 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="candidateCVDc">
-            <column width="250px">
-                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate">
+        <form id="form" dataContainer="candidateCVDc" width="100%">
+            <column width="100%">
+                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate" width="50%">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <textArea id="textCVField" property="textCV" rows="5"/>
-                <dateField id="datePostField" property="datePost"/>
+                <dateField id="datePostField" property="datePost" width="50%"/>
+                <textArea id="textCVField" property="textCV" rows="5" width="100%" height="50%"/>
+                <textArea id="candidateCVTextArea" dataContainer="candidateCVDc" property="lintToCloudFile" width="100%" height="10%"
+                          caption="msg://msgUrlCv"/>
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

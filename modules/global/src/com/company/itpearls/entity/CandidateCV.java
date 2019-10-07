@@ -1,7 +1,10 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.CaseConversion;
+import com.haulmont.cuba.core.entity.annotation.ConversionType;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 
@@ -25,10 +28,23 @@ public class CandidateCV extends StandardEntity {
     @Column(name = "TEXT_CV")
     protected String textCV;
 
+    @Transient
+    @MetaProperty
+    @CaseConversion(type = ConversionType.LOWER)
+    protected String lintToCloudFile;
+
     @Temporal(TemporalType.DATE)
     @NotNull
     @Column(name = "DATE_POST", nullable = false)
     protected Date datePost;
+
+    public String getLintToCloudFile() {
+        return lintToCloudFile;
+    }
+
+    public void setLintToCloudFile(String lintToCloudFile) {
+        this.lintToCloudFile = lintToCloudFile;
+    }
 
     public Date getDatePost() {
         return datePost;

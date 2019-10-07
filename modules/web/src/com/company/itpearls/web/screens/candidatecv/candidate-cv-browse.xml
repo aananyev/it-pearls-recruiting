@@ -33,7 +33,6 @@
             </actions>
             <columns>
                 <column id="candidate"/>
-                <column id="textCV"/>
                 <column id="datePost"/>
             </columns>
             <rowsCount/>
