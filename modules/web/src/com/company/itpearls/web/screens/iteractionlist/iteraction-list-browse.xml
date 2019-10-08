@@ -32,16 +32,16 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="numberIteraction"/>
-                <column id="dateIteraction"/>
-                <column id="candidate"/>
-                <column id="currentJobPosition"/>
-                <column id="project"/>
-                <column id="companyDepartment"/>
-                <column id="iteractionType"/>
-                <column id="recrutier"/>
-                <column id="communicationMethod"/>
-                <column id="comment"/>
+                <column id="numberIteraction" caption="msg://msgNumber"/>
+                <column id="dateIteraction" caption="msg://msgDate"/>
+                <column id="candidate" caption="msg://msgCandidate"/>
+                <column id="currentJobPosition" caption="msg://msgCurrentPosition"/>
+                <column id="project" caption="msg://msgProject"/>
+                <column id="companyDepartment" caption="msg://msgDepartament"/>
+                <column id="iteractionType" caption="msg://msgIteractionType"/>
+                <column id="recrutier" caption="msg://msgRecrutier"/>
+                <column id="communicationMethod" caption="mainMsg://msgCommunicationMethod"/>
+                <column id="comment" caption="mainMsg://msgComment"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

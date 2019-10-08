@@ -1,0 +1,1 @@
+alter table ITPEARLS_ITERACTION_LIST drop column NUMBER_ITERACTION__U80641 cascade ;

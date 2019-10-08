@@ -24,11 +24,6 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "FIRST_NAME", nullable = false, length = 80)
     protected String firstName;
 
-    @Composition
-    @OnDelete(DeletePolicy.CASCADE)
-    @OneToMany(mappedBy = "candidate")
-    protected List<CandidateCV> candidateCv;
-
     @Column(name = "MIDDLE_NAME", length = 80)
     protected String middleName;
 
@@ -38,13 +33,18 @@ public class JobCandidate extends StandardEntity {
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CURRENT_COMPANY_ID")
+    protected Company currentCompany;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CURRENT_COMPANY_ID")
-    protected Company currentCompany;
+    @JoinColumn(name = "CITY_OF_RESIDENCE_ID")
+    protected City cityOfResidence;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "BIRDH_DATE")
@@ -74,11 +74,6 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "POSITION_COUNTRY_ID")
     protected Country positionCountry;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CITY_OF_RESIDENCE_ID")
-    protected City cityOfResidence;
-
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
@@ -103,6 +98,11 @@ public class JobCandidate extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "jobCandidate")
     protected List<SocialNetworkURLs> socialNetwork;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "candidate")
+    protected List<CandidateCV> candidateCv;
 
     public List<SocialNetworkURLs> getSocialNetwork() {
         return socialNetwork;

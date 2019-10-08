@@ -292,7 +292,7 @@ create table ITPEARLS_ITERACTION_LIST (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    NUMBER_ITERACTION integer,
+    NUMBER_ITERACTION decimal(19, 2),
     DATE_ITERACTION timestamp,
     CANDIDATE_ID varchar(36) not null,
     CURRENT_JOB_POSITION_ID varchar(36),

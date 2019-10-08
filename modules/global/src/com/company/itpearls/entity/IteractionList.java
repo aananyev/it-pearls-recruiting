@@ -7,6 +7,7 @@ import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Table(name = "ITPEARLS_ITERACTION_LIST")
@@ -15,7 +16,7 @@ public class IteractionList extends StandardEntity {
     private static final long serialVersionUID = -1889183300534377752L;
 
     @Column(name = "NUMBER_ITERACTION")
-    protected Integer numberIteraction;
+    protected BigDecimal numberIteraction;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "DATE_ITERACTION")
@@ -61,8 +62,12 @@ public class IteractionList extends StandardEntity {
     @Column(name = "COMMENT_")
     protected String comment;
 
-    public void setNumberIteraction(Integer numberIteraction) {
+    public void setNumberIteraction(BigDecimal numberIteraction) {
         this.numberIteraction = numberIteraction;
+    }
+
+    public BigDecimal getNumberIteraction() {
+        return numberIteraction;
     }
 
     public String getComment() {
@@ -133,7 +138,4 @@ public class IteractionList extends StandardEntity {
         this.dateIteraction = dateIteraction;
     }
 
-    public Integer getNumberIteraction() {
-        return numberIteraction;
-    }
 }
