@@ -246,6 +246,7 @@ create table ITPEARLS_ITERACTION (
     DELETED_BY varchar(50),
     --
     NUMBER_ integer not null,
+    ITERACTION_TREE_ID varchar(36),
     ITERATION_NAME varchar(80) not null,
     --
     primary key (ID)
