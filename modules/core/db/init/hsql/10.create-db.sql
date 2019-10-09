@@ -296,6 +296,7 @@ create table ITPEARLS_ITERACTION_LIST (
     DATE_ITERACTION timestamp,
     CANDIDATE_ID varchar(36) not null,
     CURRENT_JOB_POSITION_ID varchar(36),
+    VACANCY_ID varchar(36),
     PROJECT_ID varchar(36),
     COMPANY_DEPARTMENT_ID varchar(36) not null,
     ITERACTION_TYPE_ID varchar(36) not null,
