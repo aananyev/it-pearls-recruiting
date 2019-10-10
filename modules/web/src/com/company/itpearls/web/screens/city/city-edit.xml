@@ -21,7 +21,7 @@
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="cityDc">
-            <column width="250px">
+            <column width="100%">
                 <textField id="cityRuNameField" property="cityRuName"/>
                 <textField id="cityPhoneCodeField" property="cityPhoneCode"/>
                 <lookupPickerField id="cityRegionField" optionsContainer="cityRegionsDc" property="cityRegion">
