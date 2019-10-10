@@ -381,6 +381,7 @@ create table ITPEARLS_CANDIDATE_CV (
     RESUME_POSITION_ID varchar(36),
     TEXT_CV longvarchar,
     LETTER longvarchar,
+    FILE_CV_ID varchar(36),
     DATE_POST date not null,
     --
     primary key (ID)

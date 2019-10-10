@@ -29,8 +29,8 @@
         <groupBox spacing="true">
             <table id="countryCountryOfRegionTable" height="200px" width="100%" dataContainer="countryCountryOfRegionsDc">
                 <columns>
-                    <column id="regionRuName"/>
-                    <column id="regionCode"/>
+                    <column id="regionRuName" caption="mainMsg://msgRegion"/>
+                    <column id="regionCode" caption="mainMsg://msgRegionCode"/>
                 </columns>
                 <actions>
                     <action id="add" type="add"/>
