@@ -170,6 +170,7 @@ create table ITPEARLS_SPECIALISATION (
     DELETED_BY varchar(50),
     --
     SPEC_RU_NAME varchar(80),
+    COMMENT_ longvarchar,
     --
     primary key (ID)
 )^
@@ -206,6 +207,7 @@ create table ITPEARLS_OPEN_POSITION (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    OPEN_FLAG boolean,
     VACANSY_NAME varchar(80) not null,
     POSITION_TYPE_ID varchar(36),
     PROJECT_NAME_ID varchar(36) not null,
@@ -266,8 +268,9 @@ create table ITPEARLS_JOB_CANDIDATE (
     FIRST_NAME varchar(80) not null,
     MIDDLE_NAME varchar(80),
     SECOND_NAME varchar(80) not null,
-    PERSON_POSITION_ID varchar(36),
     CURRENT_COMPANY_ID varchar(36),
+    PERSON_POSITION_ID varchar(36),
+    CITY_OF_RESIDENCE_ID varchar(36),
     BIRDH_DATE date,
     EMAIL varchar(30),
     PHONE varchar(10),
@@ -276,8 +279,8 @@ create table ITPEARLS_JOB_CANDIDATE (
     WIBER_NAME varchar(30),
     WHATSUP_NAME varchar(30),
     POSITION_COUNTRY_ID varchar(36),
-    CITY_OF_RESIDENCE_ID varchar(36),
     SPECIALISATION_ID varchar(36),
+    SKILL_TREE_ID varchar(36),
     --
     primary key (ID)
 )^
@@ -340,8 +343,8 @@ create table ITPEARLS_SKILL_TREE (
     --
     SKILL_NAME varchar(80) not null,
     SKILL_TREE_ID varchar(36),
-    JOB_CANDIDATE_ID varchar(36),
     OPEN_POSITION_ID varchar(36),
+    SPECIALISATION_ID varchar(36),
     --
     primary key (ID)
 )^
