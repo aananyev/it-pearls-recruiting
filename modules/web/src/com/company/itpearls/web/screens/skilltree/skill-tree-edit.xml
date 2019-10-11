@@ -8,7 +8,7 @@
                   class="com.company.itpearls.entity.SkillTree"
                   view="skillTree-view">
             <loader/>
-            <collection id="skillTreeCandidatesDc" property="candidate"/>
+            <collection id="skillTreeCandidatesesDc" property="candidates"/>
         </instance>
         <collection id="skillTreesDc" class="com.company.itpearls.entity.SkillTree" view="_minimal">
             <loader id="skillTreesLc">
@@ -23,39 +23,47 @@ order by e.skillName]]></query>
         <form id="form" dataContainer="skillTreeDc" width="100%">
             <column width="100%">
                 <tabSheet>
-                    <tab id="tabSkill" caption="msg://msgSkill" margin="true,false,false,false" spacing="true">
-                        <groupBox>
-                            <textField id="skillNameField" caption="mainMsg://msgSkill"
-                                       dataContainer="skillTreeDc" property="skillName"/>
-                            <lookupPickerField id="skillTreeField" optionsContainer="skillTreesDc"
-                                               caption="mainMsg://msgSkillTree" dataContainer="skillTreeDc"
-                                               property="skillTree">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                        </groupBox>
+                    <tab id="tabSkillTree" caption="msg://msgSkill" margin="true,false,false,false" spacing="true">
+                        <textField id="skillNameField" caption="mainMsg://msgSkill"
+                                   dataContainer="skillTreeDc" property="skillName"/>
+                        <lookupPickerField id="skillTreeField" optionsContainer="skillTreesDc"
+                                           caption="mainMsg://msgSkillTree" dataContainer="skillTreeDc"
+                                           property="skillTree">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
                     </tab>
-                    <tab id="tabCandidate" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
-                        <groupBox spacing="true">
-                            <table height="400px" width="100%" dataContainer="skillTreeCandidatesDc">
-                                <columns>
-                                    <column id="secondName"/>
-                                    <column id="firstName"/>
-                                    <column id="middleName"/>
-                                    <column id="birdhDate"/>
-                                    <column id="email"/>
-                                    <column id="phone"/>
-                                    <column id="skypeName"/>
-                                    <column id="telegramName"/>
-                                </columns>
-                            </table>
-                        </groupBox>
+                    <tab id="tab" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
+                        <table id="skillTreeCandidatesTable" dataContainer="skillTreeCandidatesesDc" height="200px" width="100%">
+                            <columns>
+                                <column id="firstName"/>
+                                <column id="middleName"/>
+                                <column id="secondName"/>
+                                <column id="birdhDate"/>
+                                <column id="email"/>
+                                <column id="phone"/>
+                                <column id="skypeName"/>
+                                <column id="telegramName"/>
+                                <column id="wiberName"/>
+                                <column id="whatsupName"/>
+                            </columns>
+                            <buttonsPanel>
+                                <button id="addButton" action="skillTreeCandidatesTable.add"/>
+                                <button id="editButton" action="skillTreeCandidatesTable.edit"/>
+                                <button id="removeButton" action="skillTreeCandidatesTable.remove"/>
+                            </buttonsPanel>
+                            <actions>
+                                <action id="add" type="add"/>
+                                <action id="edit" type="edit"/>
+                                <action id="remove" type="remove"/>
+                            </actions>
+                        </table>
                     </tab>
                 </tabSheet>
             </column>
         </form>
-        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>
