@@ -1,0 +1,1 @@
+drop table ITPEARLS_CANDIDATES_SOCIAL_NETWORK__U82850 if exists cascade ;

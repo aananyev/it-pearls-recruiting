@@ -30,13 +30,12 @@
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
+                <action id="excel" type="excel"/>
             </actions>
             <columns>
-                <column id="candidate"/>
-                <column id="resumePosition"/>
-                <column id="textCV"/>
-                <column id="lintToCloudFile"/>
-                <column id="datePost"/>
+                <column id="candidate" caption="msg://msgCandidate"/>
+                <column id="resumePosition" caption="msg://msgPosition"/>
+                <column id="datePost" caption="msg://msgDatePost"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -44,6 +43,7 @@
                 <button id="createBtn" action="candidateCVsTable.create"/>
                 <button id="editBtn" action="candidateCVsTable.edit"/>
                 <button id="removeBtn" action="candidateCVsTable.remove"/>
+                <button id="excelBtn" action="candidateCVsTable.excel"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

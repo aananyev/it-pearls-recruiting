@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="iteractionsTable"
+        messagesPack="com.company.itpearls.web.screens.iteraction">
+    <data readOnly="true">
+        <collection id="iteractionsTreeDc"
+                    class="com.company.itpearls.entity.Iteraction"
+                    view="iteraction-view">
+            <loader id="iteractionsDl">
+                <query><![CDATA[select e from itpearls_Iteraction e
+order by e.number]]></query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="iteractionTreeTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="iteractionsTable"
+                dataLoader="iteractionsDl">
+            <properties include=".*"/>
+        </filter>
+        <treeTable id="iteractionTreeTable" height="200px" width="100%" dataContainer="iteractionsTreeDc"
+                   hierarchyProperty="iteractionTree">
+            <columns>
+                <column id="number"/>
+                <column id="iterationName"/>
+            </columns>
+            <actions>
+                <action id="add" type="add"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <buttonsPanel id="buttonsPanel">
+                <button id="addButton" action="iteractionTreeTable.add"/>
+                <button id="editButton" action="iteractionTreeTable.edit"/>
+                <button id="removeButton" action="iteractionTreeTable.remove"/>
+            </buttonsPanel>
+        </treeTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

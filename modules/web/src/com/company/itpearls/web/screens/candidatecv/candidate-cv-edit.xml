@@ -29,33 +29,43 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="candidateCVDc" width="100%">
             <column width="100%">
-                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate" width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="resumePositionField" optionsContainer="resumePositionsDc"
-                                   property="resumePosition" width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <tabSheet height="50%">
+                <tabSheet id="tabSheet">
+                    <tab id="tabCandidate" caption="msg://msgCandidate" spacing="true">
+                        <groupBox id="groupBox" spacing="true">
+                            <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
+                                               dataContainer="candidateCVDc" property="candidate"
+                                               caption="msg://msgCandidate" height="50%" width="50%">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                            <lookupPickerField id="resumePositionField" optionsContainer="resumePositionsDc"
+                                               dataContainer="candidateCVDc" property="resumePosition"
+                                               caption="msg://msgPosition" height="50%" width="50%">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                            <textField id="lintToCloudFileField" dataContainer="candidateCVDc" property="lintToCloudFile"
+                                       caption="msg://msgLinkToCloudFile" height="50%" width="50%"
+                                       caseConversion="LOWER"/>
+                            <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost" caption="msg://msgDatePost"
+                                       height="50%"/>
+                        </groupBox>
+                    </tab>
                     <tab id="tabCV" caption="msg://msgCV" margin="true,false,false,false" spacing="true">
                         <richTextArea id="candidateCVRichTextArea" dataContainer="candidateCVDc" property="textCV"
-                                      width="100%" height="70%"/>
+                                      width="100%" height="350pt"/>
                     </tab>
                     <tab id="tabLetter" caption="msg://msgLetter" margin="true,false,false,false" spacing="true">
-                        <richTextArea id="candidateLetterRichTextArea" dataContainer="candidateCVDc" property="letter"
-                                      width="100%"
-                                      height="70%"/>
+                        <richTextArea dataContainer="candidateCVDc" property="letter" width="100%" height="350pt"/>
                     </tab>
                 </tabSheet>
-                <textField id="lintToCloudFileField" property="lintToCloudFile" width="100%"/>
-                <dateField id="datePostField" property="datePost"/>
+                <upload id="fileCVField" fileStoragePutMode="IMMEDIATE" property="fileCV" showFileName="true"
+                        align="TOP_LEFT" caption="msg://msgBlank"/>
             </column>
         </form>
-        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+        <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

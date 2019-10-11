@@ -34,6 +34,7 @@
             <columns>
                 <column id="networkName"/>
                 <column id="networkURLS"/>
+                <column id="jobCandidate"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
