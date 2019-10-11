@@ -281,6 +281,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     POSITION_COUNTRY_ID varchar(36),
     SPECIALISATION_ID varchar(36),
     SKILL_TREE_ID varchar(36),
+    OPEN_POSITION_ID varchar(36),
     --
     primary key (ID)
 )^

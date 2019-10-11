@@ -34,8 +34,9 @@ order by e.skillName]]></query>
                             </actions>
                         </lookupPickerField>
                     </tab>
-                    <tab id="tab" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
-                        <table id="skillTreeCandidatesTable" dataContainer="skillTreeCandidatesesDc" height="200px" width="100%">
+                    <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
+                        <table id="skillTreeCandidatesTable" dataContainer="skillTreeCandidatesesDc" height="200px" width="100%"
+                        >
                             <columns>
                                 <column id="firstName"/>
                                 <column id="middleName"/>
@@ -45,8 +46,6 @@ order by e.skillName]]></query>
                                 <column id="phone"/>
                                 <column id="skypeName"/>
                                 <column id="telegramName"/>
-                                <column id="wiberName"/>
-                                <column id="whatsupName"/>
                             </columns>
                             <actions>
                                 <action id="edit" type="edit"/>

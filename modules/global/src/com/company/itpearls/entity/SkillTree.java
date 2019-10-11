@@ -36,7 +36,7 @@ public class SkillTree extends StandardEntity {
     protected OpenPosition openPosition;
 
     @Composition
-    @OnDelete(DeletePolicy.CASCADE)
+    @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "skillTree")
     protected List<JobCandidate> candidates;
 

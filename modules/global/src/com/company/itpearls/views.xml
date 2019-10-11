@@ -33,6 +33,20 @@
         <property name="companyName" view="_local"/>
         <property name="companyDepartament" view="_local"/>
         <property name="skillsList" view="_local"/>
+        <property name="candidates" view="_local">
+            <property name="currentCompany" view="_minimal"/>
+            <property name="personPosition" view="_local"/>
+            <property name="cityOfResidence" view="_minimal"/>
+            <property name="positionCountry" view="_minimal"/>
+            <property name="iteractionList" view="_minimal"/>
+            <property name="specialisation" view="_minimal"/>
+            <property name="skillList" view="_minimal"/>
+            <property name="jobHistory" view="_minimal"/>
+            <property name="socialNetwork" view="_minimal"/>
+            <property name="candidateCv" view="_minimal"/>
+            <property name="skillTree" view="_minimal"/>
+            <property name="openPosition" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true">
         <property name="currentCompany" view="_local"/>
@@ -67,12 +81,27 @@
     </view>
     <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
         <property name="skillTree" view="_minimal"/>
-        <property name="jobCandidate" view="_minimal"/>
+        <property name="jobCandidate" view="jobCandidate-view"/>
         <property name="openPosition" view="_minimal"/>
-        <property name="candidates" view="_local"/>
+        <property name="candidates" view="_local">
+            <property name="currentCompany" view="_local"/>
+            <property name="personPosition" view="_local"/>
+            <property name="cityOfResidence" view="_local"/>
+            <property name="positionCountry" view="_local"/>
+            <property name="iteractionList" view="_local"/>
+            <property name="specialisation" view="_local"/>
+            <property name="skillList" view="_local"/>
+            <property name="jobHistory" view="_local"/>
+            <property name="socialNetwork" view="_local"/>
+            <property name="candidateCv" view="_local"/>
+            <property name="skillTree" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local">
-        <property name="candidate" view="_local"/>
+        <property name="candidate" view="_local">
+            <property name="skillList" view="_local"/>
+            <property name="skillTree" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_JobHistory" name="jobHistory-view" extends="_local">
         <property name="candidate" view="_local">

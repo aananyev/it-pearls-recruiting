@@ -18,9 +18,6 @@ import java.util.List;
 public class OpenPosition extends StandardEntity {
     private static final long serialVersionUID = -4276280250460057561L;
 
-    @Column(name = "OPEN_FLAG")
-    protected Boolean openFlag;
-
     @NotNull
     @Column(name = "VACANSY_NAME", nullable = false, length = 80)
     protected String vacansyName;
@@ -59,12 +56,17 @@ public class OpenPosition extends StandardEntity {
     @OneToMany(mappedBy = "openPosition")
     protected List<SkillTree> skillsList;
 
-    public Boolean getOpenFlag() {
-        return openFlag;
+    @Composition
+    @OnDelete(DeletePolicy.DENY)
+    @OneToMany(mappedBy = "openPosition")
+    protected List<JobCandidate> candidates;
+
+    public List<JobCandidate> getCandidates() {
+        return candidates;
     }
 
-    public void setOpenFlag(Boolean openFlag) {
-        this.openFlag = openFlag;
+    public void setCandidates(List<JobCandidate> candidates) {
+        this.candidates = candidates;
     }
 
     public List<SkillTree> getSkillsList() {

@@ -103,6 +103,17 @@ public class JobCandidate extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SKILL_TREE_ID")
     protected SkillTree skillTree;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "OPEN_POSITION_ID")
+    protected OpenPosition openPosition;
+
+    public OpenPosition getOpenPosition() {
+        return openPosition;
+    }
+
+    public void setOpenPosition(OpenPosition openPosition) {
+        this.openPosition = openPosition;
+    }
 
     public SkillTree getSkillTree() {
         return skillTree;
