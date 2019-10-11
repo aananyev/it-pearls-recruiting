@@ -15,7 +15,8 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="companyGroupDc">
             <column width="250px">
-                <textField id="companyRuGroupNameField" property="companyRuGroupName"/>
+                <textField id="companyRuGroupNameField" property="companyRuGroupName"
+                           caption="mainMsg://msgCompanyGroup"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

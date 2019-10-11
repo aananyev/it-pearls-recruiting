@@ -12,9 +12,8 @@
         </instance>
         <collection id="regionCountriesDc" class="com.company.itpearls.entity.Country" view="_minimal">
             <loader id="regionCountriesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Country e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Country e
+order by e.countryRuName]]></query>
             </loader>
         </collection>
     </data>

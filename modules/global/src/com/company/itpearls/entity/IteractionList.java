@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -12,6 +13,7 @@ import java.util.Date;
 
 @Table(name = "ITPEARLS_ITERACTION_LIST")
 @Entity(name = "itpearls_IteractionList")
+@NamePattern("%s|candidate")
 public class IteractionList extends StandardEntity {
     private static final long serialVersionUID = -1889183300534377752L;
 
@@ -34,6 +36,11 @@ public class IteractionList extends StandardEntity {
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "VACANCY_ID")
+    protected OpenPosition vacancy;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PROJECT_ID")
     protected Project project;
 
@@ -49,18 +56,37 @@ public class IteractionList extends StandardEntity {
     @JoinColumn(name = "ITERACTION_TYPE_ID")
     protected Iteraction iteractionType;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "RECRUTIER_ID")
-    protected User recrutier;
-
     @Column(name = "COMMUNICATION_METHOD", length = 80)
     protected String communicationMethod;
 
     @Lob
     @Column(name = "COMMENT_")
     protected String comment;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "RECRUTIER_ID")
+    protected User recrutier;
+
+    @Column(name = "RECRUTIER_NAME", length = 80)
+    protected String recrutierName;
+
+    public String getRecrutierName() {
+        return recrutierName;
+    }
+
+    public void setRecrutierName(String recrutierName) {
+        this.recrutierName = recrutierName;
+    }
+
+    public OpenPosition getVacancy() {
+        return vacancy;
+    }
+
+    public void setVacancy(OpenPosition vacancy) {
+        this.vacancy = vacancy;
+    }
 
     public void setNumberIteraction(BigDecimal numberIteraction) {
         this.numberIteraction = numberIteraction;

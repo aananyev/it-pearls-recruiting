@@ -13,12 +13,13 @@ public class SocialNetworkURLs extends StandardEntity {
     private static final long serialVersionUID = -4652381238943479311L;
 
     @NotNull
-    @Column(name = "NETWORK_NAME", nullable = false, unique = true, length = 80)
+    @Column(name = "NETWORK_NAME", nullable = false, length = 80)
     protected String networkName;
 
     @NotNull
     @Column(name = "NETWORK_URLS", nullable = false, unique = true, length = 80)
     protected String networkURLS;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_CANDIDATE_ID")
     protected JobCandidate jobCandidate;

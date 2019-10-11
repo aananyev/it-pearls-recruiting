@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.JobCandidate;
 
@@ -8,4 +9,8 @@ import com.company.itpearls.entity.JobCandidate;
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
+    @Subscribe("addButtonSN")
+    private void onAddButtonSNClick(Button.ClickEvent event) {
+    }
+    
 }

@@ -7,16 +7,25 @@
         <instance id="iteractionDc"
                   class="com.company.itpearls.entity.Iteraction"
                   view="iteraction-view">
-            <loader/>
+            <loader id="iteractionDl"/>
         </instance>
+        <collection id="iteractionsTreeDc" class="com.company.itpearls.entity.Iteraction" view="_local">
+            <loader id="iteractionsTreeDl">
+                <query><![CDATA[select e from itpearls_Iteraction e
+order by e.number]]></query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="iteractionDc">
             <column width="250px">
-                <textField id="numberField" property="number"/>
-                <textField id="iterationNameField" property="iterationName"/>
+                <textField id="numberField" property="number" caption="msg://msgNumber"/>
+                <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"/>
+                <lookupPickerField id="iteractionTreeField" dataContainer="iteractionDc"
+                                   optionsContainer="iteractionsTreeDc" property="iteractionTree"
+                                   caption="msg://msgIterationTree"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

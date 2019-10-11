@@ -33,7 +33,7 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="skillName"/>
+                <column id="skillName" caption="mainMsg://msgSkill"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

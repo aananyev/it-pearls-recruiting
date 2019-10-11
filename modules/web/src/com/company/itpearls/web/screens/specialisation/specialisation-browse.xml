@@ -32,7 +32,7 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="specRuName"/>
+                <column id="specRuName" caption="mainMsg://msgName"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

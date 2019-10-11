@@ -245,7 +245,7 @@ create table ITPEARLS_ITERACTION (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    NUMBER_ integer not null,
+    NUMBER_ varchar(255),
     ITERACTION_TREE_ID varchar(36),
     ITERATION_NAME varchar(80) not null,
     --

@@ -32,10 +32,10 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="candidate"/>
-                <column id="currentPosition"/>
-                <column id="currentCompany"/>
-                <column id="dateNewsPosition"/>
+                <column id="candidate" caption="mainMsg://msgCandidate"/>
+                <column id="currentPosition" caption="mainMsg://msgCurrentPosition"/>
+                <column id="currentCompany" caption="mainMsg://msgCompany"/>
+                <column id="dateNewsPosition" caption="mainMsg://msgDateNewPosition"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

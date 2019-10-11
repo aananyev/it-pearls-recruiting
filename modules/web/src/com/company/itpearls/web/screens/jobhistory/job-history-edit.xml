@@ -11,23 +11,20 @@
         </instance>
         <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
             <loader id="candidatesLc">
-                <query>
-                    <![CDATA[select e from itpearls_JobCandidate e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_JobCandidate e
+order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
         <collection id="currentPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="currentPositionsLc">
-                <query>
-                    <![CDATA[select e from itpearls_Position e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Position e
+order by e.positionRuName]]></query>
             </loader>
         </collection>
         <collection id="currentCompaniesDc" class="com.company.itpearls.entity.Company" view="_minimal">
             <loader id="currentCompaniesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Company e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Company e
+order by e.comanyName]]></query>
             </loader>
         </collection>
     </data>
@@ -36,24 +33,26 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="jobHistoryDc">
             <column width="250px">
-                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate">
+                <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate"
+                                   caption="mainMsg://msgCandidate">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
                 <lookupPickerField id="currentPositionField" optionsContainer="currentPositionsDc"
-                                   property="currentPosition">
+                                   property="currentPosition" caption="mainMsg://msgCurrentPosition">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
                 <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
-                                   property="currentCompany">
+                                   property="currentCompany" caption="mainMsg://msgCompany">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <dateField id="dateNewsPositionField" property="dateNewsPosition"/>
+                <dateField id="dateNewsPositionField" property="dateNewsPosition"
+                           caption="mainMsg://msgDateNewPosition"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

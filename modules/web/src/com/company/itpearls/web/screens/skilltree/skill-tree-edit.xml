@@ -11,9 +11,8 @@
         </instance>
         <collection id="skillTreesDc" class="com.company.itpearls.entity.SkillTree" view="_minimal">
             <loader id="skillTreesLc">
-                <query>
-                    <![CDATA[select e from itpearls_SkillTree e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_SkillTree e
+order by e.skillName]]></query>
             </loader>
         </collection>
     </data>
@@ -22,8 +21,9 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="skillTreeDc">
             <column width="250px">
-                <textField id="skillNameField" property="skillName"/>
-                <lookupPickerField id="skillTreeField" optionsContainer="skillTreesDc" property="skillTree">
+                <textField id="skillNameField" property="skillName" caption="mainMsg://msgSkill"/>
+                <lookupPickerField id="skillTreeField" optionsContainer="skillTreesDc" property="skillTree"
+                                   caption="mainMsg://msgSkillTree">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>

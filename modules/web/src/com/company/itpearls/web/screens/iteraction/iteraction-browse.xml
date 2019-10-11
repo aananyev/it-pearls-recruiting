@@ -8,9 +8,8 @@
                     class="com.company.itpearls.entity.Iteraction"
                     view="iteraction-view">
             <loader id="iteractionsDl">
-                <query>
-                    <![CDATA[select e from itpearls_Iteraction e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Iteraction e
+order by e.number]]></query>
             </loader>
         </collection>
     </data>
@@ -25,15 +24,15 @@
         </filter>
         <groupTable id="iteractionsTable"
                     width="100%"
-                    dataContainer="iteractionsDc">
+                    dataContainer="iteractionsDc" caption="mainMsg://msgNumber">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="number"/>
-                <column id="iterationName"/>
+                <column id="number" caption="mainMsg://msgNumber"/>
+                <column id="iterationName" caption="mainMsg://msgItercationType"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

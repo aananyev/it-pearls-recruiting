@@ -11,9 +11,8 @@
         </instance>
         <collection id="iteractionTreesDc" class="com.company.itpearls.entity.Iteraction" view="_minimal">
             <loader id="iteractionTreesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Iteraction e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Iteraction e
+order by e.iterationName]]></query>
             </loader>
         </collection>
     </data>

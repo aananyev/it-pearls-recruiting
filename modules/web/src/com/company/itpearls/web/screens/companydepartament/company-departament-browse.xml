@@ -32,12 +32,12 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="departamentRuName"/>
-                <column id="companyName"/>
-                <column id="departamentHrDirector"/>
-                <column id="departamentDirector"/>
-                <column id="departamentDescription"/>
-                <column id="departamentNumberOfProgrammers"/>
+                <column id="departamentRuName" caption="mainMsg://msgDepartament"/>
+                <column id="companyName" caption="mainMsg://msgCompany"/>
+                <column id="departamentHrDirector" caption="mainMsg://msgHRDirector"/>
+                <column id="departamentDirector" caption="mainMsg://msgDirector"/>
+                <column id="departamentDescription" caption="mainMsg://msgDescription"/>
+                <column id="departamentNumberOfProgrammers" caption="mainMsg://msgNumberOfVacansies"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

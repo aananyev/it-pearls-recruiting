@@ -12,7 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@NamePattern("%s|departamentRuName")
+@NamePattern("%s %s|companyName,departamentRuName")
 @Table(name = "ITPEARLS_COMPANY_DEPARTAMENT")
 @Entity(name = "itpearls_CompanyDepartament")
 public class CompanyDepartament extends StandardEntity {

@@ -11,37 +11,44 @@
         </instance>
         <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
             <loader id="candidatesLc">
-                <query>
-                    <![CDATA[select e from itpearls_JobCandidate e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_JobCandidate e
+order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
         <collection id="projectsDc" class="com.company.itpearls.entity.Project" view="_minimal">
             <loader id="projectsLc">
-                <query>
-                    <![CDATA[select e from itpearls_Project e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Project e
+order by e.projectName]]></query>
             </loader>
         </collection>
         <collection id="companyDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="companyDepartmentsLc">
-                <query>
-                    <![CDATA[select e from itpearls_CompanyDepartament e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_CompanyDepartament e
+order by e.departamentRuName]]></query>
             </loader>
         </collection>
         <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="_minimal">
             <loader id="iteractionTypesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Iteraction e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Iteraction e
+order by e.iterationName]]></query>
             </loader>
         </collection>
         <collection id="recrutiersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
             <loader id="recrutiersLc">
-                <query>
-                    <![CDATA[select e from sec$User e]]>
-                </query>
+                <query><![CDATA[select e from sec$User e
+order by e.lastName, e.firstName]]></query>
+            </loader>
+        </collection>
+        <collection id="positionsDc" class="com.company.itpearls.entity.Position" view="position-view">
+            <loader id="positionsDl">
+                <query><![CDATA[select e from itpearls_Position e
+order by e.positionRuName]]></query>
+            </loader>
+        </collection>
+        <collection id="vacancyDc" class="com.company.itpearls.entity.OpenPosition" view="_local">
+            <loader id="openPositionsDl">
+                <query><![CDATA[select e from itpearls_OpenPosition e
+order by e.vacansyName]]></query>
             </loader>
         </collection>
     </data>
@@ -49,53 +56,90 @@
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <groupBox spacing="true">
-            <textField id="numberIteractionField" property="numberIteraction"/>
-            <dateField id="dateIteractionField"/>
+            <textField id="numberIteractionField" dataContainer="iteractionListDc" property="numberIteraction"
+                       editable="false" caption="msg://msgNumber"/>
+            <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
+                       editable="false" caption="msg://msgDate"/>
         </groupBox>
-        <grid id="gridIteractionCandidate" width="100%"/>
-        <groupBox>
-            <dateField id="dateIteractionField" property="dateIteraction"/>
-            <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                </actions>
-            </lookupPickerField>
-            <pickerField id="currentJobPositionField" property="currentJobPosition">
+        <groupBox id="groupBoxIterationData">
+            <grid id="gridIterationData" spacing="true" width="100%">
+                <columns count="2"/>
+                <rows>
+                    <row id="row">
+                        <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
+                                           rowspan="1" colspan="1" caption="msg://msgCandidate" width="100%"
+                                           dataContainer="iteractionListDc" property="candidate">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupPickerField id="vacancyFiels" caption="mainMsg://msgVacancy" width="100%"
+                                           dataContainer="iteractionListDc" optionsContainer="vacancyDc"
+                                           property="vacancy">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                    </row>
+                    <row>
+                        <lookupPickerField id="jobPositionListField" optionsContainer="positionsDc" dataContainer="iteractionListDc"
+                                           caption="msg://msgJobPosition" width="100%"
+                                           rowspan="1" colspan="1" property="currentJobPosition">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupPickerField id="projectField" optionsContainer="projectsDc"
+                                           caption="msg://msgProject" width="100%" dataContainer="iteractionListDc"
+                                           property="project">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                    </row>
+                    <row>
+                        <lookupPickerField id="iteractionTypeField" optionsContainer="iteractionTypesDc"
+                                           caption="msg://msgIteractionType" width="100%"
+                                           dataContainer="iteractionListDc" property="iteractionType">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupPickerField id="companyDepartmentField" optionsContainer="companyDepartmentsDc"
+                                           caption="msg://msgDepartament" width="100%" editable="true"
+                                           dataContainer="iteractionListDc" property="companyDepartment">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                    </row>
+                    <row>
+                        <textField id="communicationMethodField" width="100%"
+                                   caption="msg://msgCommunicationMethod" dataContainer="iteractionListDc"
+                                   property="communicationMethod"/>
+                        <lookupPickerField id="recrutierField" optionsContainer="recrutiersDc"
+                                           caption="msg://msgRecrutier" width="100%" dataContainer="iteractionListDc"
+                                           property="recrutier">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                    </row>
+                </rows>
+            </grid>
+            <textArea id="commentField" property="comment" rows="5" width="100%" caption="msg://msgComment"/>
+            <pickerField id="recrutierNameField" dataContainer="iteractionListDc" property="recrutierName" editable="false">
                 <actions>
                     <action id="lookup" type="picker_lookup"/>
                     <action id="clear" type="picker_clear"/>
                 </actions>
             </pickerField>
-            <lookupPickerField id="projectField" optionsContainer="projectsDc" property="project">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                </actions>
-            </lookupPickerField>
-            <lookupPickerField id="companyDepartmentField" optionsContainer="companyDepartmentsDc"
-                               property="companyDepartment">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                </actions>
-            </lookupPickerField>
-            <lookupPickerField id="iteractionTypeField" optionsContainer="iteractionTypesDc"
-                               property="iteractionType">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                </actions>
-            </lookupPickerField>
-            <lookupPickerField id="recrutierField" optionsContainer="recrutiersDc" property="recrutier">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                </actions>
-            </lookupPickerField>
-            <textField id="communicationMethodField" property="communicationMethod"/>
-            <textArea id="commentField" property="comment" rows="5"/>
         </groupBox>
         <form id="form" dataContainer="iteractionListDc" width="100%">
             <column width="250px">
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

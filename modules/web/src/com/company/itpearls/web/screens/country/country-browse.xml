@@ -32,9 +32,9 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="countryRuName"/>
-                <column id="countryShortName"/>
-                <column id="phoneCode"/>
+                <column id="countryRuName" caption="msg://msgNumber"/>
+                <column id="countryShortName" caption="msg://msgCountryShortName"/>
+                <column id="phoneCode" caption="msg://msgPhoneCode"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

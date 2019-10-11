@@ -55,9 +55,6 @@
         <entity class="com.company.itpearls.entity.JobHistory">
             <include re=".*"/>
         </entity>
-        <entity class="com.company.itpearls.entity.CandidatesSocialNetwork">
-            <include re=".*"/>
-        </entity>
         <entity class="com.company.itpearls.entity.CandidateCV">
             <include re=".*"/>
         </entity>

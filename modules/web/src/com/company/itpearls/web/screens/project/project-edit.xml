@@ -13,16 +13,14 @@
         </instance>
         <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="projectDepartmentsLc">
-                <query>
-                    <![CDATA[select e from itpearls_CompanyDepartament e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_CompanyDepartament e
+order by e.departamentRuName]]></query>
             </loader>
         </collection>
         <collection id="projectOwnersDc" class="com.company.itpearls.entity.Person" view="_minimal">
             <loader id="projectOwnersLc">
-                <query>
-                    <![CDATA[select e from itpearls_Person e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Person e
+order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
     </data>

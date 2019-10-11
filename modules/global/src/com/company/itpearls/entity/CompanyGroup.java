@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.Column;
@@ -7,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+@NamePattern("%s|companyRuGroupName")
 @Table(name = "ITPEARLS_COMPANY_GROUP")
 @Entity(name = "itpearls_CompanyGroup")
 public class CompanyGroup extends StandardEntity {

@@ -4,15 +4,14 @@
         <item screen="itpearls_OpenPosition.browse"/>
         <item screen="itpearls_JobCandidate.browse"/>
         <item screen="itpearls_JobHistory.browse"/>
-        <item screen="itpearls_CandidatesSocialNetwork.browse"/>
-        <item screen="itpearls_CandidateCV.browse"/>
         <item screen="itpearls_IteractionList.browse"/>
+        <item screen="itpearls_SocialNetworkURLs.browse"/>
+        <item screen="itpearls_CandidateCV.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
-        <item screen="itpearls_Iteraction.browse"/>
+        <item screen="itpearls_Iteraction._tree.browse"/>
         <item screen="itpearls_Specialisation.browse"/>
         <item screen="itpearls_SkillTree.browse"/>
-        <item screen="itpearls_SocialNetworkURLs.browse"/>
         <item screen="itpearls_Country.browse"/>
         <item screen="itpearls_City.browse"/>
         <item screen="itpearls_Region.browse"/>

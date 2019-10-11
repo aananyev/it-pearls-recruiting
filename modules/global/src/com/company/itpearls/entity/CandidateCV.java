@@ -2,6 +2,7 @@ package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.CaseConversion;
 import com.haulmont.cuba.core.entity.annotation.ConversionType;
@@ -42,10 +43,22 @@ public class CandidateCV extends StandardEntity {
     @CaseConversion(type = ConversionType.LOWER)
     protected String lintToCloudFile;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_CV_ID")
+    protected FileDescriptor fileCV;
+
     @Temporal(TemporalType.DATE)
     @NotNull
     @Column(name = "DATE_POST", nullable = false)
     protected Date datePost;
+
+    public FileDescriptor getFileCV() {
+        return fileCV;
+    }
+
+    public void setFileCV(FileDescriptor fileCV) {
+        this.fileCV = fileCV;
+    }
 
     public String getLetter() {
         return letter;

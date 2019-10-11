@@ -6,11 +6,10 @@
     <data readOnly="true">
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList"
-                    view="iteractionList-view">
+                    view="iteractionList-current-position">
             <loader id="iteractionListsDl">
-                <query>
-                    <![CDATA[select e from itpearls_IteractionList e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_IteractionList e
+order by e.numberIteraction desc]]></query>
             </loader>
         </collection>
     </data>
@@ -32,16 +31,18 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="numberIteraction" caption="msg://msgNumber"/>
+                <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
+                <column id="createTs"/>
+                <column id="createBy"/>
                 <column id="dateIteraction" caption="msg://msgDate"/>
                 <column id="candidate" caption="msg://msgCandidate"/>
-                <column id="currentJobPosition" caption="msg://msgCurrentPosition"/>
+                <column id="personposition" caption="msg://msgCurrentPosition"/>
+                <column id="iteractionType" caption="msg://msgIteractionType"/>
+                <column id="vacancy" caption="mainMsg://msgVacancy"/>
                 <column id="project" caption="msg://msgProject"/>
                 <column id="companyDepartment" caption="msg://msgDepartament"/>
-                <column id="iteractionType" caption="msg://msgIteractionType"/>
-                <column id="recrutier" caption="msg://msgRecrutier"/>
                 <column id="communicationMethod" caption="mainMsg://msgCommunicationMethod"/>
-                <column id="comment" caption="mainMsg://msgComment"/>
+                <column id="recrutier" caption="msg://msgRecrutier"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

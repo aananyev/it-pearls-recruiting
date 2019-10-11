@@ -16,23 +16,20 @@
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="personPositionsLc">
-                <query>
-                    <![CDATA[select e from itpearls_Position e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Position e
+order by e.positionRuName]]></query>
             </loader>
         </collection>
         <collection id="currentCompaniesDc" class="com.company.itpearls.entity.Company" view="_minimal">
             <loader id="currentCompaniesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Company e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Company e
+order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="positionCountriesDc" class="com.company.itpearls.entity.Country" view="_minimal">
             <loader id="positionCountriesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Country e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Country e
+order by e.countryRuName]]></query>
             </loader>
         </collection>
     </data>

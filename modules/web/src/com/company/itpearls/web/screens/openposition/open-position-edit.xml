@@ -12,30 +12,26 @@
         </instance>
         <collection id="positionTypesDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="positionTypesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Position e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Position e
+order by e.positionRuName]]></query>
             </loader>
         </collection>
         <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_minimal">
             <loader id="projectNamesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Project e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Project e
+order by e.projectName]]></query>
             </loader>
         </collection>
         <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
             <loader id="companyNamesLc">
-                <query>
-                    <![CDATA[select e from itpearls_Company e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Company e
+order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="companyDepartamentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="companyDepartamentsLc">
-                <query>
-                    <![CDATA[select e from itpearls_CompanyDepartament e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_CompanyDepartament e
+order by e.departamentRuName]]></query>
             </loader>
         </collection>
     </data>
@@ -77,13 +73,14 @@
                     </lookupPickerField>
                     <textField id="numberPositionField" dataContainer="openPositionDc" property="numberPosition"
                                caption="msg://msgNumberOpenPosition" width="50%"/>
-                    <textArea id="commentField" rows="5" dataContainer="openPositionDc" property="comment"
-                              caption="msg://msgComment" width="100%"/>
                 </groupBox>
+            </tab>
+            <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tab">
+                <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="400pt"/>
             </tab>
             <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
-                    <table id="openPositionSkillsListTable" height="200px" width="100%" dataContainer="openPositionSkillsListsDc">
+                    <table id="openPositionSkillsListTable" height="400px" width="100%" dataContainer="openPositionSkillsListsDc">
                         <columns>
                             <column id="skillName"/>
                         </columns>

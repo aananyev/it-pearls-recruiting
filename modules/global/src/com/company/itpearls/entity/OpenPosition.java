@@ -12,7 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@NamePattern("%s|projectName")
+@NamePattern("%s|vacansyName")
 @Table(name = "ITPEARLS_OPEN_POSITION")
 @Entity(name = "itpearls_OpenPosition")
 public class OpenPosition extends StandardEntity {
@@ -44,8 +44,7 @@ public class OpenPosition extends StandardEntity {
     @JoinColumn(name = "COMPANY_DEPARTAMENT_ID")
     protected CompanyDepartament companyDepartament;
 
-    @NotNull
-    @Column(name = "NUMBER_POSITION", nullable = false)
+    @Column(name = "NUMBER_POSITION")
     protected Integer numberPosition;
 
     @Lob

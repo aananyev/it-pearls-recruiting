@@ -8,9 +8,8 @@
                     class="com.company.itpearls.entity.JobCandidate"
                     view="jobCandidate-view">
             <loader id="jobCandidatesDl">
-                <query>
-                    <![CDATA[select e from itpearls_JobCandidate e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_JobCandidate e
+order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
     </data>
@@ -32,16 +31,18 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="secondName"/>
-                <column id="firstName"/>
-                <column id="middleName"/>
-                <column id="personPosition"/>
-                <column id="currentCompany"/>
-                <column id="positionCountry"/>
-                <column id="cityOfResidence"/>
-                <column id="email"/>
-                <column id="phone"/>
-                <column id="skypeName"/>
+                <column id="secondName" caption="msg://msgSecondName"/>
+                <column id="firstName" caption="mainMsg://msgFirstName"/>
+                <column id="middleName" caption="msg://msgMiddleName"/>
+                <column id="personPosition" caption="msg://msgPersonPosition"/>
+                <column id="currentCompany" caption="msg://msgPersonPosition"/>
+                <column id="positionCountry" caption="mainMsg://msgCountry"/>
+                <column id="cityOfResidence" caption="msg://msgCityOfResidence"/>
+                <column id="email" caption="msg://msgEmail"/>
+                <column id="phone" caption="msg://msgPhone"/>
+                <column id="skypeName" caption="msg://msgSkypeAccaunt"/>
+                <column id="createBy"/>
+                <column id="createTs"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

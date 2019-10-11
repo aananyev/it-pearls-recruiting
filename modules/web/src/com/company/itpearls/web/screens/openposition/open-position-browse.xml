@@ -8,9 +8,8 @@
                     class="com.company.itpearls.entity.OpenPosition"
                     view="openPosition-view">
             <loader id="openPositionsDl">
-                <query>
-                    <![CDATA[select e from itpearls_OpenPosition e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_OpenPosition e
+order by e.createTs desc]]></query>
             </loader>
         </collection>
     </data>
@@ -32,13 +31,13 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="vacansyName"/>
-                <column id="positionType"/>
-                <column id="projectName"/>
-                <column id="companyName"/>
-                <column id="companyDepartament"/>
-                <column id="numberPosition"/>
-                <column id="comment"/>
+                <column id="vacansyName" caption="msg://msgVacancy"/>
+                <column id="positionType" caption="msg://msgPositionType"/>
+                <column id="projectName" caption="msg://msgProject"/>
+                <column id="companyName" caption="msg://msgCompanyName"/>
+                <column id="companyDepartament" caption="msg://msgDepartment"/>
+                <column id="numberPosition" description="msg://msgNumberOpenPosition"/>
+                <column id="createTs"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

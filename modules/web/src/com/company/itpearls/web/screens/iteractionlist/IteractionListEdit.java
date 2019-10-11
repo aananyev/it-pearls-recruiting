@@ -2,6 +2,8 @@ package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -22,8 +24,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
-        setIteractionNumber();
-        setCurrentDate();
+        if( PersistenceHelper.isNew(getEditedEntity()) ) {
+            setIteractionNumber();
+            setCurrentDate();
+            setCurrentUserName();
+        }
     }
 
     private BigDecimal getCountIteraction() {
@@ -41,5 +46,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     protected void setCurrentDate() {
         getEditedEntity().setDateIteraction(new Date());
+    }
+
+    protected String getCurrentUser() {
+        return UserSessionSource.NAME;
+    }
+
+    protected void setCurrentUserName() {
+        String recruterName = getCurrentUser().toString();
+//        getEditedEntity().setRecrutierName( recruterName );
     }
 }

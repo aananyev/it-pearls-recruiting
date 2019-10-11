@@ -15,7 +15,7 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="specialisationDc">
             <column width="250px">
-                <textField id="specRuNameField" property="specRuName"/>
+                <textField id="specRuNameField" property="specRuName" caption="mainMsg://msgName"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">
