@@ -33,7 +33,7 @@ order by e.numberIteraction desc]]></query>
             <columns>
                 <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
                 <column id="createTs"/>
-                <column id="createBy"/>
+                <column id="createdBy"/>
                 <column id="dateIteraction" caption="msg://msgDate"/>
                 <column id="candidate" caption="msg://msgCandidate"/>
                 <column id="personposition" caption="msg://msgCurrentPosition"/>

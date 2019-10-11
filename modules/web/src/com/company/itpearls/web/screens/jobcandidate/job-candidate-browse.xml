@@ -41,7 +41,7 @@ order by e.secondName, e.firstName]]></query>
                 <column id="email" caption="msg://msgEmail"/>
                 <column id="phone" caption="msg://msgPhone"/>
                 <column id="skypeName" caption="msg://msgSkypeAccaunt"/>
-                <column id="createBy"/>
+                <column id="createdBy"/>
                 <column id="createTs"/>
             </columns>
             <rowsCount/>
