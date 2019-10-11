@@ -6,7 +6,10 @@ import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.List;
 
 @NamePattern("%s|specRuName")
@@ -19,21 +22,9 @@ public class Specialisation extends StandardEntity {
     protected String specRuName;
 
     @Composition
-    @OnDelete(DeletePolicy.CASCADE)
+    @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "specialisation")
     protected List<JobCandidate> candidate;
-
-    @Lob
-    @Column(name = "COMMENT_")
-    protected String comment;
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
 
     public List<JobCandidate> getCandidate() {
         return candidate;

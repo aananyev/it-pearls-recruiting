@@ -48,15 +48,8 @@ order by e.skillName]]></query>
                                 <column id="wiberName"/>
                                 <column id="whatsupName"/>
                             </columns>
-                            <buttonsPanel>
-                                <button id="addButton" action="skillTreeCandidatesTable.add"/>
-                                <button id="editButton" action="skillTreeCandidatesTable.edit"/>
-                                <button id="removeButton" action="skillTreeCandidatesTable.remove"/>
-                            </buttonsPanel>
                             <actions>
-                                <action id="add" type="add"/>
                                 <action id="edit" type="edit"/>
-                                <action id="remove" type="remove"/>
                             </actions>
                         </table>
                     </tab>

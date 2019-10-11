@@ -173,7 +173,7 @@ order by e.countryRuName]]></query>
                         </actions>
                     </lookupPickerField>
                     <groupBox spacing="true">
-                        <groupTable id="jobCandidateSkillListTable" height="200px" width="100%" dataContainer="jobCandidateSkillListsDc">
+                        <groupTable id="jobCandidateSkillListTable" height="400px" width="100%" dataContainer="jobCandidateSkillListsDc">
                             <columns>
                                 <column id="skillName"/>
                             </columns>
