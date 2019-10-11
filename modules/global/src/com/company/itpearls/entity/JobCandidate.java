@@ -88,11 +88,6 @@ public class JobCandidate extends StandardEntity {
 
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
-    @OneToMany(mappedBy = "jobCandidate")
-    protected List<SkillTree> skillList;
-
-    @Composition
-    @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
     protected List<JobHistory> jobHistory;
 
@@ -105,6 +100,17 @@ public class JobCandidate extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
     protected List<CandidateCV> candidateCv;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SKILL_TREE_ID")
+    protected SkillTree skillTree;
+
+    public SkillTree getSkillTree() {
+        return skillTree;
+    }
+
+    public void setSkillTree(SkillTree skillTree) {
+        this.skillTree = skillTree;
+    }
 
     public List<SocialNetworkURLs> getSocialNetwork() {
         return socialNetwork;
@@ -136,14 +142,6 @@ public class JobCandidate extends StandardEntity {
 
     public void setCityOfResidence(City cityOfResidence) {
         this.cityOfResidence = cityOfResidence;
-    }
-
-    public List<SkillTree> getSkillList() {
-        return skillList;
-    }
-
-    public void setSkillList(List<SkillTree> skillList) {
-        this.skillList = skillList;
     }
 
     public Specialisation getSpecialisation() {

@@ -1,12 +1,16 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @NamePattern("%s|skillName")
 @Table(name = "ITPEARLS_SKILL_TREE")
@@ -24,12 +28,34 @@ public class SkillTree extends StandardEntity {
     protected SkillTree skillTree;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "JOB_CANDIDATE_ID")
-    protected JobCandidate jobCandidate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     protected OpenPosition openPosition;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SPECIALISATION_ID")
+    protected Specialisation specialisation;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "skillTree")
+    protected List<JobCandidate> candidate;
+
+    public Specialisation getSpecialisation() {
+        return specialisation;
+    }
+
+    public void setSpecialisation(Specialisation specialisation) {
+        this.specialisation = specialisation;
+    }
+
+    public List<JobCandidate> getCandidate() {
+        return candidate;
+    }
+
+    public void setCandidate(List<JobCandidate> candidate) {
+        this.candidate = candidate;
+    }
 
     public OpenPosition getOpenPosition() {
         return openPosition;
@@ -37,14 +63,6 @@ public class SkillTree extends StandardEntity {
 
     public void setOpenPosition(OpenPosition openPosition) {
         this.openPosition = openPosition;
-    }
-
-    public JobCandidate getJobCandidate() {
-        return jobCandidate;
-    }
-
-    public void setJobCandidate(JobCandidate jobCandidate) {
-        this.jobCandidate = jobCandidate;
     }
 
     public SkillTree getSkillTree() {

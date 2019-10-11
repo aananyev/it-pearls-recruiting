@@ -8,9 +8,8 @@
                     class="com.company.itpearls.entity.Specialisation"
                     view="specialisation-view">
             <loader id="specialisationsDl">
-                <query>
-                    <![CDATA[select e from itpearls_Specialisation e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Specialisation e
+order by e.specRuName]]></query>
             </loader>
         </collection>
     </data>

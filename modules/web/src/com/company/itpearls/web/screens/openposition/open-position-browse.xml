@@ -24,20 +24,21 @@ order by e.createTs desc]]></query>
         </filter>
         <groupTable id="openPositionsTable"
                     width="100%"
-                    dataContainer="openPositionsDc">
+                    dataContainer="openPositionsDc" caption="msg://msgOpenFlag">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="openFlag"/>
+                <column id="createTs"/>
                 <column id="vacansyName" caption="msg://msgVacancy"/>
                 <column id="positionType" caption="msg://msgPositionType"/>
                 <column id="projectName" caption="msg://msgProject"/>
                 <column id="companyName" caption="msg://msgCompanyName"/>
                 <column id="companyDepartament" caption="msg://msgDepartment"/>
                 <column id="numberPosition" description="msg://msgNumberOpenPosition"/>
-                <column id="createTs"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

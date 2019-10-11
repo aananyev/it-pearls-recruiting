@@ -8,17 +8,45 @@
                   class="com.company.itpearls.entity.Specialisation"
                   view="specialisation-view">
             <loader/>
+            <collection id="specialisationCandidatesDc" property="candidate"/>
         </instance>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="specialisationDc">
-            <column width="250px">
-                <textField id="specRuNameField" property="specRuName" caption="mainMsg://msgName"/>
+    <layout expand="editActions" spacing="true" width="100%">
+        <form id="form" dataContainer="specialisationDc" width="100%">
+            <column width="100%">
+                <tabSheet id="tabSheetSpec">
+                    <tab id="tabSpecialistion" caption="mainMsg://msgSpecialisation" margin="true,false,false,false" spacing="true">
+                        <groupBox spacing="true">
+                            <textField id="specRuNameField" caption="mainMsg://msgName"
+                                       dataContainer="specialisationDc" property="specRuName" width="50%"/>
+                            <textArea dataContainer="specialisationDc" property="comment" width="100%" height="200pt"
+                                      caption="msg://msgComment"/>
+                        </groupBox>
+                    </tab>
+                    <tab id="tabCandidate" caption="mainMsg://msgCandidate" margin="true,false,false,false" spacing="true">
+                        <groupBox spacing="true">
+                            <table id="specialisationCandidateTable" height="400px" width="100%" dataContainer="specialisationCandidatesDc"
+                            >
+                                <columns>
+                                    <column id="secondName"/>
+                                    <column id="firstName"/>
+                                    <column id="middleName"/>
+                                    <column id="email"/>
+                                    <column id="phone"/>
+                                    <column id="skypeName"/>
+                                    <column id="telegramName"/>
+                                    <column id="wiberName"/>
+                                    <column id="whatsupName"/>
+                                </columns>
+                            </table>
+                        </groupBox>
+                    </tab>
+                </tabSheet>
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>
