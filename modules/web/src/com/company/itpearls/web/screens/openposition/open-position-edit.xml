@@ -48,7 +48,8 @@ order by e.cityRuName]]></query>
         <tabSheet>
             <tab id="tabOpenPosition" caption="msg://msgNamePosition" margin="true,false,false,false" spacing="true">
                 <groupBox id="groupBoxOpenPosition" spacing="true">
-                    <checkBox dataContainer="openPositionDc" property="openFlag" caption="mainMsg://msgOpenFlag"/>
+                    <checkBox id="openClosePositionCheckBox" dataContainer="openPositionDc" property="openClose"
+                              caption="mainMsg://msgPositionClose"/>
                     <textField id="vacansyNameField" dataContainer="openPositionDc" property="vacansyName"
                                caption="msg://msgVacansy" width="50%"/>
                     <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc"

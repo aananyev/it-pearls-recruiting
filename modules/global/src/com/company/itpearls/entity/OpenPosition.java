@@ -18,6 +18,9 @@ import java.util.List;
 public class OpenPosition extends StandardEntity {
     private static final long serialVersionUID = -4276280250460057561L;
 
+    @Column(name = "OPEN_CLOSE")
+    protected Boolean openClose;
+
     @NotNull
     @Column(name = "VACANSY_NAME", nullable = false, length = 80)
     protected String vacansyName;
@@ -65,6 +68,14 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "openPosition")
     protected List<JobCandidate> candidates;
+
+    public Boolean getOpenClose() {
+        return openClose;
+    }
+
+    public void setOpenClose(Boolean openClose) {
+        this.openClose = openClose;
+    }
 
     public City getCityPosition() {
         return cityPosition;
