@@ -35,6 +35,12 @@ order by e.comanyName]]></query>
 order by e.departamentRuName]]></query>
             </loader>
         </collection>
+        <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_minimal">
+            <loader id="citiesDl">
+                <query><![CDATA[select e from itpearls_City e
+order by e.cityRuName]]></query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -48,6 +54,13 @@ order by e.departamentRuName]]></query>
                     <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc"
                                        dataContainer="openPositionDc" property="positionType"
                                        caption="msg://msgPositionType" width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="cityOpenPositionField" dataContainer="openPositionDc"
+                                       optionsContainer="citiesDc" property="cityPosition" width="50%"
+                                       caption="mainMsg://msgCity">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
@@ -100,7 +113,7 @@ order by e.departamentRuName]]></query>
                 </groupBox>
             </tab>
             <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
-                <table height="400px" width="100%" dataContainer="openPositionCandidatesesDc">
+                <table id="openPositionCandidatesTable" height="400px" width="100%" dataContainer="openPositionCandidatesesDc">
                     <columns>
                         <column id="secondName"/>
                         <column id="firstName"/>

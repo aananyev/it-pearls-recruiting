@@ -26,6 +26,7 @@
     </view>
     <view entity="itpearls_Position" name="position-view" extends="_minimal"/>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
+        <property name="cityPosition" view="_local"/>
         <property name="positionType" view="_local"/>
         <property name="projectName" view="_local">
             <property name="projectDepartment" view="_minimal"/>
@@ -34,17 +35,8 @@
         <property name="companyDepartament" view="_local"/>
         <property name="skillsList" view="_local"/>
         <property name="candidates" view="_local">
-            <property name="currentCompany" view="_minimal"/>
             <property name="personPosition" view="_local"/>
-            <property name="cityOfResidence" view="_minimal"/>
-            <property name="positionCountry" view="_minimal"/>
-            <property name="iteractionList" view="_minimal"/>
-            <property name="specialisation" view="_minimal"/>
-            <property name="skillList" view="_minimal"/>
-            <property name="jobHistory" view="_minimal"/>
-            <property name="socialNetwork" view="_minimal"/>
             <property name="candidateCv" view="_minimal"/>
-            <property name="skillTree" view="_minimal"/>
             <property name="openPosition" view="_minimal"/>
         </property>
     </view>
@@ -157,5 +149,8 @@
         <property name="companyDepartment" view="_minimal"/>
         <property name="iteractionType" view="_minimal"/>
         <property name="recrutier" view="_minimal"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
+        <property name="candidates" view="_local"/>
     </view>
 </views>

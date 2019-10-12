@@ -24,6 +24,11 @@ public class OpenPosition extends StandardEntity {
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CITY_POSITION_ID")
+    protected City cityPosition;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "POSITION_TYPE_ID")
     protected Position positionType;
 
@@ -60,6 +65,14 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "openPosition")
     protected List<JobCandidate> candidates;
+
+    public City getCityPosition() {
+        return cityPosition;
+    }
+
+    public void setCityPosition(City cityPosition) {
+        this.cityPosition = cityPosition;
+    }
 
     public List<JobCandidate> getCandidates() {
         return candidates;

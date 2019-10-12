@@ -209,6 +209,7 @@ create table ITPEARLS_OPEN_POSITION (
     --
     OPEN_FLAG boolean,
     VACANSY_NAME varchar(80) not null,
+    CITY_POSITION_ID varchar(36),
     POSITION_TYPE_ID varchar(36),
     PROJECT_NAME_ID varchar(36) not null,
     COMPANY_NAME_ID varchar(36) not null,

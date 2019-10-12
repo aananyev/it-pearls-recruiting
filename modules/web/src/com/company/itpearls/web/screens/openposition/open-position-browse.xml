@@ -34,8 +34,9 @@ order by e.createTs desc]]></query>
                 <column id="openFlag"/>
                 <column id="createTs"/>
                 <column id="vacansyName" caption="msg://msgVacancy"/>
-                <column id="positionType" caption="msg://msgPositionType"/>
                 <column id="projectName" caption="msg://msgProject"/>
+                <column id="cityPosition" caption="msg://msgCity"/>
+                <column id="positionType" caption="msg://msgPositionType"/>
                 <column id="companyName" caption="msg://msgCompanyName"/>
                 <column id="companyDepartament" caption="msg://msgDepartment"/>
                 <column id="numberPosition" description="msg://msgNumberOpenPosition"/>
