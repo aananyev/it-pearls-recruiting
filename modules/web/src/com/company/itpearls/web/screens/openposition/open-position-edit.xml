@@ -11,7 +11,7 @@
             <collection id="openPositionSkillsListsDc" property="skillsList"/>
             <collection id="openPositionCandidatesesDc" property="candidates"/>
         </instance>
-        <collection id="positionTypesDc" class="com.company.itpearls.entity.Position" view="_minimal">
+        <collection id="positionTypesDc" class="com.company.itpearls.entity.Position" view="_local">
             <loader id="positionTypesLc">
                 <query><![CDATA[select e from itpearls_Position e
 order by e.positionRuName]]></query>
@@ -39,6 +39,11 @@ order by e.departamentRuName]]></query>
             <loader id="citiesDl">
                 <query><![CDATA[select e from itpearls_City e
 order by e.cityRuName]]></query>
+            </loader>
+        </collection>
+        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="jobCandidate-view">
+            <loader id="jobCandidatesDl">
+                <query><![CDATA[select e from itpearls_JobCandidate e]]></query>
             </loader>
         </collection>
     </data>
@@ -114,7 +119,7 @@ order by e.cityRuName]]></query>
                 </groupBox>
             </tab>
             <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
-                <table id="openPositionCandidatesTable" height="400px" width="100%" dataContainer="openPositionCandidatesesDc">
+                <table id="openPositionCandidatesTable" height="400px" width="100%" dataContainer="jobCandidatesDc">
                     <columns>
                         <column id="secondName"/>
                         <column id="firstName"/>
