@@ -9,7 +9,6 @@ import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -30,9 +29,8 @@ public class Project extends StandardEntity {
     @Column(name = "END_PROJECT_DATE")
     protected Date endProjectDate;
 
-    @NotNull
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PROJECT_DEPARTMENT_ID")
     protected CompanyDepartament projectDepartment;
 

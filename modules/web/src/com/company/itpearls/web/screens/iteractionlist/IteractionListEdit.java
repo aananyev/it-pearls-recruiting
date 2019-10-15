@@ -27,13 +27,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if( PersistenceHelper.isNew(getEditedEntity()) ) {
             setIteractionNumber();
             setCurrentDate();
-            setCurrentUserName();
+//            setCurrentUserName();
         }
     }
 
     private BigDecimal getCountIteraction() {
         BigDecimal maxValue = iteractionListEditDataManager.loadValue(
-                "select max(a.numberIteraction) from itpearls_IteractionList a",
+                "select count(a.numberIteraction) from itpearls_IteractionList a",
                             BigDecimal.class).one().add(BigDecimal.ONE);
 
 

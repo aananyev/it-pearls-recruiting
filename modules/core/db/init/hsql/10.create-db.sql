@@ -189,7 +189,7 @@ create table ITPEARLS_PROJECT (
     PROJECT_NAME varchar(80),
     START_PROJECT_DATE date,
     END_PROJECT_DATE date,
-    PROJECT_DEPARTMENT_ID varchar(36) not null,
+    PROJECT_DEPARTMENT_ID varchar(36),
     PROJECT_OWNER_ID varchar(36),
     --
     primary key (ID)

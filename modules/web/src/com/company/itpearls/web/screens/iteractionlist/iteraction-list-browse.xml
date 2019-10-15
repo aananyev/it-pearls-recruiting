@@ -32,8 +32,8 @@ order by e.numberIteraction desc]]></query>
             </actions>
             <columns>
                 <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
-                <column id="createTs"/>
-                <column id="createdBy"/>
+                <column id="createTs" caption="mainMsg://msgCreateBy"/>
+                <column id="createBy" caption="mainMsg://msgCreatedBy"/>
                 <column id="dateIteraction" caption="msg://msgDate"/>
                 <column id="candidate" caption="msg://msgCandidate"/>
                 <column id="personposition" caption="msg://msgCurrentPosition"/>

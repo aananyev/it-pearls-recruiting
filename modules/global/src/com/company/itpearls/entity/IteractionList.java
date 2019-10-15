@@ -64,13 +64,16 @@ public class IteractionList extends StandardEntity {
     protected String comment;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECRUTIER_ID")
     protected User recrutier;
 
     @Column(name = "RECRUTIER_NAME", length = 80)
     protected String recrutierName;
+
+    public void setCurrentJobPosition(Position currentJobPosition) {
+        this.currentJobPosition = currentJobPosition;
+    }
 
     public String getRecrutierName() {
         return recrutierName;
