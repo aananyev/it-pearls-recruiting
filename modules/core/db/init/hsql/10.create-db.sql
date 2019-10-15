@@ -268,6 +268,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     FIRST_NAME varchar(80) not null,
     MIDDLE_NAME varchar(80),
     SECOND_NAME varchar(80) not null,
+    FULL_NAME varchar(160),
     CURRENT_COMPANY_ID varchar(36),
     PERSON_POSITION_ID varchar(36),
     CITY_OF_RESIDENCE_ID varchar(36),

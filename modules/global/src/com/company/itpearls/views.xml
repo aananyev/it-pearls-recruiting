@@ -65,7 +65,13 @@
             <property name="jobCandidate" view="_minimal"/>
             <property name="candidates" view="_local"/>
         </property>
-        <property name="openPosition" view="_local"/>
+        <property name="openPosition" view="_local">
+            <property name="positionType" view="_local"/>
+            <property name="candidates" view="_local">
+                <property name="personPosition" view="_minimal"/>
+                <property name="openPosition" view="_local"/>
+            </property>
+        </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="jobCandidate" view="_local">

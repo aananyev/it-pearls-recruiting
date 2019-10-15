@@ -26,7 +26,7 @@ public class Country extends StandardEntity {
     @Column(name = "COUNTRY_SHORT_NAME", unique = true, length = 2)
     protected String countryShortName;
 
-    @Column(name = "PHONE_CODE", unique = true)
+    @Column(name = "PHONE_CODE")
     protected Integer phoneCode;
 
     @Composition

@@ -8,9 +8,8 @@
                     class="com.company.itpearls.entity.Company"
                     view="company-view">
             <loader id="companiesDl">
-                <query>
-                    <![CDATA[select e from itpearls_Company e]]>
-                </query>
+                <query><![CDATA[select e from itpearls_Company e
+order by e.comanyName]]></query>
             </loader>
         </collection>
     </data>

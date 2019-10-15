@@ -43,7 +43,8 @@ order by e.cityRuName]]></query>
         </collection>
         <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="jobCandidate-view">
             <loader id="jobCandidatesDl">
-                <query><![CDATA[select e from itpearls_JobCandidate e]]></query>
+                <query><![CDATA[select e from itpearls_JobCandidate e
+order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
     </data>
@@ -121,13 +122,13 @@ order by e.cityRuName]]></query>
             <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
                 <table id="openPositionCandidatesTable" height="400px" width="100%" dataContainer="jobCandidatesDc">
                     <columns>
-                        <column id="secondName"/>
-                        <column id="firstName"/>
-                        <column id="middleName"/>
-                        <column id="email"/>
-                        <column id="phone"/>
-                        <column id="skypeName"/>
-                        <column id="telegramName"/>
+                        <column id="secondName" caption="mainMsg://msgSecondName"/>
+                        <column id="firstName" caption="mainMsg://msgFirstName"/>
+                        <column id="middleName" caption="msg://msgMiddleName"/>
+                        <column id="email" caption="msg://msgEmail"/>
+                        <column id="phone" caption="msg://msgPhone"/>
+                        <column id="skypeName" caption="msg://msgSkype"/>
+                        <column id="telegramName" caption="msg://msgTelegram"/>
                     </columns>
                 </table>
             </tab>

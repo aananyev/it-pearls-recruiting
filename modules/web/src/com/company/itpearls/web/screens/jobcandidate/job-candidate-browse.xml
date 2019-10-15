@@ -31,6 +31,7 @@ order by e.secondName, e.firstName]]></query>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="fullName" caption="mainMsg://msgFullName"/>
                 <column id="secondName" caption="msg://msgSecondName"/>
                 <column id="firstName" caption="mainMsg://msgFirstName"/>
                 <column id="middleName" caption="msg://msgMiddleName"/>

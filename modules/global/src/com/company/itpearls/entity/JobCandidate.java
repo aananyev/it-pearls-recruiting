@@ -33,6 +33,9 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "SECOND_NAME", nullable = false, length = 80)
     protected String secondName;
 
+    @Column(name = "FULL_NAME", length = 160)
+    protected String fullName;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CURRENT_COMPANY_ID")
@@ -100,12 +103,22 @@ public class JobCandidate extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
     protected List<CandidateCV> candidateCv;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SKILL_TREE_ID")
     protected SkillTree skillTree;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     protected OpenPosition openPosition;
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
     public OpenPosition getOpenPosition() {
         return openPosition;
