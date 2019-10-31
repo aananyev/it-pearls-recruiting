@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 @PublishEntityChangedEvents
-@NamePattern("%s %s %s %s|secondName,middleName,firstName,personPosition")
+@NamePattern("%s %s %s %s|secondName,firstName,middleName,personPosition")
 @Table(name = "ITPEARLS_JOB_CANDIDATE")
 @Entity(name = "itpearls_JobCandidate")
 public class JobCandidate extends StandardEntity {
@@ -56,10 +56,10 @@ public class JobCandidate extends StandardEntity {
     protected Date birdhDate;
 
     @Email
-    @Column(name = "EMAIL", length = 30)
+    @Column(name = "EMAIL", length = 50)
     protected String email;
 
-    @Column(name = "PHONE", length = 10)
+    @Column(name = "PHONE", length = 14)
     protected String phone;
 
     @Column(name = "SKYPE_NAME", length = 30)

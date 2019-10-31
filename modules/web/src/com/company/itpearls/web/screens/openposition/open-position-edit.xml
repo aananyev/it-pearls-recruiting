@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
+        focusComponent="groupBoxOpenPosition"
         messagesPack="com.company.itpearls.web.screens.openposition">
     <data>
         <instance id="openPositionDc"
@@ -19,8 +19,8 @@ order by e.positionRuName]]></query>
         </collection>
         <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_minimal">
             <loader id="projectNamesLc">
-                <query><![CDATA[select e from itpearls_Project e
-order by e.projectName]]></query>
+                <query><![CDATA[select e from itpearls_Project e where e.projectIsClosed is null
+or e.projectIsClosed=false order by e.projectName]]></query>
             </loader>
         </collection>
         <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
@@ -29,10 +29,21 @@ order by e.projectName]]></query>
 order by e.comanyName]]></query>
             </loader>
         </collection>
-        <collection id="companyDepartamentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
+        <collection id="companyDepartamentsDc" class="com.company.itpearls.entity.CompanyDepartament"
+                    view="companyDepartament-view">
             <loader id="companyDepartamentsLc">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
 order by e.departamentRuName]]></query>
+            </loader>
+        </collection>
+        <collection id="projectDc" class="com.company.itpearls.entity.Project" view="project-view">
+            <loader id="companyOfDepatmentDl">
+                <query><![CDATA[select e from itpearls_Project e where e.endProjectDate is not null]]></query>
+            </loader>
+        </collection>
+        <collection id="cityOfCompanyDc" class="com.company.itpearls.entity.Company" view="company-view">
+            <loader id="cityOfCompanyDl">
+                <query><![CDATA[select e from itpearls_Company e]]></query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_minimal">
@@ -51,7 +62,7 @@ order by e.secondName, e.firstName]]></query>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <tabSheet>
+        <tabSheet id="tabSheetOpenPosition">
             <tab id="tabOpenPosition" caption="msg://msgNamePosition" margin="true,false,false,false" spacing="true">
                 <groupBox id="groupBoxOpenPosition" spacing="true">
                     <checkBox id="openClosePositionCheckBox" dataContainer="openPositionDc" property="openClose"
@@ -65,16 +76,16 @@ order by e.secondName, e.firstName]]></query>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <lookupPickerField id="cityOpenPositionField" dataContainer="openPositionDc"
-                                       optionsContainer="citiesDc" property="cityPosition" width="50%"
-                                       caption="mainMsg://msgCity">
+                    <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc"
+                                       dataContainer="openPositionDc" property="projectName"
+                                       caption="msg://msgNamePosition" width="50%">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc"
-                                       dataContainer="openPositionDc" property="projectName"
-                                       caption="msg://msgNamePosition" width="50%">
+                    <lookupPickerField id="companyDepartamentField" optionsContainer="companyDepartamentsDc"
+                                       dataContainer="openPositionDc" property="companyDepartament"
+                                       caption="msg://msgDepartment" width="50%">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
@@ -86,9 +97,9 @@ order by e.secondName, e.firstName]]></query>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <lookupPickerField id="companyDepartamentField" optionsContainer="companyDepartamentsDc"
-                                       dataContainer="openPositionDc" property="companyDepartament"
-                                       caption="msg://msgDepartment" width="50%">
+                    <lookupPickerField id="cityOpenPositionField" dataContainer="openPositionDc"
+                                       optionsContainer="citiesDc" property="cityPosition" width="50%"
+                                       caption="mainMsg://msgCity">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>

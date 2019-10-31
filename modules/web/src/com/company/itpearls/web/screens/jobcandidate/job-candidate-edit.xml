@@ -35,7 +35,7 @@ order by e.countryRuName]]></query>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <tabSheet/>
+<!--    <tabSheet/>  -->
     <layout expand="editActions" spacing="true">
         <tabSheet>
             <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
@@ -117,7 +117,7 @@ order by e.countryRuName]]></query>
                         </rows>
                     </grid>
                 </groupBox>
-                <groupBox spacing="true" caption="msg://msgSocialNetwork">
+		<!-- <groupBox spacing="true" caption="msg://msgSocialNetwork">
                     <table id="jobCandidateSocialNetworkTable" height="200px" width="100%" dataContainer="jobCandidateSocialNetworksDc">
                         <columns>
                             <column id="networkName"/>
@@ -134,7 +134,7 @@ order by e.countryRuName]]></query>
                             <action id="remove" type="remove"/>
                         </actions>
                     </table>
-                </groupBox>
+	    </groupBox> -->
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">

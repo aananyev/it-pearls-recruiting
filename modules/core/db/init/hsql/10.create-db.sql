@@ -308,7 +308,7 @@ create table ITPEARLS_ITERACTION_LIST (
     ITERACTION_TYPE_ID varchar(36) not null,
     COMMUNICATION_METHOD varchar(80),
     COMMENT_ longvarchar,
-    RECRUTIER_ID varchar(36) not null,
+    RECRUTIER_ID varchar(36),
     RECRUTIER_NAME varchar(80),
     --
     primary key (ID)

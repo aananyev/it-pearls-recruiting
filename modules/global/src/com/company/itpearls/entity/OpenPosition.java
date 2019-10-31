@@ -12,7 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@NamePattern("%s|vacansyName")
+@NamePattern("%s %s|vacansyName,projectName")
 @Table(name = "ITPEARLS_OPEN_POSITION")
 @Entity(name = "itpearls_OpenPosition")
 public class OpenPosition extends StandardEntity {
@@ -60,7 +60,7 @@ public class OpenPosition extends StandardEntity {
     protected String comment;
 
     @Composition
-    @OnDelete(DeletePolicy.CASCADE)
+    @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "openPosition")
     protected List<SkillTree> skillsList;
 

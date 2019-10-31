@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
+        focusComponent="projectNameField"
         messagesPack="com.company.itpearls.web.screens.project">
     <data>
         <instance id="projectDc"
@@ -30,6 +30,8 @@ order by e.secondName, e.firstName]]></query>
         <tabSheet caption="msg://msgTabProject">
             <tab caption="Tab" margin="true,false,false,false" spacing="true" id="tabProject">
                 <groupBox spacing="true">
+                    <checkBox id="checkBoxProjectIsClosed" dataContainer="projectDc" property="projectIsClosed"
+                              caption="msg://msgProjectIsClosed"/>
                     <textField id="projectNameField" dataContainer="projectDc" property="projectName"
                                caption="msg://msgProjectName"/>
                     <dateField id="startProjectDateField" dataContainer="projectDc" property="startProjectDate"

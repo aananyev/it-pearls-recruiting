@@ -21,6 +21,9 @@ public class Project extends StandardEntity {
     @Column(name = "PROJECT_NAME", length = 80)
     protected String projectName;
 
+    @Column(name = "PROJECT_IS_CLOSED")
+    protected Boolean projectIsClosed;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "START_PROJECT_DATE")
     protected Date startProjectDate;
@@ -51,6 +54,14 @@ public class Project extends StandardEntity {
 
     public List<IteractionList> getJobCandidate() {
         return jobCandidate;
+    }
+
+    public Boolean getProjectIsClosed() {
+        return projectIsClosed;
+    }
+
+    public void setProjectIsClosed(Boolean projectIsClosed) {
+        this.projectIsClosed = projectIsClosed;
     }
 
     public void setJobCandidate(List<IteractionList> jobCandidate) {

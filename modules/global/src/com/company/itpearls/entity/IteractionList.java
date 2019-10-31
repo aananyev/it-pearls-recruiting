@@ -35,6 +35,7 @@ public class IteractionList extends StandardEntity {
     protected Position currentJobPosition;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "VACANCY_ID")
     protected OpenPosition vacancy;
@@ -45,7 +46,7 @@ public class IteractionList extends StandardEntity {
     protected Project project;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @NotNull
+//    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "COMPANY_DEPARTMENT_ID")
     protected CompanyDepartament companyDepartment;
@@ -64,6 +65,7 @@ public class IteractionList extends StandardEntity {
     protected String comment;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECRUTIER_ID")
     protected User recrutier;

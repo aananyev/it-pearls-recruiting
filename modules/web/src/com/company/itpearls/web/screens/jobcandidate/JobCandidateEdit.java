@@ -15,18 +15,31 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private InstanceContainer<JobCandidate> jobCandidateDc;
 
+    @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        setFullNameCandidate();
+    }
+
+    
     @Subscribe(id = "jobCandidateDc", target = Target.DATA_CONTAINER)
     private void onJobCandidateDcItemChange(InstanceContainer.ItemChangeEvent<JobCandidate> event) {
+        setFullNameCandidate();
+    }
+
+    private void setFullNameCandidate(){
         String space = " ";
 
-        getEditedEntity().setFullName(
-               getEditedEntity().getSecondName() + space +
-                       getEditedEntity().getFirstName()
-       );
+        if(getEditedEntity().getSecondName() != null &&
+            getEditedEntity().getFirstName() != null ) {
+                getEditedEntity().setFullName(
+                    getEditedEntity().getSecondName() + space +
+                            getEditedEntity().getFirstName());
+        }
+
     }
 
-    @Subscribe("addButtonSN")
-    private void onAddButtonSNClick(Button.ClickEvent event) {
-    }
+//    @Subscribe("addButtonSN")
+//    private void onAddButtonSNClick(Button.ClickEvent event) {
+//    }
     
 }

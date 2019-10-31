@@ -8,8 +8,10 @@
                     class="com.company.itpearls.entity.OpenPosition"
                     view="openPosition-view">
             <loader id="openPositionsDl">
-                <query><![CDATA[select e from itpearls_OpenPosition e
-order by e.createTs desc]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+order by e.createTs desc, e.cityPosition, e.vacansyName]]>
+                </query>
             </loader>
         </collection>
     </data>
@@ -22,23 +24,22 @@ order by e.createTs desc]]></query>
                 dataLoader="openPositionsDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="openPositionsTable"
-                    width="100%"
-                    dataContainer="openPositionsDc">
+        <table id="openPositionsTable"
+               width="100%"
+               dataContainer="openPositionsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="createTs" caption="mainMsg://msgOpenBy"/>
                 <column id="openClose" caption="mainMsg://msgOpecnClosePosition" align="CENTER"/>
+                <column id="cityPosition" caption="msg://msgCity" collapsed="true"/>
                 <column id="vacansyName" caption="msg://msgVacancy"/>
-                <column id="projectName" caption="msg://msgProject"/>
-                <column id="cityPosition" caption="msg://msgCity"/>
                 <column id="positionType" caption="msg://msgPositionType"/>
                 <column id="companyName" caption="msg://msgCompanyName"/>
-                <column id="companyDepartament" caption="msg://msgDepartment"/>
+                <column id="projectName" caption="msg://msgProject"/>
+                <column id="createTs" caption="mainMsg://msgOpenBy"/>
                 <column id="numberPosition" description="msg://msgNumberOpenPosition"/>
             </columns>
             <rowsCount/>
@@ -48,8 +49,8 @@ order by e.createTs desc]]></query>
                 <button id="editBtn" action="openPositionsTable.edit"/>
                 <button id="removeBtn" action="openPositionsTable.remove"/>
             </buttonsPanel>
-        </groupTable>
-        <hbox id="lookupActions" spacing="true" visible="false">
+        </table>
+        <hbox id="lookupActions" spacing="true" visible="false" align="TOP_RIGHT">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>

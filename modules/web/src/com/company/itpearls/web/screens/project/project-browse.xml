@@ -9,7 +9,7 @@
                     view="project-view">
             <loader id="projectsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Project e]]>
+                    <![CDATA[select e from itpearls_Project e order by e.projectIsClosed desc, e.projectName]]>
                 </query>
             </loader>
         </collection>
@@ -32,11 +32,12 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="projectName"/>
-                <column id="startProjectDate"/>
-                <column id="endProjectDate"/>
-                <column id="projectDepartment"/>
-                <column id="projectOwner"/>
+                <column id="projectIsClosed" caption="msg://msgProjectIsClosed" align="CENTER"/>
+                <column id="projectName" caption="msg://msgProjectName"/>
+                <column id="startProjectDate" caption="msg://msgProjectStartDate"/>
+                <column id="endProjectDate" caption="msg://msgProjectEndDate"/>
+                <column id="projectDepartment" caption="msg://msgProjectDepartament"/>
+                <column id="projectOwner" caption="msg://msgProjectOwner"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

@@ -3,9 +3,9 @@
     <menu id="application-hunting" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse"/>
         <item screen="itpearls_JobCandidate.browse"/>
-        <item screen="itpearls_JobHistory.browse"/>
+	<!-- <item screen="itpearls_JobHistory.browse"/> -->
         <item screen="itpearls_IteractionList.browse"/>
-        <item screen="itpearls_SocialNetworkURLs.browse"/>
+	<!-- <item screen="itpearls_SocialNetworkURLs.browse"/> -->
         <item screen="itpearls_CandidateCV.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">

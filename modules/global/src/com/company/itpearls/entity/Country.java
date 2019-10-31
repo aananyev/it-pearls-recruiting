@@ -23,7 +23,7 @@ public class Country extends StandardEntity {
     @Column(name = "COUNTRY_RU_NAME", nullable = false, unique = true, length = 50)
     protected String countryRuName;
 
-    @Column(name = "COUNTRY_SHORT_NAME", unique = true, length = 2)
+    @Column(name = "COUNTRY_SHORT_NAME", unique = false, length = 2)
     protected String countryShortName;
 
     @Column(name = "PHONE_CODE")

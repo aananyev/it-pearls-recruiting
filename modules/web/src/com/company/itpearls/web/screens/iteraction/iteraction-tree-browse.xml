@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="iteractionsTable"
+        focusComponent="iteractionTreeTable"
         messagesPack="com.company.itpearls.web.screens.iteraction">
     <data readOnly="true">
         <collection id="iteractionsTreeDc"
@@ -18,7 +18,7 @@ order by e.number]]></query>
     <layout expand="iteractionTreeTable"
             spacing="true">
         <filter id="filter"
-                applyTo="iteractionsTable"
+                applyTo="iteractionTreeTable"
                 dataLoader="iteractionsDl">
             <properties include=".*"/>
         </filter>
