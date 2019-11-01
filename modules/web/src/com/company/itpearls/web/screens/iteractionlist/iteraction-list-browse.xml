@@ -32,17 +32,15 @@ order by e.numberIteraction desc]]></query>
             </actions>
             <columns>
                 <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
-                <!--                <column id="createTs" caption="mainMsg://msgCreateBy"/> -->
-                <column id="createdBy" caption="mainMsg://msgCreatedBy"/>
                 <column id="dateIteraction" caption="msg://msgDate"/>
                 <column id="candidate" caption="msg://msgCandidate"/>
-                <!--                <column id="personposition" caption="msg://msgCurrentPosition"/> -->
                 <column id="iteractionType" caption="msg://msgIteractionType"/>
                 <column id="vacancy" caption="mainMsg://msgVacancy"/>
                 <column id="project" caption="msg://msgProject"/>
                 <column id="companyDepartment" caption="msg://msgDepartament"/>
                 <column id="communicationMethod" caption="mainMsg://msgCommunicationMethod"/>
                 <column id="recrutier" caption="msg://msgRecrutier"/>
+                <column id="createdBy" caption="mainMsg://msgCreatedBy"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

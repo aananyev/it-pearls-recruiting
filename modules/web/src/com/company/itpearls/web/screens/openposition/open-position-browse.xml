@@ -24,6 +24,7 @@ order by e.createTs desc, e.cityPosition, e.vacansyName]]>
                 dataLoader="openPositionsDl">
             <properties include=".*"/>
         </filter>
+        <checkBox id="checkBoxOnlyOpenedPosition" description="msg://msgOnlyOpenedVacansy" caption="msg://msgOnlyOpenedVacansy"/>
         <table id="openPositionsTable"
                width="100%"
                dataContainer="openPositionsDc">

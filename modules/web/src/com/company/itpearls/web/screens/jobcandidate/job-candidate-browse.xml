@@ -32,18 +32,14 @@ order by e.secondName, e.firstName]]></query>
             </actions>
             <columns>
                 <column id="fullName" caption="mainMsg://msgFullName"/>
-                <column id="secondName" caption="msg://msgSecondName"/>
-                <column id="firstName" caption="mainMsg://msgFirstName"/>
-                <column id="middleName" caption="msg://msgMiddleName"/>
                 <column id="personPosition" caption="msg://msgPersonPosition"/>
-                <column id="currentCompany" caption="msg://msgPersonPosition"/>
-                <column id="positionCountry" caption="mainMsg://msgCountry"/>
+                <column id="currentCompany" caption="msg://msgCompany"/>
                 <column id="cityOfResidence" caption="msg://msgCityOfResidence"/>
                 <column id="email" caption="msg://msgEmail"/>
                 <column id="phone" caption="msg://msgPhone"/>
                 <column id="skypeName" caption="msg://msgSkypeAccaunt"/>
-                <column id="createdBy"/>
-                <column id="createTs"/>
+                <column id="createdBy" caption="msg://msgRecrutier"/>
+                <column id="createTs" caption="msg://msgDate"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

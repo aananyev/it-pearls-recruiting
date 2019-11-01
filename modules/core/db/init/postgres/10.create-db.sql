@@ -171,6 +171,7 @@ create table ITPEARLS_ITERACTION (
     DELETED_BY varchar(50),
     --
     NUMBER_ varchar(255),
+    MANDATORY_ITERACTION boolean,
     ITERACTION_TREE_ID uuid,
     ITERATION_NAME varchar(80) not null,
     --

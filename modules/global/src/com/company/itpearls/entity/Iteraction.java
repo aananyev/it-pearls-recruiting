@@ -17,6 +17,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "NUMBER_")
     protected String number;
 
+    @Column(name = "MANDATORY_ITERACTION")
+    protected Boolean mandatoryIteraction;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ITERACTION_TREE_ID")
@@ -25,6 +28,14 @@ public class Iteraction extends StandardEntity {
     @NotNull
     @Column(name = "ITERATION_NAME", nullable = false, unique = true, length = 80)
     protected String iterationName;
+
+    public Boolean getMandatoryIteraction() {
+        return mandatoryIteraction;
+    }
+
+    public void setMandatoryIteraction(Boolean mandatoryIteraction) {
+        this.mandatoryIteraction = mandatoryIteraction;
+    }
 
     public void setNumber(String number) {
         this.number = number;
