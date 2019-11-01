@@ -46,9 +46,10 @@
                                     <action id="lookup" type="picker_lookup"/>
                                 </actions>
                             </lookupPickerField>
-                            <textField id="lintToCloudFileField" dataContainer="candidateCVDc" property="lintToCloudFile"
-                                       caption="msg://msgLinkToCloudFile" height="50%" width="50%"
-                                       caseConversion="LOWER"/>
+                            <textField id="textFieldIOriginalCV" dataContainer="candidateCVDc"
+                                       property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV" width="100%"/>
+                            <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
+                                       caption="mainMsg://msgLinkToItPearlsCV" width="100%"/>
                             <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost" caption="msg://msgDatePost"
                                        height="50%"/>
                         </groupBox>

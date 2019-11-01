@@ -49,6 +49,7 @@ order by e.secondName, e.firstName]]></query>
                 <button id="removeBtn" action="jobCandidatesTable.remove"/>
             </buttonsPanel>
         </groupTable>
+        <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

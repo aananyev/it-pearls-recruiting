@@ -112,6 +112,8 @@ create table ITPEARLS_CANDIDATE_CV (
     RESUME_POSITION_ID uuid,
     TEXT_CV text,
     LETTER text,
+    LINK_IT_PEARLS_CV varchar(255),
+    LINK_ORIGINAL_CV varchar(255),
     FILE_CV_ID uuid,
     DATE_POST date not null,
     --

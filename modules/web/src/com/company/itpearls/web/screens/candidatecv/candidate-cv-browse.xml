@@ -9,7 +9,7 @@
                     view="candidateCV-view">
             <loader id="candidateCVsDl">
                 <query>
-                    <![CDATA[select e from itpearls_CandidateCV e]]>
+                    <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName]]>
                 </query>
             </loader>
         </collection>
@@ -30,10 +30,11 @@
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
-                <action id="excel" type="excel"/>
             </actions>
             <columns>
-                <column id="candidate" caption="msg://msgCandidate"/>
+                <group>
+                    <column id="candidate" caption="msg://msgCandidate"/>
+                </group>
                 <column id="resumePosition" caption="msg://msgPosition"/>
                 <column id="datePost" caption="msg://msgDatePost"/>
             </columns>
@@ -43,7 +44,6 @@
                 <button id="createBtn" action="candidateCVsTable.create"/>
                 <button id="editBtn" action="candidateCVsTable.edit"/>
                 <button id="removeBtn" action="candidateCVsTable.remove"/>
-                <button id="excelBtn" action="candidateCVsTable.excel"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

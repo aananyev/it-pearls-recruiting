@@ -43,6 +43,12 @@ public class CandidateCV extends StandardEntity {
     @CaseConversion(type = ConversionType.LOWER)
     protected String lintToCloudFile;
 
+    @Column(name = "LINK_IT_PEARLS_CV")
+    protected String linkItPearlsCV;
+
+    @Column(name = "LINK_ORIGINAL_CV")
+    protected String linkOriginalCv;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_CV_ID")
     protected FileDescriptor fileCV;
@@ -51,6 +57,22 @@ public class CandidateCV extends StandardEntity {
     @NotNull
     @Column(name = "DATE_POST", nullable = false)
     protected Date datePost;
+
+    public String getLinkOriginalCv() {
+        return linkOriginalCv;
+    }
+
+    public void setLinkOriginalCv(String linkOriginalCv) {
+        this.linkOriginalCv = linkOriginalCv;
+    }
+
+    public String getLinkItPearlsCV() {
+        return linkItPearlsCV;
+    }
+
+    public void setLinkItPearlsCV(String linkItPearlsCV) {
+        this.linkItPearlsCV = linkItPearlsCV;
+    }
 
     public FileDescriptor getFileCV() {
         return fileCV;
