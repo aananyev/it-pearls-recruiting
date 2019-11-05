@@ -11,24 +11,29 @@
         </instance>
         <collection id="iteractionsTreeDc" class="com.company.itpearls.entity.Iteraction" view="_local">
             <loader id="iteractionsTreeDl">
-                <query><![CDATA[select e from itpearls_Iteraction e
-order by e.number]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_Iteraction e
+where e.iteractionTree is null
+order by e.number]]>
+                </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="iteractionDc">
+        <form id="form" dataContainer="iteractionDc" width="100%">
             <column width="250px">
-                <textField id="numberField" property="number" caption="msg://msgNumber"/>
-                <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"/>
+                <checkBox id="iteractionCheckBoxMandatory" dataContainer="iteractionDc" property="mandatoryIteraction" caption="msg://msgMandatory"/>
+                <textField id="numberField" property="number" caption="msg://msgNumber" width="50%"/>
                 <lookupPickerField id="iteractionTreeField" dataContainer="iteractionDc"
                                    optionsContainer="iteractionsTreeDc" property="iteractionTree"
-                                   caption="msg://msgIterationTree"/>
+                                   caption="msg://msgIterationTree" width="50%"/>
+                <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"
+                           width="50%"/>
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>
