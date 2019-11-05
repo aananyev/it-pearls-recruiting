@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://browseCaption"
         focusComponent="candidateCVsTable"
         messagesPack="com.company.itpearls.web.screens.candidatecv">
@@ -10,6 +11,11 @@
             <loader id="candidateCVsDl">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName]]>
+                    <condition>
+                        <c:jpql>
+                           <c:where>e.createdBy like :userName</c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
