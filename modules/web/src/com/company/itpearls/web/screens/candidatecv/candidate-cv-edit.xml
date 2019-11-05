@@ -23,6 +23,13 @@
                 </query>
             </loader>
         </collection>
+        <collection id="usersDc" class="com.haulmont.cuba.security.entity.User" view="_local">
+            <loader id="usersDl">
+                <query>
+                    <![CDATA[select e from sec$User e ]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -52,6 +59,8 @@
                                        caption="mainMsg://msgLinkToItPearlsCV" width="100%"/>
                             <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost" caption="msg://msgDatePost"
                                        height="50%"/>
+                            <lookupField id="owner&#1057;andidateCVField" dataContainer="candidateCVDc" optionsContainer="usersDc"
+                                         caption="mainMsg://msgOwner" property="owner"/>
                         </groupBox>
                     </tab>
                     <tab id="tabCV" caption="msg://msgCV" margin="true,false,false,false" spacing="true">

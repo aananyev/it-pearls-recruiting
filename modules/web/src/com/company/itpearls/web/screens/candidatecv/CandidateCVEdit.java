@@ -1,8 +1,11 @@
 package com.company.itpearls.web.screens.candidatecv;
 
+import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
+import com.haulmont.cuba.security.global.UserSession;
 
+import javax.inject.Inject;
 import java.util.Date;
 
 @UiController("itpearls_CandidateCV.edit")
@@ -10,9 +13,15 @@ import java.util.Date;
 @EditedEntityContainer("candidateCVDc")
 @LoadDataBeforeShow
 public class CandidateCVEdit extends StandardEditor<CandidateCV> {
+    @Inject
+    private UserSession userSession;
+
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        getEditedEntity().setDatePost(new Date());  //установить дату публикации резюме
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setDatePost(new Date());  //установить дату публикации резюме
 
+            getEditedEntity().setOwner(userSession.getUser());
+        }
     }
 }

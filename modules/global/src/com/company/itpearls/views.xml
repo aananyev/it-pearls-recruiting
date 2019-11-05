@@ -135,6 +135,10 @@
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="candidate" view="_minimal"/>
         <property name="resumePosition" view="_minimal"/>
+        <property name="owner" view="_minimal">
+            <property name="firstName"/>
+            <property name="lastName"/>
+        </property>
         <property name="lintToCloudFile"/>
         <property name="fileCV" view="_minimal"/>
         <property name="createTs"/>
@@ -175,4 +179,5 @@
     <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
         <property name="candidates" view="_local"/>
     </view>
+    <view entity="itpearls_Setup" name="setup-view" extends="_local"/>
 </views>

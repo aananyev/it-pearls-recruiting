@@ -1,0 +1,1 @@
+create unique index IDX_ITPEARLS_SETUP_UK_PERAM_NAME on ITPEARLS_SETUP (PERAM_NAME) where DELETE_TS is null ;
