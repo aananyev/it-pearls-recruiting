@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://browseCaption"
         focusComponent="iteractionListsTable"
         messagesPack="com.company.itpearls.web.screens.iteractionlist">
@@ -9,7 +10,13 @@
                     view="iteractionList-current-position">
             <loader id="iteractionListsDl">
                 <query><![CDATA[select e from itpearls_IteractionList e
-order by e.numberIteraction desc]]></query>
+order by e.numberIteraction desc]]>
+                <condition>
+                    <c:jpql>
+                        <c:where>e.createdBy like :userName</c:where>
+                    </c:jpql>
+                </condition>
+                </query>
             </loader>
         </collection>
     </data>
