@@ -1,10 +1,7 @@
 package com.company.itpearls.web.screens.candidatecv;
 
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
@@ -23,6 +20,16 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
     private CheckBox checkBoxSetOnlyMy;
     @Inject
     private UserSession userSession;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+       if( userSession.getUser().getGroup().getName().equals("Стажер") ) {
+            candidateCVsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
+
+            checkBoxSetOnlyMy.setValue( true );
+            checkBoxSetOnlyMy.setEditable( false );
+       }
+    }
 
     @Subscribe("checkBoxSetOnlyMy")
     public void onCheckBoxSetOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {

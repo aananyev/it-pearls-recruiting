@@ -23,6 +23,16 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Inject
     private CheckBox checkBoxShowOnlyMy;
 
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if( userSession.getUser().getGroup().getName().equals("Стажер") ) {
+            iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
+
+            checkBoxShowOnlyMy.setValue( true );
+            checkBoxShowOnlyMy.setEditable( false );
+        }
+    }
+
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if(checkBoxShowOnlyMy.getValue()) {

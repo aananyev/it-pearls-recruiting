@@ -22,6 +22,16 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private UserSession userSession;
 
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if( userSession.getUser().getGroup().getName().equals("Стажер") ) {
+            jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
+
+            checkBoxShowOnlyMy.setValue( true );
+            checkBoxShowOnlyMy.setEditable( false );
+        }
+    }
+
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if(checkBoxShowOnlyMy.getValue()) {
