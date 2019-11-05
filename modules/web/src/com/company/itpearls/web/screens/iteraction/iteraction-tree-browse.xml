@@ -25,7 +25,7 @@ order by e.number]]></query>
         <treeTable id="iteractionTreeTable" height="200px" width="100%" dataContainer="iteractionsTreeDc"
                    hierarchyProperty="iteractionTree">
             <columns>
-                <column id="number" width="70" align="LEFT"/>
+                <column id="number" width="70" align="CENTER"/>
                 <column id="mandatoryIteraction" caption="msg://msgMandatoryItercation" width="10" align="CENTER"/>
                 <column id="iterationName"/>
             </columns>

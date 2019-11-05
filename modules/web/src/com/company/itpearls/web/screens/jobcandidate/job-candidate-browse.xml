@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://browseCaption"
         focusComponent="jobCandidatesTable"
         messagesPack="com.company.itpearls.web.screens.jobcandidate">
@@ -8,8 +9,15 @@
                     class="com.company.itpearls.entity.JobCandidate"
                     view="jobCandidate-view">
             <loader id="jobCandidatesDl">
-                <query><![CDATA[select e from itpearls_JobCandidate e
-order by e.secondName, e.firstName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e
+order by e.secondName, e.firstName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.createdBy like :userName</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
             </loader>
         </collection>
     </data>
