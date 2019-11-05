@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://browseCaption"
         focusComponent="openPositionsTable"
         messagesPack="com.company.itpearls.web.screens.openposition">
@@ -11,6 +12,11 @@
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
 order by e.openClose, e.vacansyName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.openClose=:openClosePos</c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -34,11 +40,11 @@ order by e.openClose, e.vacansyName]]>
             </actions>
             <columns>
                 <column id="openClose" caption="mainMsg://msgOpecnClosePosition" align="CENTER"/>
-                <column id="cityPosition" caption="msg://msgCity" collapsed="true"/>
+                <column id="projectName" caption="msg://msgProject" collapsed="true"/>
                 <column id="vacansyName" caption="msg://msgVacancy"/>
                 <column id="positionType" caption="msg://msgPositionType"/>
                 <column id="companyName" caption="msg://msgCompanyName"/>
-                <column id="projectName" caption="msg://msgProject"/>
+                <column id="cityPosition" caption="msg://msgCity" collapsed="true"/>
                 <column id="createTs" caption="mainMsg://msgOpenBy"/>
                 <column id="numberPosition" description="msg://msgNumberOpenPosition"/>
             </columns>

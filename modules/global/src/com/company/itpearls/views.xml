@@ -37,7 +37,9 @@
             <property name="projectDepartment" view="_local"/>
         </property>
         <property name="companyName" view="_local"/>
-        <property name="companyDepartament" view="_local"/>
+        <property name="companyDepartament" view="_local">
+            <property name="companyName" view="_minimal"/>
+        </property>
         <property name="skillsList" view="_local"/>
         <property name="candidates" view="_local">
             <property name="personPosition" view="_local"/>
