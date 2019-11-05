@@ -81,5 +81,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
-
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+       if(PersistenceHelper.isNew(getEditedEntity())) {
+           getEditedEntity().setOpenClose(false);
+       }
+    }
 }

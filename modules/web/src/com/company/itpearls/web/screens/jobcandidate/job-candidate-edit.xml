@@ -218,7 +218,6 @@ order by e.countryRuName]]></query>
                         <columns>
                             <column id="datePost" caption="msg://msgDatePost"/>
                             <column id="resumePosition"/>
-                            <column id="textCV" caption="msg://msgTextCV"/>
                         </columns>
                         <actions>
                             <action id="add" type="add"/>

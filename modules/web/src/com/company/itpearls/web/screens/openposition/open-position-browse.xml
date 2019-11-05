@@ -10,7 +10,7 @@
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
-order by e.createTs desc, e.cityPosition, e.vacansyName]]>
+order by e.openClose, e.vacansyName]]>
                 </query>
             </loader>
         </collection>
@@ -24,7 +24,6 @@ order by e.createTs desc, e.cityPosition, e.vacansyName]]>
                 dataLoader="openPositionsDl">
             <properties include=".*"/>
         </filter>
-        <checkBox id="checkBoxOnlyOpenedPosition" description="msg://msgOnlyOpenedVacansy" caption="msg://msgOnlyOpenedVacansy"/>
         <table id="openPositionsTable"
                width="100%"
                dataContainer="openPositionsDc">
@@ -51,6 +50,7 @@ order by e.createTs desc, e.cityPosition, e.vacansyName]]>
                 <button id="removeBtn" action="openPositionsTable.remove"/>
             </buttonsPanel>
         </table>
+        <checkBox id="checkBoxOnlyOpenedPosition" description="msg://msgOnlyOpenedVacansy" caption="msg://msgOnlyOpenedVacansy"/>
         <hbox id="lookupActions" spacing="true" visible="false" align="TOP_RIGHT">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
