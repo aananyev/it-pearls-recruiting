@@ -4,10 +4,10 @@ import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.LookupPickerField;
+import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -29,6 +29,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private UserSession userSession;
     @Inject
     private UserSessionSource userSessionSource;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -81,9 +85,29 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        dialogs.createOptionDialog()
+                .withCaption("Внимание")
+                .withMessage("Создать новую запись копированием текущей?")
+                .withActions(
+                        new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                        .withHandler(e -> {
+                            createNewField();
+                        }),
+                        new DialogAction(DialogAction.Type.NO)
+                ).show();
+    }
+
+    private void createNewField() {
+
+    }
+
+    @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        if(PersistenceHelper.isNew(getEditedEntity()))
+        if(PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setRecrutier(userSession.getUser());
+            // спросить нужно ли копировать предыдущую запись?
+        }
     }
 
     protected void setCurrentUserName() {
