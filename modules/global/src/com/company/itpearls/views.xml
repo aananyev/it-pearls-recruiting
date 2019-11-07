@@ -62,6 +62,7 @@
                 <property name="personPosition" view="_local"/>
             </property>
             <property name="currentJobPosition" view="_minimal"/>
+            <property name="vacancy" view="_minimal"/>
             <property name="project" view="_minimal"/>
             <property name="companyDepartment" view="_minimal"/>
             <property name="iteractionType" view="_minimal"/>
@@ -71,10 +72,11 @@
         <property name="jobHistory" view="jobHistory-view"/>
         <property name="socialNetwork" view="_local"/>
         <property name="candidateCv" view="candidateCV-view"/>
-        <property name="skillTree" view="_local">
+        <property name="skillTree" view="_minimal">
             <property name="skillTree" view="_minimal"/>
             <property name="jobCandidate" view="_minimal"/>
-            <property name="candidates" view="_local"/>
+            <property name="openPosition" view="_minimal"/>
+            <property name="candidates" view="_minimal"/>
         </property>
         <property name="openPosition" view="_local">
             <property name="positionType" view="_local"/>
@@ -83,7 +85,6 @@
                 <property name="openPosition" view="_local"/>
             </property>
         </property>
-        <property name="createdBy" />
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="jobCandidate" view="_local">

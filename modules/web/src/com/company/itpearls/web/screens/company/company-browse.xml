@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://browseCaption"
         focusComponent="companiesTable"
         messagesPack="com.company.itpearls.web.screens.company">
@@ -9,7 +10,13 @@
                     view="company-view">
             <loader id="companiesDl">
                 <query><![CDATA[select e from itpearls_Company e
-order by e.comanyName]]></query>
+order by e.comanyName]]>
+                <condition>
+                    <c:jpql>
+                        <c:where>e.ourClient = :setOurClient</c:where>
+                    </c:jpql>
+                </condition>
+                </query>
             </loader>
         </collection>
     </data>
@@ -32,14 +39,11 @@ order by e.comanyName]]></query>
             </actions>
             <columns>
                 <column id="ourClient" align="CENTER" caption="mainMsg://msgOurClient"/>
-                <column id="companyOwnership" caption="mainMsg://msgOwnership"/>
                 <column id="comanyName" caption="mainMsg://msgLegalCompanyName"/>
                 <column id="companyShortName" caption="mainMsg://msgCompanyName"/>
-                <column id="companyDirector" caption="mainMsg://msgCompanyDirector"/>
-                <column id="cityOfCompany" caption="mainMsg://msgCity"/>
-                <column id="regionOfCompany" caption="mainMsg://msgRegion"/>
                 <column id="countryOfCompany" caption="mainMsg://msgCountry"/>
-                <column id="addressOfCompany" caption="mainMsg://msgAddress"/>
+                <column id="regionOfCompany" caption="mainMsg://msgRegion"/>
+                <column id="cityOfCompany" caption="mainMsg://msgCity"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

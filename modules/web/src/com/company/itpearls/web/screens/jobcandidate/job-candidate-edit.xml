@@ -175,7 +175,7 @@ order by e.countryRuName]]></query>
                     <groupBox spacing="true">
                         <groupTable id="jobCandidateSkillListTable" height="400px" width="100%" dataContainer="jobCandidateSkillListsDc">
                             <columns>
-                                <column id="skillName"/>
+                                <column id="skillTree.skillName"/>
                             </columns>
                             <actions>
                                 <action id="add" type="add"/>
