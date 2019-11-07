@@ -18,6 +18,9 @@ import java.util.List;
 public class Company extends StandardEntity {
     private static final long serialVersionUID = 7912366724901851184L;
 
+    @Column(name = "OUR_CLIENT")
+    protected Boolean ourClient;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_OWNERSHIP_ID")
@@ -58,6 +61,14 @@ public class Company extends StandardEntity {
     @Lob
     @Column(name = "ADDRESS_OF_COMPANY")
     protected String addressOfCompany;
+
+    public Boolean getOurClient() {
+        return ourClient;
+    }
+
+    public void setOurClient(Boolean ourClient) {
+        this.ourClient = ourClient;
+    }
 
     public Region getRegionOfCompany() {
         return regionOfCompany;

@@ -68,7 +68,6 @@
             <property name="recrutier" view="_minimal"/>
         </property>
         <property name="specialisation" view="_local"/>
-        <property name="skillList" view="_minimal"/>
         <property name="jobHistory" view="jobHistory-view"/>
         <property name="socialNetwork" view="_local"/>
         <property name="candidateCv" view="candidateCV-view"/>
@@ -102,7 +101,6 @@
             <property name="positionCountry" view="_local"/>
             <property name="iteractionList" view="_local"/>
             <property name="specialisation" view="_local"/>
-            <property name="skillList" view="_local"/>
             <property name="jobHistory" view="_local"/>
             <property name="socialNetwork" view="_local"/>
             <property name="candidateCv" view="_local"/>
@@ -111,7 +109,6 @@
     </view>
     <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local">
         <property name="candidate" view="_local">
-            <property name="skillList" view="_local"/>
             <property name="skillTree" view="_local"/>
         </property>
     </view>

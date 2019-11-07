@@ -31,14 +31,15 @@ order by e.comanyName]]></query>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="companyOwnership"/>
-                <column id="comanyName"/>
-                <column id="companyShortName"/>
-                <column id="companyDirector"/>
-                <column id="cityOfCompany"/>
-                <column id="regionOfCompany"/>
-                <column id="countryOfCompany"/>
-                <column id="addressOfCompany"/>
+                <column id="ourClient" align="CENTER" caption="mainMsg://msgOurClient"/>
+                <column id="companyOwnership" caption="mainMsg://msgOwnership"/>
+                <column id="comanyName" caption="mainMsg://msgLegalCompanyName"/>
+                <column id="companyShortName" caption="mainMsg://msgCompanyName"/>
+                <column id="companyDirector" caption="mainMsg://msgCompanyDirector"/>
+                <column id="cityOfCompany" caption="mainMsg://msgCity"/>
+                <column id="regionOfCompany" caption="mainMsg://msgRegion"/>
+                <column id="countryOfCompany" caption="mainMsg://msgCountry"/>
+                <column id="addressOfCompany" caption="mainMsg://msgAddress"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -48,6 +49,7 @@ order by e.comanyName]]></query>
                 <button id="removeBtn" action="companiesTable.remove"/>
             </buttonsPanel>
         </groupTable>
+        <checkBox id="checkBoxOnlyOurClient" caption="mainMsg://msgOnlyOurClient"/>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

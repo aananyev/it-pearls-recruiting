@@ -49,60 +49,68 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="companyDc">
-            <column width="250px">
-                <lookupPickerField id="companyOwnershipField" optionsContainer="companyOwnershipsDc"
-                                   property="companyOwnership">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <textField id="comanyNameField" property="comanyName"/>
-                <textField id="companyShortNameField" property="companyShortName"/>
-                <lookupPickerField id="companyDirectorField" optionsContainer="companyDirectorsDc"
-                                   property="companyDirector">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="cityOfCompanyField" optionsContainer="cityOfCompaniesDc"
-                                   property="cityOfCompany">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="regionOfCompanyField" optionsContainer="regionOfCompaniesDc"
-                                   property="regionOfCompany">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="countryOfCompanyField" optionsContainer="countryOfCompaniesDc"
-                                   property="countryOfCompany">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <textArea id="addressOfCompanyField" property="addressOfCompany" rows="5"/>
-            </column>
-        </form>
-        <groupBox id="departmentOfCompanyBox" caption="msg://com.company.itpearls.entity/Company.departmentOfCompany">
-            <table id="departmentOfCompanyTable" dataContainer="departmentOfCompanyDc" width="100%" height="200px">
-                <actions>
-                    <action id="create" type="create"/>
-                    <action id="edit" type="edit"/>
-                    <action id="remove" type="remove"/>
-                </actions>
-                <columns>
-                    <column id="departamentRuName"/>
-                </columns>
-                <buttonsPanel>
-                    <button action="departmentOfCompanyTable.create"/>
-                    <button action="departmentOfCompanyTable.edit"/>
-                    <button action="departmentOfCompanyTable.remove"/>
-                </buttonsPanel>
-            </table>
-        </groupBox>
+        <tabSheet>
+            <tab caption="mainMsg://msgCompanyDetail" margin="true,false,false,false" spacing="true" id="tabConpanyDetails">
+                <form id="form" dataContainer="companyDc" width="100%">
+                    <column width="250px">
+                        <checkBox id="checkBoxOurClient" caption="mainMsg://msgOurClient" dataContainer="companyDc"
+                                  property="ourClient"/>
+                        <lookupPickerField id="companyOwnershipField" optionsContainer="companyOwnershipsDc"
+                                           property="companyOwnership">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <textField id="comanyNameField" property="comanyName"/>
+                        <textField id="companyShortNameField" property="companyShortName"/>
+                        <lookupPickerField id="companyDirectorField" optionsContainer="companyDirectorsDc"
+                                           property="companyDirector">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupPickerField id="cityOfCompanyField" optionsContainer="cityOfCompaniesDc"
+                                           property="cityOfCompany">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupPickerField id="regionOfCompanyField" optionsContainer="regionOfCompaniesDc"
+                                           property="regionOfCompany">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupPickerField id="countryOfCompanyField" optionsContainer="countryOfCompaniesDc"
+                                           property="countryOfCompany">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <textArea id="addressOfCompanyField" property="addressOfCompany" rows="5"/>
+                    </column>
+                </form>
+            </tab>
+            <tab caption="mainMsg://msgCompanyDepartament" margin="true,false,false,false" spacing="true" id="tabCompanyDepartament">
+                <groupBox id="departmentOfCompanyBox" caption="msg://com.company.itpearls.entity/Company.departmentOfCompany">
+                    <table id="departmentOfCompanyTable" dataContainer="departmentOfCompanyDc" width="100%" height="200px">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                        <columns>
+                            <column id="departamentRuName"/>
+                        </columns>
+                        <buttonsPanel>
+                            <button action="departmentOfCompanyTable.create"/>
+                            <button action="departmentOfCompanyTable.edit"/>
+                            <button action="departmentOfCompanyTable.remove"/>
+                        </buttonsPanel>
+                    </table>
+                </groupBox>
+            </tab>
+        </tabSheet>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
