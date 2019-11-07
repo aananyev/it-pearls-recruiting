@@ -15,6 +15,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import javax.swing.text.html.parser.Entity;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -98,19 +99,36 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .withActions(
                         new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
                         .withHandler(e -> {
-                            createNewField();
+                            createNewField(this.getEditedEntity());
                         }),
                         new DialogAction(DialogAction.Type.NO)
                 ).show();
     }
 
     // создать новый экран
-    private void createNewField() {
-        screenBuilders.screen(this)
+    private void createNewField(IteractionList entity) {
+        JobCandidate setJobCandidate = entity.getCandidate();
+        OpenPosition vacansy = entity.getVacancy();
+        Project project = entity.getProject();
+        String communicationMethod = entity.getCommunicationMethod();
+        Iteraction itercation = entity.getIteractionType();
+        CompanyDepartament departament = entity.getCompanyDepartment();
+
+        IteractionList newEntity = iteractionListEditDataManager.create(IteractionList.class);
+
+        screenBuilders.editor(IteractionList.class, this)
+                .editEntity(newEntity)
+                .withInitializer( iteractionList -> {
+                    iteractionList.setCandidate(setJobCandidate);
+                    iteractionList.setVacancy(vacansy);
+                    iteractionList.setProject(project);
+                    iteractionList.setCommunicationMethod(communicationMethod);
+                    iteractionList.setIteractionType(itercation);
+                    iteractionList.setCompanyDepartment(departament);
+
+                    iteractionListEditDataManager.commit(newEntity);
+                } )
                 .withScreenClass(IteractionListEdit.class)
-                .withAfterCloseListener(e -> {
-                    notifications.create().withCaption("Close").show();
-                })
                 .build()
                 .show();
     }

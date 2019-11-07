@@ -7,6 +7,7 @@ import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
@@ -38,6 +39,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private LookupPickerField<Project> projectNameField;
     @Inject
     private TextField<String> vacansyNameField;
+    @Inject
+    private CollectionLoader<JobCandidate> jobCandidatesDl;
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+       jobCandidatesDl.setParameter("candidatePersonPosition", getEditedEntity().getPositionType().getPositionRuName());
+    }
 
     @Subscribe("companyDepartamentField")
     public void onCompanyDepartamentFieldValueChange(HasValue.ValueChangeEvent<CompanyDepartament> event) {

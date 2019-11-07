@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         focusComponent="groupBoxOpenPosition"
         messagesPack="com.company.itpearls.web.screens.openposition">
@@ -54,8 +55,15 @@ order by e.cityRuName]]></query>
         </collection>
         <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="jobCandidate-view">
             <loader id="jobCandidatesDl">
-                <query><![CDATA[select e from itpearls_JobCandidate e
-order by e.secondName, e.firstName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e
+order by e.secondName, e.firstName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where> e.personPosition like :candidatePersonPosition</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
             </loader>
         </collection>
     </data>
@@ -133,10 +141,17 @@ order by e.secondName, e.firstName]]></query>
             <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
                 <table id="openPositionCandidatesTable" height="400px" width="100%" dataContainer="jobCandidatesDc">
                     <columns>
-                        <column id="secondName" caption="mainMsg://msgSecondName"/>
-                        <column id="firstName" caption="mainMsg://msgFirstName"/>
-                        <column id="middleName" caption="msg://msgMiddleName"/>
-                        <column id="birdhDate" caption="mainMsg://msgBirthday"/>
+                        <column id="firstName"/>
+                        <column id="middleName"/>
+                        <column id="secondName"/>
+                        <column id="fullName"/>
+                        <column id="birdhDate"/>
+                        <column id="email"/>
+                        <column id="phone"/>
+                        <column id="skypeName"/>
+                        <column id="telegramName"/>
+                        <column id="wiberName"/>
+                        <column id="whatsupName"/>
                     </columns>
                 </table>
             </tab>
