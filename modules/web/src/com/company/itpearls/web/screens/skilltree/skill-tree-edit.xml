@@ -12,8 +12,11 @@
         </instance>
         <collection id="skillTreesDc" class="com.company.itpearls.entity.SkillTree" view="_minimal">
             <loader id="skillTreesLc">
-                <query><![CDATA[select e from itpearls_SkillTree e
-order by e.skillName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_SkillTree e
+where e.skillTree is null
+order by e.skillName]]>
+                </query>
             </loader>
         </collection>
     </data>
@@ -24,15 +27,15 @@ order by e.skillName]]></query>
             <column width="100%">
                 <tabSheet>
                     <tab id="tabSkillTree" caption="msg://msgSkill" margin="true,false,false,false" spacing="true">
-                        <textField id="skillNameField" caption="mainMsg://msgSkill"
-                                   dataContainer="skillTreeDc" property="skillName"/>
                         <lookupPickerField id="skillTreeField" optionsContainer="skillTreesDc"
                                            caption="mainMsg://msgSkillTree" dataContainer="skillTreeDc"
-                                           property="skillTree">
+                                           property="skillTree" width="50%">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
+                        <textField id="skillNameField" caption="mainMsg://msgSkill"
+                                   dataContainer="skillTreeDc" property="skillName" width="50%"/>
                     </tab>
                     <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
                         <table id="skillTreeCandidatesTable" dataContainer="skillTreeCandidatesesDc" height="200px" width="100%"

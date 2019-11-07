@@ -59,7 +59,7 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "EMAIL", length = 50)
     protected String email;
 
-    @Column(name = "PHONE", length = 14)
+    @Column(name = "PHONE", length = 18)
     protected String phone;
 
     @Column(name = "SKYPE_NAME", length = 30)

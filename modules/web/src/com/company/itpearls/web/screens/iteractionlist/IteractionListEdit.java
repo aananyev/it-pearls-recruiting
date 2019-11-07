@@ -6,6 +6,8 @@ import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
@@ -33,6 +35,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Dialogs dialogs;
     @Inject
     private Notifications notifications;
+    @Inject
+    private Screens screens;
+    @Inject
+    private ScreenBuilders screenBuilders;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -98,8 +104,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 ).show();
     }
 
+    // создать новый экран
     private void createNewField() {
-
+        screenBuilders.screen(this)
+                .withScreenClass(IteractionListEdit.class)
+                .withAfterCloseListener(e -> {
+                    notifications.create().withCaption("Close").show();
+                })
+                .build()
+                .show();
     }
 
     @Subscribe

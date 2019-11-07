@@ -136,10 +136,7 @@ order by e.secondName, e.firstName]]></query>
                         <column id="secondName" caption="mainMsg://msgSecondName"/>
                         <column id="firstName" caption="mainMsg://msgFirstName"/>
                         <column id="middleName" caption="msg://msgMiddleName"/>
-                        <column id="email" caption="msg://msgEmail"/>
-                        <column id="phone" caption="msg://msgPhone"/>
-                        <column id="skypeName" caption="msg://msgSkype"/>
-                        <column id="telegramName" caption="msg://msgTelegram"/>
+                        <column id="birdhDate" caption="mainMsg://msgBirthday"/>
                     </columns>
                 </table>
             </tab>
