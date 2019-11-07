@@ -9,10 +9,10 @@
                   view="jobCandidate-view">
             <loader/>
             <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
-            <collection id="jobCandidateSkillListsDc" property="skillList"/>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
+            <collection id="jobCandidateSkillsesDc" property="skills"/>
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="personPositionsLc">
@@ -173,9 +173,10 @@ order by e.countryRuName]]></query>
                         </actions>
                     </lookupPickerField>
                     <groupBox spacing="true">
-                        <groupTable id="jobCandidateSkillListTable" height="400px" width="100%" dataContainer="jobCandidateSkillListsDc">
+                        <groupTable id="jobCandidateSkillListTable" height="400px" width="100%"
+                                    dataContainer="jobCandidateSkillsesDc">
                             <columns>
-                                <column id="skillTree.skillName"/>
+                                <column id="skillName" caption="mainMsg://msgSkills"/>
                             </columns>
                             <actions>
                                 <action id="add" type="add"/>

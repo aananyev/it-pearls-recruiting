@@ -108,9 +108,22 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "SKILL_TREE_ID")
     protected SkillTree skillTree;
 
+    @Composition
+    @OnDelete(DeletePolicy.DENY)
+    @OneToMany(mappedBy = "jobCandidate")
+    protected List<SkillTree> skills;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     protected OpenPosition openPosition;
+
+    public List<SkillTree> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<SkillTree> skills) {
+        this.skills = skills;
+    }
 
     public String getFullName() {
         return fullName;
