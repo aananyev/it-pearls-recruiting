@@ -1,6 +1,8 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.Country;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.JobCandidate;
@@ -14,6 +16,8 @@ import javax.inject.Inject;
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private InstanceContainer<JobCandidate> jobCandidateDc;
+    @Inject
+    private LookupPickerField<Country> positionCountryField;
 
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
