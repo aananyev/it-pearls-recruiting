@@ -14,6 +14,7 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.cuba.core.global.Metadata;
 
 import javax.inject.Inject;
 import javax.swing.text.html.parser.Entity;
@@ -43,6 +44,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private ScreenBuilders screenBuilders;
     @Inject
     private InstanceLoader<IteractionList> iteractionListDl;
+    @Inject
+    private InstanceContainer<IteractionList> iteractionListDc;
+    @Inject
+    private Metadata metadata;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -117,17 +122,19 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         Iteraction itercation = entity.getIteractionType();
         CompanyDepartament departament = entity.getCompanyDepartment();
 
+        IteractionList newItercation = metadata.create(IteractionList.class);
+
         screenBuilders.editor(IteractionList.class, this)
-                .editEntity(entity)
+                .editEntity(newItercation)
                 .withInitializer( iteractionList -> {
                     iteractionList.setCandidate(setJobCandidate);
                     iteractionList.setVacancy(vacansy);
                     iteractionList.setProject(project);
                     iteractionList.setCommunicationMethod(communicationMethod);
-                    iteractionList.setIteractionType(itercation);
+//                    iteractionList.setIteractionType(itercation);
                     iteractionList.setCompanyDepartment(departament);
 
-                    iteractionListEditDataManager.commit(entity);
+                    iteractionListEditDataManager.commit(newItercation);
                 } )
                 .withScreenClass(IteractionListEdit.class)
                 .build()
