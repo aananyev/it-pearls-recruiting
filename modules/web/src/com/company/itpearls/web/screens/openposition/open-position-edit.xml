@@ -53,14 +53,13 @@ order by e.departamentRuName]]></query>
 order by e.cityRuName]]></query>
             </loader>
         </collection>
-        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="jobCandidate-view">
+        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="JobCandidate-person-position">
             <loader id="jobCandidatesDl">
                 <query>
-                    <![CDATA[select e from itpearls_JobCandidate e
-order by e.secondName, e.firstName]]>
+                    <![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]>
                     <condition>
                         <c:jpql>
-                            <c:where> e.personPosition like :candidatePersonPosition</c:where>
+                            <c:where>e.personPosition.positionRuName like :candidatePersonPosition</c:where>
                         </c:jpql>
                     </condition>
                 </query>
@@ -141,17 +140,8 @@ order by e.secondName, e.firstName]]>
             <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
                 <table id="openPositionCandidatesTable" height="400px" width="100%" dataContainer="jobCandidatesDc">
                     <columns>
-                        <column id="firstName"/>
-                        <column id="middleName"/>
-                        <column id="secondName"/>
-                        <column id="fullName"/>
-                        <column id="birdhDate"/>
-                        <column id="email"/>
-                        <column id="phone"/>
-                        <column id="skypeName"/>
-                        <column id="telegramName"/>
-                        <column id="wiberName"/>
-                        <column id="whatsupName"/>
+                        <column id="fullName" caption="mainMsg://msgFullName"/>
+                        <column id="birdhDate" caption="mainMsg://msgBirthday"/>
                     </columns>
                 </table>
             </tab>

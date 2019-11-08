@@ -43,8 +43,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CollectionLoader<JobCandidate> jobCandidatesDl;
 
     @Subscribe
-    public void onInit(InitEvent event) {
-       jobCandidatesDl.setParameter("candidatePersonPosition", getEditedEntity().getPositionType().getPositionRuName());
+    public void onBeforeShow(BeforeShowEvent event) {
+        jobCandidatesDl.setParameter("candidatePersonPosition", getEditedEntity().getPositionType().getPositionRuName());
+
+        jobCandidatesDl.load();
     }
 
     @Subscribe("companyDepartamentField")
