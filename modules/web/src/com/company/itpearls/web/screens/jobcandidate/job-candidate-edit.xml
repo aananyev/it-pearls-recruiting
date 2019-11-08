@@ -83,7 +83,6 @@ order by e.countryRuName]]></query>
                                                    caption="msg://msgCityOfResidence">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
-                                        <action id="open" type="picker_open"/>
                                     </actions>
                                 </lookupPickerField>
                             </row>
