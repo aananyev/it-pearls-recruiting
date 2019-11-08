@@ -9,8 +9,7 @@
                     class="com.company.itpearls.entity.IteractionList"
                     view="iteractionList-current-position">
             <loader id="iteractionListsDl">
-                <query><![CDATA[select e from itpearls_IteractionList e
-order by e.numberIteraction desc]]>
+                <query><![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
                 <condition>
                     <c:jpql>
                         <c:where>e.createdBy like :userName</c:where>

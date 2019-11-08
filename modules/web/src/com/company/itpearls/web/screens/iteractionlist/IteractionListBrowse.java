@@ -30,6 +30,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
             checkBoxShowOnlyMy.setValue( true );
             checkBoxShowOnlyMy.setEditable( false );
+
+            iteractionListsDl.load();
         }
     }
 

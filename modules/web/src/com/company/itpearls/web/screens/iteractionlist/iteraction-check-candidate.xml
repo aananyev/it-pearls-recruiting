@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://browseCaption"
+        focusComponent="iteractionListsTable"
+        messagesPack="com.company.itpearls.web.screens.iteractionlist">
+    <data readOnly="true">
+        <collection id="iteractionListsDc"
+                    class="com.company.itpearls.entity.IteractionList"
+                    view="iteractionList-view">
+            <loader id="iteractionListsDl">
+                <query>
+                    <![CDATA[select e from itpearls_IteractionList e
+order by e.numberIteraction desc]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidate.fullName like :fullName</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="jobCandidate-view">
+            <loader id="jobCandidatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e
+order by e.fullName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="iteractionListsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="iteractionListsTable"
+                dataLoader="iteractionListsDl" visible="false">
+            <properties include=".*"/>
+        </filter>
+        <groupBox spacing="true">
+            <lookupField id="lookupFieldCheckCandidate" width="100%" dataContainer="iteractionListsDc"
+                         optionsContainer="jobCandidatesDc" property="candidate" caption="msg://msgCandidate"/>
+        </groupBox>
+        <groupTable id="iteractionListsTable"
+                width="100%"
+                dataContainer="iteractionListsDc">
+            <actions>
+            </actions>
+            <columns>
+                <column id="numberIteraction" caption="msg://msgNumber"/>
+                <column id="dateIteraction" caption="msg://msgDate"/>
+                <column id="iteractionType" caption="msg://msgIteractionType"/>
+                <column id="vacancy.vacansyName" caption="msg://msgJobPosition" visible="false"/>
+                <column id="companyDepartment.departamentRuName" caption="msg://msgDepartament"/>
+                <column id="recrutierName" caption="msg://msgRecrutier" visible="false"/>
+                <column id="recrutier"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

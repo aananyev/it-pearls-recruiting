@@ -150,11 +150,8 @@
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local">
         <property name="candidate" view="_minimal">
-            <property name="personPosition" view="position-view">
-                <property name="positionRuName"/>
-            </property>
+            <property name="fullName"/>
         </property>
-        <property name="createdBy"/>
         <property name="currentJobPosition" fetch="JOIN" view="position-view"/>
         <property name="vacancy" view="_local"/>
         <property name="project" view="_minimal"/>
@@ -164,6 +161,7 @@
             <property name="firstName"/>
             <property name="lastName"/>
         </property>
+        <property name="createdBy"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">

@@ -7,7 +7,7 @@
         <instance id="specialisationDc"
                   class="com.company.itpearls.entity.Specialisation"
                   view="specialisation-view">
-            <loader/>
+            <loader id="specialisationDl" entityId=""/>
             <collection id="specialisationCandidatesDc" property="candidate"/>
         </instance>
     </data>

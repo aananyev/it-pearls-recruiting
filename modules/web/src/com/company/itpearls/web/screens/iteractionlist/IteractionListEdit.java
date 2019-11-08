@@ -11,6 +11,7 @@ import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
+import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
@@ -40,6 +41,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Screens screens;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private InstanceLoader<IteractionList> iteractionListDl;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -114,10 +117,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         Iteraction itercation = entity.getIteractionType();
         CompanyDepartament departament = entity.getCompanyDepartment();
 
-        IteractionList newEntity = iteractionListEditDataManager.create(IteractionList.class);
-
         screenBuilders.editor(IteractionList.class, this)
-                .editEntity(newEntity)
+                .editEntity(entity)
                 .withInitializer( iteractionList -> {
                     iteractionList.setCandidate(setJobCandidate);
                     iteractionList.setVacancy(vacansy);
@@ -126,7 +127,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     iteractionList.setIteractionType(itercation);
                     iteractionList.setCompanyDepartment(departament);
 
-                    iteractionListEditDataManager.commit(newEntity);
+                    iteractionListEditDataManager.commit(entity);
                 } )
                 .withScreenClass(IteractionListEdit.class)
                 .build()
