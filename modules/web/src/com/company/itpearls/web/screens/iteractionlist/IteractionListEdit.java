@@ -103,7 +103,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onAfterClose(AfterCloseEvent event) {
         dialogs.createOptionDialog()
                 .withCaption("Внимание")
-                .withMessage("Создать новую запись копированием текущей?")
+                .withMessage("Создать новую запись?")
                 .withActions(
                         new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
                         .withHandler(e -> {
@@ -115,7 +115,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     // создать новый экран
     private void createNewField(IteractionList entity) {
-        JobCandidate setJobCandidate = entity.getCandidate();
+        JobCandidate setJobCandidate = getEditedEntity().getCandidate();
         OpenPosition vacansy = entity.getVacancy();
         Project project = entity.getProject();
         String communicationMethod = entity.getCommunicationMethod();
@@ -127,12 +127,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         screenBuilders.editor(IteractionList.class, this)
                 .editEntity(newItercation)
                 .withInitializer( iteractionList -> {
-                    iteractionList.setCandidate(setJobCandidate);
-                    iteractionList.setVacancy(vacansy);
-                    iteractionList.setProject(project);
-                    iteractionList.setCommunicationMethod(communicationMethod);
+                    newItercation.setCandidate(setJobCandidate);
+                    newItercation.setVacancy(vacansy);
+                    newItercation.setProject(project);
+                    newItercation.setCommunicationMethod(communicationMethod);
 //                    iteractionList.setIteractionType(itercation);
-                    iteractionList.setCompanyDepartment(departament);
+                    newItercation.setCompanyDepartment(departament);
 
                     iteractionListEditDataManager.commit(newItercation);
                 } )
