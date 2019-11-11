@@ -88,7 +88,7 @@ order by e.cityRuName]]>
                                 <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="100%"
                                            caption="msg://msgBirthDate"/>
                                 <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc" property="cityOfResidence" width="100%"
-                                                   caption="msg://msgCityOfResidence" optionsContainer="citiesDc">
+                                                   caption="msg://msgCityOfResidence">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>

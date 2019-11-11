@@ -58,10 +58,22 @@ public class CandidateCV extends StandardEntity {
     @JoinColumn(name = "FILE_CV_ID")
     protected FileDescriptor fileCV;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ORIGINAL_FILE_CV_ID")
+    protected FileDescriptor originalFileCV;
+
     @Temporal(TemporalType.DATE)
     @NotNull
     @Column(name = "DATE_POST", nullable = false)
     protected Date datePost;
+
+    public FileDescriptor getOriginalFileCV() {
+        return originalFileCV;
+    }
+
+    public void setOriginalFileCV(FileDescriptor originalFileCV) {
+        this.originalFileCV = originalFileCV;
+    }
 
     public User getOwner() {
         return owner;
