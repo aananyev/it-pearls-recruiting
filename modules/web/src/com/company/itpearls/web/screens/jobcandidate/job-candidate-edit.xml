@@ -32,6 +32,14 @@ order by e.comanyName]]></query>
 order by e.countryRuName]]></query>
             </loader>
         </collection>
+        <collection id="citiesDc" class="com.company.itpearls.entity.City" view="city-view">
+            <loader id="citiesDl">
+                <query>
+                    <![CDATA[select e from itpearls_City e
+order by e.cityRuName]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -79,8 +87,8 @@ order by e.countryRuName]]></query>
                             <row>
                                 <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="100%"
                                            caption="msg://msgBirthDate"/>
-                                <lookupPickerField id="jobCandidateField" dataContainer="jobCandidateDc" property="cityOfResidence" width="100%"
-                                                   caption="msg://msgCityOfResidence">
+                                <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc" property="cityOfResidence" width="100%"
+                                                   caption="msg://msgCityOfResidence" optionsContainer="citiesDc">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>

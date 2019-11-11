@@ -9,7 +9,8 @@
                     view="project-view">
             <loader id="projectsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Project e order by e.projectIsClosed desc, e.projectName]]>
+                    <![CDATA[select e from itpearls_Project e
+order by e.projectIsClosed desc, e.projectName]]>
                 </query>
             </loader>
         </collection>

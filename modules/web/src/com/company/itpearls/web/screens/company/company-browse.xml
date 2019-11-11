@@ -9,13 +9,14 @@
                     class="com.company.itpearls.entity.Company"
                     view="company-view">
             <loader id="companiesDl">
-                <query><![CDATA[select e from itpearls_Company e
+                <query>
+                    <![CDATA[select e from itpearls_Company e
 order by e.comanyName]]>
-                <condition>
-                    <c:jpql>
-                        <c:where>e.ourClient = :setOurClient</c:where>
-                    </c:jpql>
-                </condition>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.ourClient = :setOurClient</c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>

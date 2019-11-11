@@ -21,7 +21,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        checkBoxOnlyOpenedPosition.setValue( false ); // только открытые позиции
+        checkBoxOnlyOpenedPosition.setValue( true ); // только открытые позиции
     }
 
     @Subscribe("checkBoxOnlyOpenedPosition")

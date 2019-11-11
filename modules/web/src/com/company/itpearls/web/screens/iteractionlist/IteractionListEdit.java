@@ -15,9 +15,9 @@ import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.core.global.Metadata;
+import com.sun.java.swing.action.OkAction;
 
 import javax.inject.Inject;
-import javax.swing.text.html.parser.Entity;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -127,14 +127,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         screenBuilders.editor(IteractionList.class, this)
                 .editEntity(newItercation)
                 .withInitializer( iteractionList -> {
-                    newItercation.setCandidate(setJobCandidate);
+                    getEditedEntity().setCandidate(setJobCandidate);
                     newItercation.setVacancy(vacansy);
                     newItercation.setProject(project);
                     newItercation.setCommunicationMethod(communicationMethod);
 //                    iteractionList.setIteractionType(itercation);
                     newItercation.setCompanyDepartment(departament);
 
-                    iteractionListEditDataManager.commit(newItercation);
+//                    iteractionListEditDataManager.commit(newItercation);
                 } )
                 .withScreenClass(IteractionListEdit.class)
                 .build()

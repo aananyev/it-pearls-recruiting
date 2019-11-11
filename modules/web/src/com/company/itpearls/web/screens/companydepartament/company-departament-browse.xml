@@ -9,7 +9,8 @@
                     view="companyDepartament-view">
             <loader id="companyDepartamentsDl">
                 <query>
-                    <![CDATA[select e from itpearls_CompanyDepartament e]]>
+                    <![CDATA[select e from itpearls_CompanyDepartament e
+order by e.departamentRuName]]>
                 </query>
             </loader>
         </collection>

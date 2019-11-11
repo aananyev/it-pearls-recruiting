@@ -9,7 +9,8 @@
                     view="country-view">
             <loader id="countriesDl">
                 <query>
-                    <![CDATA[select e from itpearls_Country e]]>
+                    <![CDATA[select e from itpearls_Country e
+order by e.countryRuName]]>
                 </query>
             </loader>
         </collection>

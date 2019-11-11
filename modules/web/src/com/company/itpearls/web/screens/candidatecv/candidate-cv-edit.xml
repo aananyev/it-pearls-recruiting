@@ -19,14 +19,16 @@
         <collection id="resumePositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="resumePositionsLc">
                 <query>
-                    <![CDATA[select e from itpearls_Position e]]>
+                    <![CDATA[select e from itpearls_Position e
+order by e.positionRuName]]>
                 </query>
             </loader>
         </collection>
         <collection id="usersDc" class="com.haulmont.cuba.security.entity.User" view="_local">
             <loader id="usersDl">
                 <query>
-                    <![CDATA[select e from sec$User e ]]>
+                    <![CDATA[select e from sec$User e
+order by e.name]]>
                 </query>
             </loader>
         </collection>

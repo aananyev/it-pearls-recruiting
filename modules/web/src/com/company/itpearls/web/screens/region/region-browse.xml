@@ -9,7 +9,8 @@
                     view="region-view">
             <loader id="regionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Region e]]>
+                    <![CDATA[select e from itpearls_Region e
+order by e.regionRuName]]>
                 </query>
             </loader>
         </collection>
