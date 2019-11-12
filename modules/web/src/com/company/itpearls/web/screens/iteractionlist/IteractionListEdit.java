@@ -49,6 +49,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private Metadata metadata;
 
+    public void createNewField (IteractionListEdit source) {
+        commitChanges();
+    }
+
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
         if( PersistenceHelper.isNew(getEditedEntity()) ) {
@@ -119,22 +123,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         OpenPosition vacansy = entity.getVacancy();
         Project project = entity.getProject();
         String communicationMethod = entity.getCommunicationMethod();
-        Iteraction itercation = entity.getIteractionType();
         CompanyDepartament departament = entity.getCompanyDepartment();
 
         IteractionList newItercation = metadata.create(IteractionList.class);
 
         screenBuilders.editor(IteractionList.class, this)
-                .editEntity(newItercation)
+                .newEntity()
                 .withInitializer( iteractionList -> {
-                    getEditedEntity().setCandidate(setJobCandidate);
+                    newItercation.setCandidate(setJobCandidate);
                     newItercation.setVacancy(vacansy);
                     newItercation.setProject(project);
                     newItercation.setCommunicationMethod(communicationMethod);
-//                    iteractionList.setIteractionType(itercation);
                     newItercation.setCompanyDepartment(departament);
-
-//                    iteractionListEditDataManager.commit(newItercation);
                 } )
                 .withScreenClass(IteractionListEdit.class)
                 .build()

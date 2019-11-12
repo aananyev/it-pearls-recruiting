@@ -44,7 +44,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        jobCandidatesDl.setParameter("candidatePersonPosition", getEditedEntity().getPositionType().getPositionRuName());
+        if(!PersistenceHelper.isNew(getEditedEntity()))
+            jobCandidatesDl.setParameter("candidatePersonPosition", getEditedEntity().getPositionType().getPositionRuName());
+        else
+            jobCandidatesDl.removeParameter("candidatePersonPosition");
 
         jobCandidatesDl.load();
     }

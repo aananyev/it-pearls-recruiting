@@ -56,38 +56,40 @@
                         <checkBox id="checkBoxOurClient" caption="mainMsg://msgOurClient" dataContainer="companyDc"
                                   property="ourClient"/>
                         <lookupPickerField id="companyOwnershipField" optionsContainer="companyOwnershipsDc"
-                                           property="companyOwnership">
+                                           property="companyOwnership" caption="mainMsg://msgOwnership">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
-                        <textField id="comanyNameField" property="comanyName"/>
-                        <textField id="companyShortNameField" property="companyShortName"/>
+                        <textField id="comanyNameField" property="comanyName" caption="msg://msgCompanyName"/>
+                        <textField id="companyShortNameField" property="companyShortName"
+                                   caption="mainMsg://msgCountryShortName"/>
                         <lookupPickerField id="companyDirectorField" optionsContainer="companyDirectorsDc"
-                                           property="companyDirector">
+                                           property="companyDirector" caption="msg://msgDirector">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
                         <lookupPickerField id="cityOfCompanyField" optionsContainer="cityOfCompaniesDc"
-                                           property="cityOfCompany">
+                                           property="cityOfCompany" caption="msg://msgCityOfCompany">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
                         <lookupPickerField id="regionOfCompanyField" optionsContainer="regionOfCompaniesDc"
-                                           property="regionOfCompany">
+                                           property="regionOfCompany" caption="msg://msgRegionOfCompany">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
                         <lookupPickerField id="countryOfCompanyField" optionsContainer="countryOfCompaniesDc"
-                                           property="countryOfCompany">
+                                           property="countryOfCompany" caption="msg://msgCountryOfCompany">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
-                        <textArea id="addressOfCompanyField" property="addressOfCompany" rows="5"/>
+                        <textArea id="addressOfCompanyField" property="addressOfCompany" rows="5"
+                                  caption="msg://mshCompanyAddress"/>
                     </column>
                 </form>
             </tab>

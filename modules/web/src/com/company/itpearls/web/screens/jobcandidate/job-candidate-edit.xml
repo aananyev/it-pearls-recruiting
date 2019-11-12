@@ -148,21 +148,18 @@ order by e.cityRuName]]>
                     <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
                            width="100%">
                         <columns>
-                            <column id="numberIteraction" caption="msg://msgNumber"/>
-                            <column id="dateIteraction" caption="msg://msgDate"/>
-                            <column id="companyDepartment" caption="msg://msgDepartament"/>
-                            <column id="project" caption="msg://msgProject"/>
-                            <column id="iteractionType" caption="msg://msgIteraction"/>
-                            <column id="communicationMethod" caption="msg://msgCommunicationMethod"/>
-                            <column id="recrutier" caption="msg://msgRecrutier"/>
-                            <column id="comment" caption="msg://msgComment"/>
+                            <column id="numberIteraction" caption="mainMsg://msgNumber"/>
+                            <column id="dateIteraction" caption="mainMsg://msgDate"/>
+                            <column id="communicationMethod" caption="mainMsg://msgCommunicationMethod"/>
+                            <column id="comment" caption="mainMsg://msgComment"/>
+                            <column id="recrutierName" caption="mainMsg://msgRecrutier"/>
                         </columns>
                         <actions>
                             <action id="add" type="add"/>
                             <action id="edit" type="edit"/>
                             <action id="remove" type="remove"/>
                         </actions>
-                        <buttonsPanel>
+                        <buttonsPanel visible="false">
                             <button id="addButton" action="jobCandidateIteractionListTable.add"/>
                             <button id="editButton" action="jobCandidateIteractionListTable.edit"/>
                             <button id="removeButton" action="jobCandidateIteractionListTable.remove"/>
@@ -232,7 +229,7 @@ order by e.cityRuName]]>
                             <action id="edit" type="edit"/>
                             <action id="remove" type="remove"/>
                         </actions>
-                        <buttonsPanel>
+                        <buttonsPanel visible="false">
                             <button id="addButtonCV" action="jobCandidateCandidateCvTable.add"/>
                             <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
                             <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
