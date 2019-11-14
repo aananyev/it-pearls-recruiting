@@ -186,5 +186,6 @@
         <property name="candidate" view="_minimal"/>
         <property name="vacancy" view="_minimal"/>
         <property name="iteractionType" view="iteraction-view"/>
+        <property name="recrutier" view="_minimal"/>
     </view>
 </views>

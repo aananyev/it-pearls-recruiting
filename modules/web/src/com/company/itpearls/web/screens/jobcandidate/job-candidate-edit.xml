@@ -166,7 +166,7 @@ order by e.cityRuName]]>
                             <column id="numberIteraction" caption="mainMsg://msgNumberItercation"/>
                             <column id="dateIteraction" caption="mainMsg://msgDate"/>
                             <column id="iteractionType.iterationName" caption="mainMsg://msgItercationType"/>
-                            <column id="recrutierName" caption="mainMsg://msgRecrutier"/>
+                            <column id="recrutier.name" caption="msg://msgRecrutier"/>
                         </columns>
                         <actions/>
                         <buttonsPanel visible="false">
