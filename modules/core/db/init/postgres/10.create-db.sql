@@ -36,7 +36,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     CITY_OF_RESIDENCE_ID uuid,
     BIRDH_DATE date,
     EMAIL varchar(50),
-    PHONE varchar(14),
+    PHONE varchar(18),
     SKYPE_NAME varchar(30),
     TELEGRAM_NAME varchar(30),
     WIBER_NAME varchar(30),

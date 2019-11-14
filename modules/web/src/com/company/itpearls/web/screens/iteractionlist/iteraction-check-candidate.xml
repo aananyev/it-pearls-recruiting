@@ -40,11 +40,12 @@ order by e.fullName]]>
         </filter>
         <groupBox spacing="true">
             <lookupField id="lookupFieldCheckCandidate" width="100%" dataContainer="iteractionListsDc"
-                         optionsContainer="jobCandidatesDc" property="candidate" caption="msg://msgCandidate"/>
+                         optionsContainer="jobCandidatesDc" property="candidate" caption="msg://msgCandidate"
+            />
         </groupBox>
         <groupTable id="iteractionListsTable"
-                width="100%"
-                dataContainer="iteractionListsDc">
+                    width="100%"
+                    dataContainer="iteractionListsDc" enable="false">
             <actions>
             </actions>
             <columns>

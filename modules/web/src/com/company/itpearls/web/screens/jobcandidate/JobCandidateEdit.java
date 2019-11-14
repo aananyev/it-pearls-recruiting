@@ -11,7 +11,7 @@ import com.company.itpearls.entity.JobCandidate;
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
-    public void onAfterClose(AfterCloseEvent event) {
+    public void onBeforeClose1(BeforeCloseEvent event) {
         setFullNameCandidate();
     }
 
@@ -34,6 +34,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 getEditedEntity().setFullName(
                     getEditedEntity().getSecondName() + space +
                             getEditedEntity().getFirstName());
+                
         }
     }
 }

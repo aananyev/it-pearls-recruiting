@@ -15,7 +15,6 @@ import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.core.global.Metadata;
-import com.sun.java.swing.action.OkAction;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -27,8 +26,6 @@ import java.util.Date;
 @LoadDataBeforeShow
 public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
-    private CollectionContainer<JobCandidate> candidatesDc;
-    @Inject
     private DataManager iteractionListEditDataManager;
     @Inject
     private UserSession userSession;
@@ -36,22 +33,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private UserSessionSource userSessionSource;
     @Inject
     private Dialogs dialogs;
-    @Inject
-    private Notifications notifications;
-    @Inject
-    private Screens screens;
-    @Inject
-    private ScreenBuilders screenBuilders;
-    @Inject
-    private InstanceLoader<IteractionList> iteractionListDl;
-    @Inject
-    private InstanceContainer<IteractionList> iteractionListDc;
-    @Inject
-    private Metadata metadata;
 
-    public void createNewField (IteractionListEdit source) {
-        commitChanges();
-    }
+    
+    private JobCandidate setJobCandidate;
+    private OpenPosition vacansy;
+    private Project project;
+    private String communicationMethod;
+    private CompanyDepartament departament;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -104,41 +92,30 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     @Subscribe
-    public void onAfterClose(AfterCloseEvent event) {
+    public void onBeforeClose(AfterCloseEvent event) {
         dialogs.createOptionDialog()
                 .withCaption("Внимание")
                 .withMessage("Создать новую запись?")
                 .withActions(
                         new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
                         .withHandler(e -> {
-                            createNewField(this.getEditedEntity());
+                            createNewField(getEditedEntity());
                         }),
                         new DialogAction(DialogAction.Type.NO)
                 ).show();
     }
 
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setCandidate(this.setJobCandidate);
+        }
+        
+    }
+
     // создать новый экран
     private void createNewField(IteractionList entity) {
-        JobCandidate setJobCandidate = getEditedEntity().getCandidate();
-        OpenPosition vacansy = entity.getVacancy();
-        Project project = entity.getProject();
-        String communicationMethod = entity.getCommunicationMethod();
-        CompanyDepartament departament = entity.getCompanyDepartment();
-
-        IteractionList newItercation = metadata.create(IteractionList.class);
-
-        screenBuilders.editor(IteractionList.class, this)
-                .newEntity()
-                .withInitializer( iteractionList -> {
-                    newItercation.setCandidate(setJobCandidate);
-                    newItercation.setVacancy(vacansy);
-                    newItercation.setProject(project);
-                    newItercation.setCommunicationMethod(communicationMethod);
-                    newItercation.setCompanyDepartment(departament);
-                } )
-                .withScreenClass(IteractionListEdit.class)
-                .build()
-                .show();
+        // тут по идее надо создать новый экран и передать туда параметры
     }
 
     @Subscribe
@@ -153,16 +130,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         String currentUser = getCurrentUser();
     }
 
-//    @Inject
-//    private CollectionLoader<JobCandidate> personPositionLc;
-
 // После изменения имени кандидата надо заполнить поле специализация кандидата
     protected void setCandidateSpecialisation() {
-//       String personPos = iteractionListEditDataManager.loadValues("select b.position_ru_name " +
-//                "from itpearls_job_candidate a " +
-//                "inner join itpearls_position b on a.person_position_id = b.id " +
-//                "where a.full_name='Королев Сергей'").one().toString();
-//        getEditedEntity().setComment(personPos); */
-//            getEditedEntity().setCurrentJobPosition(getEditedEntity().getCandidate().getPersonPosition());
     }
 }

@@ -87,8 +87,9 @@ order by e.cityRuName]]>
                             <row>
                                 <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="100%"
                                            caption="msg://msgBirthDate"/>
-                                <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc" property="cityOfResidence" width="100%"
-                                                   caption="msg://msgCityOfResidence">
+                                <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc" width="100%"
+                                                   caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
+                                                   property="cityOfResidence">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
@@ -148,11 +149,11 @@ order by e.cityRuName]]>
                     <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
                            width="100%">
                         <columns>
-                            <column id="numberIteraction" caption="mainMsg://msgNumber"/>
-                            <column id="dateIteraction" caption="mainMsg://msgDate"/>
-                            <column id="communicationMethod" caption="mainMsg://msgCommunicationMethod"/>
-                            <column id="comment" caption="mainMsg://msgComment"/>
-                            <column id="recrutierName" caption="mainMsg://msgRecrutier"/>
+                            <column id="numberIteraction"/>
+                            <column id="dateIteraction"/>
+                            <column id="communicationMethod"/>
+                            <column id="comment"/>
+                            <column id="recrutierName"/>
                         </columns>
                         <actions>
                             <action id="add" type="add"/>
@@ -194,27 +195,6 @@ order by e.cityRuName]]>
                             </buttonsPanel>
                         </groupTable>
                     </groupBox>
-                </groupBox>
-            </tab>
-            <tab id="tabJobHistory" caption="msg://msgTabJobHistory" margin="true,false,false,false" spacing="true">
-                <groupBox id="groupBoxHistory" spacing="true">
-                    <table id="jobCandidateJobHistoryTable" height="200px" width="100%" dataContainer="jobCandidateJobHistoriesDc">
-                        <columns>
-                            <column id="dateNewsPosition" caption="msg://msgDatePosition"/>
-                            <column id="currentCompany" caption="msg://msgCompany"/>
-                            <column id="currentPosition" caption="msg://msgPosition"/>
-                        </columns>
-                        <actions>
-                            <action id="add" type="add"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
-                        <buttonsPanel>
-                            <button id="addHistoryButton" action="jobCandidateJobHistoryTable.add"/>
-                            <button id="editHistoryButton" action="jobCandidateJobHistoryTable.edit"/>
-                            <button id="removeHistoryButton" action="jobCandidateJobHistoryTable.remove"/>
-                        </buttonsPanel>
-                    </table>
                 </groupBox>
             </tab>
             <tab id="tabResume" caption="msg://msgResume" margin="true,false,false,false" spacing="true">

@@ -1,0 +1,3 @@
+alter table ITPEARLS_JOB_CANDIDATE rename column city_of_candidate_id to city_of_candidate_id__u64453 ;
+alter table ITPEARLS_JOB_CANDIDATE drop constraint FK_ITPEARLS_JOB_CANDIDATE_ON_CITY_OF_CANDIDATE ;
+drop index IDX_ITPEARLS_JOB_CANDIDATE_ON_CITY_OF_CANDIDATE ;

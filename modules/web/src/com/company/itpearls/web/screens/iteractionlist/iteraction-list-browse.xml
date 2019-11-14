@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
-        caption="msg://browseCaption"
+        caption="mainMsg://msgIteractionList"
         focusComponent="iteractionListsTable"
         messagesPack="com.company.itpearls.web.screens.iteractionlist">
     <data readOnly="true">
@@ -42,9 +42,6 @@
                 <column id="iteractionType" caption="msg://msgIteractionType"/>
                 <column id="dateIteraction" caption="msg://msgDate"/>
                 <column id="vacancy" caption="mainMsg://msgVacancy"/>
-                <column id="project" caption="msg://msgProject"/>
-                <column id="companyDepartment" caption="msg://msgDepartament"/>
-                <column id="communicationMethod" caption="mainMsg://msgCommunicationMethod"/>
                 <column id="recrutier" caption="msg://msgRecrutier"/>
                 <column id="createdBy" caption="mainMsg://msgCreatedBy"/>
             </columns>

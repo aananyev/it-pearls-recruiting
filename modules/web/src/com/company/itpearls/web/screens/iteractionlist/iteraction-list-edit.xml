@@ -63,10 +63,12 @@ order by e.vacansyName]]></query>
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <groupBox spacing="true">
-            <textField id="numberIteractionField" dataContainer="iteractionListDc" property="numberIteraction"
-                       editable="false" caption="msg://msgNumber"/>
-            <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
-                       editable="false" caption="msg://msgDate"/>
+            <hbox spacing="true">
+                <textField id="numberIteractionField" dataContainer="iteractionListDc" property="numberIteraction"
+                           editable="false" caption="msg://msgNumber"/>
+                <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
+                           editable="false" caption="msg://msgDate"/>
+            </hbox>
         </groupBox>
         <groupBox id="groupBoxIterationData">
             <grid id="gridIterationData" spacing="true" width="100%">
@@ -89,14 +91,6 @@ order by e.vacansyName]]></query>
                         </lookupPickerField>
                     </row>
                     <row>
-<!--                        <lookupPickerField id="jobPositionListField" optionsContainer="positionsDc"
-                                           dataContainer="personPositionDc"
-                                           caption="msg://msgJobPosition" width="100%"
-                                           rowspan="1" colspan="1" property="personPosition">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField> -->
                         <lookupPickerField id="projectField" optionsContainer="projectsDc"
                                            caption="msg://msgProject" width="100%" dataContainer="iteractionListDc"
                                            property="project">
@@ -137,12 +131,6 @@ order by e.vacansyName]]></query>
             </grid>
             <textArea id="commentField" property="comment" rows="3" width="100%" dataContainer="iteractionListDc"
                       caption="msg://msgComment"/>
-            <!-- <pickerField id="recrutierNameField" dataContainer="iteractionListDc" property="recrutierName" editable="false">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                    <action id="clear" type="picker_clear"/>
-                </actions>
-            </pickerField> -->
         </groupBox>
         <form id="form" dataContainer="iteractionListDc" width="100%">
             <column width="250px">
