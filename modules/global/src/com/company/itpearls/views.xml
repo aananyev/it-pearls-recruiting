@@ -3,7 +3,9 @@
 
     <view entity="itpearls_Region" name="region-view" extends="_local">
         <property name="regionCountry" view="_minimal">
-            <property name="countryOfRegion" view="_minimal"/>
+            <property name="countryOfRegion" view="_minimal">
+                <property name="regionCountry" view="_minimal"/>
+            </property>
         </property>
         <property name="regionOfCity" view="_local"/>
     </view>

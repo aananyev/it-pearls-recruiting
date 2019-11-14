@@ -24,11 +24,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("jobCityCandidateField")
     public void onJobCityCandidateFieldValueChange(HasValue.ValueChangeEvent<City> event) {
-        if(!getEditedEntity().getCityOfResidence().equals(null)) {
-            getEditedEntity().setPositionCountry(getEditedEntity()
-                .getCityOfResidence()
-                .getCityRegion()
-                .getRegionCountry());
+        if(!getEditedEntity().getCityOfResidence().equals(null)
+            && PersistenceHelper.isNew(getEditedEntity())) {
+                getEditedEntity().setPositionCountry(getEditedEntity()
+                    .getCityOfResidence()
+                    .getCityRegion()
+                    .getRegionCountry());
         }
         
     }
