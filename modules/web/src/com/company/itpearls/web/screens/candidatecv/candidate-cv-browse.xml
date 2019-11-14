@@ -10,7 +10,7 @@
                     view="candidateCV-view">
             <loader id="candidateCVsDl">
                 <query>
-                    <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName]]>
+                    <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName, e.datePost desc]]>
                     <condition>
                         <c:jpql>
                            <c:where>e.createdBy like :userName</c:where>
@@ -41,8 +41,10 @@
                 <group>
                     <column id="candidate" caption="msg://msgCandidate"/>
                 </group>
-                <column id="resumePosition" caption="msg://msgPosition"/>
                 <column id="datePost" caption="msg://msgDatePost"/>
+                <column id="toVacancy.vacansyName" caption="mainMsg://msgCVtoVacansy"/>
+                <column id="resumePosition" caption="msg://msgPosition"/>
+                <column id="owner" caption="mainMsg://msgRecrutier"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

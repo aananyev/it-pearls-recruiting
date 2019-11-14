@@ -4,10 +4,8 @@ import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
-import com.haulmont.cuba.core.entity.annotation.CaseConversion;
-import com.haulmont.cuba.core.entity.annotation.ConversionType;
-import com.haulmont.cuba.core.entity.annotation.Lookup;
-import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.*;
+import com.haulmont.cuba.core.global.DeletePolicy;
 import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
@@ -30,6 +28,12 @@ public class CandidateCV extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RESUME_POSITION_ID")
     protected Position resumePosition;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @OnDelete(DeletePolicy.DENY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TO_VACANCY_ID")
+    protected OpenPosition toVacancy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
@@ -66,6 +70,14 @@ public class CandidateCV extends StandardEntity {
     @NotNull
     @Column(name = "DATE_POST", nullable = false)
     protected Date datePost;
+
+    public OpenPosition getToVacancy() {
+        return toVacancy;
+    }
+
+    public void setToVacancy(OpenPosition toVacancy) {
+        this.toVacancy = toVacancy;
+    }
 
     public FileDescriptor getOriginalFileCV() {
         return originalFileCV;

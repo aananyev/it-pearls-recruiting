@@ -98,18 +98,18 @@ order by e.vacansyName]]></query>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
+                        <lookupPickerField id="companyDepartmentField" optionsContainer="companyDepartmentsDc"
+                                           caption="msg://msgDepartament" width="100%" editable="true"
+                                           dataContainer="iteractionListDc" property="companyDepartment">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
                     </row>
                     <row>
                         <lookupPickerField id="iteractionTypeField" optionsContainer="iteractionTypesDc"
                                            caption="msg://msgIteractionType" width="100%"
                                            dataContainer="iteractionListDc" property="iteractionType">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="companyDepartmentField" optionsContainer="companyDepartmentsDc"
-                                           caption="msg://msgDepartament" width="100%" editable="true"
-                                           dataContainer="iteractionListDc" property="companyDepartment">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
