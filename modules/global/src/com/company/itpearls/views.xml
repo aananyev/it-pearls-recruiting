@@ -182,4 +182,9 @@
         <property name="candidates" view="_local"/>
     </view>
     <view entity="itpearls_Setup" name="setup-view" extends="_local"/>
+    <view entity="itpearls_IteractionList" name="iteractionList-job-candidate" extends="_local">
+        <property name="candidate" view="_minimal"/>
+        <property name="vacancy" view="_minimal"/>
+        <property name="iteractionType" view="iteraction-view"/>
+    </view>
 </views>

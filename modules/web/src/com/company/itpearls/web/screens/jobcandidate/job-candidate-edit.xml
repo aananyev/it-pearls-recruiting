@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.jobcandidate">
@@ -37,6 +38,19 @@ order by e.countryRuName]]></query>
                 <query>
                     <![CDATA[select e from itpearls_City e
 order by e.cityRuName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="iteractionListsDc" class="com.company.itpearls.entity.IteractionList"
+                    view="iteractionList-job-candidate">
+            <loader id="iteractionListsDl">
+                <query>
+                    <![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidate.id = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -146,24 +160,19 @@ order by e.cityRuName]]>
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
-                    <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
+                    <table id="jobCandidateIteractionListTable" dataContainer="iteractionListsDc"
                            width="100%">
                         <columns>
-                            <column id="numberIteraction"/>
-                            <column id="dateIteraction"/>
-                            <column id="communicationMethod"/>
-                            <column id="comment"/>
-                            <column id="recrutierName"/>
+                            <column id="numberIteraction" caption="mainMsg://msgNumberItercation"/>
+                            <column id="dateIteraction" caption="mainMsg://msgDate"/>
+                            <column id="iteractionType.iterationName" caption="mainMsg://msgItercationType"/>
+                            <column id="recrutierName" caption="mainMsg://msgRecrutier"/>
                         </columns>
-                        <actions>
-                            <action id="add" type="add"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
+                        <actions/>
                         <buttonsPanel visible="false">
-                            <button id="addButton" action="jobCandidateIteractionListTable.add"/>
-                            <button id="editButton" action="jobCandidateIteractionListTable.edit"/>
-                            <button id="removeButton" action="jobCandidateIteractionListTable.remove"/>
+                            <button id="addButton"/>
+                            <button id="editButton"/>
+                            <button id="removeButton"/>
                         </buttonsPanel>
                     </table>
                 </groupBox>
@@ -220,6 +229,8 @@ order by e.cityRuName]]>
         </tabSheet>
         <form id="form" dataContainer="jobCandidateDc">
             <column width="250px">
+                <textField id="jobCandidateFieldCreatedBy" dataContainer="jobCandidateDc" property="createdBy" width="50%"
+                             editable="false" enable="false"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

@@ -1,14 +1,33 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.IteractionList;
+import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.JobCandidate;
+
+import javax.inject.Inject;
 
 @UiController("itpearls_JobCandidate.edit")
 @UiDescriptor("job-candidate-edit.xml")
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
+    @Inject
+    private CollectionLoader<IteractionList> iteractionListsDl;
+
+    // загрузить таблицу взаимодействий
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+       if(!PersistenceHelper.isNew(getEditedEntity())) {
+           if(!getEditedEntity().getFullName().equals(null)) {
+                iteractionListsDl.setParameter("candidate", getEditedEntity().getId());
+
+                iteractionListsDl.load();
+           }
+       }
+    }
 
     @Subscribe
     public void onBeforeClose1(BeforeCloseEvent event) {
