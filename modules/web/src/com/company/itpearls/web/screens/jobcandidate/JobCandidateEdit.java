@@ -1,7 +1,10 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -16,6 +19,19 @@ import javax.inject.Inject;
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
+    @Inject
+    private CollectionContainer<City> citiesDc;
+
+    @Subscribe("jobCityCandidateField")
+    public void onJobCityCandidateFieldValueChange(HasValue.ValueChangeEvent<City> event) {
+        if(!getEditedEntity().getCityOfResidence().equals(null)) {
+            getEditedEntity().setPositionCountry(getEditedEntity()
+                .getCityOfResidence()
+                .getCityRegion()
+                .getRegionCountry());
+        }
+        
+    }
 
     // загрузить таблицу взаимодействий
     @Subscribe

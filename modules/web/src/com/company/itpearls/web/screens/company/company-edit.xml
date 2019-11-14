@@ -24,14 +24,14 @@
                 </query>
             </loader>
         </collection>
-        <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="_minimal">
+        <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="city-view">
             <loader id="cityOfCompaniesLc">
                 <query>
                     <![CDATA[select e from itpearls_City e]]>
                 </query>
             </loader>
         </collection>
-        <collection id="regionOfCompaniesDc" class="com.company.itpearls.entity.Region" view="_minimal">
+        <collection id="regionOfCompaniesDc" class="com.company.itpearls.entity.Region" view="region-view">
             <loader id="regionOfCompaniesLc">
                 <query>
                     <![CDATA[select e from itpearls_Region e]]>

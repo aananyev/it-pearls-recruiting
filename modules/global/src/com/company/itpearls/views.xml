@@ -2,7 +2,9 @@
 <views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
 
     <view entity="itpearls_Region" name="region-view" extends="_local">
-        <property name="regionCountry" view="_minimal"/>
+        <property name="regionCountry" view="_minimal">
+            <property name="countryOfRegion" view="_minimal"/>
+        </property>
         <property name="regionOfCity" view="_local"/>
     </view>
     <view entity="itpearls_Country" name="country-view" extends="_local">
@@ -124,7 +126,10 @@
         <property name="currentCompany" view="_local"/>
     </view>
     <view entity="itpearls_City" name="city-view" extends="_local">
-        <property name="cityRegion" view="_minimal"/>
+        <property name="cityRegion" view="_minimal">
+            <property name="regionCountry" view="_minimal"/>
+            <property name="regionOfCity" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" view="_minimal"/>

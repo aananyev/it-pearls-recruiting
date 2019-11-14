@@ -90,9 +90,9 @@ order by e.cityRuName]]>
                             <row>
                                 <textField id="secondNameField" dataContainer="jobCandidateDc" property="secondName" width="100%"
                                            caption="msg://msgSecondName"/>
-                                <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
-                                                   dataContainer="jobCandidateDc" property="positionCountry" width="100%"
-                                                   caption="msg://msgPositionCountry">
+                                <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc" width="100%"
+                                                   caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
+                                                   property="cityOfResidence">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
@@ -101,9 +101,9 @@ order by e.cityRuName]]>
                             <row>
                                 <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="100%"
                                            caption="msg://msgBirthDate"/>
-                                <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc" width="100%"
-                                                   caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
-                                                   property="cityOfResidence">
+                                <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
+                                                   dataContainer="jobCandidateDc" property="positionCountry" width="100%"
+                                                   caption="msg://msgPositionCountry">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
@@ -167,6 +167,7 @@ order by e.cityRuName]]>
                             <column id="dateIteraction" caption="mainMsg://msgDate"/>
                             <column id="iteractionType.iterationName" caption="mainMsg://msgItercationType"/>
                             <column id="recrutier.name" caption="msg://msgRecrutier"/>
+                            <column id="comment"/>
                         </columns>
                         <actions/>
                         <buttonsPanel visible="false">
