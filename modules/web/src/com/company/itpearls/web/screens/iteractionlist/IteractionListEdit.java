@@ -40,6 +40,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Project project;
     private String communicationMethod;
     private CompanyDepartament departament;
+    @Inject
+    private Button buttonCallAction;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -93,18 +95,21 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onBeforeClose(AfterCloseEvent event) {
-        dialogs.createOptionDialog()
-                .withCaption("Внимание")
-                .withMessage("Создать новую запись?")
-                .withActions(
-                        new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                        .withHandler(e -> {
-                            createNewField(getEditedEntity());
-                        }),
-                        new DialogAction(DialogAction.Type.NO)
-                ).show();
+        /* если нажата кнопка ОК, то спросить ото сделать ли новую запись?
+        if(event.getCloseAction().equals(WINDOW_COMMIT_AND_CLOSE_ACTION)) {
+            dialogs.createOptionDialog()
+                    .withCaption("Внимание")
+                    .withMessage("Создать новую запись?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                    .withHandler(e -> {
+                                        createNewField(getEditedEntity());
+                                    }),
+                            new DialogAction(DialogAction.Type.NO)
+                    ).show();
+        } */
     }
-
+    
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if(PersistenceHelper.isNew(getEditedEntity())) {
@@ -132,5 +137,25 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
 // После изменения имени кандидата надо заполнить поле специализация кандидата
     protected void setCandidateSpecialisation() {
+    }
+
+    @Subscribe("iteractionTypeField")
+    public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
+        if(!PersistenceHelper.isNew(getEditedEntity()))
+            buttonCallAction.setCaption(getEditedEntity().getIteractionType().getIterationName());
+    }
+
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private Metadata metadata;
+
+    public void callActionEntity() {
+        String calledClass = "itpearls_Company";
+        screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+                .withScreenId(calledClass + ".edit")
+                .withLaunchMode(OpenMode.DIALOG)
+                .build()
+                .show();
     }
 }

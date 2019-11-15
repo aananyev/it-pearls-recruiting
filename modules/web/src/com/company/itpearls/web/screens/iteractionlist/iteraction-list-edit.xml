@@ -114,6 +114,9 @@ order by e.vacansyName]]></query>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
+                        <buttonsPanel id="buttonsPanelCallAction" width="100%" align="BOTTOM_CENTER">
+                            <button id="buttonCallAction" invoke="callActionEntity" align="MIDDLE_CENTER" width="100%"/>
+                        </buttonsPanel>
                     </row>
                     <row>
                         <textField id="communicationMethodField" width="100%"

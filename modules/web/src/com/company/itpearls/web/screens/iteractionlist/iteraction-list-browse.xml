@@ -38,12 +38,13 @@
             </actions>
             <columns>
                 <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
-                <column id="candidate" caption="msg://msgCandidate"/>
-                <column id="iteractionType" caption="msg://msgIteractionType"/>
-                <column id="dateIteraction" caption="msg://msgDate"/>
-                <column id="vacancy" caption="mainMsg://msgVacancy"/>
+                <column id="dateIteraction" caption="msg://msgDate">
+                    <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                </column>
+                <column id="candidate" caption="msg://msgCandidate" width="250"/>
+                <column id="iteractionType" caption="msg://msgIteractionType" width="250"/>
+                <column id="vacancy" caption="mainMsg://msgVacancy" width="250"/>
                 <column id="recrutier" caption="msg://msgRecrutier"/>
-                <column id="createdBy" caption="mainMsg://msgCreatedBy"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
