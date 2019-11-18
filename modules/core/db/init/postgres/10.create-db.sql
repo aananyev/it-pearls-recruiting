@@ -179,6 +179,9 @@ create table ITPEARLS_ITERACTION (
     MANDATORY_ITERACTION boolean,
     ITERACTION_TREE_ID uuid,
     ITERATION_NAME varchar(80) not null,
+    CALL_BUTTON_TEXT varchar(30),
+    CALL_CLASS varchar(30),
+    CALL_FORM boolean,
     --
     primary key (ID)
 )^

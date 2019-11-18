@@ -42,6 +42,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private CompanyDepartament departament;
     @Inject
     private Button buttonCallAction;
+    @Inject
+    private LookupPickerField<Iteraction> iteractionTypeField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -115,7 +117,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if(PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setCandidate(this.setJobCandidate);
         }
-        
+
+        buttonCallAction.setVisible(false);
     }
 
     // создать новый экран
@@ -141,8 +144,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("iteractionTypeField")
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
-        if(!PersistenceHelper.isNew(getEditedEntity()))
-            buttonCallAction.setCaption(getEditedEntity().getIteractionType().getIterationName());
+//        if(!PersistenceHelper.isNew(getEditedEntity()))
+        buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
+//            buttonCallAction.setCaption(getEditedEntity().getIteractionType().getCallButtonText());
+        // если установлен тип взаиподейтвия и нужно действие
+        if(!getEditedEntity().getIteractionType().equals(null))
+            if(iteractionTypeField.getValue().getCallForm())
+                buttonCallAction.setVisible(true);
+            else
+                buttonCallAction.setVisible(false);
     }
 
     @Inject
@@ -151,11 +161,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Metadata metadata;
 
     public void callActionEntity() {
-        String calledClass = "itpearls_Company";
-        screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
-                .withScreenId(calledClass + ".edit")
-                .withLaunchMode(OpenMode.DIALOG)
-                .build()
-                .show();
+        String calledClass = getEditedEntity().getIteractionType().getCallClass();
+        // еслп установлено разрешение в Iteraction показать кнопку и установить на ней надпсит
+        if(!getEditedEntity().getIteractionType().getCallForm()) {
+        }
+        else {
+            screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+                    .withScreenId(calledClass + ".edit")
+                    .withLaunchMode(OpenMode.DIALOG)
+                    .build()
+                    .show();
+        }
     }
 }

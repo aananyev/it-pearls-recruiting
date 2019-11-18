@@ -29,6 +29,39 @@ public class Iteraction extends StandardEntity {
     @Column(name = "ITERATION_NAME", nullable = false, unique = true, length = 80)
     protected String iterationName;
 
+    @Column(name = "CALL_BUTTON_TEXT", length = 30)
+    protected String callButtonText;
+
+    @Column(name = "CALL_CLASS", length = 30)
+    protected String callClass;
+
+    @Column(name = "CALL_FORM")
+    protected Boolean callForm;
+
+    public Boolean getCallForm() {
+        return callForm;
+    }
+
+    public void setCallForm(Boolean callForm) {
+        this.callForm = callForm;
+    }
+
+    public String getCallClass() {
+        return callClass;
+    }
+
+    public void setCallClass(String callClass) {
+        this.callClass = callClass;
+    }
+
+    public String getCallButtonText() {
+        return callButtonText;
+    }
+
+    public void setCallButtonText(String callButtonText) {
+        this.callButtonText = callButtonText;
+    }
+
     public Boolean getMandatoryIteraction() {
         return mandatoryIteraction;
     }

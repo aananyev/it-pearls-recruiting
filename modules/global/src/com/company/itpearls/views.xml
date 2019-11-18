@@ -166,7 +166,7 @@
         <property name="vacancy" view="_local"/>
         <property name="project" view="_minimal"/>
         <property name="companyDepartment" view="_minimal"/>
-        <property name="iteractionType" view="_minimal"/>
+        <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal">
             <property name="firstName"/>
             <property name="lastName"/>

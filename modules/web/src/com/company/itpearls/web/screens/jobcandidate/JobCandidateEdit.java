@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -21,6 +22,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
     private CollectionContainer<City> citiesDc;
+    @Inject
+    private CheckBox checkBoxIfCV;
+    @Inject
+    private CheckBox checkBoxLetter;
 
     @Subscribe("jobCityCandidateField")
     public void onJobCityCandidateFieldValueChange(HasValue.ValueChangeEvent<City> event) {
@@ -44,6 +49,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 iteractionListsDl.load();
            }
        }
+
+       // если есть резюме, то поставить галку
+        if(getEditedEntity().getCandidateCv().isEmpty()) {
+            checkBoxIfCV.setValue(false);
+        } else {
+            checkBoxIfCV.setValue(true);
+        }
+
+        // если написано сопроводительное
     }
 
     @Subscribe

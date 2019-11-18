@@ -59,6 +59,22 @@ order by e.cityRuName]]>
                 width="800"/>
 <!--    <tabSheet/>  -->
     <layout expand="editActions" spacing="true">
+        <groupBox spacing="true">
+            <hbox>
+            </hbox>
+            <grid spacing="true">
+                <columns count="4"/>
+                <rows>
+                    <row>
+                        <textField id="jobCandidateFieldFullName" dataContainer="jobCandidateDc" property="fullName" editable="false" stylename="bold borderless"
+                                   align="TOP_CENTER"/>
+                        <textField id="textFieldLastContact" stylename="borderless"/>
+                        <checkBox id="checkBoxIfCV" caption="msg://msgCV" align="MIDDLE_CENTER" editable="false"/>
+                        <checkBox id="checkBoxLetter" align="MIDDLE_CENTER" caption="msg://msgLetter" editable="false"/>
+                    </row>
+                </rows>
+            </grid>
+        </groupBox>
         <tabSheet>
             <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
@@ -229,9 +245,9 @@ order by e.cityRuName]]>
             </tab>
         </tabSheet>
         <form id="form" dataContainer="jobCandidateDc">
-            <column width="250px">
+            <column width="100%">
                 <textField id="jobCandidateFieldCreatedBy" dataContainer="jobCandidateDc" property="createdBy" width="50%"
-                             editable="false" enable="false"/>
+                           editable="false" enable="false" align="BOTTOM_RIGHT"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

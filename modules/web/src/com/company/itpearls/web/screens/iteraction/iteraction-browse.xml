@@ -34,6 +34,8 @@ order by e.number]]></query>
                 <column id="number" caption="mainMsg://msgNumber"/>
                 <column id="mandatoryIteraction" caption="msg://msgMandatoryItercation"/>
                 <column id="iterationName" caption="mainMsg://msgItercationType"/>
+                <column id="callButtonText" caption="mainMsg://msgCallButtonText"/>
+                <column id="callClass" caption="mainMsg://msgCreateClass"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

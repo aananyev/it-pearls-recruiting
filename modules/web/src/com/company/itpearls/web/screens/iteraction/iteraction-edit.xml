@@ -32,6 +32,11 @@ order by e.number]]>
                 <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"
                            width="50%"/>
             </column>
+            <column width="250px">
+                <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
+                <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"/>
+                <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"/>
+            </column>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
