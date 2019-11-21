@@ -1,14 +1,10 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.TextField;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -24,15 +20,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
-    private TextField<String> firstNameField;
-    @Inject
-    private Label<JobCandidate> iteractionListLabelCandidate;
-    @Inject
     private Label<String> labelCV;
-    @Inject
-    private CollectionContainer<CandidateCV> candidateCVsDc;
-    @Inject
-    private Label<String> labelLetter;
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
