@@ -4,14 +4,9 @@ import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
-import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.core.global.Metadata;
@@ -31,15 +26,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private UserSession userSession;
     @Inject
     private UserSessionSource userSessionSource;
-    @Inject
-    private Dialogs dialogs;
-
-    
-    private JobCandidate setJobCandidate;
-    private OpenPosition vacansy;
-    private Project project;
-    private String communicationMethod;
-    private CompanyDepartament departament;
     @Inject
     private Button buttonCallAction;
     @Inject
@@ -114,10 +100,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if(PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setCandidate(this.setJobCandidate);
-        }
-
         buttonCallAction.setVisible(false);
     }
 

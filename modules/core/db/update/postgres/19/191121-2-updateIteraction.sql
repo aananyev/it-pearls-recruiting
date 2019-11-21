@@ -1,0 +1,6 @@
+alter table ITPEARLS_ITERACTION rename column job_candidate_id to job_candidate_id__u41029 ;
+alter table ITPEARLS_ITERACTION drop constraint FK_ITPEARLS_ITERACTION_ON_JOB_CANDIDATE ;
+drop index IDX_ITPEARLS_ITERACTION_ON_JOB_CANDIDATE ;
+alter table ITPEARLS_ITERACTION rename column iteraction_list_id to iteraction_list_id__u30453 ;
+alter table ITPEARLS_ITERACTION drop constraint FK_ITPEARLS_ITERACTION_ON_ITERACTION_LIST ;
+drop index IDX_ITPEARLS_ITERACTION_ON_ITERACTION_LIST ;

@@ -34,10 +34,12 @@ order by e.projectName]]></query>
 order by e.departamentRuName]]></query>
             </loader>
         </collection>
-        <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="_minimal">
+        <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="iteraction-view-button">
             <loader id="iteractionTypesLc">
-                <query><![CDATA[select e from itpearls_Iteraction e
-order by e.iterationName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_Iteraction e
+order by e.iterationName]]>
+                </query>
             </loader>
         </collection>
         <collection id="recrutiersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">

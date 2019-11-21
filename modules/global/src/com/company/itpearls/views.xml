@@ -195,4 +195,5 @@
         <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal"/>
     </view>
+    <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_local"/>
 </views>

@@ -5,6 +5,8 @@ import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
@@ -21,11 +23,56 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
-    private CollectionContainer<City> citiesDc;
-    @Inject
     private CheckBox checkBoxIfCV;
     @Inject
-    private CheckBox checkBoxLetter;
+    private TextField<String> firstNameField;
+    @Inject
+    private Label<JobCandidate> iteractionListLabelCandidate;
+
+    @Subscribe("firstNameField")
+    public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        setLabelFullName( setFullName( getEditedEntity().getFirstName(), null, null) );
+    }
+
+    @Subscribe("middleNameField")
+    public void onMiddleNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        setLabelFullName( setFullName( null, getEditedEntity().getMiddleName(), null ) );
+    }
+
+    @Subscribe("secondNameField")
+    public void onSecondNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        setLabelFullName( setFullName( null, null, getEditedEntity().getSecondName() ) );
+    }
+
+    private String setFullName(String firstName, String middleName, String secondName) {
+        String fullName = "", localFirstName = "", localMiddleName = "", localSecondName = "";
+
+        if( getEditedEntity().getFirstName() != null )
+            localFirstName = getEditedEntity().getFirstName();
+        else
+            if( firstName != null )
+                localFirstName = firstName;
+
+        if( getEditedEntity().getSecondName() != null )
+            localSecondName = getEditedEntity().getSecondName();
+        else
+            if( secondName != null )
+                localSecondName = secondName;
+
+        if( getEditedEntity().getMiddleName() != null )
+            localMiddleName = getEditedEntity().getMiddleName();
+        else
+            if( middleName != null )
+                localMiddleName = middleName;
+
+        fullName = localSecondName + " " + localFirstName + " " + localMiddleName;
+
+       return fullName;
+    }
+
+    private void setLabelFullName(String fullName ) {
+        getEditedEntity().setFullName( fullName );
+    }
 
     @Subscribe("jobCityCandidateField")
     public void onJobCityCandidateFieldValueChange(HasValue.ValueChangeEvent<City> event) {
@@ -47,17 +94,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 iteractionListsDl.setParameter("candidate", getEditedEntity().getId());
 
                 iteractionListsDl.load();
+
+                if( getEditedEntity().getFullName() == null )
+                    getEditedEntity().setFullName("");
            }
        }
 
        // если есть резюме, то поставить галку
-        if(getEditedEntity().getCandidateCv().isEmpty()) {
-            checkBoxIfCV.setValue(false);
-        } else {
-            checkBoxIfCV.setValue(true);
-        }
-
-        // если написано сопроводительное
+        if( !PersistenceHelper.isNew( getEditedEntity() ) )
+            if(getEditedEntity().getCandidateCv().isEmpty()) {
+                checkBoxIfCV.setValue(false);
+            } else {
+                checkBoxIfCV.setValue(true);
+            }
     }
 
     @Subscribe

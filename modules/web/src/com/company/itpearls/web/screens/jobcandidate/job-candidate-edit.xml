@@ -66,11 +66,10 @@ order by e.cityRuName]]>
                 <columns count="4"/>
                 <rows>
                     <row>
-                        <textField id="jobCandidateFieldFullName" dataContainer="jobCandidateDc" property="fullName" editable="false" stylename="bold borderless"
-                                   align="TOP_CENTER"/>
-                        <textField id="textFieldLastContact" stylename="borderless"/>
-                        <checkBox id="checkBoxIfCV" caption="msg://msgCV" align="MIDDLE_CENTER" editable="false"/>
-                        <checkBox id="checkBoxLetter" align="MIDDLE_CENTER" caption="msg://msgLetter" editable="false"/>
+                        <label id="iteractionListLabelCandidate" stylename="h2"
+                               align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="fullName"/>
+                        <checkBox id="checkBoxIfCV" caption="msg://msgCV" align="BOTTOM_LEFT" editable="false"/>
+                        <checkBox id="checkBoxLetter" align="BOTTOM_LEFT" caption="msg://msgLetter" editable="false"/>
                     </row>
                 </rows>
             </grid>
