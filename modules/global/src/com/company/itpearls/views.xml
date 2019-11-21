@@ -196,4 +196,5 @@
         <property name="recrutier" view="_minimal"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_local"/>
+    <view entity="itpearls_CandidateCV" name="candidateCV-view-Letter" extends="_local"/>
 </views>

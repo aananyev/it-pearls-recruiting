@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.core.global.PersistenceHelper;
@@ -23,11 +24,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
-    private CheckBox checkBoxIfCV;
-    @Inject
     private TextField<String> firstNameField;
     @Inject
     private Label<JobCandidate> iteractionListLabelCandidate;
+    @Inject
+    private Label<String> labelCV;
+    @Inject
+    private CollectionContainer<CandidateCV> candidateCVsDc;
+    @Inject
+    private Label<String> labelLetter;
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -101,12 +106,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
        }
 
        // если есть резюме, то поставить галку
-        if( !PersistenceHelper.isNew( getEditedEntity() ) )
-            if(getEditedEntity().getCandidateCv().isEmpty()) {
-                checkBoxIfCV.setValue(false);
+        if( !PersistenceHelper.isNew( getEditedEntity() ) ) {
+            if (getEditedEntity().getCandidateCv().isEmpty()) {
+                labelCV.setValue("Резюме: НЕТ");
             } else {
-                checkBoxIfCV.setValue(true);
+                labelCV.setValue("Резюме: ДА");
             }
+        }
     }
 
     @Subscribe

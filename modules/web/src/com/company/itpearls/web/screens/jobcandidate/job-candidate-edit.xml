@@ -60,16 +60,13 @@ order by e.cityRuName]]>
 <!--    <tabSheet/>  -->
     <layout expand="editActions" spacing="true">
         <groupBox spacing="true">
-            <hbox>
-            </hbox>
             <grid spacing="true">
                 <columns count="4"/>
                 <rows>
                     <row>
                         <label id="iteractionListLabelCandidate" stylename="h2"
                                align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="fullName"/>
-                        <checkBox id="checkBoxIfCV" caption="msg://msgCV" align="BOTTOM_LEFT" editable="false"/>
-                        <checkBox id="checkBoxLetter" align="BOTTOM_LEFT" caption="msg://msgLetter" editable="false"/>
+                        <label id="labelCV" align="MIDDLE_CENTER"/>
                     </row>
                 </rows>
             </grid>
