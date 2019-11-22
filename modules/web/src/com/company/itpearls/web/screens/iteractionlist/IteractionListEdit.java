@@ -155,4 +155,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .show();
         }
     }
+
+    @Subscribe("buttonAddNewIteraction")
+    public void onButtonAddNewIteractionClick(Button.ClickEvent event) {
+        screenBuilders.editor( Iteraction.class, this )
+                .newEntity()
+                .withScreenId( getEditedEntity().getIteractionType().getCallClass() )
+                .withLaunchMode( OpenMode.NEW_TAB )
+                .build()
+                .show();
+    }
+
+    public void addNewIteraction() {
+/*        screenBuilders.editor( Iteraction.class, this )
+                .newEntity()
+                .withScreenId( getEditedEntity().getIteractionType().getCallClass() )
+                .withLaunchMode( OpenMode.NEW_TAB )
+                .build()
+                .show(); */
+    }
 }

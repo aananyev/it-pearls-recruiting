@@ -142,6 +142,7 @@ order by e.vacansyName]]></query>
             </column>
         </form>
         <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+            <button id="buttonAddNewIteraction" invoke="addNewIteraction" caption="msg://msgAddNewIteraction"/>
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

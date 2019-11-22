@@ -141,7 +141,9 @@ order by e.cityRuName]]></query>
                 <table id="openPositionCandidatesTable" height="400px" width="100%" dataContainer="jobCandidatesDc">
                     <columns>
                         <column id="fullName" caption="mainMsg://msgFullName"/>
-                        <column id="personPosition.positionRuName"/>
+                        <column id="personPosition"/>
+                        <column id="cityOfResidence"/>
+                        <column id="currentCompany"/>
                         <column id="birdhDate" caption="mainMsg://msgBirthday"/>
                     </columns>
                 </table>

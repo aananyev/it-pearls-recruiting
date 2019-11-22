@@ -66,7 +66,8 @@ order by e.cityRuName]]>
                     <row>
                         <label id="iteractionListLabelCandidate" stylename="h2"
                                align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="fullName"/>
-                        <label id="labelCV" align="MIDDLE_CENTER"/>
+                        <label id="labelCV" align="MIDDLE_CENTER" stylename="h3"/>
+                        <label id="labelLastRecrutier"/>
                     </row>
                 </rows>
             </grid>
