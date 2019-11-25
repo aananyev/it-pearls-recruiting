@@ -113,6 +113,10 @@ order by e.cityRuName]]></query>
                     </lookupPickerField>
                     <textField id="numberPositionField" dataContainer="openPositionDc" property="numberPosition"
                                caption="msg://msgNumberOpenPosition" width="50%"/>
+                    <textField id="openPositionFieldSalaryMin" dataContainer="openPositionDc" property="salaryMin"
+                               caption="mainMsg://msgSalaryMin" width="50%"/>
+                    <textField id="openPositionFieldSalaryMax" dataContainer="openPositionDc" property="salaryMax"
+                               caption="msg://msgSalaryMax" width="50%"/>
                 </groupBox>
             </tab>
             <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tab">

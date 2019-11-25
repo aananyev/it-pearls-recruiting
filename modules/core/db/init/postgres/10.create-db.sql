@@ -367,6 +367,8 @@ create table ITPEARLS_OPEN_POSITION (
     --
     OPEN_CLOSE boolean,
     VACANSY_NAME varchar(80) not null,
+    SALARY_MIN decimal(19, 2),
+    SALARY_MAX decimal(19, 2),
     CITY_POSITION_ID uuid,
     POSITION_TYPE_ID uuid,
     PROJECT_NAME_ID uuid not null,

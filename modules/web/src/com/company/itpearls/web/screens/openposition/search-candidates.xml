@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://caption"
+        messagesPack="com.company.itpearls.web.screens.openposition">
+    <data>
+        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate">
+            <loader id="jobCandidatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e ]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition">
+            <loader id="openPositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <lookupPickerField optionsContainer="openPositionsDc" dataContainer="jobCandidatesDc" property="openPosition">
+            <actions>
+                <action id="lookup" type="picker_lookup"/>
+                <action id="open" type="picker_open"/>
+            </actions>
+        </lookupPickerField>
+    </layout>
+</window>

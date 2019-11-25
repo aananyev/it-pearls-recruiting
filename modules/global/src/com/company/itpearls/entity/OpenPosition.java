@@ -10,6 +10,7 @@ import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 @NamePattern("%s %s|vacansyName,projectName")
@@ -24,6 +25,12 @@ public class OpenPosition extends StandardEntity {
     @NotNull
     @Column(name = "VACANSY_NAME", nullable = false, length = 80)
     protected String vacansyName;
+
+    @Column(name = "SALARY_MIN")
+    protected BigDecimal salaryMin;
+
+    @Column(name = "SALARY_MAX")
+    protected BigDecimal salaryMax;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
@@ -68,6 +75,22 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "openPosition")
     protected List<JobCandidate> candidates;
+
+    public BigDecimal getSalaryMax() {
+        return salaryMax;
+    }
+
+    public void setSalaryMax(BigDecimal salaryMax) {
+        this.salaryMax = salaryMax;
+    }
+
+    public BigDecimal getSalaryMin() {
+        return salaryMin;
+    }
+
+    public void setSalaryMin(BigDecimal salaryMin) {
+        this.salaryMin = salaryMin;
+    }
 
     public Boolean getOpenClose() {
         return openClose;
