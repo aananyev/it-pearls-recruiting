@@ -30,6 +30,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Button buttonCallAction;
     @Inject
     private LookupPickerField<Iteraction> iteractionTypeField;
+    @Inject
+    private InstanceContainer<IteractionList> iteractionListDc;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -126,8 +128,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected void setCandidateSpecialisation() {
     }
 
+    // изменение надписи на кнопке в зависимости от щначения поля ItercationType
     @Subscribe("iteractionTypeField")
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
+        // надпись на кнопке
         if( iteractionTypeField.getValue().getCallButtonText() != null )
             buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
         // если установлен тип взаиподейтвия и нужно действие
@@ -160,7 +164,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    @Subscribe("buttonAddNewIteraction")
+/*    @Subscribe("buttonAddNewIteraction")
     public void onButtonAddNewIteractionClick(Button.ClickEvent event) {
         screenBuilders.editor( Iteraction.class, this )
                 .newEntity()
@@ -168,14 +172,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .withLaunchMode( OpenMode.NEW_TAB )
                 .build()
                 .show();
-    }
+    } */
 
     public void addNewIteraction() {
-/*        screenBuilders.editor( Iteraction.class, this )
+        String classIL = "itpearls_" + getEditedEntity().getClass().getSimpleName() + ".edit";
+
+        closeWithCommit();
+
+        screenBuilders.editor( IteractionList.class, this )
                 .newEntity()
-                .withScreenId( getEditedEntity().getIteractionType().getCallClass() )
+                .withScreenId( classIL )
                 .withLaunchMode( OpenMode.NEW_TAB )
+                .withInitializer( e -> {
+                    e.setCandidate(this.getEditedEntity().getCandidate());
+                    e.setVacancy(this.getEditedEntity().getVacancy());
+                    e.setCompanyDepartment(this.getEditedEntity().getCompanyDepartment());
+                })
                 .build()
-                .show(); */
+                .show();
     }
 }
