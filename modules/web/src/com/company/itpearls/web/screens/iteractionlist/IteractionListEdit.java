@@ -47,14 +47,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if(getEditedEntity().getVacancy().getProjectName() != null)
-            getEditedEntity().setProject(getEditedEntity().getVacancy().getProjectName());
+        if( getEditedEntity().getVacancy() != null )
+            if(getEditedEntity().getVacancy().getProjectName() != null)
+                getEditedEntity().setProject(getEditedEntity().getVacancy().getProjectName());
     }
 
     @Subscribe("projectField")
     public void onProjectFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
-        if( getEditedEntity().getVacancy().getCompanyDepartament() != null )
-            getEditedEntity().setCompanyDepartment(getEditedEntity().getVacancy().getCompanyDepartament());
+        if( getEditedEntity().getVacancy() != null )
+            if( getEditedEntity().getVacancy().getCompanyDepartament() != null )
+                getEditedEntity().setCompanyDepartment(getEditedEntity().getVacancy().getCompanyDepartament());
     }
 
 
@@ -126,15 +128,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("iteractionTypeField")
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
-//        if(!PersistenceHelper.isNew(getEditedEntity()))
-        buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
-//            buttonCallAction.setCaption(getEditedEntity().getIteractionType().getCallButtonText());
+        if( iteractionTypeField.getValue().getCallButtonText() != null )
+            buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
         // если установлен тип взаиподейтвия и нужно действие
-        if(!getEditedEntity().getIteractionType().equals(null))
-            if(iteractionTypeField.getValue().getCallForm())
-                buttonCallAction.setVisible(true);
-            else
-                buttonCallAction.setVisible(false);
+        if( getEditedEntity().getIteractionType() != null )
+            if( iteractionTypeField.getValue().getCallForm() != null )
+                if(iteractionTypeField.getValue().getCallForm())
+                    buttonCallAction.setVisible(true);
+                else
+                    buttonCallAction.setVisible(false);
     }
 
     @Inject
@@ -145,14 +147,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void callActionEntity() {
         String calledClass = getEditedEntity().getIteractionType().getCallClass();
         // еслп установлено разрешение в Iteraction показать кнопку и установить на ней надпсит
-        if(!getEditedEntity().getIteractionType().getCallForm()) {
-        }
-        else {
-            screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
-                    .withScreenId(calledClass + ".edit")
-                    .withLaunchMode(OpenMode.DIALOG)
-                    .build()
-                    .show();
+        if( getEditedEntity().getIteractionType() != null)
+            if( getEditedEntity().getIteractionType().getCallForm() != null )
+                if(!getEditedEntity().getIteractionType().getCallForm()) {
+                }
+                else {
+                    screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+                            .withScreenId(calledClass + ".edit")
+                            .withLaunchMode(OpenMode.DIALOG)
+                            .build()
+                            .show();
         }
     }
 
