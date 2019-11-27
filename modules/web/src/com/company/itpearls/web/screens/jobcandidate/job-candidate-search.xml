@@ -43,6 +43,8 @@ order by e.fullName]]>
                     </actions>
                 </lookupPickerField>
                 <hbox spacing="true" width="100%">
+                    <dateField/>
+                    <dateField/>
                 </hbox>
                 <grid spacing="true" width="100%">
                     <columns count="4"/>
@@ -75,6 +77,7 @@ order by e.fullName]]>
             </actions>
             <columns>
                 <column id="fullName"/>
+                <column id="iteractionList.dateIteraction"/>
                 <column id="birdhDate"/>
                 <column id="currentCompany.comanyName"/>
                 <column id="personPosition.positionRuName"/>
