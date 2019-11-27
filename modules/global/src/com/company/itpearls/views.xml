@@ -197,4 +197,30 @@
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_local"/>
     <view entity="itpearls_CandidateCV" name="candidateCV-view-Letter" extends="_local"/>
+    <view entity="itpearls_JobCandidate" name="jobCandidate-view-search" extends="_local">
+        <property name="currentCompany" view="_minimal"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="cityOfResidence" view="_minimal"/>
+        <property name="iteractionList" view="_minimal">
+            <property name="dateIteraction"/>
+            <property name="vacancy" view="_minimal"/>
+            <property name="project" view="_minimal"/>
+            <property name="companyDepartment" view="_minimal"/>
+            <property name="iteractionType" view="_minimal"/>
+            <property name="recrutier" view="_minimal"/>
+            <property name="recrutierName"/>
+        </property>
+        <property name="specialisation" view="_minimal"/>
+        <property name="candidateCv" view="_minimal"/>
+        <property name="openPosition" view="_minimal">
+            <property name="cityPosition" view="_minimal"/>
+            <property name="positionType" view="_minimal"/>
+        </property>
+    </view>
+    <view entity="itpearls_Company" name="company-view-search" extends="_local">
+        <property name="departmentOfCompany" view="_minimal"/>
+        <property name="cityOfCompany" view="_minimal"/>
+        <property name="regionOfCompany" view="_minimal"/>
+        <property name="countryOfCompany" view="_minimal"/>
+    </view>
 </views>

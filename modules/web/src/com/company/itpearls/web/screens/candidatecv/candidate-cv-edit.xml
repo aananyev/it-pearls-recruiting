@@ -85,7 +85,7 @@ order by e.name]]>
                                        height="50%"/>
                             <lookupField id="ownerСandidateCVField" dataContainer="candidateCVDc" optionsContainer="usersDc"
                                          caption="mainMsg://msgOwner" property="owner"/>
-                            <upload id="fileOriginalCVField" fileStoragePutMode="IMMEDIATE" property="fileCV" showFileName="true"
+                            <upload id="fileOriginalCVField" fileStoragePutMode="IMMEDIATE" property="originalFileCV" showFileName="true"
                                     align="TOP_LEFT" caption="msg://msgOriginalCV" dataContainer="candidateCVDc"/>
                             <grid spacing="true" width="100%">
                                 <columns count="2"/>
