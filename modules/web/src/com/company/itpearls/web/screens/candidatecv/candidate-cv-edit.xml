@@ -81,23 +81,34 @@ order by e.name]]>
                                     <action id="lookup" type="picker_lookup"/>
                                 </actions>
                             </lookupPickerField>
-                            <textField id="textFieldIOriginalCV" dataContainer="candidateCVDc"
-                                       property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV" width="100%"/>
-                            <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
-                                       caption="mainMsg://msgLinkToItPearlsCV" width="100%"/>
                             <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost" caption="msg://msgDatePost"
                                        height="50%"/>
                             <lookupField id="ownerСandidateCVField" dataContainer="candidateCVDc" optionsContainer="usersDc"
                                          caption="mainMsg://msgOwner" property="owner"/>
                             <upload id="fileOriginalCVField" fileStoragePutMode="IMMEDIATE" property="fileCV" showFileName="true"
-                                    align="TOP_LEFT" caption="msg://msgOriginalCV"/>
+                                    align="TOP_LEFT" caption="msg://msgOriginalCV" dataContainer="candidateCVDc"/>
+                            <grid spacing="true" width="100%">
+                                <columns count="2"/>
+                                <rows>
+                                    <row>
+                                        <textField id="textFieldIOriginalCV" dataContainer="candidateCVDc"
+                                                   property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV" width="100%"/>
+                                        <link id="linkOriginalCV" width="100%"/>
+                                    </row>
+                                    <row>
+                                        <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
+                                                   caption="mainMsg://msgLinkToItPearlsCV" width="100%"/>
+                                        <link id="linkITPearlsCV" width="100%"/>
+                                    </row>
+                                </rows>
+                            </grid>
                         </groupBox>
                     </tab>
                     <tab id="tabCV" caption="msg://msgCV" margin="true,false,false,false" spacing="true">
                         <richTextArea id="candidateCVRichTextArea" dataContainer="candidateCVDc" property="textCV"
                                       width="100%" height="300pt"/>
                         <upload id="fileCVField" fileStoragePutMode="IMMEDIATE" property="fileCV" showFileName="true"
-                                align="TOP_LEFT" caption="msg://msgCV"/>
+                                align="TOP_LEFT" caption="msg://msgCV" dataContainer="candidateCVDc"/>
                     </tab>
                     <tab id="tabLetter" caption="msg://msgLetter" margin="true,false,false,false" spacing="true">
                         <richTextArea dataContainer="candidateCVDc" property="letter" width="100%" height="350pt"/>

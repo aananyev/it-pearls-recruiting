@@ -14,7 +14,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @NamePattern("%s %s|vacansyName,projectName")
-@Table(name = "ITPEARLS_OPEN_POSITION")
+@Table(name = "ITPEARLS_OPEN_POSITION", indexes = {
+        @Index(name = "IDX_ITPEARLS_OPEN_POSITION", columnList = "VACANSY_NAME")
+})
 @Entity(name = "itpearls_OpenPosition")
 public class OpenPosition extends StandardEntity {
     private static final long serialVersionUID = -4276280250460057561L;

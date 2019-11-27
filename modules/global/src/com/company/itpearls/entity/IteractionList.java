@@ -11,7 +11,9 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Table(name = "ITPEARLS_ITERACTION_LIST")
+@Table(name = "ITPEARLS_ITERACTION_LIST", indexes = {
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST", columnList = "NUMBER_ITERACTION")
+})
 @Entity(name = "itpearls_IteractionList")
 @NamePattern("%s|candidate")
 public class IteractionList extends StandardEntity {

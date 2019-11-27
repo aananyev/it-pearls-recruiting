@@ -17,7 +17,9 @@ import java.util.List;
 
 @PublishEntityChangedEvents
 @NamePattern("%s %s %s %s|secondName,firstName,middleName,personPosition")
-@Table(name = "ITPEARLS_JOB_CANDIDATE")
+@Table(name = "ITPEARLS_JOB_CANDIDATE", indexes = {
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE", columnList = "FULL_NAME")
+})
 @Entity(name = "itpearls_JobCandidate")
 public class JobCandidate extends StandardEntity {
     private static final long serialVersionUID = 4893767839653404761L;

@@ -13,7 +13,9 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @NamePattern("%s|candidate")
-@Table(name = "ITPEARLS_CANDIDATE_CV")
+@Table(name = "ITPEARLS_CANDIDATE_CV", indexes = {
+        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V", columnList = "CANDIDATE_ID")
+})
 @Entity(name = "itpearls_CandidateCV")
 public class CandidateCV extends StandardEntity {
     private static final long serialVersionUID = 7346397128043882179L;

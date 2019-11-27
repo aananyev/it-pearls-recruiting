@@ -13,7 +13,9 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NamePattern("%s|skillName")
-@Table(name = "ITPEARLS_SKILL_TREE")
+@Table(name = "ITPEARLS_SKILL_TREE", indexes = {
+        @Index(name = "IDX_ITPEARLS_SKILL_TREE", columnList = "SKILL_NAME")
+})
 @Entity(name = "itpearls_SkillTree")
 public class SkillTree extends StandardEntity {
     private static final long serialVersionUID = -1280658717332773151L;

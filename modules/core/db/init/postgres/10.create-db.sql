@@ -134,6 +134,7 @@ create table ITPEARLS_COMPANY (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    OUR_CLIENT boolean,
     COMPANY_OWNERSHIP_ID uuid,
     COMANY_NAME varchar(80) not null,
     COMPANY_SHORT_NAME varchar(30),
