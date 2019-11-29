@@ -93,12 +93,12 @@ order by e.name]]>
                                     <row>
                                         <textField id="textFieldIOriginalCV" dataContainer="candidateCVDc"
                                                    property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV" width="100%"/>
-                                        <link id="linkOriginalCV" width="100%"/>
+                                        <link id="linkOriginalCV" width="100%" align="BOTTOM_CENTER"/>
                                     </row>
                                     <row>
                                         <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
                                                    caption="mainMsg://msgLinkToItPearlsCV" width="100%"/>
-                                        <link id="linkITPearlsCV" width="100%"/>
+                                        <link id="linkITPearlsCV" width="100%" align="BOTTOM_CENTER"/>
                                     </row>
                                 </rows>
                             </grid>

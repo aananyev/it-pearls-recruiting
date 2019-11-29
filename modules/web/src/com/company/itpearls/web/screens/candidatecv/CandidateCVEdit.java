@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.candidatecv;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.components.Link;
 import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.screen.*;
@@ -21,6 +22,25 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private UserSession userSession;
     @Inject
     private LookupPickerField<JobCandidate> candidateField;
+    @Inject
+    private Link linkOriginalCV;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if( getEditedEntity().getLinkOriginalCv() != null ) {
+            if( textFieldIOriginalCV.getValue() != null ) {
+                linkOriginalCV.setTarget(textFieldIOriginalCV.getValue());
+                linkOriginalCV.setUrl(textFieldIOriginalCV.getValue());
+            }
+        }
+
+        if( getEditedEntity().getLinkItPearlsCV() != null ) {
+            if( textFieldITPearlsCV.getValue() != null ) {
+                linkITPearlsCV.setTarget(textFieldITPearlsCV.getValue());
+                linkITPearlsCV.setUrl(textFieldITPearlsCV.getValue());
+            }
+        }
+    }
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -29,12 +49,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             getEditedEntity().setOwner(userSession.getUser());
         }
-
-        if( getEditedEntity().getLinkOriginalCv() != null )
-            getEditedEntity().setLinkOriginalCv( getEditedEntity().getLinkOriginalCv() );
-
-        if( getEditedEntity().getLinkItPearlsCV() != null )
-            getEditedEntity().setLinkItPearlsCV( getEditedEntity().getLinkItPearlsCV() );
     }
 
     public void setCandidate( JobCandidate candidate ) {
@@ -43,10 +57,15 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Inject
     private TextField<String> textFieldIOriginalCV;
+    @Inject
+    private Link linkITPearlsCV;
 
     @Subscribe("textFieldIOriginalCV")
     public void onTextFieldIOriginalCVValueChange(HasValue.ValueChangeEvent<String> event) {
-       getEditedEntity().setLinkOriginalCv( getEditedEntity().getLinkOriginalCv() );
+        if( textFieldIOriginalCV.getValue() != null ) {
+            linkOriginalCV.setTarget(textFieldIOriginalCV.getValue());
+            linkOriginalCV.setUrl(textFieldIOriginalCV.getValue());
+        }
     }
 
     @Inject
@@ -54,8 +73,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("textFieldITPearlsCV")
     public void onTextFieldITPearlsCVValueChange(HasValue.ValueChangeEvent<String> event) {
-       getEditedEntity().setLinkItPearlsCV( getEditedEntity().getLinkItPearlsCV() );
+        if( textFieldITPearlsCV.getValue() != null ) {
+            linkITPearlsCV.setTarget(textFieldITPearlsCV.getValue());
+            linkITPearlsCV.setUrl(textFieldITPearlsCV.getValue());
+        }
     }
-    
-    
+
+
 }

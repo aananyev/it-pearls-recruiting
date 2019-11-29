@@ -36,32 +36,32 @@ order by e.fullName]]>
         <groupBox spacing="true">
             <vbox spacing="true">
                 <lookupPickerField width="100%" optionsContainer="positionsDc" dataContainer="jobCandidatesDc"
-                                   property="openPosition">
+                                   property="openPosition" caption="mainMsg://msgPosition">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                         <action id="open" type="picker_open"/>
                     </actions>
                 </lookupPickerField>
                 <hbox spacing="true" width="100%">
-                    <dateField/>
-                    <dateField/>
+                    <dateField align="TOP_CENTER" datatype="date" caption="msg://msgDateFrom"/>
+                    <dateField align="TOP_CENTER" datatype="date" caption="msg://msgDateTo"/>
                 </hbox>
                 <grid spacing="true" width="100%">
                     <columns count="4"/>
                     <rows>
                         <row>
-                            <checkBox caption="msg://msgInverse" align="MIDDLE_LEFT"/>
+                            <checkBox caption="msg://msgInverse" align="MIDDLE_RIGHT"/>
                             <lookupField dataContainer="jobCandidatesDc" optionsContainer="companiesDc"
                                          property="cityOfResidence" width="100%" align="MIDDLE_LEFT"/>
-                            <checkBox caption="msg://msgInverse" align="MIDDLE_LEFT"/>
+                            <checkBox caption="msg://msgInverse" align="MIDDLE_RIGHT"/>
                             <lookupField dataContainer="jobCandidatesDc" optionsContainer="companiesDc"
                                          property="cityOfResidence" width="100%" align="MIDDLE_LEFT"/>
                         </row>
                         <row>
-                            <checkBox caption="msg://msgInverse" align="MIDDLE_LEFT"/>
+                            <checkBox caption="msg://msgInverse" align="MIDDLE_RIGHT"/>
                             <lookupField dataContainer="jobCandidatesDc" optionsContainer="companiesDc"
                                          property="cityOfResidence" width="100%" align="MIDDLE_LEFT"/>
-                            <checkBox caption="msg://msgInverse" align="MIDDLE_LEFT"/>
+                            <checkBox caption="msg://msgInverse" align="MIDDLE_RIGHT"/>
                             <lookupField dataContainer="jobCandidatesDc" optionsContainer="companiesDc"
                                          property="cityOfResidence" width="100%" align="MIDDLE_LEFT"/>
                         </row>

@@ -1,18 +1,20 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.IteractionList;
-import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.JobCandidate;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 @UiController("itpearls_JobCandidate.edit")
 @UiDescriptor("job-candidate-edit.xml")
@@ -23,14 +25,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
     private Label<String> labelCV;
+    @Named("tabIteraction")
+    private VBoxLayout tabIteraction;
+    @Named("tabResume")
+    private VBoxLayout tabResume;
     @Inject
-    private DataManager dataManager;
+    private Table<IteractionList> jobCandidateIteractionListTable;
     @Inject
-    private CollectionContainer<IteractionList> iteractionListsDc;
-    @Inject
-    private Label<String> labelLastRecrutier;
-    @Inject
-    private InstanceContainer<JobCandidate> jobCandidateDc;
+    private Table<CandidateCV> jobCandidateCandidateCvTable;
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -101,6 +103,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 if( getEditedEntity().getFullName() == null )
                     getEditedEntity().setFullName("");
            }
+
+           // заблокировать вкладки с резюме и итеракицями
+           tabIteraction.setVisible( true );
+           tabResume.setVisible( true );
+       } else {
+           // заблокировать вкладки с резюме и итеракицями
+           tabIteraction.setVisible( false );
+           tabResume.setVisible( false );
        }
 
        // если есть резюме, то поставить галку
