@@ -1,0 +1,5 @@
+create table ITPEARLS_RECRUTIES_TASKS_USER_LINK (
+    RECRUTIES_TASKS_ID uuid,
+    USER_ID uuid,
+    primary key (RECRUTIES_TASKS_ID, USER_ID)
+);

@@ -8,6 +8,7 @@
 	<!-- <item screen="itpearls_SocialNetworkURLs.browse"/> -->
         <item screen="itpearls_CandidateCV.browse"/>
         <item screen="itpearls_JobCandidateSearch.browse"/>
+        <item screen="itpearls_RecrutiesTasks.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
         <item screen="itpearls_Iteraction._tree.browse"/>

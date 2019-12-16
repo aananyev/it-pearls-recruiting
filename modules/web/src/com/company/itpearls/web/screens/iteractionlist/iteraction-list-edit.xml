@@ -44,8 +44,10 @@ order by e.iterationName]]>
         </collection>
         <collection id="recrutiersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
             <loader id="recrutiersLc">
-                <query><![CDATA[select e from sec$User e
-order by e.lastName, e.firstName]]></query>
+                <query>
+                    <![CDATA[select e from sec$User e
+order by e.lastName, e.firstName]]>
+                </query>
             </loader>
         </collection>
         <collection id="positionsDc" class="com.company.itpearls.entity.Position" view="position-view">

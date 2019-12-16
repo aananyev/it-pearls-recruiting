@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -32,6 +33,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private LookupPickerField<Iteraction> iteractionTypeField;
     @Inject
     private InstanceContainer<IteractionList> iteractionListDc;
+    @Inject
+    private LookupPickerField<JobCandidate> candidateField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -157,8 +160,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
                 else {
                     screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+                            .newEntity()
                             .withScreenId(calledClass + ".edit")
-                            .withLaunchMode(OpenMode.DIALOG)
+                            .withLaunchMode(OpenMode.NEW_TAB)
                             .build()
                             .show();
         }

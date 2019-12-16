@@ -22,5 +22,6 @@
         <class>com.company.itpearls.entity.JobHistory</class>
         <class>com.company.itpearls.entity.CandidateCV</class>
         <class>com.company.itpearls.entity.Setup</class>
+        <class>com.company.itpearls.entity.RecrutiesTasks</class>
     </persistence-unit>
 </persistence>

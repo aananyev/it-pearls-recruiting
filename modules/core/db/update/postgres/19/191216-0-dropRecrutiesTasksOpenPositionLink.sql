@@ -1,0 +1,1 @@
+alter table itpearls_recruties_tasks_open_position_link rename to ITPEARLS_RECRUTIES_TASKS_OPEN_POSITION_LINK__U72434 ;

@@ -1,0 +1,1 @@
+alter table itpearls_recruties_tasks_user_link rename to ITPEARLS_RECRUTIES_TASKS_USER_LINK__U65450 ;

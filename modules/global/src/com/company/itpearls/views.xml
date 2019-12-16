@@ -223,4 +223,11 @@
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
     </view>
+    <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-view" extends="_local">
+        <property name="reacrutier" view="_local"/>
+        <property name="openPosition" view="_minimal"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
+        <property name="projectName" view="_minimal"/>
+    </view>
 </views>

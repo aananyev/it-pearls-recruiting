@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="recrutiesTasksesTable"
+        messagesPack="com.company.itpearls.web.screens.recrutiestasks">
+    <data readOnly="true">
+        <collection id="recrutiesTasksesDc"
+                    class="com.company.itpearls.entity.RecrutiesTasks"
+                    view="recrutiesTasks-view">
+            <loader id="recrutiesTasksesDl">
+                <query>
+                    <![CDATA[select e from itpearls_RecrutiesTasks e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="recrutiesTasksesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="recrutiesTasksesTable"
+                dataLoader="recrutiesTasksesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="recrutiesTasksesTable"
+                    width="100%"
+                    dataContainer="recrutiesTasksesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="startDate"/>
+                <column id="endDate"/>
+                <column id="reacrutier.name"/>
+                <column id="openPosition.vacansyName"/>
+                <column id="openPosition.projectName.projectName"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="recrutiesTasksesTable.create"/>
+                <button id="editBtn" action="recrutiesTasksesTable.edit"/>
+                <button id="removeBtn" action="recrutiesTasksesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

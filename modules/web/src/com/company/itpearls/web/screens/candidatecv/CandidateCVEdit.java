@@ -51,9 +51,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    public void setCandidate( JobCandidate candidate ) {
+/*    public void setCandidate( JobCandidate candidate ) {
         candidateField.setValue( candidate );
-    }
+    } */
 
     @Inject
     private TextField<String> textFieldIOriginalCV;

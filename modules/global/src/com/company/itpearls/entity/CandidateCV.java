@@ -14,7 +14,10 @@ import java.util.Date;
 
 @NamePattern("%s|candidate")
 @Table(name = "ITPEARLS_CANDIDATE_CV", indexes = {
-        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V", columnList = "CANDIDATE_ID")
+        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V", columnList = "CANDIDATE_ID"),
+        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V_POSITION", columnList = "RESUME_POSITION_ID"),
+        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V_VACANSY", columnList = "TO_VACANCY_ID"),
+        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V_OWNER", columnList = "OWNER_ID")
 })
 @Entity(name = "itpearls_CandidateCV")
 public class CandidateCV extends StandardEntity {
