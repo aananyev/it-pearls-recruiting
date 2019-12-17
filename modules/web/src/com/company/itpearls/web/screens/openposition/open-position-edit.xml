@@ -65,6 +65,19 @@ order by e.cityRuName]]></query>
                 </query>
             </loader>
         </collection>
+        <collection id="taskRecrutior" class="com.company.itpearls.entity.RecrutiesTasks" view="recrutiesTasks-view">
+            <loader id="recrutiesTasksesDl">
+                <query>
+                    <![CDATA[select e from itpearls_RecrutiesTasks e
+order by e.reacrutier, e.endDate desc]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.openPosition.vacansyName = :openPosition</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -119,7 +132,7 @@ order by e.cityRuName]]></query>
                                caption="msg://msgSalaryMax" width="50%"/>
                 </groupBox>
             </tab>
-            <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tab">
+            <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tabJobDescription">
                 <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="350pt"/>
             </tab>
             <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true">
@@ -140,6 +153,17 @@ order by e.cityRuName]]></query>
                         </buttonsPanel>
                     </table>
                 </groupBox>
+            </tab>
+            <tab caption="mainMsg://msgResrutierTask" margin="true,false,false,false" spacing="true" id="tabRecrutior">
+                <table id="recrutiesTasksTable" height="100px" width="100%" dataContainer="taskRecrutior">
+                    <columns>
+                        <column id="startDate"/>
+                        <column id="endDate"/>
+                        <column id="reacrutier.name"/>
+                        <column id="openPosition.vacansyName"/>
+                        <column id="openPosition.projectName.projectName"/>
+                    </columns>
+                </table>
             </tab>
             <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
                 <table id="openPositionCandidatesTable" height="400px" width="100%" dataContainer="jobCandidatesDc">

@@ -41,13 +41,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TextField<String> vacansyNameField;
     @Inject
     private CollectionLoader<JobCandidate> jobCandidatesDl;
+    @Inject
+    private CollectionLoader<RecrutiesTasks> recrutiesTasksesDl;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if(!PersistenceHelper.isNew(getEditedEntity()))
+        if(!PersistenceHelper.isNew(getEditedEntity())) {
             jobCandidatesDl.setParameter("candidatePersonPosition", getEditedEntity().getPositionType().getPositionRuName());
-        else
+            recrutiesTasksesDl.setParameter( "openPosition", getEditedEntity().getVacansyName() );
+        } else {
             jobCandidatesDl.removeParameter("candidatePersonPosition");
+            recrutiesTasksesDl.removeParameter( "openPosition" );
+        }
 
         jobCandidatesDl.load();
     }
