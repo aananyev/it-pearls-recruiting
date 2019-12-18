@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="someFilesesTable"
+        messagesPack="com.company.itpearls.web.screens.somefiles">
+    <data readOnly="true">
+        <collection id="someFilesesDc"
+                    class="com.company.itpearls.entity.SomeFiles"
+                    view="_local">
+            <loader id="someFilesesDl">
+                <query>
+                    <![CDATA[select e from itpearls_SomeFiles e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="someFilesesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="someFilesesTable"
+                dataLoader="someFilesesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="someFilesesTable"
+                    width="100%"
+                    dataContainer="someFilesesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="fileDescription"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="someFilesesTable.create"/>
+                <button id="editBtn" action="someFilesesTable.edit"/>
+                <button id="removeBtn" action="someFilesesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

@@ -19,6 +19,8 @@
         <item screen="itpearls_Region.browse"/>
         <item screen="itpearls_Ownershup.browse"/>
         <item screen="itpearls_Position.browse"/>
+        <item screen="itpearls_FileType.browse"/>
+        <item screen="itpearls_SomeFiles.browse"/>
     </menu>
     <menu id="application-project">
         <item screen="itpearls_Person.browse"/>

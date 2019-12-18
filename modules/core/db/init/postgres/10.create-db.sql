@@ -433,8 +433,63 @@ create table ITPEARLS_RECRUTIES_TASKS (
     START_DATE date not null,
     END_DATE date,
     REACRUTIER_ID uuid not null,
-    OPEN_POSITION_ID uuid not null,
     --
     primary key (ID)
 )^
 -- end ITPEARLS_RECRUTIES_TASKS
+-- begin ITPEARLS_RECRUITING_RECRUTIERS
+create table ITPEARLS_RECRUITING_RECRUTIERS (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    RECRUTIER_NAME_ID uuid not null,
+    PASSAGE text,
+    SEND_PASSAGE boolean,
+    CHECK_PASSAGE boolean,
+    RECRUTIER_CV_ID uuid,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_RECRUITING_RECRUTIERS
+-- begin ITPEARLS_FILE_TYPE
+create table ITPEARLS_FILE_TYPE (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME_FILE_TYPE varchar(30),
+    DECRIPTION_FILE_TYPE varchar(80),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_FILE_TYPE
+-- begin ITPEARLS_SOME_FILES
+create table ITPEARLS_SOME_FILES (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    FILE_DESCRIPTOR_ID uuid,
+    FILE_DESCRIPTION varchar(80),
+    FILE_OWNER_ID uuid,
+    FILE_TYPE_ID uuid,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SOME_FILES

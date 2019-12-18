@@ -64,5 +64,14 @@
         <entity class="com.company.itpearls.entity.RecrutiesTasks">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.RecruitingRecrutiers">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.SomeFiles">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.FileType">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

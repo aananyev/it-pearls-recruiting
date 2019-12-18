@@ -23,5 +23,8 @@
         <class>com.company.itpearls.entity.CandidateCV</class>
         <class>com.company.itpearls.entity.Setup</class>
         <class>com.company.itpearls.entity.RecrutiesTasks</class>
+        <class>com.company.itpearls.entity.RecruitingRecrutiers</class>
+        <class>com.company.itpearls.entity.SomeFiles</class>
+        <class>com.company.itpearls.entity.FileType</class>
     </persistence-unit>
 </persistence>

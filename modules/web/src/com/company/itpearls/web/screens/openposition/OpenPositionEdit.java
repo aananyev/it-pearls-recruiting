@@ -17,14 +17,6 @@ import javax.inject.Inject;
 @EditedEntityContainer("openPositionDc")
 @LoadDataBeforeShow
 public class OpenPositionEdit extends StandardEditor<OpenPosition> {
-    /*    @Inject
-        private CollectionContainer<Company> companyNamesDc;
-        @Inject
-        private CollectionContainer<City> citiesDc;
-        @Inject
-        private CollectionContainer<Project> projectDc;
-        @Inject
-        private CollectionContainer<CompanyDepartament> companyDepartamentsDc; */
     @Inject
     private LookupPickerField<City> cityOpenPositionField;
     @Inject

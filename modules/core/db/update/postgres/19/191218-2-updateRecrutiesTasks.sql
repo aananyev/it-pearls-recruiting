@@ -1,0 +1,4 @@
+alter table ITPEARLS_RECRUTIES_TASKS rename column open_position_id to open_position_id__u89738 ;
+alter table ITPEARLS_RECRUTIES_TASKS alter column open_position_id__u89738 drop not null ;
+alter table ITPEARLS_RECRUTIES_TASKS drop constraint FK_ITPEARLS_RECRUTIES_TASKS_ON_OPEN_POSITION ;
+drop index IDX_ITPEARLS_RECRUTIES_TASKS_ON_OPEN_POSITION ;

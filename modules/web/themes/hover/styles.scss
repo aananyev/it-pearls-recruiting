@@ -9,3 +9,32 @@
 
   @include com_company_itpearls-hover-ext;
 }
+
+.active-customer {
+    font-weight: bold;
+}
+
+.open-position-empty-recrutier {
+    color: gray;
+    font-weight: bold;
+}
+
+.open-position-job-recrutier {
+    color: black;
+    font-weight: normal;
+}
+
+.premium-grade {
+    background-color: red;
+    color: white;
+}
+
+.high-grade {
+    background-color: green;
+    color: white;
+}
+
+.standard-grade {
+    background-color: blue;
+    color: white;
+}

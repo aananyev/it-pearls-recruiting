@@ -30,19 +30,16 @@ public class RecrutiesTasks extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "REACRUTIER_ID")
     protected User reacrutier;
-
-    @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     protected OpenPosition openPosition;
 
-    public void setOpenPosition(OpenPosition openPosition) {
-        this.openPosition = openPosition;
-    }
-
     public OpenPosition getOpenPosition() {
         return openPosition;
+    }
+
+    public void setOpenPosition(OpenPosition openPosition) {
+        this.openPosition = openPosition;
     }
 
     public void setReacrutier(User reacrutier) {
