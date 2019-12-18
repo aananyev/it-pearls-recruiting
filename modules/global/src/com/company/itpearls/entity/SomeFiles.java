@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
@@ -8,17 +9,22 @@ import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 
+@NamePattern("%s|fileDescription")
 @Table(name = "ITPEARLS_SOME_FILES")
 @Entity(name = "itpearls_SomeFiles")
 public class SomeFiles extends StandardEntity {
     private static final long serialVersionUID = 5350354177979238926L;
 
+    @Column(name = "FILE_DESCRIPTION", length = 80)
+    protected String fileDescription;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_DESCRIPTOR_ID")
     protected FileDescriptor fileDescriptor;
 
-    @Column(name = "FILE_DESCRIPTION", length = 80)
-    protected String fileDescription;
+    @Lob
+    @Column(name = "FILE_COMMENT")
+    protected String fileComment;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,6 +35,14 @@ public class SomeFiles extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_TYPE_ID")
     protected FileType fileType;
+
+    public String getFileComment() {
+        return fileComment;
+    }
+
+    public void setFileComment(String fileComment) {
+        this.fileComment = fileComment;
+    }
 
     public FileType getFileType() {
         return fileType;

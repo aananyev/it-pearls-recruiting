@@ -6,7 +6,7 @@
     <data readOnly="true">
         <collection id="someFilesesDc"
                     class="com.company.itpearls.entity.SomeFiles"
-                    view="_local">
+                    view="someFiles-view">
             <loader id="someFilesesDl">
                 <query>
                     <![CDATA[select e from itpearls_SomeFiles e]]>
@@ -32,7 +32,10 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="fileDescriptor"/>
                 <column id="fileDescription"/>
+                <column id="fileOwner"/>
+                <column id="fileType"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

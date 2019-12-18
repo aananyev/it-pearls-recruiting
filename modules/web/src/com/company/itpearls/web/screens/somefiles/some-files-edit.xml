@@ -6,16 +6,46 @@
     <data>
         <instance id="someFilesDc"
                   class="com.company.itpearls.entity.SomeFiles"
-                  view="_local">
+                  view="someFiles-view">
             <loader/>
         </instance>
+        <collection id="fileOwnersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
+            <loader id="fileOwnersLc">
+                <query>
+                    <![CDATA[select e from sec$User e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="fileTypesDc" class="com.company.itpearls.entity.FileType" view="fileType-view">
+            <loader id="fileTypesLc">
+                <query>
+                    <![CDATA[select e from itpearls_FileType e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="someFilesDc">
-            <column width="250px">
-                <textField id="fileDescriptionField" property="fileDescription"/>
+    <layout expand="editActions" spacing="true" width="100%">
+        <form id="form" dataContainer="someFilesDc" width="100%">
+            <column width="100%">
+                <lookupPickerField id="fileOwnerField" optionsContainer="fileOwnersDc" property="fileOwner"
+                                   dataContainer="someFilesDc" width="50%" required="true">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="fileTypeField" optionsContainer="fileTypesDc" property="fileType"
+                                   dataContainer="someFilesDc" width="50%" required="true">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <upload id="fileDescriptorField" fileStoragePutMode="IMMEDIATE" property="fileDescriptor"
+                        showFileName="true" dataContainer="someFilesDc"/>
+                <textField id="fileDescriptionField" property="fileDescription" dataContainer="someFilesDc"
+                           width="50%" required="true"/>
+                <textArea id="someFilesTextArea" dataContainer="someFilesDc" property="fileComment" width="50%"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">
