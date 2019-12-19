@@ -41,16 +41,18 @@ order by e.name]]>
                 </query>
             </loader>
         </collection>
-        <keyValueCollection id="someFilesDc">
-            <loader id="someFilesDl">
+        <collection id="someFilesesDc" class="com.company.itpearls.entity.SomeFiles" view="someFiles-view">
+            <loader id="someFilesesDl">
                 <query>
-                    <![CDATA[select e from itpearls_SomeFiles e]]>
+                    <![CDATA[select e from itpearls_SomeFiles e ]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidateCV.candidate.fullName = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
-            <properties>
-                <property name="candidateCv" class="com.company.itpearls.entity.CandidateCV"/>
-            </properties>
-        </keyValueCollection>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -123,9 +125,10 @@ order by e.name]]>
                     </tab>
                     <tab id="tabFiles" caption="Files" margin="true,false,fsalse,false" spacing="true">
 
-                        <table id="someFilesTable" height="100px" width="100%" dataContainer="someFilesDc">
+                        <table id="someFilesTable" height="300px" width="100%" dataContainer="someFilesesDc">
                             <columns>
-                                <column id="candidateCv"/>
+                                <column id="fileDescription"/>
+                                <column id="fileComment"/>
                             </columns>
                             <buttonsPanel>
                                 <button action="someFilesTable.add"/>

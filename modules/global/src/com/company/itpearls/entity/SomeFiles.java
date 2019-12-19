@@ -8,6 +8,7 @@ import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|fileDescription")
 @Table(name = "ITPEARLS_SOME_FILES")
@@ -15,10 +16,12 @@ import javax.persistence.*;
 public class SomeFiles extends StandardEntity {
     private static final long serialVersionUID = 5350354177979238926L;
 
-    @Column(name = "FILE_DESCRIPTION", length = 80)
+    @NotNull
+    @Column(name = "FILE_DESCRIPTION", nullable = false, length = 80)
     protected String fileDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FILE_DESCRIPTOR_ID")
     protected FileDescriptor fileDescriptor;
 
@@ -26,13 +29,15 @@ public class SomeFiles extends StandardEntity {
     @Column(name = "FILE_COMMENT")
     protected String fileComment;
 
+    @NotNull
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FILE_OWNER_ID")
     protected User fileOwner;
 
+    @NotNull
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FILE_TYPE_ID")
     protected FileType fileType;
 
@@ -40,6 +45,10 @@ public class SomeFiles extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CANDIDATE_CV_ID")
     protected CandidateCV candidateCV;
+
+    public void setFileDescription(String fileDescription) {
+        this.fileDescription = fileDescription;
+    }
 
     public CandidateCV getCandidateCV() {
         return candidateCV;
@@ -75,10 +84,6 @@ public class SomeFiles extends StandardEntity {
 
     public String getFileDescription() {
         return fileDescription;
-    }
-
-    public void setFileDescription(String fileDescription) {
-        this.fileDescription = fileDescription;
     }
 
     public FileDescriptor getFileDescriptor() {

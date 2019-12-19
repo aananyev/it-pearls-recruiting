@@ -1,11 +1,13 @@
 package com.company.itpearls.web.screens.candidatecv;
 
 import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.entity.SomeFiles;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Link;
 import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
 import com.haulmont.cuba.security.global.UserSession;
@@ -24,6 +26,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private LookupPickerField<JobCandidate> candidateField;
     @Inject
     private Link linkOriginalCV;
+    @Inject
+    private CollectionLoader<SomeFiles> someFilesesDl;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -79,5 +83,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-
+    @Subscribe
+    public void onBeforeShow1(BeforeShowEvent event) {
+        if( !PersistenceHelper.isNew( getEditedEntity() ) )
+            someFilesesDl.setParameter( "candidate", getEditedEntity().getCandidate().getFullName() );
+    }
 }
