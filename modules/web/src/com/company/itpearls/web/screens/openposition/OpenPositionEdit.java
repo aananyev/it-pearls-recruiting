@@ -52,20 +52,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("companyDepartamentField")
     public void onCompanyDepartamentFieldValueChange(HasValue.ValueChangeEvent<CompanyDepartament> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setCompanyName(getEditedEntity().getCompanyDepartament().getCompanyName());
+            if( getEditedEntity().getCompanyDepartament().getDepartamentRuName() != null )
+                getEditedEntity().setCompanyName(getEditedEntity().getCompanyDepartament().getCompanyName());
         }
     }
 
     @Subscribe("companyNameField")
     public void onCompanyNameFieldValueChange(HasValue.ValueChangeEvent<Company> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setCityPosition(getEditedEntity().getCompanyName().getCityOfCompany());
+            if( getEditedEntity().getCompanyName().getCityOfCompany() != null )
+                getEditedEntity().setCityPosition(getEditedEntity().getCompanyName().getCityOfCompany());
         }
     }
 
     @Subscribe("projectNameField")
     public void onProjectNameFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
+            if( getEditedEntity().getProjectName().getProjectDepartment() != null )
             getEditedEntity().setCompanyDepartament(getEditedEntity().getProjectName().getProjectDepartment());
         }
     }

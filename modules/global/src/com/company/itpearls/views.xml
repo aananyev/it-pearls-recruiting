@@ -167,7 +167,7 @@
         </property>
         <property name="currentJobPosition" fetch="JOIN" view="position-view"/>
         <property name="vacancy" view="_local"/>
-        <property name="project" view="_minimal"/>
+        <property name="project" view="_local"/>
         <property name="companyDepartment" view="_minimal"/>
         <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal">
@@ -232,13 +232,13 @@
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
         <property name="projectName" view="_minimal"/>
     </view>
-    <view entity="itpearls_SomeFiles" name="someFiles-view" extends="_minimal">
+    <view entity="itpearls_SomeFiles" name="someFiles-view" extends="_local">
         <property name="fileDescriptor" view="_minimal">
             <property name="size"/>
         </property>
-        <property name="fileComment"/>
         <property name="fileOwner" view="_local"/>
         <property name="fileType" view="_local"/>
+        <property name="candidateCV" view="candidateCV-view"/>
     </view>
     <view entity="itpearls_FileType" name="fileType-view" extends="_local"/>
 </views>

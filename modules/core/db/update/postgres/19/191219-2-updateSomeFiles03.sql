@@ -1,0 +1,3 @@
+alter table ITPEARLS_SOME_FILES rename column candidate_cv_id to candidate_cv_id__u94481 ;
+alter table ITPEARLS_SOME_FILES drop constraint FK_ITPEARLS_SOME_FILES_ON_CANDIDATE_CV ;
+drop index IDX_ITPEARLS_SOME_FILES_ON_CANDIDATE_CV ;

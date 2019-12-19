@@ -32,10 +32,12 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="fileDescriptor"/>
                 <column id="fileDescription"/>
+                <column id="fileDescriptor"/>
+                <column id="fileComment"/>
                 <column id="fileOwner"/>
                 <column id="fileType"/>
+                <column id="candidateCV"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

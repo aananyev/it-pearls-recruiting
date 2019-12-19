@@ -16,36 +16,48 @@
                 </query>
             </loader>
         </collection>
-        <collection id="fileTypesDc" class="com.company.itpearls.entity.FileType" view="fileType-view">
+        <collection id="fileTypesDc" class="com.company.itpearls.entity.FileType" view="_minimal">
             <loader id="fileTypesLc">
                 <query>
                     <![CDATA[select e from itpearls_FileType e]]>
                 </query>
             </loader>
         </collection>
+        <collection id="candidateCVsDc" class="com.company.itpearls.entity.CandidateCV" view="_minimal">
+            <loader id="candidateCVsLc">
+                <query>
+                    <![CDATA[select e from itpearls_CandidateCV e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true" width="100%">
+    <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="someFilesDc" width="100%">
             <column width="100%">
+                <textField id="fileDescriptionField" property="fileDescription" required="true" width="100%"/>
+                <upload id="fileDescriptorField" fileStoragePutMode="IMMEDIATE" property="fileDescriptor"
+                        showFileName="true"/>
+                <textArea id="fileCommentField" property="fileComment" rows="5" width="100%"/>
                 <lookupPickerField id="fileOwnerField" optionsContainer="fileOwnersDc" property="fileOwner"
-                                   dataContainer="someFilesDc" width="50%" required="true">
+                                   required="true" width="50%">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
                 <lookupPickerField id="fileTypeField" optionsContainer="fileTypesDc" property="fileType"
-                                   dataContainer="someFilesDc" width="50%" required="true">
+                                   required="true" width="50%">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <upload id="fileDescriptorField" fileStoragePutMode="IMMEDIATE" property="fileDescriptor"
-                        showFileName="true" dataContainer="someFilesDc"/>
-                <textField id="fileDescriptionField" property="fileDescription" dataContainer="someFilesDc"
-                           width="50%" required="true"/>
-                <textArea id="someFilesTextArea" dataContainer="someFilesDc" property="fileComment" width="50%"/>
+                <lookupPickerField id="candidateCVField" optionsContainer="candidateCVsDc" property="candidateCV"
+                                   width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

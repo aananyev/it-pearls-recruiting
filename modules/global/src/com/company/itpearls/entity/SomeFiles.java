@@ -36,6 +36,19 @@ public class SomeFiles extends StandardEntity {
     @JoinColumn(name = "FILE_TYPE_ID")
     protected FileType fileType;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CANDIDATE_CV_ID")
+    protected CandidateCV candidateCV;
+
+    public CandidateCV getCandidateCV() {
+        return candidateCV;
+    }
+
+    public void setCandidateCV(CandidateCV candidateCV) {
+        this.candidateCV = candidateCV;
+    }
+
     public String getFileComment() {
         return fileComment;
     }

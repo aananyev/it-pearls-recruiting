@@ -485,10 +485,12 @@ create table ITPEARLS_SOME_FILES (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    FILE_DESCRIPTOR_ID uuid,
     FILE_DESCRIPTION varchar(80) not null,
+    FILE_DESCRIPTOR_ID uuid,
+    FILE_COMMENT text,
     FILE_OWNER_ID uuid not null,
     FILE_TYPE_ID uuid not null,
+    CANDIDATE_CV_ID uuid,
     --
     primary key (ID)
 )^

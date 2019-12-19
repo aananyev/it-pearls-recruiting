@@ -9,6 +9,7 @@
         <item screen="itpearls_CandidateCV.browse"/>
         <item screen="itpearls_JobCandidateSearch.browse"/>
         <item screen="itpearls_RecrutiesTasks.browse"/>
+        <item screen="itpearls_SomeFiles.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
         <item screen="itpearls_Iteraction._tree.browse"/>
@@ -20,7 +21,6 @@
         <item screen="itpearls_Ownershup.browse"/>
         <item screen="itpearls_Position.browse"/>
         <item screen="itpearls_FileType.browse"/>
-        <item screen="itpearls_SomeFiles.browse"/>
     </menu>
     <menu id="application-project">
         <item screen="itpearls_Person.browse"/>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.candidatecv">
@@ -40,6 +41,16 @@ order by e.name]]>
                 </query>
             </loader>
         </collection>
+        <keyValueCollection id="someFilesDc">
+            <loader id="someFilesDl">
+                <query>
+                    <![CDATA[select e from itpearls_SomeFiles e]]>
+                </query>
+            </loader>
+            <properties>
+                <property name="candidateCv" class="com.company.itpearls.entity.CandidateCV"/>
+            </properties>
+        </keyValueCollection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -109,6 +120,24 @@ order by e.name]]>
                                       width="100%" height="300pt"/>
                         <upload id="fileCVField" fileStoragePutMode="IMMEDIATE" property="fileCV" showFileName="true"
                                 align="TOP_LEFT" caption="msg://msgCV" dataContainer="candidateCVDc"/>
+                    </tab>
+                    <tab id="tabFiles" caption="Files" margin="true,false,fsalse,false" spacing="true">
+
+                        <table id="someFilesTable" height="100px" width="100%" dataContainer="someFilesDc">
+                            <columns>
+                                <column id="candidateCv"/>
+                            </columns>
+                            <buttonsPanel>
+                                <button action="someFilesTable.add"/>
+                                <button action="someFilesTable.edit"/>
+                                <button action="someFilesTable.remove"/>
+                            </buttonsPanel>
+                            <actions>
+                                <action type="add" id="add"/>
+                                <action type="edit" id="edit"/>
+                                <action type="remove" id="remove"/>
+                            </actions>
+                        </table>
                     </tab>
                     <tab id="tabLetter" caption="msg://msgLetter" margin="true,false,false,false" spacing="true">
                         <richTextArea dataContainer="candidateCVDc" property="letter" width="100%" height="350pt"/>
