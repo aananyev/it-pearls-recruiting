@@ -123,11 +123,14 @@ order by e.name]]>
                         <upload id="fileCVField" fileStoragePutMode="IMMEDIATE" property="fileCV" showFileName="true"
                                 align="TOP_LEFT" caption="msg://msgCV" dataContainer="candidateCVDc"/>
                     </tab>
-                    <tab id="tabFiles" caption="Files" margin="true,false,fsalse,false" spacing="true">
+                    <tab id="tabFiles" caption="mainMsg://msgFiles" margin="true,false,fsalse,false" spacing="true">
 
                         <table id="someFilesTable" height="300px" width="100%" dataContainer="someFilesesDc">
                             <columns>
                                 <column id="fileDescription"/>
+                                <column id="fileType.nameFileType"/>
+                                <column id="fileOwner.name"/>
+                                <column id="fileDescriptor.size"/>
                                 <column id="fileComment"/>
                             </columns>
                             <buttonsPanel>

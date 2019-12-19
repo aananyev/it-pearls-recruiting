@@ -33,11 +33,10 @@
             </actions>
             <columns>
                 <column id="fileDescription"/>
-                <column id="fileDescriptor"/>
-                <column id="fileComment"/>
                 <column id="fileOwner"/>
                 <column id="fileType"/>
                 <column id="candidateCV"/>
+                <column id="fileDescriptor.size"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
