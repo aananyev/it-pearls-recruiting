@@ -54,6 +54,19 @@ order by e.cityRuName]]>
                 </query>
             </loader>
         </collection>
+        <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs"
+                    view="socialNetworkURLs-view">
+            <loader id="socialNetworkURLsesDl">
+                <query>
+                    <![CDATA[select e from itpearls_SocialNetworkURLs e ]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.jobCandidate.id = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -72,7 +85,7 @@ order by e.cityRuName]]>
                 </rows>
             </grid>
         </groupBox>
-        <tabSheet>
+        <tabSheet id="tabSheetSocialNetworks" description="mainMsg://msgSocialNetworks">
             <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
                     <grid spacing="true" width="100%">
@@ -152,24 +165,6 @@ order by e.cityRuName]]>
                         </rows>
                     </grid>
                 </groupBox>
-		<!-- <groupBox spacing="true" caption="msg://msgSocialNetwork">
-                    <table id="jobCandidateSocialNetworkTable" height="200px" width="100%" dataContainer="jobCandidateSocialNetworksDc">
-                        <columns>
-                            <column id="networkName"/>
-                            <column id="networkURLS"/>
-                        </columns>
-                        <buttonsPanel>
-                            <button id="addButtonSN" action="jobCandidateSocialNetworkTable.add"/>
-                            <button id="editButtonSN" action="jobCandidateSocialNetworkTable.edit"/>
-                            <button id="removeButtonSN" action="jobCandidateSocialNetworkTable.remove"/>
-                        </buttonsPanel>
-                        <actions>
-                            <action id="add" type="add"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
-                    </table>
-	    </groupBox> -->
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
@@ -182,11 +177,11 @@ order by e.cityRuName]]>
                             <column id="recrutier.name" caption="msg://msgRecrutier"/>
                             <column id="comment"/>
                         </columns>
-                        <actions/>
-                        <buttonsPanel visible="false">
-                            <button id="addButton"/>
-                            <button id="editButton"/>
-                            <button id="removeButton"/>
+                        <actions>
+                            <action type="create" id="create"/>
+                        </actions>
+                        <buttonsPanel>
+                            <button id="addButton" action="jobCandidateIteractionListTable.create"/>
                         </buttonsPanel>
                     </table>
                 </groupBox>
@@ -228,16 +223,37 @@ order by e.cityRuName]]>
                             <column id="resumePosition"/>
                         </columns>
                         <actions>
-                            <action id="add" type="add"/>
+                            <action type="create" id="create"/>
                             <action id="edit" type="edit"/>
                             <action id="remove" type="remove"/>
                         </actions>
-                        <buttonsPanel visible="false">
-                            <button id="addButtonCV" action="jobCandidateCandidateCvTable.add"/>
+                        <buttonsPanel>
+                            <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
                             <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
                             <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
                         </buttonsPanel>
                     </table>
+                </groupBox>
+            </tab>
+            <tab caption="mainMsg://msgSocialNetworks" margin="true,false,false,false" spacing="true" id="tabSocialNetworks"
+                 description="mainMsg://msgSocialNetwork">
+                <groupBox spacing="true">
+                <table id="socialNetworkURLsTable" height="100px" width="100%" dataContainer="socialNetworkURLsesDc">
+                    <columns>
+                        <column id="networkName"/>
+                        <column id="networkURLS"/>
+                    </columns>
+                    <buttonsPanel>
+                        <button id="createButtonSocialNetwork" action="socialNetworkURLsTable.create"/>
+                        <button id="editButtonSocialNetwork" action="socialNetworkURLsTable.edit"/>
+                        <button id="removeButtonSocialNetwork" action="socialNetworkURLsTable.remove"/>
+                    </buttonsPanel>
+                    <actions>
+                        <action type="create" id="create"/>
+                        <action type="edit" id="edit"/>
+                        <action type="remove" id="remove"/>
+                    </actions>
+                </table>
                 </groupBox>
             </tab>
         </tabSheet>

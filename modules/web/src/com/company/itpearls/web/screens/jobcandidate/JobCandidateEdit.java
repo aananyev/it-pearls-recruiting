@@ -1,8 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.City;
-import com.company.itpearls.entity.IteractionList;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
@@ -11,7 +9,6 @@ import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.JobCandidate;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -33,6 +30,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Table<IteractionList> jobCandidateIteractionListTable;
     @Inject
     private Table<CandidateCV> jobCandidateCandidateCvTable;
+    @Inject
+    private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -97,11 +96,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
        if(!PersistenceHelper.isNew(getEditedEntity())) {
            if(!getEditedEntity().getFullName().equals(null)) {
                 iteractionListsDl.setParameter("candidate", getEditedEntity().getId());
-
                 iteractionListsDl.load();
+
+                socialNetworkURLsesDl.setParameter( "candidate", getEditedEntity().getId() );
+                socialNetworkURLsesDl.load();
 
                 if( getEditedEntity().getFullName() == null )
                     getEditedEntity().setFullName("");
+           } else {
+               iteractionListsDl.removeParameter( "candidate" );
+               socialNetworkURLsesDl.removeParameter( "candidate" );
            }
 
            // заблокировать вкладки с резюме и итеракицями

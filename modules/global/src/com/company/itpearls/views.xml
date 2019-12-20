@@ -98,6 +98,7 @@
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="jobCandidate" view="_local">
+            <property name="personPosition" view="_minimal"/>
             <property name="socialNetwork" view="_local"/>
         </property>
     </view>
