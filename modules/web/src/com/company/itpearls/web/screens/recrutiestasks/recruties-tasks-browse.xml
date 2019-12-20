@@ -32,11 +32,11 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="startDate"/>
-                <column id="endDate"/>
                 <column id="reacrutier.name"/>
                 <column id="openPosition.vacansyName"/>
                 <column id="openPosition.projectName.projectName"/>
+                <column id="startDate"/>
+                <column id="endDate"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
