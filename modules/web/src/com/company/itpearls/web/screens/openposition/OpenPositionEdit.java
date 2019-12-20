@@ -1,16 +1,17 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.cuba.core.app.EmailService;
+import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.components.GroupBoxLayout;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.LookupPickerField;
-import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
+import java.util.Collections;
 
 @UiController("itpearls_OpenPosition.edit")
 @UiDescriptor("open-position-edit.xml")
@@ -35,6 +36,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CollectionLoader<JobCandidate> jobCandidatesDl;
     @Inject
     private CollectionLoader<RecrutiesTasks> recrutiesTasksesDl;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private EmailService emailService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -100,4 +105,59 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
            getEditedEntity().setOpenClose(false);
        }
     }
+
+    @Override
+      protected void commit(Action.ActionPerformedEvent event) {
+        // If a new entity was saved to the database, ask a user about sending an email
+        if( PersistenceHelper.isNew( getEditedEntity() ) )
+          dialogs.createOptionDialog()
+                    .withCaption("Email")
+                    .withMessage("Send the news item by email?")
+                    .withContentMode( ContentMode.HTML )
+                    .withActions(
+                            new Action[] {
+                                    new DialogAction(DialogAction.Type.YES) {
+                                        @Override
+                                        public void actionPerform(Component component) {
+                                            sendByEmail();
+                                        }
+                                    },
+                                    new DialogAction(DialogAction.Type.NO)
+                            })
+                    .show();
+
+      super.commit( event );
+    }
+
+    // Queues an email for sending asynchronously
+    private void sendByEmail() {
+        OpenPosition openPosttion = getEditedEntity();
+
+        EmailInfo emailInfo = new EmailInfo(
+                getMailList(),                                  // получатели
+                getSubject(),                                   // тема сообщения
+                null, // the "from" address will be taken from the "cuba.email.fromAddress" app property
+                getNewOpenPositionText(),                       // текст сообщения
+                Collections.singletonMap( "OpenPosition", openPosttion ) // template parameters
+        );
+
+        emailService.sendEmailAsync(emailInfo);
+    }
+
+    private String getNewOpenPositionText() {
+        // "com/company/demo/templates/news_item.txt"
+        return "com/itpearls/core/open_position.txt";
+    }
+
+    private String getSubject() {
+        return "Test message";
+    }
+
+    private String getMailList() {
+        return "a.ananjev@gmail.com";
+    }
+
+
+
+
 }

@@ -2,17 +2,18 @@ package com.company.itpearls.web.screens.candidatecv;
 
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.SomeFiles;
+import com.haulmont.cuba.core.app.EmailService;
+import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.Link;
-import com.haulmont.cuba.gui.components.LookupPickerField;
-import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.Date;
 
 @UiController("itpearls_CandidateCV.edit")
@@ -23,11 +24,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private UserSession userSession;
     @Inject
-    private LookupPickerField<JobCandidate> candidateField;
-    @Inject
     private Link linkOriginalCV;
     @Inject
     private CollectionLoader<SomeFiles> someFilesesDl;
+    @Inject
+    private Dialogs dialogs;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
