@@ -6,6 +6,7 @@ import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.VBoxLayout;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -32,6 +33,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Table<CandidateCV> jobCandidateCandidateCvTable;
     @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
+    @Inject
+    private CollectionContainer<JobHistory> jobHistoriesDc;
+    @Inject
+    private CollectionLoader<JobHistory> jobHistoriesDl;
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -87,7 +92,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .getCityRegion()
                     .getRegionCountry());
         }
-        
     }
 
     // загрузить таблицу взаимодействий
@@ -95,17 +99,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onBeforeShow(BeforeShowEvent event) {
        if(!PersistenceHelper.isNew(getEditedEntity())) {
            if(!getEditedEntity().getFullName().equals(null)) {
+
                 iteractionListsDl.setParameter("candidate", getEditedEntity().getId());
                 iteractionListsDl.load();
 
                 socialNetworkURLsesDl.setParameter( "candidate", getEditedEntity().getId() );
                 socialNetworkURLsesDl.load();
 
+                jobHistoriesDl.setParameter( "candidate", getEditedEntity().getFullName() );
+                jobHistoriesDl.load();
+
                 if( getEditedEntity().getFullName() == null )
                     getEditedEntity().setFullName("");
            } else {
                iteractionListsDl.removeParameter( "candidate" );
                socialNetworkURLsesDl.removeParameter( "candidate" );
+               jobHistoriesDl.removeParameter( "candidate" );
            }
 
            // заблокировать вкладки с резюме и итеракицями

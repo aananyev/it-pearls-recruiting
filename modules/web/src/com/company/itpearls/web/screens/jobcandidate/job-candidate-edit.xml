@@ -67,6 +67,18 @@ order by e.cityRuName]]>
                 </query>
             </loader>
         </collection>
+        <collection id="jobHistoriesDc" class="com.company.itpearls.entity.JobHistory" view="jobHistory-view">
+            <loader id="jobHistoriesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobHistory e ]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidate.fullName = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -258,10 +270,11 @@ order by e.cityRuName]]>
             </tab>
             <tab caption="msg://msgJobHistory" margin="true,false,false,false" spacing="true" id="tabJobHistory">
                 <groupBox spacing="true">
-                    <table id="jobCandidateJobHistoryTable" height="350px" width="100%" dataContainer="jobCandidateJobHistoriesDc">
+                    <table id="jobCandidateJobHistoryTable" height="350px" width="100%" dataContainer="jobHistoriesDc">
                         <columns>
                             <column id="dateNewsPosition"/>
-                            <column id="jobHistory.currentCompany.companyShortName"/>
+                            <column id="currentCompany.comanyName"/>
+                            <column id="currentPosition.positionRuName"/>
                         </columns>
                         <buttonsPanel>
                             <button action="jobCandidateJobHistoryTable.create"/>
