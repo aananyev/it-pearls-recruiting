@@ -89,6 +89,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         if( !PersistenceHelper.isNew( getEditedEntity() ) )
             someFilesesDl.setParameter( "candidate", getEditedEntity().getCandidate().getFullName() );
         else
-            someFilesesDl.removeParameter( "candidate" );
+            someFilesesDl.setParameter( "candidate", "None" );
     }
 }

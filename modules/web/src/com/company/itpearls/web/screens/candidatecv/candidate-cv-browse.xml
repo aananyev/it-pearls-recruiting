@@ -44,6 +44,7 @@
                 <column id="datePost" caption="msg://msgDatePost"/>
                 <column id="toVacancy.vacansyName" caption="mainMsg://msgCVtoVacansy"/>
                 <column id="resumePosition" caption="msg://msgPosition"/>
+                <column id="semafor" generator="generateSemaforCell"/>
                 <column id="owner" caption="mainMsg://msgRecrutier"/>
             </columns>
             <rowsCount/>
