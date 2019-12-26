@@ -2,6 +2,8 @@ package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.Lookup;
+import com.haulmont.cuba.core.entity.annotation.LookupType;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -12,8 +14,7 @@ import javax.validation.constraints.NotNull;
 public class SocialNetworkURLs extends StandardEntity {
     private static final long serialVersionUID = -4652381238943479311L;
 
-    @NotNull
-    @Column(name = "NETWORK_NAME", nullable = false, length = 80)
+    @Column(name = "NETWORK_NAME", length = 80)
     protected String networkName;
 
     @NotNull
@@ -23,6 +24,19 @@ public class SocialNetworkURLs extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_CANDIDATE_ID")
     protected JobCandidate jobCandidate;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SOCIAL_NETWORK_URL_ID")
+    protected SocialNetworkType socialNetworkURL;
+
+    public SocialNetworkType getSocialNetworkURL() {
+        return socialNetworkURL;
+    }
+
+    public void setSocialNetworkURL(SocialNetworkType socialNetworkURL) {
+        this.socialNetworkURL = socialNetworkURL;
+    }
 
     public JobCandidate getJobCandidate() {
         return jobCandidate;

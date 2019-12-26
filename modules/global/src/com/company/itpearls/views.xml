@@ -97,6 +97,9 @@
         </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
+        <property name="socialNetworkURL" view="_minimal">
+            <property name="socialNetwork"/>
+        </property>
         <property name="jobCandidate" view="_local">
             <property name="personPosition" view="_minimal"/>
             <property name="socialNetwork" view="_local"/>
@@ -169,6 +172,7 @@
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local">
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
+            <property name="status"/>
         </property>
         <property name="currentJobPosition" fetch="JOIN" view="position-view"/>
         <property name="vacancy" view="_local"/>
@@ -247,4 +251,5 @@
         <property name="candidateCV" view="candidateCV-view"/>
     </view>
     <view entity="itpearls_FileType" name="fileType-view" extends="_local"/>
+    <view entity="itpearls_SocialNetworkType" name="socialNetworkType-view" extends="_local"/>
 </views>

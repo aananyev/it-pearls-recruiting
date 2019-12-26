@@ -43,4 +43,28 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         jobCandidatesDl.load();
     }
+
+    @Install(to = "jobCandidatesTable", subject = "iconProvider")
+    private String jobCandidatesTableIconProvider(JobCandidate jobCandidate) {
+        if( jobCandidate.getStatus() != null ) {
+            switch (jobCandidate.getStatus()) {
+                case 0:
+                    return "icons/clear.png";
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                    return "icons/eye-plus.png";
+                case 10:
+                    return "icons/erase.png;";
+            }
+        }
+
+        return "icons/refresh.png";
+    }
 }

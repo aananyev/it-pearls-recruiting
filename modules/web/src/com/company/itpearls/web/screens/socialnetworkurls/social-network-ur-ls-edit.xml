@@ -5,6 +5,14 @@
         focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.socialnetworkurls">
     <data>
+        <collection id="socialNetworkTypesDc" class="com.company.itpearls.entity.SocialNetworkType"
+                    view="socialNetworkType-view">
+            <loader id="socialNetworkTypesDl">
+                <query>
+                    <![CDATA[select e from itpearls_SocialNetworkType e ]]>
+                </query>
+            </loader>
+        </collection>
         <instance id="socialNetworkURLsDc"
                   class="com.company.itpearls.entity.SocialNetworkURLs"
                   view="socialNetworkURLs-view">
@@ -13,17 +21,24 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="socialNetworkURLsDc">
-            <column width="250px">
-                <textField id="networkNameField" property="networkName"/>
-                <textField id="networkURLSField" property="networkURLS"/>
-                <pickerField id="jobCandidateField" property="jobCandidate">
+    <layout expand="editActions" spacing="true" width="100%">
+        <form id="form" dataContainer="socialNetworkURLsDc" width="100%">
+            <column width="100%">
+                <lookupPickerField id="socialNetworkURLsField" dataContainer="socialNetworkURLsDc" optionsContainer="socialNetworkTypesDc"
+                                   description="mainMsg://msgSocialNetworkType" property="socialNetworkURL" width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                    </actions>
+                </lookupPickerField>
+                <pickerField id="jobCandidateField" property="jobCandidate" width="50%">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                         <action id="clear" type="picker_clear"/>
                     </actions>
                 </pickerField>
+                <textField id="networkURLSField" property="networkURLS" width="50%"/>
+                <textField id="networkNameField" property="networkName" visible="false"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

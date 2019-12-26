@@ -76,4 +76,12 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
                         userSessionSource.getUserSession().getUser().getName() + "';",
                 Boolean.class).one();
     } */
+
+    @Install(to = "candidateCVsTable", subject = "iconProvider")
+    protected String candidateCVsTableiconProvider(CandidateCV candidateCV) {
+        if( !candidateCV.getTextCV().isEmpty()  )
+            return candidateCV.getTextCV().isEmpty() ? "icons/ok.png" : "icons/cancel.png";
+        else
+            return "icons/minus.png";
+    }
 }

@@ -134,6 +134,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 labelCV.setValue("|dataManager Резюме: ДА");
             }
         }
+
+        // обнулить статус для вновь создаваемного кандидата
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+            getEditedEntity().setStatus( 0 );
+        }
         // кто последникй рекрутер
         // последний контакт с кандидатом
     }

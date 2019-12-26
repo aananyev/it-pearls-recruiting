@@ -26,5 +26,6 @@
         <class>com.company.itpearls.entity.RecruitingRecrutiers</class>
         <class>com.company.itpearls.entity.SomeFiles</class>
         <class>com.company.itpearls.entity.FileType</class>
+        <class>com.company.itpearls.entity.SocialNetworkType</class>
     </persistence-unit>
 </persistence>

@@ -10,6 +10,7 @@ create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
     DELETED_BY varchar(50),
     --
     NETWORK_NAME varchar(80) not null,
+    SOCIAL_NETWORK_URL_ID uuid,
     NETWORK_URLS varchar(80) not null,
     JOB_CANDIDATE_ID uuid,
     --
@@ -45,6 +46,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     SPECIALISATION_ID uuid,
     SKILL_TREE_ID uuid,
     OPEN_POSITION_ID uuid,
+    STATUS integer,
     --
     primary key (ID)
 )^
@@ -495,3 +497,21 @@ create table ITPEARLS_SOME_FILES (
     primary key (ID)
 )^
 -- end ITPEARLS_SOME_FILES
+-- begin ITPEARLS_SOCIAL_NETWORK_TYPE
+create table ITPEARLS_SOCIAL_NETWORK_TYPE (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    SOCIAL_NETWORK varchar(30) not null,
+    SOCIAL_NETWORK_URL varchar(80),
+    COMMENT_ varchar(255),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SOCIAL_NETWORK_TYPE

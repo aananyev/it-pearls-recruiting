@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
-        focusComponent="socialNetworkURLsesTable"
-        messagesPack="com.company.itpearls.web.screens.socialnetworkurls">
+        focusComponent="socialNetworkTypesTable"
+        messagesPack="com.company.itpearls.web.screens.socialnetworktype">
     <data readOnly="true">
-        <collection id="socialNetworkURLsesDc"
-                    class="com.company.itpearls.entity.SocialNetworkURLs"
-                    view="socialNetworkURLs-view">
-            <loader id="socialNetworkURLsesDl">
+        <collection id="socialNetworkTypesDc"
+                    class="com.company.itpearls.entity.SocialNetworkType"
+                    view="socialNetworkType-view">
+            <loader id="socialNetworkTypesDl">
                 <query>
-                    <![CDATA[select e from itpearls_SocialNetworkURLs e]]>
+                    <![CDATA[select e from itpearls_SocialNetworkType e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="socialNetworkURLsesTable"
+    <layout expand="socialNetworkTypesTable"
             spacing="true">
         <filter id="filter"
-                applyTo="socialNetworkURLsesTable"
-                dataLoader="socialNetworkURLsesDl">
+                applyTo="socialNetworkTypesTable"
+                dataLoader="socialNetworkTypesDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="socialNetworkURLsesTable"
+        <groupTable id="socialNetworkTypesTable"
                     width="100%"
-                    dataContainer="socialNetworkURLsesDc">
+                    dataContainer="socialNetworkTypesDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="socialNetworkURL.socialNetwork"/>
-                <column id="networkURLS"/>
-                <column id="jobCandidate"/>
+                <column id="socialNetwork"/>
+                <column id="socialNetworkURL"/>
+                <column id="comment"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="socialNetworkURLsesTable.create"/>
-                <button id="editBtn" action="socialNetworkURLsesTable.edit"/>
-                <button id="removeBtn" action="socialNetworkURLsesTable.remove"/>
+                <button id="createBtn" action="socialNetworkTypesTable.create"/>
+                <button id="editBtn" action="socialNetworkTypesTable.edit"/>
+                <button id="removeBtn" action="socialNetworkTypesTable.remove"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

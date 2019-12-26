@@ -1,0 +1,1 @@
+alter table ITPEARLS_SOCIAL_NETWORK_UR_LS add column SOCIAL_NETWORK_URL_ID uuid ;
