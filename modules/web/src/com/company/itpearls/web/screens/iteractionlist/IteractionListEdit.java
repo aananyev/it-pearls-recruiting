@@ -13,6 +13,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.UUID;
 
 @UiController("itpearls_IteractionList.edit")
 @UiDescriptor("iteraction-list-edit.xml")
@@ -39,6 +40,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private MetadataTools metadataTools;
     @Inject
     private CollectionLoader<JobCandidate> candidatesLc;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -96,24 +99,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onBeforeClose(AfterCloseEvent event) {
         // записать статус в карточку кандидата
         Integer i = Integer.parseInt( getEditedEntity().getIteractionType().getNumber());
-        candidateField.getValue().setStatus( Integer.parseInt(
-                getEditedEntity().getIteractionType().getNumber() ) );
-        candidateField.commit();
+        JobCandidate    candidate = loadJobCandidate( candidateField.getValue().getId() );
+        candidate.setStatus( i );
+        dataManager.commit( candidate );
+    }
 
-
-        /* если нажата кнопка ОК, то спросить ото сделать ли новую запись?
-        if(event.getCloseAction().equals(WINDOW_COMMIT_AND_CLOSE_ACTION)) {
-            dialogs.createOptionDialog()
-                    .withCaption("Внимание")
-                    .withMessage("Создать новую запись?")
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                    .withHandler(e -> {
-                                        createNewField(getEditedEntity());
-                                    }),
-                            new DialogAction(DialogAction.Type.NO)
-                    ).show();
-        } */
+    private JobCandidate loadJobCandidate( UUID jobCandidateId ) {
+        return dataManager.load( JobCandidate.class )
+                .id( jobCandidateId )
+                .view( "jobCandidate-view" )
+                .one();
     }
     
     @Subscribe
