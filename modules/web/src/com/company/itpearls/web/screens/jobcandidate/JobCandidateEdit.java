@@ -2,17 +2,16 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.gui.components.VBoxLayout;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Date;
 
 @UiController("itpearls_JobCandidate.edit")
 @UiDescriptor("job-candidate-edit.xml")
@@ -37,6 +36,38 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionContainer<JobHistory> jobHistoriesDc;
     @Inject
     private CollectionLoader<JobHistory> jobHistoriesDl;
+    @Inject
+    private DateField<Date> birdhDateField;
+    @Inject
+    private LookupPickerField<Company> currentCompanyField;
+    @Inject
+    private TextField<String> emailField;
+    @Inject
+    private TextField<String> firstNameField;
+    @Inject
+    private LookupPickerField<Specialisation> jobCandidateSpecialisationField;
+    @Inject
+    private TextField<String> middleNameField;
+    @Inject
+    private TextField<String> secondNameField;
+    @Inject
+    private LookupPickerField<City> jobCityCandidateField;
+    @Inject
+    private LookupPickerField<Position> personPositionField;
+    @Inject
+    private TextField<String> phoneField;
+    @Inject
+    private LookupPickerField<Country> positionCountryField;
+    @Inject
+    private TextField<String> skypeNameField;
+    @Inject
+    private TextField<String> telegramNameField;
+    @Inject
+    private TextField<String> whatsupNameField;
+    @Inject
+    private TextField<String> wiberNameField;
+    @Inject
+    private Label<String> labelQualityPercent;
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -83,6 +114,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         getEditedEntity().setFullName( fullName );
     }
 
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        setPercentLabel();
+    }
+
+    private void setPercentLabel() {
+        // вычислить процент заполнения карточки кандидата
+        Integer qualityPercent = setQualityPercent() * 100 / 15;
+
+        if( !PersistenceHelper.isNew( getEditedEntity() ) ) {
+            labelQualityPercent.setValue("| Процент заполнения карточки: " + qualityPercent.toString()
+                    + "%");
+        }
+    }
+
     @Subscribe("jobCityCandidateField")
     public void onJobCityCandidateFieldValueChange(HasValue.ValueChangeEvent<City> event) {
         if(!getEditedEntity().getCityOfResidence().equals(null)
@@ -93,6 +139,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .getRegionCountry());
         }
     }
+    
+    
 
     // загрузить таблицу взаимодействий
     @Subscribe
@@ -141,6 +189,64 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
         // кто последникй рекрутер
         // последний контакт с кандидатом
+    }
+
+    @Subscribe(target = Target.DATA_CONTEXT)
+    public void onChange(DataContext.ChangeEvent event) {
+       setPercentLabel();
+    }
+
+
+    private Integer setQualityPercent() {
+        Integer qPercent = 0;
+
+        if( birdhDateField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( currentCompanyField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( emailField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( firstNameField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( middleNameField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( secondNameField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( jobCandidateSpecialisationField != null )
+            qPercent = ++qPercent;
+
+        if( jobCityCandidateField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( personPositionField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( phoneField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( positionCountryField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( skypeNameField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( telegramNameField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( whatsupNameField.getValue() != null )
+            qPercent = ++qPercent;
+
+        if( wiberNameField.getValue() != null )
+            qPercent = ++qPercent;
+
+        return qPercent;
+
     }
 
     @Subscribe

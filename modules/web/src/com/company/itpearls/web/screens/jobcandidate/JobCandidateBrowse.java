@@ -65,6 +65,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             }
         }
 
-        return "icons/refresh.png";
+        return "icons/cancel.png";
     }
 }

@@ -93,6 +93,7 @@ order by e.cityRuName]]>
                                align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="fullName"/>
                         <label id="labelCV" align="MIDDLE_CENTER" stylename="h3"/>
                         <label id="labelLastRecrutier"/>
+                        <label id="labelQualityPercent"/>
                     </row>
                 </rows>
             </grid>
