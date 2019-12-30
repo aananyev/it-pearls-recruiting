@@ -8,7 +8,7 @@ import com.haulmont.cuba.core.entity.annotation.LookupType;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@NamePattern("%s %s|number,iterationName")
+@NamePattern("%s|iterationName")
 @Table(name = "ITPEARLS_ITERACTION", indexes = {
         @Index(name = "IDX_ITPEARLS_ITERACTION", columnList = "ITERATION_NAME")
 })
@@ -31,6 +31,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "ITERATION_NAME", nullable = false, unique = true, length = 80)
     protected String iterationName;
 
+    @Column(name = "PIC", length = 80)
+    protected String pic;
+
     @Column(name = "CALL_BUTTON_TEXT", length = 30)
     protected String callButtonText;
 
@@ -39,6 +42,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "CALL_FORM")
     protected Boolean callForm;
+
+    public String getPic() {
+        return pic;
+    }
+
+    public void setPic(String pic) {
+        this.pic = pic;
+    }
 
     public Boolean getCallForm() {
         return callForm;

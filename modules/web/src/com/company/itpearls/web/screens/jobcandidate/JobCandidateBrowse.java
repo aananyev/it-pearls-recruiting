@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FluentValuesLoader;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -21,6 +23,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CollectionLoader<JobCandidate> jobCandidatesDl;
     @Inject
     private UserSession userSession;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -46,6 +50,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable", subject = "iconProvider")
     private String jobCandidatesTableIconProvider(JobCandidate jobCandidate) {
+        // return getPictString( jobCandidate );
+
         if( jobCandidate.getStatus() != null ) {
             switch (jobCandidate.getStatus()) {
                 case 0:
@@ -66,5 +72,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return "icons/cancel.png";
+    }
+
+    private FluentValuesLoader getPictString(JobCandidate jobCandidate) {
+        // загрузить последний тип взаимодействия
+        FluentValuesLoader s = dataManager.loadValues( "select e.iteractionType where iteractionList e " +
+                "where e.candidate = " + jobCandidate.getFullName() +
+                " and e.iteractionNumber = max( e.iteractionNumber )" );
+
+        return dataManager.loadValues( "select e.iteractionName from iteractionList e " +
+                "where e." );
     }
 }

@@ -36,6 +36,7 @@ order by e.number]]>
                 <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
                 <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"/>
                 <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"/>
+                <textField id="iteractionField" dataContainer="iteractionDc" property="pic"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

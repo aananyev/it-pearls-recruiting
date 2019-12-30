@@ -97,6 +97,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onBeforeClose(AfterCloseEvent event) {
+        // если кейс не нечат, то сначала надо начать
         // записать статус в карточку кандидата
         Integer i = Integer.parseInt( getEditedEntity().getIteractionType().getNumber());
         JobCandidate    candidate = loadJobCandidate( candidateField.getValue().getId() );

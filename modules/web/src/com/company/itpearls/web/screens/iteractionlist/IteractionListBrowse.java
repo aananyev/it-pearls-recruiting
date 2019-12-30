@@ -44,6 +44,11 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
         iteractionListsDl.load();
     }
+
+    @Install(to = "iteractionListsTable", subject = "iconProvider")
+    private String iteractionListsTableIconProvider(IteractionList iteractionList) {
+        return iteractionList.getIteractionType().getPic();
+    }
     
     
 }
