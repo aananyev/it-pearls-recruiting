@@ -50,8 +50,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable", subject = "iconProvider")
     private String jobCandidatesTableIconProvider(JobCandidate jobCandidate) {
-        // return getPictString( jobCandidate );
-
         if( jobCandidate.getStatus() != null ) {
             switch (jobCandidate.getStatus()) {
                 case 0:
@@ -74,13 +72,18 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return "icons/cancel.png";
     }
 
-    private FluentValuesLoader getPictString(JobCandidate jobCandidate) {
+    private String getPictString(JobCandidate jobCandidate) {
         // загрузить последний тип взаимодействия
-        FluentValuesLoader s = dataManager.loadValues( "select e.iteractionType where iteractionList e " +
-                "where e.candidate = " + jobCandidate.getFullName() +
-                " and e.iteractionNumber = max( e.iteractionNumber )" );
+        String s = dataManager.loadValues( "select e.iteractionType " +
+                "from iteractionList e " +
+                "where e.candidate.fullName = :jobCandidate" +
+                " and e.iteractionNumber = max( e.iteractionNumber )" )
+                .parameter( "jobCandidate", jobCandidate.getFullName() )
+                .one()
+                .toString();
 
-        return dataManager.loadValues( "select e.iteractionName from iteractionList e " +
-                "where e." );
+        // return dataManager.loadValues( "select e.iteractionName from iteractionList e " +
+        //        "where e." );
+        return  s;
     }
 }

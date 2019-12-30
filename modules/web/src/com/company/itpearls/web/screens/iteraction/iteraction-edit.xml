@@ -23,7 +23,7 @@ order by e.number]]>
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="iteractionDc" width="100%">
-            <column width="250px">
+            <column width="50%">
                 <checkBox id="iteractionCheckBoxMandatory" dataContainer="iteractionDc" property="mandatoryIteraction" caption="msg://msgMandatory"/>
                 <textField id="numberField" property="number" caption="msg://msgNumber" width="50%"/>
                 <lookupPickerField id="iteractionTreeField" dataContainer="iteractionDc"
@@ -32,11 +32,15 @@ order by e.number]]>
                 <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"
                            width="50%"/>
             </column>
-            <column width="250px">
+            <column width="50%">
                 <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
                 <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"/>
                 <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"/>
-                <textField id="iteractionField" dataContainer="iteractionDc" property="pic"/>
+                <hbox spacing="true" width="100%">
+                    <textField id="iteractionFieldPic" dataContainer="iteractionDc" property="pic" width="200pt"
+                               description="msg://msgPic" caption="msg://msgPic"/>
+                    <embedded id="embeddedPict" align="BOTTOM_RIGHT" type="IMAGE" width="0pt" height="0pt"/>
+                </hbox>
             </column>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

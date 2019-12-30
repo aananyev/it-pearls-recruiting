@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.iteraction;
 
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.components.Embedded;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.TextField;
@@ -14,6 +15,21 @@ import javax.inject.Inject;
 @EditedEntityContainer("iteractionDc")
 @LoadDataBeforeShow
 public class IteractionEdit extends StandardEditor<Iteraction> {
+    @Inject
+    private Embedded embeddedPict;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if( !PersistenceHelper.isNew( getEditedEntity() )) {
+            embeddedPict.setIcon(getEditedEntity().getPic());
+        }
+    }
+
+    @Subscribe("iteractionFieldPic")
+    public void onIteractionFieldPicValueChange(HasValue.ValueChangeEvent<String> event) {
+        embeddedPict.setIcon( getEditedEntity().getPic() );
+    }
+
     @Inject
     private LookupPickerField<Iteraction> iteractionTreeField;
     @Inject
