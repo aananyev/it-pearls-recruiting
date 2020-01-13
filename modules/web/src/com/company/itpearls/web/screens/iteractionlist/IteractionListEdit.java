@@ -2,17 +2,18 @@ package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import org.apache.commons.lang3.ObjectUtils;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @UiController("itpearls_IteractionList.edit")
@@ -31,17 +32,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private LookupPickerField<Iteraction> iteractionTypeField;
     @Inject
-    private InstanceContainer<IteractionList> iteractionListDc;
-    @Inject
-    private LookupPickerField<JobCandidate> candidateField;
-    @Inject
-    private CollectionContainer<JobCandidate> candidatesDc;
-    @Inject
-    private MetadataTools metadataTools;
-    @Inject
-    private CollectionLoader<JobCandidate> candidatesLc;
-    @Inject
     private DataManager dataManager;
+    @Inject
+    private Dialogs dialogs;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -95,14 +88,49 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         return currentUser;
     }
 
+    @Subscribe("candidateField")
+    public void onCandidateFieldValueChange1(HasValue.ValueChangeEvent<JobCandidate> event) {
+        // сколько записей есть по этому кандидату
+        if( getIteractionCount() != 0) {
+            // ввели кандидата - предложи скопировать предыдущую запись
+            dialogs.createOptionDialog()
+                    .withCaption("Подтвердите")
+                    .withMessage("Скопировать предыдущую запись кандидата?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(e -> {
+                                copyPrevionsItems();
+                            }),
+                            new DialogAction(DialogAction.Type.NO)
+                    )
+                    .show();
+        }
+    }
+
+    private Integer getIteractionCount() {
+        Integer d = dataManager.loadValue(
+                "select count(e) " +
+                        "from itpearls_IteractionList e " +
+                        "where e.candidate.fullName = :candidate",
+                Integer.class )
+                .parameter("candidate", getEditedEntity().getCandidate().getFullName() )
+                .one();
+
+        return d;
+    }
+
+    private void copyPrevionsItems() {
+    }
+
     @Subscribe
     public void onBeforeClose(AfterCloseEvent event) {
         // если кейс не нечат, то сначала надо начать
         // записать статус в карточку кандидата
-        Integer i = Integer.parseInt( getEditedEntity().getIteractionType().getNumber());
-        JobCandidate    candidate = loadJobCandidate( candidateField.getValue().getId() );
-        candidate.setStatus( i );
-        dataManager.commit( candidate );
+//        String  a = getEditedEntity().getIteractionType().getNumber();
+//        Integer i = Integer.parseInt( getEditedEntity().getIteractionType().getNumber());
+//        JobCandidate    candidate = loadJobCandidate( candidateField.getValue().getId() );
+//        candidate.setStatus( i );
+//        dataManager.commit( candidate );
     }
 
     private JobCandidate loadJobCandidate( UUID jobCandidateId ) {
