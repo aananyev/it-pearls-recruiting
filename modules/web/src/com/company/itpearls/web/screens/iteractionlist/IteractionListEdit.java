@@ -90,20 +90,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("candidateField")
     public void onCandidateFieldValueChange1(HasValue.ValueChangeEvent<JobCandidate> event) {
-        // сколько записей есть по этому кандидату
-        if( getIteractionCount() != 0) {
-            // ввели кандидата - предложи скопировать предыдущую запись
-            dialogs.createOptionDialog()
-                    .withCaption("Подтвердите")
-                    .withMessage("Скопировать предыдущую запись кандидата?")
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES,
-                                    Action.Status.PRIMARY).withHandler(e -> {
-                                copyPrevionsItems();
-                            }),
-                            new DialogAction(DialogAction.Type.NO)
-                    )
-                    .show();
+        if( PersistenceHelper.isNew( getEditedEntity() )) {
+            // сколько записей есть по этому кандидату
+            if (getIteractionCount() != 0) {
+                // ввели кандидата - предложи скопировать предыдущую запись
+                dialogs.createOptionDialog()
+                        .withCaption("Подтвердите")
+                        .withMessage("Скопировать предыдущую запись кандидата?")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES,
+                                        Action.Status.PRIMARY).withHandler(e -> {
+                                    copyPrevionsItems();
+                                }),
+                                new DialogAction(DialogAction.Type.NO)
+                        )
+                        .show();
+            }
         }
     }
 
@@ -120,6 +122,39 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void copyPrevionsItems() {
+        // вакансия
+        getEditedEntity().setVacancy( dataManager.loadValue(
+                "select e.vacancy " +
+                "from itpearls_IteractionList e " +
+                "where e.candidate.fullName = :candidate and " +
+                "e.numberIteraction = " +
+                "(select max(f.numberIteraction) " +
+                "from itpearls_IteractionList f " +
+                "where f.candidate.fullName = :candidate)", OpenPosition.class )
+        .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+        .one() );
+        // проект
+        getEditedEntity().setProject( dataManager.loadValue(
+                "select e.project.projectName " +
+                        "from itpearls_IteractionList e " +
+                        "where e.candidate.fullName = :candidate and " +
+                        "e.numberIteraction = " +
+                        "(select max(f.numberIteraction) " +
+                        "from itpearls_IteractionList f " +
+                        "where f.candidate.fullName = :candidate)", Project.class )
+                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+                .one() );
+        // департамент
+        getEditedEntity().setCompanyDepartment( dataManager.loadValue(
+                "select e.companyDepatment.departmentRuName " +
+                        "from itpearls_IteractionList e " +
+                        "where e.candidate.fullName = :candidate and " +
+                        "e.numberIteraction = " +
+                        "(select max(f.numberIteraction) " +
+                        "from itpearls_IteractionList f " +
+                        "where f.candidate.fullName = :candidate)", CompanyDepartament.class )
+                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+                .one() );
     }
 
     @Subscribe
