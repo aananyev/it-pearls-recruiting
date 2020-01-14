@@ -8,12 +8,10 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
-import org.apache.commons.lang3.ObjectUtils;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @UiController("itpearls_IteractionList.edit")
@@ -123,19 +121,21 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private void copyPrevionsItems() {
         // вакансия
-        getEditedEntity().setVacancy( dataManager.loadValue(
-                "select e.vacancy " +
-                "from itpearls_IteractionList e " +
-                "where e.candidate.fullName = :candidate and " +
-                "e.numberIteraction = " +
-                "(select max(f.numberIteraction) " +
-                "from itpearls_IteractionList f " +
-                "where f.candidate.fullName = :candidate)", OpenPosition.class )
-        .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
-        .one() );
+        getEditedEntity().setVacancy( dataManager.load( OpenPosition.class )
+                .query( "select e.vacancy " +
+                        "from itpearls_IteractionList e " +
+                        "where e.candidate.fullName = :candidate and " +
+                        "e.numberIteraction = " +
+                        "(select max(f.numberIteraction) " +
+                        "from itpearls_IteractionList f " +
+                        "where f.candidate.fullName = :candidate)" )
+                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+                .view( "openPosition-view" )
+                .one()
+        );
         // проект
         getEditedEntity().setProject( dataManager.loadValue(
-                "select e.project.projectName " +
+                "select e.project " +
                         "from itpearls_IteractionList e " +
                         "where e.candidate.fullName = :candidate and " +
                         "e.numberIteraction = " +
@@ -145,15 +145,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
                 .one() );
         // департамент
-        getEditedEntity().setCompanyDepartment( dataManager.loadValue(
-                "select e.companyDepatment.departmentRuName " +
+        getEditedEntity().setCompanyDepartment( dataManager.load( CompanyDepartament.class )
+                .query(
+                "select e.companyDepartment " +
                         "from itpearls_IteractionList e " +
                         "where e.candidate.fullName = :candidate and " +
                         "e.numberIteraction = " +
                         "(select max(f.numberIteraction) " +
                         "from itpearls_IteractionList f " +
-                        "where f.candidate.fullName = :candidate)", CompanyDepartament.class )
+                        "where f.candidate.fullName = :candidate)" )
                 .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+                .view( "companyDepartament-view" )
                 .one() );
     }
 
