@@ -1,5 +1,9 @@
 package com.company.itpearls.web.screens.openposition;
 
+import com.company.itpearls.entity.RecrutiesTasks;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.LoadContext;
+import com.haulmont.cuba.core.global.ValueLoadContext;
 import com.haulmont.cuba.gui.actions.list.CreateAction;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
@@ -10,6 +14,8 @@ import com.company.itpearls.entity.OpenPosition;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.Null;
+import java.util.List;
 
 @UiController("itpearls_OpenPosition.browse")
 @UiDescriptor("open-position-browse.xml")
@@ -22,14 +28,30 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private CheckBox checkBoxOnlyOpenedPosition;
     @Inject
     private Table<OpenPosition> openPositionsTable;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe
     protected void onInit( InitEvent event ) {
         openPositionsTable.setStyleProvider( ( openPositions, property ) -> {
-            if( property == null )
-                return "open-position-empty-recrutier";
-            else
-                return "open-position-empty-recruitier";
+            Integer s = dataManager.loadValue( "select count(e.reacrutier) " +
+                    "from itpearls_RecrutiesTasks e " +
+                    "where e.openPosition = :openPos", Integer.class)
+                    .parameter( "openPos", openPositions )
+                    .one();
+
+            if( property == null ) {
+                if( s == 0 )
+                    return "open-position-empty-recrutier";
+                else
+                    return "open-position-job-recruitier";
+            }
+            else {
+                if (s == 0)
+                    return "open-position-empty-recrutier";
+                else
+                    return "open-position-job-recruitier";
+            }
         });
     }
 
