@@ -79,7 +79,7 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
 
     @Install(to = "candidateCVsTable", subject = "iconProvider")
     protected String candidateCVsTableiconProvider(CandidateCV candidateCV) {
-        if( !candidateCV.getTextCV().isEmpty()  )
+        if( candidateCV.getTextCV() != null )
             return candidateCV.getTextCV().isEmpty() ? "icons/ok.png" : "icons/cancel.png";
         else
             return "icons/minus.png";
