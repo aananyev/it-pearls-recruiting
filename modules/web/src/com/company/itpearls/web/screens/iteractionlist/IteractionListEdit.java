@@ -1,10 +1,14 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.BindingState;
+import com.haulmont.cuba.gui.components.data.Options;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -13,6 +17,8 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @UiController("itpearls_IteractionList.edit")
 @UiDescriptor("iteraction-list-edit.xml")
@@ -33,6 +39,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private DataManager dataManager;
     @Inject
     private Dialogs dialogs;
+    @Inject
+    private CollectionLoader<OpenPosition> openPositionsDl;
+    @Inject
+    private LookupPickerField<OpenPosition> vacancyFiels;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -120,19 +130,34 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void copyPrevionsItems() {
+        // а вдруг позиция уже закрыта?
+        openPositionsDl.setQuery("select e from itpearls_OpenPosition e " +
+                "order by e.vacansyName");
+        openPositionsDl.load();
+        vacancyFiels.setOptionsList(openPositionsDl.getContainer().getItems());
+
+        OpenPosition openPos;
         // вакансия
-        getEditedEntity().setVacancy( dataManager.load( OpenPosition.class )
-                .query( "select e.vacancy " +
-                        "from itpearls_IteractionList e " +
-                        "where e.candidate.fullName = :candidate and " +
-                        "e.numberIteraction = " +
-                        "(select max(f.numberIteraction) " +
-                        "from itpearls_IteractionList f " +
-                        "where f.candidate.fullName = :candidate)" )
-                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
-                .view( "openPosition-view" )
-                .one()
-        );
+        // а вдруг в результате экспорта не были заполнены поля
+        try {
+            openPos = dataManager.load(OpenPosition.class)
+                    .query("select e.vacancy " +
+                            "from itpearls_IteractionList e " +
+                            "where e.candidate.fullName = :candidate and " +
+                            "e.numberIteraction = " +
+                            "(select max(f.numberIteraction) " +
+                            "from itpearls_IteractionList f " +
+                            "where f.candidate.fullName = :candidate)")
+                    .parameter("candidate", getEditedEntity().getCandidate().getFullName())
+                    .view("openPosition-view")
+                    .one();
+        } catch ( IllegalStateException e ) {
+            openPos = null;
+        }
+        // а вдруг пустое поле?
+        if( openPos != null ) {
+            getEditedEntity().setVacancy( openPos );
+        }
         // проект
         getEditedEntity().setProject( dataManager.loadValue(
                 "select e.project " +
