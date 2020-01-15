@@ -15,6 +15,7 @@ import com.company.itpearls.entity.OpenPosition;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.constraints.Null;
+import java.util.Date;
 import java.util.List;
 
 @UiController("itpearls_OpenPosition.browse")
@@ -36,8 +37,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsTable.setStyleProvider( ( openPositions, property ) -> {
             Integer s = dataManager.loadValue( "select count(e.reacrutier) " +
                     "from itpearls_RecrutiesTasks e " +
-                    "where e.openPosition = :openPos", Integer.class)
+                    "where e.openPosition = :openPos and " +
+                    "e.endDate >= :currentDate", Integer.class)
                     .parameter( "openPos", openPositions )
+                    .parameter( "currentDate", new Date() )
                     .one();
 
             if( property == null ) {
