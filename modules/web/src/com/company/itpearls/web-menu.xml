@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
+    <menu id="application-researching" insertBefore="application-hunting">
+        <item screen="itpearls_JobCandidateSearch.browse"/>
+        <item screen="itpearls_RecrutiesTasks.browse"/>
+    </menu>
     <menu id="application-hunting" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse"/>
         <item screen="itpearls_JobCandidate.browse"/>
-	<!-- <item screen="itpearls_JobHistory.browse"/> -->
-        <item screen="itpearls_IteractionList.browse"/>
-	    <item screen="itpearls_SocialNetworkURLs.browse"/>
         <item screen="itpearls_CandidateCV.browse"/>
-        <item screen="itpearls_JobCandidateSearch.browse"/>
-        <item screen="itpearls_RecrutiesTasks.browse"/>
+        <item screen="itpearls_SocialNetworkURLs.browse"/>
         <item screen="itpearls_JobHistory.browse" openType="NEW_TAB"/>
+        <item screen="itpearls_IteractionList.browse"/>
     </menu>
     <menu id="application-hadbook" insertBefore="application-project">
         <item screen="itpearls_Iteraction._tree.browse"/>
