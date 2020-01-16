@@ -12,6 +12,7 @@ import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
@@ -48,6 +49,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected IteractionList parentChain;
     protected Project currentProject;
     protected Boolean newProject;
+    static Boolean myClient;
+
     @Inject
     private CollectionContainer<Iteraction> iteractionTypesDc;
     @Inject
@@ -159,23 +162,68 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("candidateField")
     public void onCandidateFieldValueChange1(HasValue.ValueChangeEvent<JobCandidate> event) {
-        if( PersistenceHelper.isNew( getEditedEntity() )) {
-            // сколько записей есть по этому кандидату
-            if (getIteractionCount() != 0) {
-                // ввели кандидата - предложи скопировать предыдущую запись
-                dialogs.createOptionDialog()
-                        .withCaption("Подтвердите")
-                        .withMessage("Скопировать предыдущую запись кандидата?")
-                        .withActions(
-                                new DialogAction(DialogAction.Type.YES,
-                                        Action.Status.PRIMARY).withHandler(e -> {
-                                    copyPrevionsItems();
-                                }),
-                                new DialogAction(DialogAction.Type.NO)
-                        )
-                        .show();
+        if( yourCandidate() ) {
+            if( PersistenceHelper.isNew( getEditedEntity() )) {
+                // сколько записей есть по этому кандидату
+                if (getIteractionCount() != 0) {
+                    // ввели кандидата - предложи скопировать предыдущую запись
+                    dialogs.createOptionDialog()
+                            .withCaption("Подтвердите")
+                            .withMessage("Скопировать предыдущую запись кандидата?")
+                            .withActions(
+                                    new DialogAction(DialogAction.Type.YES,
+                                            Action.Status.PRIMARY).withHandler(e -> {
+                                            copyPrevionsItems();
+                                    }),
+                                    new DialogAction(DialogAction.Type.NO)
+                            )
+                            .show();
+                    }
             }
+        } else {
+            getEditedEntity().setCandidate( null );
         }
+    }
+
+    private boolean yourCandidate() {
+        // твой ли это кандидат?
+        User user = userSession.getUser();
+
+        User lastUser = dataManager.loadValue("select e.recrutier " +
+                "from itpearls_IteractionList e " +
+                "where e.dateIteraction > :dateLimit and " +
+                "e.candidate = :candidate and " +
+                "e.numberIteraction = " +
+                "(select max(f.numberIteraction) " +
+                "from itpearls_IteractionList f " +
+                "where f.candidate = :candidate)" , User.class )
+                .parameter( "dateLimit", new Date(System.currentTimeMillis() - 2628000000l))
+                .parameter( "candidate", getEditedEntity().getCandidate() )
+                .one();
+
+        if( !user.equals( lastUser )) {
+            String msg = "Менее месяца назад с кандидатом " +
+                    getEditedEntity().getCandidate().getFullName() +
+                    " работал рекрутер " +
+                    lastUser.getName() +
+                    "\nПродолжаем??";
+            // до этого момента с этим кандидатом работал другой рекрутор: точно надо?
+            myClient = false;
+            dialogs.createOptionDialog()
+                    .withCaption("Подтвердите")
+                    .withMessage( "Продолжаем?" )
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY)
+                                    .withHandler(g1 -> {
+                                        myClient = true;
+                            }),
+                            new DialogAction(DialogAction.Type.NO)
+                    )
+                    .show();
+        }
+
+        return myClient;
     }
 
     private Integer getIteractionCount() {
