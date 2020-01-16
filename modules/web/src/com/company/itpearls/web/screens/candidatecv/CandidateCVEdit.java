@@ -16,10 +16,7 @@ import com.company.itpearls.entity.CandidateCV;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.Date;
-
-import static sun.tools.jconsole.SheetDialog.showOptionDialog;
 
 @UiController("itpearls_CandidateCV.edit")
 @UiDescriptor("candidate-cv-edit.xml")

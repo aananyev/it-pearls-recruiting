@@ -169,7 +169,11 @@
         <property name="createdBy"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_local">
-        <property name="iteractionTree" view="_local"/>
+        <property name="iteractionTree" view="_local">
+            <property name="iteractionTree" view="_minimal">
+                <property name="number"/>
+            </property>
+        </property>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local">
         <property name="candidate" view="_minimal">

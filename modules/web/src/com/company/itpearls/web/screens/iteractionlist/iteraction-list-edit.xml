@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.iteractionlist">
@@ -37,8 +38,14 @@ order by e.departamentRuName]]></query>
         <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="iteraction-view-button">
             <loader id="iteractionTypesLc">
                 <query>
-                    <![CDATA[select e from itpearls_Iteraction e
-order by e.iterationName]]>
+                    <![CDATA[select e from itpearls_Iteraction e order by e.iterationName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e.iteractionTree.number like :number
+                            </c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>

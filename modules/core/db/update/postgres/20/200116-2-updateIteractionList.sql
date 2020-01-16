@@ -1,0 +1,1 @@
+alter table ITPEARLS_ITERACTION_LIST add column ITERACTION_CHAIN_ID uuid ;

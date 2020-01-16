@@ -8,6 +8,7 @@ import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.BindingState;
 import com.haulmont.cuba.gui.components.data.Options;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -43,6 +44,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private CollectionLoader<OpenPosition> openPositionsDl;
     @Inject
     private LookupPickerField<OpenPosition> vacancyFiels;
+    
+    protected IteractionList parentChain;
+    protected Project currentProject;
+    protected Boolean newProject;
+    @Inject
+    private CollectionContainer<Iteraction> iteractionTypesDc;
+    @Inject
+    private CollectionLoader<Iteraction> iteractionTypesLc;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -60,6 +69,58 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
+        IteractionList chain;
+        // сменить цепочку
+        try {
+            chain = dataManager.load( IteractionList.class )
+                .query( "select e " +
+                        "from itpearls_IteractionList e " +
+                        "where e.candidate.fullName = :candidate and " +
+                        "e.project = :project and " +
+                        "e.numberIteraction = " +
+                        "(select max(f.numberIteraction) " +
+                        "from itpearls_IteractionList f " +
+                        "where f.candidate.fullName = :candidate)" )
+                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+                .parameter( "project", getEditedEntity().getProject() )
+                .view( "iteractionList-view" )
+                .one();
+        } catch ( IllegalStateException e ) {
+            chain = null;
+        }
+
+        if( chain == null ) {
+            // Это новый кейс?
+            dialogs.createOptionDialog()
+                    .withCaption("Подтвердите")
+                    .withMessage("Новый проект для кандидата?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler( e-> {
+                                getEditedEntity().setIteractionChain( null );
+                                // если это новый проект для кандидата,
+                                // то необходимо начать его со статуса из первой группы
+                                dialogs.createMessageDialog()
+                                        .withCaption( "Warning" )
+                                        .withMessage( "Тип взаимодействия должен быть из группы 001" )
+                                        .show();
+                                // установить признак нового проекта
+                                newProject = true;
+                                // сократить список в дадалоадете типа итерации
+                                iteractionTypesLc.setParameter("number", "001");
+                                iteractionTypesLc.load();
+
+                            }),
+                            new DialogAction(DialogAction.Type.NO).withHandler(f -> {
+                                getEditedEntity().setIteractionChain( parentChain );
+                                // вернуть взад поле проекта
+                                getEditedEntity().setProject( currentProject );
+                            })
+                    )
+                    .show();
+        }
+        // НО! Если все-таки это из первой группы, то кейс открываем и присваиваем IteractionChain значение NULL
+
+        // заполнить другие поля
         if( getEditedEntity().getVacancy() != null )
             if(getEditedEntity().getVacancy().getProjectName() != null)
                 getEditedEntity().setProject(getEditedEntity().getVacancy().getProjectName());
@@ -182,6 +243,19 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
                 .view( "companyDepartament-view" )
                 .one() );
+        // создание цепочки
+        parentChain = dataManager.load( IteractionList.class )
+                .query( "select e " +
+                        "from itpearls_IteractionList e " +
+                        "where e.candidate.fullName = :candidate and " +
+                        "e.numberIteraction = " +
+                        "(select max(f.numberIteraction) " +
+                        "from itpearls_IteractionList f " +
+                        "where f.candidate.fullName = :candidate)" )
+                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+                .view( "iteractionList-view" )
+                .one();
+        getEditedEntity().setIteractionChain( parentChain );
     }
 
     @Subscribe
@@ -205,6 +279,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         buttonCallAction.setVisible(false);
+        // запомнить текущий проект
+        currentProject = getEditedEntity().getProject();
     }
 
     // создать новый экран
@@ -241,6 +317,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     buttonCallAction.setVisible(true);
                 else
                     buttonCallAction.setVisible(false);
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        // изначально предполагаем, что это продолжение проекта
+        newProject = false;
+        // вся сортировка в поле IteractionType
+        iteractionTypesLc.removeParameter("number");
     }
 
     @Inject

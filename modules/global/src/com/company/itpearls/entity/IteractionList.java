@@ -80,6 +80,18 @@ public class IteractionList extends StandardEntity {
     @Column(name = "RECRUTIER_NAME", length = 80)
     protected String recrutierName;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ITERACTION_CHAIN_ID")
+    protected IteractionList iteractionChain;
+
+    public IteractionList getIteractionChain() {
+        return iteractionChain;
+    }
+
+    public void setIteractionChain(IteractionList iteractionChain) {
+        this.iteractionChain = iteractionChain;
+    }
+
     public void setCurrentJobPosition(Position currentJobPosition) {
         this.currentJobPosition = currentJobPosition;
     }
