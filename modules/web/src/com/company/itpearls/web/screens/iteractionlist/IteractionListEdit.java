@@ -14,6 +14,7 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import org.apache.tools.ant.util.DateUtils;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -50,6 +51,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected Project currentProject;
     protected Boolean newProject;
     static Boolean myClient;
+    protected User lastUser = null;
+    protected Date lastIteraction;
+
 
     @Inject
     private CollectionContainer<Iteraction> iteractionTypesDc;
@@ -168,7 +172,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (getIteractionCount() != 0) {
                     // ввели кандидата - предложи скопировать предыдущую запись
                     dialogs.createOptionDialog()
-                            .withCaption("Подтвердите")
+                            .withCaption("Warning")
                             .withMessage("Скопировать предыдущую запись кандидата?")
                             .withActions(
                                     new DialogAction(DialogAction.Type.YES,
@@ -181,14 +185,29 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     }
             }
         } else {
-            getEditedEntity().setCandidate( null );
+            String msg = "С этим кандидатом " + lastUser.getName() + " контактировал " + lastIteraction.toString() +
+                    " МЕНЕЕ МЕСЯЦА НАЗАД!";
+            // dialogs.createMessageDialog().withCaption( "Warning" ).withMessage( msg ).show();
+
+            dialogs.createOptionDialog()
+                    .withCaption( "Warning" )
+                    .withMessage( msg + "\nПродолжить?" )
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(y -> {
+                                        copyPrevionsItems();
+                            }),
+                            new DialogAction(DialogAction.Type.NO).withHandler(z -> {
+                                getEditedEntity().setCandidate(null);
+                            })
+                    )
+                    .show();
         }
     }
 
     private boolean yourCandidate() {
         // твой ли это кандидат?
         User user = userSession.getUser();
-        User lastUser = null;
 
         myClient = false;
         BigDecimal numberIteraction;
@@ -212,7 +231,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         if( numberIteraction != null ) {
             // больше месяца назад?
-            Date lastIteraction = dataManager.loadValue( "select e.dateIteraction " +
+            lastIteraction = dataManager.loadValue( "select e.dateIteraction " +
                     "from itpearls_IteractionList e " +
                     "where e.numberIteraction = :number", Date.class )
                     .parameter( "number", numberIteraction )
@@ -246,13 +265,19 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private Integer getIteractionCount() {
-        Integer d = dataManager.loadValue(
-                "select count(e) " +
-                        "from itpearls_IteractionList e " +
-                        "where e.candidate.fullName = :candidate",
-                Integer.class )
-                .parameter("candidate", getEditedEntity().getCandidate().getFullName() )
-                .one();
+        Integer d;
+
+        try {
+            d = dataManager.loadValue(
+                    "select count(e) " +
+                            "from itpearls_IteractionList e " +
+                            "where e.candidate.fullName = :candidate",
+                    Integer.class)
+                    .parameter("candidate", getEditedEntity().getCandidate().getFullName())
+                    .one();
+        } catch ( NullPointerException e ) {
+            d = 0;
+        }
 
         return d;
     }
