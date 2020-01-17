@@ -11,6 +11,7 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.Collections;
 
 @UiController("itpearls_OpenPosition.edit")
@@ -127,6 +128,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .show();
 
       super.commit( event );
+    }
+
+    @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        // разослать оповещение об изменении позиции
+        sendMessage();
+        
+    }
+
+    private void sendMessage() {
+        OpenPosition openPosition = getEditedEntity();
+
+        EmailInfo   emailInfo = new EmailInfo( "alan@itpearls.ru",
+                openPosition.getVacansyName(),
+                null, "com/company/itpearls/templates/news_item.txt",
+                Collections.singletonMap( "openPosition", openPosition ));
+
+        emailService.sendEmailAsync( emailInfo );
     }
 
     // Queues an email for sending asynchronously

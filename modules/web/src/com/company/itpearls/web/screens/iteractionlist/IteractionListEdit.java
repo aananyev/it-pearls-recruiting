@@ -116,6 +116,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                 iteractionTypesLc.setParameter("number", "001");
                                 iteractionTypesLc.load();
 
+                                // закрутить сам на себя chain
+                                getEditedEntity().setIteractionChain( getEditedEntity() );
+
                             }),
                             new DialogAction(DialogAction.Type.NO).withHandler(f -> {
                                 getEditedEntity().setIteractionChain( parentChain );
@@ -384,7 +387,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onAfterShow(AfterShowEvent event) {
         if(PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setRecrutier(userSession.getUser());
-            // спросить нужно ли копировать предыдущую запись?
         }
     }
 
