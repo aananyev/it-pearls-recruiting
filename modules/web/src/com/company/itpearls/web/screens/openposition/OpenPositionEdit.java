@@ -107,29 +107,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
        }
     }
 
-    @Override
-      protected void commit(Action.ActionPerformedEvent event) {
-        // If a new entity was saved to the database, ask a user about sending an email
-        if( PersistenceHelper.isNew( getEditedEntity() ) )
-          dialogs.createOptionDialog()
-                    .withCaption("Email")
-                    .withMessage("Send the news item by email?")
-                    .withContentMode( ContentMode.HTML )
-                    .withActions(
-                            new Action[] {
-                                    new DialogAction(DialogAction.Type.YES) {
-                                        @Override
-                                        public void actionPerform(Component component) {
-                                            sendByEmail();
-                                        }
-                                    },
-                                    new DialogAction(DialogAction.Type.NO)
-                            })
-                    .show();
-
-      super.commit( event );
-    }
-
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
         // разослать оповещение об изменении позиции

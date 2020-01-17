@@ -1,27 +1,19 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.*;
-import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.data.BindingState;
-import com.haulmont.cuba.gui.components.data.Options;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import org.apache.tools.ant.util.DateUtils;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 @UiController("itpearls_IteractionList.edit")
 @UiDescriptor("iteraction-list-edit.xml")
@@ -44,21 +36,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Dialogs dialogs;
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
-    @Inject
-    private LookupPickerField<OpenPosition> vacancyFiels;
-    
+
     protected IteractionList parentChain;
     protected Project currentProject;
     protected Boolean newProject;
     static Boolean myClient;
     protected User lastUser = null;
     protected Date lastIteraction;
+    protected JobCandidate candidate;
 
 
-    @Inject
-    private CollectionContainer<Iteraction> iteractionTypesDc;
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
+    @Inject
+    private LookupPickerField<JobCandidate> candidateField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -71,7 +62,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("candidateField")
     public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
-       setCandidateSpecialisation();
+        // запомним кандидата
+       candidate = getEditedEntity().getCandidate(); 
     }
 
     @Subscribe("vacancyFiels")
@@ -92,43 +84,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .parameter( "project", getEditedEntity().getProject() )
                 .view( "iteractionList-view" )
                 .one();
+
+            iteractionTypesLc.removeParameter( "number" );
+            iteractionTypesLc.load();
         } catch ( IllegalStateException e ) {
-            chain = null;
+            // если вообще ничего не нашел
+            chain = getEditedEntity();
+
+            iteractionTypesLc.setParameter("number", "001");
+            iteractionTypesLc.load();
         }
 
-        if( chain == null ) {
-            // Это новый кейс?
-            dialogs.createOptionDialog()
-                    .withCaption("Подтвердите")
-                    .withMessage("Новый проект для кандидата?")
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler( e-> {
-                                getEditedEntity().setIteractionChain( null );
-                                // если это новый проект для кандидата,
-                                // то необходимо начать его со статуса из первой группы
-                                dialogs.createMessageDialog()
-                                        .withCaption( "Warning" )
-                                        .withMessage( "Тип взаимодействия должен быть из группы 001" )
-                                        .show();
-                                // установить признак нового проекта
-                                newProject = true;
-                                // сократить список в дадалоадете типа итерации
-                                iteractionTypesLc.setParameter("number", "001");
-                                iteractionTypesLc.load();
-
-                                // закрутить сам на себя chain
-                                getEditedEntity().setIteractionChain( getEditedEntity() );
-
-                            }),
-                            new DialogAction(DialogAction.Type.NO).withHandler(f -> {
-                                getEditedEntity().setIteractionChain( parentChain );
-                                // вернуть взад поле проекта
-                                getEditedEntity().setProject( currentProject );
-                            })
-                    )
-                    .show();
-        }
-        // НО! Если все-таки это из первой группы, то кейс открываем и присваиваем IteractionChain значение NULL
+        getEditedEntity().setIteractionChain( chain );
 
         // заполнить другие поля
         if( getEditedEntity().getVacancy() != null )
@@ -190,7 +157,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         } else {
             String msg = "С этим кандидатом " + lastUser.getName() + " контактировал " + lastIteraction.toString() +
                     " МЕНЕЕ МЕСЯЦА НАЗАД!";
-            // dialogs.createMessageDialog().withCaption( "Warning" ).withMessage( msg ).show();
 
             dialogs.createOptionDialog()
                     .withCaption( "Warning" )
@@ -201,7 +167,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                         copyPrevionsItems();
                             }),
                             new DialogAction(DialogAction.Type.NO).withHandler(z -> {
-                                getEditedEntity().setCandidate(null);
+                                candidateField.setValue(null);
+                                //getEditedEntity().setCandidate(null);
                             })
                     )
                     .show();
@@ -261,7 +228,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 else
                     myClient = false;
             }
-
         }
 
         return myClient;
@@ -286,11 +252,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void copyPrevionsItems() {
-        // а вдруг позиция уже закрыта?
+        // а вдруг позиция уже закрыта? надо разрешить в вакансию писать даже закрытые
         openPositionsDl.setQuery("select e from itpearls_OpenPosition e " +
                 "order by e.vacansyName");
         openPositionsDl.load();
-        vacancyFiels.setOptionsList(openPositionsDl.getContainer().getItems());
 
         OpenPosition openPos;
         // вакансия
@@ -354,33 +319,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     @Subscribe
-    public void onBeforeClose(AfterCloseEvent event) {
-        // если кейс не нечат, то сначала надо начать
-        // записать статус в карточку кандидата
-//        String  a = getEditedEntity().getIteractionType().getNumber();
-//        Integer i = Integer.parseInt( getEditedEntity().getIteractionType().getNumber());
-//        JobCandidate    candidate = loadJobCandidate( candidateField.getValue().getId() );
-//        candidate.setStatus( i );
-//        dataManager.commit( candidate );
-    }
-
-    private JobCandidate loadJobCandidate( UUID jobCandidateId ) {
-        return dataManager.load( JobCandidate.class )
-                .id( jobCandidateId )
-                .view( "jobCandidate-view" )
-                .one();
-    }
-    
-    @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         buttonCallAction.setVisible(false);
         // запомнить текущий проект
         currentProject = getEditedEntity().getProject();
-    }
 
-    // создать новый экран
-    private void createNewField(IteractionList entity) {
-        // тут по идее надо создать новый экран и передать туда параметры
+        candidate = getEditedEntity().getCandidate();
     }
 
     @Subscribe
@@ -392,10 +336,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     protected void setCurrentUserName() {
         String currentUser = getCurrentUser();
-    }
-
-// После изменения имени кандидата надо заполнить поле специализация кандидата
-    protected void setCandidateSpecialisation() {
     }
 
     // изменение надписи на кнопке в зависимости от щначения поля ItercationType
@@ -442,16 +382,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             .show();
         }
     }
-
-/*    @Subscribe("buttonAddNewIteraction")
-    public void onButtonAddNewIteractionClick(Button.ClickEvent event) {
-        screenBuilders.editor( Iteraction.class, this )
-                .newEntity()
-                .withScreenId( getEditedEntity().getIteractionType().getCallClass() )
-                .withLaunchMode( OpenMode.NEW_TAB )
-                .build()
-                .show();
-    } */
 
     public void addNewIteraction() {
         String classIL = "itpearls_" + getEditedEntity().getClass().getSimpleName() + ".edit";
