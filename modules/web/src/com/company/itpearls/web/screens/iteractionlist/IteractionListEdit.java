@@ -188,39 +188,58 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private boolean yourCandidate() {
         // твой ли это кандидат?
         User user = userSession.getUser();
+        User lastUser = null;
 
-        User lastUser = dataManager.loadValue("select e.recrutier " +
-                "from itpearls_IteractionList e " +
-                "where e.dateIteraction > :dateLimit and " +
-                "e.candidate = :candidate and " +
-                "e.numberIteraction = " +
-                "(select max(f.numberIteraction) " +
-                "from itpearls_IteractionList f " +
-                "where f.candidate = :candidate)" , User.class )
-                .parameter( "dateLimit", new Date(System.currentTimeMillis() - 2628000000l))
-                .parameter( "candidate", getEditedEntity().getCandidate() )
-                .one();
+        myClient = false;
+        BigDecimal numberIteraction;
+        // проверка прошлого взаимодействия
+        try {
+            numberIteraction = dataManager.loadValue( "select e.numberIteraction " +
+                    "from itpearls_IteractionList e " +
+                    "where e.candidate = :candidate and " +
+                    "e.numberIteraction = " +
+                    "(select max(f.numberIteraction) " +
+                    "from itpearls_IteractionList f " +
+                    "where f.candidate = :candidate)", BigDecimal.class )
+                    .parameter( "candidate", getEditedEntity().getCandidate() )
+                    .one();
+        } catch ( IllegalStateException e) {
+            // не было взаимодействий с кандидатом
+            numberIteraction = null;
 
-        if( !user.equals( lastUser )) {
-            String msg = "Менее месяца назад с кандидатом " +
-                    getEditedEntity().getCandidate().getFullName() +
-                    " работал рекрутер " +
-                    lastUser.getName() +
-                    "\nПродолжаем??";
-            // до этого момента с этим кандидатом работал другой рекрутор: точно надо?
-            myClient = false;
-            dialogs.createOptionDialog()
-                    .withCaption("Подтвердите")
-                    .withMessage( "Продолжаем?" )
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES,
-                                    Action.Status.PRIMARY)
-                                    .withHandler(g1 -> {
-                                        myClient = true;
-                            }),
-                            new DialogAction(DialogAction.Type.NO)
-                    )
-                    .show();
+            myClient = true;
+        }
+
+        if( numberIteraction != null ) {
+            // больше месяца назад?
+            Date lastIteraction = dataManager.loadValue( "select e.dateIteraction " +
+                    "from itpearls_IteractionList e " +
+                    "where e.numberIteraction = :number", Date.class )
+                    .parameter( "number", numberIteraction )
+                    .one();
+            if( lastIteraction.before( new Date(System.currentTimeMillis() - 2628000000l)  ) ) {
+                // все зашибись и кандидат свободен
+                myClient = true;
+            } else {
+                // а это точно не ты?
+                try {
+                    lastUser = dataManager.loadValue("select e.recrutier " +
+                            "from itpearls_IteractionList e " +
+                            "where e.numberIteraction = :number", User.class)
+                            .parameter("number", numberIteraction)
+                            .one();
+                } catch ( IllegalStateException e ) {
+                    // не записан пользователь из старых записей
+                    myClient = false;
+                    lastUser = null;
+                }
+
+                if( user.equals( lastUser ) )
+                    myClient = true;
+                else
+                    myClient = false;
+            }
+
         }
 
         return myClient;
