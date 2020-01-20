@@ -51,6 +51,7 @@ order by e.lastName, e.firstName]]>
             </column>
         </form>
         <hbox id="editActions" spacing="true">
+            <button id="windowExtendAndCloseButton" action="windowCommitAndClose" caption="msg://msgExtend"/>
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

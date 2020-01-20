@@ -9,7 +9,7 @@
                     view="recrutiesTasks-view">
             <loader id="recrutiesTasksesDl">
                 <query>
-                    <![CDATA[select e from itpearls_RecrutiesTasks e]]>
+                    <![CDATA[select e from itpearls_RecrutiesTasks e order by e.reacrutier.name]]>
                 </query>
             </loader>
         </collection>
@@ -32,7 +32,9 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="reacrutier.name"/>
+                <group>
+                    <column id="reacrutier.name"/>
+                </group>
                 <column id="openPosition.vacansyName"/>
                 <column id="openPosition.projectName.projectName"/>
                 <column id="startDate"/>

@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DateField;
 import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.screen.*;
@@ -28,6 +29,13 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private UserSession userSession;
     @Inject
     private Dialogs dialogs;
+
+    @Subscribe("windowExtendAndCloseButton")
+    public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
+        getEditedEntity().setEndDate( new Date( System.currentTimeMillis() + 1000L * 3600L * 24L * 7L ));
+
+        commitChanges();
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
