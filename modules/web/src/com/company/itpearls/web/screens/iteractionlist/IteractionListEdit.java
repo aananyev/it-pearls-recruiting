@@ -69,32 +69,41 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
         IteractionList chain;
+        String  fullName = getEditedEntity().getCandidate().getFullName();
         // сменить цепочку
         try {
             chain = dataManager.load( IteractionList.class )
                 .query( "select e " +
                         "from itpearls_IteractionList e " +
                         "where e.candidate.fullName = :candidate and " +
-                        "e.project = :project and " +
+                        "e.vacancy = :vacancy and " +
                         "e.numberIteraction = " +
                         "(select max(f.numberIteraction) " +
                         "from itpearls_IteractionList f " +
                         "where f.candidate.fullName = :candidate)" )
-                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
-                .parameter( "project", getEditedEntity().getProject() )
+                .parameter( "candidate", fullName )
+                .parameter("vacancy", getEditedEntity().getVacancy() )
                 .view( "iteractionList-view" )
                 .one();
-
-            iteractionTypesLc.removeParameter( "number" );
-            iteractionTypesLc.load();
         } catch ( IllegalStateException e ) {
             // если вообще ничего не нашел
             chain = getEditedEntity();
-
-            iteractionTypesLc.setParameter("number", "001");
-            iteractionTypesLc.load();
         }
 
+        if( chain.equals( getEditedEntity() ) ) {
+            // это начало цепочки - обрезаем выбор
+            iteractionTypesLc.setParameter("number", "001");
+
+            dialogs.createMessageDialog()
+                    .withCaption( "Warnind!" )
+                    .withMessage( "С кандидатом начат новый процесс. " +
+                            "Начните взаимодействие с ним с типом из группы \"Ресерчинг\"" )
+                    .show();
+        } else {
+            iteractionTypesLc.removeParameter("number" );
+        }
+
+        iteractionTypesLc.load();
         getEditedEntity().setIteractionChain( chain );
 
         // заполнить другие поля

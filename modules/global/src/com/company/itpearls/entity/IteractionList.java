@@ -84,6 +84,29 @@ public class IteractionList extends StandardEntity {
     @JoinColumn(name = "ITERACTION_CHAIN_ID")
     protected IteractionList iteractionChain;
 
+    @Column(name = "SALARY")
+    protected BigDecimal salary;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "DATE_INTERVIEW")
+    protected Date dateInterview;
+
+    public Date getDateInterview() {
+        return dateInterview;
+    }
+
+    public void setDateInterview(Date dateInterview) {
+        this.dateInterview = dateInterview;
+    }
+
+    public BigDecimal getSalary() {
+        return salary;
+    }
+
+    public void setSalary(BigDecimal salary) {
+        this.salary = salary;
+    }
+
     public IteractionList getIteractionChain() {
         return iteractionChain;
     }

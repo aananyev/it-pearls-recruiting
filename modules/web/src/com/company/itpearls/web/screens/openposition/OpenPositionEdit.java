@@ -5,6 +5,7 @@ import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -41,15 +42,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Dialogs dialogs;
     @Inject
     private EmailService emailService;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if(!PersistenceHelper.isNew(getEditedEntity())) {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
             jobCandidatesDl.setParameter("candidatePersonPosition", getEditedEntity().getPositionType().getPositionRuName());
-            recrutiesTasksesDl.setParameter( "openPosition", getEditedEntity().getVacansyName() );
+            recrutiesTasksesDl.setParameter("openPosition", getEditedEntity().getVacansyName());
         } else {
             jobCandidatesDl.removeParameter("candidatePersonPosition");
-            recrutiesTasksesDl.removeParameter( "openPosition" );
+            recrutiesTasksesDl.removeParameter("openPosition");
         }
 
         jobCandidatesDl.load();
@@ -58,7 +61,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("companyDepartamentField")
     public void onCompanyDepartamentFieldValueChange(HasValue.ValueChangeEvent<CompanyDepartament> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            if( getEditedEntity().getCompanyDepartament().getDepartamentRuName() != null )
+            if (getEditedEntity().getCompanyDepartament().getDepartamentRuName() != null)
                 getEditedEntity().setCompanyName(getEditedEntity().getCompanyDepartament().getCompanyName());
         }
     }
@@ -66,7 +69,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("companyNameField")
     public void onCompanyNameFieldValueChange(HasValue.ValueChangeEvent<Company> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            if( getEditedEntity().getCompanyName().getCityOfCompany() != null )
+            if (getEditedEntity().getCompanyName().getCityOfCompany() != null)
                 getEditedEntity().setCityPosition(getEditedEntity().getCompanyName().getCityOfCompany());
         }
     }
@@ -74,8 +77,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("projectNameField")
     public void onProjectNameFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            if( getEditedEntity().getProjectName().getProjectDepartment() != null )
-            getEditedEntity().setCompanyDepartament(getEditedEntity().getProjectName().getProjectDepartment());
+            if (getEditedEntity().getProjectName().getProjectDepartment() != null)
+                getEditedEntity().setCompanyDepartament(getEditedEntity().getProjectName().getProjectDepartment());
         }
     }
 
@@ -102,29 +105,43 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-       if(PersistenceHelper.isNew(getEditedEntity())) {
-           getEditedEntity().setOpenClose(false);
-       }
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setOpenClose(false);
+        }
     }
 
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
         // разослать оповещение об изменении позиции
         sendMessage();
-        
     }
 
     private void sendMessage() {
+        // по почте
         OpenPosition openPosition = getEditedEntity();
 
-        EmailInfo   emailInfo = new EmailInfo( "alan@itpearls.ru",
+        EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
                 openPosition.getVacansyName(),
                 null, "com/company/itpearls/templates/news_item.txt",
-                Collections.singletonMap( "openPosition", openPosition ));
+                Collections.singletonMap("openPosition", openPosition));
 
-        emailService.sendEmailAsync( emailInfo );
+        emailService.sendEmailAsync(emailInfo);
+
+        // нотификация
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Открыта новая позиции:" )
+                    .withDescription( getEditedEntity().getVacansyName() )
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Изменение описания позиции:" )
+                    .withDescription( getEditedEntity().getVacansyName() )
+                    .show();
+        }
     }
-
+}
+/*
     // Queues an email for sending asynchronously
     private void sendByEmail() {
         OpenPosition openPosttion = getEditedEntity();
@@ -152,8 +169,5 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private String getMailList() {
         return "a.ananjev@gmail.com";
     }
+*/
 
-
-
-
-}

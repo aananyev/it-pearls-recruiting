@@ -95,6 +95,9 @@ create table ITPEARLS_ITERACTION_LIST (
     COMMENT_ text,
     RECRUTIER_ID uuid,
     RECRUTIER_NAME varchar(80),
+    ITERACTION_CHAIN_ID uuid,
+    SALARY decimal(19, 2),
+    DATE_INTERVIEW timestamp,
     --
     primary key (ID)
 )^
