@@ -33,8 +33,10 @@ order by e.comanyName]]></query>
         <collection id="companyDepartamentsDc" class="com.company.itpearls.entity.CompanyDepartament"
                     view="companyDepartament-view">
             <loader id="companyDepartamentsLc">
-                <query><![CDATA[select e from itpearls_CompanyDepartament e
-order by e.departamentRuName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_CompanyDepartament e where e.departamentRuName not like '%(не использовать)%'
+order by e.departamentRuName]]>
+                </query>
             </loader>
         </collection>
         <collection id="projectDc" class="com.company.itpearls.entity.Project" view="project-view">

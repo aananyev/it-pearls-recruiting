@@ -18,8 +18,7 @@
         </collection>
         <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
             <loader id="candidatesLc">
-                <query><![CDATA[select e from itpearls_JobCandidate e
-order by e.secondName, e.firstName]]></query>
+                <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
         <collection id="projectsDc" class="com.company.itpearls.entity.Project" view="project-view">
@@ -31,8 +30,11 @@ order by e.projectName]]></query>
         <collection id="companyDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament"
                     view="companyDepartament-view">
             <loader id="companyDepartmentsLc">
-                <query><![CDATA[select e from itpearls_CompanyDepartament e
-order by e.departamentRuName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_CompanyDepartament e
+where e.departamentRuName not like '%(не использовать)%'
+order by e.departamentRuName]]>
+                </query>
             </loader>
         </collection>
         <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="iteraction-view-button">

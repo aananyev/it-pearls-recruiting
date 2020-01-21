@@ -68,7 +68,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        IteractionList chain;
+        IteractionList chain = new IteractionList();
         String  fullName = getEditedEntity().getCandidate().getFullName();
         // сменить цепочку
         try {
@@ -76,13 +76,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .query( "select e " +
                         "from itpearls_IteractionList e " +
                         "where e.candidate.fullName = :candidate and " +
-                        "e.vacancy = :vacancy and " +
+                        "e.vacancy = :vacansy and " +
                         "e.numberIteraction = " +
                         "(select max(f.numberIteraction) " +
                         "from itpearls_IteractionList f " +
-                        "where f.candidate.fullName = :candidate)" )
+                        "where f.candidate.fullName = :candidate and " +
+                        "f.vacancy = :vacansy)" )
                 .parameter( "candidate", fullName )
-                .parameter("vacancy", getEditedEntity().getVacancy() )
+                .parameter("vacansy", getEditedEntity().getVacancy() )
                 .view( "iteractionList-view" )
                 .one();
         } catch ( IllegalStateException e ) {
@@ -156,7 +157,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             .withActions(
                                     new DialogAction(DialogAction.Type.YES,
                                             Action.Status.PRIMARY).withHandler(e -> {
-                                            copyPrevionsItems();
+                                            this.copyPrevionsItems();
                                     }),
                                     new DialogAction(DialogAction.Type.NO)
                             )
@@ -173,12 +174,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .withActions(
                             new DialogAction(DialogAction.Type.YES,
                                     Action.Status.PRIMARY).withHandler(y -> {
-                                        copyPrevionsItems();
+                                        this.copyPrevionsItems();
                             }),
-                            new DialogAction(DialogAction.Type.NO).withHandler(z -> {
-                                candidateField.setValue(null);
-                                //getEditedEntity().setCandidate(null);
-                            })
+                            new DialogAction(DialogAction.Type.NO)
                     )
                     .show();
         }

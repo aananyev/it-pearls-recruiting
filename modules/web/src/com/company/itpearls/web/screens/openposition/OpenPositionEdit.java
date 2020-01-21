@@ -141,33 +141,3 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 }
-/*
-    // Queues an email for sending asynchronously
-    private void sendByEmail() {
-        OpenPosition openPosttion = getEditedEntity();
-
-        EmailInfo emailInfo = new EmailInfo(
-                getMailList(),                                  // получатели
-                getSubject(),                                   // тема сообщения
-                null, // the "from" address will be taken from the "cuba.email.fromAddress" app property
-                getNewOpenPositionText(),                       // текст сообщения
-                Collections.singletonMap( "OpenPosition", openPosttion ) // template parameters
-        );
-
-        emailService.sendEmailAsync(emailInfo);
-    }
-
-    private String getNewOpenPositionText() {
-        // "com/company/demo/templates/news_item.txt"
-        return "com/itpearls/core/open_position.txt";
-    }
-
-    private String getSubject() {
-        return "Test message";
-    }
-
-    private String getMailList() {
-        return "a.ananjev@gmail.com";
-    }
-*/
-

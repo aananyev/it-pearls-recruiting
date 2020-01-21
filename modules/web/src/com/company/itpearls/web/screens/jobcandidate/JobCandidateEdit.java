@@ -179,7 +179,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
                 labelCV.setValue("| Резюме: НЕТ");
             } else {
-                labelCV.setValue("|dataManager Резюме: ДА");
+                labelCV.setValue("| Резюме: ДА");
             }
         }
 

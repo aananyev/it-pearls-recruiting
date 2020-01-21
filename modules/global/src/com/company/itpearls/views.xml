@@ -48,11 +48,7 @@
             <property name="companyName" view="_minimal"/>
         </property>
         <property name="skillsList" view="_local"/>
-        <property name="candidates" view="_local">
-            <property name="personPosition" view="_local"/>
-            <property name="candidateCv" view="_minimal"/>
-            <property name="openPosition" view="_local"/>
-        </property>
+        <property name="candidates" view="_minimal"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" view="_minimal"/>
