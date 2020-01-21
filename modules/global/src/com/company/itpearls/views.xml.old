@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
+
+    <view entity="itpearls_Region" name="region-view" extends="_local">
+        <property name="regionCountry" view="_minimal">
+            <property name="countryOfRegion" view="_minimal">
+                <property name="regionCountry" view="_minimal"/>
+            </property>
+        </property>
+        <property name="regionOfCity" view="_local"/>
+    </view>
+    <view entity="itpearls_Country" name="country-view" extends="_local">
+        <property name="countryOfRegion" view="_local"/>
+    </view>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
+        <property name="companyName" view="_local"/>
+        <property name="departamentHrDirector" view="_minimal"/>
+        <property name="departamentDirector" view="_minimal"/>
+        <property name="projectOfDepartment" view="_local"/>
+    </view>
+    <view entity="itpearls_Project" name="project-view" extends="_local">
+        <property name="projectDepartment" view="_local">
+            <property name="companyName" view="_local"/>
+        </property>
+        <property name="projectOwner" view="_local"/>
+        <property name="openPosition" view="_local"/>
+        <property name="jobCandidate" view="_local"/>
+    </view>
+    <view entity="itpearls_Person" name="person-view" extends="_local">
+        <property name="positionCountry" view="_minimal"/>
+        <property name="personPosition" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Position" name="position-view" extends="_minimal">
+        <property name="positionRuName"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
+        <property name="cityPosition" view="_local"/>
+        <property name="positionType" view="_local"/>
+        <property name="projectName" view="_local">
+            <property name="projectDepartment" view="_local"/>
+        </property>
+        <property name="companyName" view="_local"/>
+        <property name="companyDepartament" view="_local">
+            <property name="companyName" view="_minimal"/>
+        </property>
+        <property name="skillsList" view="_local"/>
+        <property name="candidates" view="_local">
+            <property name="personPosition" view="_local"/>
+            <property name="candidateCv" view="_minimal"/>
+            <property name="openPosition" view="_local"/>
+        </property>
+    </view>
+    <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
+        <property name="currentCompany" view="_minimal"/>
+        <property name="personPosition" view="_local"/>
+        <property name="cityOfResidence" view="_minimal"/>
+    </view>
+    <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true">
+        <property name="currentCompany" view="_local"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="cityOfResidence" view="_local">
+            <property name="cityRegion" view="_minimal"/>
+        </property>
+        <property name="positionCountry" view="_local"/>
+        <property name="iteractionList" view="_local">
+            <property name="iteractionTree" view="_minimal"/>
+            <property name="iteractionList" view="_minimal"/>
+            <property name="jobCandidate" view="_minimal"/>
+        </property>
+        <property name="specialisation" view="_local"/>
+        <property name="jobHistory" view="_local">
+            <property name="candidate" view="_minimal"/>
+            <property name="currentPosition" view="_minimal"/>
+            <property name="currentCompany" view="_minimal"/>
+        </property>
+        <property name="socialNetwork" view="_local"/>
+        <property name="candidateCv" view="_local">
+            <property name="resumePosition" view="_local"/>
+            <property name="toVacancy" view="_minimal"/>
+            <property name="createdBy"/>
+        </property>
+        <property name="skillTree" view="_minimal">
+            <property name="skillTree" view="_minimal"/>
+            <property name="jobCandidate" view="_minimal"/>
+            <property name="openPosition" view="_minimal"/>
+            <property name="candidates" view="_minimal"/>
+        </property>
+        <property name="skills" view="_minimal"/>
+        <property name="openPosition" view="_local">
+            <property name="positionType" view="_local"/>
+            <property name="candidates" view="_local">
+                <property name="personPosition" view="_minimal"/>
+                <property name="openPosition" view="_local"/>
+            </property>
+        </property>
+    </view>
+    <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
+        <property name="jobCandidate" view="_local">
+            <property name="socialNetwork" view="_local"/>
+        </property>
+    </view>
+    <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
+        <property name="skillTree" view="_minimal"/>
+        <property name="jobCandidate" view="jobCandidate-view"/>
+        <property name="openPosition" view="_local"/>
+        <property name="candidates" view="_local">
+            <property name="currentCompany" view="_local"/>
+            <property name="personPosition" view="_local"/>
+            <property name="cityOfResidence" view="_local"/>
+            <property name="positionCountry" view="_local"/>
+            <property name="iteractionList" view="_local"/>
+            <property name="specialisation" view="_local"/>
+            <property name="jobHistory" view="_local"/>
+            <property name="socialNetwork" view="_local"/>
+            <property name="candidateCv" view="_local"/>
+            <property name="skillTree" view="_local"/>
+        </property>
+    </view>
+    <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local">
+        <property name="candidate" view="_local">
+            <property name="skillTree" view="_local"/>
+        </property>
+    </view>
+    <view entity="itpearls_JobHistory" name="jobHistory-view" extends="_local">
+        <property name="candidate" view="_local">
+            <property name="personPosition" view="_local"/>
+        </property>
+        <property name="currentPosition" view="_local"/>
+        <property name="currentCompany" view="_local"/>
+    </view>
+    <view entity="itpearls_City" name="city-view" extends="_local">
+        <property name="cityRegion" view="_minimal">
+            <property name="regionCountry" view="_minimal"/>
+            <property name="regionOfCity" view="_minimal"/>
+        </property>
+    </view>
+    <view entity="itpearls_Company" name="company-view" extends="_local">
+        <property name="companyOwnership" view="_minimal"/>
+        <property name="companyDirector" view="_minimal"/>
+        <property name="departmentOfCompany" view="_minimal"/>
+        <property name="cityOfCompany" view="city-view">
+        </property>
+        <property name="regionOfCompany" view="_minimal"/>
+        <property name="countryOfCompany" view="_minimal"/>
+    </view>
+    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
+        <property name="candidate" view="_minimal"/>
+        <property name="resumePosition" view="_minimal"/>
+        <property name="toVacancy" view="_minimal"/>
+        <property name="owner" view="_minimal">
+            <property name="firstName"/>
+            <property name="lastName"/>
+        </property>
+        <property name="lintToCloudFile"/>
+        <property name="fileCV" view="_minimal"/>
+        <property name="originalFileCV" view="_minimal"/>
+        <property name="createTs"/>
+        <property name="createdBy"/>
+    </view>
+    <view entity="itpearls_Iteraction" name="iteraction-view" extends="_local">
+        <property name="iteractionTree" view="_local">
+            <property name="iteractionTree" view="_minimal"/>
+            <property name="iteractionList" view="_minimal"/>
+            <property name="jobCandidate" view="_minimal"/>
+        </property>
+        <property name="iteractionList" view="_local">
+            <property name="numberIteraction"/>
+            <property name="dateIteraction"/>
+            <property name="candidate" view="_minimal"/>
+            <property name="currentJobPosition" view="_minimal"/>
+            <property name="vacancy" view="_minimal"/>
+            <property name="project" view="_minimal"/>
+            <property name="companyDepartment" view="_minimal"/>
+            <property name="iteractionType" view="_minimal"/>
+            <property name="communicationMethod"/>
+            <property name="comment"/>
+            <property name="recrutier" view="_minimal"/>
+            <property name="recrutierName"/>
+            <property name="iterationTypeComp" view="_minimal"/>
+        </property>
+        <property name="jobCandidate" view="_local"/>
+    </view>
+    <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local">
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="currentJobPosition" fetch="JOIN" view="_minimal">
+            <property name="positionRuName"/>
+        </property>
+        <property name="vacancy" view="_local">
+            <property name="cityPosition" view="_minimal"/>
+            <property name="positionType" view="_minimal"/>
+            <property name="projectName" view="_minimal"/>
+            <property name="companyName" view="_minimal"/>
+            <property name="companyDepartament" view="_local">
+                <property name="departamentRuName"/>
+                <property name="companyName" view="_local">
+                    <property name="comanyName"/>
+                    <property name="companyShortName"/>
+                </property>
+            </property>
+        </property>
+        <property name="project" view="_minimal">
+            <property name="projectName"/>
+        </property>
+        <property name="companyDepartment" view="_local">
+            <property name="departamentRuName"/>
+            <property name="companyName" view="_minimal"/>
+        </property>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+            <property name="callButtonText"/>
+            <property name="callClass"/>
+            <property name="callForm"/>
+        </property>
+        <property name="recrutier" view="_minimal">
+            <property name="firstName"/>
+            <property name="lastName"/>
+        </property>
+        <property name="iterationTypeComp" view="iteraction-view"/>
+        <property name="createTs"/>
+        <property name="createdBy"/>
+    </view>
+    <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
+          systemProperties="true">
+        <property name="candidate" view="_local">
+            <property name="personPosition" view="position-view"/>
+        </property>
+        <property name="currentJobPosition" view="position-view"/>
+        <property name="vacancy" view="_minimal"/>
+        <property name="project" view="_minimal"/>
+        <property name="companyDepartment" view="_minimal"/>
+        <property name="iteractionType" view="_minimal"/>
+        <property name="recrutier" view="_minimal"/>
+        <property name="iterationTypeComp" view="_minimal"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
+        <property name="candidates" view="_local"/>
+    </view>
+    <view entity="itpearls_Setup" name="setup-view" extends="_local"/>
+    <view entity="itpearls_IteractionList" name="iteractionList-job-candidate" extends="_local">
+        <property name="candidate" view="_local"/>
+        <property name="currentJobPosition" view="_minimal"/>
+        <property name="vacancy" view="_minimal"/>
+        <property name="project" view="_minimal"/>
+        <property name="companyDepartment" view="_minimal"/>
+        <property name="iteractionType" view="iteraction-view"/>
+        <property name="recrutier" view="_minimal"/>
+        <property name="iterationTypeComp" view="_minimal"/>
+    </view>
+</views>
