@@ -1,1 +1,4 @@
-Проверка
+Внимание изменена позиция $(openPosition.vacansyName)!!!
+
+Описание позиции
+$(openPosition.comment)
