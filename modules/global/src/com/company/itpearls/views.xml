@@ -178,7 +178,9 @@
         </property>
         <property name="currentJobPosition" fetch="JOIN" view="position-view"/>
         <property name="vacancy" view="_local"/>
-        <property name="project" view="_local"/>
+        <property name="project" view="_local">
+            <property name="projectDepartment" view="_minimal"/>
+        </property>
         <property name="companyDepartment" view="_minimal"/>
         <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal">
@@ -197,22 +199,31 @@
         </property>
         <property name="currentJobPosition" view="position-view"/>
         <property name="vacancy" view="_minimal"/>
-        <property name="project" view="_minimal"/>
+        <property name="project" view="_minimal">
+            <property name="projectDepartment" view="_minimal"/>
+        </property>
         <property name="companyDepartment" view="_minimal"/>
         <property name="iteractionType" view="_minimal">
             <property name="pic"/>
         </property>
         <property name="recrutier" view="_minimal"/>
+        <property name="iteractionChain" view="_minimal"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
+        <property name="projectName" view="_minimal"/>
+        <property name="companyDepartament" view="_minimal"/>
         <property name="candidates" view="_local"/>
     </view>
     <view entity="itpearls_Setup" name="setup-view" extends="_local"/>
     <view entity="itpearls_IteractionList" name="iteractionList-job-candidate" extends="_local">
         <property name="candidate" view="_minimal"/>
         <property name="vacancy" view="_minimal"/>
+        <property name="project" view="_minimal">
+            <property name="projectDepartment" view="_minimal"/>
+        </property>
         <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal"/>
+        <property name="iteractionChain" view="_minimal"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_local"/>
     <view entity="itpearls_CandidateCV" name="candidateCV-view-Letter" extends="_local"/>
@@ -247,7 +258,9 @@
         <property name="openPosition" view="_minimal"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
-        <property name="projectName" view="_minimal"/>
+        <property name="projectName" view="_minimal">
+            <property name="projectDepartment" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_SomeFiles" name="someFiles-view" extends="_local">
         <property name="fileDescriptor" view="_minimal">

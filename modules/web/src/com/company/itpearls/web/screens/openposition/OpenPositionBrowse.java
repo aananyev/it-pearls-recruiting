@@ -73,4 +73,37 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         openPositionsDl.load();
     }
+
+    @Install(to = "openPositionsTable", subject = "iconProvider")
+    private String openPositionsTableIconProvider(OpenPosition openPosition) {
+
+        String icon = null;
+
+        Integer priority = openPosition.getPriority();
+
+        if( priority != null ) {
+
+            switch ( priority ) {
+                case 0: //"Cloded"
+                    icon = "icons/remove.png";
+                    break;
+                case 1: //"Low"
+                    icon = "icons/tag.png";
+                    break;
+                case 2: //"Normal"
+                    icon = "icons/tag-green.png";
+                    break;
+                case 3: //"High"
+                    icon = "icons/tag-gray.png";
+                    break;
+                case 4: //"Critical"
+                    icon = "icons/tag-red.png";
+                    break;
+            }
+        } else {
+            icon = "icons/question-white.png";
+        }
+
+        return icon;
+    }
 }

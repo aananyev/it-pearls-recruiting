@@ -37,7 +37,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
 
-    protected IteractionList parentChain;
     protected Project currentProject;
     protected Boolean newProject;
     static Boolean myClient;
@@ -68,49 +67,45 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        IteractionList chain = new IteractionList();
-        String  fullName = getEditedEntity().getCandidate().getFullName();
-        // сменить цепочку
-        try {
-            chain = dataManager.load( IteractionList.class )
-                .query( "select e " +
-                        "from itpearls_IteractionList e " +
-                        "where e.candidate.fullName = :candidate and " +
-                        "e.vacancy = :vacansy and " +
-                        "e.numberIteraction = " +
-                        "(select max(f.numberIteraction) " +
-                        "from itpearls_IteractionList f " +
-                        "where f.candidate.fullName = :candidate and " +
-                        "f.vacancy = :vacansy)" )
-                .parameter( "candidate", fullName )
-                .parameter("vacansy", getEditedEntity().getVacancy() )
-                .view( "iteractionList-view" )
-                .one();
-        } catch ( IllegalStateException e ) {
-            // если вообще ничего не нашел
-            chain = getEditedEntity();
-        }
+        BigDecimal a = new BigDecimal("0.0");
 
-        if( chain.equals( getEditedEntity() ) ) {
-            // это начало цепочки - обрезаем выбор
+        // проверка на наличие записей по этой вакансии
+        BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) " +
+                        "from itpearls_IteractionList e " +
+                        "where e.candidate = :candidate and " +
+                        "e.vacancy = :vacancy", BigDecimal.class )
+            .parameter( "candidate", getEditedEntity().getCandidate() )
+            .parameter( "vacancy", getEditedEntity().getVacancy() )
+            .one();
+
+            // есть взаимодействия с кандидатом по этой позиции
+        if( countIteraction.compareTo( a ) != 0)
+            newProject = false;
+        else
+            // новое взаимодействие с кандидатом
+        newProject = true;
+
+//        getEditedEntity().setIteractionChain(parentChain);
+
+        if ( newProject ) {
+        // это начало цепочки - обрезаем выбор
             iteractionTypesLc.setParameter("number", "001");
 
             dialogs.createMessageDialog()
-                    .withCaption( "Warnind!" )
-                    .withMessage( "С кандидатом начат новый процесс. " +
-                            "Начните взаимодействие с ним с типом из группы \"Ресерчинг\"" )
-                    .show();
-        } else {
-            iteractionTypesLc.removeParameter("number" );
-        }
+                   .withCaption("Warnind!")
+                   .withMessage("С кандидатом начат новый процесс. " +
+                                "Начните взаимодействие с ним с типом из группы \"001 Ресерчинг\"")
+                   .show();
+            } else {
+                iteractionTypesLc.removeParameter("number");
+            }
 
-        iteractionTypesLc.load();
-        getEditedEntity().setIteractionChain( chain );
+            iteractionTypesLc.load();
 
-        // заполнить другие поля
-        if( getEditedEntity().getVacancy() != null )
-            if(getEditedEntity().getVacancy().getProjectName() != null)
-                getEditedEntity().setProject(getEditedEntity().getVacancy().getProjectName());
+            // заполнить другие поля
+            if (getEditedEntity().getVacancy() != null)
+                if (getEditedEntity().getVacancy().getProjectName() != null)
+                    getEditedEntity().setProject(getEditedEntity().getVacancy().getProjectName());
     }
 
     @Subscribe("projectField")
@@ -310,6 +305,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
                 .view( "companyDepartament-view" )
                 .one() );
+        /*
         // создание цепочки
         parentChain = dataManager.load( IteractionList.class )
                 .query( "select e " +
@@ -322,7 +318,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
                 .view( "iteractionList-view" )
                 .one();
-        getEditedEntity().setIteractionChain( parentChain );
+        getEditedEntity().setIteractionChain( parentChain ); */
     }
 
     @Subscribe

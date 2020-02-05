@@ -98,6 +98,10 @@ order by e.reacrutier, e.endDate desc]]>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
+                    <lookupField id="priorityField"
+                                       dataContainer="openPositionDc" property="priority"
+                                       caption="msg://msgPriorityPosition" width="50%">
+                    </lookupField>
                     <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc"
                                        dataContainer="openPositionDc" property="projectName"
                                        caption="msg://msgNamePosition" width="50%">

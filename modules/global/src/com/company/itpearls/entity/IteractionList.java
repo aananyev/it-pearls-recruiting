@@ -80,6 +80,7 @@ public class IteractionList extends StandardEntity {
     @Column(name = "RECRUTIER_NAME", length = 80)
     protected String recrutierName;
 
+    @Lookup(type = LookupType.DROPDOWN)
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ITERACTION_CHAIN_ID")
     protected IteractionList iteractionChain;

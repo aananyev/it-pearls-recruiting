@@ -125,6 +125,7 @@ create table ITPEARLS_COMPANY (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    OUR_CLIENT boolean,
     COMPANY_OWNERSHIP_ID varchar(36),
     COMANY_NAME varchar(80) not null,
     COMPANY_SHORT_NAME varchar(30),
@@ -187,6 +188,7 @@ create table ITPEARLS_PROJECT (
     DELETED_BY varchar(50),
     --
     PROJECT_NAME varchar(80),
+    PROJECT_IS_CLOSED boolean,
     START_PROJECT_DATE date,
     END_PROJECT_DATE date,
     PROJECT_DEPARTMENT_ID varchar(36),
@@ -208,6 +210,8 @@ create table ITPEARLS_OPEN_POSITION (
     --
     OPEN_CLOSE boolean,
     VACANSY_NAME varchar(80) not null,
+    SALARY_MIN decimal(19, 2),
+    SALARY_MAX decimal(19, 2),
     CITY_POSITION_ID varchar(36),
     POSITION_TYPE_ID varchar(36),
     PROJECT_NAME_ID varchar(36) not null,
@@ -215,6 +219,7 @@ create table ITPEARLS_OPEN_POSITION (
     COMPANY_DEPARTAMENT_ID varchar(36),
     NUMBER_POSITION integer,
     COMMENT_ longvarchar,
+    PRIORITY integer,
     --
     primary key (ID)
 )^
@@ -248,8 +253,13 @@ create table ITPEARLS_ITERACTION (
     DELETED_BY varchar(50),
     --
     NUMBER_ varchar(255),
+    MANDATORY_ITERACTION boolean,
     ITERACTION_TREE_ID varchar(36),
     ITERATION_NAME varchar(80) not null,
+    PIC varchar(80),
+    CALL_BUTTON_TEXT varchar(30),
+    CALL_CLASS varchar(30),
+    CALL_FORM boolean,
     --
     primary key (ID)
 )^
@@ -273,8 +283,8 @@ create table ITPEARLS_JOB_CANDIDATE (
     PERSON_POSITION_ID varchar(36),
     CITY_OF_RESIDENCE_ID varchar(36),
     BIRDH_DATE date,
-    EMAIL varchar(30),
-    PHONE varchar(10),
+    EMAIL varchar(50),
+    PHONE varchar(18),
     SKYPE_NAME varchar(30),
     TELEGRAM_NAME varchar(30),
     WIBER_NAME varchar(30),
@@ -283,6 +293,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     SPECIALISATION_ID varchar(36),
     SKILL_TREE_ID varchar(36),
     OPEN_POSITION_ID varchar(36),
+    STATUS integer,
     --
     primary key (ID)
 )^
@@ -310,6 +321,9 @@ create table ITPEARLS_ITERACTION_LIST (
     COMMENT_ longvarchar,
     RECRUTIER_ID varchar(36),
     RECRUTIER_NAME varchar(80),
+    ITERACTION_CHAIN_ID varchar(36),
+    SALARY decimal(19, 2),
+    DATE_INTERVIEW timestamp,
     --
     primary key (ID)
 )^
@@ -325,9 +339,10 @@ create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    NETWORK_NAME varchar(80) not null,
+    NETWORK_NAME varchar(80),
     NETWORK_URLS varchar(80) not null,
     JOB_CANDIDATE_ID varchar(36),
+    SOCIAL_NETWORK_URL_ID varchar(36),
     --
     primary key (ID)
 )^
@@ -384,11 +399,130 @@ create table ITPEARLS_CANDIDATE_CV (
     --
     CANDIDATE_ID varchar(36) not null,
     RESUME_POSITION_ID varchar(36),
+    TO_VACANCY_ID varchar(36),
+    OWNER_ID varchar(36),
     TEXT_CV longvarchar,
     LETTER longvarchar,
+    LINK_IT_PEARLS_CV varchar(255),
+    LINK_ORIGINAL_CV varchar(255),
     FILE_CV_ID varchar(36),
+    ORIGINAL_FILE_CV_ID varchar(36),
     DATE_POST date not null,
     --
     primary key (ID)
 )^
 -- end ITPEARLS_CANDIDATE_CV
+-- begin ITPEARLS_RECRUITING_RECRUTIERS
+create table ITPEARLS_RECRUITING_RECRUTIERS (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    RECRUTIER_NAME_ID varchar(36) not null,
+    PASSAGE longvarchar,
+    SEND_PASSAGE boolean,
+    CHECK_PASSAGE boolean,
+    RECRUTIER_CV_ID varchar(36),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_RECRUITING_RECRUTIERS
+-- begin ITPEARLS_FILE_TYPE
+create table ITPEARLS_FILE_TYPE (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME_FILE_TYPE varchar(30),
+    DECRIPTION_FILE_TYPE varchar(80),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_FILE_TYPE
+-- begin ITPEARLS_SETUP
+create table ITPEARLS_SETUP (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    PERAM_NAME varchar(30) not null,
+    PARAM_USER_ID varchar(36) not null,
+    PARAM_SET varchar(80),
+    PARAM_SET_BOOL boolean,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SETUP
+-- begin ITPEARLS_SOME_FILES
+create table ITPEARLS_SOME_FILES (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    FILE_DESCRIPTION varchar(80) not null,
+    FILE_DESCRIPTOR_ID varchar(36) not null,
+    FILE_COMMENT longvarchar,
+    FILE_OWNER_ID varchar(36) not null,
+    FILE_TYPE_ID varchar(36) not null,
+    CANDIDATE_CV_ID varchar(36),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SOME_FILES
+-- begin ITPEARLS_SOCIAL_NETWORK_TYPE
+create table ITPEARLS_SOCIAL_NETWORK_TYPE (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    SOCIAL_NETWORK varchar(30) not null,
+    SOCIAL_NETWORK_URL varchar(80),
+    COMMENT_ varchar(255),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SOCIAL_NETWORK_TYPE
+-- begin ITPEARLS_RECRUTIES_TASKS
+create table ITPEARLS_RECRUTIES_TASKS (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    START_DATE date not null,
+    END_DATE date,
+    REACRUTIER_ID varchar(36) not null,
+    OPEN_POSITION_ID varchar(36),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_RECRUTIES_TASKS

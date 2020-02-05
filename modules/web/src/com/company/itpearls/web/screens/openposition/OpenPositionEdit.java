@@ -7,13 +7,11 @@ import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 @UiController("itpearls_OpenPosition.edit")
 @UiDescriptor("open-position-edit.xml")
@@ -44,6 +42,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private EmailService emailService;
     @Inject
     private Notifications notifications;
+    @Inject
+    private LookupField priorityField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -139,5 +139,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .withDescription( getEditedEntity().getVacansyName() )
                     .show();
         }
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+
+        priorityMap.put("Closed", 0);
+        priorityMap.put("Low", 1);
+        priorityMap.put("Normal", 2);
+        priorityMap.put("High", 3);
+        priorityMap.put("Critical", 4);
+
+        priorityField.setOptionsMap(priorityMap);
     }
 }

@@ -68,6 +68,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "COMMENT_")
     protected String comment;
 
+    @Column(name = "PRIORITY")
+    protected Integer priority;
+
     @Composition
     @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "openPosition")
@@ -77,6 +80,14 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "openPosition")
     protected List<JobCandidate> candidates;
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
+    }
 
     public BigDecimal getSalaryMax() {
         return salaryMax;
