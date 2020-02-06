@@ -112,7 +112,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
-        // разослать оповещение об изменении позиции
         sendMessage();
     }
 
