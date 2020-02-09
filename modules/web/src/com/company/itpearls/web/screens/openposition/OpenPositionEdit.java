@@ -119,20 +119,29 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // по почте
         OpenPosition openPosition = getEditedEntity();
 
-        EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
-                openPosition.getVacansyName(),
-                null, "com/company/itpearls/templates/news_item.txt",
-                Collections.singletonMap("openPosition", openPosition));
-
-        emailService.sendEmailAsync(emailInfo);
-
         // нотификация
         if (PersistenceHelper.isNew(getEditedEntity())) {
+            // пошлем по почте
+            EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
+                    openPosition.getVacansyName(),
+                    null, "com/company/itpearls/templates/create_new_pos.txt",
+                    Collections.singletonMap("openPosition", openPosition));
+
+            emailService.sendEmailAsync(emailInfo);
+            // высплывающее сообщение
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption("Открыта новая позиции:" )
                     .withDescription( getEditedEntity().getVacansyName() )
                     .show();
         } else {
+            EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
+                    openPosition.getVacansyName(),
+                    null, "com/company/itpearls/templates/edit_open_pos.txt",
+                    Collections.singletonMap("openPosition", openPosition));
+
+            emailService.sendEmailAsync(emailInfo);
+
+            // всплывающее сообщение
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption("Изменение описания позиции:" )
                     .withDescription( getEditedEntity().getVacansyName() )
@@ -144,7 +153,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onInit(InitEvent event) {
         Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
-        priorityMap.put("Closed", 0);
+        priorityMap.put("Paused", 0);
         priorityMap.put("Low", 1);
         priorityMap.put("Normal", 2);
         priorityMap.put("High", 3);

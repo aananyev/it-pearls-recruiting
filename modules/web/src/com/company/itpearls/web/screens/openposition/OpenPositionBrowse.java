@@ -84,7 +84,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if( priority != null ) {
 
             switch ( priority ) {
-                case 0: //"Cloded"
+                case 0: //"Paused"
                     icon = "icons/remove.png";
                     break;
                 case 1: //"Low"
