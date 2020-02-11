@@ -160,5 +160,32 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         priorityMap.put("Critical", 4);
 
         priorityField.setOptionsMap(priorityMap);
+
+    }
+
+    @Install(to = "priorityField", subject = "optionIconProvider")
+    private String priorityFieldOptionIconProvider(Integer integer) {
+
+        String icon = null;
+
+        switch ( integer ) {
+            case 0: //"Paused"
+                icon = "icons/remove.png";
+                break;
+            case 1: //"Low"
+                icon = "icons/traffic-lights_blue.png";
+                break;
+            case 2: //"Normal"
+                icon = "icons/traffic-lights_green.png";
+                break;
+            case 3: //"High"
+                icon = "icons/traffic-lights_yellow.png";
+                break;
+            case 4: //"Critical"
+                icon = "icons/traffic-lights_red.png";
+                break;
+        }
+
+        return icon;
     }
 }

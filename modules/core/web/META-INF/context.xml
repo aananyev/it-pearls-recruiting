@@ -20,7 +20,7 @@
           name="jdbc/CubaDS"
           password="cuba"
           type="javax.sql.DataSource"
-          url="jdbc:postgresql://84.201.142.32/itpearls"
+          url="jdbc:postgresql://127.0.0.1/itpearls"
           username="cuba"/>-->
     <Resource driverClassName="org.postgresql.Driver"
               maxIdle="2"
@@ -29,7 +29,7 @@
               name="jdbc/CubaDS"
               password="cuba"
               type="javax.sql.DataSource"
-              url="jdbc:postgresql://127.0.0.1/itpearls"
+              url="jdbc:postgresql://84.201.142.32/itpearls"
               username="cuba"/>
 
 </Context>
