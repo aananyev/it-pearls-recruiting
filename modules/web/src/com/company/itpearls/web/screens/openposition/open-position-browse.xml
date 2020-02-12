@@ -40,7 +40,6 @@ order by e.positionType]]>
             </actions>
             <columns>
                 <column id="positionType.positionRuName" collapsed="true"/>
-                <column id="priority" align="CENTER"/>
                 <column id="vacansyName" caption="msg://msgVacancy"/>
                 <column id="cityPosition" caption="msg://msgCity" collapsed="true"/>
                 <column id="projectName" caption="msg://msgProject" collapsed="true"/>
