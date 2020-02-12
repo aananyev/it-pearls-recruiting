@@ -24,6 +24,8 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
     private CollectionLoader<RecrutiesTasks> recrutiesTasksesDl;
     @Inject
     private CheckBox checkBoxRemoveOld;
+    @Inject
+    private GroupTable<RecrutiesTasks> recrutiesTasksesTable;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -40,6 +42,17 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         }
 
         recrutiesTasksesDl.load();
+
+        // перечеркнем просроченные позиции
+        recrutiesTasksesTable.setStyleProvider( ( recrutiesTask, property ) -> {
+            Date curDate = new Date();
+
+            if( !recrutiesTask.getEndDate().after( curDate )) {
+                return "recrutier-tasks-gray";
+            } else {
+                return  "recrutier-tasks-normal";
+            }
+        });
     }
 
     @Subscribe

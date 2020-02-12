@@ -10,7 +10,7 @@
                     view="recrutiesTasks-view">
             <loader id="recrutiesTasksesDl">
                 <query>
-                    <![CDATA[select e from itpearls_RecrutiesTasks e order by e.reacrutier.name]]>
+                    <![CDATA[select e from itpearls_RecrutiesTasks e order by e.reacrutier.name, e.endDate desc]]>
                     <condition>
                         <c:jpql>
                             <c:where>
