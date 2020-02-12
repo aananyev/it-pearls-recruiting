@@ -50,21 +50,23 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable", subject = "iconProvider")
     private String jobCandidatesTableIconProvider(JobCandidate jobCandidate) {
-        if( jobCandidate.getStatus() != null ) {
-            switch (jobCandidate.getStatus()) {
-                case 0:
+        String s = getPictString( jobCandidate );
+
+        if( s != null ) {
+            switch ( s ) {
+                case "0":
                     return "icons/clear.png";
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                case "9":
                     return "icons/eye-plus.png";
-                case 10:
+                case "10":
                     return "icons/erase.png;";
             }
         }
@@ -73,17 +75,22 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private String getPictString(JobCandidate jobCandidate) {
+        String s = null;
         // загрузить последний тип взаимодействия
-        String s = dataManager.loadValues( "select e.iteractionType " +
-                "from iteractionList e " +
-                "where e.candidate.fullName = :jobCandidate" +
-                " and e.iteractionNumber = max( e.iteractionNumber )" )
-                .parameter( "jobCandidate", jobCandidate.getFullName() )
-                .one()
-                .toString();
+//        try {
 
-        // return dataManager.loadValues( "select e.iteractionName from iteractionList e " +
-        //        "where e." );
+            s = dataManager.loadValue("select e.iteractionType.number " +
+                    "from itpearls_iteractionList e " +
+                    "where e.candidate = :jobCandidate " +
+                    "and e.numberItercation = " +
+                    "select max( f.numberIteraction ) " +
+                    "from itpearls_itercationList f " +
+                    "where candidate = :candidate", String.class )
+                    .parameter("jobCandidate", jobCandidate )
+                    .one();
+//        } catch ( Exception e ) {
+//            s = null;
+//        }
         return  s;
     }
 }

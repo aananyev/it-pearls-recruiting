@@ -2,7 +2,9 @@ package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.GroupTable;
+import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.RecrutiesTasks;
@@ -20,6 +22,8 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
     private UserSessionSource userSessionSource;
     @Inject
     private CollectionLoader<RecrutiesTasks> recrutiesTasksesDl;
+    @Inject
+    private CheckBox checkBoxRemoveOld;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -36,6 +40,23 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         }
 
         recrutiesTasksesDl.load();
+    }
 
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+       checkBoxRemoveOld.setValue( true );
+    }
+
+    @Subscribe("checkBoxRemoveOld")
+    public void onCheckBoxRemoveOldValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if( checkBoxRemoveOld.getValue() ) {
+            Date curDate = new Date();
+
+            recrutiesTasksesDl.setParameter( "currentDate", curDate );
+        } else {
+            recrutiesTasksesDl.removeParameter( "currentDate" );
+        }
+
+        recrutiesTasksesDl.load();
     }
 }

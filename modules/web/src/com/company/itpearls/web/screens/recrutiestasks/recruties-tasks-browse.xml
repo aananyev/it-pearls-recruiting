@@ -14,7 +14,7 @@
                     <condition>
                         <c:jpql>
                             <c:where>
-                                where e.reacrutier = :recrutier
+                                e.endDate > :currentDate
                             </c:where>
                         </c:jpql>
                     </condition>
@@ -60,5 +60,6 @@
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>
+        <checkBox id="checkBoxRemoveOld" caption="msg://msgRemoveOld"/>
     </layout>
 </window>
