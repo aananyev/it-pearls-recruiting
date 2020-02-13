@@ -47,8 +47,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
-    @Inject
-    private LookupPickerField<JobCandidate> candidateField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -174,6 +172,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             new DialogAction(DialogAction.Type.NO)
                     )
                     .show();
+        }
+    }
+
+    @Subscribe
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        if( getEditedEntity().getIteractionType().getNumber() != null ) {
+            String s = getEditedEntity().getIteractionType().getNumber();
+            Integer i = Integer.parseInt(s);
+
+            getEditedEntity().getCandidate().setStatus(i);
         }
     }
 

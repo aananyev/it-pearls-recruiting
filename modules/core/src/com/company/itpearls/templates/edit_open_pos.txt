@@ -1,4 +1,8 @@
 Внимание изменена позиция ${openPosition.vacansyName}
 
-Описание позиции
-${openPosition.comment}
+<html>
+<body>
+<p>Описание позиции</p>
+<p>${openPosition.comment}</p>
+</body>
+</html>

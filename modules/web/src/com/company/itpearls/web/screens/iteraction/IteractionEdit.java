@@ -17,6 +17,8 @@ import javax.inject.Inject;
 public class IteractionEdit extends StandardEditor<Iteraction> {
     @Inject
     private Embedded embeddedPict;
+    @Inject
+    private TextField<String> numberField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

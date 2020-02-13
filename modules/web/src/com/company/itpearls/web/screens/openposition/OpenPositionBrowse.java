@@ -34,8 +34,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Table<OpenPosition> openPositionsTable;
     @Inject
     private DataManager dataManager;
-    @Inject
-    private UiComponents uiComponents;
 
     @Subscribe
     protected void onInit(InitEvent event) {

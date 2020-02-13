@@ -13,9 +13,20 @@
                     <![CDATA[select e from itpearls_JobCandidate e
 order by e.secondName, e.firstName]]>
                     <condition>
+                        <and>
                         <c:jpql>
                             <c:where>e.createdBy like :userName</c:where>
                         </c:jpql>
+                        <c:jpql>
+                            <c:where>not e.status = :param1</c:where>
+                        </c:jpql>
+                        <c:jpql>
+                            <c:where>not e.status = :param2</c:where>
+                        </c:jpql>
+                        <c:jpql>
+                            <c:where>not e.status = :param3</c:where>
+                        </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
@@ -55,7 +66,10 @@ order by e.secondName, e.firstName]]>
                 <button id="removeBtn" action="jobCandidatesTable.remove"/>
             </buttonsPanel>
         </groupTable>
-        <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
+        <groupBox orientation="horizontal" spacing="true">
+            <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
+            <checkBox id="checkBoxOnWork" caption="msg://msgCandidateOnWork"/>
+        </groupBox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

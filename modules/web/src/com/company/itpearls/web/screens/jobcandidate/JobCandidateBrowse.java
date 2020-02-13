@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.Iteraction;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FluentValuesLoader;
 import com.haulmont.cuba.gui.components.CheckBox;
@@ -24,7 +25,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private UserSession userSession;
     @Inject
-    private DataManager dataManager;
+    private CheckBox checkBoxOnWork;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -34,6 +35,29 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             checkBoxShowOnlyMy.setValue( true );
             checkBoxShowOnlyMy.setEditable( false );
         }
+
+        checkBoxOnWork.setValue( false );
+        jobCandidatesDl.removeParameter( "param1" );
+        jobCandidatesDl.removeParameter( "param2" );
+        jobCandidatesDl.removeParameter( "param3" );
+
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("checkBoxOnWork")
+    public void onCheckBoxOnWorkValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if( !checkBoxOnWork.getValue() ) {
+            jobCandidatesDl.removeParameter( "param1" );
+            jobCandidatesDl.removeParameter( "param2" );
+            jobCandidatesDl.removeParameter( "param3" );
+        } else {
+            jobCandidatesDl.setParameter( "param1", null );
+            jobCandidatesDl.setParameter( "param2", 1 );
+            jobCandidatesDl.setParameter( "param3", 10 );
+        }
+
+        jobCandidatesDl.load();
+        
     }
 
     @Subscribe("checkBoxShowOnlyMy")
@@ -50,47 +74,36 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable", subject = "iconProvider")
     private String jobCandidatesTableIconProvider(JobCandidate jobCandidate) {
-        String s = getPictString( jobCandidate );
+        Integer s = getPictString( jobCandidate );
 
         if( s != null ) {
             switch ( s ) {
-                case "0":
+                case 0:
                     return "icons/clear.png";
-                case "1":
-                case "2":
-                case "3":
-                case "4":
-                case "5":
-                case "6":
-                case "7":
-                case "8":
-                case "9":
+                case 1:
+                    return "icons/researching.png";
+                case 2:
+                    return "icons/recruiting.png";
+                case 3:
+                    return "icons/to-client.png";
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
                     return "icons/eye-plus.png";
-                case "10":
-                    return "icons/erase.png;";
+                case 10:
+                    return "icons/case-closed.png";
+                default:
+                    return "";
             }
         }
 
-        return "icons/cancel.png";
+        return "icons/question-white.png";
     }
 
-    private String getPictString(JobCandidate jobCandidate) {
-        String s = null;
-        // загрузить последний тип взаимодействия
-//        try {
-
-            s = dataManager.loadValue("select e.iteractionType.number " +
-                    "from itpearls_iteractionList e " +
-                    "where e.candidate = :jobCandidate " +
-                    "and e.numberItercation = " +
-                    "select max( f.numberIteraction ) " +
-                    "from itpearls_itercationList f " +
-                    "where candidate = :candidate", String.class )
-                    .parameter("jobCandidate", jobCandidate )
-                    .one();
-//        } catch ( Exception e ) {
-//            s = null;
-//        }
-        return  s;
+    private Integer getPictString(JobCandidate jobCandidate) {
+        return jobCandidate.getStatus();
     }
 }

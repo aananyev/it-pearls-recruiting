@@ -27,13 +27,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Named("tabResume")
     private VBoxLayout tabResume;
     @Inject
-    private Table<IteractionList> jobCandidateIteractionListTable;
-    @Inject
-    private Table<CandidateCV> jobCandidateCandidateCvTable;
-    @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
-    @Inject
-    private CollectionContainer<JobHistory> jobHistoriesDc;
     @Inject
     private CollectionLoader<JobHistory> jobHistoriesDl;
     @Inject

@@ -37,8 +37,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CollectionLoader<RecrutiesTasks> recrutiesTasksesDl;
     @Inject
-    private Dialogs dialogs;
-    @Inject
     private EmailService emailService;
     @Inject
     private Notifications notifications;
