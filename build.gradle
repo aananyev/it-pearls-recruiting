@@ -40,8 +40,10 @@ cuba {
 
 dependencies {
     appComponent("com.haulmont.cuba:cuba-global:$cubaVersion")
-    appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.10.0')
     appComponent("com.haulmont.fts:fts-global:$cubaVersion")
+    appComponent('com.haulmont.addon.globalevents:cubaglevt-global:0.5.1')
+    appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.11.1')
+    appComponent('com.haulmont.addon.emailtemplates:yet-global:1.3.0')
 }
 
 def postgres = 'org.postgresql:postgresql:42.2.5'

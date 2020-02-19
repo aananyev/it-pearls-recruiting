@@ -1,1 +1,1 @@
-alter table itpearls_event_registration rename to ITPEARLS_EVENT_REGISTRATION__U41999 ;
+-- alter table itpearls_event_registration rename to ITPEARLS_EVENT_REGISTRATION__U41999 ;

@@ -106,10 +106,10 @@ order by e.cityRuName]]>
                         <rows>
                             <row>
                                 <textField id="firstNameField" dataContainer="jobCandidateDc" property="firstName" width="100%"
-                                           caption="msg://msgFirstName" rowspan="1" colspan="1"/>
+                                           caption="msg://msgFirstName" rowspan="1" colspan="1" required="true"/>
                                 <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
                                                    dataContainer="jobCandidateDc" property="currentCompany" width="100%"
-                                                   caption="msg://msgCorrentCompany">
+                                                   caption="msg://msgCorrentCompany" required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
@@ -120,7 +120,7 @@ order by e.cityRuName]]>
                                            caption="msg://msgMiddleName"/>
                                 <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
                                                    dataContainer="jobCandidateDc" property="personPosition" width="100%"
-                                                   caption="msg://msgPersonPosition">
+                                                   caption="msg://msgPersonPosition" required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
@@ -128,10 +128,10 @@ order by e.cityRuName]]>
                             </row>
                             <row>
                                 <textField id="secondNameField" dataContainer="jobCandidateDc" property="secondName" width="100%"
-                                           caption="msg://msgSecondName"/>
+                                           caption="msg://msgSecondName" required="true"/>
                                 <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc" width="100%"
                                                    caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
-                                                   property="cityOfResidence">
+                                                   property="cityOfResidence" required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
@@ -142,7 +142,7 @@ order by e.cityRuName]]>
                                            caption="msg://msgBirthDate"/>
                                 <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
                                                    dataContainer="jobCandidateDc" property="positionCountry" width="100%"
-                                                   caption="msg://msgPositionCountry">
+                                                   caption="msg://msgPositionCountry" required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
@@ -187,6 +187,7 @@ order by e.cityRuName]]>
                             <column id="numberIteraction" caption="mainMsg://msgNumberItercation"/>
                             <column id="dateIteraction" caption="mainMsg://msgDate"/>
                             <column id="iteractionType.iterationName" caption="mainMsg://msgItercationType"/>
+                            <column id="vacancy.vacansyName"/>
                             <column id="recrutier.name" caption="msg://msgRecrutier"/>
                             <column id="comment"/>
                         </columns>

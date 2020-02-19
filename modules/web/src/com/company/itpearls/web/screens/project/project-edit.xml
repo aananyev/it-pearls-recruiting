@@ -67,7 +67,7 @@ order by e.secondName, e.firstName]]></query>
             </tab>
             <tab id="tabIteraction" caption="msg://msgTabIteraction" margin="true,false,false,false" spacing="true">
                 <groupBox id="groupBoxIteraction" spacing="true">
-                    <table id="projectJobCandidateTable" height="100px" width="100%" dataContainer="projectJobCandidatesDc">
+                    <table id="projectJobCandidateTable" height="250px" width="100%" dataContainer="projectJobCandidatesDc">
                         <columns>
                             <column id="numberIteraction"/>
                             <column id="dateIteraction"/>

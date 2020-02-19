@@ -1,8 +1,4 @@
-Внимание изменена позиция ${openPosition.vacansyName}
+Внимание изменена позиция openPosition.vacansyName
 
-<html>
-<body>
-<p>Описание позиции</p>
-<p>${openPosition.comment}</p>
-</body>
-</html>
+<p><b>Описание позиции</b></p>
+${bodyMessage}

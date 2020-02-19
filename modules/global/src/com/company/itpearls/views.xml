@@ -46,6 +46,7 @@
         <property name="companyName" view="_local"/>
         <property name="companyDepartament" view="_local">
             <property name="companyName" view="_minimal"/>
+            <property name="projectOfDepartment" view="_minimal"/>
         </property>
         <property name="skillsList" view="_local"/>
         <property name="candidates" view="_minimal"/>
@@ -187,7 +188,12 @@
         <property name="project" view="_local">
             <property name="projectDepartment" view="_minimal"/>
         </property>
-        <property name="companyDepartment" view="_minimal"/>
+        <property name="companyDepartment" view="_local">
+            <property name="companyName" view="_minimal"/>
+            <property name="projectOfDepartment" view="_minimal">
+                <property name="projectDepartment" view="_minimal"/>
+            </property>
+        </property>
         <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal">
             <property name="firstName"/>
@@ -208,7 +214,18 @@
         <property name="project" view="_minimal">
             <property name="projectDepartment" view="_minimal"/>
         </property>
-        <property name="companyDepartment" view="_minimal"/>
+        <property name="companyDepartment" view="_minimal">
+            <property name="departamentHrDirector" view="_minimal"/>
+            <property name="departamentDirector" view="_minimal"/>
+            <property name="departamentDescription"/>
+            <property name="departamentNumberOfProgrammers"/>
+            <property name="projectOfDepartment" view="_local">
+                <property name="projectDepartment" view="_minimal"/>
+                <property name="projectOwner" view="_minimal"/>
+                <property name="openPosition" view="_minimal"/>
+                <property name="jobCandidate" view="_minimal"/>
+            </property>
+        </property>
         <property name="iteractionType" view="_minimal">
             <property name="pic"/>
         </property>
@@ -217,7 +234,9 @@
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
         <property name="projectName" view="_minimal"/>
-        <property name="companyDepartament" view="_minimal"/>
+        <property name="companyDepartament" view="_minimal">
+            <property name="projectOfDepartment" view="_minimal"/>
+        </property>
         <property name="candidates" view="_local"/>
     </view>
     <view entity="itpearls_Setup" name="setup-view" extends="_local"/>
@@ -227,6 +246,7 @@
         <property name="project" view="_minimal">
             <property name="projectDepartment" view="_minimal"/>
         </property>
+        <property name="companyDepartment" view="_minimal"/>
         <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal"/>
         <property name="iteractionChain" view="_minimal"/>
@@ -267,6 +287,7 @@
         <property name="projectName" view="_minimal">
             <property name="projectDepartment" view="_minimal"/>
         </property>
+        <property name="companyDepartament" view="_minimal"/>
     </view>
     <view entity="itpearls_SomeFiles" name="someFiles-view" extends="_local">
         <property name="fileDescriptor" view="_minimal">

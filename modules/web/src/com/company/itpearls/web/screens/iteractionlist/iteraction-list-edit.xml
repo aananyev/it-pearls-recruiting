@@ -90,9 +90,10 @@ order by e.vacansyName]]></query>
                     <row id="row">
                         <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
                                            rowspan="1" colspan="1" caption="msg://msgCandidate" width="100%"
-                                           dataContainer="iteractionListDc" property="candidate">
+                                           dataContainer="iteractionListDc" property="candidate" required="true">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
                             </actions>
                         </lookupPickerField>
                         <lookupPickerField id="vacancyFiels" caption="mainMsg://msgVacancy" width="100%"

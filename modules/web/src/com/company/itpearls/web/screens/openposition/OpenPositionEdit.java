@@ -4,11 +4,12 @@ import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
+import org.jsoup.Jsoup;
+import java.util.*;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -132,10 +133,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .withDescription( getEditedEntity().getVacansyName() )
                     .show();
         } else {
+            String bodyMessage= Jsoup.parse( openPosition.getComment() ).text();
+
             EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
                     openPosition.getVacansyName(),
                     null, "com/company/itpearls/templates/edit_open_pos.txt",
-                    Collections.singletonMap("openPosition", openPosition));
+//                    Collections.singletonMap("openPosition", openPosition));
+                    Collections.singletonMap("bodyMessage", bodyMessage ));
 
             emailService.sendEmailAsync(emailInfo);
 

@@ -111,7 +111,7 @@ order by e.reacrutier, e.endDate desc]]>
                     </lookupPickerField>
                     <lookupPickerField id="companyDepartamentField" optionsContainer="companyDepartamentsDc"
                                        dataContainer="openPositionDc" property="companyDepartament"
-                                       caption="msg://msgDepartment" width="50%">
+                                       caption="msg://msgDepartment" width="50%" required="true">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
@@ -125,7 +125,7 @@ order by e.reacrutier, e.endDate desc]]>
                     </lookupPickerField>
                     <lookupPickerField id="cityOpenPositionField" dataContainer="openPositionDc"
                                        optionsContainer="citiesDc" property="cityPosition" width="50%"
-                                       caption="mainMsg://msgCity">
+                                       caption="mainMsg://msgCity" required="true">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>

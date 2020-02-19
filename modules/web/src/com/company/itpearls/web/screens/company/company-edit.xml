@@ -71,19 +71,21 @@
                             </actions>
                         </lookupPickerField>
                         <lookupPickerField id="cityOfCompanyField" optionsContainer="cityOfCompaniesDc"
-                                           property="cityOfCompany" caption="msg://msgCityOfCompany">
+                                           property="cityOfCompany" caption="msg://msgCityOfCompany" required="true">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
                         <lookupPickerField id="regionOfCompanyField" optionsContainer="regionOfCompaniesDc"
-                                           property="regionOfCompany" caption="msg://msgRegionOfCompany">
+                                           property="regionOfCompany" caption="msg://msgRegionOfCompany"
+                                           required="true">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
                         <lookupPickerField id="countryOfCompanyField" optionsContainer="countryOfCompaniesDc"
-                                           property="countryOfCompany" caption="msg://msgCountryOfCompany">
+                                           property="countryOfCompany" caption="msg://msgCountryOfCompany"
+                                           required="true">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>

@@ -38,7 +38,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         checkBoxOnWork.setValue( false );
         jobCandidatesDl.removeParameter( "param1" );
-        jobCandidatesDl.removeParameter( "param2" );
         jobCandidatesDl.removeParameter( "param3" );
 
         jobCandidatesDl.load();
@@ -48,11 +47,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     public void onCheckBoxOnWorkValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if( !checkBoxOnWork.getValue() ) {
             jobCandidatesDl.removeParameter( "param1" );
-            jobCandidatesDl.removeParameter( "param2" );
             jobCandidatesDl.removeParameter( "param3" );
         } else {
             jobCandidatesDl.setParameter( "param1", null );
-            jobCandidatesDl.setParameter( "param2", 1 );
             jobCandidatesDl.setParameter( "param3", 10 );
         }
 

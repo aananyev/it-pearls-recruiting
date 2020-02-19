@@ -123,7 +123,7 @@ order by e.name]]>
                     </tab>
                     <tab id="tabCV" caption="msg://msgCV" margin="true,false,false,false" spacing="true">
                         <richTextArea id="candidateCVRichTextArea" dataContainer="candidateCVDc" property="textCV"
-                                      width="100%" height="250pt"/>
+                                      width="100%" height="250pt" required="true"/>
                         <upload id="fileCVField" fileStoragePutMode="IMMEDIATE" property="fileCV" showFileName="true"
                                 align="TOP_LEFT" caption="msg://msgCV" dataContainer="candidateCVDc"/>
                     </tab>

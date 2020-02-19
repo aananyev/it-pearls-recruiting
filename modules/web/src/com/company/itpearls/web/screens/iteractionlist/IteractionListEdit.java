@@ -301,18 +301,21 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
                 .one() );
         // департамент
-        getEditedEntity().setCompanyDepartment( dataManager.load( CompanyDepartament.class )
+        CompanyDepartament companyDepartment = dataManager.load( CompanyDepartament.class )
                 .query(
-                "select e.companyDepartment " +
-                        "from itpearls_IteractionList e " +
-                        "where e.candidate.fullName = :candidate and " +
-                        "e.numberIteraction = " +
-                        "(select max(f.numberIteraction) " +
-                        "from itpearls_IteractionList f " +
-                        "where f.candidate.fullName = :candidate)" )
+                        "select e.companyDepartment " +
+                                "from itpearls_IteractionList e " +
+                                "where e.candidate.fullName = :candidate and " +
+                                "e.numberIteraction = " +
+                                "(select max(f.numberIteraction) " +
+                                "from itpearls_IteractionList f " +
+                                "where f.candidate.fullName = :candidate)" )
                 .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
                 .view( "companyDepartament-view" )
-                .one() );
+                .one();
+
+        if( companyDepartment != null )
+            getEditedEntity().setCompanyDepartment( companyDepartment );
         /*
         // создание цепочки
         parentChain = dataManager.load( IteractionList.class )

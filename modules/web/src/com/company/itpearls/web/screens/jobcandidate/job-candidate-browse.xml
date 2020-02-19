@@ -21,9 +21,6 @@ order by e.secondName, e.firstName]]>
                             <c:where>not e.status = :param1</c:where>
                         </c:jpql>
                         <c:jpql>
-                            <c:where>not e.status = :param2</c:where>
-                        </c:jpql>
-                        <c:jpql>
                             <c:where>not e.status = :param3</c:where>
                         </c:jpql>
                         </and>
