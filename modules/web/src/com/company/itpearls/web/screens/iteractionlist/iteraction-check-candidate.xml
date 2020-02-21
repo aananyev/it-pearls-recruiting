@@ -52,8 +52,8 @@ order by e.fullName]]>
                 <column id="numberIteraction" caption="msg://msgNumber"/>
                 <column id="dateIteraction" caption="msg://msgDate"/>
                 <column id="iteractionType" caption="msg://msgIteractionType"/>
-                <column id="vacancy.vacansyName" caption="msg://msgJobPosition" visible="false"/>
-                <column id="companyDepartment.departamentRuName" caption="msg://msgDepartament"/>
+                <column id="vacancy.vacansyName"/>
+                <column id="vacancy.cityPosition"/>
                 <column id="recrutierName" caption="msg://msgRecrutier" visible="false"/>
                 <column id="recrutier"/>
             </columns>

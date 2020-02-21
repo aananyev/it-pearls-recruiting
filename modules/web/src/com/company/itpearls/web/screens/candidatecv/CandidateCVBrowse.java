@@ -28,23 +28,23 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-       if( userSession.getUser().getGroup().getName().equals("Стажер") ) {
-            candidateCVsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
+        if (userSession.getUser().getGroup().getName().equals("Стажер")) {
+            candidateCVsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
 
-            checkBoxSetOnlyMy.setValue( true );
-            checkBoxSetOnlyMy.setEditable( false );
-       }
+            checkBoxSetOnlyMy.setValue(true);
+            checkBoxSetOnlyMy.setEditable(false);
+        }
     }
 
     @Subscribe("checkBoxSetOnlyMy")
     public void onCheckBoxSetOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-       if(checkBoxSetOnlyMy.getValue()) {
-           candidateCVsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
-       } else {
-          candidateCVsDl.removeParameter( "userName");
-       }
+        if (checkBoxSetOnlyMy.getValue()) {
+            candidateCVsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+        } else {
+            candidateCVsDl.removeParameter("userName");
+        }
 
-       candidateCVsDl.load();
+        candidateCVsDl.load();
     }
 
     public Component generateSemaforCell(CandidateCV entity) {
@@ -79,9 +79,18 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
 
     @Install(to = "candidateCVsTable", subject = "iconProvider")
     protected String candidateCVsTableiconProvider(CandidateCV candidateCV) {
-        if( candidateCV.getTextCV() != null )
-            return candidateCV.getTextCV().isEmpty() ? "icons/ok.png" : "icons/cancel.png";
-        else
-            return "icons/minus.png";
+        if (candidateCV.getLetter() != null &&
+                candidateCV.getTextCV() != null &&
+                candidateCV.getLinkItPearlsCV() != null) {
+            return "icons/resume-green.png";
+        } else {
+            if (candidateCV.getLetter() == null &&
+                    candidateCV.getLinkItPearlsCV() == null &&
+                    candidateCV.getOriginalFileCV() != null) {
+                return "icons/resume-yellow.png";
+            } else {
+                return "icons/resume-red.png";
+            }
+        }
     }
 }

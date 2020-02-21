@@ -1,4 +1,10 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
 Внимание изменена позиция openPosition.vacansyName
-
+</head>
+<body>
 <p><b>Описание позиции</b></p>
 ${bodyMessage}
+</body>
+</html>

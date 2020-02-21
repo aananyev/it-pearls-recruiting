@@ -90,21 +90,21 @@ order by e.reacrutier, e.endDate desc]]>
                     <checkBox id="openClosePositionCheckBox" dataContainer="openPositionDc" property="openClose"
                               caption="mainMsg://msgPositionClose"/>
                     <textField id="vacansyNameField" dataContainer="openPositionDc" property="vacansyName"
-                               caption="msg://msgVacansy" width="50%"/>
+                               caption="msg://msgVacansy" width="50%" required="true"/>
                     <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc"
                                        dataContainer="openPositionDc" property="positionType"
-                                       caption="msg://msgPositionType" width="50%">
+                                       caption="msg://msgPositionType" width="50%" required="true">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
                     <lookupField id="priorityField"
-                                       dataContainer="openPositionDc" property="priority"
-                                       caption="msg://msgPriorityPosition" width="50%">
+                                 dataContainer="openPositionDc" property="priority"
+                                 caption="msg://msgPriorityPosition" width="50%" required="true">
                     </lookupField>
                     <lookupPickerField id="projectNameField" optionsContainer="projectNamesDc"
                                        dataContainer="openPositionDc" property="projectName"
-                                       caption="msg://msgNamePosition" width="50%">
+                                       caption="msg://msgNamePosition" width="50%" required="true">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
@@ -118,7 +118,7 @@ order by e.reacrutier, e.endDate desc]]>
                     </lookupPickerField>
                     <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc"
                                        dataContainer="openPositionDc" property="companyName" caption="msg://msgCompanyName"
-                                       width="50%">
+                                       width="50%" required="true">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
@@ -139,7 +139,8 @@ order by e.reacrutier, e.endDate desc]]>
                 </groupBox>
             </tab>
             <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tabJobDescription">
-                <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="350pt"/>
+                <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="350pt"
+                              required="true"/>
             </tab>
             <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
@@ -161,7 +162,7 @@ order by e.reacrutier, e.endDate desc]]>
                 </groupBox>
             </tab>
             <tab caption="mainMsg://msgResrutierTask" margin="true,false,false,false" spacing="true" id="tabRecrutior">
-                <table id="recrutiesTasksTable" height="100px" width="100%" dataContainer="taskRecrutior">
+                <table id="recrutiesTasksTable" height="400px" width="100%" dataContainer="taskRecrutior">
                     <columns>
                         <column id="startDate"/>
                         <column id="endDate"/>

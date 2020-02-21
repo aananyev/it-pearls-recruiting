@@ -1,18 +1,23 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.addon.emailtemplates.exceptions.ReportParameterTypeChangedException;
+import com.haulmont.addon.emailtemplates.exceptions.TemplateNotFoundException;
 import com.haulmont.cuba.core.app.EmailService;
+import com.haulmont.cuba.core.global.EmailException;
 import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 import java.util.*;
-
 import javax.inject.Inject;
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @UiController("itpearls_OpenPosition.edit")
 @UiDescriptor("open-position-edit.xml")
@@ -43,6 +48,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Notifications notifications;
     @Inject
     private LookupField priorityField;
+    @Inject
+    private UserSession userSession;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -112,7 +119,26 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
         sendMessage();
+//        sendMessageAction();
     }
+
+    public static final String EDITED_OPEN_POSITION = "openposition.edited";
+    private static final Logger LOG = LoggerFactory.getLogger( OpenPosition.class );
+
+/*    private void sendMessageAction() {
+        try {
+            emailTemplatesAPI.buildFromTemplate( EDITED_OPEN_POSITION )
+                    .setSubject( "Изменение позиции" )
+                    .setTo( userSession.getAddress() )
+                    .setBodyParameter( "firstName", userSession.getUser().getFirstName() )
+                    .setBodyParameter( "secondName", userSession.getUser().getLastName() )
+                    .setBodyParameter( "openPosition", getEditedEntity() )
+                    .sendEmail();
+        } catch ( TemplateNotFoundException | EmailException | ReportParameterTypeChangedException e ) {
+            LOG.warn(e.getMessage());
+        }
+
+    } */
 
     private void sendMessage() {
         // по почте
@@ -137,7 +163,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
                     openPosition.getVacansyName(),
-                    null, "com/company/itpearls/templates/edit_open_pos.txt",
+                    null, "com/company/itpearls/templates/edit_open_pos.html",
 //                    Collections.singletonMap("openPosition", openPosition));
                     Collections.singletonMap("bodyMessage", bodyMessage ));
 

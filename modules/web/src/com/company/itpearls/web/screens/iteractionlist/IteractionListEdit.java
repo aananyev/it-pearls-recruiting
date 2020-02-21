@@ -43,6 +43,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected User lastUser = null;
     protected Date lastIteraction;
     protected JobCandidate candidate;
+    private static Boolean isCopyButton;
 
 
     @Inject
@@ -144,18 +145,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 // сколько записей есть по этому кандидату
                 if (getIteractionCount() != 0) {
                     // ввели кандидата - предложи скопировать предыдущую запись
-                    dialogs.createOptionDialog()
-                            .withCaption("Warning")
-                            .withMessage("Скопировать предыдущую запись кандидата?")
-                            .withActions(
-                                    new DialogAction(DialogAction.Type.YES,
-                                            Action.Status.PRIMARY).withHandler(e -> {
+                    if( !isCopyButton ) {
+                        dialogs.createOptionDialog()
+                                .withCaption("Warning")
+                                .withMessage("Скопировать предыдущую запись кандидата?")
+                                .withActions(
+                                        new DialogAction(DialogAction.Type.YES,
+                                                Action.Status.PRIMARY).withHandler(e -> {
                                             this.copyPrevionsItems();
-                                    }),
-                                    new DialogAction(DialogAction.Type.NO)
-                            )
-                            .show();
+                                        }),
+                                        new DialogAction(DialogAction.Type.NO)
+                                )
+                                .show();
                     }
+                }
             }
         } else {
             String msg = "С этим кандидатом " + lastUser.getName() + " контактировал " + lastIteraction.toString() +
@@ -369,6 +372,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        isCopyButton = false;
         // изначально предполагаем, что это продолжение проекта
         newProject = false;
         // вся сортировка в поле IteractionType
@@ -401,6 +405,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         String classIL = "itpearls_" + getEditedEntity().getClass().getSimpleName() + ".edit";
 
         closeWithCommit();
+        isCopyButton = true;
 
         screenBuilders.editor( IteractionList.class, this )
                 .newEntity()
@@ -413,5 +418,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 })
                 .build()
                 .show();
+
+        isCopyButton = false;
     }
 }
