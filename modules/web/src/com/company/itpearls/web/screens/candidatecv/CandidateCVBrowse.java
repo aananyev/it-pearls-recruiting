@@ -84,9 +84,10 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
                 candidateCV.getLinkItPearlsCV() != null) {
             return "icons/resume-green.png";
         } else {
-            if (candidateCV.getLetter() == null &&
-                    candidateCV.getLinkItPearlsCV() == null &&
-                    candidateCV.getOriginalFileCV() != null) {
+            if ( ( candidateCV.getLetter() == null ||
+                    candidateCV.getLinkItPearlsCV() == null ) &&
+                    candidateCV.getOriginalFileCV() != null  &&
+                    candidateCV.getTextCV() != null ) {
                 return "icons/resume-yellow.png";
             } else {
                 return "icons/resume-red.png";

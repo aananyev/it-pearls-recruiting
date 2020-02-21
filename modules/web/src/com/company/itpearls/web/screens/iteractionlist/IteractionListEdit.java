@@ -253,11 +253,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             d = dataManager.loadValue(
                     "select count(e) " +
                             "from itpearls_IteractionList e " +
-                            "where e.candidate.fullName = :candidate",
+                            "where e.candidate = :candidate",
                     Integer.class)
-                    .parameter("candidate", getEditedEntity().getCandidate().getFullName())
+                    .parameter("candidate", getEditedEntity().getCandidate() )
                     .one();
-        } catch ( NullPointerException e ) {
+        } catch ( NullPointerException | IllegalStateException e ) {
             d = 0;
         }
 
@@ -277,12 +277,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             openPos = dataManager.load(OpenPosition.class)
                     .query("select e.vacancy " +
                             "from itpearls_IteractionList e " +
-                            "where e.candidate.fullName = :candidate and " +
+                            "where e.candidate = :candidate and " +
                             "e.numberIteraction = " +
                             "(select max(f.numberIteraction) " +
                             "from itpearls_IteractionList f " +
-                            "where f.candidate.fullName = :candidate)")
-                    .parameter("candidate", getEditedEntity().getCandidate().getFullName())
+                            "where f.candidate = :candidate)")
+                    .parameter("candidate", getEditedEntity().getCandidate() )
                     .view("openPosition-view")
                     .one();
         } catch ( IllegalStateException e ) {
@@ -296,24 +296,24 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         getEditedEntity().setProject( dataManager.loadValue(
                 "select e.project " +
                         "from itpearls_IteractionList e " +
-                        "where e.candidate.fullName = :candidate and " +
+                        "where e.candidate = :candidate and " +
                         "e.numberIteraction = " +
                         "(select max(f.numberIteraction) " +
                         "from itpearls_IteractionList f " +
-                        "where f.candidate.fullName = :candidate)", Project.class )
-                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+                        "where f.candidate = :candidate)", Project.class )
+                .parameter( "candidate", getEditedEntity().getCandidate() )
                 .one() );
         // департамент
         CompanyDepartament companyDepartment = dataManager.load( CompanyDepartament.class )
                 .query(
                         "select e.companyDepartment " +
                                 "from itpearls_IteractionList e " +
-                                "where e.candidate.fullName = :candidate and " +
+                                "where e.candidate = :candidate and " +
                                 "e.numberIteraction = " +
                                 "(select max(f.numberIteraction) " +
                                 "from itpearls_IteractionList f " +
-                                "where f.candidate.fullName = :candidate)" )
-                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
+                                "where f.candidate = :candidate)" )
+                .parameter( "candidate", getEditedEntity().getCandidate() )
                 .view( "companyDepartament-view" )
                 .one();
 

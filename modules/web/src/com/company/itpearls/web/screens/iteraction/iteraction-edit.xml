@@ -23,26 +23,31 @@ order by e.number]]>
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="iteractionDc" width="100%">
-            <column width="50%">
+        </form>
+        <tabSheet>
+            <tab caption="msg://msgIteracionType" margin="true,false,false,false" spacing="true" id="tab">
                 <checkBox id="iteractionCheckBoxMandatory" dataContainer="iteractionDc" property="mandatoryIteraction" caption="msg://msgMandatory"/>
-                <textField id="numberField" property="number" caption="msg://msgNumber" width="50%"/>
+                <textField id="numberField" property="number" caption="msg://msgNumber" width="50%"
+                           dataContainer="iteractionDc"/>
                 <lookupPickerField id="iteractionTreeField" dataContainer="iteractionDc"
                                    optionsContainer="iteractionsTreeDc" property="iteractionTree"
                                    caption="msg://msgIterationTree" width="50%"/>
                 <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"
-                           width="50%"/>
-            </column>
-            <column width="50%">
+                           width="50%" dataContainer="iteractionDc"/>
+            </tab>
+            <tab caption="msg://Tab" margin="true,false,false,false" spacing="true" id="tab_1">
                 <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
-                <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"/>
-                <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"/>
+                <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"
+                           caption="msg://msgCallButtonText"/>
+                <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"
+                           caption="msg://msgCallButtonText"/>
                 <hbox spacing="true" width="100%">
                     <textField id="iteractionFieldPic" dataContainer="iteractionDc" property="pic" width="200pt"
                                description="msg://msgPic" caption="msg://msgPic"/>
                     <embedded id="embeddedPict" align="BOTTOM_RIGHT" type="IMAGE" width="0pt" height="0pt"/>
                 </hbox>
-            </column>
-        </form>
+            </tab>
+        </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

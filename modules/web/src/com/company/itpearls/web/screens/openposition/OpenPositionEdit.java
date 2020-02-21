@@ -164,8 +164,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
                     openPosition.getVacansyName(),
                     null, "com/company/itpearls/templates/edit_open_pos.html",
-//                    Collections.singletonMap("openPosition", openPosition));
-                    Collections.singletonMap("bodyMessage", bodyMessage ));
+                    Collections.singletonMap("openPosition", openPosition));
+//                    Collections.singletonMap("bodyMessage", bodyMessage ));
 
             emailService.sendEmailAsync(emailInfo);
 

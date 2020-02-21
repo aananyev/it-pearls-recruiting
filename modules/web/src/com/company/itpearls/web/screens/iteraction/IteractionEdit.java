@@ -1,10 +1,7 @@
 package com.company.itpearls.web.screens.iteraction;
 
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.components.Embedded;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.LookupPickerField;
-import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Iteraction;
 
@@ -19,11 +16,32 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private Embedded embeddedPict;
     @Inject
     private TextField<String> numberField;
+    @Inject
+    private CheckBox checkBoxCallDialog;
+    @Inject
+    private TextField<String> textFieldCallButtonText;
+    @Inject
+    private TextField<String> textFieldCallForm;
+    @Inject
+    private TextField<String> iteractionFieldPic;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if( !PersistenceHelper.isNew( getEditedEntity() )) {
             embeddedPict.setIcon(getEditedEntity().getPic());
+        }
+    }
+
+    @Subscribe("checkBoxCallDialog")
+    public void onCheckBoxCallDialogValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if( !checkBoxCallDialog.getValue() ) {
+            textFieldCallButtonText.setEditable( false );
+            textFieldCallForm.setEditable( false );
+            iteractionFieldPic.setEditable( false );
+        } else {
+            textFieldCallButtonText.setEditable( true );
+            textFieldCallForm.setEditable( true );
+            iteractionFieldPic.setEditable( true );
         }
     }
 
