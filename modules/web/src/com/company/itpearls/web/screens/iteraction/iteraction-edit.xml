@@ -38,13 +38,13 @@ order by e.number]]>
             <tab caption="msg://Tab" margin="true,false,false,false" spacing="true" id="tab_1">
                 <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
                 <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"
-                           caption="msg://msgCallButtonText"/>
+                           caption="msg://msgCallButtonText" width="50%"/>
                 <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"
-                           caption="msg://msgCallButtonText"/>
+                           caption="msg://msgCallButtonText" width="50%"/>
                 <hbox spacing="true" width="100%">
-                    <textField id="iteractionFieldPic" dataContainer="iteractionDc" property="pic" width="200pt"
+                    <textField id="iteractionFieldPic" dataContainer="iteractionDc" property="pic" width="100%"
                                description="msg://msgPic" caption="msg://msgPic"/>
-                    <embedded id="embeddedPict" align="BOTTOM_RIGHT" type="IMAGE" width="0pt" height="0pt"/>
+                    <embedded id="embeddedPict" align="MIDDLE_CENTER" type="IMAGE" width="100%" height="40pt"/>
                 </hbox>
             </tab>
         </tabSheet>

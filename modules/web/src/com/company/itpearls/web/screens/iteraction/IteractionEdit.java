@@ -30,10 +30,16 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         if( !PersistenceHelper.isNew( getEditedEntity() )) {
             embeddedPict.setIcon(getEditedEntity().getPic());
         }
+
+        disablePicAndButton();
     }
 
     @Subscribe("checkBoxCallDialog")
     public void onCheckBoxCallDialogValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        disablePicAndButton();
+    }
+
+    private void disablePicAndButton() {
         if( !checkBoxCallDialog.getValue() ) {
             textFieldCallButtonText.setEditable( false );
             textFieldCallForm.setEditable( false );
