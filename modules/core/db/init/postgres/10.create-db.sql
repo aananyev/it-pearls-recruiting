@@ -96,8 +96,10 @@ create table ITPEARLS_ITERACTION_LIST (
     RECRUTIER_ID uuid,
     RECRUTIER_NAME varchar(80),
     ITERACTION_CHAIN_ID uuid,
-    SALARY decimal(19, 2),
-    DATE_INTERVIEW timestamp,
+    ADD_TYPE integer,
+    ADD_DATE timestamp,
+    ADD_STRING varchar(255),
+    ADD_INTEGER integer,
     --
     primary key (ID)
 )^
@@ -142,7 +144,7 @@ create table ITPEARLS_COMPANY (
     OUR_CLIENT boolean,
     COMPANY_OWNERSHIP_ID uuid,
     COMANY_NAME varchar(80) not null,
-    COMPANY_SHORT_NAME varchar(30),
+    COMPANY_SHORT_NAME varchar(80),
     COMPANY_DIRECTOR_ID uuid,
     CITY_OF_COMPANY_ID uuid,
     REGION_OF_COMPANY_ID uuid,
@@ -185,9 +187,14 @@ create table ITPEARLS_ITERACTION (
     MANDATORY_ITERACTION boolean,
     ITERACTION_TREE_ID uuid,
     ITERATION_NAME varchar(80) not null,
+    PIC varchar(80),
     CALL_BUTTON_TEXT varchar(30),
     CALL_CLASS varchar(30),
     CALL_FORM boolean,
+    ADD_FLAG boolean,
+    ADD_TYPE integer,
+    ADD_FIELD varchar(40),
+    ADD_CAPTION varchar(80),
     --
     primary key (ID)
 )^

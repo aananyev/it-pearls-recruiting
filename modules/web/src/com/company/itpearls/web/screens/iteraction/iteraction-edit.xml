@@ -25,7 +25,7 @@ order by e.number]]>
         <form id="form" dataContainer="iteractionDc" width="100%">
         </form>
         <tabSheet>
-            <tab caption="msg://msgIteracionType" margin="true,false,false,false" spacing="true" id="tab">
+            <tab caption="msg://msgIteracionType" margin="true,false,false,false" spacing="true" id="tabType">
                 <checkBox id="iteractionCheckBoxMandatory" dataContainer="iteractionDc" property="mandatoryIteraction" caption="msg://msgMandatory"/>
                 <textField id="numberField" property="number" caption="msg://msgNumber" width="50%"
                            dataContainer="iteractionDc"/>
@@ -35,7 +35,7 @@ order by e.number]]>
                 <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"
                            width="50%" dataContainer="iteractionDc"/>
             </tab>
-            <tab caption="msg://Tab" margin="true,false,false,false" spacing="true" id="tab_1">
+            <tab caption="msg://Tab" margin="true,false,false,false" spacing="true" id="tabIcons">
                 <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
                 <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"
                            caption="msg://msgCallButtonText" width="50%"/>
@@ -46,6 +46,15 @@ order by e.number]]>
                                description="msg://msgPic" caption="msg://msgPic"/>
                     <embedded id="embeddedPict" align="MIDDLE_CENTER" type="IMAGE" width="100%" height="40pt"/>
                 </hbox>
+            </tab>
+            <tab caption="msg://msgSetupFiels" margin="true,false,false,false" spacing="true" id="tabSetup">
+                <checkBox id="checkBoxFlag" caption="msg://msgAdd" dataContainer="iteractionDc" property="addFlag"/>
+                <radioButtonGroup id="radioButtonAddType" caption="msg://msgRadioButton" width="50%"
+                                  dataContainer="iteractionDc" property="addType"/>
+                <textField id="textFieldCaption" caption="msg://msgCaption" dataContainer="iteractionDc"
+                           property="addCaption" width="50%"/>
+                <textField id="textFieldDBFieldName" caption="msg://msgDBFiledNme" dataContainer="iteractionDc"
+                           property="addField" width="50%"/>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

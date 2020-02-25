@@ -33,7 +33,7 @@ public class Company extends StandardEntity {
     @Column(name = "COMANY_NAME", nullable = false, unique = true, length = 80)
     protected String comanyName;
 
-    @Column(name = "COMPANY_SHORT_NAME", unique = true, length = 30)
+    @Column(name = "COMPANY_SHORT_NAME", unique = true, length = 80)
     protected String companyShortName;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})

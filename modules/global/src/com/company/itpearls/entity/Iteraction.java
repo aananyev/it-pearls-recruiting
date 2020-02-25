@@ -10,7 +10,8 @@ import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|iterationName")
 @Table(name = "ITPEARLS_ITERACTION", indexes = {
-        @Index(name = "IDX_ITPEARLS_ITERACTION", columnList = "ITERATION_NAME")
+        @Index(name = "IDX_ITPEARLS_ITERACTION", columnList = "ITERATION_NAME"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_1", columnList = "NUMBER_")
 })
 @Entity(name = "itpearls_Iteraction")
 public class Iteraction extends StandardEntity {
@@ -42,6 +43,50 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "CALL_FORM")
     protected Boolean callForm;
+
+    @Column(name = "ADD_FLAG")
+    protected Boolean addFlag;
+
+    @Column(name = "ADD_TYPE")
+    protected Integer addType;
+
+    @Column(name = "ADD_FIELD", length = 40)
+    protected String addField;
+
+    @Column(name = "ADD_CAPTION", length = 80)
+    protected String addCaption;
+
+    public String getAddCaption() {
+        return addCaption;
+    }
+
+    public void setAddCaption(String addCaption) {
+        this.addCaption = addCaption;
+    }
+
+    public String getAddField() {
+        return addField;
+    }
+
+    public void setAddField(String addField) {
+        this.addField = addField;
+    }
+
+    public Integer getAddType() {
+        return addType;
+    }
+
+    public void setAddType(Integer addType) {
+        this.addType = addType;
+    }
+
+    public Boolean getAddFlag() {
+        return addFlag;
+    }
+
+    public void setAddFlag(Boolean addFlag) {
+        this.addFlag = addFlag;
+    }
 
     public String getPic() {
         return pic;

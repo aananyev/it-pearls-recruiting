@@ -6,6 +6,8 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Iteraction;
 
 import javax.inject.Inject;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @UiController("itpearls_Iteraction.edit")
 @UiDescriptor("iteraction-edit.xml")
@@ -24,6 +26,24 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private TextField<String> textFieldCallForm;
     @Inject
     private TextField<String> iteractionFieldPic;
+    @Inject
+    private RadioButtonGroup<Integer> radioButtonAddType;
+    @Inject
+    private CheckBox checkBoxFlag;
+    @Inject
+    private TextField textFieldCaption;
+    @Inject
+    private TextField textFieldDBFieldName;
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        Map<String, Integer> mapAddType = new LinkedHashMap<>();
+        mapAddType.put("Data", 1);
+        mapAddType.put("String", 2);
+        mapAddType.put("Integer", 3);
+
+        radioButtonAddType.setOptionsMap(mapAddType);
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -32,7 +52,22 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         }
 
         disablePicAndButton();
+
+        setDisableElements();
     }
+
+    @Subscribe("checkBoxFlag")
+    public void onCheckBoxFlagValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        setDisableElements();
+    }
+
+    protected void setDisableElements() {
+        textFieldCaption.setEditable( checkBoxFlag.getValue() );
+        textFieldDBFieldName.setEditable( checkBoxFlag.getValue() );
+        radioButtonAddType.setEditable( checkBoxFlag.getValue() );
+    }
+
+    
 
     @Subscribe("checkBoxCallDialog")
     public void onCheckBoxCallDialogValueChange(HasValue.ValueChangeEvent<Boolean> event) {

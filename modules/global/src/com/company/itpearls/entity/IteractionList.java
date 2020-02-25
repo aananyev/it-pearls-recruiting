@@ -85,27 +85,49 @@ public class IteractionList extends StandardEntity {
     @JoinColumn(name = "ITERACTION_CHAIN_ID")
     protected IteractionList iteractionChain;
 
-    @Column(name = "SALARY")
-    protected BigDecimal salary;
+    @Column(name = "ADD_TYPE")
+    protected Integer addType;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "DATE_INTERVIEW")
-    protected Date dateInterview;
+    @Column(name = "ADD_DATE")
+    protected Date addDate;
 
-    public Date getDateInterview() {
-        return dateInterview;
+    @Column(name = "ADD_STRING")
+    protected String addString;
+
+    @Column(name = "ADD_INTEGER")
+    protected Integer addInteger;
+
+    public Integer getAddInteger() {
+        return addInteger;
     }
 
-    public void setDateInterview(Date dateInterview) {
-        this.dateInterview = dateInterview;
+    public void setAddInteger(Integer addInteger) {
+        this.addInteger = addInteger;
     }
 
-    public BigDecimal getSalary() {
-        return salary;
+    public String getAddString() {
+        return addString;
     }
 
-    public void setSalary(BigDecimal salary) {
-        this.salary = salary;
+    public void setAddString(String addString) {
+        this.addString = addString;
+    }
+
+    public Integer getAddType() {
+        return addType;
+    }
+
+    public void setAddType(Integer addType) {
+        this.addType = addType;
+    }
+
+    public Date getAddDate() {
+        return addDate;
+    }
+
+    public void setAddDate(Date addDate) {
+        this.addDate = addDate;
     }
 
     public IteractionList getIteractionChain() {
