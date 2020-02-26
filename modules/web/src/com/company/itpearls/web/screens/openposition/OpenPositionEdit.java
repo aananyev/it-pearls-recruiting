@@ -5,6 +5,7 @@ import com.haulmont.addon.emailtemplates.exceptions.ReportParameterTypeChangedEx
 import com.haulmont.addon.emailtemplates.exceptions.TemplateNotFoundException;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.EmailException;
+import com.haulmont.cuba.core.global.EmailHeader;
 import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Notifications;
@@ -51,6 +52,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private UserSession userSession;
 
+    private Boolean booOpenClosePosition;
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
@@ -62,6 +65,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         jobCandidatesDl.load();
+
+        booOpenClosePosition = getEditedEntity().getOpenClose();
     }
 
     @Subscribe("companyDepartamentField")
@@ -118,7 +123,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
-        sendMessage();
 //        sendMessageAction();
     }
 
@@ -147,7 +151,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // нотификация
         if (PersistenceHelper.isNew(getEditedEntity())) {
             // пошлем по почте
-            EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
+            EmailInfo emailInfo = new EmailInfo( setMaillist(),
                     openPosition.getVacansyName(),
                     null, "com/company/itpearls/templates/create_new_pos.txt",
                     Collections.singletonMap("openPosition", openPosition));
@@ -161,10 +165,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         } else {
             String bodyMessage= Jsoup.parse( openPosition.getComment() ).text();
 
-            EmailInfo emailInfo = new EmailInfo("alan@itpearls.ru",
+            EmailInfo emailInfo = new EmailInfo( setMaillist(),
                     openPosition.getVacansyName(),
                     null, "com/company/itpearls/templates/edit_open_pos.html",
                     Collections.singletonMap("openPosition", openPosition));
+            emailInfo.setBodyContentType( "text/html; charset=utf-8" );
+
 //                    Collections.singletonMap("bodyMessage", bodyMessage ));
 
             emailService.sendEmailAsync(emailInfo);
@@ -175,6 +181,66 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .withDescription( getEditedEntity().getVacansyName() )
                     .show();
         }
+    }
+
+    private Boolean sendOpenCloseMessage() {
+        EmailInfo emailInfo;
+        OpenPosition openPosition = getEditedEntity();
+
+        Boolean setOK = getEditedEntity().getOpenClose();
+        int a = setOK ? 1 : 0;
+        int b = booOpenClosePosition ? 1 : 0;
+
+        // если что-то изменилось
+       if( a != b ) {
+
+           if( !getEditedEntity().getOpenClose() ) {
+               // позиция открылась
+               notifications.create(Notifications.NotificationType.TRAY)
+                       .withCaption("Открыта позиция" )
+                       .withDescription( getEditedEntity().getVacansyName() )
+                       .show();
+
+               emailInfo = new EmailInfo( setMaillist(),
+                       "Открыта позиция " + openPosition.getVacansyName(),
+                       null, "com/company/itpearls/templates/open_position.html",
+                       Collections.singletonMap("openPosition", openPosition));
+
+           } else {
+               // позиция закрылась
+               notifications.create(Notifications.NotificationType.TRAY)
+                       .withCaption("Закрыта позиция" )
+                       .withDescription( getEditedEntity().getVacansyName() )
+                       .show();
+
+               emailInfo = new EmailInfo( setMaillist(),
+                       "Закрыта позиция " + openPosition.getVacansyName(),
+                       null, "com/company/itpearls/templates/close_position.html",
+                       Collections.singletonMap("openPosition", openPosition));
+           }
+
+           emailInfo.setBodyContentType( "text/html" );
+//           emailInfo.addHeader("charset", "UTF-8");
+
+           emailService.sendEmailAsync(emailInfo);
+
+           return true;
+       } else
+           return false;
+    }
+
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        // если не изменился статус открыто/закрыто
+        if( !sendOpenCloseMessage() )
+            // отослать сооьщение об изменении позиции
+            sendMessage();
+    }
+
+    private String setMaillist()
+    {
+       return "alan@itpearls.ru";
     }
 
     @Subscribe

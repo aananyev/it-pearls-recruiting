@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -62,6 +63,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> wiberNameField;
     @Inject
     private Label<String> labelQualityPercent;
+    @Named("jobCityCandidateField.lookup")
+    private LookupAction jobCityCandidateFieldLookup;
+    @Named("positionCountryField.lookup")
+    private LookupAction positionCountryFieldLookup;
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -150,6 +155,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                 jobHistoriesDl.setParameter( "candidate", getEditedEntity().getFullName() );
                 jobHistoriesDl.load();
+
+                // устранить проблему с Страной
+               if( getEditedEntity().getPositionCountry() == null )
+                   getEditedEntity().setPositionCountry(
+                           getEditedEntity().getCityOfResidence().getCityRegion().getRegionCountry() );
 
                 if( getEditedEntity().getFullName() == null )
                     getEditedEntity().setFullName("");

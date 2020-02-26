@@ -4,6 +4,7 @@ import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
@@ -48,6 +49,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -368,6 +371,31 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     buttonCallAction.setVisible(true);
                 else
                     buttonCallAction.setVisible(false);
+                // если надо специальное поле
+                if( iteractionTypeField.getValue().getAddFlag() ) {
+                    // удалить кнопку
+                    TextField<Integer> textFieldInteger;
+                    TextField<String> textFieldString;
+                    TextField<Date> textFieldDate;
+
+                    switch( iteractionTypeField.getValue().getAddType() ) {
+                        case 1: // поле Data
+                            textFieldDate = uiComponents.create( TextField.class );
+                            textFieldDate.setCaption( iteractionTypeField.getValue().getAddCaption() );
+                            textFieldDate.setWidth("50%");
+                            break;
+                        case 2: // поле String
+                            textFieldString = uiComponents.create( TextField.class );
+                            textFieldString.setCaption( iteractionTypeField.getValue().getAddCaption() );
+                            textFieldString.setWidth("50%");
+                            break;
+                        case 3: // поле Integer
+                            textFieldInteger = uiComponents.create( TextField.TYPE_INTEGER );
+                            textFieldInteger.setCaption( iteractionTypeField.getValue().getAddCaption() );
+                            textFieldInteger.setWidth("50%");
+                            break;
+                    }
+                }
     }
 
     @Subscribe

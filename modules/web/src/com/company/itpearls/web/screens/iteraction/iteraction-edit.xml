@@ -24,6 +24,8 @@ order by e.number]]>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="iteractionDc" width="100%">
         </form>
+        <label id="labelItercationName" stylename="h1"/>
+        <label id="labelWarning" icon="WARNING" description="msg://msgWarning" stylename="h2"/>
         <tabSheet>
             <tab caption="msg://msgIteracionType" margin="true,false,false,false" spacing="true" id="tabType">
                 <checkBox id="iteractionCheckBoxMandatory" dataContainer="iteractionDc" property="mandatoryIteraction" caption="msg://msgMandatory"/>

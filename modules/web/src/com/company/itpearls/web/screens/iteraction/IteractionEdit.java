@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.iteraction;
 
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -34,6 +35,12 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private TextField textFieldCaption;
     @Inject
     private TextField textFieldDBFieldName;
+    @Inject
+    private Label<String> labelItercationName;
+    @Inject
+    private Label<String> labelWarning;
+    @Inject
+    private Messages messages;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -45,11 +52,21 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         radioButtonAddType.setOptionsMap(mapAddType);
     }
 
+    @Subscribe("radioButtonAddType")
+    public void onRadioButtonAddTypeValueChange(HasValue.ValueChangeEvent<Integer> event) {
+//       textFieldDBFieldName.setValue(radioButtonAddType.getLookupSelectedItems().getClass());
+    }
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if( !PersistenceHelper.isNew( getEditedEntity() )) {
             embeddedPict.setIcon(getEditedEntity().getPic());
         }
+
+        if( !PersistenceHelper.isNew( getEditedEntity() ) )
+            labelItercationName.setValue( getEditedEntity().getIterationName() );
+
+        labelWarning.setValue( messages.getMessage( getClass(), "msgForAdmin") );
 
         disablePicAndButton();
 
