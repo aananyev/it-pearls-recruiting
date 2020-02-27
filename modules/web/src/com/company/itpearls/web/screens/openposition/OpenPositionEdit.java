@@ -4,10 +4,8 @@ import com.company.itpearls.entity.*;
 import com.haulmont.addon.emailtemplates.exceptions.ReportParameterTypeChangedException;
 import com.haulmont.addon.emailtemplates.exceptions.TemplateNotFoundException;
 import com.haulmont.cuba.core.app.EmailService;
-import com.haulmont.cuba.core.global.EmailException;
-import com.haulmont.cuba.core.global.EmailHeader;
-import com.haulmont.cuba.core.global.EmailInfo;
-import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -53,6 +51,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private UserSession userSession;
 
     private Boolean booOpenClosePosition;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -169,7 +169,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     openPosition.getVacansyName(),
                     null, "com/company/itpearls/templates/edit_open_pos.html",
                     Collections.singletonMap("openPosition", openPosition));
-            emailInfo.setBodyContentType( "text/html; charset=utf-8" );
+            emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
 
 //                    Collections.singletonMap("bodyMessage", bodyMessage ));
 
@@ -219,7 +219,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                        Collections.singletonMap("openPosition", openPosition));
            }
 
-           emailInfo.setBodyContentType( "text/html" );
+           emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
 //           emailInfo.addHeader("charset", "UTF-8");
 
            emailService.sendEmailAsync(emailInfo);
@@ -240,7 +240,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private String setMaillist()
     {
-       return "alan@itpearls.ru";
+        List<RecrutiesTasks> listRecrutiers = dataManager.load(RecrutiesTasks.class)
+                .query("select e " +
+                    "from itpearls_RecrutiesTasks e " +
+                    "where e.endDate  >= :currentDate and " +
+                        "e.openPosition = :openPosition" )
+                .parameter( "currentDate", new Date() )
+                .parameter( "openPosition", getEditedEntity() )
+                .view("recrutiesTasks-view")
+                .list();
+
+        String maillist = "";
+
+        for( RecrutiesTasks address : listRecrutiers ) {
+            String email = address.getReacrutier().getEmail();
+            if( !email.equals( "null" ))
+                maillist = maillist + email + ";";
+        }
+
+       return maillist + "alan@itpearls.ru";
     }
 
     @Subscribe
