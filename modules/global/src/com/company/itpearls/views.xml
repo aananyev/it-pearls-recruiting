@@ -60,9 +60,17 @@
         <property name="currentCompany" view="_local"/>
         <property name="personPosition" view="_minimal"/>
         <property name="cityOfResidence" view="_local">
-            <property name="cityRegion" view="_minimal"/>
+            <property name="cityRegion" view="_minimal">
+                <property name="regionCountry" view="_minimal"/>
+                <property name="regionOfCity" view="_minimal"/>
+            </property>
         </property>
-        <property name="positionCountry" view="_local"/>
+        <property name="positionCountry" view="_local">
+            <property name="countryOfRegion" view="_minimal">
+                <property name="regionCountry" view="_minimal"/>
+                <property name="regionOfCity" view="_minimal"/>
+            </property>
+        </property>
         <property name="iteractionList" view="_local">
             <property name="candidate" view="_local">
                 <property name="personPosition" view="_local"/>

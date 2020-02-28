@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
+import com.company.itpearls.entity.OpenPosition;
+import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.Button;
@@ -28,7 +30,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Inject
     private UserSession userSession;
     @Inject
-    private Dialogs dialogs;
+    private LookupPickerField<OpenPosition> recrutiesTasksField;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {

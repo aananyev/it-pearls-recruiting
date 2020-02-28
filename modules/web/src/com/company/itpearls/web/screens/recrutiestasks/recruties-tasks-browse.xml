@@ -12,11 +12,18 @@
                 <query>
                     <![CDATA[select e from itpearls_RecrutiesTasks e order by e.reacrutier.name, e.endDate desc]]>
                     <condition>
+                        <and>
                         <c:jpql>
                             <c:where>
                                 e.endDate > :currentDate
                             </c:where>
                         </c:jpql>
+                        <c:jpql>
+                            <c:where>
+                                e.reacrutier = :recrutier
+                            </c:where>
+                        </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>

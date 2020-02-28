@@ -4,8 +4,10 @@ import com.company.itpearls.entity.RecrutiesTasks;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.ValueLoadContext;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.actions.list.CreateAction;
+import com.haulmont.cuba.gui.builders.ScreenBuilderProcessor;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.HasValue;
@@ -34,6 +36,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Table<OpenPosition> openPositionsTable;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private ScreenBuilders screenBuilders;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -107,6 +111,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return icon;
+    }
+
+    public void subscribePosition() {
+       Screen opScreen = screenBuilders
+                .editor(RecrutiesTasks.class, this)
+                .newEntity()
+                .withScreenId("itpearls_RecrutiesTasks.edit")
+                .withLaunchMode(OpenMode.DIALOG)
+                .build();
+
+       opScreen.show();
     }
 }
 

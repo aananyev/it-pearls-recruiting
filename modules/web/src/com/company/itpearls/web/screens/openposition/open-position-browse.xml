@@ -55,9 +55,13 @@ order by e.positionType]]>
                 <button id="createBtn" action="openPositionsTable.create"/>
                 <button id="editBtn" action="openPositionsTable.edit"/>
                 <button id="removeBtn" action="openPositionsTable.remove"/>
+                <button id="buttonSubscribe" caption="msg://mshSubscibe" invoke="subscribePosition"/>
             </buttonsPanel>
         </table>
-        <checkBox id="checkBoxOnlyOpenedPosition" description="msg://msgOnlyOpenedVacansy" caption="msg://msgOnlyOpenedVacansy"/>
+        <hbox spacing="true">
+            <checkBox id="checkBoxOnlyOpenedPosition" description="msg://msgOnlyOpenedVacansy" caption="msg://msgOnlyOpenedVacansy"/>
+            <checkBox id="checkBoxOnlyMySubscribe" description="msg://msgOnlyMySubscribe" caption="msg://msgOnlyMySubscribe"/>
+        </hbox>
         <hbox id="lookupActions" spacing="true" visible="false" align="TOP_RIGHT">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

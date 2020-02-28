@@ -1,15 +1,15 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.entity.*;
-import com.haulmont.addon.emailtemplates.exceptions.ReportParameterTypeChangedException;
-import com.haulmont.addon.emailtemplates.exceptions.TemplateNotFoundException;
 import com.haulmont.cuba.core.app.EmailService;
-import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.security.app.UserSessionService;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 import java.util.*;
@@ -53,6 +53,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Boolean booOpenClosePosition;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
+    private UserSessionService userSessionService;
+    @Inject
+    private ScreenBuilders screenBuilders;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -151,7 +157,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // нотификация
         if (PersistenceHelper.isNew(getEditedEntity())) {
             // пошлем по почте
-            EmailInfo emailInfo = new EmailInfo( setMaillist(),
+            EmailInfo emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
+                    ";" + getRecrutiersMaillist(),
                     openPosition.getVacansyName(),
                     null, "com/company/itpearls/templates/create_new_pos.txt",
                     Collections.singletonMap("openPosition", openPosition));
@@ -165,7 +172,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         } else {
             String bodyMessage= Jsoup.parse( openPosition.getComment() ).text();
 
-            EmailInfo emailInfo = new EmailInfo( setMaillist(),
+            EmailInfo emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
+                    ";" + getRecrutiersMaillist(),
                     openPosition.getVacansyName(),
                     null, "com/company/itpearls/templates/edit_open_pos.html",
                     Collections.singletonMap("openPosition", openPosition));
@@ -201,7 +209,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                        .withDescription( getEditedEntity().getVacansyName() )
                        .show();
 
-               emailInfo = new EmailInfo( setMaillist(),
+               emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
+                       ";" + getRecrutiersMaillist(),
                        "Открыта позиция " + openPosition.getVacansyName(),
                        null, "com/company/itpearls/templates/open_position.html",
                        Collections.singletonMap("openPosition", openPosition));
@@ -213,14 +222,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                        .withDescription( getEditedEntity().getVacansyName() )
                        .show();
 
-               emailInfo = new EmailInfo( setMaillist(),
+               emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
+                       ";" + getRecrutiersMaillist(),
                        "Закрыта позиция " + openPosition.getVacansyName(),
                        null, "com/company/itpearls/templates/close_position.html",
                        Collections.singletonMap("openPosition", openPosition));
            }
 
            emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
-//           emailInfo.addHeader("charset", "UTF-8");
 
            emailService.sendEmailAsync(emailInfo);
 
@@ -238,27 +247,50 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             sendMessage();
     }
 
-    private String setMaillist()
+    private String getSubscriberMaillist(Entity entity)
     {
-        List<RecrutiesTasks> listRecrutiers = dataManager.load(RecrutiesTasks.class)
+        List<RecrutiesTasks> listResearchers = dataManager.load(RecrutiesTasks.class)
                 .query("select e " +
                     "from itpearls_RecrutiesTasks e " +
                     "where e.endDate  >= :currentDate and " +
                         "e.openPosition = :openPosition" )
                 .parameter( "currentDate", new Date() )
-                .parameter( "openPosition", getEditedEntity() )
+                .parameter( "openPosition", entity )
                 .view("recrutiesTasks-view")
                 .list();
 
         String maillist = "";
 
-        for( RecrutiesTasks address : listRecrutiers ) {
+        for( RecrutiesTasks address : listResearchers ) {
             String email = address.getReacrutier().getEmail();
-            if( !email.equals( "null" ))
+            if( email != null )
                 maillist = maillist + email + ";";
         }
 
-       return maillist + "alan@itpearls.ru";
+       return maillist.substring(0, maillist.length() - 1);
+    }
+
+    private String getRecrutiersMaillist() {
+        /* Role role = dataManager.load(Role.class)
+                .query("select e from sec$Role e " +
+                        "where e.locName like 'Хедхантер'")
+                .one();
+
+        List<User> users = dataManager.load(User.class)
+                .query( "select e from sec$User e " +
+                        "where e.role = :userRole")
+                .parameter( "userRole", role )
+                .list();
+
+        String maillist = "";
+
+        for(User user : users ) {
+            if( user.getUserRoles().equals(role))
+            maillist = maillist + user.getEmail() + ";";
+        }
+
+        return maillist.substring( 0, maillist.length() -1 ); */
+        return "alan@itpearls.ru;tdgitpearls.ru;tmd@itpearls.ru";
     }
 
     @Subscribe
@@ -299,5 +331,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         return icon;
+    }
+
+    public void subscribePosition() {
+        Screen opScreen = screenBuilders
+                .editor(RecrutiesTasks.class, this)
+                .newEntity()
+                .withScreenId("itpearls_RecrutiesTasks.edit")
+                .withLaunchMode(OpenMode.DIALOG)
+                .build();
+
+        opScreen.show();
     }
 }
