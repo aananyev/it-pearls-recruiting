@@ -51,8 +51,7 @@ order by e.departamentRuName]]>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_minimal">
             <loader id="citiesDl">
-                <query><![CDATA[select e from itpearls_City e
-order by e.cityRuName]]></query>
+                <query><![CDATA[select e from itpearls_City e order by e.cityRuName]]></query>
             </loader>
         </collection>
         <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="JobCandidate-person-position">
@@ -206,7 +205,7 @@ order by e.reacrutier, e.endDate desc]]>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="TOP_RIGHT">
             <button invoke="subscribePosition" caption="msg://msgSubscribe"/>
-            <button action="windowCommitAndClose"/>
+            <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>
     </layout>

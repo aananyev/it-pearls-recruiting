@@ -10,6 +10,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.app.UserSessionService;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 import java.util.*;
@@ -47,16 +48,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Notifications notifications;
     @Inject
     private LookupField priorityField;
-    @Inject
-    private UserSession userSession;
 
     private Boolean booOpenClosePosition;
+
     @Inject
     private DataManager dataManager;
-    @Inject
-    private UserSessionSource userSessionSource;
-    @Inject
-    private UserSessionService userSessionService;
     @Inject
     private ScreenBuilders screenBuilders;
 
@@ -126,29 +122,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             getEditedEntity().setOpenClose(false);
         }
     }
-
-    @Subscribe
-    public void onAfterClose(AfterCloseEvent event) {
-//        sendMessageAction();
-    }
-
-    public static final String EDITED_OPEN_POSITION = "openposition.edited";
-    private static final Logger LOG = LoggerFactory.getLogger( OpenPosition.class );
-
-/*    private void sendMessageAction() {
-        try {
-            emailTemplatesAPI.buildFromTemplate( EDITED_OPEN_POSITION )
-                    .setSubject( "Изменение позиции" )
-                    .setTo( userSession.getAddress() )
-                    .setBodyParameter( "firstName", userSession.getUser().getFirstName() )
-                    .setBodyParameter( "secondName", userSession.getUser().getLastName() )
-                    .setBodyParameter( "openPosition", getEditedEntity() )
-                    .sendEmail();
-        } catch ( TemplateNotFoundException | EmailException | ReportParameterTypeChangedException e ) {
-            LOG.warn(e.getMessage());
-        }
-
-    } */
 
     private void sendMessage() {
         // по почте
@@ -267,29 +240,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 maillist = maillist + email + ";";
         }
 
-       return maillist.substring(0, maillist.length() - 1);
+       return maillist;
     }
 
     private String getRecrutiersMaillist() {
-        /* Role role = dataManager.load(Role.class)
-                .query("select e from sec$Role e " +
-                        "where e.locName like 'Хедхантер'")
-                .one();
+        /* LoadContext<User> loadContext = LoadContext.create(User.class)
+                .setQuery(LoadContext.createQuery("select e from sec$User e where " +
+                        "e.userRoles.name = :roleName" )
+                .setParameter("roleName", "Headhunter"));
 
-        List<User> users = dataManager.load(User.class)
-                .query( "select e from sec$User e " +
-                        "where e.role = :userRole")
-                .parameter( "userRole", role )
-                .list();
+        List<User> listManagers = dataManager.loadList(loadContext );
+        String      list = "";
 
-        String maillist = "";
+        for( User user : listManagers ) {
+            list = list + user.getEmail() + ";";
+        } */
 
-        for(User user : users ) {
-            if( user.getUserRoles().equals(role))
-            maillist = maillist + user.getEmail() + ";";
-        }
 
-        return maillist.substring( 0, maillist.length() -1 ); */
         return "alan@itpearls.ru;tdgitpearls.ru;tmd@itpearls.ru";
     }
 

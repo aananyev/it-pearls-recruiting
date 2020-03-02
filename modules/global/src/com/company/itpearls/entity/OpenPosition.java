@@ -76,10 +76,18 @@ public class OpenPosition extends StandardEntity {
     @OneToMany(mappedBy = "openPosition")
     protected List<SkillTree> skillsList;
 
-    @Composition
+    @JoinTable(name = "ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK", joinColumns = @JoinColumn(name = "OPEN_POSITION_ID"), inverseJoinColumns = @JoinColumn(name = "RECRUTIES_TASKS_ID"))
+    @ManyToMany
     @OnDelete(DeletePolicy.DENY)
-    @OneToMany(mappedBy = "openPosition")
-    protected List<JobCandidate> candidates;
+    protected List<RecrutiesTasks> candidates;
+
+    public void setCandidates(List<RecrutiesTasks> candidates) {
+        this.candidates = candidates;
+    }
+
+    public List<RecrutiesTasks> getCandidates() {
+        return candidates;
+    }
 
     public Integer getPriority() {
         return priority;
@@ -119,14 +127,6 @@ public class OpenPosition extends StandardEntity {
 
     public void setCityPosition(City cityPosition) {
         this.cityPosition = cityPosition;
-    }
-
-    public List<JobCandidate> getCandidates() {
-        return candidates;
-    }
-
-    public void setCandidates(List<JobCandidate> candidates) {
-        this.candidates = candidates;
     }
 
     public List<SkillTree> getSkillsList() {

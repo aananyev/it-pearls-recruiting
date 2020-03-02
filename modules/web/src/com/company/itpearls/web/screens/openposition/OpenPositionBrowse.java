@@ -15,6 +15,7 @@ import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
+import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -38,6 +39,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private DataManager dataManager;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private CheckBox checkBoxOnlyMySubscribe;
+    @Inject
+    private UserSession userSession;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -67,6 +72,24 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         checkBoxOnlyOpenedPosition.setValue(true); // только открытые позиции
+
+        setSubcribersFilter();
+
+    }
+
+    private void setSubcribersFilter() {
+       if( checkBoxOnlyMySubscribe.getValue() ) {
+           openPositionsDl.setParameter( "recrutier", userSession.getUser() );
+       } else {
+           openPositionsDl.removeParameter( "recrutier" );
+       }
+       
+       openPositionsDl.load();
+    }
+
+    @Subscribe("checkBoxOnlyMySubscribe")
+    public void onCheckBoxOnlyMySubscribeValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+       setSubcribersFilter();
     }
 
     @Subscribe("checkBoxOnlyOpenedPosition")

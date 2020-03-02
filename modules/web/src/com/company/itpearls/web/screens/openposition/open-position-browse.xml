@@ -10,12 +10,18 @@
                     view="openPosition-view">
             <loader id="openPositionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e
-order by e.positionType]]>
+                    <![CDATA[select e from itpearls_OpenPosition e order by e.positionType]]>
                     <condition>
-                        <c:jpql>
-                            <c:where>e.openClose=:openClosePos</c:where>
-                        </c:jpql>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.openClose=:openClosePos</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.candidates.recrutier = :recrutier
+                                </c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
