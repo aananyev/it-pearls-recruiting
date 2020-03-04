@@ -445,6 +445,8 @@ create table ITPEARLS_RECRUTIES_TASKS (
     START_DATE date not null,
     END_DATE date,
     REACRUTIER_ID uuid not null,
+    OPEN_POSITION_ID uuid,
+    SUBSCRIBE boolean,
     --
     primary key (ID)
 )^
@@ -499,6 +501,7 @@ create table ITPEARLS_SOME_FILES (
     --
     FILE_DESCRIPTION varchar(80) not null,
     FILE_DESCRIPTOR_ID uuid not null,
+    FILE_LINK varchar(255),
     FILE_COMMENT text,
     FILE_OWNER_ID uuid not null,
     FILE_TYPE_ID uuid not null,

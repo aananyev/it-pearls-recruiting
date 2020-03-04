@@ -3,6 +3,8 @@ package com.company.itpearls.entity;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.CaseConversion;
+import com.haulmont.cuba.core.entity.annotation.ConversionType;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.security.entity.User;
@@ -25,6 +27,10 @@ public class SomeFiles extends StandardEntity {
     @JoinColumn(name = "FILE_DESCRIPTOR_ID")
     protected FileDescriptor fileDescriptor;
 
+    @CaseConversion(type = ConversionType.LOWER)
+    @Column(name = "FILE_LINK")
+    protected String fileLink;
+
     @Lob
     @Column(name = "FILE_COMMENT")
     protected String fileComment;
@@ -45,6 +51,14 @@ public class SomeFiles extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CANDIDATE_CV_ID")
     protected CandidateCV candidateCV;
+
+    public String getFileLink() {
+        return fileLink;
+    }
+
+    public void setFileLink(String fileLink) {
+        this.fileLink = fileLink;
+    }
 
     public void setFileDescription(String fileDescription) {
         this.fileDescription = fileDescription;

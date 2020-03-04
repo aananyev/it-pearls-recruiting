@@ -30,9 +30,21 @@ public class RecrutiesTasks extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "REACRUTIER_ID")
     protected User reacrutier;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     protected OpenPosition openPosition;
+
+    @Column(name = "SUBSCRIBE")
+    protected Boolean subscribe;
+
+    public Boolean getSubscribe() {
+        return subscribe;
+    }
+
+    public void setSubscribe(Boolean subscribe) {
+        this.subscribe = subscribe;
+    }
 
     public OpenPosition getOpenPosition() {
         return openPosition;

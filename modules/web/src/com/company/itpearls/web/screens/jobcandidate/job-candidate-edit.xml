@@ -210,7 +210,7 @@ order by e.cityRuName]]>
                         </actions>
                     </lookupPickerField>
                     <groupBox spacing="true">
-                        <groupTable id="jobCandidateSkillListTable" height="400px" width="100%"
+                        <groupTable id="jobCandidateSkillListTable" height="300px" width="100%"
                                     dataContainer="jobCandidateSkillsesDc">
                             <columns>
                                 <column id="skillName" caption="mainMsg://msgSkills"/>
@@ -252,7 +252,7 @@ order by e.cityRuName]]>
             <tab caption="mainMsg://msgSocialNetworks" margin="true,false,false,false" spacing="true" id="tabSocialNetworks"
                  description="mainMsg://msgSocialNetwork">
                 <groupBox spacing="true">
-                <table id="socialNetworkURLsTable" height="100px" width="100%" dataContainer="socialNetworkURLsesDc">
+                <table id="socialNetworkURLsTable" height="300px" width="100%" dataContainer="socialNetworkURLsesDc">
                     <columns>
                         <column id="socialNetworkURL.socialNetwork"/>
                         <column id="networkURLS"/>

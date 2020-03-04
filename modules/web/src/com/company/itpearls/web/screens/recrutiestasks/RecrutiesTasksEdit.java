@@ -1,6 +1,8 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.company.itpearls.entity.OpenPosition;
+import com.haulmont.cuba.core.app.EmailService;
+import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
@@ -14,6 +16,7 @@ import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 @UiController("itpearls_RecrutiesTasks.edit")
@@ -31,6 +34,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private UserSession userSession;
     @Inject
     private LookupPickerField<OpenPosition> recrutiesTasksField;
+    @Inject
+    private EmailService emailService;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
@@ -53,5 +58,18 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
             recrutiesTasksFieldUser.setEnabled(false);
         }
+    }
+
+    @Subscribe
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        String email = userSession.getUser().getEmail();
+        EmailInfo   emailInfo;
+
+        emailInfo = new EmailInfo( email,
+                "Вы подписаны на вакансию " + recrutiesTasksField.getValue(),
+                null, "com/company/itpearls/templates/subscribe_position.html",
+                Collections.singletonMap("RescutiesTask", getEditedEntity() ) );
+
+        emailService.sendEmailAsync(emailInfo);
     }
 }

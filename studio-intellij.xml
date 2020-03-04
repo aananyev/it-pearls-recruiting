@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CubaPluginProjectSettings">
-    <option name="notifyLongModelDbComp" value="false" />
-    <option name="hotDeploySrcDirectories">
-      <list>
-        <option value="modules/global/src" />
-        <option value="modules/core/src" />
-        <option value="modules/global/src" />
-        <option value="modules/web/src" />
-        <option value="modules/gui/src" />
-      </list>
-    </option>
-    <option name="hotDeployDstDirectories">
-      <list>
-        <option value="conf/app-core" />
-        <option value="conf/app-core" />
-        <option value="conf/app" />
-        <option value="conf/app" />
-        <option value="conf/app" />
-      </list>
-    </option>
+    <option name="checkModelDbComp" value="false" />
   </component>
 </project>
