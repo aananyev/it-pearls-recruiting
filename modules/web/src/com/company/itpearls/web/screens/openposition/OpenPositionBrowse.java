@@ -138,11 +138,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     public void subscribePosition() {
        Screen opScreen = screenBuilders
-                .editor(RecrutiesTasks.class, this)
-                .newEntity()
-                .withScreenId("itpearls_RecrutiesTasks.edit")
-                .withLaunchMode(OpenMode.DIALOG)
-                .build();
+               .editor(RecrutiesTasks.class, this)
+               .newEntity()
+               .withInitializer( data -> {
+                   data.setOpenPosition( openPositionsTable.getSingleSelected() );
+               })
+               .withScreenId("itpearls_RecrutiesTasks.edit")
+               .withLaunchMode(OpenMode.DIALOG)
+               .build();
 
        opScreen.show();
     }

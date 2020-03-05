@@ -236,8 +236,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         for( RecrutiesTasks address : listResearchers ) {
             String email = address.getReacrutier().getEmail();
-            if( email != null )
-                maillist = maillist + email + ";";
+
+            if( address.getSubscribe() )
+                if( email != null )
+                    maillist = maillist + email + ";";
         }
 
        return maillist;
@@ -269,8 +271,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         priorityMap.put("Normal", 2);
         priorityMap.put("High", 3);
         priorityMap.put("Critical", 4);
-
-        priorityField.setOptionsMap(priorityMap);
     }
 
     @Install(to = "priorityField", subject = "optionIconProvider")
@@ -301,11 +301,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     public void subscribePosition() {
         Screen opScreen = screenBuilders
-                .editor(RecrutiesTasks.class, this)
+                .editor( RecrutiesTasks.class, this )
+                .newEntity()
+                .withInitializer( data -> {
+                    data.setOpenPosition( this.getEditedEntity() );
+                })
                 .newEntity()
                 .withScreenId("itpearls_RecrutiesTasks.edit")
                 .withLaunchMode(OpenMode.DIALOG)
                 .build();
+
 
         opScreen.show();
     }

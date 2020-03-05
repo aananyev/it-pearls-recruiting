@@ -16,6 +16,11 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -39,6 +44,11 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private EmailService emailService;
     @Inject
     private InstanceContainer<RecrutiesTasks> recrutiesTasksDc;
+    @Inject
+    private DateField<Date> endDateField;
+
+    private OpenPosition openPosition = null;
+    private Boolean fromOpenPosition = false;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
@@ -51,15 +61,30 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     public void onBeforeShow(BeforeShowEvent event) {
         String  role = "Researcher";
 
+        if( openPosition != null ) {
+            recrutiesTasksField.setValue( openPosition );
+        }
+
         startDateField.setValue( new Date() );
 
         // если роль - ресерчер, то автоматически вставить себя
         Collection<String> s = userSessionSource.getUserSession().getRoles();
         // установить поле рекрутера
-        if( s.contains(role) ) {
+        if( s.contains(role) || !fromOpenPosition ) {
             recrutiesTasksFieldUser.setValue(userSession.getUser());
 
             recrutiesTasksFieldUser.setEnabled(false);
+            // поставить следующий понедельник
+            LocalDate currentDate = LocalDate.now();
+            LocalDate nextMonday = currentDate.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+
+            Instant instant = nextMonday
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant();
+
+            Date legacyDate = Date.from(instant);
+
+            endDateField.setValue( legacyDate );
         }
     }
 
@@ -76,5 +101,10 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
 
         emailService.sendEmailAsync(emailInfo);
+    }
+
+    public void setOpenPosition( OpenPosition op ) {
+      this.openPosition = op;
+      fromOpenPosition = true;
     }
 }
