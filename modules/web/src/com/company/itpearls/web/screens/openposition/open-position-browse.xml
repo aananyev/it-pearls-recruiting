@@ -49,8 +49,8 @@
                 <column id="vacansyName" caption="msg://msgVacancy"/>
                 <column id="cityPosition" caption="msg://msgCity" collapsed="true"/>
                 <column id="projectName" caption="msg://msgProject" collapsed="true"/>
-                <column id="companyName"/>
                 <column id="positionType" caption="msg://msgPositionType"/>
+                <column id="companyName"/>
                 <column id="projectName.projectName"/>
                 <column id="openClose" caption="mainMsg://msgOpecnClosePosition" align="CENTER"/>
                 <column id="numberPosition" description="msg://msgNumberOpenPosition"/>

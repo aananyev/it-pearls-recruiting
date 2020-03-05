@@ -162,7 +162,7 @@
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
     </view>
-    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
+    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_minimal">
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
             <property name="currentCompany" view="_minimal"/>
@@ -174,10 +174,24 @@
             <property name="firstName"/>
             <property name="lastName"/>
         </property>
+        <property name="textCV"/>
+        <property name="letter"/>
         <property name="lintToCloudFile"/>
-        <property name="fileCV" view="_minimal"/>
+        <property name="linkItPearlsCV"/>
+        <property name="linkOriginalCv"/>
+        <property name="fileCV" view="_minimal">
+            <property name="size"/>
+            <property name="createTs"/>
+            <property name="createdBy"/>
+            <property name="updateTs"/>
+            <property name="updatedBy"/>
+        </property>
         <property name="originalFileCV" view="_minimal"/>
+        <property name="datePost"/>
+        <property name="createTs"/>
         <property name="createdBy"/>
+        <property name="updateTs"/>
+        <property name="updatedBy"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_local">
         <property name="iteractionTree" view="_minimal">
@@ -285,6 +299,14 @@
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
         </property>
+        <property name="resumePosition" view="_minimal"/>
+        <property name="toVacancy" view="_minimal"/>
+        <property name="owner" view="_minimal"/>
+        <property name="lintToCloudFile"/>
+        <property name="fileCV" view="_minimal">
+            <property name="size"/>
+        </property>
+        <property name="originalFileCV" view="_minimal"/>
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view-search" extends="_local">
         <property name="currentCompany" view="_minimal"/>

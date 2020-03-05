@@ -74,9 +74,10 @@ order by e.name]]>
                 <tabSheet id="tabSheet">
                     <tab id="tabCandidate" caption="msg://msgCandidate" spacing="true">
                         <groupBox id="groupBox" spacing="true">
+                            <vbox>
                             <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
                                                dataContainer="candidateCVDc" property="candidate"
-                                               caption="msg://msgCandidate" height="50%" width="50%">
+                                               caption="msg://msgCandidate" height="50%" width="70%">
                                 <actions>
                                     <action id="lookup" type="picker_lookup"/>
                                     <action id="open" type="picker_open"/>
@@ -84,23 +85,26 @@ order by e.name]]>
                             </lookupPickerField>
                             <lookupPickerField id="resumePositionField" optionsContainer="resumePositionsDc"
                                                dataContainer="candidateCVDc" property="resumePosition"
-                                               caption="msg://msgPosition" height="50%" width="50%">
+                                               caption="msg://msgPosition" height="50%" width="70%">
                                 <actions>
                                     <action id="lookup" type="picker_lookup"/>
                                 </actions>
                             </lookupPickerField>
                             <lookupPickerField id="candidateCVFieldOpenPosition" dataContainer="candidateCVDc" optionsContainer="openPositionsDc"
-                                               property="toVacancy" caption="mainMsg://msgVacancy" width="50%">
+                                               property="toVacancy" caption="mainMsg://msgVacancy" width="70%">
                                 <actions>
                                     <action id="lookup" type="picker_lookup"/>
                                 </actions>
                             </lookupPickerField>
+                            </vbox>
+                            <lookupField id="СandidateCVField" dataContainer="candidateCVDc" optionsContainer="usersDc"
+                                         caption="mainMsg://msgOwner" property="owner" width="70%"/>
+                            <hbox width="70%">
                             <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost" caption="msg://msgDatePost"
-                                       height="50%"/>
-                            <lookupField id="ownerСandidateCVField" dataContainer="candidateCVDc" optionsContainer="usersDc"
-                                         caption="mainMsg://msgOwner" property="owner"/>
-                            <upload id="fileOriginalCVField" fileStoragePutMode="IMMEDIATE" property="originalFileCV" showFileName="true"
+                                       height="50%" width="50%"/>
+                            <upload id="fileOriginalCVField" property="originalFileCV" showFileName="true"
                                     align="TOP_LEFT" caption="msg://msgOriginalCV" dataContainer="candidateCVDc"/>
+                            </hbox>
                             <grid spacing="true" width="100%">
                                 <columns count="2"/>
                                 <rows>
@@ -109,14 +113,16 @@ order by e.name]]>
                                                    property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV"
                                                    width="100%" align="MIDDLE_LEFT"/>
                                         <linkButton id="linkOriginalCV" align="BOTTOM_LEFT"
-                                                    description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"/>
+                                                    description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"
+                                                    invoke="setUrlOriginalCV"/>
                                     </row>
                                     <row>
                                         <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
                                                    caption="mainMsg://msgLinkToItPearlsCV" width="100%"
                                                    align="MIDDLE_LEFT"/>
                                         <linkButton id="linkITPearlsCV" align="BOTTOM_LEFT"
-                                                    description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"/>
+                                                    description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"
+                                                    invoke="setUrlITPearlsCV"/>
                                     </row>
                                 </rows>
                             </grid>
@@ -124,9 +130,10 @@ order by e.name]]>
                     </tab>
                     <tab id="tabCV" caption="msg://msgCV" margin="true,false,false,false" spacing="true">
                         <richTextArea id="candidateCVRichTextArea" dataContainer="candidateCVDc" property="textCV"
-                                      width="100%" height="250pt" required="true"/>
+                                      width="100%" height="300pt" required="true"/>
                         <upload id="fileCVField" fileStoragePutMode="IMMEDIATE" property="fileCV" showFileName="true"
-                                align="TOP_LEFT" caption="msg://msgCV" dataContainer="candidateCVDc"/>
+                                align="TOP_LEFT" caption="msg://msgCV" dataContainer="candidateCVDc"
+                                showClearButton="true"/>
                     </tab>
                     <tab id="tabFiles" caption="mainMsg://msgFiles" margin="true,false,fsalse,false" spacing="true">
 
@@ -152,7 +159,7 @@ order by e.name]]>
                         </table>
                     </tab>
                     <tab id="tabLetter" caption="msg://msgLetter" margin="true,false,false,false" spacing="true">
-                        <richTextArea dataContainer="candidateCVDc" property="letter" width="100%" height="350pt"/>
+                        <richTextArea dataContainer="candidateCVDc" property="letter" width="100%" height="300pt"/>
                     </tab>
                 </tabSheet>
             </column>

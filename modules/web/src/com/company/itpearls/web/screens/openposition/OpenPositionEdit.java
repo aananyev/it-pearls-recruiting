@@ -271,7 +271,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         priorityMap.put("Critical", 4);
 
         priorityField.setOptionsMap(priorityMap);
-
     }
 
     @Install(to = "priorityField", subject = "optionIconProvider")

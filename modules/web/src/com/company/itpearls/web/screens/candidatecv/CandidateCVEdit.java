@@ -1,21 +1,28 @@
 package com.company.itpearls.web.screens.candidatecv;
 
-import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.SomeFiles;
-import com.haulmont.cuba.core.app.EmailService;
-import com.haulmont.cuba.core.global.EmailInfo;
+import com.haulmont.bali.util.ParamsMap;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.WindowManagerProvider;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
+import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
 
+import com.haulmont.cuba.gui.WebBrowserTools;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.web.AppUI;
+
 import javax.inject.Inject;
+import java.io.File;
 import java.util.Date;
 
 @UiController("itpearls_CandidateCV.edit")
@@ -31,6 +38,71 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private LinkButton linkOriginalCV;
     @Inject
     private LinkButton linkITPearlsCV;
+    @Inject
+    private TextField<String> textFieldIOriginalCV;
+
+    private WebBrowserTools webBrowserTools;
+    @Inject
+    private TextField<String> textFieldITPearlsCV;
+    @Inject
+    private FileUploadField fileOriginalCVField;
+    @Inject
+    private FileUploadingAPI fileUploadingAPI;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private DataManager dataManager;
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        AppUI ui = AppBeans.get(AppUI.class);
+        webBrowserTools = ui.getWebBrowserTools();
+
+        fileOriginalCVField.addFileUploadSucceedListener( uploadSucceedEvent -> {
+            File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+
+            if (file != null) {
+                notifications.create()
+                        .withCaption("File is uploaded to temporary storage at " + file.getAbsolutePath())
+                        .show();
+            }
+
+            FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
+
+            try {
+                fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
+            } catch (FileStorageException e) {
+                throw new RuntimeException("Error saving file to FileStorage", e);
+            }
+
+            dataManager.commit(fd);
+
+            notifications.create()
+                    .withCaption("Uploaded file: " + fileOriginalCVField.getFileName())
+                    .show();
+        });
+
+        fileOriginalCVField.addFileUploadErrorListener(uploadErrorEvent ->
+                notifications.create()
+                        .withCaption("File upload error")
+                        .show());
+    }
+
+    @Subscribe("textFieldIOriginalCV")
+    public void onTextFieldIOriginalCVValueChange(HasValue.ValueChangeEvent<String> event) {
+        if( textFieldIOriginalCV.getValue() != null )
+            linkOriginalCV.setVisible( true );
+        else
+            linkOriginalCV.setVisible( false );
+    }
+
+    @Subscribe("textFieldITPearlsCV")
+    public void onTextFieldITPearlsCVValueChange(HasValue.ValueChangeEvent<String> event) {
+        if( textFieldITPearlsCV.getValue() != null )
+            linkITPearlsCV.setVisible(( true ));
+        else
+            linkITPearlsCV.setVisible( false );
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -62,5 +134,27 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             someFilesesDl.setParameter( "candidate", getEditedEntity().getCandidate().getFullName() );
         else
             someFilesesDl.setParameter( "candidate", "None" );
+    }
+
+    public void setUrlOriginalCV() {
+         String value = textFieldIOriginalCV.getValue();
+
+         if (value == null)
+             return;
+         if (!value.startsWith("http://"))
+             value = "http://" + value;
+
+         webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
+    }
+
+    public void setUrlITPearlsCV() {
+        String value = textFieldITPearlsCV.getValue();
+
+        if (value == null)
+            return;
+        if (!value.startsWith("http://"))
+            value = "http://" + value;
+
+        webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
     }
 }

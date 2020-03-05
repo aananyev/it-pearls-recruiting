@@ -37,7 +37,7 @@
         <form id="form" dataContainer="someFilesDc" width="100%">
             <column width="100%">
                 <textField id="fileDescriptionField" property="fileDescription" required="true" width="100%"/>
-                <textField id="fileLinkField" property="fileLink" required="true" width="100%"
+                <textField id="fileLinkField" property="fileLink" width="100%"
                            caption="msg://msgFileLink"/>
                 <upload id="fileDescriptorField" fileStoragePutMode="IMMEDIATE" property="fileDescriptor"
                         showFileName="true"/>

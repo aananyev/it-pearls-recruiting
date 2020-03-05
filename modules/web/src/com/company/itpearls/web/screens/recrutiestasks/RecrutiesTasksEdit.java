@@ -9,6 +9,7 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DateField;
 import com.haulmont.cuba.gui.components.LookupPickerField;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.haulmont.cuba.security.entity.User;
@@ -36,6 +37,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private LookupPickerField<OpenPosition> recrutiesTasksField;
     @Inject
     private EmailService emailService;
+    @Inject
+    private InstanceContainer<RecrutiesTasks> recrutiesTasksDc;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
@@ -62,13 +65,15 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        String email = userSession.getUser().getEmail();
+        String email = recrutiesTasksDc.getItem().getReacrutier().getEmail();
+        String emailSubscriber = userSession.getUser().getEmail();
         EmailInfo   emailInfo;
 
         emailInfo = new EmailInfo( email,
                 "Вы подписаны на вакансию " + recrutiesTasksField.getValue(),
                 null, "com/company/itpearls/templates/subscribe_position.html",
                 Collections.singletonMap("RescutiesTask", getEditedEntity() ) );
+        emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
 
         emailService.sendEmailAsync(emailInfo);
     }
