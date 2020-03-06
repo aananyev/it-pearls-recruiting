@@ -322,20 +322,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         if( companyDepartment != null )
             getEditedEntity().setCompanyDepartment( companyDepartment );
-        /*
-        // создание цепочки
-        parentChain = dataManager.load( IteractionList.class )
-                .query( "select e " +
-                        "from itpearls_IteractionList e " +
-                        "where e.candidate.fullName = :candidate and " +
-                        "e.numberIteraction = " +
-                        "(select max(f.numberIteraction) " +
-                        "from itpearls_IteractionList f " +
-                        "where f.candidate.fullName = :candidate)" )
-                .parameter( "candidate", getEditedEntity().getCandidate().getFullName() )
-                .view( "iteractionList-view" )
-                .one();
-        getEditedEntity().setIteractionChain( parentChain ); */
     }
 
     @Subscribe

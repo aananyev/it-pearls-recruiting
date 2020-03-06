@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.candidatecv;
 
+import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.SomeFiles;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -52,6 +54,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Notifications notifications;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private LookupPickerField<OpenPosition> candidateCVFieldOpenPosition;
+    @Inject
+    private LookupPickerField<JobCandidate> candidateField;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -156,5 +162,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             value = "http://" + value;
 
         webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
+    }
+
+    public void setParameter( CandidateCV entity ) {
+        candidateCVFieldOpenPosition.setValue( entity.getToVacancy() );
+        candidateField.setValue( entity.getCandidate() );
     }
 }

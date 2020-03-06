@@ -91,13 +91,16 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         String email = recrutiesTasksDc.getItem().getReacrutier().getEmail();
+        String creator = userSession.getUser().getName();
         String emailSubscriber = userSession.getUser().getEmail();
+
         EmailInfo   emailInfo;
 
         emailInfo = new EmailInfo( email,
                 "Вы подписаны на вакансию " + recrutiesTasksField.getValue(),
-                null, "com/company/itpearls/templates/subscribe_position.html",
+                null, "com/company/itpearls/templates/subscribe_to_position.html",
                 Collections.singletonMap("RescutiesTask", getEditedEntity() ) );
+
         emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
 
         emailService.sendEmailAsync(emailInfo);
