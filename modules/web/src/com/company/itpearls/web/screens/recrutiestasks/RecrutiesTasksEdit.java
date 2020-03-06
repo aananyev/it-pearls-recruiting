@@ -73,7 +73,10 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         if( s.contains(role) || !fromOpenPosition ) {
             recrutiesTasksFieldUser.setValue(userSession.getUser());
 
-            recrutiesTasksFieldUser.setEnabled(false);
+            if( s.contains(role) )
+                recrutiesTasksFieldUser.setEnabled(false);
+            else
+                recrutiesTasksFieldUser.setEnabled(true);
             // поставить следующий понедельник
             LocalDate currentDate = LocalDate.now();
             LocalDate nextMonday = currentDate.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
