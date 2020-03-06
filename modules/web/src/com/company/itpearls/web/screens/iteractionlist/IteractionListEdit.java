@@ -134,11 +134,21 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         } else {
-            if( getEditedEntity().getIteractionType().getCallForm() ) {
+            Boolean callForm = getEditedEntity().getIteractionType().getCallForm();
+
+            if( callForm == null )
+                callForm = false;
+
+            if( callForm ) {
                 addDate.setVisible( false );
                 addString.setVisible( false );
                 addInteger.setVisible( false );
                 buttonCallAction.setVisible( true );
+            } else {
+                addDate.setVisible( false );
+                addString.setVisible( false );
+                addInteger.setVisible( false );
+                buttonCallAction.setVisible( false );
             }
         }
     }
@@ -407,6 +417,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         currentProject = getEditedEntity().getProject();
 
         candidate = getEditedEntity().getCandidate();
+
+        changeField();
     }
 
     @Subscribe

@@ -223,6 +223,10 @@
             <property name="callButtonText"/>
             <property name="callClass"/>
             <property name="callForm"/>
+            <property name="addFlag"/>
+            <property name="addType"/>
+            <property name="addField"/>
+            <property name="addCaption"/>
         </property>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local">
@@ -313,7 +317,14 @@
         <property name="recrutier" view="_minimal"/>
         <property name="iteractionChain" view="_minimal"/>
     </view>
-    <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_local"/>
+    <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_local">
+        <property name="iteractionTree" view="_minimal">
+            <property name="addFlag"/>
+            <property name="addType"/>
+            <property name="addField"/>
+            <property name="addCaption"/>
+        </property>
+    </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view-Letter" extends="_local">
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
