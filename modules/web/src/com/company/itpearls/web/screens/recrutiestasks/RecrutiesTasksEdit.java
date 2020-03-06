@@ -85,7 +85,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                     .atStartOfDay(ZoneId.systemDefault())
                     .toInstant();
 
-            Date legacyDate = Date.from(instant);
+            Date legacyDate = Date.from( instant );
 
             endDateField.setValue( legacyDate );
         }

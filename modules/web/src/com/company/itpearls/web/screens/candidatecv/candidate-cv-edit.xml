@@ -103,7 +103,7 @@ order by e.name]]>
                             <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost" caption="msg://msgDatePost"
                                        height="50%" width="50%"/>
                             <upload id="fileOriginalCVField" property="originalFileCV" showFileName="true"
-                                    align="TOP_LEFT" caption="msg://msgOriginalCV" dataContainer="candidateCVDc"/>
+                                    align="TOP_RIGHT" caption="msg://msgOriginalCV" dataContainer="candidateCVDc"/>
                             </hbox>
                             <grid spacing="true" width="100%">
                                 <columns count="2"/>

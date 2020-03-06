@@ -9,6 +9,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -16,13 +17,11 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
-
 import com.haulmont.cuba.gui.WebBrowserTools;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.web.AppUI;
-
 import javax.inject.Inject;
 import java.io.File;
 import java.util.Date;
@@ -58,6 +57,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private LookupPickerField<OpenPosition> candidateCVFieldOpenPosition;
     @Inject
     private LookupPickerField<JobCandidate> candidateField;
+    @Inject
+    private Dialogs dialogs;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -151,6 +152,23 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
              value = "http://" + value;
 
          webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
+    }
+
+    @Subscribe("tabFiles")
+    public void onTabFilesLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
+        if( !PersistenceHelper.isNew( getEditedEntity() ) ) {
+            dialogs.createOptionDialog()
+                    .withCaption("Warning")
+                    .withMessage("Сохранить резюме кандидата?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(y -> {
+                                this.commitChanges();
+                            }),
+                            new DialogAction(DialogAction.Type.NO)
+                    )
+                    .show();
+        }
     }
 
     public void setUrlITPearlsCV() {

@@ -162,23 +162,37 @@
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
     </view>
-    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_minimal">
+    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
             <property name="currentCompany" view="_minimal"/>
             <property name="cityOfResidence" view="_minimal"/>
+            <property name="positionCountry" view="_minimal"/>
+            <property name="iteractionList" view="_minimal"/>
+            <property name="jobHistory" view="_minimal"/>
+            <property name="candidateCv" view="_minimal"/>
+            <property name="openPosition" view="_minimal"/>
         </property>
         <property name="resumePosition" view="_minimal"/>
-        <property name="toVacancy" view="_minimal"/>
+        <property name="toVacancy" view="_minimal">
+            <property name="openClose"/>
+            <property name="salaryMin"/>
+            <property name="salaryMax"/>
+            <property name="cityPosition" view="_minimal"/>
+            <property name="positionType" view="_minimal"/>
+            <property name="companyName" view="_minimal"/>
+            <property name="companyDepartament" view="_minimal"/>
+            <property name="numberPosition"/>
+            <property name="comment"/>
+            <property name="priority"/>
+            <property name="skillsList" view="_minimal"/>
+            <property name="candidates" view="_minimal"/>
+        </property>
         <property name="owner" view="_minimal">
             <property name="firstName"/>
             <property name="lastName"/>
         </property>
-        <property name="textCV"/>
-        <property name="letter"/>
         <property name="lintToCloudFile"/>
-        <property name="linkItPearlsCV"/>
-        <property name="linkOriginalCv"/>
         <property name="fileCV" view="_minimal">
             <property name="size"/>
             <property name="createTs"/>
@@ -186,8 +200,13 @@
             <property name="updateTs"/>
             <property name="updatedBy"/>
         </property>
-        <property name="originalFileCV" view="_minimal"/>
-        <property name="datePost"/>
+        <property name="originalFileCV" view="_minimal">
+            <property name="size"/>
+            <property name="createTs"/>
+            <property name="createdBy"/>
+            <property name="updateTs"/>
+            <property name="updatedBy"/>
+        </property>
         <property name="createTs"/>
         <property name="createdBy"/>
         <property name="updateTs"/>
