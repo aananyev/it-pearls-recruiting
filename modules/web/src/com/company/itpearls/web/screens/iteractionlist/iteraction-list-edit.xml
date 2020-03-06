@@ -129,7 +129,12 @@ order by e.vacansyName]]></query>
                             </actions>
                         </lookupPickerField>
                         <buttonsPanel id="buttonsPanelCallAction" width="100%" align="BOTTOM_CENTER">
-                            <button id="buttonCallAction" invoke="callActionEntity" align="MIDDLE_CENTER" width="100%"/>
+                            <hbox>
+                                <button id="buttonCallAction" invoke="callActionEntity" align="MIDDLE_CENTER" width="300%"/>
+                                <textField id="addString" dataContainer="iteractionListDc" property="addString" width="300%"/>
+                                <dateField id="addDate" dataContainer="iteractionListDc" property="addDate" width="100%" />
+                                <textField id="addInteger" dataContainer="iteractionListDc" property="addInteger" width="100%"/>
+                            </hbox>
                         </buttonsPanel>
                     </row>
                     <row>

@@ -356,6 +356,7 @@
     <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-view" extends="_local">
         <property name="reacrutier" view="_local"/>
         <property name="openPosition" view="_minimal"/>
+        <property name="createdBy"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
         <property name="projectName" view="_minimal">

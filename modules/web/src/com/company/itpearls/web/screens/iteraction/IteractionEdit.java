@@ -18,8 +18,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     @Inject
     private Embedded embeddedPict;
     @Inject
-    private TextField<String> numberField;
-    @Inject
     private CheckBox checkBoxCallDialog;
     @Inject
     private TextField<String> textFieldCallButtonText;
@@ -75,6 +73,9 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe("checkBoxFlag")
     public void onCheckBoxFlagValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if( checkBoxFlag.getValue() )
+            checkBoxCallDialog.setValue( false );
+
         setDisableElements();
     }
 
@@ -84,10 +85,11 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         radioButtonAddType.setEditable( checkBoxFlag.getValue() );
     }
 
-    
-
     @Subscribe("checkBoxCallDialog")
     public void onCheckBoxCallDialogValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if( checkBoxCallDialog.getValue() )
+            checkBoxFlag.setValue( false );
+
         disablePicAndButton();
     }
 

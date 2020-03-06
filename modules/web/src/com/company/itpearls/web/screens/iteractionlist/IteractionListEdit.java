@@ -51,6 +51,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private CollectionLoader<Iteraction> iteractionTypesLc;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private DateField<Date> addDate;
+    @Inject
+    private TextField<String> addString;
+    @Inject
+    private TextField<Integer> addInteger;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -65,6 +71,76 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
         // запомним кандидата
        candidate = getEditedEntity().getCandidate(); 
+    }
+
+    private void changeField() {
+        Integer addType = getEditedEntity().getIteractionType().getAddType();
+
+        Boolean addFlag = getEditedEntity().getIteractionType().getAddFlag();
+
+        if( addFlag == null )
+            addFlag = false;
+
+        if( addType == null )
+            addType = 0;
+
+        if( addFlag ) {
+            if( addType != 0 ) {
+                switch ( addType ) {
+                    case 1:
+                        addDate.setVisible( true );
+                        addDate.setRequired( true );
+                        addDate.setCaption( iteractionTypeField.getValue().getAddCaption() );
+                        addDate.setRequired( true );
+
+                        addString.setVisible( false );
+                        addInteger.setVisible( false );
+                        buttonCallAction.setVisible( false );
+                        break;
+                    case 2:
+                        addDate.setVisible( false );
+                        addString.setVisible( true );
+                        addString.setRequired( true );
+                        addString.setCaption( iteractionTypeField.getValue().getAddCaption() );
+                        addString.setRequired( true );
+
+                        addInteger.setVisible( false );
+                        buttonCallAction.setVisible( false );
+                        break;
+                    case 3:
+                        addDate.setVisible( false );
+                        addString.setVisible( false );
+                        addInteger.setVisible( true );
+                        addInteger.setCaption( iteractionTypeField.getValue().getAddCaption() );
+                        addInteger.setRequired( true );
+
+                        addInteger.setRequired( true );
+                        buttonCallAction.setVisible( false );
+                        break;
+                    default:
+                        addDate.setVisible( false );
+                        addString.setVisible( false );
+                        addInteger.setVisible( false );
+                        addDate.setVisible( false );
+
+                        addDate.setRequired( false );
+                        addInteger.setRequired( false );
+                        addString.setRequired( false );
+
+                        addDate.setCaption( "" );
+                        addInteger.setCaption( "" );
+                        addString.setCaption( "" );
+                        break;
+                }
+            }
+        } else {
+            if( getEditedEntity().getIteractionType().getCallForm() ) {
+                addDate.setVisible( false );
+                addString.setVisible( false );
+                addInteger.setVisible( false );
+                buttonCallAction.setVisible( true );
+            }
+        }
     }
 
     @Subscribe("vacancyFiels")
@@ -347,6 +423,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     // изменение надписи на кнопке в зависимости от щначения поля ItercationType
     @Subscribe("iteractionTypeField")
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
+        changeField();
         // надпись на кнопке
         if( iteractionTypeField.getValue().getCallButtonText() != null )
             buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
@@ -393,6 +470,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         newProject = false;
         // вся сортировка в поле IteractionType
         iteractionTypesLc.removeParameter("number");
+
+        addDate.setVisible( false );
+        addString.setVisible( false );
+        addInteger.setVisible( false );
+        addDate.setVisible( false );
     }
 
     @Inject
