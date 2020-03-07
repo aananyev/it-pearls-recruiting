@@ -52,8 +52,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
     @Inject
-    private UiComponents uiComponents;
-    @Inject
     private DateField<Date> addDate;
     @Inject
     private TextField<String> addString;
@@ -253,7 +251,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe("candidateField")
     public void onCandidateFieldValueChange1(HasValue.ValueChangeEvent<JobCandidate> event) {
         if( yourCandidate() ) {
-            if( PersistenceHelper.isNew( getEditedEntity() )) {
+            if( PersistenceHelper.isNew( getEditedEntity() ) ) {
                 // сколько записей есть по этому кандидату
                 if (getIteractionCount() != 0) {
                     // ввели кандидата - предложи скопировать предыдущую запись
@@ -273,20 +271,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         } else {
-            String msg = "С этим кандидатом " + lastUser.getName() + " контактировал " + lastIteraction.toString() +
-                    " МЕНЕЕ МЕСЯЦА НАЗАД!";
+            if( PersistenceHelper.isNew( getEditedEntity() )) {
+                String msg = "С этим кандидатом " + lastUser.getName() + " контактировал " + lastIteraction.toString() +
+                        " МЕНЕЕ МЕСЯЦА НАЗАД!";
 
-            dialogs.createOptionDialog()
-                    .withCaption( "Warning" )
-                    .withMessage( msg + "\nПродолжить?" )
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES,
-                                    Action.Status.PRIMARY).withHandler(y -> {
-                                        this.copyPrevionsItems();
-                            }),
-                            new DialogAction(DialogAction.Type.NO)
-                    )
-                    .show();
+                dialogs.createOptionDialog()
+                        .withCaption("Warning")
+                        .withMessage(msg + "\nПродолжить?")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES,
+                                        Action.Status.PRIMARY).withHandler(y -> {
+                                    this.copyPrevionsItems();
+                                }),
+                                new DialogAction(DialogAction.Type.NO)
+                        )
+                        .show();
+            }
         }
     }
 
