@@ -5,6 +5,7 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
@@ -13,6 +14,7 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -57,10 +59,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private TextField<String> addString;
     @Inject
     private TextField<Integer> addInteger;
+    @Inject
+    private LookupPickerField<OpenPosition> vacancyFiels;
+    @Inject
+    private LookupPickerField<Project> projectField;
+    @Inject
+    private LookupPickerField<CompanyDepartament> companyDepartmentField;
+    @Named("candidateField.lookup")
+    private LookupAction candidateFieldLookup;
+    @Inject
+    private LookupPickerField<User> recrutierField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
-        if( PersistenceHelper.isNew(getEditedEntity()) ) {
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             setIteractionNumber();
             setCurrentDate();
             setCurrentUserName(); // имя пользователя в нередактируемое поле
@@ -74,19 +86,24 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void changeField() {
-        Integer addType = getEditedEntity().getIteractionType().getAddType();
+        Integer _addType;
+        Boolean _addFlag;
 
-        Boolean addFlag = getEditedEntity().getIteractionType().getAddFlag();
+        try {
+            _addType = iteractionTypeField.getValue().getAddType();
+        } catch ( NullPointerException e ) {
+            _addType = 0;
+        }
 
-        if( addFlag == null )
-            addFlag = false;
+        try {
+            _addFlag = iteractionTypeField.getValue().getAddFlag();
+        } catch ( NullPointerException e ) {
+            _addFlag = false;
+        }
 
-        if( addType == null )
-            addType = 0;
-
-        if( addFlag ) {
-            if( addType != 0 ) {
-                switch ( addType ) {
+        if( _addFlag ) {
+            if( _addType != 0 ) {
+                switch ( _addType ) {
                     case 1:
                         addDate.setVisible( true );
                         addDate.setRequired( true );
@@ -111,7 +128,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         addDate.setVisible( false );
                         addString.setVisible( false );
                         addInteger.setVisible( true );
-                        addInteger.setCaption( iteractionTypeField.getValue().getAddCaption() );
+
+                        try {
+                            addInteger.setCaption(iteractionTypeField.getValue().getAddCaption());
+                        } catch ( NullPointerException e ) {
+                            addInteger.setCaption( iteractionTypeField.getValue().getIterationName() );
+                        }
                         addInteger.setRequired( true );
 
                         addInteger.setRequired( true );
@@ -134,10 +156,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         } else {
-            Boolean callForm = getEditedEntity().getIteractionType().getCallForm();
+            Boolean callForm;
 
-            if( callForm == null )
+            try {
+                callForm = iteractionTypeField.getValue().getCallForm();
+            } catch ( NullPointerException e ) {
                 callForm = false;
+            }
 
             if( callForm ) {
                 addDate.setVisible( false );
@@ -173,8 +198,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             // новое взаимодействие с кандидатом
         newProject = true;
 
-//        getEditedEntity().setIteractionChain(parentChain);
-
         if ( newProject ) {
         // это начало цепочки - обрезаем выбор
             iteractionTypesLc.setParameter("number", "001");
@@ -191,16 +214,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             iteractionTypesLc.load();
 
             // заполнить другие поля
-            if (getEditedEntity().getVacancy() != null)
-                if (getEditedEntity().getVacancy().getProjectName() != null)
-                    getEditedEntity().setProject(getEditedEntity().getVacancy().getProjectName());
+            if ( vacancyFiels.getValue() != null)
+                if ( vacancyFiels.getValue().getProjectName() != null)
+                    projectField.setValue( vacancyFiels.getValue().getProjectName() );
     }
 
     @Subscribe("projectField")
     public void onProjectFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
-        if( getEditedEntity().getVacancy() != null )
-            if( getEditedEntity().getVacancy().getCompanyDepartament() != null )
-                getEditedEntity().setCompanyDepartment(getEditedEntity().getVacancy().getCompanyDepartament());
+        if( vacancyFiels.getValue() != null )
+            if( vacancyFiels.getValue().getCompanyDepartament() != null )
+                companyDepartmentField.setValue( vacancyFiels.getValue().getCompanyDepartament() );
     }
 
 
@@ -269,7 +292,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if( getEditedEntity().getIteractionType().getNumber() != null ) {
+        if( iteractionTypeField.getValue().getNumber() != null ) {
             String s = getEditedEntity().getIteractionType().getNumber();
             Integer i = Integer.parseInt(s);
 
@@ -379,7 +402,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
         // а вдруг пустое поле?
         if( openPos != null ) {
-            getEditedEntity().setVacancy( openPos );
+            vacancyFiels.setValue( openPos );
         }
         // проект
         getEditedEntity().setProject( dataManager.loadValue(
@@ -407,7 +430,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .one();
 
         if( companyDepartment != null )
-            getEditedEntity().setCompanyDepartment( companyDepartment );
+            companyDepartmentField.setValue( companyDepartment );
     }
 
     @Subscribe
@@ -424,7 +447,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         if(PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setRecrutier(userSession.getUser());
+            recrutierField.setValue( userSession.getUser() );
         }
     }
 
@@ -440,13 +463,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if( iteractionTypeField.getValue().getCallButtonText() != null )
             buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
         // если установлен тип взаиподейтвия и нужно действие
-        if( getEditedEntity().getIteractionType() != null )
+        if( iteractionTypeField.getValue() != null )
             if( iteractionTypeField.getValue().getCallForm() != null )
                 if(iteractionTypeField.getValue().getCallForm())
                     buttonCallAction.setVisible(true);
                 else
                     buttonCallAction.setVisible(false);
+
+                /*
                 // если надо специальное поле
+
+
+
                 if( iteractionTypeField.getValue().getAddType() != null ) {
                     if (iteractionTypeField.getValue().getAddFlag()) {
                         // удалить кнопку
@@ -473,6 +501,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         }
                     }
                 }
+
+                 */
     }
 
     @Subscribe
@@ -495,11 +525,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Metadata metadata;
 
     public void callActionEntity() {
-        String calledClass = getEditedEntity().getIteractionType().getCallClass();
+        String calledClass = iteractionTypeField.getValue().getCallClass();
         // еслп установлено разрешение в Iteraction показать кнопку и установить на ней надпсит
-        if( getEditedEntity().getIteractionType() != null)
-            if( getEditedEntity().getIteractionType().getCallForm() != null )
-                if(!getEditedEntity().getIteractionType().getCallForm()) {
+        if( iteractionTypeField.getValue() != null)
+            if( iteractionTypeField.getValue().getCallForm() != null )
+                if(!iteractionTypeField.getValue().getCallForm() ) {
                 }
                 else {
                     screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
