@@ -59,6 +59,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private LookupPickerField<JobCandidate> candidateField;
     @Inject
     private Dialogs dialogs;
+    @Inject
+    private DateField<Date> datePostField;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -113,13 +115,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if( getEditedEntity().getLinkOriginalCv() != null ) {
+        if( textFieldIOriginalCV.getValue() != null ) {
                 linkOriginalCV.setVisible( true );
         } else {
                 linkOriginalCV.setVisible( false );
         }
 
-        if( getEditedEntity().getLinkItPearlsCV() != null ) {
+        if( textFieldITPearlsCV.getValue() != null ) {
                 linkITPearlsCV.setVisible( true );
             } else {
                 linkITPearlsCV.setVisible( false );
@@ -129,7 +131,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         if(PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setDatePost(new Date());  //установить дату публикации резюме
+            getEditedEntity().setDatePost( new Date() );
 
             getEditedEntity().setOwner(userSession.getUser());
         }
@@ -138,7 +140,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
         if( !PersistenceHelper.isNew( getEditedEntity() ) )
-            someFilesesDl.setParameter( "candidate", getEditedEntity().getCandidate().getFullName() );
+            someFilesesDl.setParameter( "candidate", candidateField.getValue().getFullName() );
         else
             someFilesesDl.setParameter( "candidate", "None" );
     }

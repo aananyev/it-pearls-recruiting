@@ -39,8 +39,6 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Inject
     private UserSession userSession;
     @Inject
-    private LookupPickerField<OpenPosition> recrutiesTasksField;
-    @Inject
     private EmailService emailService;
     @Inject
     private InstanceContainer<RecrutiesTasks> recrutiesTasksDc;
@@ -49,6 +47,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
     private OpenPosition openPosition = null;
     private Boolean fromOpenPosition = false;
+    @Inject
+    private LookupPickerField<OpenPosition> openPositionField;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
@@ -62,7 +62,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         String  role = "Researcher";
 
         if( openPosition != null ) {
-            recrutiesTasksField.setValue( openPosition );
+            openPositionField.setValue( openPosition );
         }
 
         startDateField.setValue( new Date() );
@@ -92,21 +92,30 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     }
 
     @Subscribe
-    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+    public void onBeforeCommitChanges(AfterCommitChangesEvent event) {
+        getEditedEntity().setRecrutierName( userSession.getUser().getName() );
+        sendMessage();
+    }
+
+    public void sendMessage() {
         String email = recrutiesTasksDc.getItem().getReacrutier().getEmail();
-        String creator = userSession.getUser().getName();
         String emailSubscriber = userSession.getUser().getEmail();
+        String openPos = openPositionField.getValue().getVacansyName();
 
         EmailInfo   emailInfo;
 
         emailInfo = new EmailInfo( email,
-                "Вы подписаны на вакансию " + recrutiesTasksField.getValue(),
+                "Вы подписаны на вакансию " + openPositionField.getValue().getVacansyName(),
                 null, "com/company/itpearls/templates/subscribe_to_position.html",
-                Collections.singletonMap("RescutiesTask", getEditedEntity() ) );
+                Collections.singletonMap( "RecrutierTask", getEditedEntity() ) );
 
         emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
 
+//        emailInfo.setTemplateParameters( Collections.singletonMap("startDate", startDateField.getValue() ) );
+//        emailInfo.setTemplateParameters( Collections.singletonMap("reacrutier", emailSubscriber ) );
+
         emailService.sendEmailAsync(emailInfo);
+
     }
 
     public void setOpenPosition( OpenPosition op ) {

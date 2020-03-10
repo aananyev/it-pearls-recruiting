@@ -447,6 +447,7 @@ create table ITPEARLS_RECRUTIES_TASKS (
     REACRUTIER_ID uuid not null,
     OPEN_POSITION_ID uuid,
     SUBSCRIBE boolean,
+    RECRUTIER_NAME varchar(80),
     --
     primary key (ID)
 )^

@@ -38,6 +38,17 @@ public class RecrutiesTasks extends StandardEntity {
     @Column(name = "SUBSCRIBE")
     protected Boolean subscribe;
 
+    @Column(name = "RECRUTIER_NAME", length = 80)
+    protected String recrutierName;
+
+    public String getRecrutierName() {
+        return recrutierName;
+    }
+
+    public void setRecrutierName(String recrutierName) {
+        this.recrutierName = recrutierName;
+    }
+
     public Boolean getSubscribe() {
         return subscribe;
     }

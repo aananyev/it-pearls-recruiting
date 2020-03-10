@@ -233,5 +233,4 @@ public class IteractionList extends StandardEntity {
     public void setDateIteraction(Date dateIteraction) {
         this.dateIteraction = dateIteraction;
     }
-
 }

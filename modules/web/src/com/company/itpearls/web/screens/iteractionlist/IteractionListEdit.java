@@ -48,6 +48,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected JobCandidate candidate;
     private static Boolean isCopyButton;
 
+    private Boolean transferFlag;
 
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
@@ -67,6 +68,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private LookupAction candidateFieldLookup;
     @Inject
     private LookupPickerField<User> recrutierField;
+    @Inject
+    private LookupPickerField<JobCandidate> candidateField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -437,9 +440,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onBeforeShow(BeforeShowEvent event) {
         buttonCallAction.setVisible(false);
         // запомнить текущий проект
-        currentProject = getEditedEntity().getProject();
-
-        candidate = getEditedEntity().getCandidate();
+        currentProject = projectField.getValue();
+        candidate = candidateField.getValue();
 
         changeField();
     }
@@ -470,43 +472,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 else
                     buttonCallAction.setVisible(false);
 
-                /*
-                // если надо специальное поле
-
-
-
-                if( iteractionTypeField.getValue().getAddType() != null ) {
-                    if (iteractionTypeField.getValue().getAddFlag()) {
-                        // удалить кнопку
-                        TextField<Integer> textFieldInteger;
-                        TextField<String> textFieldString;
-                        TextField<Date> textFieldDate;
-
-                        switch (iteractionTypeField.getValue().getAddType()) {
-                            case 1: // поле Data
-                                textFieldDate = uiComponents.create(TextField.class);
-                                textFieldDate.setCaption(iteractionTypeField.getValue().getAddCaption());
-                                textFieldDate.setWidth("50%");
-                                break;
-                            case 2: // поле String
-                                textFieldString = uiComponents.create(TextField.class);
-                                textFieldString.setCaption(iteractionTypeField.getValue().getAddCaption());
-                                textFieldString.setWidth("50%");
-                                break;
-                            case 3: // поле Integer
-                                textFieldInteger = uiComponents.create(TextField.TYPE_INTEGER);
-                                textFieldInteger.setCaption(iteractionTypeField.getValue().getAddCaption());
-                                textFieldInteger.setWidth("50%");
-                                break;
-                        }
-                    }
-                }
-
-                 */
     }
 
     @Subscribe
-    public void onInit(InitEvent event) {
+    public void onInit( InitEvent event ) {
         isCopyButton = false;
         // изначально предполагаем, что это продолжение проекта
         newProject = false;

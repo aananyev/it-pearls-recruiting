@@ -41,7 +41,7 @@ order by e.lastName, e.firstName]]>
                         <action id="open" type="picker_open"/>
                     </actions>
                 </lookupPickerField>
-                <lookupPickerField id="recrutiesTasksField" width="50%" dataContainer="recrutiesTasksDc" optionsContainer="openPositionsDc"
+                <lookupPickerField id="openPositionField" width="50%" dataContainer="recrutiesTasksDc" optionsContainer="openPositionsDc"
                                    property="openPosition">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
