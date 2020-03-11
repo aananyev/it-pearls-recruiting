@@ -23,8 +23,6 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
     private CheckBox checkBoxSetOnlyMy;
     @Inject
     private UserSession userSession;
-    @Inject
-    private UiComponents uiComponents;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -46,36 +44,6 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
 
         candidateCVsDl.load();
     }
-
-    public Component generateSemaforCell(CandidateCV entity) {
-//        Image image = uiComponents.create(Image.NAME);
-
-//        image.setSource( FileDescriptorResource.class ).setFileDescriptor( entity. );
-//        image.setSource( FileDescriptorResource.class ).setFileDescriptor( entity.)
-
-        return null;
-    }
-    
-    
-/*    private CollectionContainer<CandidateCV> candidateCVsSetupDc;
-    @Inject
-    private DataManager dataManager;
-    @Inject
-    private UserSessionSource userSessionSource;
-
-    @Subscribe
-    public void onAfterShow(AfterShowEvent event) {
-        setCheckBoxOnlyMy(); // установка флага "только мои клиенты"
-    }
-
-    private void setCheckBoxOnlyMy() {
-       Boolean onlyMyCandidates =
-                dataManager.loadValue("select e.paramSetBool from itpearls_setup e" +
-                        "where e.paramName='" +
-                        "OnlyMyCandidates" + "' and e.paramUser='" +
-                        userSessionSource.getUserSession().getUser().getName() + "';",
-                Boolean.class).one();
-    } */
 
     @Install(to = "candidateCVsTable", subject = "iconProvider")
     protected String candidateCVsTableiconProvider(CandidateCV candidateCV) {

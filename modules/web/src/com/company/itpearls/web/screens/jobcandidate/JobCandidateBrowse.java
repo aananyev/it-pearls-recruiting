@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.entity.Iteraction;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FluentValuesLoader;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -26,6 +27,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private UserSession userSession;
     @Inject
     private CheckBox checkBoxOnWork;
+    @Inject
+    private Dialogs dialogs;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -102,5 +105,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Integer getPictString(JobCandidate jobCandidate) {
         return jobCandidate.getStatus();
+    }
+
+    public void onButtonSubscribeClick() {
+        dialogs.createMessageDialog()
+                .withCaption("Information")
+                .withMessage("Подписка на действия с кандидатом будет реализована позднее")
+                .show();
     }
 }

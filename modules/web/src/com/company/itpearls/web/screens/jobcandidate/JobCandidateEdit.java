@@ -299,4 +299,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 
         }
     }
+
+    public void onButtonSubscribeClick() {
+        dialogs.createMessageDialog()
+                .withCaption("Information")
+                .withMessage("Подписка на действия с кандидатом будет реализована позднее")
+                .show();
+    }
 }
