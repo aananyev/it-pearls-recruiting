@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -19,6 +20,9 @@ import java.util.Date;
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
+    @Inject
+    private Dialogs dialogs;
+
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
@@ -67,6 +71,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LookupAction jobCityCandidateFieldLookup;
     @Named("positionCountryField.lookup")
     private LookupAction positionCountryFieldLookup;
+
+    @Subscribe("tabIteraction")
+    public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
+        dialogs.createOptionDialog()
+                .withCaption("Warning")
+                .withMessage("Подписатся на изменение вакансии?")
+                .withActions(
+                        new DialogAction(DialogAction.Type.YES,
+                                Action.Status.PRIMARY).withHandler(e -> {
+                            this.commitChanges();
+                        }),
+                        new DialogAction(DialogAction.Type.NO)
+                )
+                .show();
+    }
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -201,52 +220,52 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
 
-    private Integer setQualityPercent() {
+    public Integer setQualityPercent() {
         Integer qPercent = 0;
 
-        if( birdhDateField.getValue() != null )
+        if( birdhDateField.getValue() != null )         // 1
             qPercent = ++qPercent;
 
-        if( currentCompanyField.getValue() != null )
+        if( currentCompanyField.getValue() != null )    // 2
             qPercent = ++qPercent;
 
-        if( emailField.getValue() != null )
+        if( emailField.getValue() != null )             // 3
             qPercent = ++qPercent;
 
-        if( firstNameField.getValue() != null )
+        if( firstNameField.getValue() != null )         // 4
             qPercent = ++qPercent;
 
-        if( middleNameField.getValue() != null )
+        if( middleNameField.getValue() != null )        // 5
             qPercent = ++qPercent;
 
-        if( secondNameField.getValue() != null )
+        if( secondNameField.getValue() != null )        // 6
             qPercent = ++qPercent;
 
-        if( jobCandidateSpecialisationField != null )
+        if( jobCandidateSpecialisationField != null )   // 7
             qPercent = ++qPercent;
 
-        if( jobCityCandidateField.getValue() != null )
+        if( jobCityCandidateField.getValue() != null )  // 8
             qPercent = ++qPercent;
 
-        if( personPositionField.getValue() != null )
+        if( personPositionField.getValue() != null )    // 9
             qPercent = ++qPercent;
 
-        if( phoneField.getValue() != null )
+        if( phoneField.getValue() != null )             // 10
             qPercent = ++qPercent;
 
-        if( positionCountryField.getValue() != null )
+        if( positionCountryField.getValue() != null )   // 11
             qPercent = ++qPercent;
 
-        if( skypeNameField.getValue() != null )
+        if( skypeNameField.getValue() != null )         // 12
             qPercent = ++qPercent;
 
-        if( telegramNameField.getValue() != null )
+        if( telegramNameField.getValue() != null )      // 13
             qPercent = ++qPercent;
 
-        if( whatsupNameField.getValue() != null )
+        if( whatsupNameField.getValue() != null )       // 14
             qPercent = ++qPercent;
 
-        if( wiberNameField.getValue() != null )
+        if( wiberNameField.getValue() != null )         // 15
             qPercent = ++qPercent;
 
         return qPercent;

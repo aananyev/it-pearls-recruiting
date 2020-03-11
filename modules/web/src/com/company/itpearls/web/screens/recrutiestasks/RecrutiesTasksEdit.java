@@ -8,6 +8,7 @@ import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.RecrutiesTasks;
@@ -99,6 +100,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Subscribe
     public void onBeforeCommitChanges(AfterCommitChangesEvent event) {
         getEditedEntity().setRecrutierName( userSession.getUser().getName() );
+
+        // если были изменения, то послать оповещение по почте
         sendMessage();
 
         // если не установлен флаг подписки, то установить его в false

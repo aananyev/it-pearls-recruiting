@@ -8,15 +8,10 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
-import com.haulmont.cuba.security.app.UserSessionService;
-import com.haulmont.cuba.security.entity.User;
-import com.haulmont.cuba.security.global.UserSession;
-import org.jsoup.Jsoup;
 import java.util.*;
 import javax.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 @UiController("itpearls_OpenPosition.edit")
@@ -46,10 +41,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private EmailService emailService;
     @Inject
     private Notifications notifications;
-    @Inject
-    private LookupField priorityField;
 
     private Boolean booOpenClosePosition;
+    private Boolean entityIsChanged = false;
+
+    @Subscribe(id = "openPositionDc", target = Target.DATA_CONTAINER)
+    public void onOpenPositionDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<OpenPosition> event) {
+        entityIsChanged = false;
+    }
 
     @Inject
     private DataManager dataManager;
@@ -218,9 +217,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         // если не изменился статус открыто/закрыто
-        if( !sendOpenCloseMessage() )
+        if( !sendOpenCloseMessage() ) {
             // отослать сооьщение об изменении позиции
+            if (entityIsChanged) {
                 sendMessage();
+            }
+        }
+        // отправить глобальный мессагу
     }
 
     private String getSubscriberMaillist(Entity entity)
