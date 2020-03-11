@@ -143,8 +143,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .withDescription( getEditedEntity().getVacansyName() )
                     .show();
         } else {
-            String bodyMessage= Jsoup.parse( openPosition.getComment() ).text();
-
             EmailInfo emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
                     ";" + getRecrutiersMaillist(),
                     openPosition.getVacansyName(),
@@ -206,6 +204,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
            emailService.sendEmailAsync(emailInfo);
 
+           notifications.create(Notifications.NotificationType.TRAY)
+               .withCaption("Рассылка обновлений позиции")
+               .withDescription("Рассылка по адресам: " + getSubscriberMaillist(getEditedEntity()))
+               .show();
+
            return true;
        } else
            return false;
@@ -217,7 +220,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // если не изменился статус открыто/закрыто
         if( !sendOpenCloseMessage() )
             // отослать сооьщение об изменении позиции
-            sendMessage();
+                sendMessage();
     }
 
     private String getSubscriberMaillist(Entity entity)
@@ -232,12 +235,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .view("recrutiesTasks-view")
                 .list();
 
+
+
         String maillist = "";
+        Boolean subs = false;
 
         for( RecrutiesTasks address : listResearchers ) {
             String email = address.getReacrutier().getEmail();
 
-            if( address.getSubscribe() )
+            if( address.getSubscribe() == null ? false : address.getSubscribe() )
+                // if( address.getSubscribe() )
                 if( email != null )
                     maillist = maillist + email + ";";
         }

@@ -28,27 +28,27 @@ order by e.vacansyName]]>
         <collection id="resumePositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="resumePositionsLc">
                 <query>
-                    <![CDATA[select e from itpearls_Position e
-order by e.positionRuName]]>
+                    <![CDATA[select e from itpearls_Position e order by e.positionRuName]]>
                 </query>
             </loader>
         </collection>
         <collection id="usersDc" class="com.haulmont.cuba.security.entity.User" view="_local">
             <loader id="usersDl">
                 <query>
-                    <![CDATA[select e from sec$User e
-order by e.name]]>
+                    <![CDATA[select e from sec$User e order by e.name]]>
                 </query>
             </loader>
         </collection>
         <collection id="someFilesesDc" class="com.company.itpearls.entity.SomeFiles" view="someFiles-view">
             <loader id="someFilesesDl">
                 <query>
-                    <![CDATA[select e from itpearls_SomeFiles e ]]>
+                    <![CDATA[select e from itpearls_SomeFiles e where e.candidateCV is not null]]>
                     <condition>
-                        <c:jpql>
-                            <c:where>e.candidateCV.candidate.fullName = :candidate</c:where>
-                        </c:jpql>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.candidateCV.candidate = :candidate</c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
@@ -104,7 +104,7 @@ order by e.name]]>
                                        height="50%" width="50%"/>
                             <upload id="fileOriginalCVField" property="originalFileCV" showFileName="true"
                                     align="TOP_RIGHT" caption="msg://msgOriginalCV" dataContainer="candidateCVDc"
-                                    fileStoragePutMode="IMMEDIATE"/>
+                                    fileStoragePutMode="IMMEDIATE" showClearButton="true"/>
                             </hbox>
                             <grid spacing="true" width="100%">
                                 <columns count="2"/>
@@ -115,7 +115,7 @@ order by e.name]]>
                                                    width="100%" align="MIDDLE_LEFT"/>
                                         <linkButton id="linkOriginalCV" align="BOTTOM_LEFT"
                                                     description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"
-                                                    invoke="setUrlOriginalCV"/>
+                                                    invoke="setUrlOriginalCV" responsive="true"/>
                                     </row>
                                     <row>
                                         <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
@@ -142,9 +142,10 @@ order by e.name]]>
                             <columns>
                                 <column id="fileDescription"/>
                                 <column id="fileType.nameFileType"/>
-                                <column id="fileOwner.name"/>
-                                <column id="fileDescriptor.size"/>
                                 <column id="fileComment"/>
+                                <column id="candidateCV"/>
+                                <column id="fileDescriptor.size"/>
+                                <column id="fileOwner.name" caption="mainMsg://msgOwner"/>
                             </columns>
                             <buttonsPanel>
                                 <button action="someFilesTable.create"/>

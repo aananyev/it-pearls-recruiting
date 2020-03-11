@@ -6,9 +6,8 @@ import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.DateField;
-import com.haulmont.cuba.gui.components.LookupPickerField;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.RecrutiesTasks;
@@ -49,6 +48,12 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private Boolean fromOpenPosition = false;
     @Inject
     private LookupPickerField<OpenPosition> openPositionField;
+    @Inject
+    private CheckBox recrutiesTasksSubscribeCheckBox;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
@@ -95,6 +100,34 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     public void onBeforeCommitChanges(AfterCommitChangesEvent event) {
         getEditedEntity().setRecrutierName( userSession.getUser().getName() );
         sendMessage();
+
+        // если не установлен флаг подписки, то установить его в false
+        if( recrutiesTasksSubscribeCheckBox.getValue() == null ) {
+            dialogs.createOptionDialog()
+                    .withCaption("Warning")
+                    .withMessage("Подписатся на изменение вакансии?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(e -> {
+                                this.recrutiesTasksSubscribeCheckBox.setValue(true);
+                            }),
+                            new DialogAction(DialogAction.Type.NO).withHandler(f -> {
+                                this.recrutiesTasksSubscribeCheckBox.setValue(false);
+                            })
+                    )
+                    .show();
+        }
+    }
+
+    @Subscribe
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Подписка" )
+                .withDescription( recrutiesTasksFieldUser.getValue().getName() +
+                        " подписан на позицию: \n" +
+                        openPositionField.getValue().getVacansyName() )
+                .show();
+        
     }
 
     public void sendMessage() {

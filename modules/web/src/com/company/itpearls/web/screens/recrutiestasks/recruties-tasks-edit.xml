@@ -48,7 +48,7 @@ order by e.lastName, e.firstName]]>
                         <action id="open" type="picker_open"/>
                     </actions>
                 </lookupPickerField>
-                <checkBox id="recrutiesTasksCheckBox" dataContainer="recrutiesTasksDc" property="subscribe"
+                <checkBox id="recrutiesTasksSubscribeCheckBox" dataContainer="recrutiesTasksDc" property="subscribe"
                           caption="msg://msgSubscribe"/>
             </column>
         </form>
