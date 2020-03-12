@@ -162,7 +162,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("tabFiles")
     public void onTabFilesLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
-        if( !PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             dialogs.createOptionDialog()
                     .withCaption("Warning")
                     .withMessage("Сохранить резюме кандидата?")

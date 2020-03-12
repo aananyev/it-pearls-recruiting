@@ -36,6 +36,11 @@ order by e.number]]>
                                    caption="msg://msgIterationTree" width="50%"/>
                 <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"
                            width="50%" dataContainer="iteractionDc"/>
+                <hbox spacing="true" width="100%">
+                    <textField id="iteractionFieldPic" dataContainer="iteractionDc" property="pic" width="100%"
+                               description="msg://msgPic" caption="msg://msgPic"/>
+                    <image id="embeddedPict" align="BOTTOM_LEFT"/>
+                </hbox>
             </tab>
             <tab caption="msg://Tab" margin="true,false,false,false" spacing="true" id="tabIcons">
                 <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
@@ -43,11 +48,6 @@ order by e.number]]>
                            caption="msg://msgCallButtonText" width="50%"/>
                 <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"
                            caption="msg://msgCallButtonText" width="50%"/>
-                <hbox spacing="true" width="100%">
-                    <textField id="iteractionFieldPic" dataContainer="iteractionDc" property="pic" width="100%"
-                               description="msg://msgPic" caption="msg://msgPic"/>
-                    <embedded id="embeddedPict" align="MIDDLE_CENTER" type="IMAGE" width="100%" height="40pt"/>
-                </hbox>
             </tab>
             <tab caption="msg://msgSetupFiels" margin="true,false,false,false" spacing="true" id="tabSetup">
                 <checkBox id="checkBoxFlag" caption="msg://msgAdd" dataContainer="iteractionDc" property="addFlag"/>

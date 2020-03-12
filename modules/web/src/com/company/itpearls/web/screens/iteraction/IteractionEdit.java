@@ -16,7 +16,7 @@ import java.util.Map;
 @LoadDataBeforeShow
 public class IteractionEdit extends StandardEditor<Iteraction> {
     @Inject
-    private Embedded embeddedPict;
+    private Image embeddedPict;
     @Inject
     private CheckBox checkBoxCallDialog;
     @Inject
@@ -58,7 +58,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if( !PersistenceHelper.isNew( getEditedEntity() )) {
-            embeddedPict.setIcon(getEditedEntity().getPic());
+            // embeddedPict.setIcon(getEditedEntity().getPic());
         }
 
         if( !PersistenceHelper.isNew( getEditedEntity() ) )
@@ -97,17 +97,18 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         if( !checkBoxCallDialog.getValue() ) {
             textFieldCallButtonText.setEditable( false );
             textFieldCallForm.setEditable( false );
-            iteractionFieldPic.setEditable( false );
+            // iteractionFieldPic.setEditable( false );
         } else {
             textFieldCallButtonText.setEditable( true );
             textFieldCallForm.setEditable( true );
-            iteractionFieldPic.setEditable( true );
+            // iteractionFieldPic.setEditable( true );
         }
     }
 
     @Subscribe("iteractionFieldPic")
     public void onIteractionFieldPicValueChange(HasValue.ValueChangeEvent<String> event) {
-        embeddedPict.setIcon( getEditedEntity().getPic() );
+        String  iconURL = iteractionFieldPic.getValue();
+        embeddedPict.setSource(ThemeResource.class).setPath( iconURL );
     }
 
     @Inject
