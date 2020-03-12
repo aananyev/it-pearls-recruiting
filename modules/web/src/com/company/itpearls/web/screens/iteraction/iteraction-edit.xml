@@ -55,8 +55,6 @@ order by e.number]]>
                                   dataContainer="iteractionDc" property="addType"/>
                 <textField id="textFieldCaption" caption="msg://msgCaption" dataContainer="iteractionDc"
                            property="addCaption" width="50%"/>
-                <textField id="textFieldDBFieldName" caption="msg://msgDBFiledNme" dataContainer="iteractionDc"
-                           property="addField" width="50%"/>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

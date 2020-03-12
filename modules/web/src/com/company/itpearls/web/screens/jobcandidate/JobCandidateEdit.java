@@ -1,11 +1,11 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
@@ -14,6 +14,8 @@ import com.haulmont.cuba.gui.screen.*;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @UiController("itpearls_JobCandidate.edit")
 @UiDescriptor("job-candidate-edit.xml")
@@ -21,8 +23,9 @@ import java.util.Date;
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
+    private DataManager dataManager;
+    @Inject
     private Dialogs dialogs;
-
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
@@ -71,6 +74,51 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LookupAction jobCityCandidateFieldLookup;
     @Named("positionCountryField.lookup")
     private LookupAction positionCountryFieldLookup;
+
+    private Boolean ifCandidateIsExist() {
+       // вдруг такой кандидат уже есть
+       List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
+               .query("select e from itpearls_JobCandidate e where e.fullName like :fullName")
+               .parameter("fullName", getEditedEntity().getFullName())
+               .view("jobCandidate-view")
+               .list();
+
+       return candidates.isEmpty() ? false : true;
+    }
+
+
+
+    private AtomicReference<Boolean> returnE = new AtomicReference<>(false );
+
+    //  типа эта шняга не даст закрыть экран, если мы не хоти дублировать кандидата по базе
+    @Override
+    protected void validateAdditionalRules(ValidationErrors errors) {
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+            if (!ifCandidateIsExist()) {
+                dialogs.createOptionDialog()
+                        .withCaption("WARNING")
+                        .withMessage("Кандидат " + getEditedEntity().getFullName() +
+                                " есть в базе!\n Вы точно хотите создать еще одного?")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
+                                        .withHandler(e -> {
+                                            returnE.set(true);
+                                        }),
+                                new DialogAction(DialogAction.Type.NO)
+                                        .withHandler(f -> {
+                                            returnE.set(false);
+                                        })
+                        )
+                        .show();
+            }
+
+            if (returnE.get()) {
+                // комитимся и выходим, если разрешено
+                super.validateAdditionalRules(errors);
+            }
+        } else
+            super.validateAdditionalRules(errors);
+    }
 
     @Subscribe("tabIteraction")
     public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
