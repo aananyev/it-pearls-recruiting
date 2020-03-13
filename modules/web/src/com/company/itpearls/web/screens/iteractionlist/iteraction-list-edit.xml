@@ -23,8 +23,7 @@
         </collection>
         <collection id="projectsDc" class="com.company.itpearls.entity.Project" view="project-view">
             <loader id="projectsLc">
-                <query><![CDATA[select e from itpearls_Project e where e.projectIsClosed is null or e.projectIsClosed=0
-order by e.projectName]]></query>
+                <query><![CDATA[select e from itpearls_Project e order by e.projectName]]></query>
             </loader>
         </collection>
         <collection id="companyDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament"

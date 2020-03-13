@@ -181,33 +181,35 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        BigDecimal a = new BigDecimal("0.0");
 
-        // проверка на наличие записей по этой вакансии
-        BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) " +
-                        "from itpearls_IteractionList e " +
-                        "where e.candidate = :candidate and " +
-                        "e.vacancy = :vacancy", BigDecimal.class )
-            .parameter( "candidate", getEditedEntity().getCandidate() )
-            .parameter( "vacancy", getEditedEntity().getVacancy() )
-            .one();
+        if( !isClosedVacancy() ) {
+            BigDecimal a = new BigDecimal("0.0");
+
+            // проверка на наличие записей по этой вакансии
+            BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) " +
+                    "from itpearls_IteractionList e " +
+                    "where e.candidate = :candidate and " +
+                    "e.vacancy = :vacancy", BigDecimal.class)
+                    .parameter("candidate", getEditedEntity().getCandidate())
+                    .parameter("vacancy", getEditedEntity().getVacancy())
+                    .one();
 
             // есть взаимодействия с кандидатом по этой позиции
-        if( countIteraction.compareTo( a ) != 0)
-            newProject = false;
-        else
-            // новое взаимодействие с кандидатом
-        newProject = true;
+            if (countIteraction.compareTo(a) != 0)
+                newProject = false;
+            else
+                // новое взаимодействие с кандидатом
+                newProject = true;
 
-        if ( newProject ) {
-        // это начало цепочки - обрезаем выбор
-            iteractionTypesLc.setParameter("number", "001");
+            if (newProject) {
+                // это начало цепочки - обрезаем выбор
+                iteractionTypesLc.setParameter("number", "001");
 
-            dialogs.createMessageDialog()
-                   .withCaption("Warnind!")
-                   .withMessage("С кандидатом начат новый процесс. " +
+                dialogs.createMessageDialog()
+                        .withCaption("Warnind!")
+                        .withMessage("С кандидатом начат новый процесс. " +
                                 "Начните взаимодействие с ним с типом из группы \"001 Ресерчинг\"")
-                   .show();
+                        .show();
             } else {
                 iteractionTypesLc.removeParameter("number");
             }
@@ -215,9 +217,27 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             iteractionTypesLc.load();
 
             // заполнить другие поля
-            if ( vacancyFiels.getValue() != null)
-                if ( vacancyFiels.getValue().getProjectName() != null)
-                    projectField.setValue( vacancyFiels.getValue().getProjectName() );
+            if (vacancyFiels.getValue() != null)
+                if (vacancyFiels.getValue().getProjectName() != null)
+                    projectField.setValue(vacancyFiels.getValue().getProjectName());
+        } else {
+            dialogs.createOptionDialog()
+                    .withCaption( "WARNING" )
+                    .withMessage( "Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\n" +
+                            "Отменить действие?" )
+                    .withActions( new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(e -> {
+                                        this.vacancyFiels.setValue( null );
+                                        vacancyFiels.focus();
+
+                            }),
+                            new DialogAction(DialogAction.Type.NO))
+                    .show();
+        }
+    }
+
+    private boolean isClosedVacancy() {
+        return vacancyFiels.getValue().getOpenClose();
     }
 
     @Subscribe("projectField")

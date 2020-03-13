@@ -44,6 +44,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private Boolean booOpenClosePosition;
     private Boolean entityIsChanged = false;
+    @Inject
+    private LookupField<Integer> priorityField;
 
     @Subscribe(id = "openPositionDc", target = Target.DATA_CONTAINER)
     public void onOpenPositionDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<OpenPosition> event) {
@@ -281,6 +283,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         priorityMap.put("Normal", 2);
         priorityMap.put("High", 3);
         priorityMap.put("Critical", 4);
+
+        priorityField.setOptionsMap( priorityMap );
     }
 
     @Install(to = "priorityField", subject = "optionIconProvider")

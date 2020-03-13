@@ -299,8 +299,9 @@ order by e.cityRuName]]>
             </column>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
-            <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick"/>
-            <button action="windowCommitAndClose"/>
+            <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick" icon="BELL"/>
+            <button id="windowCommitAndCloseButton"
+                    invoke="onWindowCommitAndCloseButtonClick" caption="msg://msgOK" icon="OK"/>
             <button action="windowClose"/>
         </hbox>
     </layout>

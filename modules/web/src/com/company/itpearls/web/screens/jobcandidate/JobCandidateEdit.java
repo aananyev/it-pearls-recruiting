@@ -91,9 +91,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false );
 
     //  типа эта шняга не даст закрыть экран, если мы не хоти дублировать кандидата по базе
-    @Override
+/*    @Override
     protected void validateAdditionalRules(ValidationErrors errors) {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             if (!ifCandidateIsExist()) {
                 dialogs.createOptionDialog()
                         .withCaption("WARNING")
@@ -118,7 +118,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         } else
             super.validateAdditionalRules(errors);
-    }
+    } */
 
     @Subscribe("tabIteraction")
     public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
@@ -353,5 +353,36 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .withCaption("Information")
                 .withMessage("Подписка на действия с кандидатом будет реализована позднее")
                 .show();
+    }
+
+    private Boolean needDublicateDialog() {
+        if (ifCandidateIsExist()) {
+            dialogs.createOptionDialog()
+                    .withCaption("WARNING")
+                    .withMessage("Кандидат " + getEditedEntity().getFullName() +
+                            " есть в базе!\n Вы точно хотите создать еще одного?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
+                                    .withHandler(e -> {
+                                        returnE.set(true);
+                                    }),
+                            new DialogAction(DialogAction.Type.NO)
+                                    .withHandler(f -> {
+                                        returnE.set(false);
+                                    })
+                    )
+                    .show();
+        }
+
+        return returnE.get();
+    }
+
+    public void onWindowCommitAndCloseButtonClick() {
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+            if( needDublicateDialog() ) {
+                closeWithCommit();
+            }
+        }
+
     }
 }
