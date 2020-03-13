@@ -132,10 +132,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 linkITPearlsCV.setVisible( false );
             }
         // отфильтровать файлы кандидата только
-//        if( !PersistenceHelper.isNew( getEditedEntity() ) )
+       if( !PersistenceHelper.isNew( getEditedEntity() ) )
             someFilesesDl.setParameter( "candidate", candidateField.getValue() );
-//        else
-//            someFilesesDl.removeParameter( "candidate" );
+        else
+           someFilesesDl.setParameter( "candidate", "Null" );
 
         someFilesesDl.load();
     }
@@ -191,5 +191,15 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void setParameter( CandidateCV entity ) {
         candidateCVFieldOpenPosition.setValue( entity.getToVacancy() );
         candidateField.setValue( entity.getCandidate() );
+    }
+
+    @Subscribe("candidateField")
+    public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
+        if( !PersistenceHelper.isNew( getEditedEntity() ) )
+            someFilesesDl.setParameter( "candidate", candidateField.getValue() );
+        else
+            someFilesesDl.setParameter( "candidate", "Null" );
+
+        someFilesesDl.load();
     }
 }
