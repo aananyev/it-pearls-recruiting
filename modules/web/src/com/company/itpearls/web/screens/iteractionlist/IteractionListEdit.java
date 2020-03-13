@@ -236,8 +236,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    private boolean isClosedVacancy() {
-        return vacancyFiels.getValue().getOpenClose();
+    private Boolean isClosedVacancy() {
+        Boolean r;
+
+        if( vacancyFiels.getValue() != null )
+            r = vacancyFiels.getValue().getOpenClose();
+        else
+            r = false;
+
+        return r == null ? false : r;
     }
 
     @Subscribe("projectField")

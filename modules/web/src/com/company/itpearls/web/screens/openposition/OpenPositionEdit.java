@@ -46,6 +46,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Boolean entityIsChanged = false;
     @Inject
     private LookupField<Integer> priorityField;
+    @Inject
+    private CheckBox openClosePositionCheckBox;
 
     @Subscribe(id = "openPositionDc", target = Target.DATA_CONTAINER)
     public void onOpenPositionDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<OpenPosition> event) {
@@ -225,6 +227,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 sendMessage();
             }
         }
+
+        if( openClosePositionCheckBox.getValue() == null )
+            openClosePositionCheckBox.setValue( false );
         // отправить глобальный мессагу
     }
 

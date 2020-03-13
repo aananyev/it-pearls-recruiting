@@ -66,8 +66,7 @@ order by e.positionRuName]]></query>
         </collection>
         <collection id="vacancyDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
             <loader id="openPositionsDl">
-                <query><![CDATA[select e from itpearls_OpenPosition e where e.openClose is null or e.openClose=false
-order by e.vacansyName]]></query>
+                <query><![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]></query>
             </loader>
         </collection>
     </data>
