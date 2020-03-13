@@ -35,4 +35,15 @@ public class IteractionCheckCandidate extends StandardLookup<IteractionList> {
         iteractionListsDl.setParameter("fullName", "Null" );
         iteractionListsDl.load();
     }
+
+    @Install(to = "lookupFieldCheckCandidate", subject = "optionIconProvider")
+    private String lookupFieldCheckCandidateOptionIconProvider(JobCandidate jobCandidate) {
+        return lookupFieldCheckCandidate.getIcon();
+    }
+
+
+    @Install(to = "iteractionListsTable", subject = "iconProvider")
+    private String iteractionListsTableIconProvider(IteractionList iteractionList) {
+        return iteractionList.getIteractionType().getPic();
+    }
 }

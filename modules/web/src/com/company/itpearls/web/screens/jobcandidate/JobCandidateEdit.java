@@ -377,12 +377,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return returnE.get();
     }
 
-/*    @Subscribe("okButton")
+    @Subscribe("windowCommitAndCloseButton")
     private void onOkButtonClick(Button.ClickEvent event) {
         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             if (needDublicateDialog()) {
                 close(WINDOW_COMMIT_AND_CLOSE_ACTION);
             }
         }
-    } */
+    }
 }

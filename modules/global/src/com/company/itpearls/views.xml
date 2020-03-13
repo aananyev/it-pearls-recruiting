@@ -114,12 +114,13 @@
         </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
-        <property name="socialNetworkURL" view="_minimal">
-            <property name="socialNetwork"/>
-        </property>
         <property name="jobCandidate" view="_local">
             <property name="personPosition" view="_minimal"/>
             <property name="socialNetwork" view="_local"/>
+        </property>
+        <property name="socialNetworkURL" view="_minimal">
+            <property name="socialNetworkURL"/>
+            <property name="comment"/>
         </property>
     </view>
     <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
