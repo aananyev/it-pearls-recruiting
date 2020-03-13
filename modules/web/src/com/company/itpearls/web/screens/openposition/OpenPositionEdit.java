@@ -8,6 +8,7 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import java.util.*;
@@ -41,23 +42,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private EmailService emailService;
     @Inject
     private Notifications notifications;
-
-    private Boolean booOpenClosePosition;
-    private Boolean entityIsChanged = false;
     @Inject
     private LookupField<Integer> priorityField;
     @Inject
     private CheckBox openClosePositionCheckBox;
-
-    @Subscribe(id = "openPositionDc", target = Target.DATA_CONTAINER)
-    public void onOpenPositionDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<OpenPosition> event) {
-        entityIsChanged = false;
-    }
-
     @Inject
     private DataManager dataManager;
     @Inject
     private ScreenBuilders screenBuilders;
+
+    private Boolean booOpenClosePosition;
+    private Boolean entityIsChanged = false;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -146,22 +141,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .withDescription( getEditedEntity().getVacansyName() )
                     .show();
         } else {
-            EmailInfo emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
-                    ";" + getRecrutiersMaillist(),
-                    openPosition.getVacansyName(),
-                    null, "com/company/itpearls/templates/edit_open_pos.html",
-                    Collections.singletonMap("openPosition", openPosition));
-            emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
+            if( entityIsChanged ) {
+                EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
+                        ";" + getRecrutiersMaillist(),
+                        openPosition.getVacansyName(),
+                        null, "com/company/itpearls/templates/edit_open_pos.html",
+                        Collections.singletonMap("openPosition", openPosition));
+                emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
-//                    Collections.singletonMap("bodyMessage", bodyMessage ));
+                emailService.sendEmailAsync(emailInfo);
 
-            emailService.sendEmailAsync(emailInfo);
-
-            // всплывающее сообщение
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Изменение описания позиции:" )
-                    .withDescription( getEditedEntity().getVacansyName() )
-                    .show();
+                // всплывающее сообщение
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Изменение описания позиции:")
+                        .withDescription(getEditedEntity().getVacansyName())
+                        .show();
+            }
         }
     }
 
@@ -316,6 +311,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         return icon;
+    }
+
+    @Subscribe(target = Target.DATA_CONTEXT)
+    public void onChange(DataContext.ChangeEvent event) {
+        entityIsChanged = true;
     }
 
     public void subscribePosition() {
