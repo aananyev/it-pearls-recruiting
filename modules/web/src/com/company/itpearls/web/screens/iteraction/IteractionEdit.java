@@ -31,8 +31,8 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private CheckBox checkBoxFlag;
     @Inject
     private TextField textFieldCaption;
-    @Inject
-    private TextField textFieldDBFieldName;
+//    @Inject
+//    private TextField textFieldDBFieldName;
     @Inject
     private Label<String> labelItercationName;
     @Inject
@@ -81,7 +81,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     protected void setDisableElements() {
         textFieldCaption.setEditable( checkBoxFlag.getValue() );
-        textFieldDBFieldName.setEditable( checkBoxFlag.getValue() );
+//        textFieldDBFieldName.setEditable( checkBoxFlag.getValue() );
         radioButtonAddType.setEditable( checkBoxFlag.getValue() );
     }
 
