@@ -42,11 +42,14 @@ order by e.vacansyName]]>
         <collection id="someFilesesDc" class="com.company.itpearls.entity.SomeFiles" view="someFiles-view">
             <loader id="someFilesesDl">
                 <query>
-                    <![CDATA[select e from itpearls_SomeFiles e where e.candidateCV is not null]]>
+                    <![CDATA[select e from itpearls_SomeFiles e ]]>
                     <condition>
                         <and>
                             <c:jpql>
                                 <c:where>e.candidateCV.candidate = :candidate</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.candidateCV is not null</c:where>
                             </c:jpql>
                         </and>
                     </condition>
