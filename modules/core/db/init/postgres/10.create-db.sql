@@ -389,6 +389,7 @@ create table ITPEARLS_OPEN_POSITION (
     COMPANY_DEPARTAMENT_ID uuid,
     NUMBER_POSITION integer,
     COMMENT_ text,
+    PRIORITY integer,
     --
     primary key (ID)
 )^

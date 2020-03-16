@@ -4,6 +4,7 @@ import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
@@ -11,6 +12,8 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.security.entity.User;
+
 import java.util.*;
 import javax.inject.Inject;
 
@@ -53,6 +56,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private Boolean booOpenClosePosition = false;
     private Boolean entityIsChanged = false;
+    private EmailInfo emailInfo;
+    private String  emails = "";
+
+    @Inject
+    private Dialogs dialogs;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -164,55 +172,88 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private Boolean sendOpenCloseMessage() {
-        EmailInfo emailInfo;
         OpenPosition openPosition = getEditedEntity();
 
         Boolean setOK = getEditedEntity().getOpenClose();
         int a = setOK ? 1 : 0;
         int b = booOpenClosePosition ? 1 : 0;
 
+
         // если что-то изменилось
-       if( a != b ) {
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+            emails = getAllSubscibers();
+            // позиция открылась
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Открыта позиция" )
+                    .withDescription( getEditedEntity().getVacansyName() )
+                    .show();
 
-           if( !getEditedEntity().getOpenClose() ) {
-               // позиция открылась
-               notifications.create(Notifications.NotificationType.TRAY)
-                       .withCaption("Открыта позиция" )
-                       .withDescription( getEditedEntity().getVacansyName() )
-                       .show();
+            dialogs.createOptionDialog()
+                    .withCaption( "Внимание!" )
+                    .withMessage( "Разослать оповещение по всем сотрудникам?")
+                    .withActions( new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(e -> {
+                                this.emailInfo = new EmailInfo( this.emails,
+                                        "Открыта позиция " + openPosition.getVacansyName(),
+                                        null, "com/company/itpearls/templates/open_position.html",
+                                        Collections.singletonMap( "openPosition", openPosition ) );
+                            }),
+                            new DialogAction(DialogAction.Type.NO))
+                    .show();;
+        } else {
+            if( a != b ) {
+               if( !getEditedEntity().getOpenClose() ) {
 
-               emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
-                       ";" + getRecrutiersMaillist(),
-                       "Открыта позиция " + openPosition.getVacansyName(),
-                       null, "com/company/itpearls/templates/open_position.html",
-                       Collections.singletonMap("openPosition", openPosition));
+                   emails = getAllSubscibers();
+                   // позиция открылась
+                   notifications.create(Notifications.NotificationType.TRAY)
+                           .withCaption("Открыта позиция" )
+                           .withDescription( getEditedEntity().getVacansyName() )
+                           .show();
 
-           } else {
-               // позиция закрылась
-               notifications.create(Notifications.NotificationType.TRAY)
-                       .withCaption("Закрыта позиция" )
-                       .withDescription( getEditedEntity().getVacansyName() )
-                       .show();
+                    dialogs.createOptionDialog()
+                           .withCaption( "Внимание!" )
+                           .withMessage( "Разослать оповещение по всем сотрудникам?")
+                           .withActions( new DialogAction(DialogAction.Type.YES,
+                                           Action.Status.PRIMARY).withHandler(e -> {
+                                               this.emailInfo = new EmailInfo( this.emails,
+                                               "Открыта позиция " + openPosition.getVacansyName(),
+                                               null, "com/company/itpearls/templates/open_position.html",
+                                               Collections.singletonMap( "openPosition", openPosition ) );
+                                    }),
+                                    new DialogAction(DialogAction.Type.NO))
+                            .show();;
+               } else {
+                    // позиция закрылась
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption("Закрыта позиция" )
+                            .withDescription( getEditedEntity().getVacansyName() )
+                            .show();
 
-               emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
-                       ";" + getRecrutiersMaillist(),
-                       "Закрыта позиция " + openPosition.getVacansyName(),
-                       null, "com/company/itpearls/templates/close_position.html",
-                       Collections.singletonMap("openPosition", openPosition));
-           }
+                    emails = getSubscriberMaillist(getEditedEntity()) +
+                           ";" + getRecrutiersMaillist();
 
-           emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
+                    emailInfo = new EmailInfo( emails,
+                           "Закрыта позиция " + openPosition.getVacansyName(),
+                            null, "com/company/itpearls/templates/close_position.html",
+                            Collections.singletonMap("openPosition", openPosition));
+               }
 
-           emailService.sendEmailAsync(emailInfo);
+                emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
 
-           notifications.create(Notifications.NotificationType.TRAY)
-               .withCaption("Рассылка обновлений позиции")
-               .withDescription("Рассылка по адресам: " + getSubscriberMaillist(getEditedEntity()))
-               .show();
+                emailService.sendEmailAsync(emailInfo);
 
-           return true;
-       } else
-           return false;
+                notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Рассылка обновлений позиции")
+                    .withDescription("Рассылка по адресам: " + emails )
+                    .show();
+
+                return true;
+            } else
+                return false;
+        }
+
+        return true;
     }
 
 
@@ -229,6 +270,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if( openClosePositionCheckBox.getValue() == null )
             openClosePositionCheckBox.setValue( false );
         // отправить глобальный мессагу
+    }
+
+    private String getAllSubscibers() {
+        LoadContext<User> loadContext = LoadContext.create(User.class)
+                .setQuery(LoadContext.createQuery("select e from sec$User e" ));
+
+        List<User> listManagers = dataManager.loadList(loadContext );
+
+        String maillist = "";
+
+        for( User user : listManagers ) {
+            if( !user.getEmail().equals( "null " ) && user.getActive() )
+            maillist = maillist + ";" + user.getEmail();
+        }
+
+        return maillist;
     }
 
     private String getSubscriberMaillist(Entity entity)
@@ -274,7 +331,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         } */
 
 
-        return "alan@itpearls.ru";
+        return "alan@itpearls.ru;tmd@itpearls.ru;tdg@itpearls.ru";
     }
 
     @Subscribe
