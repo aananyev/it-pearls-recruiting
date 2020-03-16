@@ -58,6 +58,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Boolean entityIsChanged = false;
     private EmailInfo emailInfo;
     private String  emails = "";
+    private Boolean setOK = getEditedEntity().getOpenClose();
 
     @Inject
     private Dialogs dialogs;
@@ -173,8 +174,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private Boolean sendOpenCloseMessage() {
         OpenPosition openPosition = getEditedEntity();
+        Boolean r = false;
 
-        Boolean setOK = getEditedEntity().getOpenClose();
         int a = setOK ? 1 : 0;
         int b = booOpenClosePosition ? 1 : 0;
 
@@ -220,8 +221,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                                "Открыта позиция " + openPosition.getVacansyName(),
                                                null, "com/company/itpearls/templates/open_position.html",
                                                Collections.singletonMap( "openPosition", openPosition ) );
+
+                                               this.setOK = true;
                                     }),
-                                    new DialogAction(DialogAction.Type.NO))
+                                    new DialogAction(DialogAction.Type.NO).withHandler(f -> {
+                                        this.setOK = false;
+                                    }))
                             .show();;
                } else {
                     // позиция закрылась
@@ -237,23 +242,29 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                            "Закрыта позиция " + openPosition.getVacansyName(),
                             null, "com/company/itpearls/templates/close_position.html",
                             Collections.singletonMap("openPosition", openPosition));
+
+                    setOK = true;
                }
 
-                emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
-
-                emailService.sendEmailAsync(emailInfo);
-
-                notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Рассылка обновлений позиции")
-                    .withDescription("Рассылка по адресам: " + emails )
-                    .show();
-
-                return true;
+                r = true;
             } else
-                return false;
+                r = false;
         }
 
-        return true;
+        r = true;
+
+        if( setOK ) {
+            emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
+            emailService.sendEmailAsync(emailInfo);
+
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Рассылка обновлений позиции")
+                    .withDescription("Рассылка по адресам: " + emails)
+                    .show();
+        }
+
+        return r;
     }
 
 
