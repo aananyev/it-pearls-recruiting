@@ -4,7 +4,6 @@ import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -12,6 +11,7 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import org.springframework.web.bind.support.WebExchangeDataBinder;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -47,7 +47,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected Date lastIteraction;
     protected JobCandidate candidate;
     private static Boolean isCopyButton;
-
     private Boolean transferFlag;
 
     @Inject
@@ -520,7 +519,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private Metadata metadata;
 
-    public void callActionEntity() {
+    public void callActionEntity() { /*
+        ExchangeBean exchangeBean = new ExchangeBean();
+        exchangeBean.setCandidate( candidateField.getValue() );
+        exchangeBean.setOpenPosition( vacancyFiels.getValue() );
+
+        ExchangeData    exchange = new ExchangeData();
+        exchange.setCandidate( candidateField.getValue() );
+        exchange.setOpenPosition( vacancyFiels.getValue() ); */
+
         String calledClass = iteractionTypeField.getValue().getCallClass();
         // еслп установлено разрешение в Iteraction показать кнопку и установить на ней надпсит
         if( iteractionTypeField.getValue() != null)
@@ -528,12 +535,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if(!iteractionTypeField.getValue().getCallForm() ) {
                 }
                 else {
-                    screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+
+                    Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
                             .newEntity()
                             .withScreenId(calledClass + ".edit")
                             .withLaunchMode(OpenMode.NEW_TAB)
-                            .build()
-                            .show();
+                            .withInitializer( e -> {
+                                // e.setValue( "exchange", exchangeBean );
+                            })
+                            .build();
+
+                            a.show();
         }
     }
 

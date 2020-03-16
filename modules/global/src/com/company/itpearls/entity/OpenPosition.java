@@ -15,7 +15,7 @@ import java.util.List;
 
 @NamePattern("%s %s|vacansyName,projectName")
 @Table(name = "ITPEARLS_OPEN_POSITION", indexes = {
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION", columnList = "VACANSY_NAME")
+        @Index(name = "IDX_ITPEARLS_OPEN_POSITION", columnList = "VACANSY_NAME, CITY_POSITION_ID, PROJECT_NAME_ID, COMPANY_DEPARTAMENT_ID, PRIORITY")
 })
 @Entity(name = "itpearls_OpenPosition")
 public class OpenPosition extends StandardEntity {
@@ -34,29 +34,29 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "SALARY_MAX")
     protected BigDecimal salaryMax;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_POSITION_ID")
     protected City cityPosition;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "POSITION_TYPE_ID")
     protected Position positionType;
 
     @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "PROJECT_NAME_ID")
     protected Project projectName;
 
     @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "COMPANY_NAME_ID")
     protected Company companyName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_DEPARTAMENT_ID")
     protected CompanyDepartament companyDepartament;

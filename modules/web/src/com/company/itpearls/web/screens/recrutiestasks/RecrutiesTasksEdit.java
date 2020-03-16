@@ -135,23 +135,19 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
     public void sendMessage() {
         String email = recrutiesTasksDc.getItem().getReacrutier().getEmail();
-        String emailSubscriber = userSession.getUser().getEmail();
-        String openPos = openPositionField.getValue().getVacansyName();
 
         EmailInfo   emailInfo;
 
-        emailInfo = new EmailInfo( email,
-                "Вы подписаны на вакансию " + openPositionField.getValue().getVacansyName(),
-                null, "com/company/itpearls/templates/subscribe_to_position.html",
-                Collections.singletonMap( "RecrutierTask", getEditedEntity() ) );
+        if( !email.isEmpty() ) {
+            emailInfo = new EmailInfo(email,
+                    "Вы подписаны на вакансию " + openPositionField.getValue().getVacansyName(),
+                    null, "com/company/itpearls/templates/subscribe_to_position.html",
+                    Collections.singletonMap("RecrutierTask", getEditedEntity()));
 
-        emailInfo.setBodyContentType( "text/html; charset=UTF-8" );
+            emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
-//        emailInfo.setTemplateParameters( Collections.singletonMap("startDate", startDateField.getValue() ) );
-//        emailInfo.setTemplateParameters( Collections.singletonMap("reacrutier", emailSubscriber ) );
-
-        emailService.sendEmailAsync(emailInfo);
-
+            emailService.sendEmailAsync(emailInfo);
+        }
     }
 
     public void setOpenPosition( OpenPosition op ) {

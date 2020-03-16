@@ -100,6 +100,15 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 notifications.create()
                         .withCaption("File upload error")
                         .show());
+
+        /*
+        // а вдруг этот класс вызван из ItercationListEdit кнопкой?
+         ExchangeBean exchange = getEditedEntity().getValue( "exchange" );
+
+        if( exchange != null) {
+            candidateField.setValue( exchange.getCandidate() );
+            candidateCVFieldOpenPosition.setValue( exchange.getOpenPosition() );
+        } */
     }
 
     @Subscribe("textFieldIOriginalCV")

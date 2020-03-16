@@ -51,7 +51,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private ScreenBuilders screenBuilders;
 
-    private Boolean booOpenClosePosition;
+    private Boolean booOpenClosePosition = false;
     private Boolean entityIsChanged = false;
 
     @Subscribe
@@ -67,6 +67,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         jobCandidatesDl.load();
 
         booOpenClosePosition = getEditedEntity().getOpenClose();
+
+        // проверка на ноль
+        booOpenClosePosition = booOpenClosePosition == null ? false : booOpenClosePosition;
     }
 
     @Subscribe("companyDepartamentField")
@@ -131,7 +134,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             EmailInfo emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
                     ";" + getRecrutiersMaillist(),
                     openPosition.getVacansyName(),
-                    null, "com/company/itpearls/templates/create_new_pos.txt",
+                    null, "com/company/itpearls/templates/create_new_pos.html",
                     Collections.singletonMap("openPosition", openPosition));
 
             emailService.sendEmailAsync(emailInfo);
@@ -271,7 +274,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         } */
 
 
-        return "alan@itpearls.ru;tdgitpearls.ru;tmd@itpearls.ru";
+        return "alan@itpearls.ru";
     }
 
     @Subscribe
