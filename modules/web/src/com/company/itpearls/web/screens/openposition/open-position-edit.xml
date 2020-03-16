@@ -204,7 +204,7 @@ order by e.reacrutier, e.endDate desc]]>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="TOP_RIGHT">
-            <button invoke="subscribePosition" caption="msg://msgSubscribe"/>
+            <button invoke="subscribePosition" caption="msg://msgSubscribe" icon="BELL"/>
             <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

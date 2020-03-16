@@ -60,7 +60,7 @@
                 <button id="createBtn" action="openPositionsTable.create"/>
                 <button id="editBtn" action="openPositionsTable.edit"/>
                 <button id="removeBtn" action="openPositionsTable.remove"/>
-                <button id="buttonSubscribe" caption="msg://mshSubscibe" invoke="subscribePosition"/>
+                <button id="buttonSubscribe" caption="msg://mshSubscibe" invoke="subscribePosition" icon="BELL"/>
             </buttonsPanel>
         </table>
         <hbox spacing="true">

@@ -281,7 +281,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         String maillist = "";
 
         for( User user : listManagers ) {
-            if( !user.getEmail().equals( "null " ) && user.getActive() )
+            if( !user.getEmail().equals( null ) && user.getActive() )
             maillist = maillist + ";" + user.getEmail();
         }
 
