@@ -201,6 +201,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                         "Открыта позиция " + openPosition.getVacansyName(),
                                         null, "com/company/itpearls/templates/open_position.html",
                                         Collections.singletonMap( "openPosition", openPosition ) );
+
+                                emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
+                                emailService.sendEmailAsync(emailInfo);
+
+                                notifications.create(Notifications.NotificationType.TRAY)
+                                        .withCaption("Рассылка обновлений позиции")
+                                        .withDescription("Рассылка по адресам: " + emails)
+                                        .show();
+
                             }),
                             new DialogAction(DialogAction.Type.NO))
                     .show();
@@ -228,7 +238,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                                Collections.singletonMap( "openPosition", openPosition ) );
 
                                                this.setOK = true;
-                                               this.r = true;
+
+                                               emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
+                                               emailService.sendEmailAsync(emailInfo);
+
+                                               notifications.create(Notifications.NotificationType.TRAY)
+                                                        .withCaption("Рассылка обновлений позиции")
+                                                        .withDescription("Рассылка по адресам: " + emails)
+                                                        .show();
+
                                     }),
                                     new DialogAction(DialogAction.Type.NO).withHandler(f -> {
                                         this.setOK = false;
@@ -246,28 +265,26 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                    emails = getSubscriberMaillist(getEditedEntity()) +
                            ";" + getRecrutiersMaillist();
 
-                    emailInfo = new EmailInfo( emails,
+                   emailInfo = new EmailInfo( emails,
                            "Закрыта позиция " + openPosition.getVacansyName(),
                             null, "com/company/itpearls/templates/close_position.html",
                             Collections.singletonMap("openPosition", openPosition));
 
-                    setOK = true;
+                   emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
+                   emailService.sendEmailAsync(emailInfo);
+
+                   notifications.create(Notifications.NotificationType.TRAY)
+                           .withCaption("Рассылка обновлений позиции")
+                           .withDescription("Рассылка по адресам: " + emails)
+                           .show();
+
+                   setOK = true;
                }
 
                 r = true;
             } else
                 r = false;
-        }
-
-        if( setOK ) {
-            emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
-            emailService.sendEmailAsync(emailInfo);
-
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Рассылка обновлений позиции")
-                    .withDescription("Рассылка по адресам: " + emails)
-                    .show();
         }
 
         return r;
