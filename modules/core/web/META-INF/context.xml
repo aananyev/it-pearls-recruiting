@@ -13,15 +13,6 @@
           type="javax.sql.DataSource"
           url="jdbc:hsqldb:hsql://localhost:9010/itpearls-37qv3wkAY"
           username="sa"/>-->
-    <!--<Resource driverClassName="org.postgresql.Driver"
-          maxIdle="2"
-          maxTotal="20"
-          maxWaitMillis="5000"
-          name="jdbc/CubaDS"
-          password="cuba"
-          type="javax.sql.DataSource"
-          url="jdbc:postgresql://84.201.142.32/itpearls"
-          username="cuba"/>-->
     <Resource driverClassName="org.postgresql.Driver"
               maxIdle="2"
               maxTotal="20"
@@ -29,7 +20,7 @@
               name="jdbc/CubaDS"
               password="cuba"
               type="javax.sql.DataSource"
-              url="jdbc:postgresql://hr.it-pearls.ru/itpearls"
+              url="jdbc:postgresql://localhost/itpearls"
               username="cuba"/>
 
 </Context>

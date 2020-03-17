@@ -3,5 +3,18 @@
   <component name="CubaPluginProjectSettings">
     <option name="checkModelDbComp" value="false" />
     <option name="stateVersion" value="1" />
+    <option name="savedDbProperties">
+      <list>
+        <SavedDbProperties>
+          <option name="databaseName" value="itpearls" />
+          <option name="dbType" value="hsql" />
+          <option name="host" value="localhost" />
+          <option name="systemPassword" value="" />
+          <option name="systemUser" value="" />
+          <option name="url" value="jdbc:hsqldb:hsql://localhost/itpearls" />
+          <option name="user" value="sa" />
+        </SavedDbProperties>
+      </list>
+    </option>
   </component>
 </project>

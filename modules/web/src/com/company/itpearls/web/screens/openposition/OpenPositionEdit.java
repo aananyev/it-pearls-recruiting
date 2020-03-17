@@ -58,10 +58,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Boolean entityIsChanged = false;
     private EmailInfo emailInfo;
     private String  emails = "";
-    private Boolean setOK = getEditedEntity().getOpenClose();
+    private Boolean setOK;
 
     @Inject
     private Dialogs dialogs;
+    private boolean r;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -174,7 +175,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private Boolean sendOpenCloseMessage() {
         OpenPosition openPosition = getEditedEntity();
-        Boolean r = false;
+        r = false;
+
+        setOK = getEditedEntity().getOpenClose();
 
         int a = setOK ? 1 : 0;
         int b = booOpenClosePosition ? 1 : 0;
@@ -191,7 +194,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             dialogs.createOptionDialog()
                     .withCaption( "Внимание!" )
-                    .withMessage( "Разослать оповещение по всем сотрудникам?")
+                    .withMessage( "Разослать оповещение по всем сотрудникам об открытии новой позиции?")
                     .withActions( new DialogAction(DialogAction.Type.YES,
                                     Action.Status.PRIMARY).withHandler(e -> {
                                 this.emailInfo = new EmailInfo( this.emails,
@@ -200,7 +203,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                         Collections.singletonMap( "openPosition", openPosition ) );
                             }),
                             new DialogAction(DialogAction.Type.NO))
-                    .show();;
+                    .show();
+
+            r = true;
         } else {
             if( a != b ) {
                if( !getEditedEntity().getOpenClose() ) {
@@ -212,7 +217,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                            .withDescription( getEditedEntity().getVacansyName() )
                            .show();
 
-                    dialogs.createOptionDialog()
+                   dialogs.createOptionDialog()
                            .withCaption( "Внимание!" )
                            .withMessage( "Разослать оповещение по всем сотрудникам?")
                            .withActions( new DialogAction(DialogAction.Type.YES,
@@ -223,19 +228,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                                Collections.singletonMap( "openPosition", openPosition ) );
 
                                                this.setOK = true;
+                                               this.r = true;
                                     }),
                                     new DialogAction(DialogAction.Type.NO).withHandler(f -> {
                                         this.setOK = false;
                                     }))
-                            .show();;
+                            .show();
+
+                   r = true;
                } else {
-                    // позиция закрылась
-                    notifications.create(Notifications.NotificationType.TRAY)
+                   // позиция закрылась
+                   notifications.create(Notifications.NotificationType.TRAY)
                             .withCaption("Закрыта позиция" )
                             .withDescription( getEditedEntity().getVacansyName() )
                             .show();
 
-                    emails = getSubscriberMaillist(getEditedEntity()) +
+                   emails = getSubscriberMaillist(getEditedEntity()) +
                            ";" + getRecrutiersMaillist();
 
                     emailInfo = new EmailInfo( emails,
@@ -250,8 +258,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             } else
                 r = false;
         }
-
-        r = true;
 
         if( setOK ) {
             emailInfo.setBodyContentType("text/html; charset=UTF-8");
@@ -292,7 +298,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         String maillist = "";
 
         for( User user : listManagers ) {
-            if( !user.getEmail().equals( null ) && user.getActive() )
+            if( user.getEmail() != null && user.getActive() )
             maillist = maillist + ";" + user.getEmail();
         }
 
