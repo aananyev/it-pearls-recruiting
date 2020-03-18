@@ -24,6 +24,7 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.web.AppUI;
 import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 
 @UiController("itpearls_CandidateCV.edit")
@@ -109,6 +110,59 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             candidateField.setValue( exchange.getCandidate() );
             candidateCVFieldOpenPosition.setValue( exchange.getOpenPosition() );
         } */
+    }
+    
+    void openURL( String url) {
+        
+        String mylaunch = url;
+        String os = System.getProperty("os.name").toLowerCase();
+
+        if( os.indexOf( "win" ) >= 0 ) {
+            try {
+                Runtime rt = Runtime.getRuntime();
+                rt.exec("rundll32 url.dll,FileProtocolHandler " + mylaunch);
+            } catch (IOException e) {
+                //System.out.println("THROW::: make sure we handle browser error");
+                e.printStackTrace();
+            }
+        }
+
+        if (os.indexOf("mac") >= 0) {
+            try {
+                Runtime rt = Runtime.getRuntime();
+                rt.exec("open " + mylaunch);
+            } catch (IOException e) {
+                //System.out.println("THROW::: make sure we handle browser error");
+                e.printStackTrace();
+            }
+        }
+
+        if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
+            try {
+                Runtime rt = Runtime.getRuntime();
+                String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
+                            "netscape", "opera", "links", "lynx"};
+                StringBuffer cmd = new StringBuffer();
+
+                for (int i = 0; i < browsers.length; i++)
+                    cmd.append((i == 0 ? "" : " || ") + browsers[i] +" \"" + mylaunch + "\" ");
+
+                rt.exec(new String[]{"sh", "-c", cmd.toString()});
+            } catch (IOException e) {
+                //System.out.println("THROW::: make sure we handle browser error");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Subscribe("linkOriginalCV")
+    public void onLinkOriginalCVClick(Button.ClickEvent event) {
+        openURL( textFieldIOriginalCV.getValue() );
+    }
+
+    @Subscribe("linkITPearlsCV")
+    public void onLinkITPearlsCVClick(Button.ClickEvent event) {
+            openURL( textFieldITPearlsCV.getValue() );
     }
 
     @Subscribe("textFieldIOriginalCV")

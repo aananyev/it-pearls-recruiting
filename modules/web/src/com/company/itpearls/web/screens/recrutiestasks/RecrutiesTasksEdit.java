@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.core.app.EmailService;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.EmailInfo;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -9,6 +10,7 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.RecrutiesTasks;
@@ -16,6 +18,8 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -24,6 +28,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Locale;
 
 @UiController("itpearls_RecrutiesTasks.edit")
 @UiDescriptor("recruties-tasks-edit.xml")
@@ -55,6 +60,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private Dialogs dialogs;
     @Inject
     private Notifications notifications;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
@@ -120,6 +127,48 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                     )
                     .show();
         }
+    }
+    
+    @Subscribe(target = Target.DATA_CONTEXT)
+    public void onPreCommit(DataContext.PreCommitEvent event) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat( "dd MMMM YYYY",
+                ruDateFormatSymbols );
+
+        // проверить, а вдруг вы уже подписаны на эту вакансию?
+        if( checkSubscribePosition() ) {
+            dialogs.createMessageDialog()
+                    .withCaption( "Внимание" )
+                    .withMessage( "Вы уже подписаны на вакансию " + openPositionField.getValue().getVacansyName() +
+                            "\n c " + dateFormat.format( startDateField.getValue() ) +
+                            " по " + dateFormat.format( endDateField.getValue() ) )
+                    .show();
+        }
+    }
+
+    private static DateFormatSymbols ruDateFormatSymbols = new DateFormatSymbols(){
+
+        @Override
+        public String[] getMonths() {
+            return new String[]{"января", "февраля", "марта", "апреля", "мая", "июня",
+                    "июля", "августа", "сентября", "октября", "ноября", "декабря"};
+        }
+
+    };
+
+    private Boolean checkSubscribePosition() {
+        Integer countSubscrine = dataManager
+                .loadValue( "select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
+                    "where e.reacrutier = :recrutier and " +
+                    "e.openPosition = :openPosition and " +
+                    "e.endDate > :nowDate", Integer.class )
+                .parameter( "recrutier", recrutiesTasksFieldUser.getValue() )
+                .parameter( "openPosition", openPositionField.getValue() )
+                .parameter( "nowDate", new Date() )
+                .one();
+
+        // если нет соответствия, значит нет еще подписки, значит можно подписаться,
+        // если уже есть, то не надо подписываться
+        return countSubscrine != 0 ? true : false;
     }
 
     @Subscribe
