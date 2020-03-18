@@ -316,7 +316,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         for( User user : listManagers ) {
             if( user.getEmail() != null && user.getActive() )
-            maillist = maillist + ";" + user.getEmail();
+            maillist = maillist + user.getEmail() + ";";
         }
 
         return maillist;

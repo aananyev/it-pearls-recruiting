@@ -80,8 +80,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private void setSubcribersFilter() {
        if( checkBoxOnlyMySubscribe.getValue() ) {
            openPositionsDl.setParameter( "recrutier", userSession.getUser() );
+           openPositionsDl.setParameter( "nowDate", new Date() );
        } else {
            openPositionsDl.removeParameter( "recrutier" );
+           openPositionsDl.removeParameter( "nowDate" );
        }
        
        openPositionsDl.load();
