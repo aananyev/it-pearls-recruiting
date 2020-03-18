@@ -17,8 +17,18 @@
                                 <c:where>e.openClose=:openClosePos</c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.vacansyName like (select f.openPosition.vacansyName from itpearls_RecrutiesTasks f
-                                    where f.reacrutier = :recrutier and f.endDate > :nowDate )
+                                <c:where>
+                                    e.vacansyName like
+                                    (select
+                                        f.openPosition.vacansyName
+                                    from
+                                        itpearls_RecrutiesTasks f
+                                    where
+                                        f.reacrutier = :recrutier and
+                                        f.endDate > :nowDate and
+                                        f.openPosition.vacansyName like e.vacansyName
+                                    order by
+                                        f.startDate desc )
                                 </c:where>
                             </c:jpql>
                         </and>

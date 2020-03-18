@@ -128,22 +128,6 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                     .show();
         }
     }
-    
-    @Subscribe(target = Target.DATA_CONTEXT)
-    public void onPreCommit(DataContext.PreCommitEvent event) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat( "dd MMMM YYYY",
-                ruDateFormatSymbols );
-
-        // проверить, а вдруг вы уже подписаны на эту вакансию?
-        if( checkSubscribePosition() ) {
-            dialogs.createMessageDialog()
-                    .withCaption( "Внимание" )
-                    .withMessage( "Вы уже подписаны на вакансию " + openPositionField.getValue().getVacansyName() +
-                            "\n c " + dateFormat.format( startDateField.getValue() ) +
-                            " по " + dateFormat.format( endDateField.getValue() ) )
-                    .show();
-        }
-    }
 
     private static DateFormatSymbols ruDateFormatSymbols = new DateFormatSymbols(){
 
@@ -168,7 +152,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
         // если нет соответствия, значит нет еще подписки, значит можно подписаться,
         // если уже есть, то не надо подписываться
-        return countSubscrine != 0 ? true : false;
+        return countSubscrine > 1 ? true : false;
     }
 
     @Subscribe
@@ -203,4 +187,27 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
       this.openPosition = op;
       fromOpenPosition = true;
     }
+
+    @Subscribe("okButton")
+    private void onOkButtonClick(Button.ClickEvent event) {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat( "dd MMMM YYYY",
+                ruDateFormatSymbols );
+
+        // проверить, а вдруг вы уже подписаны на эту вакансию?
+        if( checkSubscribePosition() ) {
+            dialogs.createMessageDialog()
+                    .withCaption( "Внимание" )
+                    .withMessage( "Вы уже подписаны на вакансию " + openPositionField.getValue().getVacansyName() +
+                            "\n c " + dateFormat.format( startDateField.getValue() ) +
+                            " по " + dateFormat.format( endDateField.getValue() ) )
+                   .show();
+
+            closeWithDiscard();
+            // close(WINDOW_DISCARD_AND_CLOSE_ACTION);
+        } else
+            closeWithCommit();
+            // close(WINDOW_COMMIT_AND_CLOSE_ACTION);
+    }
+
 }
