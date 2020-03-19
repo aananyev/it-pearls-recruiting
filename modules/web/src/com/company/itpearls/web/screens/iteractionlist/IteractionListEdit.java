@@ -208,6 +208,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         .withCaption("Warnind!")
                         .withMessage("С кандидатом начат новый процесс. " +
                                 "Начните взаимодействие с ним с типом из группы \"001 Ресерчинг\"")
+                        .withModal( true )
                         .show();
             } else {
                 iteractionTypesLc.removeParameter("number");
@@ -232,6 +233,31 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             }),
                             new DialogAction(DialogAction.Type.NO))
                     .show();
+        }
+        // проверить - подписан ли ресерчер на это позицию
+        isUnsubscribedPosition( getEditedEntity().getVacancy() );
+    }
+
+    private void isUnsubscribedPosition( OpenPosition op ) {
+        Integer a = dataManager
+                .loadValue( "select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
+                        "where e.reacrutier = :recrutier and " +
+                        "e.openPosition = :openPosition and " +
+                        ":nowDate between e.startDate and e.endDate", Integer.class )
+                .parameter( "recrutier", userSession.getUser()  )
+                .parameter( "openPosition", op )
+                .parameter( "nowDate", new Date() )
+                .one();
+
+        if( a == 0 ) {
+            if( vacancyFiels.getValue() != null ) {
+                dialogs.createMessageDialog()
+                        .withCaption("ВНИМАНИЕ !")
+                        .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
+                                ".\nРекомендуем подписаться и вы будете получать обновления по ней.")
+                        .withModal(true)
+                        .show();
+            }
         }
     }
 
