@@ -416,4 +416,8 @@
     </view>
     <view entity="itpearls_FileType" name="fileType-view" extends="_local"/>
     <view entity="itpearls_SocialNetworkType" name="socialNetworkType-view" extends="_local"/>
+    <view entity="itpearls_SubscribeCandidateAction" name="subscribeCandidateAction-view" extends="_local">
+        <property name="candidate" view="_minimal"/>
+        <property name="subscriber" view="_minimal"/>
+    </view>
 </views>

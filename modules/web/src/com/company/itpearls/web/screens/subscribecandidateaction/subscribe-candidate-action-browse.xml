@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://browseCaption"
+        focusComponent="subscribeCandidateActionsTable"
+        messagesPack="com.company.itpearls.web.screens.subscribecandidateaction">
+    <data readOnly="true">
+        <collection id="subscribeCandidateActionsDc"
+                    class="com.company.itpearls.entity.SubscribeCandidateAction"
+                    view="subscribeCandidateAction-view">
+            <loader id="subscribeCandidateActionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_SubscribeCandidateAction e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="subscribeCandidateActionsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="subscribeCandidateActionsTable"
+                dataLoader="subscribeCandidateActionsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="subscribeCandidateActionsTable"
+                    width="100%"
+                    dataContainer="subscribeCandidateActionsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="candidate" groupAllowed="true" caption="mainMsg://msgCandidate"/>
+                <column id="startDate" caption="mainMsg://msgStartDate"/>
+                <column id="endDate" caption="mainMsg://msgEndDate"/>
+                <column id="subscriber" caption="mainMsg://msgRecrutier"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="subscribeCandidateActionsTable.create"/>
+                <button id="editBtn" action="subscribeCandidateActionsTable.edit"/>
+                <button id="removeBtn" action="subscribeCandidateActionsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

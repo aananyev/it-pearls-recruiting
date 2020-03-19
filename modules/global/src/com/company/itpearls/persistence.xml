@@ -27,5 +27,6 @@
         <class>com.company.itpearls.entity.SomeFiles</class>
         <class>com.company.itpearls.entity.FileType</class>
         <class>com.company.itpearls.entity.SocialNetworkType</class>
+        <class>com.company.itpearls.entity.SubscribeCandidateAction</class>
     </persistence-unit>
 </persistence>

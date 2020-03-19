@@ -1,0 +1,2 @@
+alter table ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION drop column START_DATE__U15341 cascade ;
+alter table ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION drop column END_DATE__U84104 cascade ;

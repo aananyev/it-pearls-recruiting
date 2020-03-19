@@ -209,8 +209,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 //            closeWithDiscard();
             close(WINDOW_DISCARD_AND_CLOSE_ACTION);
         } else
-//            closeWithCommit();
-            close(WINDOW_COMMIT_AND_CLOSE_ACTION);
+            closeWithCommit();
+//            close(WINDOW_COMMIT_AND_CLOSE_ACTION);
     }
 
 }

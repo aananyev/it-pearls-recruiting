@@ -1,10 +1,14 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.Iteraction;
+import com.company.itpearls.entity.SubscribeCandidateAction;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FluentValuesLoader;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.CheckBox;
+import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -29,6 +33,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CheckBox checkBoxOnWork;
     @Inject
     private Dialogs dialogs;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private GroupTable<JobCandidate> jobCandidatesTable;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -108,9 +116,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     public void onButtonSubscribeClick() {
-        dialogs.createMessageDialog()
-                .withCaption("Information")
-                .withMessage("Подписка на действия с кандидатом будет реализована позднее")
-                .show();
+        Screen subscribe = screenBuilders.editor(SubscribeCandidateAction.class, this )
+                .newEntity()
+                .withLaunchMode( OpenMode.DIALOG )
+                .withInitializer( data -> {
+                    data.setCandidate( jobCandidatesTable.getSingleSelected() );
+                    data.setSubscriber( userSession.getUser() );
+                })
+                .build();
+
+        subscribe.show();
     }
 }

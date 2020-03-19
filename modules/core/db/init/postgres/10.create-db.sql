@@ -530,3 +530,22 @@ create table ITPEARLS_SOCIAL_NETWORK_TYPE (
     primary key (ID)
 )^
 -- end ITPEARLS_SOCIAL_NETWORK_TYPE
+-- begin ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION
+create table ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    START_DATE date,
+    END_DATE date,
+    CANDIDATE_ID uuid,
+    SUBSCRIBER_ID uuid,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION

@@ -2,6 +2,7 @@
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <menu id="application-researching" insertBefore="application-hunting">
         <item screen="itpearls_RecrutiesTasks.browse"/>
+        <item screen="itpearls_SubscribeCandidateAction.browse"/>
     </menu>
     <menu id="application-hunting" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse"/>

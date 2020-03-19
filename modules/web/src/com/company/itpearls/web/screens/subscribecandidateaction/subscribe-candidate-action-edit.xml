@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.subscribecandidateaction">
+    <data>
+        <instance id="subscribeCandidateActionDc"
+                  class="com.company.itpearls.entity.SubscribeCandidateAction"
+                  view="subscribeCandidateAction-view">
+            <loader/>
+        </instance>
+        <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+            <loader id="candidatesLc">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="subscribersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
+            <loader id="subscribersLc">
+                <query>
+                    <![CDATA[select e from sec$User e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="subscribeCandidateActionDc" width="100%">
+            <column width="100%">
+                <groupBox caption="msg://msgSubscribe">
+                    <radioButtonGroup id="radioButtonGroupDates" caption="msg://msgChoise" required="true"/>
+                    <hbox spacing="true" width="100%">
+                        <dateField id="startDateField" property="startDate" width="50%" caption="mainMsg://msgStartDate"
+                                   dataContainer="subscribeCandidateActionDc" required="true"/>
+                        <dateField id="endDateField" property="endDate" width="50%" caption="mainMsg://msgEndDate"
+                                   dataContainer="subscribeCandidateActionDc" required="true"/>
+                    </hbox>
+                    <hbox spacing="true" width="100%">
+                        <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate"
+                                           width="100%" caption="mainMsg://msgCandidate"
+                                           dataContainer="subscribeCandidateActionDc" required="true"/>
+                        <lookupPickerField id="subscriberField" optionsContainer="subscribersDc" property="subscriber"
+                                           width="100%" caption="mainMsg://msgSubscriber"
+                                           dataContainer="subscribeCandidateActionDc" required="true"/>
+                    </hbox>
+                </groupBox>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+            <button id="okButton" caption="mainMsg://msgOK" icon="OK" invoke="onOkButtonClick"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

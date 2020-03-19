@@ -62,7 +62,8 @@ order by e.secondName, e.firstName]]>
                 <button id="createBtn" action="jobCandidatesTable.create"/>
                 <button id="editBtn" action="jobCandidatesTable.edit"/>
                 <button id="removeBtn" action="jobCandidatesTable.remove"/>
-                <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick"/>
+                <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick"
+                        icon="ENVELOPE"/>
             </buttonsPanel>
         </groupTable>
         <groupBox orientation="horizontal" spacing="true">
