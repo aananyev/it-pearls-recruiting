@@ -53,8 +53,8 @@ order by e.lastName, e.firstName]]>
             </column>
         </form>
         <hbox id="editActions" spacing="true">
-            <button id="windowExtendAndCloseButton" action="windowCommitAndClose" caption="msg://msgExtend"/>
-            <button id="okButton" action="windowCommitAndClose"/>
+            <button id="windowExtendAndCloseButton" caption="msg://msgExtend"/>
+            <button id="okButton" icon="OK" caption="msg://msgOK"/>
             <button action="windowClose"/>
         </hbox>
     </layout>

@@ -144,15 +144,17 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                 .loadValue( "select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
                     "where e.reacrutier = :recrutier and " +
                     "e.openPosition = :openPosition and " +
-                    "e.endDate > :nowDate", Integer.class )
-                .parameter( "recrutier", recrutiesTasksFieldUser.getValue() )
-                .parameter( "openPosition", openPositionField.getValue() )
+                    ":nowDate between e.startDate and e.endDate", Integer.class )
+//                .parameter( "recrutier", recrutiesTasksFieldUser.getValue() )
+                .parameter( "recrutier", getEditedEntity().getReacrutier() )
+                .parameter( "openPosition", getEditedEntity().getOpenPosition() )
+//                .parameter( "openPosition", openPositionField.getValue() )
                 .parameter( "nowDate", new Date() )
                 .one();
 
         // если нет соответствия, значит нет еще подписки, значит можно подписаться,
         // если уже есть, то не надо подписываться
-        return countSubscrine > 1 ? true : false;
+        return countSubscrine > 0 ? true : false;
     }
 
     @Subscribe
@@ -198,16 +200,17 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         if( checkSubscribePosition() ) {
             dialogs.createMessageDialog()
                     .withCaption( "Внимание" )
+                    .withModal( true )
                     .withMessage( "Вы уже подписаны на вакансию " + openPositionField.getValue().getVacansyName() +
                             "\n c " + dateFormat.format( startDateField.getValue() ) +
                             " по " + dateFormat.format( endDateField.getValue() ) )
                    .show();
 
-            closeWithDiscard();
-            // close(WINDOW_DISCARD_AND_CLOSE_ACTION);
+//            closeWithDiscard();
+            close(WINDOW_DISCARD_AND_CLOSE_ACTION);
         } else
-            closeWithCommit();
-            // close(WINDOW_COMMIT_AND_CLOSE_ACTION);
+//            closeWithCommit();
+            close(WINDOW_COMMIT_AND_CLOSE_ACTION);
     }
 
 }
