@@ -1,13 +1,15 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataComponents;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.event.FieldEvents;
 
 import javax.inject.Inject;
 
@@ -22,6 +24,12 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
     private CheckBox checkBoxShowOnlyMy;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private GroupTable<IteractionList> iteractionListsTable;
+    @Inject
+    private Button buttonCopy;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -49,6 +57,25 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private String iteractionListsTableIconProvider(IteractionList iteractionList) {
         return iteractionList.getIteractionType().getPic();
     }
-    
-    
+
+
+    public void onButtonCopyClick() {
+        screenBuilders.editor(iteractionListsTable)
+                .newEntity()
+                .withInitializer( data -> {
+                    if( iteractionListsTable.getSingleSelected() != null )
+                        data.setCandidate( iteractionListsTable.getSingleSelected().getCandidate() );
+                })
+                .build()
+                .show();
+    }
+
+    @Subscribe("iteractionListsTable")
+    public void onIteractionListsTableSelection(Table.SelectionEvent<IteractionList> event) {
+        if( iteractionListsTable.isFocusable() )
+            buttonCopy.setEnabled( true );
+        else
+            buttonCopy.setEnabled( false );
+        
+    }
 }
