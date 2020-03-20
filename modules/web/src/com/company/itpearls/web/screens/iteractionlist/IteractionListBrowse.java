@@ -12,6 +12,8 @@ import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.event.FieldEvents;
 
 import javax.inject.Inject;
+import javax.management.relation.Role;
+import java.util.List;
 
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
@@ -30,6 +32,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private GroupTable<IteractionList> iteractionListsTable;
     @Inject
     private Button buttonCopy;
+    @Inject
+    private Button buttonExcel;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -58,6 +62,23 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         return iteractionList.getIteractionType().getPic();
     }
 
+    @Subscribe
+    public void onInit(InitEvent event) {
+        // закрыть кнопку экспорта для неменеджероа
+        List roles = userSession.getUser().getUserRoles();
+        Boolean ex = false;
+
+        for( Object r : roles ) {
+            if( r.equals( "Manager" ) )
+                ex = true;
+        }
+
+        if( !ex )
+            buttonCopy.setVisible( false );
+
+/*        if( !userSession.getUser().getUserRoles().contains( "Manager" ) )
+            buttonExcel.setVisible( false ); */
+    }
 
     public void onButtonCopyClick() {
         screenBuilders.editor(iteractionListsTable)

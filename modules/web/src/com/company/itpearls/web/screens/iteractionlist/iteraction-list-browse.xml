@@ -35,6 +35,7 @@
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
+                <action id="excel" type="excel"/>
             </actions>
             <columns>
                 <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
@@ -51,9 +52,10 @@
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
                 <button id="createBtn" action="iteractionListsTable.create"/>
+                <button id="buttonCopy" caption="msg://msgCopyButton" invoke="onButtonCopyClick" icon="COPY"/>
                 <button id="editBtn" action="iteractionListsTable.edit"/>
                 <button id="removeBtn" action="iteractionListsTable.remove"/>
-                <button id="buttonCopy" caption="msg://msgCopyButton" invoke="onButtonCopyClick" icon="COPY"/>
+                <button id="buttonExcel" action="iteractionListsTable.excel" caption="mainMsg://msgExcelExport" icon="FILE_EXCEL_O"/>
             </buttonsPanel>
         </groupTable>
         <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
