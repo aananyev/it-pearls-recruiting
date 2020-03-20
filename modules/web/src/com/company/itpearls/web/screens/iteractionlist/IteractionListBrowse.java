@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
+import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -8,11 +9,19 @@ import com.haulmont.cuba.gui.model.DataComponents;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.event.FieldEvents;
 
 import javax.inject.Inject;
 import javax.management.relation.Role;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @UiController("itpearls_IteractionList.browse")
@@ -33,10 +42,14 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Inject
     private Button buttonCopy;
     @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
     private Button buttonExcel;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        buttonExcel.setVisible( isRole( userSession.getUser(), "Manager" ) );
+
         if( userSession.getUser().getGroup().getName().equals("Стажер") ) {
             iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
 
@@ -62,24 +75,6 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         return iteractionList.getIteractionType().getPic();
     }
 
-    @Subscribe
-    public void onInit(InitEvent event) {
-        // закрыть кнопку экспорта для неменеджероа
-        List roles = userSession.getUser().getUserRoles();
-        Boolean ex = false;
-
-        for( Object r : roles ) {
-            if( r.equals( "Manager" ) )
-                ex = true;
-        }
-
-        if( !ex )
-            buttonCopy.setVisible( false );
-
-/*        if( !userSession.getUser().getUserRoles().contains( "Manager" ) )
-            buttonExcel.setVisible( false ); */
-    }
-
     public void onButtonCopyClick() {
         screenBuilders.editor(iteractionListsTable)
                 .newEntity()
@@ -98,5 +93,19 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         else
             buttonCopy.setEnabled( false );
         
+    }
+
+    private Boolean isRole(User user, String role ) {
+        // если роль - ресерчер, то автоматически вставить себя
+        Collection<String> s = userSessionSource.getUserSession().getRoles();
+        Boolean c = false;
+        // установить поле рекрутера
+        for( String a : s ) {
+            if (a.contains(role)) {
+                c = true;
+                break;
+            }
+        }
+        return c;
     }
 }
