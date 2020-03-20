@@ -1,8 +1,10 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.support.WebExchangeDataBinder;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 
 @UiController("itpearls_IteractionList.edit")
@@ -69,6 +72,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private LookupPickerField<User> recrutierField;
     @Inject
     private LookupPickerField<JobCandidate> candidateField;
+    @Inject
+    private EmailService emailService;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -353,6 +360,37 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             getEditedEntity().getCandidate().setStatus(i);
         }
+
+        sendMessages();
+    }
+
+    private void sendMessages() {
+        LoadContext<SubscribeCandidateAction> loadContext = LoadContext.create(SubscribeCandidateAction.class)
+                .setQuery( LoadContext.createQuery("select e from itpearls_SubscribeCandidateAction e " +
+                        "where e.candidate = :candidate and " +
+                        "e.subscriber = :subscriber and " +
+                        ":curDate between e.startDate and e.endDate" )
+                .setParameter( "candidate", candidateField.getValue() )
+                .setParameter( "subscriber", userSession.getUser() )
+                .setParameter( "curDate", new Date() ) )
+                .setView( "subscribeCandidateAction-view" );
+
+        if( dataManager.getCount( loadContext )  != 0 ) {
+            EmailInfo emailInfo = new EmailInfo(userSession.getUser().getEmail(),
+                    candidateField.getValue().getFullName(), null,
+                    "com/company/itpearls/templates/iteraction.html",
+                    Collections.singletonMap("IteractionList", getEditedEntity()));
+
+            emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
+            emailService.sendEmailAsync(emailInfo);
+        }
+            // высплывающее сообщение
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Новое взаимодействие с кандидатом" )
+                .withDescription( getEditedEntity().getRecrutierName() + " - " +
+                        getEditedEntity().getIteractionType().getIterationName() )
+                .show();
     }
 
     private boolean yourCandidate() {

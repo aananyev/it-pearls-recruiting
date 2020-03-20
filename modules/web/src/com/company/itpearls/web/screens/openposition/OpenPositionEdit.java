@@ -147,6 +147,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     null, "com/company/itpearls/templates/create_new_pos.html",
                     Collections.singletonMap("openPosition", openPosition));
 
+            emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
             emailService.sendEmailAsync(emailInfo);
             // высплывающее сообщение
             notifications.create(Notifications.NotificationType.TRAY)
