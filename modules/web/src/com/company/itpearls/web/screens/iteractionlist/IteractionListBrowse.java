@@ -78,9 +78,11 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     public void onButtonCopyClick() {
         screenBuilders.editor(iteractionListsTable)
                 .newEntity()
+                .withScreenClass( IteractionListEdit.class )
                 .withInitializer( data -> {
                     if( iteractionListsTable.getSingleSelected() != null )
                         data.setCandidate( iteractionListsTable.getSingleSelected().getCandidate() );
+//                        data.setVacancy( iteractionListsTable.getSingleSelected().getVacancy() );
                 })
                 .build()
                 .show();

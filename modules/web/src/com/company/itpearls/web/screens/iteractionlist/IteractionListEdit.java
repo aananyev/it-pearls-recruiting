@@ -317,18 +317,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 // сколько записей есть по этому кандидату
                 if (getIteractionCount() != 0) {
                     // ввели кандидата - предложи скопировать предыдущую запись
-                    if( !isCopyButton ) {
-                        dialogs.createOptionDialog()
-                                .withCaption("Warning")
-                                .withMessage("Скопировать предыдущую запись кандидата?")
-                                .withActions(
-                                        new DialogAction(DialogAction.Type.YES,
-                                                Action.Status.PRIMARY).withHandler(e -> {
-                                            this.copyPrevionsItems();
-                                        }),
-                                        new DialogAction(DialogAction.Type.NO)
-                                )
-                                .show();
+                    if( !isCopyButton && vacancyFiels.getValue() == null ) {
+                            dialogs.createOptionDialog()
+                                    .withCaption("Warning")
+                                    .withMessage("Скопировать предыдущую запись кандидата?")
+                                    .withActions(
+                                            new DialogAction(DialogAction.Type.YES,
+                                                    Action.Status.PRIMARY).withHandler(e -> {
+                                                this.copyPrevionsItems();
+                                            }),
+                                            new DialogAction(DialogAction.Type.NO)
+                                    )
+                                    .show();
                     }
                 }
             }
@@ -353,6 +353,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        sendMessages();
+    }
+
+    @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         if( iteractionTypeField.getValue().getNumber() != null ) {
             String s = getEditedEntity().getIteractionType().getNumber();
@@ -360,8 +365,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             getEditedEntity().getCandidate().setStatus(i);
         }
-
-        sendMessages();
     }
 
     private void sendMessages() {
@@ -388,7 +391,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             // высплывающее сообщение
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Новое взаимодействие с кандидатом" )
-                .withDescription( getEditedEntity().getRecrutierName() + " - " +
+                .withDescription( getEditedEntity().getCandidate() + ": " +
                         getEditedEntity().getIteractionType().getIterationName() )
                 .show();
     }
