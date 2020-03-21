@@ -11,6 +11,13 @@
             <loader id="subscribeCandidateActionsDl">
                 <query>
                     <![CDATA[select e from itpearls_SubscribeCandidateAction e]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e.subscriber = :subscriber
+                            </c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -33,10 +40,12 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <group>
+                    <column id="subscriber" caption="mainMsg://msgRecrutier"/>
+                </group>
                 <column id="candidate" groupAllowed="true" caption="mainMsg://msgCandidate"/>
                 <column id="startDate" caption="mainMsg://msgStartDate"/>
                 <column id="endDate" caption="mainMsg://msgEndDate"/>
-                <column id="subscriber" caption="mainMsg://msgRecrutier"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

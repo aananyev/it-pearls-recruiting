@@ -7,5 +7,14 @@
     <context:component-scan base-package="com.company.itpearls"/>
     
     <gui:screens base-packages="com.company.itpearls.web"/>
+    <bean id="itpearls_proxyCreator" class="com.haulmont.cuba.web.sys.remoting.WebRemoteProxyBeanCreator">
+        <property name="serverSelector" ref="cuba_ServerSelector"/>
+        <property name="remoteServices">
+            <map>
+                <entry key="itpearls_GetUserRoleService" value="com.company.itpearls.service.GetUserRoleService"/>
+                <entry key="itpearls_GetRoleService" value="com.company.itpearls.service.GetRoleService"/>
+            </map>
+        </property>
+    </bean>
 
 </beans>
