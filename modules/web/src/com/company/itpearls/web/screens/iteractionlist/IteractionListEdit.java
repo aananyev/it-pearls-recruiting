@@ -20,6 +20,8 @@ import javax.inject.Named;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @UiController("itpearls_IteractionList.edit")
 @UiDescriptor("iteraction-list-edit.xml")
@@ -385,6 +387,19 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     Collections.singletonMap("IteractionList", getEditedEntity()));
 
             emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
+            emailInfo.setTemplateParameters( Collections.singletonMap("iteractionType",
+                    getEditedEntity().getIteractionType().getIterationName() ) );
+            emailInfo.setTemplateParameters( Collections.singletonMap("candidate",
+                    candidateField.getValue().getFullName() ) );
+            emailInfo.setTemplateParameters( Collections.singletonMap("comment",
+                    getEditedEntity().getComment() ) );
+            emailInfo.setTemplateParameters( Collections.singletonMap("vacancy",
+                    getEditedEntity().getVacancy().getVacansyName() ) );
+            emailInfo.setTemplateParameters( Collections.singletonMap("project",
+                    getEditedEntity().getProject().getProjectName() ) );
+            emailInfo.setTemplateParameters( Collections.singletonMap("dateIteraction",
+                    getEditedEntity().getDateIteraction().toString() ) );
 
             emailService.sendEmailAsync(emailInfo);
         }
