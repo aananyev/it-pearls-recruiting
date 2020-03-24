@@ -51,6 +51,7 @@
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
+                <action id="excel" type="excel"/>
             </actions>
             <columns>
                 <column id="positionType.positionRuName" collapsed="true"/>
@@ -70,6 +71,7 @@
                 <button id="editBtn" action="openPositionsTable.edit"/>
                 <button id="removeBtn" action="openPositionsTable.remove"/>
                 <button id="buttonSubscribe" caption="msg://mshSubscibe" invoke="subscribePosition" icon="BELL"/>
+                <button id="buttonExcel" action="openPositionsTable.excel" icon="EXCEL_ACTION"/>
             </buttonsPanel>
         </table>
         <hbox spacing="true">

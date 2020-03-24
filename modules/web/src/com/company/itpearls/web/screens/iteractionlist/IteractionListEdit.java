@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.iteractionlist;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.GetUserRoleService;
+import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
@@ -275,18 +276,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         .withCaption("ВНИМАНИЕ !")
                         .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
                                 ".\nПодписаться?")
-                        .withActions( new DialogAction(DialogAction.Type.YES,
-                                        Action.Status.PRIMARY).withHandler(e -> {
+                        .withActions( new DialogAction(DialogAction.Type.YES).withHandler(e -> {
+                                            screenBuilders.editor( RecrutiesTasks.class, this )
+                                                    .newEntity()
+                                                    .withScreenClass( RecrutiesTasksEdit.class )
+                                                    .withLaunchMode( OpenMode.DIALOG )
+                                                    .withInitializer( data -> {
+                                                       data.setReacrutier( userSession.getUser() );
+                                                       data.setOpenPosition( op );
+                                                       data.setStartDate( new Date() );
+                                                       data.setEndDate( new Date( System.currentTimeMillis() +
+                                                               1000L * 3600L * 24L * 7L ) );
+                                                    })
+                                                    .build()
+                                                    .show();
                                 }),
-                                new DialogAction(DialogAction.Type.NO) )
+                                new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY) )
                         .show();
-
-                /* dialogs.createMessageDialog()
-                        .withCaption("ВНИМАНИЕ !")
-                        .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
-                                ".\nРекомендуем подписаться и вы будете получать обновления по ней.")
-                        .withModal(true)
-                        .show(); */
             }
         }
     }

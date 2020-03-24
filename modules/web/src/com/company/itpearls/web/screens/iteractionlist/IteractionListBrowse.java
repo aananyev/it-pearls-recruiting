@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
+import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
@@ -34,10 +35,13 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private UserSessionSource userSessionSource;
     @Inject
     private Button buttonExcel;
+    @Inject
+    private GetRoleService getRoleService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        buttonExcel.setVisible( isRole( userSession.getUser(), "Manager" ) );
+        // buttonExcel.setVisible( isRole( userSession.getUser(), "Manager" ) );
+        buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
 
         if( userSession.getUser().getGroup().getName().equals("Стажер") ) {
             iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
@@ -92,7 +96,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         
     }
 
-    private Boolean isRole(User user, String role ) {
+    /* private Boolean isRole(User user, String role ) {
         // если роль - ресерчер, то автоматически вставить себя
         Collection<String> s = userSessionSource.getUserSession().getRoles();
         Boolean c = false;
@@ -104,5 +108,5 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             }
         }
         return c;
-    }
+    } */
 }

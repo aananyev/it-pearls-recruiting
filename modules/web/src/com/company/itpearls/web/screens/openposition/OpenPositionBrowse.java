@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.entity.RecrutiesTasks;
+import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.ValueLoadContext;
@@ -43,9 +44,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private CheckBox checkBoxOnlyMySubscribe;
     @Inject
     private UserSession userSession;
+    @Inject
+    private com.haulmont.cuba.gui.components.Button buttonExcel;
+    @Inject
+    private GetRoleService getRoleService;
 
     @Subscribe
     protected void onInit(InitEvent event) {
+        buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
+
         openPositionsTable.setStyleProvider((openPositions, property) -> {
             Integer s = dataManager.loadValue("select count(e.reacrutier) " +
                     "from itpearls_RecrutiesTasks e " +

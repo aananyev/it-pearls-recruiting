@@ -52,7 +52,7 @@ order by e.lastName, e.firstName]]>
                           caption="msg://msgSubscribe"/>
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button id="windowExtendAndCloseButton" caption="msg://msgExtend"/>
             <button id="okButton" icon="OK" caption="msg://msgOK"/>
             <button action="windowClose"/>

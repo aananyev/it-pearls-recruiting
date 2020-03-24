@@ -12,6 +12,13 @@
         <item screen="itpearls_SocialNetworkURLs.browse"/>
         <item screen="itpearls_JobHistory.browse" openType="NEW_TAB"/>
     </menu>
+    <menu id="application-project" insertAfter="application-hunting">
+        <item screen="itpearls_Person.browse"/>
+        <item screen="itpearls_CompanyGroup.browse"/>
+        <item screen="itpearls_CompanyDepartament.browse"/>
+        <item screen="itpearls_Project.browse"/>
+        <item screen="itpearls_Company.browse"/>
+    </menu>
     <menu id="application-hadbook" insertBefore="application-project">
         <item screen="itpearls_Iteraction._tree.browse"/>
         <item screen="itpearls_Specialisation.browse"/>
@@ -24,13 +31,6 @@
         <item screen="itpearls_FileType.browse"/>
         <item screen="itpearls_SomeFiles.browse"/>
         <item screen="itpearls_SocialNetworkType.browse"/>
-    </menu>
-    <menu id="application-project">
-        <item screen="itpearls_Person.browse"/>
-        <item screen="itpearls_CompanyGroup.browse"/>
-        <item screen="itpearls_CompanyDepartament.browse"/>
-        <item screen="itpearls_Project.browse"/>
-        <item screen="itpearls_Company.browse"/>
     </menu>
     <item screen="itpearls_CheckCandidate.browse" insertAfter="application-project" openType="DIALOG"/>
 </menu-config>
