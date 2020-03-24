@@ -1,6 +1,8 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.service.GetUserRoleService;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
@@ -51,8 +53,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected User lastUser = null;
     protected Date lastIteraction;
     protected JobCandidate candidate;
-    private static Boolean isCopyButton;
-    private Boolean transferFlag;
+    private Boolean transferFlag = false;
+
 
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
@@ -78,6 +80,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private EmailService emailService;
     @Inject
     private Notifications notifications;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private GetRoleService getRoleService;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -91,7 +99,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe("candidateField")
     public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
         // запомним кандидата
-       candidate = getEditedEntity().getCandidate(); 
+        candidate = candidateField.getValue();
+        // предложить копирование если до этого было взаимодействие и узнать чей это был кандидат
+        copyAndCheckCandidate();
     }
 
     private void changeField() {
@@ -244,7 +254,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .show();
         }
         // проверить - подписан ли ресерчер на это позицию
-        isUnsubscribedPosition( getEditedEntity().getVacancy() );
+        if( getRoleService.isUserRoles( userSession.getUser(), "Researcher" ) )
+            isUnsubscribedPosition( getEditedEntity().getVacancy() );
     }
 
     private void isUnsubscribedPosition( OpenPosition op ) {
@@ -260,23 +271,35 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         if( a == 0 ) {
             if( vacancyFiels.getValue() != null ) {
-                dialogs.createMessageDialog()
+                dialogs.createOptionDialog()
+                        .withCaption("ВНИМАНИЕ !")
+                        .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
+                                ".\nПодписаться?")
+                        .withActions( new DialogAction(DialogAction.Type.YES,
+                                        Action.Status.PRIMARY).withHandler(e -> {
+                                }),
+                                new DialogAction(DialogAction.Type.NO) )
+                        .show();
+
+                /* dialogs.createMessageDialog()
                         .withCaption("ВНИМАНИЕ !")
                         .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
                                 ".\nРекомендуем подписаться и вы будете получать обновления по ней.")
                         .withModal(true)
-                        .show();
+                        .show(); */
             }
         }
     }
 
     private Boolean isClosedVacancy() {
-        Boolean r;
+        Boolean r = true;
+        Boolean oc;
 
-        if( vacancyFiels.getValue() != null )
-            r = vacancyFiels.getValue().getOpenClose();
-        else
-            r = false;
+            if (vacancyFiels.getValue() != null) {
+                // if( !PersistenceHelper.isDetached( getEditedEntity().getVacancy() ) )
+                    r = getEditedEntity().getVacancy().getOpenClose();
+            } else
+                r = false;
 
         return r == null ? false : r;
     }
@@ -285,7 +308,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onProjectFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
         if( vacancyFiels.getValue() != null )
             if( vacancyFiels.getValue().getCompanyDepartament() != null )
-                companyDepartmentField.setValue( vacancyFiels.getValue().getCompanyDepartament() );
+//                companyDepartmentField.setValue( vacancyFiels.getValue().getCompanyDepartament() );
+            companyDepartmentField.setValue( projectField.getValue().getProjectDepartment() );
     }
 
 
@@ -312,25 +336,25 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         return currentUser;
     }
 
-    @Subscribe("candidateField")
-    public void onCandidateFieldValueChange1(HasValue.ValueChangeEvent<JobCandidate> event) {
+    void copyAndCheckCandidate() {
         if( yourCandidate() ) {
             if( PersistenceHelper.isNew( getEditedEntity() ) ) {
                 // сколько записей есть по этому кандидату
                 if (getIteractionCount() != 0) {
                     // ввели кандидата - предложи скопировать предыдущую запись
-                    if( !isCopyButton && vacancyFiels.getValue() == null ) {
-                            dialogs.createOptionDialog()
-                                    .withCaption("Warning")
-                                    .withMessage("Скопировать предыдущую запись кандидата?")
-                                    .withActions(
-                                            new DialogAction(DialogAction.Type.YES,
-                                                    Action.Status.PRIMARY).withHandler(e -> {
-                                                this.copyPrevionsItems();
-                                            }),
-                                            new DialogAction(DialogAction.Type.NO)
-                                    )
-                                    .show();
+                    OpenPosition op = getEditedEntity().getVacancy();
+                    if ( op == null ) {
+                        dialogs.createOptionDialog()
+                                .withCaption("Warning")
+                                .withMessage("Скопировать предыдущую запись кандидата?")
+                                .withActions(
+                                        new DialogAction(DialogAction.Type.YES,
+                                                Action.Status.PRIMARY).withHandler(e -> {
+                                            this.copyPrevionsItems();
+                                        }),
+                                        new DialogAction(DialogAction.Type.NO)
+                                )
+                                .show();
                     }
                 }
             }
@@ -355,11 +379,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     @Subscribe
-    public void onAfterClose(AfterCloseEvent event) {
-        sendMessages();
-    }
-
-    @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         if( iteractionTypeField.getValue().getNumber() != null ) {
             String s = getEditedEntity().getIteractionType().getNumber();
@@ -367,6 +386,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             getEditedEntity().getCandidate().setStatus(i);
         }
+
+        sendMessages();
     }
 
     private void sendMessages() {
@@ -384,14 +405,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             EmailInfo emailInfo = new EmailInfo(userSession.getUser().getEmail(),
                     candidateField.getValue().getFullName(), null,
                     "com/company/itpearls/templates/iteraction.html",
-                    Collections.singletonMap("IteractionList", getEditedEntity()));
+                    Collections.singletonMap( "IteractionList", getEditedEntity() ) );
 
             emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
+            String candidate = candidateField.getValue().getFullName();
+
             emailInfo.setTemplateParameters( Collections.singletonMap("iteractionType",
                     getEditedEntity().getIteractionType().getIterationName() ) );
-            emailInfo.setTemplateParameters( Collections.singletonMap("candidate",
-                    candidateField.getValue().getFullName() ) );
+//            emailInfo.setTemplateParameters( Collections.singletonMap("candidate",
+//                    candidate ) );
             emailInfo.setTemplateParameters( Collections.singletonMap("comment",
                     getEditedEntity().getComment() ) );
             emailInfo.setTemplateParameters( Collections.singletonMap("vacancy",
@@ -426,7 +449,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     "(select max(f.numberIteraction) " +
                     "from itpearls_IteractionList f " +
                     "where f.candidate = :candidate)", BigDecimal.class )
-                    .parameter( "candidate", getEditedEntity().getCandidate() )
+                    .parameter( "candidate", candidateField.getValue() )
                     .one();
         } catch ( IllegalStateException e) {
             // не было взаимодействий с кандидатом
@@ -584,7 +607,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onInit( InitEvent event ) {
-        isCopyButton = false;
         // изначально предполагаем, что это продолжение проекта
         newProject = false;
         // вся сортировка в поле IteractionType
@@ -596,19 +618,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         addDate.setVisible( false );
     }
 
-    @Inject
-    private ScreenBuilders screenBuilders;
-    @Inject
-    private Metadata metadata;
-
-    public void callActionEntity() { /*
-        ExchangeBean exchangeBean = new ExchangeBean();
-        exchangeBean.setCandidate( candidateField.getValue() );
-        exchangeBean.setOpenPosition( vacancyFiels.getValue() );
-
-        ExchangeData    exchange = new ExchangeData();
-        exchange.setCandidate( candidateField.getValue() );
-        exchange.setOpenPosition( vacancyFiels.getValue() ); */
+    public void callActionEntity() {
 
         String calledClass = iteractionTypeField.getValue().getCallClass();
         // еслп установлено разрешение в Iteraction показать кнопку и установить на ней надпсит
@@ -635,11 +645,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         String classIL = "itpearls_" + getEditedEntity().getClass().getSimpleName() + ".edit";
 
         closeWithCommit();
-        isCopyButton = true;
 
         screenBuilders.editor( IteractionList.class, this )
                 .newEntity()
-                .withScreenId( classIL )
+                // .withScreenId( classIL )
+                .withScreenClass( IteractionListEdit.class )
                 .withLaunchMode( OpenMode.NEW_TAB )
                 .withInitializer( e -> {
                     e.setCandidate(this.getEditedEntity().getCandidate());
@@ -648,7 +658,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 })
                 .build()
                 .show();
+    }
 
-        isCopyButton = false;
+    public void setTransferFlag( Boolean flag ) {
+        transferFlag = flag;
+    }
+
+    public Boolean getTransferFlag() {
+        return transferFlag;
     }
 }

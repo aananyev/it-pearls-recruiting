@@ -3,26 +3,15 @@ package com.company.itpearls.web.screens.iteractionlist;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataComponents;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import com.vaadin.event.FieldEvents;
 
 import javax.inject.Inject;
-import javax.management.relation.Role;
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
@@ -76,16 +65,22 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     }
 
     public void onButtonCopyClick() {
-        screenBuilders.editor(iteractionListsTable)
+        Screen screen = screenBuilders.editor(iteractionListsTable)
                 .newEntity()
-                .withScreenClass( IteractionListEdit.class )
                 .withInitializer( data -> {
-                    if( iteractionListsTable.getSingleSelected() != null )
-                        data.setCandidate( iteractionListsTable.getSingleSelected().getCandidate() );
-//                        data.setVacancy( iteractionListsTable.getSingleSelected().getVacancy() );
+                    if( iteractionListsTable.getSingleSelected() != null ) {
+
+                        data.setCandidate( iteractionListsTable.getSingleSelected().getCandidate());
+                        data.setVacancy( iteractionListsTable.getSingleSelected().getVacancy() );
+                        data.setCompanyDepartment( iteractionListsTable.getSingleSelected().getCompanyDepartment() );
+                        data.setProject( iteractionListsTable.getSingleSelected().getProject() );
+                    }
                 })
-                .build()
-                .show();
+                .withScreenClass( IteractionListEdit.class )
+                .withLaunchMode( OpenMode.THIS_TAB )
+                .build();
+
+                screen.show();
     }
 
     @Subscribe("iteractionListsTable")

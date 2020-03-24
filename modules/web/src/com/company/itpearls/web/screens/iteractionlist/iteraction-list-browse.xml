@@ -47,6 +47,8 @@
                 <column id="dateIteraction" caption="msg://msgDate">
                     <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                 </column>
+                <column id="project" visible="false"/>
+                <column id="companyDepartment"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
