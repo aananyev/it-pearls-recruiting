@@ -40,7 +40,6 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        // buttonExcel.setVisible( isRole( userSession.getUser(), "Manager" ) );
         buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
 
         if( userSession.getUser().getGroup().getName().equals("Стажер") ) {

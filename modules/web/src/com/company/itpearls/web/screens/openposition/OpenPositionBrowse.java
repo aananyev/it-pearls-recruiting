@@ -51,8 +51,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
-
         openPositionsTable.setStyleProvider((openPositions, property) -> {
             Integer s = dataManager.loadValue("select count(e.reacrutier) " +
                     "from itpearls_RecrutiesTasks e " +
@@ -79,6 +77,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         checkBoxOnlyOpenedPosition.setValue(true); // только открытые позиции
+        buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
 
         setSubcribersFilter();
 
