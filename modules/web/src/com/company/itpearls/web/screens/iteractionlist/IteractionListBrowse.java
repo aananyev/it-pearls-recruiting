@@ -1,7 +1,10 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
+import com.company.itpearls.BeanNotificationEvent;
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -10,9 +13,12 @@ import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import org.junit.platform.commons.logging.LoggerFactory;
+import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
@@ -37,6 +43,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private Button buttonExcel;
     @Inject
     private GetRoleService getRoleService;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -95,17 +103,17 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         
     }
 
-    /* private Boolean isRole(User user, String role ) {
-        // если роль - ресерчер, то автоматически вставить себя
-        Collection<String> s = userSessionSource.getUserSession().getRoles();
-        Boolean c = false;
-        // установить поле рекрутера
-        for( String a : s ) {
-            if (a.contains(role)) {
-                c = true;
-                break;
-            }
-        }
-        return c;
-    } */
+    @EventListener
+    public void onUiNotificationEvent(UiNotificationEvent event) {
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withDescription( event.getMessage() )
+                .withCaption("WARNING")
+                .show();
+    }
+
+    // screens do not receive non-UI events!
+    @EventListener
+    public void onBeanNotificationEvent(BeanNotificationEvent event) {
+        throw new IllegalStateException("Received " + event);
+    }
 }

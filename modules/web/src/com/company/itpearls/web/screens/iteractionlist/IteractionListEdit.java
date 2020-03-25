@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
+import com.company.itpearls.BeanNotificationEvent;
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.GetUserRoleService;
@@ -16,6 +18,7 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 
 import javax.inject.Inject;
@@ -710,5 +713,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .build()
                     .show();
         }
+    }
+    @EventListener
+    public void onUiNotificationEvent(UiNotificationEvent event) {
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withDescription( event.getMessage() )
+                .withCaption("WARNING")
+                .show();
+    }
+
+    // screens do not receive non-UI events!
+    @EventListener
+    public void onBeanNotificationEvent(BeanNotificationEvent event) {
+        throw new IllegalStateException("Received " + event);
     }
 }

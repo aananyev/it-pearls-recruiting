@@ -1,10 +1,13 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.BeanNotificationEvent;
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.SubscribeCandidateAction;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FluentValuesLoader;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.CheckBox;
@@ -15,6 +18,7 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.security.global.UserSession;
+import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import java.util.Date;
@@ -38,6 +42,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private ScreenBuilders screenBuilders;
     @Inject
     private GroupTable<JobCandidate> jobCandidatesTable;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -88,7 +94,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         if( s != null ) {
             switch ( s ) {
                 case 0:
-                    break;
+                    return "icons/question-white.png";
                 case 1:
                     return "icons/resume-red.png";
                 case 2:
@@ -103,7 +109,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 case 8:
                 case 9:
                 case 10:
-                    return "icons/case-closed.png";
+                    return "icons/recruiting.png";
                 default:
                     return "";
             }
@@ -121,21 +127,30 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         // если только имя и отчество - красный сигнал светофора
         // если имя, день рождения и один из контактов - желтый
         // если больше двух контактов - зеленый, если нет др - все равно желтый
-        if( ( jobCandidate.getEmail() != null && jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null ) ||
+        if( ( ( jobCandidate.getEmail() != null && jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null ) ||
                 ( jobCandidate.getEmail() != null && jobCandidate.getPhone() != null ) ||
                 ( jobCandidate.getEmail() != null && jobCandidate.getSkypeName() != null ) ||
-                ( jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null ) &&
-        jobCandidate.getBirdhDate() != null )
+                ( jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null ) ) &&
+                jobCandidate.getBirdhDate() != null ) {
             return 3;
-        else
-            if( jobCandidate.getBirdhDate() != null &&
-                    ( jobCandidate.getPhone() != null ||
-                            jobCandidate.getEmail() != null ||
-                            jobCandidate.getSkypeName() != null ) )
+        } else {
+            if (jobCandidate.getPhone() != null ||
+                    jobCandidate.getEmail() != null ||
+                    jobCandidate.getSkypeName() != null) {
                 return 2;
-            else
-                return 1;
+            } else {
+                if ( jobCandidate.getFirstName() == null ||
+                        jobCandidate.getMiddleName() == null ||
+                        jobCandidate.getCityOfResidence() == null ||
+                        jobCandidate.getCurrentCompany() == null ||
+                        jobCandidate.getPersonPosition() == null ||
+                        jobCandidate.getPositionCountry() == null ) {
+                    return 0;
+                }
+            }
+        }
 
+        return 0;
     }
 
     public void onButtonSubscribeClick() {
@@ -149,5 +164,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withOpenMode( OpenMode.DIALOG )
                 .build()
                 .show();
+    }
+
+    @EventListener
+    public void onUiNotificationEvent(UiNotificationEvent event) {
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withDescription( event.getMessage() )
+                .withCaption("WARNING")
+                .show();
+    }
+
+    // screens do not receive non-UI events!
+    @EventListener
+    public void onBeanNotificationEvent(BeanNotificationEvent event) {
+        throw new IllegalStateException("Received " + event);
     }
 }

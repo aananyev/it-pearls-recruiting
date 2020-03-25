@@ -1,10 +1,13 @@
 package com.company.itpearls.web.screens.openposition;
 
+import com.company.itpearls.BeanNotificationEvent;
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.ValueLoadContext;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.actions.list.CreateAction;
@@ -17,6 +20,7 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.security.global.UserSession;
+import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -48,6 +52,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private com.haulmont.cuba.gui.components.Button buttonExcel;
     @Inject
     private GetRoleService getRoleService;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -156,6 +162,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                .build();
 
        opScreen.show();
+    }
+
+    @EventListener
+    public void onUiNotificationEvent(UiNotificationEvent event) {
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withDescription( event.getMessage() )
+                .withCaption("WARNING")
+                .show();
+    }
+
+    // screens do not receive non-UI events!
+    @EventListener
+    public void onBeanNotificationEvent(BeanNotificationEvent event) {
+        throw new IllegalStateException("Received " + event);
     }
 }
 

@@ -1,5 +1,8 @@
 package com.company.itpearls.web.screens.candidatecv;
 
+import com.company.itpearls.BeanNotificationEvent;
+import com.company.itpearls.UiNotificationEvent;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -7,6 +10,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -23,6 +27,8 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
     private CheckBox checkBoxSetOnlyMy;
     @Inject
     private UserSession userSession;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -61,5 +67,19 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
                 return "icons/resume-red.png";
             }
         }
+    }
+
+    @EventListener
+    public void onUiNotificationEvent(UiNotificationEvent event) {
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withDescription( event.getMessage() )
+                .withCaption("WARNING")
+                .show();
+    }
+
+    // screens do not receive non-UI events!
+    @EventListener
+    public void onBeanNotificationEvent(BeanNotificationEvent event) {
+        throw new IllegalStateException("Received " + event);
     }
 }

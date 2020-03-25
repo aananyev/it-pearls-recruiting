@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.candidatecv;
 
+import com.company.itpearls.BeanNotificationEvent;
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.SomeFiles;
@@ -22,6 +24,8 @@ import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.web.AppUI;
+import org.springframework.context.event.EventListener;
+
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -261,5 +265,19 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         someFilesesDl.setParameter( "candidate", candidateField.getValue() );
 
         someFilesesDl.load();
+    }
+
+    @EventListener
+    public void onUiNotificationEvent(UiNotificationEvent event) {
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withDescription( event.getMessage() )
+                .withCaption("WARNING")
+                .show();
+    }
+
+    // screens do not receive non-UI events!
+    @EventListener
+    public void onBeanNotificationEvent(BeanNotificationEvent event) {
+        throw new IllegalStateException("Received " + event);
     }
 }

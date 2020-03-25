@@ -6,7 +6,7 @@
     <data readOnly="true">
         <collection id="iteractionsDc"
                     class="com.company.itpearls.entity.Iteraction"
-                    view="iteraction-view">
+                    view="_local">
             <loader id="iteractionsDl">
                 <query><![CDATA[select e from itpearls_Iteraction e
 order by e.number]]></query>
