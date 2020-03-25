@@ -423,8 +423,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 //                    candidate ) );
             emailInfo.setTemplateParameters( Collections.singletonMap("comment",
                     getEditedEntity().getComment() ) );
-            emailInfo.setTemplateParameters( Collections.singletonMap("vacancy",
-                    getEditedEntity().getVacancy().getVacansyName() ) );
+//            emailInfo.setTemplateParameters( Collections.singletonMap("vacancy",
+//                    getEditedEntity().getVacancy().getVacansyName() ) );
             emailInfo.setTemplateParameters( Collections.singletonMap("project",
                     getEditedEntity().getProject().getProjectName() ) );
             emailInfo.setTemplateParameters( Collections.singletonMap("dateIteraction",
@@ -672,5 +672,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     public Boolean getTransferFlag() {
         return transferFlag;
+    }
+
+    public void onButtonSubscribeClick() {
+        screenBuilders.editor( SubscribeCandidateAction.class, this)
+                .newEntity()
+                .withInitializer( e -> {
+                    e.setCandidate( candidateField.getValue() );
+                    e.setSubscriber( userSession.getUser() );
+                    e.setStartDate( new Date() );
+                })
+                .withOpenMode( OpenMode.DIALOG )
+                .build()
+                .show();
     }
 }

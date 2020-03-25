@@ -156,7 +156,8 @@ order by e.positionRuName]]></query>
             <column width="250px">
             </column>
         </form>
-        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
+            <button id="subscribeButton" invoke="onButtonSubscribeClick" caption="mainMsg://msgSubscribe" icon="BELL"/>
             <button id="buttonAddNewIteraction" invoke="addNewIteraction" caption="msg://msgAddNewIteraction"
                     icon="COPY"/>
             <button action="windowCommitAndClose"/>

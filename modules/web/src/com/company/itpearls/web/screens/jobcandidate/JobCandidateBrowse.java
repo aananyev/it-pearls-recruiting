@@ -17,6 +17,7 @@ import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.util.Date;
 
 @UiController("itpearls_JobCandidate.browse")
 @UiDescriptor("job-candidate-browse.xml")
@@ -116,15 +117,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     public void onButtonSubscribeClick() {
-        Screen subscribe = screenBuilders.editor(SubscribeCandidateAction.class, this )
+        screenBuilders.editor( SubscribeCandidateAction.class, this)
                 .newEntity()
-                .withLaunchMode( OpenMode.DIALOG )
-                .withInitializer( data -> {
-                    data.setCandidate( jobCandidatesTable.getSingleSelected() );
-                    data.setSubscriber( userSession.getUser() );
+                .withInitializer( e -> {
+                    e.setCandidate( jobCandidatesTable.getSingleSelected() );
+                    e.setSubscriber( userSession.getUser() );
+                    e.setStartDate( new Date() );
                 })
-                .build();
-
-        subscribe.show();
+                .withOpenMode( OpenMode.DIALOG )
+                .build()
+                .show();
     }
 }

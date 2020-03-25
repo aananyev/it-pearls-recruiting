@@ -1,15 +1,19 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.subscribecandidateaction.SubscribeCandidateActionEdit;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -74,6 +78,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LookupAction jobCityCandidateFieldLookup;
     @Named("positionCountryField.lookup")
     private LookupAction positionCountryFieldLookup;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private UserSession userSession;
 
     private Boolean ifCandidateIsExist() {
        // вдруг такой кандидат уже есть
@@ -349,10 +357,44 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void onButtonSubscribeClick() {
-        dialogs.createMessageDialog()
-                .withCaption("Information")
-                .withMessage("Подписка на действия с кандидатом будет реализована позднее")
-                .show();
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+            dialogs.createOptionDialog()
+                    .withCaption( "WARNING!" )
+                    .withMessage( "Записать изменения?" )
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
+                                    .withHandler(e -> {
+                                        commitChanges();
+
+                                        screenBuilders.editor(SubscribeCandidateAction.class, this)
+                                                .newEntity()
+                                                .withInitializer(g -> {
+                                                    g.setCandidate(getEditedEntity());
+                                                    g.setSubscriber(userSession.getUser());
+                                                    g.setStartDate(new Date());
+                                                })
+                                                .withOpenMode(OpenMode.DIALOG)
+                                                .build()
+                                                .show();
+                                    }),
+                            new DialogAction(DialogAction.Type.NO)
+                                    .withHandler(f -> {
+                                        closeWithDiscard();
+                                    })
+                    )
+                    .show();
+        } else {
+            screenBuilders.editor(SubscribeCandidateAction.class, this)
+                    .newEntity()
+                    .withInitializer(e -> {
+                        e.setCandidate(getEditedEntity());
+                        e.setSubscriber(userSession.getUser());
+                        e.setStartDate(new Date());
+                    })
+                    .withOpenMode(OpenMode.DIALOG)
+                    .build()
+                    .show();
+        }
     }
 
     private Boolean needDublicateDialog() {
