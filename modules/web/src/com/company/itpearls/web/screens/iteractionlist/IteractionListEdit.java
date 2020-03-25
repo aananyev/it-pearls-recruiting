@@ -675,15 +675,40 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     public void onButtonSubscribeClick() {
-        screenBuilders.editor( SubscribeCandidateAction.class, this)
-                .newEntity()
-                .withInitializer( e -> {
-                    e.setCandidate( candidateField.getValue() );
-                    e.setSubscriber( userSession.getUser() );
-                    e.setStartDate( new Date() );
-                })
-                .withOpenMode( OpenMode.DIALOG )
-                .build()
-                .show();
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+            dialogs.createOptionDialog()
+                    .withCaption( "WARNING!" )
+                    .withMessage( "Сохранить изменения?" )
+                    .withActions( new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(e -> {
+                                        commitChanges();
+
+                                         screenBuilders.editor(SubscribeCandidateAction.class, this)
+                                                .newEntity()
+                                                .withInitializer(k -> {
+                                                    k.setCandidate(candidateField.getValue());
+                                                    k.setSubscriber(userSession.getUser());
+                                                    k.setStartDate(new Date());
+                                                })
+                                                .withOpenMode(OpenMode.DIALOG)
+                                                .build()
+                                                .show();
+
+                            }),
+                            new DialogAction(DialogAction.Type.NO) )
+                    .show();
+
+        } else {
+            screenBuilders.editor(SubscribeCandidateAction.class, this)
+                    .newEntity()
+                    .withInitializer(e -> {
+                        e.setCandidate(candidateField.getValue());
+                        e.setSubscriber(userSession.getUser());
+                        e.setStartDate(new Date());
+                    })
+                    .withOpenMode(OpenMode.DIALOG)
+                    .build()
+                    .show();
+        }
     }
 }

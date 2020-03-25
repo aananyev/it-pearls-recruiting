@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.subscribecandidateaction;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.DateField;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.LookupPickerField;
@@ -46,6 +47,8 @@ public class SubscribeCandidateActionEdit extends StandardEditor<SubscribeCandid
     private DataManager dataManager;
     @Inject
     private RadioButtonGroup radioButtonGroupDates;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -78,9 +81,15 @@ public class SubscribeCandidateActionEdit extends StandardEditor<SubscribeCandid
                     .show();
 
 //            closeWithDiscard();
+
             close(WINDOW_DISCARD_AND_CLOSE_ACTION);
-        } else
+        } else {
+            notifications.create().withDescription( "Подписка" )
+                    .withCaption( "Вы подписались на действия с кандидатом " + candidateField.getValue().getFullName() )
+                    .show();
+            
             closeWithCommit();
+        }
 //            close(WINDOW_COMMIT_AND_CLOSE_ACTION);
     }
 
