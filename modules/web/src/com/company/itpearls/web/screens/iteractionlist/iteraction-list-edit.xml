@@ -150,7 +150,7 @@ order by e.positionRuName]]></query>
                 </rows>
             </grid>
             <textArea id="commentField" property="comment" rows="3" width="100%" dataContainer="iteractionListDc"
-                      caption="msg://msgComment"/>
+                      caption="msg://msgComment" height="150pt"/>
         </groupBox>
         <form id="form" dataContainer="iteractionListDc" width="100%">
             <column width="250px">

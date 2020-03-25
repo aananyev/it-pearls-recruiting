@@ -85,9 +85,11 @@ public class SubscribeCandidateActionEdit extends StandardEditor<SubscribeCandid
             close(WINDOW_DISCARD_AND_CLOSE_ACTION);
         } else {
             notifications.create().withDescription( "Подписка" )
-                    .withCaption( "Вы подписались на действия с кандидатом " + candidateField.getValue().getFullName() )
+//                    .withCaption( "Вы подписались на действия с кандидатом " + candidateField.getValue().getFullName() )
+                    .withCaption( "Вы подписались на действия с кандидатом " +
+                            getEditedEntity().getCandidate().getFullName()  )
                     .show();
-            
+
             closeWithCommit();
         }
 //            close(WINDOW_COMMIT_AND_CLOSE_ACTION);

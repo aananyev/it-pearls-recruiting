@@ -98,36 +98,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false );
 
-    //  типа эта шняга не даст закрыть экран, если мы не хоти дублировать кандидата по базе
-/*    @Override
-    protected void validateAdditionalRules(ValidationErrors errors) {
-         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
-            if (!ifCandidateIsExist()) {
-                dialogs.createOptionDialog()
-                        .withCaption("WARNING")
-                        .withMessage("Кандидат " + getEditedEntity().getFullName() +
-                                " есть в базе!\n Вы точно хотите создать еще одного?")
-                        .withActions(
-                                new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
-                                        .withHandler(e -> {
-                                            returnE.set(true);
-                                        }),
-                                new DialogAction(DialogAction.Type.NO)
-                                        .withHandler(f -> {
-                                            returnE.set(false);
-                                        })
-                        )
-                        .show();
-            }
-
-            if (returnE.get()) {
-                // комитимся и выходим, если разрешено
-                super.validateAdditionalRules(errors);
-            }
-        } else
-            super.validateAdditionalRules(errors);
-    } */
-
     @Subscribe("tabIteraction")
     public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
         dialogs.createOptionDialog()

@@ -88,20 +88,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         if( s != null ) {
             switch ( s ) {
                 case 0:
-                    return "icons/clear.png";
+                    break;
                 case 1:
-                    return "icons/researching.png";
+                    return "icons/resume-red.png";
                 case 2:
-                    return "icons/recruiting.png";
+                    return "icons/resume-yellow.png";
                 case 3:
-                    return "icons/to-client.png";
+                    return "icons/resume-green.png";
                 case 4:
+                    return "icons/to-client.png";
                 case 5:
                 case 6:
                 case 7:
                 case 8:
                 case 9:
-                    return "icons/eye-plus.png";
                 case 10:
                     return "icons/case-closed.png";
                 default:
@@ -111,9 +111,31 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return "icons/question-white.png";
     }
-
+/*
     private Integer getPictString(JobCandidate jobCandidate) {
         return jobCandidate.getStatus();
+    }
+*/
+
+    private Integer getPictString(JobCandidate jobCandidate ) {
+        // если только имя и отчество - красный сигнал светофора
+        // если имя, день рождения и один из контактов - желтый
+        // если больше двух контактов - зеленый, если нет др - все равно желтый
+        if( ( jobCandidate.getEmail() != null && jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null ) ||
+                ( jobCandidate.getEmail() != null && jobCandidate.getPhone() != null ) ||
+                ( jobCandidate.getEmail() != null && jobCandidate.getSkypeName() != null ) ||
+                ( jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null ) &&
+        jobCandidate.getBirdhDate() != null )
+            return 3;
+        else
+            if( jobCandidate.getBirdhDate() != null &&
+                    ( jobCandidate.getPhone() != null ||
+                            jobCandidate.getEmail() != null ||
+                            jobCandidate.getSkypeName() != null ) )
+                return 2;
+            else
+                return 1;
+
     }
 
     public void onButtonSubscribeClick() {

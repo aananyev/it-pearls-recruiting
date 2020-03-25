@@ -13,7 +13,9 @@
         <property name="countryOfRegion" view="_local"/>
     </view>
     <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
-        <property name="companyName" view="_local"/>
+        <property name="companyName" view="_local">
+            <property name="departmentOfCompany" view="_minimal"/>
+        </property>
         <property name="departamentHrDirector" view="_minimal"/>
         <property name="departamentDirector" view="_minimal"/>
         <property name="projectOfDepartment" view="_local">
@@ -26,7 +28,9 @@
         </property>
         <property name="projectOwner" view="_local"/>
         <property name="openPosition" view="_local">
-            <property name="projectName" view="_minimal"/>
+            <property name="projectName" view="_minimal">
+                <property name="projectDepartment" view="_minimal"/>
+            </property>
             <property name="companyName" view="_minimal"/>
             <property name="companyDepartament" view="_minimal"/>
         </property>
@@ -48,7 +52,9 @@
             <property name="openPosition" view="_minimal"/>
             <property name="jobCandidate" view="_minimal"/>
         </property>
-        <property name="companyName" view="_local"/>
+        <property name="companyName" view="_local">
+            <property name="departmentOfCompany" view="_minimal"/>
+        </property>
         <property name="companyDepartament" view="_minimal"/>
         <property name="skillsList" view="_local"/>
         <property name="candidates" view="_minimal">
@@ -238,27 +244,15 @@
             <property name="addCaption"/>
         </property>
     </view>
-    <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_base" systemProperties="true">
-        <property name="candidate" view="_local">
-            <property name="currentCompany" view="_minimal"/>
-            <property name="cityOfResidence" view="_minimal"/>
-            <property name="positionCountry" view="_minimal"/>
-            <property name="iteractionList" view="_minimal">
-                <property name="iteractionType" view="_minimal"/>
-            </property>
-            <property name="specialisation" view="_minimal"/>
-            <property name="jobHistory" view="_minimal"/>
-            <property name="socialNetwork" view="_minimal"/>
-            <property name="candidateCv" view="_minimal"/>
-            <property name="skillTree" view="_minimal"/>
-            <property name="skills" view="_minimal"/>
-            <property name="openPosition" view="_minimal"/>
+    <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_minimal" systemProperties="true">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
         </property>
         <property name="currentJobPosition" fetch="JOIN" view="position-view"/>
         <property name="vacancy" view="_minimal">
             <property name="openClose"/>
-            <property name="cityPosition" view="_minimal"/>
-            <property name="positionType" view="_minimal"/>
             <property name="projectName" view="_minimal">
                 <property name="projectDepartment" view="_minimal"/>
             </property>
@@ -289,13 +283,20 @@
                 <property name="addCaption"/>
             </property>
         </property>
+        <property name="communicationMethod"/>
+        <property name="comment"/>
         <property name="recrutier" view="_minimal">
             <property name="firstName"/>
             <property name="lastName"/>
         </property>
+        <property name="recrutierName"/>
         <property name="iteractionChain" view="_local">
             <property name="candidate" view="_minimal"/>
         </property>
+        <property name="addType"/>
+        <property name="addDate"/>
+        <property name="addString"/>
+        <property name="addInteger"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">
