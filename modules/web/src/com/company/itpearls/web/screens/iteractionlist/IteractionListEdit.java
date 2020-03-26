@@ -18,8 +18,6 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.springframework.context.event.EventListener;
-import com.haulmont.addon.globalevents.GlobalApplicationEvent;
-import com.haulmont.addon.globalevents.GlobalUiEvent;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -436,9 +434,29 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             emailService.sendEmailAsync(emailInfo);
         }
             // высплывающее сообщение
-        events.publish( new UiNotificationEvent(this,
-                getEditedEntity().getCandidate().getFullName() + ":" +
-                getEditedEntity().getIteractionType().getIterationName() ) );
+        if( iteractionTypeField.getValue().getNotificationType() != null ) {
+            switch (iteractionTypeField.getValue().getNotificationType()) {
+                case 0: // ???
+                    break;
+                case 1: // Нет
+                    break;
+                case 2: // Только менеджеру"
+                    break;
+                case 3: // Подписчику вакансии
+                    break;
+                case 4: // Подписчику кандидата
+                    break;
+                case 5: // Определенным адресам (список)
+                    break;
+                case 6: // всем
+                    events.publish(new UiNotificationEvent(this,
+                            getEditedEntity().getCandidate().getFullName() + ":" +
+                                    getEditedEntity().getIteractionType().getIterationName()));
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     private boolean yourCandidate() {
@@ -582,6 +600,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         candidate = candidateField.getValue();
 
         changeField();
+
+        if( getEditedEntity().getIteractionType() != null )
+            if( getEditedEntity().getIteractionType().getNotificationType() == null )
+                getEditedEntity().getIteractionType().setNotificationType( 1 );
     }
 
     @Subscribe
@@ -623,6 +645,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         addString.setVisible( false );
         addInteger.setVisible( false );
         addDate.setVisible( false );
+
     }
 
     public void callActionEntity() {
@@ -711,18 +734,5 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .build()
                     .show();
         }
-    }
-    @EventListener
-    public void onUiNotificationEvent(UiNotificationEvent event) {
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withDescription( event.getMessage() )
-                .withCaption("WARNING")
-                .show();
-    }
-
-    // screens do not receive non-UI events!
-    @EventListener
-    public void onBeanNotificationEvent(BeanNotificationEvent event) {
-        throw new IllegalStateException("Received " + event);
     }
 }
