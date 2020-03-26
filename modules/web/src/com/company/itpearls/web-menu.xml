@@ -19,7 +19,7 @@
         <item screen="itpearls_RecrutiesTasks.browse"/>
         <item screen="itpearls_SubscribeCandidateAction.browse"/>
     </menu>
-    <menu id="application-hadbook" insertAfter="application-project">
+    <menu id="application-hadbook" insertAfter="application-researching">
         <item screen="itpearls_Iteraction._tree.browse"/>
         <item screen="itpearls_Specialisation.browse"/>
         <item screen="itpearls_SkillTree.browse"/>
@@ -32,5 +32,5 @@
         <item screen="itpearls_SomeFiles.browse"/>
         <item screen="itpearls_SocialNetworkType.browse"/>
     </menu>
-    <item screen="itpearls_CheckCandidate.browse" insertAfter="application-project" openType="DIALOG"/>
+    <item screen="itpearls_CheckCandidate.browse" insertAfter="application-researching" openType="DIALOG"/>
 </menu-config>

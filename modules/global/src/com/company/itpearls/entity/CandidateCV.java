@@ -13,28 +13,23 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @NamePattern("%s|candidate")
-@Table(name = "ITPEARLS_CANDIDATE_CV", indexes = {
-        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V", columnList = "CANDIDATE_ID"),
-        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V_POSITION", columnList = "RESUME_POSITION_ID"),
-        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V_VACANSY", columnList = "TO_VACANCY_ID"),
-        @Index(name = "IDX_ITPEARLS_CANDIDATE_C_V_OWNER", columnList = "OWNER_ID")
-})
+@Table(name = "ITPEARLS_CANDIDATE_CV")
 @Entity(name = "itpearls_CandidateCV")
 public class CandidateCV extends StandardEntity {
     private static final long serialVersionUID = 7346397128043882179L;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "CANDIDATE_ID")
     protected JobCandidate candidate;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RESUME_POSITION_ID")
     protected Position resumePosition;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @OnDelete(DeletePolicy.DENY)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TO_VACANCY_ID")

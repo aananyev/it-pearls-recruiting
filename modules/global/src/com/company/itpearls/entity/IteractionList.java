@@ -12,12 +12,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Table(name = "ITPEARLS_ITERACTION_LIST", indexes = {
-        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_NUMBER_ITERACTION", columnList = "NUMBER_ITERACTION"),
-        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_CANDIDATE_ID", columnList = "CANDIDATE_ID"),
-        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_CURRENT_JOB_POSITION_ID", columnList = "CURRENT_JOB_POSITION_ID"),
-        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_VACANSY_ID", columnList = "VACANCY_ID"),
-        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_COMPANY_DEPARTMENT_ID", columnList = "COMPANY_DEPARTMENT_ID"),
-        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_PROJECT_ID", columnList = "PROJECT_ID")
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_NUMBER_ITERACTION", columnList = "NUMBER_ITERACTION")
 })
 @Entity(name = "itpearls_IteractionList")
 @NamePattern("%s|candidate")
@@ -31,7 +26,7 @@ public class IteractionList extends StandardEntity {
     @Column(name = "DATE_ITERACTION")
     protected Date dateIteraction;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "CANDIDATE_ID")
@@ -41,24 +36,24 @@ public class IteractionList extends StandardEntity {
     @JoinColumn(name = "CURRENT_JOB_POSITION_ID")
     protected Position currentJobPosition;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "VACANCY_ID")
     protected OpenPosition vacancy;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PROJECT_ID")
     protected Project project;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
 //    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "COMPANY_DEPARTMENT_ID")
     protected CompanyDepartament companyDepartment;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ITERACTION_TYPE_ID")
@@ -71,7 +66,7 @@ public class IteractionList extends StandardEntity {
     @Column(name = "COMMENT_")
     protected String comment;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECRUTIER_ID")
@@ -80,7 +75,7 @@ public class IteractionList extends StandardEntity {
     @Column(name = "RECRUTIER_NAME", length = 80)
     protected String recrutierName;
 
-    @Lookup(type = LookupType.DROPDOWN)
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ITERACTION_CHAIN_ID")
     protected IteractionList iteractionChain;
