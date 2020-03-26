@@ -174,12 +174,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
                 emailService.sendEmailAsync(emailInfo);
-
-                // всплывающее сообщение
-                /* notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption("Изменение описания позиции:")
-                        .withDescription(getEditedEntity().getVacansyName())
-                        .show(); */
             }
         }
     }

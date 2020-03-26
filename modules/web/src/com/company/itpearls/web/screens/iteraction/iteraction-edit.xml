@@ -28,33 +28,47 @@ order by e.number]]>
         <label id="labelWarning" icon="WARNING" description="msg://msgWarning" stylename="h2"/>
         <tabSheet>
             <tab caption="msg://msgIteracionType" margin="true,false,false,false" spacing="true" id="tabType">
-                <checkBox id="iteractionCheckBoxMandatory" dataContainer="iteractionDc" property="mandatoryIteraction" caption="msg://msgMandatory"/>
-                <textField id="numberField" property="number" caption="msg://msgNumber" width="50%"
-                           dataContainer="iteractionDc"/>
-                <lookupPickerField id="iteractionTreeField" dataContainer="iteractionDc"
-                                   optionsContainer="iteractionsTreeDc" property="iteractionTree"
-                                   caption="msg://msgIterationTree" width="50%"/>
-                <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"
-                           width="50%" dataContainer="iteractionDc"/>
-                <hbox spacing="true" width="100%">
-                    <textField id="iteractionFieldPic" dataContainer="iteractionDc" property="pic" width="100%"
-                               description="msg://msgPic" caption="msg://msgPic"/>
-                    <image id="embeddedPict" align="BOTTOM_LEFT"/>
-                </hbox>
+                <groupBox height="200pt">
+                    <checkBox id="iteractionCheckBoxMandatory" dataContainer="iteractionDc" property="mandatoryIteraction" caption="msg://msgMandatory"/>
+                    <textField id="numberField" property="number" caption="msg://msgNumber" width="50%"
+                               dataContainer="iteractionDc"/>
+                    <lookupPickerField id="iteractionTreeField" dataContainer="iteractionDc"
+                                       optionsContainer="iteractionsTreeDc" property="iteractionTree"
+                                       caption="msg://msgIterationTree" width="50%"/>
+                    <textField id="iterationNameField" property="iterationName" caption="mainMsg://msgItercationType"
+                               width="50%" dataContainer="iteractionDc"/>
+                    <hbox spacing="true" width="100%">
+                        <textField id="iteractionFieldPic" dataContainer="iteractionDc" property="pic" width="100%"
+                                   description="msg://msgPic" caption="msg://msgPic"/>
+                        <image id="embeddedPict" align="BOTTOM_LEFT"/>
+                    </hbox>
+                </groupBox>
             </tab>
             <tab caption="msg://Tab" margin="true,false,false,false" spacing="true" id="tabIcons">
-                <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
-                <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"
-                           caption="msg://msgCallButtonText" width="50%"/>
-                <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"
-                           caption="msg://msgCallButtonText" width="50%"/>
+                <groupBox height="200pt">
+                    <checkBox id="checkBoxCallDialog" dataContainer="iteractionDc" property="callForm"/>
+                    <textField id="textFieldCallButtonText" dataContainer="iteractionDc" property="callButtonText"
+                               caption="msg://msgCallButtonText" width="50%"/>
+                    <textField id="textFieldCallForm" dataContainer="iteractionDc" property="callClass"
+                               caption="msg://msgCallButtonText" width="50%"/>
+                </groupBox>
+            </tab>
+            <tab id="tabNotifictions" caption="msg://msgNotifications" margin="true,false,false,false" spacing="true"
+            >
+                <groupBox height="200pt">
+                    <radioButtonGroup id="radioButtonTypeNotifications" dataContainer="iteractionDc"
+                                      property="notificationType"/>
+                    <textField id="lookupFieldEmails" caseConversion="LOWER" contextHelpText="msg://msgEmailHelpText"/>
+                </groupBox>
             </tab>
             <tab caption="msg://msgSetupFiels" margin="true,false,false,false" spacing="true" id="tabSetup">
-                <checkBox id="checkBoxFlag" caption="msg://msgAdd" dataContainer="iteractionDc" property="addFlag"/>
-                <radioButtonGroup id="radioButtonAddType" caption="msg://msgRadioButton" width="50%"
-                                  dataContainer="iteractionDc" property="addType"/>
-                <textField id="textFieldCaption" caption="msg://msgCaption" dataContainer="iteractionDc"
-                           property="addCaption" width="50%"/>
+                <groupBox height="200pt">
+                    <checkBox id="checkBoxFlag" caption="msg://msgAdd" dataContainer="iteractionDc" property="addFlag"/>
+                    <radioButtonGroup id="radioButtonAddType" caption="msg://msgRadioButton" width="50%"
+                                      dataContainer="iteractionDc" property="addType"/>
+                    <textField id="textFieldCaption" caption="msg://msgCaption" dataContainer="iteractionDc"
+                               property="addCaption" width="50%"/>
+                </groupBox>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

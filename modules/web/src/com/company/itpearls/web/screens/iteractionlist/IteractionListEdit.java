@@ -4,7 +4,6 @@ import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
-import com.company.itpearls.service.GetUserRoleService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
@@ -19,15 +18,14 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.springframework.context.event.EventListener;
-import org.springframework.web.bind.support.WebExchangeDataBinder;
+import com.haulmont.addon.globalevents.GlobalApplicationEvent;
+import com.haulmont.addon.globalevents.GlobalUiEvent;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @UiController("itpearls_IteractionList.edit")
 @UiDescriptor("iteraction-list-edit.xml")
@@ -90,6 +88,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Metadata metadata;
     @Inject
     private GetRoleService getRoleService;
+    @Inject
+    private Events events;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -436,11 +436,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             emailService.sendEmailAsync(emailInfo);
         }
             // высплывающее сообщение
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withCaption("Новое взаимодействие с кандидатом" )
-                .withDescription( getEditedEntity().getCandidate() + ": " +
-                        getEditedEntity().getIteractionType().getIterationName() )
-                .show();
+        events.publish( new UiNotificationEvent(this,
+                getEditedEntity().getCandidate().getFullName() + ":" +
+                getEditedEntity().getIteractionType().getIterationName() ) );
     }
 
     private boolean yourCandidate() {

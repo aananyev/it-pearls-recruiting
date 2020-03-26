@@ -23,7 +23,7 @@ public class Iteraction extends StandardEntity {
     @Column(name = "MANDATORY_ITERACTION")
     protected Boolean mandatoryIteraction;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ITERACTION_TREE_ID")
     protected Iteraction iteractionTree;
@@ -55,6 +55,17 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "ADD_CAPTION", length = 80)
     protected String addCaption;
+
+    @Column(name = "NOTIFICATION_TYPE")
+    protected Integer notificationType;
+
+    public Integer getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(Integer notificationType) {
+        this.notificationType = notificationType;
+    }
 
     public String getAddCaption() {
         return addCaption;

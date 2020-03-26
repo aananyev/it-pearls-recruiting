@@ -195,6 +195,7 @@ create table ITPEARLS_ITERACTION (
     ADD_TYPE integer,
     ADD_FIELD varchar(40),
     ADD_CAPTION varchar(80),
+    NOTIFICATION_TYPE integer,
     --
     primary key (ID)
 )^

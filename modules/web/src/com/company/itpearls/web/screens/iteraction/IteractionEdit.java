@@ -5,6 +5,8 @@ import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Iteraction;
+import com.company.itpearls.BeanNotificationEvent;
+import com.company.itpearls.UiNotificationEvent;
 
 import javax.inject.Inject;
 import java.util.LinkedHashMap;
@@ -39,6 +41,10 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private Label<String> labelWarning;
     @Inject
     private Messages messages;
+    @Inject
+    private RadioButtonGroup radioButtonTypeNotifications;
+    @Inject
+    private TextField<String> lookupFieldEmails;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -48,6 +54,16 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         mapAddType.put("Integer", 3);
 
         radioButtonAddType.setOptionsMap(mapAddType);
+
+        Map<String, Integer> mapTypeNotifications = new LinkedHashMap<>();
+        mapTypeNotifications.put( "Нет", 1);
+        mapTypeNotifications.put( "Только менеджеру", 2 );
+        mapTypeNotifications.put( "Подписчику вакансии", 3);
+        mapTypeNotifications.put( "Подписчику кандидата", 4);
+        mapTypeNotifications.put( "Определенным адресам (список)", 5 );
+        mapTypeNotifications.put( "Всем", 6 );
+
+        radioButtonTypeNotifications.setOptionsMap( mapTypeNotifications );
     }
 
     @Subscribe("radioButtonAddType")
@@ -57,9 +73,9 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if( !PersistenceHelper.isNew( getEditedEntity() )) {
+/*        if( !PersistenceHelper.isNew( getEditedEntity() )) {
             // embeddedPict.setIcon(getEditedEntity().getPic());
-        }
+        } */
 
         if( !PersistenceHelper.isNew( getEditedEntity() ) )
             labelItercationName.setValue( getEditedEntity().getIterationName() );
@@ -69,6 +85,16 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         disablePicAndButton();
 
         setDisableElements();
+
+        if( radioButtonTypeNotifications.getValue() != null )
+            lookupFieldEmails.setEditable( radioButtonTypeNotifications.getValue().equals( 5 ) );
+        else
+            lookupFieldEmails.setEditable( false );
+    }
+
+    @Subscribe("radioButtonTypeNotifications")
+    public void onRadioButtonTypeNotificationsValueChange(HasValue.ValueChangeEvent event) {
+        lookupFieldEmails.setEditable( radioButtonTypeNotifications.getValue().equals( 5 ) );
     }
 
     @Subscribe("checkBoxFlag")
