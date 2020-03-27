@@ -90,6 +90,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Events events;
     @Inject
     private TextArea<String> commentField;
+    @Inject
+    private DateField<Date> dateIteractionField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -395,7 +397,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             getEditedEntity().getCandidate().setStatus(i);
         }
+    }
 
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if( commentField.getValue() == null )
             commentField.setValue( "" );
 
@@ -421,6 +426,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     Collections.singletonMap( "IteractionList", getEditedEntity() ) );
 
             emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
             emailService.sendEmailAsync(emailInfo);
         }
             // высплывающее сообщение
