@@ -32,5 +32,5 @@
         <item screen="itpearls_SomeFiles.browse"/>
         <item screen="itpearls_SocialNetworkType.browse"/>
     </menu>
-    <item screen="itpearls_CheckCandidate.browse" insertAfter="application-researching" openType="DIALOG"/>
+    <item screen="itpearls_CheckCandidate.browse" insertAfter="application-hadbook" openType="DIALOG"/>
 </menu-config>

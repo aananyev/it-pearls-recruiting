@@ -602,8 +602,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         changeField();
 
         if( getEditedEntity().getIteractionType() != null )
-            if( getEditedEntity().getIteractionType().getNotificationType() == null )
-                getEditedEntity().getIteractionType().setNotificationType( 1 );
+            if( iteractionTypeField.getValue().getNotificationType() == null )
+                iteractionTypeField.getValue().setNotificationType( 1 );
     }
 
     @Subscribe
