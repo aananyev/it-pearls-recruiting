@@ -319,8 +319,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onProjectFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
         if( vacancyFiels.getValue() != null )
             if( vacancyFiels.getValue().getCompanyDepartament() != null )
-//                companyDepartmentField.setValue( vacancyFiels.getValue().getCompanyDepartament() );
-            companyDepartmentField.setValue( projectField.getValue().getProjectDepartment() );
+                companyDepartmentField.setValue( projectField.getValue().getProjectDepartment() );
     }
 
 
@@ -597,9 +596,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         changeField();
 
-        if( getEditedEntity().getIteractionType() != null )
-            if( iteractionTypeField.getValue().getNotificationType() == null )
-                iteractionTypeField.getValue().setNotificationType( 1 );
+/*        if( getEditedEntity().getIteractionType() != null )
+            if( getEditedEntity().getIteractionType().getNotificationType() == null )
+                iteractionTypeField.getValue().setNotificationType( 1 ); */
     }
 
     @Subscribe

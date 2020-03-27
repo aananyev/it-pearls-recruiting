@@ -121,7 +121,7 @@ order by e.positionRuName]]></query>
                     <row>
                         <lookupPickerField id="iteractionTypeField" optionsContainer="iteractionTypesDc"
                                            caption="msg://msgIteractionType" width="100%"
-                                           dataContainer="iteractionListDc" property="iteractionType">
+                                           dataContainer="iteractionListDc" property="iteractionType" colspan="1">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
