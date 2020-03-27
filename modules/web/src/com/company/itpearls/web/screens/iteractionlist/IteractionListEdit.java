@@ -88,6 +88,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private GetRoleService getRoleService;
     @Inject
     private Events events;
+    @Inject
+    private TextArea<String> commentField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -394,6 +396,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             getEditedEntity().getCandidate().setStatus(i);
         }
 
+        if( commentField.getValue() == null )
+            commentField.setValue( "" );
+
         sendMessages();
     }
 
@@ -410,27 +415,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         if( dataManager.getCount( loadContext )  != 0 ) {
             EmailInfo emailInfo = new EmailInfo(userSession.getUser().getEmail(),
-                    candidateField.getValue().getFullName(), null,
+                    candidateField.getValue().getFullName() + " : " +
+                    iteractionTypeField.getValue().getIterationName(), null,
                     "com/company/itpearls/templates/iteraction.html",
                     Collections.singletonMap( "IteractionList", getEditedEntity() ) );
 
             emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
-            String candidate = candidateField.getValue().getFullName();
-
-            emailInfo.setTemplateParameters( Collections.singletonMap("iteractionType",
-                    getEditedEntity().getIteractionType().getIterationName() ) );
-//            emailInfo.setTemplateParameters( Collections.singletonMap("candidate",
-//                    candidate ) );
-            emailInfo.setTemplateParameters( Collections.singletonMap("comment",
-                    getEditedEntity().getComment() ) );
-//            emailInfo.setTemplateParameters( Collections.singletonMap("vacancy",
-//                    getEditedEntity().getVacancy().getVacansyName() ) );
-            emailInfo.setTemplateParameters( Collections.singletonMap("project",
-                    getEditedEntity().getProject().getProjectName() ) );
-            emailInfo.setTemplateParameters( Collections.singletonMap("dateIteraction",
-                    getEditedEntity().getDateIteraction().toString() ) );
-
             emailService.sendEmailAsync(emailInfo);
         }
             // высплывающее сообщение

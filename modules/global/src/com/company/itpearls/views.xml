@@ -25,6 +25,7 @@
     <view entity="itpearls_Project" name="project-view" extends="_local">
         <property name="projectDepartment" view="_local">
             <property name="companyName" view="_local"/>
+            <property name="projectOfDepartment" view="_minimal"/>
         </property>
         <property name="projectOwner" view="_local"/>
         <property name="openPosition" view="_local">
