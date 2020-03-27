@@ -168,7 +168,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     public void onUiNotificationEvent(UiNotificationEvent event) {
         notifications.create(Notifications.NotificationType.TRAY)
                 .withDescription( event.getMessage() )
-                .withCaption("WARNING")
+                .withCaption("INFO")
                 .show();
     }
 

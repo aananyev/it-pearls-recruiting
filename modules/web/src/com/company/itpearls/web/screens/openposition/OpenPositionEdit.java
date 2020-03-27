@@ -435,18 +435,4 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         opScreen.show();
     }
-
-    @EventListener
-    public void onUiNotificationEvent(UiNotificationEvent event) {
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withDescription( event.getMessage() )
-                .withCaption("WARNING")
-                .show();
-    }
-
-    // screens do not receive non-UI events!
-    @EventListener
-    public void onBeanNotificationEvent(BeanNotificationEvent event) {
-        throw new IllegalStateException("Received " + event);
-    }
 }
