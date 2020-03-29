@@ -3,7 +3,7 @@
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
-        messagesPack="com.company.itpearls.web.screens.iteractionlist" icon="DRIVERS_LICENSE">
+        messagesPack="com.company.itpearls.web.screens.iteractionlist"  icon="REORDER">
     <data>
         <instance id="iteractionListDc"
                   class="com.company.itpearls.entity.IteractionList"

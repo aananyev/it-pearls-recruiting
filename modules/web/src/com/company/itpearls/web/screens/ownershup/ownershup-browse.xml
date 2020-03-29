@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
         focusComponent="ownershupsTable"
-        messagesPack="com.company.itpearls.web.screens.ownershup">
+        messagesPack="com.company.itpearls.web.screens.ownershup" icon="icons/wf-user-group-button.png">
     <data readOnly="true">
         <collection id="ownershupsDc"
                     class="com.company.itpearls.entity.Ownershup"

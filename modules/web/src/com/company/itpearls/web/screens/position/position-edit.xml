@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
-        messagesPack="com.company.itpearls.web.screens.position">
+        messagesPack="com.company.itpearls.web.screens.position" icon="CUBE">
     <data>
         <instance id="positionDc"
                   class="com.company.itpearls.entity.Position"

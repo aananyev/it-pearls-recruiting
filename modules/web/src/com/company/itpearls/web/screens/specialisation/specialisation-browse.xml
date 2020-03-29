@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
         focusComponent="specialisationsTable"
-        messagesPack="com.company.itpearls.web.screens.specialisation">
+        messagesPack="com.company.itpearls.web.screens.specialisation" icon="icons/to-client.png">
     <data readOnly="true">
         <collection id="specialisationsDc"
                     class="com.company.itpearls.entity.Specialisation"
