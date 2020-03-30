@@ -1,5 +1,5 @@
 buildscript {
-    ext.cubaVersion = '7.1.5'
+    ext.cubaVersion = '7.2.2'
     repositories {
         mavenLocal()
         maven {
@@ -101,15 +101,8 @@ configure(coreModule) {
         testRuntime(postgres)
     }
 
-    task cleanConf(description: 'Cleans up conf directory') {
-        doLast {
-            def dir = new File(cuba.tomcat.dir, "/conf/${modulePrefix}-core")
-            if (dir.isDirectory()) {
-                ant.delete(includeemptydirs: true) {
-                    fileset(dir: dir, includes: '**/*', excludes: 'local.app.properties')
-                }
-            }
-        }
+    task cleanConf(description: 'Cleans up conf directory', type: Delete) {
+        delete "$cuba.appHome/${modulePrefix}-core/conf"
     }
 
     task deploy(dependsOn: [assemble, cleanConf], type: CubaDeployment) {
@@ -142,7 +135,7 @@ configure(guiModule) {
     task deployConf(type: Copy) {
         from file('src')
         include "com/company/itpearls/**"
-        into "$cuba.tomcat.dir/conf/${modulePrefix}"
+        into "$cuba.appHome/${modulePrefix}/conf"
     }
 }
 
@@ -176,7 +169,7 @@ configure(webModule) {
     task deployConf(type: Copy) {
         from file('src')
         include "com/company/itpearls/**"
-        into "$cuba.tomcat.dir/conf/${modulePrefix}"
+        into "$cuba.appHome/${modulePrefix}/conf"
     }
 
     task clearMessagesCache(type: CubaClearMessagesCache) {
@@ -184,15 +177,8 @@ configure(webModule) {
     }
     deployConf.dependsOn clearMessagesCache
 
-    task cleanConf(description: 'Cleans up conf directory') {
-        doLast {
-            def dir = new File(cuba.tomcat.dir, "/conf/${modulePrefix}")
-            if (dir.isDirectory()) {
-                ant.delete(includeemptydirs: true) {
-                    fileset(dir: dir, includes: '**/*', excludes: 'local.app.properties')
-                }
-            }
-        }
+    task cleanConf(description: 'Cleans up conf directory', type: Delete) {
+        delete "$cuba.appHome/${modulePrefix}/conf"
     }
 
     task deploy(dependsOn: [assemble, cleanConf], type: CubaDeployment) {
@@ -261,7 +247,7 @@ task restart(dependsOn: ['stop', ":${modulePrefix}-core:deploy", ":${modulePrefi
                 socket(server: 'localhost', port: '8787')
             }
         }
-        start.execute()
     }
 }
+restart.finalizedBy start
 
