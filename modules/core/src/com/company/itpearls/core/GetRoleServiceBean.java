@@ -1,9 +1,9 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.security.entity.User;
 import org.springframework.stereotype.Service;
-import com.company.itpearls.service.GetRoleService;
 
 import javax.inject.Inject;
 import java.util.Collection;
@@ -18,7 +18,7 @@ public class GetRoleServiceBean implements GetRoleService {
         Collection<String> s = userSessionSource.getUserSession().getRoles();
         Boolean c = false;
         // установить поле рекрутера
-        for( String a : s ) {
+        for (String a : s) {
             if (a.contains(role)) {
                 c = true;
                 break;

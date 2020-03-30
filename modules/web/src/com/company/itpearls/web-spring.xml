@@ -13,6 +13,7 @@
             <map>
                 <entry key="itpearls_GetUserRoleService" value="com.company.itpearls.service.GetUserRoleService"/>
                 <entry key="itpearls_GetRoleService" value="com.company.itpearls.service.GetRoleService"/>
+                <entry key="itpearls_SubscribeDateService" value="com.company.itpearls.service.SubscribeDateService"/>
             </map>
         </property>
     </bean>

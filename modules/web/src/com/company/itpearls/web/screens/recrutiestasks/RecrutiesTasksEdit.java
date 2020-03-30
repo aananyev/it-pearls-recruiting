@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.service.SubscribeDateService;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.EmailInfo;
@@ -62,10 +63,12 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private Notifications notifications;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private SubscribeDateService subscribeDateService;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
-        getEditedEntity().setEndDate( new Date( System.currentTimeMillis() + 1000L * 3600L * 24L * 7L ));
+        getEditedEntity().setEndDate( subscribeDateService.dateOfNextMonday() );
 
         commitChanges();
     }

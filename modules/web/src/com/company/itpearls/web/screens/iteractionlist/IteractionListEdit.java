@@ -4,6 +4,7 @@ import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.service.SubscribeDateService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
@@ -22,6 +23,11 @@ import org.springframework.context.event.EventListener;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.Date;
 
@@ -92,6 +98,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private TextArea<String> commentField;
     @Inject
     private DateField<Date> dateIteractionField;
+    @Inject
+    private SubscribeDateService subscribeDateService;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -280,23 +288,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 dialogs.createOptionDialog()
                         .withCaption("ВНИМАНИЕ !")
                         .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
-                                ".\nПодписаться?")
-                        .withActions( new DialogAction(DialogAction.Type.YES).withHandler(e -> {
+                                ".\nПодписаться до будущео понедельника?")
+                        .withActions( new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                                             screenBuilders.editor( RecrutiesTasks.class, this )
                                                     .newEntity()
                                                     .withScreenClass( RecrutiesTasksEdit.class )
                                                     .withLaunchMode( OpenMode.DIALOG )
                                                     .withInitializer( data -> {
-                                                       data.setReacrutier( userSession.getUser() );
-                                                       data.setOpenPosition( op );
-                                                       data.setStartDate( new Date() );
-                                                       data.setEndDate( new Date( System.currentTimeMillis() +
-                                                               1000L * 3600L * 24L * 7L ) );
+                                                        data.setReacrutier( userSession.getUser() );
+                                                        data.setOpenPosition( op );
+                                                        data.setStartDate( new Date() );
+                                                        data.setEndDate( subscribeDateService.dateOfNextMonday() );
                                                     })
                                                     .build()
                                                     .show();
                                 }),
-                                new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY) )
+                                new DialogAction( DialogAction.Type.NO ) )
                         .show();
             }
         }
