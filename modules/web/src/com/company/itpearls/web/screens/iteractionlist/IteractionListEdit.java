@@ -326,7 +326,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onProjectFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
         if( vacancyFiels.getValue() != null )
             if( vacancyFiels.getValue().getCompanyDepartament() != null )
-                companyDepartmentField.setValue( projectField.getValue().getProjectDepartment() );
+                companyDepartmentField.setValue( vacancyFiels.getValue().getCompanyDepartament() );
     }
 
 

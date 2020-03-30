@@ -27,16 +27,22 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
     @Inject
     private GroupTable<RecrutiesTasks> recrutiesTasksesTable;
 
+    private String ROLE_RESEARCHER = "Researcher";
+    private String ROLE_MANAGER = "Manager";
+
     @Subscribe
     public void onInit(InitEvent event) {
-       String role = "Researcher";
 
         // если роль - ресерчер, то автоматически вставить себя
         Collection<String> s = userSessionSource.getUserSession().getRoles();
         // установить поле рекрутера
-        if( s.contains(role) ) {
+        if( s.contains( ROLE_RESEARCHER ) ) {
             // если ресерчер то ограничить просмотр других рекрутеров
-            recrutiesTasksesDl.setParameter( "recrutier", userSessionSource.getUserSession().getUser() );
+            if( !s.contains( ROLE_MANAGER ))
+                recrutiesTasksesDl.setParameter( "recrutier", userSessionSource.getUserSession().getUser() );
+            else
+                // менеджеру тоже всех показывать
+                recrutiesTasksesDl.removeParameter( "recrutier" );
         } else {
             recrutiesTasksesDl.removeParameter( "recrutier" );
         }
