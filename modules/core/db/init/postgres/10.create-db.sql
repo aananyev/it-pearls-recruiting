@@ -230,6 +230,7 @@ create table ITPEARLS_PROJECT (
     DELETED_BY varchar(50),
     --
     PROJECT_NAME varchar(80),
+    PROJECT_IS_CLOSED boolean,
     START_PROJECT_DATE date,
     END_PROJECT_DATE date,
     PROJECT_DEPARTMENT_ID uuid,

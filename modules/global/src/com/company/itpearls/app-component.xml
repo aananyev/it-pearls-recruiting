@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<app-component xmlns="http://schemas.haulmont.com/cuba/app-component.xsd"
+               dependsOn="com.haulmont.addon.emailtemplates, com.haulmont.reports, com.haulmont.addon.globalevents, com.haulmont.cuba, com.haulmont.fts, de.diedavids.cuba.dataimport">
+
+    <module name="global" blocks="*">
+        <artifact name="app-global" appJar="true"/>
+
+        <property name="cuba.persistenceConfig" value="+com/company/itpearls/persistence.xml"/>
+        <property name="cuba.metadataConfig" value="+com/company/itpearls/metadata.xml"/>
+        <property name="cuba.viewsConfig" value="+com/company/itpearls/views.xml"/>
+    </module>
+    <module name="core" dependsOn="global" blocks="core">
+        <artifact name="app-core" appJar="true"/>
+        <artifact name="app-core" classifier="db" ext="zip" configuration="dbscripts"/>
+
+        <property name="cuba.springContextConfig" value="+com/company/itpearls/spring.xml"/>
+        <property name="cuba.ftsConfig" value="+com/company/itpearls/fts.xml"/>
+        <property name="cuba.mainMessagePack" value="+com.company.itpearls.core"/>
+    </module>
+    <module name="gui" dependsOn="global" blocks="web,desktop">
+        <artifact name="app-gui" appJar="true"/>
+    </module>
+    <module name="web" dependsOn="gui" blocks="web">
+        <artifact name="app-web" appJar="true"/>
+        <artifact name="app-web" classifier="web" ext="zip" configuration="webcontent"/>
+        <artifact name="app-web-toolkit" appJar="true" classifier="client" ext="jar"
+                  skipIfExists="web-toolkit"/>
+        <artifact name="app-web" ext="jar" configuration="themes" classifier="themes"/>
+
+        <property name="cuba.springContextConfig" value="+com/company/itpearls/web-spring.xml"/>
+        <property name="cuba.dispatcherSpringContextConfig" value="+com/company/itpearls/web-dispatcher-spring.xml"/>
+        <property name="cuba.windowConfig" value="+com/company/itpearls/web-screens.xml"/>
+        <property name="cuba.menuConfig" value="+com/company/itpearls/web-menu.xml"/>
+        <property name="cuba.permissionConfig" value="+com/company/itpearls/web-permissions.xml"/>
+        <property name="cuba.mainMessagePack" value="+com.company.itpearls.web"/>
+        <property name="cuba.web.widgetSet" value="com.company.itpearls.web.toolkit.ui.AppWidgetSet"/>
+    </module>
+    <module name="web-toolkit" dependsOn="web">
+        <artifact name="app-web-toolkit"/>
+    </module>
+</app-component>

@@ -44,11 +44,11 @@ cuba {
 dependencies {
     appComponent("com.haulmont.cuba:cuba-global:$cubaVersion")
     appComponent("com.haulmont.fts:fts-global:$cubaVersion")
-    appComponent('com.haulmont.addon.globalevents:cubaglevt-global:0.5.1')
-    appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.11.1')
     appComponent("com.haulmont.reports:reports-global:$cubaVersion")
     appComponent("com.haulmont.reports:reports-global:$cubaVersion")
-    appComponent('com.haulmont.addon.emailtemplates:yet-global:1.3.0')
+    appComponent('com.haulmont.addon.emailtemplates:yet-global:1.4.0')
+    appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.12.0')
+    appComponent('com.haulmont.addon.globalevents:cubaglevt-global:0.6.0')
 }
 
 def postgres = 'org.postgresql:postgresql:42.2.5'
@@ -85,6 +85,13 @@ configure(globalModule) {
             enabled = true
         }
     }
+
+    jar {
+        manifest {
+            attributes('App-Component-Id': cuba.artifact.group)
+            attributes('App-Component-Version': cuba.artifact.version + (cuba.artifact.isSnapshot ? '-SNAPSHOT' : ''))
+        }
+    }
 }
 
 configure(coreModule) {
@@ -111,19 +118,9 @@ configure(coreModule) {
     }
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
-        dbms = 'postgres'
-        host = 'hr.it-pearls.ru'
-        dbName = 'itpearls'
-        dbUser = 'cuba'
-        dbPassword = 'cuba'
     }
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
-        dbms = 'postgres'
-        host = 'hr.it-pearls.ru'
-        dbName = 'itpearls'
-        dbUser = 'cuba'
-        dbPassword = 'cuba'
     }
 }
 
