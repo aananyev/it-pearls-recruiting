@@ -12,23 +12,23 @@
         </instance>
         <collection id="personPositionDc" class="com.company.itpearls.entity.JobCandidate"
                     view="JobCandidate-person-position">
-            <loader id="personPositionLc">
+            <loader id="personPositionLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_JobCandidate e]]></query>
             </loader>
         </collection>
         <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
-            <loader id="candidatesLc">
+            <loader id="candidatesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
         <collection id="projectsDc" class="com.company.itpearls.entity.Project" view="project-view">
-            <loader id="projectsLc">
+            <loader id="projectsLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Project e order by e.projectName]]></query>
             </loader>
         </collection>
         <collection id="companyDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament"
                     view="companyDepartament-view">
-            <loader id="companyDepartmentsLc">
+            <loader id="companyDepartmentsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CompanyDepartament e
 where e.departamentRuName not like '%(не использовать)%'
@@ -37,7 +37,7 @@ order by e.departamentRuName]]>
             </loader>
         </collection>
         <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="iteraction-view-button">
-            <loader id="iteractionTypesLc">
+            <loader id="iteractionTypesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Iteraction e order by e.iterationName]]>
                     <condition>
@@ -51,7 +51,7 @@ order by e.departamentRuName]]>
             </loader>
         </collection>
         <collection id="recrutiersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
-            <loader id="recrutiersLc">
+            <loader id="recrutiersLc" cacheable="true">
                 <query>
                     <![CDATA[select e from sec$User e
 order by e.lastName, e.firstName]]>
@@ -59,13 +59,13 @@ order by e.lastName, e.firstName]]>
             </loader>
         </collection>
         <collection id="positionsDc" class="com.company.itpearls.entity.Position" view="position-view">
-            <loader id="positionsDl">
+            <loader id="positionsDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Position e
 order by e.positionRuName]]></query>
             </loader>
         </collection>
         <collection id="vacancyDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
-            <loader id="openPositionsDl">
+            <loader id="openPositionsDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]></query>
             </loader>
         </collection>

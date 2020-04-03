@@ -9,10 +9,10 @@ create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    NETWORK_NAME varchar(80) not null,
-    SOCIAL_NETWORK_URL_ID uuid,
+    NETWORK_NAME varchar(80),
     NETWORK_URLS varchar(80) not null,
     JOB_CANDIDATE_ID uuid,
+    SOCIAL_NETWORK_URL_ID uuid,
     --
     primary key (ID)
 )^
@@ -551,3 +551,10 @@ create table ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION (
     primary key (ID)
 )^
 -- end ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION
+-- begin ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK
+create table ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK (
+    OPEN_POSITION_ID uuid,
+    RECRUTIES_TASKS_ID uuid,
+    primary key (OPEN_POSITION_ID, RECRUTIES_TASKS_ID)
+)^
+-- end ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK
