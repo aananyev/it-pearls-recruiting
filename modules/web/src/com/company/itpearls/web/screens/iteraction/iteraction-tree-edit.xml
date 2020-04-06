@@ -10,7 +10,7 @@
             <loader/>
         </instance>
         <collection id="iteractionTreesDc" class="com.company.itpearls.entity.Iteraction" view="_minimal">
-            <loader id="iteractionTreesLc">
+            <loader id="iteractionTreesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Iteraction e
 order by e.iterationName]]></query>
             </loader>

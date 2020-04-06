@@ -128,7 +128,7 @@ order by e.positionRuName]]></query>
                         </lookupPickerField>
                         <buttonsPanel id="buttonsPanelCallAction" width="100%" align="BOTTOM_CENTER">
                             <vbox>
-                                <button id="buttonCallAction" invoke="callActionEntity" align="MIDDLE_CENTER" width="100%"/>
+                                <button id="buttonCallAction" invoke="callActionEntity" align="BOTTOM_CENTER" width="100%"/>
                                 <textField id="addString" dataContainer="iteractionListDc" property="addString" width="100%"/>
                                 <dateField id="addDate" dataContainer="iteractionListDc" property="addDate" width="100%" />
                                 <textField id="addInteger" dataContainer="iteractionListDc" property="addInteger" width="100%"/>

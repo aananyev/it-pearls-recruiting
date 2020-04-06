@@ -109,6 +109,7 @@
             <property name="candidates" view="_minimal"/>
         </property>
         <property name="skills" view="_minimal"/>
+        <property name="currentCompany" view="_minimal"/>
         <property name="openPosition" view="_local">
             <property name="cityPosition" view="_minimal"/>
             <property name="positionType" view="_local"/>
@@ -239,7 +240,9 @@
             <property name="projectDepartment" view="_minimal"/>
         </property>
         <property name="companyDepartment" view="_local"/>
-        <property name="iteractionType" view="_minimal"/>
+        <property name="iteractionType" view="_minimal">
+            <property name="pic"/>
+        </property>
         <property name="recrutier" view="_minimal"/>
         <property name="recrutierName"/>
         <property name="addType"/>

@@ -166,7 +166,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .show();
     }
 
-    @EventListener
+    /* @EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {
         notifications.create(Notifications.NotificationType.TRAY)
                 .withDescription( event.getMessage() )
@@ -178,5 +178,5 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @EventListener
     public void onBeanNotificationEvent(BeanNotificationEvent event) {
         throw new IllegalStateException("Received " + event);
-    }
+    } */
 }

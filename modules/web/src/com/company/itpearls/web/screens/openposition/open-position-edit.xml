@@ -13,26 +13,26 @@
             <collection id="openPositionCandidatesesDc" property="candidates"/>
         </instance>
         <collection id="positionTypesDc" class="com.company.itpearls.entity.Position" view="_local">
-            <loader id="positionTypesLc">
+            <loader id="positionTypesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Position e
 order by e.positionRuName]]></query>
             </loader>
         </collection>
         <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_minimal">
-            <loader id="projectNamesLc">
+            <loader id="projectNamesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Project e where e.projectIsClosed is null
 or e.projectIsClosed=false order by e.projectName]]></query>
             </loader>
         </collection>
         <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
-            <loader id="companyNamesLc">
+            <loader id="companyNamesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e
 order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="companyDepartamentsDc" class="com.company.itpearls.entity.CompanyDepartament"
                     view="companyDepartament-view">
-            <loader id="companyDepartamentsLc">
+            <loader id="companyDepartamentsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CompanyDepartament e where e.departamentRuName not like '%(не использовать)%'
 order by e.departamentRuName]]>
@@ -40,22 +40,22 @@ order by e.departamentRuName]]>
             </loader>
         </collection>
         <collection id="projectDc" class="com.company.itpearls.entity.Project" view="project-view">
-            <loader id="companyOfDepatmentDl">
+            <loader id="companyOfDepatmentDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Project e where e.endProjectDate is not null]]></query>
             </loader>
         </collection>
         <collection id="cityOfCompanyDc" class="com.company.itpearls.entity.Company" view="company-view">
-            <loader id="cityOfCompanyDl">
+            <loader id="cityOfCompanyDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e]]></query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_minimal">
-            <loader id="citiesDl">
+            <loader id="citiesDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_City e order by e.cityRuName]]></query>
             </loader>
         </collection>
         <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="JobCandidate-person-position">
-            <loader id="jobCandidatesDl">
+            <loader id="jobCandidatesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]>
                     <condition>
@@ -67,7 +67,7 @@ order by e.departamentRuName]]>
             </loader>
         </collection>
         <collection id="taskRecrutior" class="com.company.itpearls.entity.RecrutiesTasks" view="recrutiesTasks-view">
-            <loader id="recrutiesTasksesDl">
+            <loader id="recrutiesTasksesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_RecrutiesTasks e
 order by e.reacrutier, e.endDate desc]]>

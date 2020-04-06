@@ -69,7 +69,7 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         }
     }
 
-    @EventListener
+    /* @EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {
         notifications.create(Notifications.NotificationType.TRAY)
                 .withDescription( event.getMessage() )
@@ -81,5 +81,5 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
     @EventListener
     public void onBeanNotificationEvent(BeanNotificationEvent event) {
         throw new IllegalStateException("Received " + event);
-    }
+    } */
 }

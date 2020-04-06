@@ -24,6 +24,8 @@ import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.management.Query;
+import javax.persistence.Persistence;
 import javax.validation.constraints.Null;
 import java.awt.*;
 import java.util.Date;
@@ -164,7 +166,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
        opScreen.show();
     }
 
-    @EventListener
+    /*@EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {
         notifications.create(Notifications.NotificationType.TRAY)
                 .withDescription( event.getMessage() )
@@ -176,6 +178,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @EventListener
     public void onBeanNotificationEvent(BeanNotificationEvent event) {
         throw new IllegalStateException("Received " + event);
-    }
+    }*/
 }
 

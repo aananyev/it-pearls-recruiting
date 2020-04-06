@@ -8,7 +8,7 @@
         <collection id="jobCandidatesDc"
                     class="com.company.itpearls.entity.JobCandidate"
                     view="jobCandidate-view">
-            <loader id="jobCandidatesDl">
+            <loader id="jobCandidatesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e
 order by e.secondName, e.firstName]]>

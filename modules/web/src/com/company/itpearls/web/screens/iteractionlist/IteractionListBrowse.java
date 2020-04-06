@@ -103,7 +103,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         
     }
 
-    @EventListener
+    /* @EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {
         notifications.create(Notifications.NotificationType.TRAY)
                 .withDescription( event.getMessage() )
@@ -115,5 +115,5 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @EventListener
     public void onBeanNotificationEvent(BeanNotificationEvent event) {
         throw new IllegalStateException("Received " + event);
-    }
+    }*/
 }

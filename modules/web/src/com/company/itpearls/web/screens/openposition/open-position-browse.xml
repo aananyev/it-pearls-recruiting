@@ -8,7 +8,7 @@
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition"
                     view="openPosition-view">
-            <loader id="openPositionsDl">
+            <loader id="openPositionsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e order by e.positionType]]>
                     <condition>

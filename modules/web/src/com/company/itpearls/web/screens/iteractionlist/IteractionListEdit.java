@@ -419,6 +419,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         "where e.candidate = :candidate and " +
                         "e.subscriber = :subscriber and " +
                         ":curDate between e.startDate and e.endDate" )
+                        .setCacheable( true )
                 .setParameter( "candidate", candidateField.getValue() )
                 .setParameter( "subscriber", userSession.getUser() )
                 .setParameter( "curDate", new Date() ) )
@@ -452,8 +453,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     break;
                 case 6: // всем
                     events.publish(new UiNotificationEvent(this,
-                            getEditedEntity().getCandidate().getFullName() + ":" +
-                                    getEditedEntity().getIteractionType().getIterationName()));
+                            "<img src=\"VAADIN/themes/halo/" + iteractionTypeField.getValue().getPic() +
+                                    "\"> <h2>" +
+                                    getEditedEntity().getCandidate().getFullName() + " : " +
+                                    getEditedEntity().getIteractionType().getIterationName() + "</h2>"));
                     break;
                 default:
                     break;
