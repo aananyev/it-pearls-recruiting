@@ -18,6 +18,7 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
@@ -53,14 +54,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
 
-    protected Project currentProject;
-    protected Boolean newProject;
+    private Project currentProject;
+    private Boolean newProject;
     static Boolean myClient;
-    protected User lastUser = null;
-    protected Date lastIteraction;
-    protected JobCandidate candidate;
     private Boolean transferFlag = false;
-
+    private IteractionList oldIteraction = null;
+    private JobCandidate candidate = null;
 
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
@@ -100,6 +99,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private DateField<Date> dateIteractionField;
     @Inject
     private SubscribeDateService subscribeDateService;
+    @Inject
+    private TextField<BigDecimal> numberIteractionField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -226,7 +227,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .parameter("vacancy", getEditedEntity().getVacancy())
                     .one();
 
-            // есть взаимодействия с кандидатом по этой позиции
+            // есть
+            // взаимодействия с кандидатом по этой позиции
             if (countIteraction.compareTo(a) != 0)
                 newProject = false;
             else
@@ -331,19 +333,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
 
     private BigDecimal getCountIteraction() {
-        BigDecimal maxValue = iteractionListEditDataManager.loadValue(
-                "select max(a.numberIteraction) from itpearls_IteractionList a",
-                            BigDecimal.class).one().add(BigDecimal.ONE);
+        IteractionList e = dataManager.load( IteractionList.class )
+                .query( "select e from itpearls_IteractionList e where e.numberIteraction = " +
+                        "(select max(f.numberIteraction) from itpearls_IteractionList f)" )
+                .view( "iteractionList-view" )
+                .cacheable( true )
+                .one();
 
-        return maxValue;
+        return e.getNumberIteraction().add( BigDecimal.ONE );
     }
 
     protected void setIteractionNumber() {
-        getEditedEntity().setNumberIteraction(getCountIteraction());
+        numberIteractionField.setValue( getCountIteraction() );
     }
 
     protected void setCurrentDate() {
-        getEditedEntity().setDateIteraction(new Date());
+        dateIteractionField.setValue( new Date() );
     }
 
     // не могу получить имя пользователя и записать его в базу
@@ -377,8 +382,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         } else {
             if( PersistenceHelper.isNew( getEditedEntity() )) {
-                String msg = "С этим кандидатом " + lastUser.getName() + " контактировал " + lastIteraction.toString() +
-                        " МЕНЕЕ МЕСЯЦА НАЗАД!";
+                String msg = "С этим кандидатом " + oldIteraction.getRecrutier().getName() + " контактировал " +
+                        oldIteraction.getDateIteraction().toString() + " МЕНЕЕ МЕСЯЦА НАЗАД!";
 
                 dialogs.createOptionDialog()
                         .withCaption("Warning")
@@ -398,10 +403,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         if( iteractionTypeField.getValue().getNumber() != null ) {
-            String s = getEditedEntity().getIteractionType().getNumber();
+            String s = iteractionTypeField.getValue().getNumber();
             Integer i = Integer.parseInt(s);
 
-            getEditedEntity().getCandidate().setStatus(i);
+            candidateField.getValue().setStatus(i);
+//            getEditedEntity().getCandidate().setStatus(i);
         }
     }
 
@@ -454,9 +460,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 case 6: // всем
                     events.publish(new UiNotificationEvent(this,
                             "<img src=\"VAADIN/themes/halo/" + iteractionTypeField.getValue().getPic() +
-                                    "\"> <h2>" +
+                                    "\"> <b>" +
                                     getEditedEntity().getCandidate().getFullName() + " : " +
-                                    getEditedEntity().getIteractionType().getIterationName() + "</h2>"));
+                                    getEditedEntity().getIteractionType().getIterationName() + "</b>"));
                     break;
                 default:
                     break;
@@ -490,32 +496,26 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         if( numberIteraction != null ) {
             // больше месяца назад?
-            lastIteraction = dataManager.loadValue( "select e.dateIteraction " +
-                    "from itpearls_IteractionList e " +
-                    "where e.numberIteraction = :number", Date.class )
-                    .parameter( "number", numberIteraction )
-                    .one();
-            if( lastIteraction.before( new Date(System.currentTimeMillis() - 2628000000l)  ) ) {
+            try {
+                oldIteraction = dataManager.load(IteractionList.class).query("select e " +
+                        "from itpearls_IteractionList e " +
+                        "where e.numberIteraction = :number")
+                        .parameter("number", numberIteraction)
+                        .view( "iteractionList-view" )
+                        .one();
+            } catch ( IllegalStateException e ) {
+                myClient = false;
+            }
+
+            if( oldIteraction.getDateIteraction().before( new Date(System.currentTimeMillis() - 2628000000l)  ) ) {
                 // все зашибись и кандидат свободен
                 myClient = true;
             } else {
-                // а это точно не ты?
-                try {
-                    lastUser = dataManager.loadValue("select e.recrutier " +
-                            "from itpearls_IteractionList e " +
-                            "where e.numberIteraction = :number", User.class)
-                            .parameter("number", numberIteraction)
-                            .one();
-                } catch ( IllegalStateException e ) {
-                    // не записан пользователь из старых записей
-                    myClient = false;
-                    lastUser = null;
-                }
-
-                if( user.equals( lastUser ) )
+                if( oldIteraction.getRecrutier().equals( userSession.getUser() ) ) {
                     myClient = true;
-                else
+                } else {
                     myClient = false;
+                }
             }
         }
 
@@ -531,7 +531,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             "from itpearls_IteractionList e " +
                             "where e.candidate = :candidate",
                     Integer.class)
-                    .parameter("candidate", getEditedEntity().getCandidate() )
+                    .parameter("candidate", candidateField.getValue() )
                     .one();
         } catch ( NullPointerException | IllegalStateException e ) {
             d = 0;
@@ -545,13 +545,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         openPositionsDl.setQuery("select e from itpearls_OpenPosition e " +
                 "order by e.vacansyName");
         openPositionsDl.load();
-
-        OpenPosition openPos;
         // вакансия
         // а вдруг в результате экспорта не были заполнены поля
+        IteractionList duplicateIteraction = null;
         try {
-            openPos = dataManager.load(OpenPosition.class)
-                    .query("select e.vacancy " +
+            duplicateIteraction = dataManager.load(IteractionList.class)
+                    .query("select e " +
                             "from itpearls_IteractionList e " +
                             "where e.candidate = :candidate and " +
                             "e.numberIteraction = " +
@@ -559,42 +558,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             "from itpearls_IteractionList f " +
                             "where f.candidate = :candidate)")
                     .parameter("candidate", getEditedEntity().getCandidate() )
-                    .view("openPosition-view")
+                    .view("iteractionList-view")
+                    .cacheable( true )
                     .one();
         } catch ( IllegalStateException e ) {
-            openPos = null;
+            duplicateIteraction = null;
         }
         // а вдруг пустое поле?
-        if( openPos != null ) {
-            vacancyFiels.setValue( openPos );
+        if( duplicateIteraction.getVacancy() != null ) {
+            vacancyFiels.setValue( duplicateIteraction.getVacancy() );
         }
         // проект
-        getEditedEntity().setProject( dataManager.loadValue(
-                "select e.project " +
-                        "from itpearls_IteractionList e " +
-                        "where e.candidate = :candidate and " +
-                        "e.numberIteraction = " +
-                        "(select max(f.numberIteraction) " +
-                        "from itpearls_IteractionList f " +
-                        "where f.candidate = :candidate)", Project.class )
-                .parameter( "candidate", getEditedEntity().getCandidate() )
-                .one() );
+        projectField.setValue( duplicateIteraction.getProject() );
         // департамент
-        CompanyDepartament companyDepartment = dataManager.load( CompanyDepartament.class )
-                .query(
-                        "select e.companyDepartment " +
-                                "from itpearls_IteractionList e " +
-                                "where e.candidate = :candidate and " +
-                                "e.numberIteraction = " +
-                                "(select max(f.numberIteraction) " +
-                                "from itpearls_IteractionList f " +
-                                "where f.candidate = :candidate)" )
-                .parameter( "candidate", getEditedEntity().getCandidate() )
-                .view( "companyDepartament-view" )
-                .one();
-
-        if( companyDepartment != null )
-            companyDepartmentField.setValue( companyDepartment );
+        if( duplicateIteraction.getCompanyDepartment() != null ) {
+            companyDepartmentField.setValue( duplicateIteraction.getVacancy().getCompanyDepartament() );
+        }
     }
 
     @Subscribe

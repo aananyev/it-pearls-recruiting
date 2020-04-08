@@ -10,8 +10,8 @@ import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|iterationName")
 @Table(name = "ITPEARLS_ITERACTION", indexes = {
-        @Index(name = "IDX_ITPEARLS_ITERACTION", columnList = "ITERATION_NAME"),
-        @Index(name = "IDX_ITPEARLS_ITERACTION_1", columnList = "NUMBER_")
+        @Index(name = "IDX_ITPEARLS_ITERACTION_NAME", columnList = "ITERATION_NAME"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_NUMBER", columnList = "NUMBER_")
 })
 @Entity(name = "itpearls_Iteraction")
 public class Iteraction extends StandardEntity {

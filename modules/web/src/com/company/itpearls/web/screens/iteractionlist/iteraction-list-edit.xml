@@ -10,58 +10,23 @@
                   view="iteractionList-view">
             <loader id="iteractionListDl"/>
         </instance>
-        <collection id="personPositionDc" class="com.company.itpearls.entity.JobCandidate"
-                    view="JobCandidate-person-position">
-            <loader id="personPositionLc" cacheable="true">
-                <query><![CDATA[select e from itpearls_JobCandidate e]]></query>
-            </loader>
-        </collection>
-        <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
-            <loader id="candidatesLc" cacheable="true">
-                <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
-            </loader>
-        </collection>
-        <collection id="projectsDc" class="com.company.itpearls.entity.Project" view="project-view">
-            <loader id="projectsLc" cacheable="true">
-                <query><![CDATA[select e from itpearls_Project e order by e.projectName]]></query>
-            </loader>
-        </collection>
-        <collection id="companyDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament"
-                    view="companyDepartament-view">
-            <loader id="companyDepartmentsLc" cacheable="true">
-                <query>
-                    <![CDATA[select e from itpearls_CompanyDepartament e
-where e.departamentRuName not like '%(не использовать)%'
-order by e.departamentRuName]]>
-                </query>
-            </loader>
-        </collection>
         <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="iteraction-view-button">
             <loader id="iteractionTypesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Iteraction e order by e.iterationName]]>
-                    <condition>
-                        <c:jpql>
-                            <c:where>
-                                e.iteractionTree.number like :number
-                            </c:where>
-                        </c:jpql>
-                    </condition>
-                </query>
-            </loader>
-        </collection>
-        <collection id="recrutiersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
-            <loader id="recrutiersLc" cacheable="true">
-                <query>
-                    <![CDATA[select e from sec$User e
-order by e.lastName, e.firstName]]>
-                </query>
-            </loader>
-        </collection>
-        <collection id="positionsDc" class="com.company.itpearls.entity.Position" view="position-view">
-            <loader id="positionsDl" cacheable="true">
-                <query><![CDATA[select e from itpearls_Position e
-order by e.positionRuName]]></query>
+                        <condition>
+                            <c:jpql>
+                                <c:where>
+                                    e.iteractionTree.number like :number
+                                </c:where>
+                            </c:jpql>
+                        </condition>
+                    </query>
+                </loader>
+            </collection>
+        <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+            <loader id="candidatesLc" cacheable="true">
+                <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
         <collection id="vacancyDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
@@ -74,11 +39,22 @@ order by e.positionRuName]]></query>
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <groupBox spacing="true">
-            <hbox spacing="true">
-                <textField id="numberIteractionField" dataContainer="iteractionListDc" property="numberIteraction"
-                           editable="false" caption="msg://msgNumber"/>
-                <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
-                           editable="false" caption="msg://msgDate"/>
+            <hbox spacing="true" width="100%">
+                <hbox width="30%">
+                    <textField id="numberIteractionField" dataContainer="iteractionListDc" property="numberIteraction"
+                               editable="false" caption="msg://msgNumber"/>
+                    <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
+                               editable="false" caption="msg://msgDate"/>
+                </hbox>
+                <hbox width="70%">
+                    <lookupPickerField id="projectField"
+                                       caption="msg://msgProject"
+                                       editable="false">
+                    </lookupPickerField>
+                    <lookupPickerField id="companyDepartmentField"
+                                       caption="msg://msgDepartament" editable="false">
+                    </lookupPickerField>
+                </hbox>
             </hbox>
         </groupBox>
         <groupBox id="groupBoxIterationData">
@@ -97,22 +73,6 @@ order by e.positionRuName]]></query>
                         <lookupPickerField id="vacancyFiels" caption="mainMsg://msgVacancy" width="100%"
                                            dataContainer="iteractionListDc" optionsContainer="vacancyDc"
                                            property="vacancy">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                    </row>
-                    <row>
-                        <lookupPickerField id="projectField" optionsContainer="projectsDc"
-                                           caption="msg://msgProject" width="100%" dataContainer="iteractionListDc"
-                                           property="project">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="companyDepartmentField" optionsContainer="companyDepartmentsDc"
-                                           caption="msg://msgDepartament" width="100%" editable="true"
-                                           dataContainer="iteractionListDc" property="companyDepartment">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
@@ -139,7 +99,7 @@ order by e.positionRuName]]></query>
                         <textField id="communicationMethodField" width="100%"
                                    caption="msg://msgCommunicationMethod" dataContainer="iteractionListDc"
                                    property="communicationMethod"/>
-                        <lookupPickerField id="recrutierField" optionsContainer="recrutiersDc"
+                        <lookupPickerField id="recrutierField"
                                            caption="msg://msgRecrutier" width="100%" dataContainer="iteractionListDc"
                                            property="recrutier">
                             <actions>

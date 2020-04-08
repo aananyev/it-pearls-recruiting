@@ -13,7 +13,9 @@ import java.util.Date;
 import java.util.List;
 
 @NamePattern("%s|projectName")
-@Table(name = "ITPEARLS_PROJECT")
+@Table(name = "ITPEARLS_PROJECT", indexes = {
+        @Index(name = "IDX_ITPEARLS_PROJECT", columnList = "PROJECT_NAME")
+})
 @Entity(name = "itpearls_Project")
 public class Project extends StandardEntity {
     private static final long serialVersionUID = 8105712812181375543L;
@@ -32,12 +34,12 @@ public class Project extends StandardEntity {
     @Column(name = "END_PROJECT_DATE")
     protected Date endProjectDate;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PROJECT_DEPARTMENT_ID")
     protected CompanyDepartament projectDepartment;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PROJECT_OWNER_ID")
     protected Person projectOwner;
