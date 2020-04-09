@@ -53,8 +53,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Dialogs dialogs;
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
-
-    private Project currentProject;
     private Boolean newProject;
     static Boolean myClient;
     private Boolean transferFlag = false;
@@ -71,10 +69,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private TextField<Integer> addInteger;
     @Inject
     private LookupPickerField<OpenPosition> vacancyFiels;
-    @Inject
-    private LookupPickerField<Project> projectField;
-    @Inject
-    private LookupPickerField<CompanyDepartament> companyDepartmentField;
     @Named("candidateField.lookup")
     private LookupAction candidateFieldLookup;
     @Inject
@@ -250,11 +244,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
 
             iteractionTypesLc.load();
-
-            // заполнить другие поля
-            if (vacancyFiels.getValue() != null)
-                if (vacancyFiels.getValue().getProjectName() != null)
-                    projectField.setValue(vacancyFiels.getValue().getProjectName());
         } else {
             dialogs.createOptionDialog()
                     .withCaption( "WARNING" )
@@ -323,14 +312,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         return r == null ? false : r;
     }
-
-    @Subscribe("projectField")
-    public void onProjectFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
-        if( vacancyFiels.getValue() != null )
-            if( vacancyFiels.getValue().getCompanyDepartament() != null )
-                companyDepartmentField.setValue( vacancyFiels.getValue().getCompanyDepartament() );
-    }
-
 
     private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load( IteractionList.class )
@@ -568,19 +549,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if( duplicateIteraction.getVacancy() != null ) {
             vacancyFiels.setValue( duplicateIteraction.getVacancy() );
         }
-        // проект
-        projectField.setValue( duplicateIteraction.getProject() );
-        // департамент
-        if( duplicateIteraction.getCompanyDepartment() != null ) {
-            companyDepartmentField.setValue( duplicateIteraction.getVacancy().getCompanyDepartament() );
-        }
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         buttonCallAction.setVisible(false);
         // запомнить текущий проект
-        currentProject = projectField.getValue();
         candidate = candidateField.getValue();
 
         changeField();

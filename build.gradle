@@ -51,7 +51,7 @@ dependencies {
     appComponent('com.haulmont.addon.globalevents:cubaglevt-global:0.6.0')
 }
 
-def postgres = 'org.postgresql:postgresql:42.2.5'
+def postgres = 'org.postgresql:postgresql:42.2.9'
 
 configure([globalModule, coreModule, webModule, guiModule, webToolkitModule]) {
     apply(plugin: 'java')

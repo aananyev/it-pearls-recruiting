@@ -6,13 +6,42 @@
     <option name="savedDbProperties">
       <list>
         <SavedDbProperties>
-          <option name="databaseName" value="itpearls" />
+          <option name="databaseName" value="itpearls-37qv3wkAY" />
           <option name="dbType" value="hsql" />
           <option name="host" value="localhost" />
+          <option name="port" value="9010" />
           <option name="systemPassword" value="" />
           <option name="systemUser" value="" />
-          <option name="url" value="jdbc:hsqldb:hsql://localhost/itpearls" />
+          <option name="url" value="jdbc:hsqldb:hsql://localhost:9010/itpearls-37qv3wkAY" />
           <option name="user" value="sa" />
+          <option name="additionalProperties">
+            <map>
+              <entry key="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+              <entry key="maxIdle" value="2" />
+              <entry key="maxTotal" value="20" />
+              <entry key="maxWaitMillis" value="5000" />
+              <entry key="type" value="javax.sql.DataSource" />
+            </map>
+          </option>
+        </SavedDbProperties>
+        <SavedDbProperties>
+          <option name="databaseName" value="itpearls" />
+          <option name="dbType" value="postgres" />
+          <option name="host" value="localhost" />
+          <option name="pass" value="cuba" />
+          <option name="systemPassword" value="" />
+          <option name="systemUser" value="" />
+          <option name="url" value="jdbc:postgresql://localhost/itpearls" />
+          <option name="user" value="cuba" />
+          <option name="additionalProperties">
+            <map>
+              <entry key="driverClassName" value="org.postgresql.Driver" />
+              <entry key="maxIdle" value="2" />
+              <entry key="maxTotal" value="20" />
+              <entry key="maxWaitMillis" value="5000" />
+              <entry key="type" value="javax.sql.DataSource" />
+            </map>
+          </option>
         </SavedDbProperties>
       </list>
     </option>

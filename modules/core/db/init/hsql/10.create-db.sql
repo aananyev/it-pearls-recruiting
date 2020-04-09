@@ -128,7 +128,7 @@ create table ITPEARLS_COMPANY (
     OUR_CLIENT boolean,
     COMPANY_OWNERSHIP_ID varchar(36),
     COMANY_NAME varchar(80) not null,
-    COMPANY_SHORT_NAME varchar(30),
+    COMPANY_SHORT_NAME varchar(80),
     COMPANY_DIRECTOR_ID varchar(36),
     CITY_OF_COMPANY_ID varchar(36),
     REGION_OF_COMPANY_ID varchar(36),
@@ -260,6 +260,11 @@ create table ITPEARLS_ITERACTION (
     CALL_BUTTON_TEXT varchar(30),
     CALL_CLASS varchar(30),
     CALL_FORM boolean,
+    ADD_FLAG boolean,
+    ADD_TYPE integer,
+    ADD_FIELD varchar(40),
+    ADD_CAPTION varchar(80),
+    NOTIFICATION_TYPE integer,
     --
     primary key (ID)
 )^
@@ -322,8 +327,10 @@ create table ITPEARLS_ITERACTION_LIST (
     RECRUTIER_ID varchar(36),
     RECRUTIER_NAME varchar(80),
     ITERACTION_CHAIN_ID varchar(36),
-    SALARY decimal(19, 2),
-    DATE_INTERVIEW timestamp,
+    ADD_TYPE integer,
+    ADD_DATE timestamp,
+    ADD_STRING varchar(255),
+    ADD_INTEGER integer,
     --
     primary key (ID)
 )^
@@ -481,6 +488,7 @@ create table ITPEARLS_SOME_FILES (
     --
     FILE_DESCRIPTION varchar(80) not null,
     FILE_DESCRIPTOR_ID varchar(36) not null,
+    FILE_LINK varchar(255),
     FILE_COMMENT longvarchar,
     FILE_OWNER_ID varchar(36) not null,
     FILE_TYPE_ID varchar(36) not null,
@@ -522,7 +530,35 @@ create table ITPEARLS_RECRUTIES_TASKS (
     END_DATE date,
     REACRUTIER_ID varchar(36) not null,
     OPEN_POSITION_ID varchar(36),
+    SUBSCRIBE boolean,
+    RECRUTIER_NAME varchar(80),
     --
     primary key (ID)
 )^
 -- end ITPEARLS_RECRUTIES_TASKS
+-- begin ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION
+create table ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION (
+    ID varchar(36) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    START_DATE date,
+    END_DATE date,
+    CANDIDATE_ID varchar(36),
+    SUBSCRIBER_ID varchar(36),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION
+-- begin ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK
+create table ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK (
+    OPEN_POSITION_ID varchar(36) not null,
+    RECRUTIES_TASKS_ID varchar(36) not null,
+    primary key (OPEN_POSITION_ID, RECRUTIES_TASKS_ID)
+)^
+-- end ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK

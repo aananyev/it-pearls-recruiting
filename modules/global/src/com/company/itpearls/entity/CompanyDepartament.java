@@ -24,17 +24,17 @@ public class CompanyDepartament extends StandardEntity {
     @Column(name = "DEPARTAMENT_RU_NAME", nullable = false, length = 80)
     protected String departamentRuName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_NAME_ID")
     protected Company companyName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DEPARTAMENT_HR_DIRECTOR_ID")
     protected Person departamentHrDirector;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DEPARTAMENT_DIRECTOR_ID")
     protected Person departamentDirector;

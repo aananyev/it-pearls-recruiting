@@ -10,7 +10,7 @@
                   view="iteractionList-view">
             <loader id="iteractionListDl"/>
         </instance>
-        <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="iteraction-view-button">
+        <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="_minimal">
             <loader id="iteractionTypesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Iteraction e order by e.iterationName]]>
@@ -29,9 +29,18 @@
                 <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
-        <collection id="vacancyDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
+        <collection id="vacancyDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view-iteraction-list">
             <loader id="openPositionsDl" cacheable="true">
-                <query><![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e.companyDepartament = :departament
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
             </loader>
         </collection>
     </data>
@@ -45,15 +54,6 @@
                                editable="false" caption="msg://msgNumber"/>
                     <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
                                editable="false" caption="msg://msgDate"/>
-                </hbox>
-                <hbox width="70%">
-                    <lookupPickerField id="projectField"
-                                       caption="msg://msgProject"
-                                       editable="false">
-                    </lookupPickerField>
-                    <lookupPickerField id="companyDepartmentField"
-                                       caption="msg://msgDepartament" editable="false">
-                    </lookupPickerField>
                 </hbox>
             </hbox>
         </groupBox>

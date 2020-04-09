@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
-@NamePattern("%s %s|vacansyName,projectName")
+@NamePattern("%s %s|vacansyName,companyDepartament")
 @Table(name = "ITPEARLS_OPEN_POSITION", indexes = {
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_VACANCY_NAME", columnList = "VACANSY_NAME"),
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_COMPANY_NAME", columnList = "COMPANY_NAME_ID")

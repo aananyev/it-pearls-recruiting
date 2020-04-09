@@ -13,7 +13,7 @@
         <property name="countryOfRegion" view="_local"/>
     </view>
     <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
-        <property name="companyName" view="_local">
+        <property name="companyName" fetch="JOIN" view="_local">
             <property name="departmentOfCompany" view="_minimal"/>
         </property>
         <property name="departamentHrDirector" view="_minimal"/>
@@ -45,22 +45,7 @@
         <property name="positionRuName"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
-        <property name="cityPosition" view="_local"/>
-        <property name="positionType" view="_local"/>
-        <property name="projectName" view="_local">
-            <property name="projectDepartment" view="_local"/>
-            <property name="projectOwner" view="_minimal"/>
-            <property name="openPosition" view="_minimal"/>
-            <property name="jobCandidate" view="_minimal"/>
-        </property>
-        <property name="companyName" view="_local">
-            <property name="departmentOfCompany" view="_minimal"/>
-        </property>
-        <property name="companyDepartament" view="_minimal"/>
-        <property name="skillsList" view="_local"/>
-        <property name="candidates" view="_minimal">
-            <property name="endDate"/>
-        </property>
+        <property name="companyDepartament" fetch="BATCH" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="personPosition" view="_local"/>
@@ -226,26 +211,19 @@
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_minimal" systemProperties="true">
         <property name="numberIteraction"/>
         <property name="dateIteraction"/>
-        <property name="candidate" view="_minimal">
-            <property name="fullName"/>
+        <property name="vacancy" fetch="BATCH" view="_local">
+            <property name="projectName" fetch="JOIN" view="_minimal"/>
+            <property name="companyDepartament" fetch="JOIN" view="_local"/>
         </property>
-        <property name="currentJobPosition" fetch="JOIN" view="position-view"/>
-        <property name="vacancy" view="_minimal">
-            <property name="openClose"/>
-            <property name="projectName" view="_minimal">
-                <property name="projectDepartment" view="_minimal"/>
-            </property>
-            <property name="companyDepartament" view="_minimal"/>
-        </property>
-        <property name="project" view="_local">
-            <property name="projectDepartment" view="_minimal"/>
-        </property>
-        <property name="companyDepartment" view="_local"/>
-        <property name="iteractionType" view="_minimal">
+        <property name="project" fetch="BATCH" view="_local"/>
+        <property name="companyDepartment" fetch="BATCH" view="_minimal"/>
+        <property name="iteractionType" fetch="JOIN" view="_minimal">
             <property name="number"/>
             <property name="pic"/>
         </property>
-        <property name="recrutier" view="_minimal"/>
+        <property name="communicationMethod"/>
+        <property name="comment"/>
+        <property name="recrutier" fetch="JOIN" view="_minimal"/>
         <property name="recrutierName"/>
         <property name="addType"/>
         <property name="addDate"/>
@@ -309,7 +287,7 @@
         <property name="iteractionChain" view="_minimal"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_base">
-        <property name="iteractionTree" view="_minimal">
+        <property name="iteractionTree" fetch="BATCH" view="_minimal">
             <property name="addFlag"/>
             <property name="addType"/>
             <property name="addField"/>
@@ -383,5 +361,11 @@
     <view entity="itpearls_SubscribeCandidateAction" name="subscribeCandidateAction-view" extends="_local">
         <property name="candidate" view="_minimal"/>
         <property name="subscriber" view="_minimal"/>
+    </view>
+    <view entity="itpearls_JobCandidate" name="jobCandidate-view-iteraction-list" extends="_local"/>
+    <view entity="itpearls_OpenPosition" name="openPosition-view-iteraction-list" extends="_local">
+        <property name="companyDepartament" fetch="JOIN" view="_local">
+            <property name="companyName" fetch="JOIN" view="_local"/>
+        </property>
     </view>
 </views>
