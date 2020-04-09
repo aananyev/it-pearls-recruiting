@@ -58,6 +58,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Boolean transferFlag = false;
     private IteractionList oldIteraction = null;
     private JobCandidate candidate = null;
+    private Boolean askFlag = false;
+    private Boolean askFlag2 = false;
 
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
@@ -95,6 +97,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private SubscribeDateService subscribeDateService;
     @Inject
     private TextField<BigDecimal> numberIteractionField;
+    @Inject
+    private Label<String> companyLabel;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -208,6 +212,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
+        String labetText = "<h2><b>" + vacancyFiels.getValue().getCompanyName().getCompanyShortName() + "</b>: " +
+                vacancyFiels.getValue().getCompanyDepartament().getDepartamentRuName() + "</h2>";
+
+        companyLabel.setValue( labetText );
 
         if( !isClosedVacancy() ) {
             BigDecimal a = new BigDecimal("0.0");
@@ -245,18 +253,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             iteractionTypesLc.load();
         } else {
-            dialogs.createOptionDialog()
-                    .withCaption( "WARNING" )
-                    .withMessage( "Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\n" +
-                            "Отменить действие?" )
-                    .withActions( new DialogAction(DialogAction.Type.YES,
-                                    Action.Status.PRIMARY).withHandler(e -> {
-                                        this.vacancyFiels.setValue( null );
-                                        vacancyFiels.focus();
+            if( !askFlag2 ) {
+                askFlag2 = true;
 
-                            }),
-                            new DialogAction(DialogAction.Type.NO))
-                    .show();
+                dialogs.createOptionDialog()
+                        .withCaption("WARNING")
+                        .withMessage("Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\n" +
+                                "Отменить действие?")
+                        .withActions(new DialogAction(DialogAction.Type.YES,
+                                        Action.Status.PRIMARY).withHandler(e -> {
+                                    this.vacancyFiels.setValue(null);
+                                    vacancyFiels.focus();
+
+                                }),
+                                new DialogAction(DialogAction.Type.NO))
+                        .show();
+            }
         }
         // проверить - подписан ли ресерчер на это позицию
         if( getRoleService.isUserRoles( userSession.getUser(), "Researcher" ) )
@@ -264,38 +276,44 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void isUnsubscribedPosition( OpenPosition op ) {
-        Integer a = dataManager
-                .loadValue( "select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
-                        "where e.reacrutier = :recrutier and " +
-                        "e.openPosition = :openPosition and " +
-                        ":nowDate between e.startDate and e.endDate", Integer.class )
-                .parameter( "recrutier", userSession.getUser()  )
-                .parameter( "openPosition", op )
-                .parameter( "nowDate", new Date() )
-                .one();
+        if( !askFlag ) {
+            // ну типа уже спрашивали
+            askFlag = true;
 
-        if( a == 0 ) {
-            if( vacancyFiels.getValue() != null ) {
-                dialogs.createOptionDialog()
-                        .withCaption("ВНИМАНИЕ !")
-                        .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
-                                ".\nПодписаться до будущео понедельника?")
-                        .withActions( new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                                            screenBuilders.editor( RecrutiesTasks.class, this )
-                                                    .newEntity()
-                                                    .withScreenClass( RecrutiesTasksEdit.class )
-                                                    .withLaunchMode( OpenMode.DIALOG )
-                                                    .withInitializer( data -> {
-                                                        data.setReacrutier( userSession.getUser() );
-                                                        data.setOpenPosition( op );
-                                                        data.setStartDate( new Date() );
-                                                        data.setEndDate( subscribeDateService.dateOfNextMonday() );
-                                                    })
-                                                    .build()
-                                                    .show();
-                                }),
-                                new DialogAction( DialogAction.Type.NO ) )
-                        .show();
+            Integer a = dataManager
+                    .loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
+                            "where e.reacrutier = :recrutier and " +
+                            "e.openPosition = :openPosition and " +
+                            ":nowDate between e.startDate and e.endDate", Integer.class)
+                    .parameter("recrutier", userSession.getUser())
+                    .parameter("openPosition", op)
+                    .parameter("nowDate", new Date())
+                    .one();
+
+            if ( a == 0 ) {
+                if (vacancyFiels.getValue() != null) {
+
+                    dialogs.createOptionDialog()
+                            .withCaption("ВНИМАНИЕ !")
+                            .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
+                                    ".\nПодписаться до будущео понедельника?")
+                            .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                                        screenBuilders.editor(RecrutiesTasks.class, this)
+                                                .newEntity()
+                                                .withScreenClass(RecrutiesTasksEdit.class)
+                                                .withLaunchMode(OpenMode.DIALOG)
+                                                .withInitializer(data -> {
+                                                    data.setReacrutier(userSession.getUser());
+                                                    data.setOpenPosition(op);
+                                                    data.setStartDate(new Date());
+                                                    data.setEndDate(subscribeDateService.dateOfNextMonday());
+                                                })
+                                                .build()
+                                                .show();
+                                    }),
+                                    new DialogAction(DialogAction.Type.NO))
+                            .show();
+                }
             }
         }
     }
@@ -396,6 +414,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if( commentField.getValue() == null )
             commentField.setValue( "" );
+
+        getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getCompanyDepartament() );
 
         sendMessages();
     }
@@ -603,6 +623,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         addString.setVisible( false );
         addInteger.setVisible( false );
         addDate.setVisible( false );
+
+        askFlag = false;
+        askFlag2 = false;
+    }
+
+    @Subscribe("vacancyFiels")
+    public void onVacancyFielsValueChange1(HasValue.ValueChangeEvent<OpenPosition> event) {
 
     }
 

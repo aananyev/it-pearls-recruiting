@@ -49,11 +49,14 @@
     <layout expand="editActions" spacing="true">
         <groupBox spacing="true">
             <hbox spacing="true" width="100%">
-                <hbox width="30%">
+                <hbox width="40%">
                     <textField id="numberIteractionField" dataContainer="iteractionListDc" property="numberIteraction"
                                editable="false" caption="msg://msgNumber"/>
                     <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
                                editable="false" caption="msg://msgDate"/>
+                </hbox>
+                <hbox>
+                    <label id="companyLabel" align="MIDDLE_LEFT" htmlEnabled="true"/>
                 </hbox>
             </hbox>
         </groupBox>
