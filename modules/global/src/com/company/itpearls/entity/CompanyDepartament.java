@@ -12,7 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@NamePattern("%s|companyName")
+@NamePattern("%s|departamentRuName")
 @Table(name = "ITPEARLS_COMPANY_DEPARTAMENT", indexes = {
         @Index(name = "IDX_ITPEARLS_COMPANY_DEPARTAMENT", columnList = "DEPARTAMENT_RU_NAME")
 })

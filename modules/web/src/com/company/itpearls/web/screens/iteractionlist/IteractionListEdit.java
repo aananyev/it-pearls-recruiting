@@ -406,8 +406,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             Integer i = Integer.parseInt(s);
 
             candidateField.getValue().setStatus(i);
-//            getEditedEntity().getCandidate().setStatus(i);
         }
+
+        sendMessages();
     }
 
     @Subscribe
@@ -416,8 +417,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             commentField.setValue( "" );
 
         getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getCompanyDepartament() );
-
-        sendMessages();
     }
 
     private void sendMessages() {

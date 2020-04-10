@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList"
-                    view="iteractionList-current-position">
+                    view="iteractionList-view">
             <loader id="iteractionListsDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
                 <condition>
@@ -39,16 +39,15 @@
             </actions>
             <columns>
                 <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
-                <column id="candidate" caption="msg://msgCandidate" width="250"/>
+                <column id="candidate.fullName" caption="msg://msgCandidate" width="250"/>
                 <column id="iteractionType" caption="msg://msgIteractionType" width="250"/>
-                <column id="companyDepartment.companyName.companyShortName" caption="msg://msgCompanyShortName"/>
+                <column id="vacancy.companyName.companyShortName" caption="msg://msgCompanyShortName"/>
                 <column id="vacancy" caption="mainMsg://msgVacancy" width="250"/>
                 <column id="recrutier" caption="msg://msgRecrutier"/>
                 <column id="dateIteraction" caption="msg://msgDate">
                     <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                 </column>
                 <column id="project" visible="false"/>
-                <column id="companyDepartment"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

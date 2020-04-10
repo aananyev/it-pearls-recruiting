@@ -20,7 +20,7 @@ order by e.numberIteraction desc]]>
                 </query>
             </loader>
         </collection>
-        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="jobCandidate-view">
+        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_local">
             <loader id="jobCandidatesDl">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e
