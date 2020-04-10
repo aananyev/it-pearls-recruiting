@@ -43,8 +43,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private TextField<String> vacansyNameField;
     @Inject
-    private CollectionLoader<JobCandidate> jobCandidatesDl;
-    @Inject
     private CollectionLoader<RecrutiesTasks> recrutiesTasksesDl;
     @Inject
     private EmailService emailService;
@@ -78,14 +76,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            jobCandidatesDl.setParameter("candidatePersonPosition", getEditedEntity().getPositionType().getPositionRuName());
             recrutiesTasksesDl.setParameter("openPosition", getEditedEntity().getVacansyName());
         } else {
-            jobCandidatesDl.removeParameter("candidatePersonPosition");
             recrutiesTasksesDl.removeParameter("openPosition");
         }
-
-        jobCandidatesDl.load();
+        recrutiesTasksesDl.load();
 
         booOpenClosePosition = getEditedEntity().getOpenClose();
 

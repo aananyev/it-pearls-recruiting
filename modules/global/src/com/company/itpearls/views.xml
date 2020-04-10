@@ -14,7 +14,9 @@
     </view>
     <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
         <property name="companyName" fetch="JOIN" view="_local">
-            <property name="departmentOfCompany" view="_minimal"/>
+            <property name="departmentOfCompany" view="_local">
+                <property name="companyName" view="_local"/>
+            </property>
         </property>
         <property name="departamentHrDirector" view="_minimal"/>
         <property name="departamentDirector" view="_minimal"/>
@@ -45,10 +47,16 @@
         <property name="positionRuName"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
-        <property name="companyName" fetch="JOIN" view="_local"/>
+        <property name="cityPosition" fetch="JOIN" view="_local"/>
+        <property name="positionType" fetch="JOIN" view="_local"/>
+        <property name="projectName" fetch="JOIN" view="_local"/>
+        <property name="companyName" fetch="BATCH" view="_local"/>
         <property name="companyDepartament" fetch="BATCH" view="_local"/>
+        <property name="skillsList" fetch="JOIN" view="_local"/>
+        <property name="candidates" fetch="BATCH" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
+        <property name="currentCompany" fetch="JOIN" view="_local"/>
         <property name="personPosition" view="_local"/>
         <property name="cityOfResidence" view="_minimal"/>
         <property name="iteractionList" view="_minimal">
@@ -335,8 +343,10 @@
         <property name="countryOfCompany" view="_minimal"/>
     </view>
     <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-view" extends="_local">
-        <property name="reacrutier" view="_local"/>
-        <property name="openPosition" view="openPosition-view"/>
+        <property name="reacrutier" fetch="JOIN" view="_local"/>
+        <property name="openPosition" fetch="JOIN" view="_local">
+            <property name="vacansyName"/>
+        </property>
         <property name="createdBy"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">

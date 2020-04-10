@@ -18,13 +18,13 @@
 order by e.positionRuName]]></query>
             </loader>
         </collection>
-        <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_minimal">
+        <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_local">
             <loader id="projectNamesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Project e where e.projectIsClosed is null
 or e.projectIsClosed=false order by e.projectName]]></query>
             </loader>
         </collection>
-        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
+        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_local">
             <loader id="companyNamesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e
 order by e.comanyName]]></query>
@@ -39,38 +39,31 @@ order by e.departamentRuName]]>
                 </query>
             </loader>
         </collection>
-        <collection id="projectDc" class="com.company.itpearls.entity.Project" view="project-view">
+        <collection id="projectDc" class="com.company.itpearls.entity.Project" view="_local">
             <loader id="companyOfDepatmentDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Project e where e.endProjectDate is not null]]></query>
             </loader>
         </collection>
-        <collection id="cityOfCompanyDc" class="com.company.itpearls.entity.Company" view="company-view">
+        <collection id="cityOfCompanyDc" class="com.company.itpearls.entity.Company" view="_local">
             <loader id="cityOfCompanyDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e]]></query>
             </loader>
         </collection>
-        <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_minimal">
+        <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_local">
             <loader id="citiesDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_City e order by e.cityRuName]]></query>
             </loader>
         </collection>
-        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="JobCandidate-person-position">
-            <loader id="jobCandidatesDl" cacheable="true">
-                <query>
-                    <![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]>
-                    <condition>
-                        <c:jpql>
-                            <c:where>e.personPosition.positionRuName like :candidatePersonPosition</c:where>
-                        </c:jpql>
-                    </condition>
-                </query>
-            </loader>
-        </collection>
-        <collection id="taskRecrutior" class="com.company.itpearls.entity.RecrutiesTasks" view="recrutiesTasks-view">
+        <collection id="taskRecrutior" class="com.company.itpearls.entity.RecrutiesTasks">
+            <view extends="_local">
+                <property name="reacrutier" fetch="BATCH" view="_local"/>
+                <property name="openPosition" fetch="BATCH" view="_local"/>
+            </view>
             <loader id="recrutiesTasksesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_RecrutiesTasks e
-order by e.reacrutier, e.endDate desc]]>
+where CURRENT_DATE between e.startDate and e.endDate
+order by e.endDate desc]]>
                     <condition>
                         <c:jpql>
                             <c:where>e.openPosition.vacansyName = :openPosition</c:where>
@@ -189,17 +182,6 @@ order by e.reacrutier, e.endDate desc]]>
                         <action type="edit" id="edit"/>
                         <action id="remove" type="remove"/>
                     </actions>
-                </table>
-            </tab>
-            <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
-                <table id="openPositionCandidatesTable" height="300px" width="100%" dataContainer="jobCandidatesDc">
-                    <columns>
-                        <column id="fullName" caption="mainMsg://msgFullName"/>
-                        <column id="personPosition"/>
-                        <column id="cityOfResidence"/>
-                        <column id="currentCompany"/>
-                        <column id="birdhDate" caption="mainMsg://msgBirthday"/>
-                    </columns>
                 </table>
             </tab>
         </tabSheet>
