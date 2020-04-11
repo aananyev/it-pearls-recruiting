@@ -7,7 +7,15 @@
     <data readOnly="true">
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList"
-                    view="iteractionList-view">
+        >
+            <view extends="_local">
+                <property name="vacancy" fetch="JOIN" view="_local">
+                    <property name="cityPosition" fetch="JOIN" view="_local"/>
+                </property>
+                <property name="companyDepartment" fetch="JOIN" view="_local"/>
+                <property name="iteractionType" fetch="JOIN" view="_local"/>
+                <property name="recrutier" fetch="JOIN" view="_local"/>
+            </view>
             <loader id="iteractionListsDl">
                 <query>
                     <![CDATA[select e from itpearls_IteractionList e
@@ -20,7 +28,10 @@ order by e.numberIteraction desc]]>
                 </query>
             </loader>
         </collection>
-        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_local">
+        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate">
+            <view extends="_local">
+                <property name="personPosition" fetch="JOIN" view="_local"/>
+            </view>
             <loader id="jobCandidatesDl">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e
@@ -51,12 +62,11 @@ order by e.fullName]]>
             <columns>
                 <column id="numberIteraction" caption="msg://msgNumber"/>
                 <column id="dateIteraction" caption="msg://msgDate"/>
-                <column id="iteractionType" caption="msg://msgIteractionType"/>
-                <column id="companyDepartment.companyName"/>
+                <column id="vacancy.vacansyName" />
+                <column id="iteractionType.iterationName" caption="msg://msgIteractionType"/>
+                <column id="companyDepartment.departamentRuName"/>
                 <column id="vacancy.cityPosition"/>
-                <column id="vacancy" />
-                <column id="recrutierName" caption="msg://msgRecrutier" visible="false"/>
-                <column id="recrutier"/>
+                <column id="recrutier.name" caption="msg://msgRecrutier" visible="false"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

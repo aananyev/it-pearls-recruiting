@@ -16,25 +16,25 @@
             <collection id="jobCandidateSkillsesDc" property="skills"/>
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
-            <loader id="personPositionsLc">
+            <loader id="personPositionsLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Position e
 order by e.positionRuName]]></query>
             </loader>
         </collection>
         <collection id="currentCompaniesDc" class="com.company.itpearls.entity.Company" view="_minimal">
-            <loader id="currentCompaniesLc">
+            <loader id="currentCompaniesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e
 order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="positionCountriesDc" class="com.company.itpearls.entity.Country" view="_minimal">
-            <loader id="positionCountriesLc">
+            <loader id="positionCountriesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Country e
 order by e.countryRuName]]></query>
             </loader>
         </collection>
-        <collection id="citiesDc" class="com.company.itpearls.entity.City" view="city-view">
-            <loader id="citiesDl">
+        <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_local">
+            <loader id="citiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e
 order by e.cityRuName]]>
@@ -43,7 +43,7 @@ order by e.cityRuName]]>
         </collection>
         <collection id="iteractionListsDc" class="com.company.itpearls.entity.IteractionList"
                     view="iteractionList-job-candidate">
-            <loader id="iteractionListsDl">
+            <loader id="iteractionListsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
                     <condition>
@@ -56,7 +56,7 @@ order by e.cityRuName]]>
         </collection>
         <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs"
                     view="socialNetworkURLs-view">
-            <loader id="socialNetworkURLsesDl">
+            <loader id="socialNetworkURLsesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_SocialNetworkURLs e ]]>
                     <condition>
@@ -68,7 +68,7 @@ order by e.cityRuName]]>
             </loader>
         </collection>
         <collection id="jobHistoriesDc" class="com.company.itpearls.entity.JobHistory" view="jobHistory-view">
-            <loader id="jobHistoriesDl">
+            <loader id="jobHistoriesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobHistory e ]]>
                     <condition>
@@ -150,6 +150,15 @@ order by e.cityRuName]]>
                             </row>
                         </rows>
                     </grid>
+                </groupBox>
+                <groupBox>
+                    <table id="socialNetworkTable" height="160px" width="100%" dataContainer="socialNetworkURLsesDc"
+                           editable="true">
+                        <columns>
+                            <column id="socialNetworkURL.socialNetwork"/>
+                            <column id="networkURLS"/>
+                        </columns>
+                    </table>
                 </groupBox>
             </tab>
             <tab id="tabContactInfo" caption="msg://msgTabContactInfo" margin="true,false,false,false" spacing="true">
@@ -247,27 +256,6 @@ order by e.cityRuName]]>
                             <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
                         </buttonsPanel>
                     </table>
-                </groupBox>
-            </tab>
-            <tab caption="mainMsg://msgSocialNetworks" margin="true,false,false,false" spacing="true" id="tabSocialNetworks"
-                 description="mainMsg://msgSocialNetwork">
-                <groupBox spacing="true">
-                <table id="socialNetworkURLsTable" height="300px" width="100%" dataContainer="socialNetworkURLsesDc">
-                    <columns>
-                        <column id="socialNetworkURL.socialNetwork"/>
-                        <column id="networkURLS"/>
-                    </columns>
-                    <buttonsPanel>
-                        <button id="createButtonSocialNetwork" action="socialNetworkURLsTable.create"/>
-                        <button id="editButtonSocialNetwork" action="socialNetworkURLsTable.edit"/>
-                        <button id="removeButtonSocialNetwork" action="socialNetworkURLsTable.remove"/>
-                    </buttonsPanel>
-                    <actions>
-                        <action type="create" id="create"/>
-                        <action type="edit" id="edit"/>
-                        <action type="remove" id="remove"/>
-                    </actions>
-                </table>
                 </groupBox>
             </tab>
             <tab caption="msg://msgJobHistory" margin="true,false,false,false" spacing="true" id="tabJobHistory">

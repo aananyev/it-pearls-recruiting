@@ -4,6 +4,7 @@ import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.ContentMode;
+import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.web.app.main.MainScreen;

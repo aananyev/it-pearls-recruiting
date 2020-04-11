@@ -1,26 +1,24 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.BeanNotificationEvent;
-import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
-import com.company.itpearls.web.screens.subscribecandidateaction.SubscribeCandidateActionEdit;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
-import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -88,6 +86,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private UserSession userSession;
     @Inject
     private Notifications notifications;
+    @Inject
+    private CollectionContainer<SocialNetworkURLs> socialNetworkURLsesDc;
+    @Inject
+    private Table<SocialNetworkURLs> socialNetworkTable;
 
     private Boolean ifCandidateIsExist() {
        // вдруг такой кандидат уже есть
@@ -98,6 +100,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                .list();
 
        return candidates.isEmpty() ? false : true;
+    }
+
+    @Subscribe
+    public void onBeforeShow1(BeforeShowEvent event) {
+       // основные социальные сети показать
+        List<SocialNetworkURLs> socialNetwork = getEditedEntity().getSocialNetwork();
+
+        List<String> networksName = Arrays.asList("LinkedIn", "FaceBook", "VK.com", "GitHub", "Habr");
+
+        if( socialNetwork.size() == 0 ) {
+            for( String s : networksName ) {
+                SocialNetworkURLs e = new SocialNetworkURLs();
+            }
+        }
+
+        socialNetworkURLsesDl.load();
     }
 
 
