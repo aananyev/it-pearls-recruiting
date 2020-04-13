@@ -178,6 +178,7 @@
             <property name="positionCountry" view="_minimal"/>
             <property name="iteractionList" view="_minimal"/>
             <property name="jobHistory" view="_minimal"/>
+            <property name="candidateCv" view="_local"/>
         </property>
         <property name="resumePosition" view="_minimal"/>
         <property name="toVacancy" view="_minimal"/>
@@ -357,7 +358,9 @@
         </property>
         <property name="fileOwner" view="_local"/>
         <property name="fileType" view="_local"/>
-        <property name="candidateCV" view="_minimal"/>
+        <property name="candidateCV" view="_minimal">
+            <property name="resumePosition" fetch="AUTO" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_FileType" name="fileType-view" extends="_local"/>
     <view entity="itpearls_SocialNetworkType" name="socialNetworkType-view" extends="_local"/>

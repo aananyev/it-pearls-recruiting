@@ -23,7 +23,15 @@
                 </query>
             </loader>
         </collection>
-        <collection id="candidateCVsDc" class="com.company.itpearls.entity.CandidateCV" view="_minimal">
+        <collection id="candidateCVsDc" class="com.company.itpearls.entity.CandidateCV">
+            <view extends="_local">
+                <property name="candidate" fetch="JOIN" view="_local">
+                    <property name="personPosition" fetch="JOIN" view="_local"/>
+                </property>
+                <property name="resumePosition" fetch="JOIN" view="_local"/>
+                <property name="owner" fetch="JOIN" view="_local"/>
+                <property name="originalFileCV" fetch="BATCH" view="_local"/>
+            </view>
             <loader id="candidateCVsLc">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e]]>
