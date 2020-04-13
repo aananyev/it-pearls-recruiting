@@ -33,7 +33,12 @@ order by e.comanyName]]></query>
 order by e.countryRuName]]></query>
             </loader>
         </collection>
-        <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_local">
+        <collection id="citiesDc" class="com.company.itpearls.entity.City">
+            <view extends="_local">
+                <property name="cityRegion" fetch="JOIN" view="_local">
+                    <property name="regionCountry" fetch="JOIN" view="_local"/>
+                </property>
+            </view>
             <loader id="citiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e

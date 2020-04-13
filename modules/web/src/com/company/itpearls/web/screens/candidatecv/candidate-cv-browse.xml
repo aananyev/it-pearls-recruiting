@@ -3,7 +3,7 @@
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://browseCaption"
         focusComponent="candidateCVsTable"
-        messagesPack="com.company.itpearls.web.screens.candidatecv" icon="USER">
+        messagesPack="com.company.itpearls.web.screens.candidatecv" icon="VCARD">
     <data readOnly="true">
         <collection id="candidateCVsDc"
                     class="com.company.itpearls.entity.CandidateCV"
