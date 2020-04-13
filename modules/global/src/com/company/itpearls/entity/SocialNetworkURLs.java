@@ -6,7 +6,6 @@ import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|networkName")
 @Table(name = "ITPEARLS_SOCIAL_NETWORK_UR_LS")
@@ -17,15 +16,14 @@ public class SocialNetworkURLs extends StandardEntity {
     @Column(name = "NETWORK_NAME", length = 80)
     protected String networkName;
 
-    @NotNull
-    @Column(name = "NETWORK_URLS", nullable = false, unique = true, length = 80)
+    @Column(name = "NETWORK_URLS", unique = true, length = 80)
     protected String networkURLS;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_CANDIDATE_ID")
     protected JobCandidate jobCandidate;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SOCIAL_NETWORK_URL_ID")
     protected SocialNetworkType socialNetworkURL;

@@ -96,7 +96,9 @@
             <property name="currentPosition" view="_local"/>
             <property name="currentCompany" view="_local"/>
         </property>
-        <property name="socialNetwork" fetch="JOIN" view="_local"/>
+        <property name="socialNetwork" fetch="JOIN" view="_local">
+            <property name="socialNetworkURL" fetch="BATCH" view="_minimal"/>
+        </property>
         <property name="candidateCv" fetch="BATCH" view="_local">
             <property name="candidate" view="_minimal"/>
             <property name="resumePosition" view="_minimal"/>

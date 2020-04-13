@@ -10,7 +10,7 @@ create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
     DELETED_BY varchar(50),
     --
     NETWORK_NAME varchar(80),
-    NETWORK_URLS varchar(80) not null,
+    NETWORK_URLS varchar(80),
     JOB_CANDIDATE_ID uuid,
     SOCIAL_NETWORK_URL_ID uuid,
     --

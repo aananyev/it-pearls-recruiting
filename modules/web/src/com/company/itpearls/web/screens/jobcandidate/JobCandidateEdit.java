@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.PersistenceHelper;
@@ -98,27 +99,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
        return candidates.isEmpty() ? false : true;
     }
 
-//    @Inject
-//    private CollectionContainer<SocialNetworkURLs> socialNetworkURLs;
-/*
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
        // основные социальные сети показать
         List<SocialNetworkURLs> socialNetwork = getEditedEntity().getSocialNetwork();
+        List<SocialNetworkType> socialNetworkType = dataManager.load(SocialNetworkType.class).list();
 
-        List<String> networksName = Arrays.asList("LinkedIn", "FaceBook", "VK.com", "GitHub", "Habr");
-        // socialNetworkURLs = metadata.create( SocialNetworkURLs.class );
+        // тут либо если не новая запись, то проверить на наличие других записей, либо если новая запись, то пофигу
+        if( !PersistenceHelper.isNew(getEditedEntity()) ? socialNetwork.size() == 0 : true ) {
+            for( SocialNetworkType s : socialNetworkType ) {
+                SocialNetworkURLs socialNetworkURLs = dataManager.create( SocialNetworkURLs.class );
 
-        if( socialNetwork.size() == 0 ) {
-            for( String s : networksName ) {
-                // collectionContainer.add
+                socialNetworkURLs.setSocialNetworkURL( s );
+                socialNetworkURLs.setNetworkName( s.getSocialNetwork() );
+                socialNetworkURLs.setJobCandidate( getEditedEntity() );
+
+                dataManager.commit(new CommitContext(socialNetworkURLs));
             }
         }
-
-//        socialNetworkURLsesDl.load();
     }
-
-*/
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false );
 

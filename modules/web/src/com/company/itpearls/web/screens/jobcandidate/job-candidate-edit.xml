@@ -122,10 +122,8 @@ order by e.cityRuName]]>
                     <table id="socialNetworkTable" height="160px" width="100%" dataContainer="jobCandidateSocialNetworksDc"
                            editable="true">
                         <columns>
-                            <column id="networkName"/>
-                            <column id="networkURLS"/>
-                            <column id="jobCandidate"/>
-                            <column id="socialNetworkURL"/>
+                            <column id="networkName" maxTextLength="15"/>
+                            <column id="networkURLS" editable="true"/>
                         </columns>
                     </table>
                 </groupBox>
