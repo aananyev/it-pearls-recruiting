@@ -5,8 +5,6 @@
         <item screen="itpearls_IteractionList.browse"/>
         <item screen="itpearls_JobCandidate.browse"/>
         <item screen="itpearls_CandidateCV.browse"/>
-        <item screen="itpearls_SocialNetworkURLs.browse"/>
-        <item screen="itpearls_JobHistory.browse" openType="NEW_TAB"/>
     </menu>
     <menu id="application-project" insertAfter="application-hunting">
         <item screen="itpearls_Person.browse"/>

@@ -4,21 +4,14 @@ import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.Region;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Company;
-
-import javax.inject.Inject;
 
 @UiController("itpearls_Company.edit")
 @UiDescriptor("company-edit.xml")
 @EditedEntityContainer("companyDc")
 @LoadDataBeforeShow
 public class CompanyEdit extends StandardEditor<Company> {
-    @Inject
-    private CollectionContainer<City> cityOfCompaniesDc;
-    @Inject
-    private CollectionContainer<Region> regionOfCompaniesDc;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {

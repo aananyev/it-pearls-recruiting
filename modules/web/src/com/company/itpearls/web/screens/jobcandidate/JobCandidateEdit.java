@@ -1,8 +1,8 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
-import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
@@ -33,17 +33,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Dialogs dialogs;
     @Inject
-    private CollectionLoader<IteractionList> iteractionListsDl;
-    @Inject
     private Label<String> labelCV;
     @Named("tabIteraction")
     private VBoxLayout tabIteraction;
     @Named("tabResume")
     private VBoxLayout tabResume;
-    @Inject
-    private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
-    @Inject
-    private CollectionLoader<JobHistory> jobHistoriesDl;
     @Inject
     private DateField<Date> birdhDateField;
     @Inject
@@ -86,10 +80,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private UserSession userSession;
     @Inject
     private Notifications notifications;
-    @Inject
-    private CollectionContainer<SocialNetworkURLs> socialNetworkURLsesDc;
+//    @Inject
+//    private CollectionContainer<SocialNetworkURLs> socialNetworkURLsesDc;
     @Inject
     private Table<SocialNetworkURLs> socialNetworkTable;
+    @Inject
+    private Metadata metadata;
 
     private Boolean ifCandidateIsExist() {
        // вдруг такой кандидат уже есть
@@ -102,23 +98,27 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
        return candidates.isEmpty() ? false : true;
     }
 
+//    @Inject
+//    private CollectionContainer<SocialNetworkURLs> socialNetworkURLs;
+/*
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
        // основные социальные сети показать
         List<SocialNetworkURLs> socialNetwork = getEditedEntity().getSocialNetwork();
 
         List<String> networksName = Arrays.asList("LinkedIn", "FaceBook", "VK.com", "GitHub", "Habr");
+        // socialNetworkURLs = metadata.create( SocialNetworkURLs.class );
 
         if( socialNetwork.size() == 0 ) {
             for( String s : networksName ) {
-                SocialNetworkURLs e = new SocialNetworkURLs();
+                // collectionContainer.add
             }
         }
 
-        socialNetworkURLsesDl.load();
+//        socialNetworkURLsesDl.load();
     }
 
-
+*/
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false );
 
@@ -214,17 +214,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
        if(!PersistenceHelper.isNew(getEditedEntity())) {
-           if(!getEditedEntity().getFullName().equals(null)) {
-
-                iteractionListsDl.setParameter("candidate", getEditedEntity().getId());
-                iteractionListsDl.load();
-
-                socialNetworkURLsesDl.setParameter( "candidate", getEditedEntity().getId() );
-                socialNetworkURLsesDl.load();
-
-                jobHistoriesDl.setParameter( "candidate", getEditedEntity().getFullName() );
-                jobHistoriesDl.load();
-
+           if(!getEditedEntity().getFullName().equals( "" ) ) {
                 // устранить проблему с Страной
                if( getEditedEntity().getPositionCountry() == null )
                    getEditedEntity().setPositionCountry(
@@ -233,11 +223,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 if( getEditedEntity().getFullName() == null )
                     getEditedEntity().setFullName("");
            } else {
-               iteractionListsDl.removeParameter( "candidate" );
-               socialNetworkURLsesDl.removeParameter( "candidate" );
-               jobHistoriesDl.removeParameter( "candidate" );
            }
-
            // заблокировать вкладки с резюме и итеракицями
            tabIteraction.setVisible( true );
            tabResume.setVisible( true );
