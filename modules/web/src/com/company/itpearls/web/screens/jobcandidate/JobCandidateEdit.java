@@ -10,10 +10,7 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataContext;
-import com.haulmont.cuba.gui.model.InstanceContainer;
+import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
@@ -60,8 +57,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private TextField<String> phoneField;
     @Inject
-    private LookupPickerField<Country> positionCountryField;
-    @Inject
     private TextField<String> skypeNameField;
     @Inject
     private TextField<String> telegramNameField;
@@ -73,20 +68,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> labelQualityPercent;
     @Named("jobCityCandidateField.lookup")
     private LookupAction jobCityCandidateFieldLookup;
-    @Named("positionCountryField.lookup")
-    private LookupAction positionCountryFieldLookup;
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
     private UserSession userSession;
     @Inject
     private Notifications notifications;
-//    @Inject
-//    private CollectionContainer<SocialNetworkURLs> socialNetworkURLsesDc;
     @Inject
     private Table<SocialNetworkURLs> socialNetworkTable;
     @Inject
     private Metadata metadata;
+    @Inject
+    private CollectionPropertyContainer<SocialNetworkURLs> jobCandidateSocialNetworksDc;
 
     private Boolean ifCandidateIsExist() {
        // вдруг такой кандидат уже есть
@@ -106,15 +99,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         List<SocialNetworkType> socialNetworkType = dataManager.load(SocialNetworkType.class).list();
 
         // тут либо если не новая запись, то проверить на наличие других записей, либо если новая запись, то пофигу
-        if( !PersistenceHelper.isNew(getEditedEntity()) ? socialNetwork.size() == 0 : true ) {
+        if( !PersistenceHelper.isNew(getEditedEntity() ) ) {
+            if (socialNetwork.size() == 0) {
+                for (SocialNetworkType s : socialNetworkType) {
+                    SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
+
+                    socialNetworkURLs.setSocialNetworkURL(s);
+                    socialNetworkURLs.setNetworkName(s.getSocialNetwork());
+                    socialNetworkURLs.setJobCandidate(getEditedEntity());
+
+                    dataManager.commit(new CommitContext(socialNetworkURLs));
+                }
+            }
+        } else {
+            // отключить таблицу от контейнера
             for( SocialNetworkType s : socialNetworkType ) {
-                SocialNetworkURLs socialNetworkURLs = dataManager.create( SocialNetworkURLs.class );
 
-                socialNetworkURLs.setSocialNetworkURL( s );
-                socialNetworkURLs.setNetworkName( s.getSocialNetwork() );
-                socialNetworkURLs.setJobCandidate( getEditedEntity() );
-
-                dataManager.commit(new CommitContext(socialNetworkURLs));
             }
         }
     }
@@ -188,7 +188,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void setPercentLabel() {
         // вычислить процент заполнения карточки кандидата
-        Integer qualityPercent = setQualityPercent() * 100 / 15;
+        Integer qualityPercent = setQualityPercent() * 100 / 14;
 
         if( !PersistenceHelper.isNew( getEditedEntity() ) ) {
             labelQualityPercent.setValue("| Процент заполнения карточки: " + qualityPercent.toString()
@@ -196,29 +196,55 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Subscribe("jobCityCandidateField")
-    public void onJobCityCandidateFieldValueChange(HasValue.ValueChangeEvent<City> event) {
-        if(!getEditedEntity().getCityOfResidence().equals(null)
-            && PersistenceHelper.isNew(getEditedEntity())) {
-                getEditedEntity().setPositionCountry(getEditedEntity()
-                    .getCityOfResidence()
-                    .getCityRegion()
-                    .getRegionCountry());
+    @Subscribe("emailField")
+    public void onEmailFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if( emailField.getValue() != null ) {
+            skypeNameField.setRequired( false );
+            phoneField.setRequired( false );
+        } else {
+            if( skypeNameField.getValue() == null && phoneField.getValue() == null ) {
+                skypeNameField.setRequired(true);
+                phoneField.setRequired(true);
+                emailField.setRequired(true);
+            }
         }
+
     }
-    
-    
+
+    @Subscribe("skypeNameField")
+    public void onSkypeNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+       if( skypeNameField.getValue() != null ) {
+           phoneField.setRequired( false );
+           emailField.setRequired( false );
+       } else {
+           if ( phoneField.getValue() == null && emailField.getValue() == null ) {
+               skypeNameField.setRequired(true);
+               phoneField.setRequired(true);
+               emailField.setRequired(true);
+           }
+       }
+    }
+
+    @Subscribe("phoneField")
+    public void onPhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if( phoneField.getValue() != null ) {
+            emailField.setRequired( false );
+            skypeNameField.setRequired( false );
+        } else {
+            if( phoneField.getValue() == null && skypeNameField.getValue() == null ) {
+                skypeNameField.setRequired(true);
+                phoneField.setRequired(true);
+                emailField.setRequired(true);
+            }
+        }
+
+    }
 
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
        if(!PersistenceHelper.isNew(getEditedEntity())) {
            if(!getEditedEntity().getFullName().equals( "" ) ) {
-                // устранить проблему с Страной
-               if( getEditedEntity().getPositionCountry() == null )
-                   getEditedEntity().setPositionCountry(
-                           getEditedEntity().getCityOfResidence().getCityRegion().getRegionCountry() );
-
                 if( getEditedEntity().getFullName() == null )
                     getEditedEntity().setFullName("");
            } else {
@@ -286,9 +312,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             qPercent = ++qPercent;
 
         if( phoneField.getValue() != null )             // 10
-            qPercent = ++qPercent;
-
-        if( positionCountryField.getValue() != null )   // 11
             qPercent = ++qPercent;
 
         if( skypeNameField.getValue() != null )         // 12

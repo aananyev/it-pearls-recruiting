@@ -27,7 +27,7 @@ order by e.positionRuName]]></query>
 order by e.comanyName]]></query>
             </loader>
         </collection>
-        <collection id="positionCountriesDc" class="com.company.itpearls.entity.Country" view="_local">
+        <collection id="positionCountriesDc" class="com.company.itpearls.entity.Country" view="_minimal">
             <loader id="positionCountriesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Country e
 order by e.countryRuName]]></query>
@@ -107,13 +107,6 @@ order by e.cityRuName]]>
                             <row>
                                 <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="100%"
                                            caption="msg://msgBirthDate"/>
-                                <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
-                                                   dataContainer="jobCandidateDc" property="positionCountry" width="100%"
-                                                   caption="msg://msgPositionCountry" required="true">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                    </actions>
-                                </lookupPickerField>
                             </row>
                         </rows>
                     </grid>
@@ -135,19 +128,19 @@ order by e.cityRuName]]>
                         <rows>
                             <row>
                                 <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="100%"
-                                           caption="msg://msgEmail"/>
+                                           caption="msg://msgEmail" required="true"/>
                                 <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
                                            width="100%" caption="msg://msgTelegramAccount"/>
                             </row>
                             <row>
                                 <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="100%"
-                                           caption="msg://msgPhone"/>
+                                           caption="msg://msgPhone" required="true"/>
                                 <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName" width="100%"
                                            caption="msg://msgViberAccount"/>
                             </row>
                             <row>
                                 <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName" width="100%"
-                                           caption="msg://msgSkypeAccaunt"/>
+                                           caption="msg://msgSkypeAccaunt" required="true"/>
                                 <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName" width="100%"
                                            caption="msg://msgWhatsAppAccount"/>
                             </row>

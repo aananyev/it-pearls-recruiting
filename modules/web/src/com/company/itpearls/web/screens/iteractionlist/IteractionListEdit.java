@@ -15,6 +15,7 @@ import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
+import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
@@ -99,6 +100,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private TextField<BigDecimal> numberIteractionField;
     @Inject
     private Label<String> companyLabel;
+    @Inject
+    private InstanceLoader<IteractionList> iteractionListDl;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -662,7 +665,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         screenBuilders.editor( IteractionList.class, this )
                 .newEntity()
-                // .withScreenId( classIL )
                 .withScreenClass( IteractionListEdit.class )
                 .withLaunchMode( OpenMode.NEW_TAB )
                 .withInitializer( e -> {
@@ -672,6 +674,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 })
                 .build()
                 .show();
+
+        iteractionListDl.load();
     }
 
     public void setTransferFlag( Boolean flag ) {
