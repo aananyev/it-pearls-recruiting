@@ -16,7 +16,7 @@ public class SocialNetworkURLs extends StandardEntity {
     @Column(name = "NETWORK_NAME", length = 80)
     protected String networkName;
 
-    @Column(name = "NETWORK_URLS", unique = true, length = 80)
+    @Column(name = "NETWORK_URLS", length = 80)
     protected String networkURLS;
 
     @ManyToOne(fetch = FetchType.LAZY)

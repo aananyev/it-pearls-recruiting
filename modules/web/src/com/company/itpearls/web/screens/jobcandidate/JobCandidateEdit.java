@@ -1,6 +1,8 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.cuba.core.app.DataService;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
@@ -13,12 +15,14 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import org.eclipse.persistence.internal.sessions.CommitManager;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @UiController("itpearls_JobCandidate.edit")
@@ -80,6 +84,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Metadata metadata;
     @Inject
     private CollectionPropertyContainer<SocialNetworkURLs> jobCandidateSocialNetworksDc;
+    @Inject
+    private DataService dataService;
 
     private Boolean ifCandidateIsExist() {
        // вдруг такой кандидат уже есть
@@ -96,7 +102,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onBeforeShow1(BeforeShowEvent event) {
        // основные социальные сети показать
         List<SocialNetworkURLs> socialNetwork = getEditedEntity().getSocialNetwork();
-        List<SocialNetworkType> socialNetworkType = dataManager.load(SocialNetworkType.class).list();
+        List<SocialNetworkType> socialNetworkType = dataManager.load(SocialNetworkType.class)
+                .list();
 
         // тут либо если не новая запись, то проверить на наличие других записей, либо если новая запись, то пофигу
         if( !PersistenceHelper.isNew(getEditedEntity() ) ) {
@@ -112,11 +119,46 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             }
         } else {
-            // отключить таблицу от контейнера
-            for( SocialNetworkType s : socialNetworkType ) {
+            /* for( SocialNetworkType s : socialNetworkType ) {
 
+                SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
+
+                socialNetworkURLs.setSocialNetworkURL(s);
+                socialNetworkURLs.setNetworkName(s.getSocialNetwork());
+                socialNetworkURLs.setJobCandidate(getEditedEntity());
+
+                jobCandidateSocialNetworksDc.getMutableItems().add( socialNetworkURLs );
+            } */
+        }
+    }
+
+    protected boolean isRequiredAddresField() {
+        Boolean isEmptySN = false;
+
+        for( SocialNetworkURLs a : jobCandidateSocialNetworksDc.getItems() ) {
+            if( a.getNetworkURLS() != null) {
+                isEmptySN = true;
+                break;
             }
         }
+        return  ( ( emailField.getValue() == null ) &&
+                ( skypeNameField.getValue() == null ) &&
+                ( phoneField.getValue() == null ) ) && !isEmptySN ;
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+/*
+        if( PersistenceHelper.isNew(getEditedEntity())) {
+            CommitContext commitContext = new CommitContext(getEditedEntity());
+
+            for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
+                commitContext.addInstanceToCommit(s);
+            }
+
+            dataService.commit(commitContext);
+        }
+ */
     }
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false );
@@ -198,52 +240,52 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("emailField")
     public void onEmailFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        if( emailField.getValue() != null ) {
-            skypeNameField.setRequired( false );
-            phoneField.setRequired( false );
-        } else {
-            if( skypeNameField.getValue() == null && phoneField.getValue() == null ) {
-                skypeNameField.setRequired(true);
-                phoneField.setRequired(true);
-                emailField.setRequired(true);
-            }
-        }
-
+        enableDisableContacts();
     }
 
     @Subscribe("skypeNameField")
     public void onSkypeNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-       if( skypeNameField.getValue() != null ) {
-           phoneField.setRequired( false );
-           emailField.setRequired( false );
-       } else {
-           if ( phoneField.getValue() == null && emailField.getValue() == null ) {
-               skypeNameField.setRequired(true);
-               phoneField.setRequired(true);
-               emailField.setRequired(true);
-           }
-       }
+        enableDisableContacts();
     }
 
     @Subscribe("phoneField")
     public void onPhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        if( phoneField.getValue() != null ) {
-            emailField.setRequired( false );
-            skypeNameField.setRequired( false );
-        } else {
-            if( phoneField.getValue() == null && skypeNameField.getValue() == null ) {
-                skypeNameField.setRequired(true);
-                phoneField.setRequired(true);
-                emailField.setRequired(true);
-            }
-        }
+        enableDisableContacts();
+    }
 
+    @Subscribe("socialNetworkTable")
+    public void onSocialNetworkTableSelection(Table.SelectionEvent<SocialNetworkURLs> event) {
+        enableDisableContacts();
+
+    }
+
+
+
+    protected void enableDisableContacts() {
+        // ХОТЯ БЫ ОДИН КОНТАКТ
+        if( isRequiredAddresField() ) {
+            skypeNameField.setRequired(true);
+            phoneField.setRequired(true);
+            emailField.setRequired(true);
+        } else {
+            skypeNameField.setRequired(false);
+            phoneField.setRequired(false);
+            emailField.setRequired(false);
+        }
     }
 
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-       if(!PersistenceHelper.isNew(getEditedEntity())) {
+/*
+        // ВРЕМЕННО!!!
+        skypeNameField.setRequired(false);
+        phoneField.setRequired(false);
+        emailField.setRequired(false);
+ */
+        enableDisableContacts();
+
+        if(!PersistenceHelper.isNew(getEditedEntity())) {
            if(!getEditedEntity().getFullName().equals( "" ) ) {
                 if( getEditedEntity().getFullName() == null )
                     getEditedEntity().setFullName("");
@@ -330,12 +372,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     }
 
-    @Subscribe
-    public void onBeforeClose1(BeforeCloseEvent event) {
-        setFullNameCandidate();
-    }
-
-    
     @Subscribe(id = "jobCandidateDc", target = Target.DATA_CONTAINER)
     private void onJobCandidateDcItemChange(InstanceContainer.ItemChangeEvent<JobCandidate> event) {
         setFullNameCandidate();

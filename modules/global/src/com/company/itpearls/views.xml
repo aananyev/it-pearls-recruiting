@@ -46,12 +46,11 @@
     <view entity="itpearls_Position" name="position-view" extends="_minimal">
         <property name="positionRuName"/>
     </view>
-    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_minimal" systemProperties="true">
         <property name="cityPosition" fetch="JOIN" view="_local"/>
         <property name="positionType" fetch="JOIN" view="_local"/>
         <property name="projectName" fetch="JOIN" view="_local"/>
         <property name="companyName" fetch="BATCH" view="_local"/>
-        <property name="companyDepartament" fetch="BATCH" view="_local"/>
         <property name="skillsList" fetch="JOIN" view="_local"/>
         <property name="candidates" fetch="BATCH" view="_local"/>
     </view>

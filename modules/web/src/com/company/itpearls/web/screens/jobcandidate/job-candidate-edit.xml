@@ -111,15 +111,6 @@ order by e.cityRuName]]>
                         </rows>
                     </grid>
                 </groupBox>
-                <groupBox>
-                    <table id="socialNetworkTable" height="160px" width="100%" dataContainer="jobCandidateSocialNetworksDc"
-                           editable="true">
-                        <columns>
-                            <column id="networkName" maxTextLength="15"/>
-                            <column id="networkURLS" editable="true"/>
-                        </columns>
-                    </table>
-                </groupBox>
             </tab>
             <tab id="tabContactInfo" caption="msg://msgTabContactInfo" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true" caption="msg://msgContactInfo">
@@ -146,6 +137,15 @@ order by e.cityRuName]]>
                             </row>
                         </rows>
                     </grid>
+                </groupBox>
+                <groupBox>
+                    <table id="socialNetworkTable" height="160px" width="100%"
+                           editable="true" dataContainer="jobCandidateSocialNetworksDc">
+                        <columns>
+                            <column id="networkName"/>
+                            <column id="networkURLS" editable="true"/>
+                        </columns>
+                    </table>
                 </groupBox>
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
