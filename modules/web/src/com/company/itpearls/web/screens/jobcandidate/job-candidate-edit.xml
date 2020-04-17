@@ -22,7 +22,10 @@
 order by e.positionRuName]]></query>
             </loader>
         </collection>
-        <collection id="currentCompaniesDc" class="com.company.itpearls.entity.Company" view="_minimal">
+        <collection id="currentCompaniesDc" class="com.company.itpearls.entity.Company">
+            <view extends="_local">
+                <property name="companyOwnership" fetch="JOIN" view="_minimal"/>
+            </view>
             <loader id="currentCompaniesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e
 order by e.comanyName]]></query>
@@ -44,6 +47,24 @@ order by e.countryRuName]]></query>
                 <query>
                     <![CDATA[select e from itpearls_City e
 order by e.cityRuName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs">
+            <view extends="_local">
+                <property name="jobCandidate" fetch="BATCH" view="_minimal"/>
+                <property name="socialNetworkURL" fetch="JOIN" view="_minimal">
+                    <property name="socialNetworkURL"/>
+                </property>
+            </view>
+            <loader id="socialNetworkURLsesDl">
+                <query>
+                    <![CDATA[select e from itpearls_SocialNetworkURLs e order by e.networkName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.jobCandidate = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -239,7 +260,7 @@ order by e.cityRuName]]>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick" icon="BELL"/>
-            <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
+            <button id="okAndCheck" caption="OK" invoke="onBtnOkAndCheck" icon="OK"/>
             <button action="windowClose"/>
         </hbox>
     </layout>

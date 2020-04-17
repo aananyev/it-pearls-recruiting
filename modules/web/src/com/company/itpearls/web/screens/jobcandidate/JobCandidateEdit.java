@@ -78,14 +78,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataContext dataContext;
 
     private Boolean ifCandidateIsExist() {
+        setFullNameCandidate();
        // вдруг такой кандидат уже есть
        List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
-               .query("select e from itpearls_JobCandidate e where e.fullName like :fullName")
-               .parameter("fullName", getEditedEntity().getFullName())
+               .query("select e from itpearls_JobCandidate e where e.firstName like :firstName and " +
+                       "e.secondName like :secondName")
+               .parameter("firstName", firstNameField.getValue() )
+               .parameter("secondName", secondNameField.getValue() )
                .view("jobCandidate-view")
                .list();
 
-       return candidates.isEmpty() ? false : true;
+       return candidates.size() == 0 ? false : true;
     }
 
     @Subscribe
@@ -462,6 +465,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (needDublicateDialog()) {
                 close(WINDOW_COMMIT_AND_CLOSE_ACTION);
             }
+        }
+    }
+
+    public void onBtnOkAndCheck() {
+        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+            if (needDublicateDialog()) {
+                close(WINDOW_COMMIT_AND_CLOSE_ACTION);
+            }
+        } else {
+            close(WINDOW_COMMIT_AND_CLOSE_ACTION);
         }
     }
 }
