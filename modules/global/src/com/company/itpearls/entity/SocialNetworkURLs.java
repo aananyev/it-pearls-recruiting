@@ -28,12 +28,12 @@ public class SocialNetworkURLs extends StandardEntity {
     @JoinColumn(name = "SOCIAL_NETWORK_URL_ID")
     protected SocialNetworkType socialNetworkURL;
 
-    public SocialNetworkType getSocialNetworkURL() {
-        return socialNetworkURL;
-    }
-
     public void setSocialNetworkURL(SocialNetworkType socialNetworkURL) {
         this.socialNetworkURL = socialNetworkURL;
+    }
+
+    public SocialNetworkType getSocialNetworkURL() {
+        return socialNetworkURL;
     }
 
     public JobCandidate getJobCandidate() {

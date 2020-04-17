@@ -65,7 +65,9 @@
         </property>
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true">
-        <property name="currentCompany" fetch="JOIN" view="_local"/>
+        <property name="currentCompany" fetch="JOIN" view="_local">
+            <property name="companyOwnership" fetch="JOIN" view="_minimal"/>
+        </property>
         <property name="personPosition" fetch="JOIN" view="_local"/>
         <property name="cityOfResidence" fetch="JOIN" view="_local">
             <property name="cityRegion" fetch="JOIN" view="_local"/>
@@ -96,8 +98,9 @@
             <property name="currentPosition" view="_local"/>
             <property name="currentCompany" view="_local"/>
         </property>
-        <property name="socialNetwork" fetch="JOIN" view="_local">
-            <property name="socialNetworkURL" fetch="BATCH" view="_minimal"/>
+        <property name="socialNetwork" fetch="JOIN" view="_minimal">
+            <property name="networkURLS"/>
+            <property name="socialNetworkURL" fetch="JOIN" view="_local"/>
         </property>
         <property name="candidateCv" fetch="BATCH" view="_local">
             <property name="candidate" view="_minimal"/>

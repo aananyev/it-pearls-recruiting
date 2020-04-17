@@ -1,28 +1,20 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
-import com.haulmont.cuba.core.app.DataService;
-import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.core.global.CommitContext;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
-import org.eclipse.persistence.internal.sessions.CommitManager;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @UiController("itpearls_JobCandidate.edit")
@@ -77,15 +69,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private UserSession userSession;
     @Inject
-    private Notifications notifications;
-    @Inject
     private Table<SocialNetworkURLs> socialNetworkTable;
     @Inject
     private Metadata metadata;
     @Inject
     private CollectionPropertyContainer<SocialNetworkURLs> jobCandidateSocialNetworksDc;
     @Inject
-    private DataService dataService;
+    private DataContext dataContext;
 
     private Boolean ifCandidateIsExist() {
        // вдруг такой кандидат уже есть
@@ -107,9 +97,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         // тут либо если не новая запись, то проверить на наличие других записей, либо если новая запись, то пофигу
         if( !PersistenceHelper.isNew(getEditedEntity() ) ) {
-            if (socialNetwork.size() == 0) {
-                for (SocialNetworkType s : socialNetworkType) {
-                    SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
+            if (socialNetwork.size() < socialNetworkType.size() ) {
+                SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
+
+                for (SocialNetworkType s : socialNetworkType ) {
 
                     socialNetworkURLs.setSocialNetworkURL(s);
                     socialNetworkURLs.setNetworkName(s.getSocialNetwork());
@@ -119,8 +110,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             }
         } else {
-            /* for( SocialNetworkType s : socialNetworkType ) {
+            dataContext.create(SocialNetworkURLs.class);
+            List<SocialNetworkURLs> sn = new ArrayList<SocialNetworkURLs>();
 
+            for( SocialNetworkType s : socialNetworkType ) {
                 SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
 
                 socialNetworkURLs.setSocialNetworkURL(s);
@@ -128,7 +121,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 socialNetworkURLs.setJobCandidate(getEditedEntity());
 
                 jobCandidateSocialNetworksDc.getMutableItems().add( socialNetworkURLs );
-            } */
+                sn.add(socialNetworkURLs);
+            }
+
+            dataContext.merge( sn );
         }
     }
 
@@ -147,8 +143,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     @Subscribe
-    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-/*
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         if( PersistenceHelper.isNew(getEditedEntity())) {
             CommitContext commitContext = new CommitContext(getEditedEntity());
 
@@ -156,9 +151,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 commitContext.addInstanceToCommit(s);
             }
 
-            dataService.commit(commitContext);
+            dataManager.commit(commitContext);
         }
- */
     }
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false );
@@ -256,7 +250,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe("socialNetworkTable")
     public void onSocialNetworkTableSelection(Table.SelectionEvent<SocialNetworkURLs> event) {
         enableDisableContacts();
-
     }
 
 
@@ -277,12 +270,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-/*
-        // ВРЕМЕННО!!!
-        skypeNameField.setRequired(false);
-        phoneField.setRequired(false);
-        emailField.setRequired(false);
- */
         enableDisableContacts();
 
         if(!PersistenceHelper.isNew(getEditedEntity())) {
@@ -315,6 +302,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
         // кто последникй рекрутер
         // последний контакт с кандидатом
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+       secondNameField.setValue( replaceE_E(secondNameField.getValue() ) );
+       firstNameField.setValue( replaceE_E(firstNameField.getValue() ) );
+       if( middleNameField.getValue() != null )
+           middleNameField.setValue( replaceE_E(middleNameField.getValue() ) );
+    }
+
+    String replaceE_E( String str ) {
+        return str.replace( 'ё', 'e' );
     }
 
     @Subscribe(target = Target.DATA_CONTEXT)

@@ -12,7 +12,8 @@
             <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
-            <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
+            <collection id="jobCandidateSocialNetworksDc" property="socialNetwork">
+            </collection>
             <collection id="jobCandidateSkillsesDc" property="skills"/>
         </instance>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_local">
