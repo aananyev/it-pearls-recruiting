@@ -99,8 +99,12 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe("checkBoxFlag")
     public void onCheckBoxFlagValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if( checkBoxFlag.getValue() )
-            checkBoxCallDialog.setValue( false );
+        if( checkBoxFlag.getValue() ) {
+            checkBoxCallDialog.setValue(false);
+        }
+
+        radioButtonAddType.setRequired( checkBoxFlag.getValue() );
+        textFieldCaption.setRequired( checkBoxFlag.getValue() );
 
         setDisableElements();
     }

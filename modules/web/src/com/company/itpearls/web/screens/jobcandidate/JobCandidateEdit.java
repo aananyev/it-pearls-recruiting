@@ -126,8 +126,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 jobCandidateSocialNetworksDc.getMutableItems().add( socialNetworkURLs );
                 sn.add(socialNetworkURLs);
             }
-
-            dataContext.merge( sn );
         }
     }
 
@@ -140,6 +138,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 break;
             }
         }
+
         return  ( ( emailField.getValue() == null ) &&
                 ( skypeNameField.getValue() == null ) &&
                 ( phoneField.getValue() == null ) ) && !isEmptySN ;
@@ -446,6 +445,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withActions(
                             new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
                                     .withHandler(e -> {
+                                        this.commitChanges();
                                         returnE.set(true);
                                     }),
                             new DialogAction(DialogAction.Type.NO)
@@ -459,22 +459,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return returnE.get();
     }
 
-    @Subscribe("windowCommitAndCloseButton")
-    private void onOkButtonClick(Button.ClickEvent event) {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
-            if (needDublicateDialog()) {
-                close(WINDOW_COMMIT_AND_CLOSE_ACTION);
-            }
-        }
-    }
-
     public void onBtnOkAndCheck() {
         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             if (needDublicateDialog()) {
-                close(WINDOW_COMMIT_AND_CLOSE_ACTION);
+                closeWithCommit();
+                return;
             }
         } else {
-            close(WINDOW_COMMIT_AND_CLOSE_ACTION);
+            closeWithCommit();
+            return;
         }
+        closeWithDiscard();
+        return;
     }
 }
