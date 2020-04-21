@@ -35,7 +35,7 @@ order by e.fullName]]>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="iteractionListsTable"
-            spacing="true" maxHeight="90%" minHeight="90%" height="90%">
+            spacing="true">
         <filter id="filter"
                 applyTo="iteractionListsTable"
                 dataLoader="iteractionListsDl" visible="false">

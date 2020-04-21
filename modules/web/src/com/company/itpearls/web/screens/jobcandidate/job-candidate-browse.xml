@@ -52,7 +52,7 @@ order by e.secondName, e.firstName]]>
                 <column id="currentCompany" caption="msg://msgCompany"/>
                 <column id="cityOfResidence" caption="msg://msgCityOfResidence"/>
                 <column id="createTs" caption="msg://msgDate">
-                    <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter" format="dd.mm.yyyy"
+                    <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter" format="dd.MM.yyyy"
                                useUserTimezone="true"/>
                 </column>
             </columns>
