@@ -58,7 +58,7 @@ order by e.fullName]]>
                 </column>
                 <column id="vacancy.vacansyName" caption="mainMsg://msgVacancy" width="250"/>
                 <column id="iteractionType.iterationName" caption="msg://msgIteractionType" width="250"/>
-                <column id="vacancy.projectName" width="200"/>
+                <column id="vacancy.projectName" width="150"/>
                 <column id="recrutier.name" caption="msg://msgRecrutier" width="150"/>
             </columns>
             <rowsCount/>

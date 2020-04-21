@@ -279,6 +279,8 @@ create table ITPEARLS_PERSON (
     WATSUP_NAME varchar(15),
     POSITION_COUNTRY_ID uuid,
     PERSON_POSITION_ID uuid,
+    COMPANY_DEPARTMENT_ID uuid,
+    SEND_RESUME_TO_EMAIL boolean,
     --
     primary key (ID)
 )^
@@ -392,6 +394,7 @@ create table ITPEARLS_OPEN_POSITION (
     NUMBER_POSITION integer,
     COMMENT_ text,
     PRIORITY integer,
+    PAYMENTS_TYPE integer,
     --
     primary key (ID)
 )^

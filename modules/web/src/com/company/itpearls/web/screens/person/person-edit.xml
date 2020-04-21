@@ -28,26 +28,28 @@ order by e.positionRuName]]></query>
         <scrollBox id="scrollBox" spacing="true">
             <form id="form" dataContainer="personDc">
                 <column width="250px">
-                    <textField id="firstNameField" property="firstName"/>
-                    <textField id="middleNameField" property="middleName"/>
-                    <textField id="secondNameField" property="secondName"/>
-                    <dateField id="birdhDateField" property="birdhDate"/>
-                    <textField id="emailField" property="email"/>
-                    <textField id="phoneField" property="phone"/>
+                    <textField id="firstNameField" property="firstName" caption="mainMsg://msgFirstName"/>
+                    <textField id="middleNameField" property="middleName" caption="mainMsg://msgMiddleName"/>
+                    <textField id="secondNameField" property="secondName" caption="mainMsg://msgSecondName"/>
+                    <lookupPickerField id="personFieldCompanyDepartment" dataContainer="personDc" property="companyDepartment"
+                                       caption="mainMsg://msgCompanyDepartment"/>
+                    <dateField id="birdhDateField" property="birdhDate" caption="mainMsg://msgBirthday"/>
+                    <textField id="emailField" property="email" caption="mainMsg://msgEmail"/>
+                    <textField id="phoneField" property="phone" caption="mainMsg://msgPhone"/>
                     <textField id="mobilePhoneField" caption="msg://msgMobPhone" dataContainer="personDc"
                                property="mobPhone"/>
-                    <textField id="skypeNameField" property="skypeName"/>
-                    <textField id="telegramNameField" property="telegramName"/>
-                    <textField id="wiberNameField" property="wiberName"/>
-                    <textField id="watsupNameField" property="watsupName"/>
+                    <textField id="skypeNameField" property="skypeName" caption="mainMsg://msgSkype"/>
+                    <textField id="telegramNameField" property="telegramName" caption="mainMsg://msgTelegram"/>
+                    <textField id="wiberNameField" property="wiberName" caption="mainMsg://msgViber"/>
+                    <textField id="watsupNameField" property="watsupName" caption="mainMsg://msgWhatsApp"/>
                     <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
-                                       property="positionCountry">
+                                       property="positionCountry" caption="mainMsg://msgCountry">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
                     <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
-                                       property="personPosition">
+                                       property="personPosition" caption="mainMsg://msgPersonPosition">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>

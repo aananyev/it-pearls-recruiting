@@ -72,6 +72,26 @@ order by e.endDate desc]]>
                 </query>
             </loader>
         </collection>
+        <collection id="personsDc" class="com.company.itpearls.entity.Person">
+            <view extends="_local">
+                <property name="positionCountry" fetch="JOIN" view="_local">
+                    <property name="countryOfRegion" fetch="JOIN" view="_local">
+                        <property name="regionOfCity" view="_local"/>
+                    </property>
+                </property>
+                <property name="personPosition" fetch="JOIN" view="_local"/>
+            </view>
+            <loader id="personsDl">
+                <query>
+                    <![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.companyDepartment = :companyDepartment</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -139,6 +159,41 @@ order by e.endDate desc]]>
                     <textField id="openPositionFieldSalaryMax" dataContainer="openPositionDc" property="salaryMax"
                                caption="msg://msgSalaryMax" width="100%"/>
                 </hbox>
+            </tab>
+            <tab id="tabPayments" caption="msg://msgPayments" margin="true,false,false,false" spacing="true">
+                <groupBox id="groupBoxPaymentsResearcher" orientation="horizontal" spacing="true" caption="msg://msgResearcherPayment"/>
+                <groupBox id="groupBoxPaymentsRecrutier" spacing="true" caption="msg://msgRecrutierSalary"/>
+                <groupBox id="groupBoxPaymentsDetail" orientation="horizontal" spacing="true"
+                          caption="msg://msgPaymentsDetail">
+                    <hbox spacing="true">
+                        <vbox spacing="true">
+                            <radioButtonGroup id="radioButtonGroupPaymentsType" dataContainer="openPositionDc"
+                                              property="paymentsType" caption="msg://msgPaymentType"/>
+                            <textField/>
+                        </vbox>
+                        <vbox spacing="true">
+                            <radioButtonGroup id="radioButtonGroupResearcherSalary" caption="msg://msgResearcherSalary"/>
+                            <textField/>
+                        </vbox>
+                        <vbox spacing="true">
+                            <radioButtonGroup
+                                    id="radioButtonGroupRecrutierSalary" caption="msg://msgRecrutierSalary"/>
+                            <textField/>
+                        </vbox>
+                    </hbox>
+                </groupBox>
+                <groupBox id="groupBoxCompanyContacts" orientation="horizontal" spacing="true"
+                          caption="msg://msgCompanyContacts">
+                    <table id="personTable" height="150px" width="100%" dataContainer="personsDc">
+                        <columns>
+                            <column id="sendResumeToEmail" caption="msg://msgSendResume" width="80" editable="true"/>
+                            <column id="secondName"/>
+                            <column id="firstName"/>
+                            <column id="personPosition.positionRuName"/>
+                            <column id="positionCountry.countryRuName"/>
+                        </columns>
+                    </table>
+                </groupBox>
             </tab>
             <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tabJobDescription">
                 <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="300pt"

@@ -42,6 +42,7 @@
     <view entity="itpearls_Person" name="person-view" extends="_local">
         <property name="positionCountry" view="_minimal"/>
         <property name="personPosition" view="_minimal"/>
+        <property name="companyDepartment" view="_minimal"/>
     </view>
     <view entity="itpearls_Position" name="position-view" extends="_minimal">
         <property name="positionRuName"/>
@@ -53,6 +54,7 @@
         <property name="companyName" fetch="BATCH" view="_local"/>
         <property name="skillsList" fetch="JOIN" view="_local"/>
         <property name="candidates" fetch="BATCH" view="_local"/>
+        <property name="paymentsType"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" fetch="JOIN" view="_local"/>
@@ -98,9 +100,8 @@
             <property name="currentPosition" view="_local"/>
             <property name="currentCompany" view="_local"/>
         </property>
-        <property name="socialNetwork" fetch="JOIN" view="_minimal">
-            <property name="networkURLS"/>
-            <property name="socialNetworkURL" fetch="JOIN" view="_local"/>
+        <property name="socialNetwork" fetch="JOIN" view="_local">
+            <property name="socialNetworkURL" view="_local"/>
         </property>
         <property name="candidateCv" fetch="BATCH" view="_local">
             <property name="candidate" view="_minimal"/>

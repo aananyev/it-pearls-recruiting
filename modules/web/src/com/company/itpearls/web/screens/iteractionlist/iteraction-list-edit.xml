@@ -43,6 +43,13 @@
                 </query>
             </loader>
         </collection>
+        <collection id="usersDc" class="com.haulmont.cuba.security.entity.User" view="_local">
+            <loader id="usersDl">
+                <query>
+                    <![CDATA[select e from sec$User e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -104,7 +111,7 @@
                                    property="communicationMethod"/>
                         <lookupPickerField id="recrutierField"
                                            caption="msg://msgRecrutier" width="100%" dataContainer="iteractionListDc"
-                                           property="recrutier">
+                                           property="recrutier" optionsContainer="usersDc">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>

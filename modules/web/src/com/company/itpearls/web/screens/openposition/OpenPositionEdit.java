@@ -4,6 +4,7 @@ import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.service.GetUserRoleService;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
@@ -71,6 +72,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private GetRoleService getRoleService;
     @Inject
     private UserSession userSession;
+    @Inject
+    private CollectionLoader<Person> personsDl;
+    @Inject
+    private Table<Person> personTable;
+    @Inject
+    private RadioButtonGroup radioButtonGroupPaymentsType;
+    @Inject
+    private RadioButtonGroup radioButtonGroupResearcherSalary;
+    @Inject
+    private RadioButtonGroup radioButtonGroupRecrutierSalary;
+    @Inject
+    private GroupBoxLayout groupBoxPaymentsDetail;
+    @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
+    private GroupBoxLayout groupBoxPaymentsResearcher;
+    @Inject
+    private GroupBoxLayout groupBoxPaymentsRecrutier;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -90,8 +109,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("companyDepartamentField")
     public void onCompanyDepartamentFieldValueChange(HasValue.ValueChangeEvent<CompanyDepartament> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (getEditedEntity().getCompanyDepartament().getDepartamentRuName() != null)
+            if (getEditedEntity().getCompanyDepartament().getDepartamentRuName() != null) {
                 getEditedEntity().setCompanyName(getEditedEntity().getCompanyDepartament().getCompanyName());
+
+                personTable.setVisible(false);
+            }
+        } else {
+            if( companyDepartamentField.getValue() != null ) {
+                personsDl.setParameter("companyDepartment", companyDepartamentField.getValue());
+                personsDl.load();
+
+                personTable.setVisible(true);
+            }
         }
     }
 
@@ -370,8 +399,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return "alan@itpearls.ru;tmd@itpearls.ru;tdg@itpearls.ru";
     }
 
-    @Subscribe
-    public void onInit(InitEvent event) {
+    private void setRadioButtons() {
         Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
         priorityMap.put("Paused", 0);
@@ -381,6 +409,53 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         priorityMap.put("Critical", 4);
 
         priorityField.setOptionsMap( priorityMap );
+
+        Map<String, Integer> paymentsType = new LinkedHashMap<>();
+        paymentsType.put( "Фиксированная оплата", 0);
+        paymentsType.put( "Процент от зарплаты кандидата", 1);
+        paymentsType.put( "Процент от зарплаты кандидата + НДФЛ 13%", 2);
+
+        radioButtonGroupPaymentsType.setOptionsMap( paymentsType );
+
+        Map<String, Integer> researcherSalary = new LinkedHashMap<>();
+        researcherSalary.put( "Фиксированная комиссия", 0 );
+        researcherSalary.put( "Процент комиссии компании", 1 );
+
+        radioButtonGroupResearcherSalary.setOptionsMap( researcherSalary );
+
+        Map<String, Integer> recrutierSalary = new LinkedHashMap<>();
+        recrutierSalary.put( "Фиксированная комиссия", 0 );
+        recrutierSalary.put( "Процент комиссии компании", 1 );
+
+        radioButtonGroupRecrutierSalary.setOptionsMap( recrutierSalary );
+    }
+
+    private void setHiddeField() {
+        // скрыть менеджерские пункты
+       if( isUserRoles( userSession.getUser(), "Manager" ) ) {
+           groupBoxPaymentsDetail.setVisible( true );
+           groupBoxPaymentsResearcher.setVisible( true );
+           groupBoxPaymentsRecrutier.setVisible( true );
+       } else {
+           groupBoxPaymentsDetail.setVisible( false );
+
+           if( isUserRoles( userSession.getUser(), "Researcher " ) ) {
+               groupBoxPaymentsResearcher.setVisible( true );
+               groupBoxPaymentsRecrutier.setVisible( false );
+           } else {
+               if( isUserRoles( userSession.getUser(), "Recrutier" ) ) {
+                   groupBoxPaymentsResearcher.setVisible(false);
+                   groupBoxPaymentsRecrutier.setVisible(true);
+               }
+           }
+       }
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        setRadioButtons();
+
+        setHiddeField();
     }
 
     @Install(to = "priorityField", subject = "optionIconProvider")
@@ -428,5 +503,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
 
         opScreen.show();
+    }
+
+    public Boolean isUserRoles(User user, String role) {
+        Collection<String> s = userSessionSource.getUserSession().getRoles();
+        Boolean c = false;
+        // установить поле рекрутера
+        for (String a : s) {
+            if (a.contains(role)) {
+                c = true;
+                break;
+            }
+        }
+        return c;
     }
 }

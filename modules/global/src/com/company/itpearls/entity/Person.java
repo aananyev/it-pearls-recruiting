@@ -54,15 +54,39 @@ public class Person extends StandardEntity {
     @Column(name = "WATSUP_NAME", unique = true, length = 15)
     protected String watsupName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "POSITION_COUNTRY_ID")
     protected Country positionCountry;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMPANY_DEPARTMENT_ID")
+    protected CompanyDepartament companyDepartment;
+
+    @Column(name = "SEND_RESUME_TO_EMAIL")
+    protected Boolean sendResumeToEmail;
+
+    public Boolean getSendResumeToEmail() {
+        return sendResumeToEmail;
+    }
+
+    public void setSendResumeToEmail(Boolean sendResumeToEmail) {
+        this.sendResumeToEmail = sendResumeToEmail;
+    }
+
+    public CompanyDepartament getCompanyDepartment() {
+        return companyDepartment;
+    }
+
+    public void setCompanyDepartment(CompanyDepartament companyDepartment) {
+        this.companyDepartment = companyDepartment;
+    }
 
     public String getMobPhone() {
         return mobPhone;

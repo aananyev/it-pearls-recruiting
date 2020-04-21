@@ -105,15 +105,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // тут либо если не новая запись, то проверить на наличие других записей, либо если новая запись, то пофигу
         if( !PersistenceHelper.isNew(getEditedEntity() ) ) {
             if (socialNetwork.size() < socialNetworkType.size() ) {
-                SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
+
+                List<SocialNetworkType> type = dataManager
+                        .load(SocialNetworkType.class)
+                        .query( "select e.socialNetworkURL " +
+                                "from itpearls_SocialNetworkURLs e " +
+                                "where e.jobCandidate = :candidate" )
+                        .parameter( "candidate", getEditedEntity() )
+                        .list();
 
                 for (SocialNetworkType s : socialNetworkType ) {
+                    SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
 
-                    socialNetworkURLs.setSocialNetworkURL(s);
-                    socialNetworkURLs.setNetworkName(s.getSocialNetwork());
-                    socialNetworkURLs.setJobCandidate(getEditedEntity());
+                    if( !type.contains(s) ) {
+                        socialNetworkURLs.setSocialNetworkURL(s);
+                        socialNetworkURLs.setNetworkName(s.getSocialNetwork());
+                        socialNetworkURLs.setJobCandidate(getEditedEntity());
 
-                    dataManager.commit(new CommitContext(socialNetworkURLs));
+                        dataManager.commit( socialNetworkURLs );
+                    }
                 }
             }
         } else {

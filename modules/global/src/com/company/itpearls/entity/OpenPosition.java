@@ -82,6 +82,17 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.DENY)
     protected List<RecrutiesTasks> candidates;
 
+    @Column(name = "PAYMENTS_TYPE")
+    protected Integer paymentsType;
+
+    public Integer getPaymentsType() {
+        return paymentsType;
+    }
+
+    public void setPaymentsType(Integer paymentsType) {
+        this.paymentsType = paymentsType;
+    }
+
     public void setCandidates(List<RecrutiesTasks> candidates) {
         this.candidates = candidates;
     }

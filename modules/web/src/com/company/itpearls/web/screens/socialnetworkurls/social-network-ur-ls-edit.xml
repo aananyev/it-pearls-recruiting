@@ -18,6 +18,13 @@
                   view="socialNetworkURLs-view">
             <loader/>
         </instance>
+        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+            <loader id="jobCandidatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -32,7 +39,7 @@
                     </actions>
                 </lookupPickerField>
                 <lookupPickerField id="jobCandidateField" property="jobCandidate" width="50%"
-                                   dataContainer="socialNetworkURLsDc">
+                                   dataContainer="socialNetworkURLsDc" optionsContainer="jobCandidatesDc">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                         <action id="open" type="picker_open"/>
