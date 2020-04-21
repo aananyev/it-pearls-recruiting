@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
         focusComponent="someFilesesTable"
-        messagesPack="com.company.itpearls.web.screens.somefiles" icon="FILE">
+        messagesPack="com.company.itpearls.web.screens.somefiles" icon="COPY">
     <data readOnly="true">
         <collection id="someFilesesDc"
                     class="com.company.itpearls.entity.SomeFiles"

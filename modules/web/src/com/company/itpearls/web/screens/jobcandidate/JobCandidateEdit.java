@@ -6,6 +6,8 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -76,6 +78,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionPropertyContainer<SocialNetworkURLs> jobCandidateSocialNetworksDc;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -113,7 +117,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             }
         } else {
-            dataContext.create(SocialNetworkURLs.class);
             List<SocialNetworkURLs> sn = new ArrayList<SocialNetworkURLs>();
 
             for( SocialNetworkType s : socialNetworkType ) {
@@ -126,6 +129,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 jobCandidateSocialNetworksDc.getMutableItems().add( socialNetworkURLs );
                 sn.add(socialNetworkURLs);
             }
+
+            DataContext dc = socialNetworkURLsesDl.getDataContext();
+
+            dc.setParent( dataContext );
+
+            dataContext.merge( sn );
         }
     }
 
@@ -147,13 +156,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         if( PersistenceHelper.isNew(getEditedEntity())) {
-            CommitContext commitContext = new CommitContext(getEditedEntity());
+/*            CommitContext commitContext = new CommitContext(getEditedEntity());
 
             for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
                 commitContext.addInstanceToCommit(s);
             }
 
-            dataManager.commit(commitContext);
+            dataManager.commit(commitContext); */
         }
     }
 
@@ -302,14 +311,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             getEditedEntity().setStatus( 0 );
         }
-        // кто последникй рекрутер
-        // последний контакт с кандидатом
     }
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
        secondNameField.setValue( replaceE_E(secondNameField.getValue() ) );
        firstNameField.setValue( replaceE_E(firstNameField.getValue() ) );
+
        if( middleNameField.getValue() != null )
            middleNameField.setValue( replaceE_E(middleNameField.getValue() ) );
     }
@@ -438,38 +446,37 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private Boolean needDublicateDialog() {
         if (ifCandidateIsExist()) {
-            dialogs.createOptionDialog()
+            Dialogs.OptionDialogBuilder d = dialogs.createOptionDialog()
                     .withCaption("WARNING")
-                    .withMessage("Кандидат " + getEditedEntity().getFullName() +
-                            " есть в базе!\n Вы точно хотите создать еще одного?")
+                    .withMessage("Кандидат <b>" + getEditedEntity().getFullName() +
+                            "</b> есть в базе!\n Вы точно хотите создать еще одного?")
                     .withActions(
                             new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
                                     .withHandler(e -> {
-                                        this.commitChanges();
+                                        closeWithCommit();
                                         returnE.set(true);
                                     }),
                             new DialogAction(DialogAction.Type.NO)
                                     .withHandler(f -> {
                                         returnE.set(false);
                                     })
-                    )
-                    .show();
-        }
+                    );
+
+            d.withContentMode(ContentMode.HTML);
+            d.show();
+        } else
+            closeWithCommit();
 
         return returnE.get();
     }
 
     public void onBtnOkAndCheck() {
         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
-            if (needDublicateDialog()) {
-                closeWithCommit();
-                return;
-            }
+            needDublicateDialog();
+            return;
         } else {
             closeWithCommit();
             return;
         }
-        closeWithDiscard();
-        return;
     }
 }
