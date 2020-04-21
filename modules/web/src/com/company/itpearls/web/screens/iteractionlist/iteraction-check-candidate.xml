@@ -7,22 +7,14 @@
     <data readOnly="true">
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList"
-        >
-            <view extends="_local">
-                <property name="vacancy" fetch="JOIN" view="_local">
-                    <property name="cityPosition" fetch="JOIN" view="_local"/>
-                </property>
-                <property name="companyDepartment" fetch="JOIN" view="_local"/>
-                <property name="iteractionType" fetch="JOIN" view="_local"/>
-                <property name="recrutier" fetch="JOIN" view="_local"/>
-            </view>
+                    view="iteractionList-view">
             <loader id="iteractionListsDl">
                 <query>
                     <![CDATA[select e from itpearls_IteractionList e
 order by e.numberIteraction desc]]>
                     <condition>
                         <c:jpql>
-                            <c:where>e.candidate.fullName like :fullName</c:where>
+                            <c:where>e.candidate =  :name</c:where>
                         </c:jpql>
                     </condition>
                 </query>
@@ -43,7 +35,7 @@ order by e.fullName]]>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="iteractionListsTable"
-            spacing="true">
+            spacing="true" maxHeight="90%" minHeight="90%" height="90%">
         <filter id="filter"
                 applyTo="iteractionListsTable"
                 dataLoader="iteractionListsDl" visible="false">
@@ -60,13 +52,14 @@ order by e.fullName]]>
             <actions>
             </actions>
             <columns>
-                <column id="numberIteraction" caption="msg://msgNumber"/>
-                <column id="dateIteraction" caption="msg://msgDate"/>
-                <column id="vacancy.vacansyName" />
-                <column id="iteractionType.iterationName" caption="msg://msgIteractionType"/>
-                <column id="companyDepartment.departamentRuName"/>
-                <column id="vacancy.cityPosition"/>
-                <column id="recrutier.name" caption="msg://msgRecrutier" visible="false"/>
+                <column id="dateIteraction" caption="msg://msgDate" width="85">
+                    <formatter format="dd-MM-yyyy" useUserTimezone="true"
+                               class="com.haulmont.cuba.gui.components.formatters.DateFormatter" type="DATE"/>
+                </column>
+                <column id="vacancy.vacansyName" caption="mainMsg://msgVacancy" width="250"/>
+                <column id="iteractionType.iterationName" caption="msg://msgIteractionType" width="250"/>
+                <column id="vacancy.projectName" width="200"/>
+                <column id="recrutier.name" caption="msg://msgRecrutier" width="150"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

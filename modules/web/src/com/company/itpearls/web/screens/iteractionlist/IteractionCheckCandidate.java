@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.JobCandidate;
+import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -19,21 +20,25 @@ public class IteractionCheckCandidate extends StandardLookup<IteractionList> {
     private LookupField<JobCandidate> lookupFieldCheckCandidate;
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
+    @Inject
+    private GroupTable<IteractionList> iteractionListsTable;
 
     @Subscribe("lookupFieldCheckCandidate")
     public void onLookupFieldCheckCandidateValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
-        if(lookupFieldCheckCandidate.getValue().getFullName().equals(""))
-            iteractionListsDl.setParameter("fullName", "Null" );
-        else
-           iteractionListsDl.setParameter("fullName", lookupFieldCheckCandidate.getValue().getFullName());
+        if(lookupFieldCheckCandidate.getValue().getFullName().equals("")) {
+            iteractionListsDl.removeParameter("name");
+            iteractionListsTable.setVisible(false);
+        } else {
+            iteractionListsTable.setVisible( true );
+            iteractionListsDl.setParameter("name", lookupFieldCheckCandidate.getValue());
+        }
 
         iteractionListsDl.load();
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        iteractionListsDl.setParameter("fullName", "Null" );
-        iteractionListsDl.load();
+        iteractionListsTable.setVisible( false );
     }
 
     @Install(to = "lookupFieldCheckCandidate", subject = "optionIconProvider")
