@@ -18,8 +18,7 @@ import java.util.List;
 @PublishEntityChangedEvents
 @NamePattern("%s %s %s %s|secondName,firstName,middleName,personPosition")
 @Table(name = "ITPEARLS_JOB_CANDIDATE", indexes = {
-        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FULL_NAME", columnList = "FULL_NAME"),
-        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FIRST_SECOND_NAME", columnList = "FIRST_NAME, SECOND_NAME")
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FULL_NAME", columnList = "FULL_NAME")
 })
 @Entity(name = "itpearls_JobCandidate")
 public class JobCandidate extends StandardEntity {

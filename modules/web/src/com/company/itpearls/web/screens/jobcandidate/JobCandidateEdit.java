@@ -166,13 +166,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         if( PersistenceHelper.isNew(getEditedEntity())) {
-/*            CommitContext commitContext = new CommitContext(getEditedEntity());
+            CommitContext commitContext = new CommitContext(getEditedEntity());
 
             for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
                 commitContext.addInstanceToCommit(s);
             }
 
-            dataManager.commit(commitContext); */
+            dataManager.commit(commitContext);
         }
     }
 
@@ -463,7 +463,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withActions(
                             new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
                                     .withHandler(e -> {
-                                        closeWithCommit();
+                                        close(StandardOutcome.COMMIT);
                                         returnE.set(true);
                                     }),
                             new DialogAction(DialogAction.Type.NO)
@@ -475,7 +475,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             d.withContentMode(ContentMode.HTML);
             d.show();
         } else
-            closeWithCommit();
+            close(StandardOutcome.COMMIT);
 
         return returnE.get();
     }
@@ -485,7 +485,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             needDublicateDialog();
             return;
         } else {
-            closeWithCommit();
+            close(StandardOutcome.COMMIT);
             return;
         }
     }

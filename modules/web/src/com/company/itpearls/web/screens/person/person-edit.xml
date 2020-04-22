@@ -21,6 +21,13 @@ order by e.countryRuName]]></query>
 order by e.positionRuName]]></query>
             </loader>
         </collection>
+        <collection id="companyDepartamentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_local">
+            <loader id="companyDepartamentsDl">
+                <query>
+                    <![CDATA[select e from itpearls_CompanyDepartament e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -31,8 +38,8 @@ order by e.positionRuName]]></query>
                     <textField id="firstNameField" property="firstName" caption="mainMsg://msgFirstName"/>
                     <textField id="middleNameField" property="middleName" caption="mainMsg://msgMiddleName"/>
                     <textField id="secondNameField" property="secondName" caption="mainMsg://msgSecondName"/>
-                    <lookupPickerField id="personFieldCompanyDepartment" dataContainer="personDc" property="companyDepartment"
-                                       caption="mainMsg://msgCompanyDepartment"/>
+                    <lookupPickerField id="personFieldCompanyDepartment" dataContainer="companyDepartamentsDc" property="companyDepartment"
+                                       caption="mainMsg://msgCompanyDepartment" optionsContainer="personPositionsDc"/>
                     <dateField id="birdhDateField" property="birdhDate" caption="mainMsg://msgBirthday"/>
                     <textField id="emailField" property="email" caption="mainMsg://msgEmail"/>
                     <textField id="phoneField" property="phone" caption="mainMsg://msgPhone"/>

@@ -13,10 +13,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NamePattern("%s %s|comanyName,companyShortName")
-@Table(name = "ITPEARLS_COMPANY", indexes = {
-        @Index(name = "IDX_ITPEARLS_COMPANY_NAME", columnList = "COMANY_NAME"),
-        @Index(name = "IDX_ITPEARLS_COMPANY_SHORT_NAME", columnList = "COMPANY_SHORT_NAME")
-})
+@Table(name = "ITPEARLS_COMPANY")
 @Entity(name = "itpearls_Company")
 public class Company extends StandardEntity {
     private static final long serialVersionUID = 7912366724901851184L;
@@ -24,19 +21,19 @@ public class Company extends StandardEntity {
     @Column(name = "OUR_CLIENT")
     protected Boolean ourClient;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_OWNERSHIP_ID")
     protected Ownershup companyOwnership;
 
     @NotNull
-    @Column(name = "COMANY_NAME", nullable = false, unique = true, length = 80)
+    @Column(name = "COMANY_NAME", nullable = false, length = 80)
     protected String comanyName;
 
-    @Column(name = "COMPANY_SHORT_NAME", unique = true, length = 80)
+    @Column(name = "COMPANY_SHORT_NAME", length = 80)
     protected String companyShortName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_DIRECTOR_ID")
     protected Person companyDirector;
@@ -46,17 +43,17 @@ public class Company extends StandardEntity {
     @OneToMany(mappedBy = "companyName")
     protected List<CompanyDepartament> departmentOfCompany;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_OF_COMPANY_ID")
     protected City cityOfCompany;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REGION_OF_COMPANY_ID")
     protected Region regionOfCompany;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COUNTRY_OF_COMPANY_ID")
     protected Country countryOfCompany;
