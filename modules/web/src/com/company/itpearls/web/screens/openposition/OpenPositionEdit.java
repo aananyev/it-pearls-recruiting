@@ -19,6 +19,9 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.springframework.context.event.EventListener;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.*;
 import javax.inject.Inject;
 
@@ -90,6 +93,28 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private GroupBoxLayout groupBoxPaymentsResearcher;
     @Inject
     private GroupBoxLayout groupBoxPaymentsRecrutier;
+    @Inject
+    private TextField<String> textFieldPercentOrSum;
+    @Inject
+    private TextField<String> textFieldCompanyPayment;
+    @Inject
+    private TextField<BigDecimal> openPositionFieldSalaryMin;
+    @Inject
+    private TextField<BigDecimal> openPositionFieldSalaryMax;
+    @Inject
+    private CheckBox checkBoxUseNDFL;
+    @Inject
+    private TextField<String> textFieldResearcherSalaryPercentOrSum;
+    @Inject
+    private TextField<String> textFieldResearcherSalary;
+    @Inject
+    private TextField<String> textFieldRecrutierPercentOrSum;
+    @Inject
+    private TextField<String> textFieldRecrutierSalary;
+    @Inject
+    private Label<String> labelResearcherSalary;
+    @Inject
+    private Label<String> labelRecrutierSalary;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -412,20 +437,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         Map<String, Integer> paymentsType = new LinkedHashMap<>();
         paymentsType.put( "Фиксированная оплата", 0);
-        paymentsType.put( "Процент от зарплаты кандидата", 1);
-        paymentsType.put( "Процент от зарплаты кандидата + НДФЛ 13%", 2);
+        paymentsType.put( "Процент от годового оклада", 1);
+        paymentsType.put( "Процент от месячной зарплаты", 2);
 
         radioButtonGroupPaymentsType.setOptionsMap( paymentsType );
 
         Map<String, Integer> researcherSalary = new LinkedHashMap<>();
         researcherSalary.put( "Фиксированная комиссия", 0 );
-        researcherSalary.put( "Процент комиссии компании", 1 );
+        researcherSalary.put( "Процент комиссии компании, 20%", 1 );
+        researcherSalary.put( "Процент комиссии компании", 2 );
 
         radioButtonGroupResearcherSalary.setOptionsMap( researcherSalary );
 
         Map<String, Integer> recrutierSalary = new LinkedHashMap<>();
         recrutierSalary.put( "Фиксированная комиссия", 0 );
-        recrutierSalary.put( "Процент комиссии компании", 1 );
+        recrutierSalary.put( "Процент комиссии компании, 10%", 1 );
+        recrutierSalary.put( "Процент комиссии компании", 2 );
 
         radioButtonGroupRecrutierSalary.setOptionsMap( recrutierSalary );
     }
@@ -449,6 +476,330 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                }
            }
        }
+    }
+
+    @Subscribe("radioButtonGroupPaymentsType")
+    public void onRadioButtonGroupPaymentsTypeValueChange(HasValue.ValueChangeEvent<Integer> event) {
+
+        switch ( (int) radioButtonGroupPaymentsType.getValue() ) {
+            case 0:
+                textFieldPercentOrSum.setCaption("Сумма комиссии");
+                textFieldPercentOrSum.setVisible( false );
+                textFieldCompanyPayment.setVisible( true );
+                textFieldCompanyPayment.setEditable( true );
+                break;
+            case 1:
+                textFieldPercentOrSum.setCaption("Процент, %");
+                textFieldCompanyPayment.setVisible( true );
+                textFieldPercentOrSum.setVisible( true );
+                textFieldCompanyPayment.setEditable( false );
+                break;
+            case 2:
+                textFieldPercentOrSum.setCaption("Процент, %");
+                textFieldCompanyPayment.setVisible( true );
+                textFieldPercentOrSum.setVisible( true );
+                textFieldCompanyPayment.setEditable( false );
+                break;
+        }
+
+        setCalculateCompanyPercentField();
+
+        calculateRecrutierSalary();
+        calculateResearcherSalary();
+    }
+
+    @Subscribe("checkBoxUseNDFL")
+    public void onCheckBoxUseNDFLValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        setCalculateCompanyPercentField();
+        calculateResearcherSalary();
+        calculateRecrutierSalary();
+    }
+
+
+
+    @Subscribe("textFieldPercentOrSum")
+    public void onTextFieldPercentOrSumValueChange(HasValue.ValueChangeEvent<String> event) {
+        setCalculateCompanyPercentField();
+        calculateResearcherSalary();
+        calculateRecrutierSalary();
+    }
+
+    protected void setCalculateCompanyPercentField() {
+        if( textFieldPercentOrSum.getValue() != null ) {
+            textFieldCompanyPayment.setValue(calculateComission(textFieldPercentOrSum.getValue(),
+                    (Integer) radioButtonGroupPaymentsType.getValue(),
+                    checkBoxUseNDFL.getValue(),
+                    openPositionFieldSalaryMin.getValue(),
+                    openPositionFieldSalaryMax.getValue())
+            );
+        }
+    }
+
+
+    
+    protected BigDecimal minCompanyComission = new BigDecimal( BigInteger.ZERO );
+    protected BigDecimal maxCompanyComission = new BigDecimal( BigInteger.ZERO );
+
+    protected String calculateComission( String percent, Integer type, boolean ndflFlag, BigDecimal minSalary, BigDecimal maxSalary ) {
+
+        String retValue = new String("");
+        BigDecimal  p = new BigDecimal( percent );
+        BigDecimal  ndfl = new BigDecimal( 1.13 );
+        BigDecimal  mounths = new BigDecimal( 12 );
+        BigDecimal  hungred = new BigDecimal( 100 );
+
+        if( minSalary == null )
+            minSalary = BigDecimal.ZERO;
+
+        if( maxSalary == null )
+            maxSalary = BigDecimal.ZERO;
+
+        switch ( type ) {
+            case 0:
+                retValue = percent;
+                minSalary = new BigDecimal(percent);
+                maxSalary = new BigDecimal(percent);
+                
+                break;
+            case 1:
+                minSalary = minSalary.multiply( p ).multiply(mounths).divide(hungred)
+                        .multiply(ndflFlag ? ndfl : BigDecimal.ONE);
+                maxSalary = maxSalary.multiply( p ).multiply(mounths).divide(hungred)
+                        .multiply(ndflFlag ? ndfl : BigDecimal.ONE);
+
+                minSalary = minSalary.setScale(0, RoundingMode.HALF_EVEN );
+                maxSalary = maxSalary.setScale(0, RoundingMode.HALF_EVEN );
+                
+                retValue = "От " +
+                        minSalary.toString() +
+                          " до " +
+                        maxSalary.toString();
+                break;
+            case 2:
+                minSalary = minSalary.multiply( p ).multiply(ndflFlag ? ndfl : BigDecimal.ONE).divide( hungred );
+                maxSalary = maxSalary.multiply( p ).multiply(ndflFlag ? ndfl : BigDecimal.ONE).divide( hungred );
+
+                minSalary = minSalary.setScale(0, RoundingMode.HALF_EVEN );
+                maxSalary = maxSalary.setScale(0, RoundingMode.HALF_EVEN );
+
+                retValue = "От " +
+                        minSalary.toString() +
+                          " до " +
+                        maxSalary.toString();
+                break;
+        }
+        
+        minCompanyComission = minSalary;
+        maxCompanyComission = maxSalary;
+
+        return retValue;
+    }
+
+    @Subscribe("radioButtonGroupResearcherSalary")
+    public void onRadioButtonGroupResearcherSalaryValueChange(HasValue.ValueChangeEvent event) {
+        calculateResearcherSalary();
+
+        setResearcherSalaryLabel();
+    }
+
+    @Subscribe("radioButtonGroupRecrutierSalary")
+    public void onRadioButtonGroupRecrutierSalaryValueChange(HasValue.ValueChangeEvent event) {
+        calculateRecrutierSalary();
+
+        setRecrutierSalaryLabel();
+    }
+
+    protected void calculateResearcherSalary() {
+        BigDecimal hungred = new BigDecimal( 100 );
+        BigDecimal minSalary = new BigDecimal(String.valueOf(minCompanyComission));
+        BigDecimal maxSalary = new BigDecimal(String.valueOf(maxCompanyComission));
+        String textSalaryMessage = null;
+
+        if( radioButtonGroupResearcherSalary.getValue() != null ) {
+            switch ((int) radioButtonGroupResearcherSalary.getValue()) {
+                case 0:
+                    textFieldResearcherSalaryPercentOrSum.setCaption("Сумма комиссии");
+                    textFieldResearcherSalary.setVisible(false);
+                    textFieldResearcherSalaryPercentOrSum.setVisible(true);
+                    textFieldResearcherSalary.setEditable(true);
+
+                    textSalaryMessage = textFieldResearcherSalary.getValue() + " рублей.";
+
+                    break;
+                case 1:
+                    textFieldResearcherSalaryPercentOrSum.setCaption("Процент комиссии, %");
+                    textFieldResearcherSalaryPercentOrSum.setVisible(false);
+                    textFieldResearcherSalary.setVisible(true);
+                    textFieldResearcherSalary.setEditable(false);
+
+                    if (!maxCompanyComission.equals(BigDecimal.ZERO) &&
+                            !minCompanyComission.equals(BigDecimal.ZERO)) {
+
+                        BigDecimal percent = new BigDecimal(20);
+
+                        textSalaryMessage = "От " +
+                                minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN) +
+                                " до " +
+                                maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN);
+
+                        textFieldResearcherSalary.setValue(textSalaryMessage);
+                    }
+
+                    break;
+
+                case 2:
+                    textFieldResearcherSalaryPercentOrSum.setCaption("Процент комиссии, %");
+                    textFieldResearcherSalaryPercentOrSum.setVisible(true);
+                    textFieldResearcherSalary.setVisible(true);
+                    textFieldResearcherSalary.setEditable(false);
+                    textFieldResearcherSalary.setValue("");
+
+                    if (textFieldPercentOrSum.getValue() != null &&
+                            !maxCompanyComission.equals(BigDecimal.ZERO) &&
+                            !minCompanyComission.equals(BigDecimal.ZERO)) {
+
+                        BigDecimal percent = new BigDecimal(textFieldPercentOrSum.getValue());
+
+                        textSalaryMessage = "От " +
+                                minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN) +
+                                " до " +
+                                maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN);
+
+                        textFieldResearcherSalary.setValue(textSalaryMessage);
+                    }
+
+                    break;
+            }
+        }
+
+        setResearcherSalaryLabel();
+    }
+
+    protected void calculateRecrutierSalary() {
+        BigDecimal hungred = new BigDecimal( 100 );
+        BigDecimal minSalary = new BigDecimal(String.valueOf(minCompanyComission));
+        BigDecimal maxSalary = new BigDecimal(String.valueOf(maxCompanyComission));
+        String textSalaryMessage = null;
+
+        if( radioButtonGroupRecrutierSalary.getValue() != null ) {
+            switch ((int) radioButtonGroupRecrutierSalary.getValue()) {
+                case 0:
+                    textFieldRecrutierPercentOrSum.setCaption("Сумма комиссии");
+                    textFieldRecrutierSalary.setVisible(false);
+                    textFieldRecrutierPercentOrSum.setVisible(true);
+                    textFieldRecrutierSalary.setEditable(true);
+
+                    textSalaryMessage = textFieldRecrutierSalary.getValue() + " рублей.";
+
+                    break;
+                case 1:
+                    textFieldRecrutierPercentOrSum.setCaption("Процент комиссии, %");
+                    textFieldRecrutierPercentOrSum.setVisible(false);
+                    textFieldRecrutierSalary.setVisible(true);
+                    textFieldRecrutierSalary.setEditable(false);
+                    // textFieldRecrutierSalary.setValue("");
+
+                    if (!maxCompanyComission.equals(BigDecimal.ZERO) &&
+                            !minCompanyComission.equals(BigDecimal.ZERO)) {
+
+                        BigDecimal percent = new BigDecimal(10);
+
+                        textSalaryMessage = "От " +
+                                minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN) +
+                                " до " +
+                                maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN);
+
+                        textFieldRecrutierSalary.setValue(textSalaryMessage);
+                    }
+
+                    break;
+
+                case 2:
+                    textFieldRecrutierPercentOrSum.setCaption("Процент комиссии, %");
+                    textFieldRecrutierPercentOrSum.setVisible(true);
+                    textFieldRecrutierSalary.setVisible(true);
+                    textFieldRecrutierSalary.setEditable(false);
+
+                    if (textFieldPercentOrSum.getValue() != null &&
+                            !maxCompanyComission.equals(BigDecimal.ZERO) &&
+                            !minCompanyComission.equals(BigDecimal.ZERO)) {
+
+                        BigDecimal percent = new BigDecimal(textFieldPercentOrSum.getValue());
+
+                        textSalaryMessage = "От " +
+                                minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN) +
+                                " до " +
+                                maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN);
+
+                        textFieldRecrutierSalary.setValue(textSalaryMessage);
+                    }
+
+                    break;
+            }
+        }
+
+        setRecrutierSalaryLabel();
+    }
+
+    @Subscribe("textFieldRecrutierSalary")
+    public void onTextFieldRecrutierSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
+        calculateRecrutierSalary();
+
+        setRecrutierSalaryLabel();
+    }
+
+    @Subscribe("textFieldResearcherSalary")
+    public void onTextFieldResearcherSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
+        calculateResearcherSalary();
+
+        setResearcherSalaryLabel();
+    }
+
+    private void setResearcherSalaryLabel() {
+        if( radioButtonGroupResearcherSalary.getValue() != null ) {
+            if ((int) radioButtonGroupResearcherSalary.getValue() == 0) {
+                labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
+                        vacansyNameField.getValue() + "</i>\" составит " +
+                        textFieldResearcherSalary.getValue() + " рублей.");
+            } else {
+                labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
+                        vacansyNameField.getValue() + "</i>\" составит " +
+                        textFieldResearcherSalary.getValue() + " рублей.");
+            }
+        }
+    }
+
+    private void setRecrutierSalaryLabel() {
+        if( radioButtonGroupRecrutierSalary.getValue() != null ) {
+            if ((int) radioButtonGroupRecrutierSalary.getValue() == 0) {
+                labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
+                        vacansyNameField.getValue() + "</i>\" составит " +
+                        textFieldRecrutierSalary.getValue() + " рублей.");
+            } else{
+                labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
+                        vacansyNameField.getValue() + "</i>\" составит " +
+                        textFieldRecrutierSalary.getValue() + " рублей.");
+            }
+        }
+    }
+
+    @Subscribe
+    public void onBeforeShow1(BeforeShowEvent event) {
+        // показываем или нет все строки ввода в оплаты
+        if( radioButtonGroupPaymentsType.getValue() == null ) {
+            textFieldPercentOrSum.setVisible( false );
+            textFieldCompanyPayment.setVisible( false );
+        }
+
+        if( radioButtonGroupResearcherSalary.getValue() == null ) {
+            textFieldResearcherSalaryPercentOrSum.setVisible( false );
+            textFieldResearcherSalary.setVisible( false );
+        }
+
+        if( radioButtonGroupRecrutierSalary.getValue() == null ) {
+            textFieldRecrutierPercentOrSum.setVisible( false );
+            textFieldRecrutierSalary.setVisible( false );
+        }
     }
 
     @Subscribe

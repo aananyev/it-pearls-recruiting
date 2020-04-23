@@ -39,9 +39,9 @@
             </actions>
             <columns>
                 <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
-                <column id="candidate.fullName" caption="msg://msgCandidate" width="250"/>
+                <column id="candidate.fullName" caption="msg://msgCandidate" width="200"/>
                 <column id="iteractionType" caption="msg://msgIteractionType" width="250"/>
-                <column id="vacancy.companyName.companyShortName" caption="msg://msgCompanyShortName"/>
+                <column id="vacancy.companyName.companyShortName" caption="msg://msgCompanyShortName" width="200"/>
                 <column id="vacancy" caption="mainMsg://msgVacancy" width="250"/>
                 <column id="recrutier" caption="msg://msgRecrutier"/>
                 <column id="dateIteraction" caption="msg://msgDate">

@@ -14,8 +14,11 @@
         </instance>
         <collection id="positionTypesDc" class="com.company.itpearls.entity.Position" view="_local">
             <loader id="positionTypesLc" cacheable="true">
-                <query><![CDATA[select e from itpearls_Position e
-order by e.positionRuName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_Position e
+where e.positionRuName not like '%(не использовать)%'
+order by e.positionRuName]]>
+                </query>
             </loader>
         </collection>
         <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_local">
@@ -97,7 +100,8 @@ order by e.endDate desc]]>
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <tabSheet id="tabSheetOpenPosition">
-            <tab id="tabOpenPosition" caption="msg://msgNamePosition" margin="true,false,false,false" spacing="true">
+            <tab id="tabOpenPosition" caption="msg://msgNamePosition" margin="true,false,false,false" spacing="true"
+                 icon="USERS">
                 <hbox id="hboxProject1" spacing="true" width="100%">
                     <checkBox id="openClosePositionCheckBox" dataContainer="openPositionDc" property="openClose"
                               caption="mainMsg://msgPositionClose" align="MIDDLE_LEFT"/>
@@ -160,25 +164,46 @@ order by e.endDate desc]]>
                                caption="msg://msgSalaryMax" width="100%"/>
                 </hbox>
             </tab>
-            <tab id="tabPayments" caption="msg://msgPayments" margin="true,false,false,false" spacing="true">
-                <groupBox id="groupBoxPaymentsResearcher" orientation="horizontal" spacing="true" caption="msg://msgResearcherPayment"/>
-                <groupBox id="groupBoxPaymentsRecrutier" spacing="true" caption="msg://msgRecrutierSalary"/>
+            <tab id="tabPayments" caption="msg://msgPayments" margin="true,false,false,false" spacing="true"
+                 icon="BITCOIN">
+                <groupBox id="groupBoxPaymentsResearcher" orientation="horizontal" spacing="true" caption="msg://msgResearcherPayment">
+                    <label id="labelResearcherSalary" htmlEnabled="true"/>
+                </groupBox>
+                <groupBox id="groupBoxPaymentsRecrutier" spacing="true" caption="msg://msgRecrutierSalary">
+                    <label id="labelRecrutierSalary" htmlEnabled="true"/>
+                </groupBox>
                 <groupBox id="groupBoxPaymentsDetail" orientation="horizontal" spacing="true"
-                          caption="msg://msgPaymentsDetail">
-                    <hbox spacing="true">
-                        <vbox spacing="true">
+                          caption="msg://msgPaymentsDetail" width="100%">
+                    <hbox spacing="true" width="100%" height="100%">
+                        <vbox spacing="true" height="100%" width="33%">
                             <radioButtonGroup id="radioButtonGroupPaymentsType" dataContainer="openPositionDc"
                                               property="paymentsType" caption="msg://msgPaymentType"/>
-                            <textField/>
+                            <checkBox id="checkBoxUseNDFL" caption="msg://msgUseNDFL"/>
+                            <vbox spacing="true" align="BOTTOM_LEFT">
+                                <textField id="textFieldPercentOrSum" align="BOTTOM_LEFT"
+                                           caption="msg://msgPercentOrSum"/>
+                                <textField id="textFieldCompanyPayment" caption="msg://msgCompanyComission"
+                                           align="BOTTOM_LEFT"/>
+                            </vbox>
                         </vbox>
-                        <vbox spacing="true">
+                        <vbox spacing="true" height="100%" width="33%">
                             <radioButtonGroup id="radioButtonGroupResearcherSalary" caption="msg://msgResearcherSalary"/>
-                            <textField/>
+                            <vbox spacing="true" align="BOTTOM_LEFT" width="100%">
+                                <textField id="textFieldResearcherSalaryPercentOrSum"
+                                           caption="msg://msgResearcherComission" align="BOTTOM_LEFT"/>
+                                <textField id="textFieldResearcherSalary" align="BOTTOM_LEFT"
+                                           caption="msg://msgResearcherSalary"/>
+                            </vbox>
                         </vbox>
-                        <vbox spacing="true">
+                        <vbox spacing="true" height="100%">
                             <radioButtonGroup
                                     id="radioButtonGroupRecrutierSalary" caption="msg://msgRecrutierSalary"/>
-                            <textField/>
+                            <vbox spacing="true" width="100%">
+                                <textField id="textFieldRecrutierPercentOrSum" align="BOTTOM_LEFT"
+                                           caption="msg://msgRecrutierComission"/>
+                                <textField id="textFieldRecrutierSalary" align="BOTTOM_LEFT"
+                                           caption="msg://msgRecrutierSalary"/>
+                            </vbox>
                         </vbox>
                     </hbox>
                 </groupBox>
@@ -195,11 +220,13 @@ order by e.endDate desc]]>
                     </table>
                 </groupBox>
             </tab>
-            <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tabJobDescription">
+            <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tabJobDescription"
+                 icon="FILE_WORD_O">
                 <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="300pt"
                               required="true"/>
             </tab>
-            <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true">
+            <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true"
+                 icon="BULK_EDIT_ACTION">
                 <groupBox spacing="true">
                     <table id="openPositionSkillsListTable" height="300px" width="100%" dataContainer="openPositionSkillsListsDc">
                         <columns>
@@ -218,7 +245,8 @@ order by e.endDate desc]]>
                     </table>
                 </groupBox>
             </tab>
-            <tab caption="mainMsg://msgResrutierTask" margin="true,false,false,false" spacing="true" id="tabRecrutior">
+            <tab caption="mainMsg://msgResrutierTask" margin="true,false,false,false" spacing="true" id="tabRecrutior"
+                 icon="ANDROID">
                 <table id="recrutiesTasksTable" height="300px" width="100%" dataContainer="taskRecrutior">
                     <columns>
                         <column id="startDate"/>
