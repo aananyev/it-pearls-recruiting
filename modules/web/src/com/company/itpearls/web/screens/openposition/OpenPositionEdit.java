@@ -652,27 +652,35 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     textFieldResearcherSalaryPercentOrSum.setVisible(true);
                     textFieldResearcherSalary.setVisible(true);
                     textFieldResearcherSalary.setEditable(false);
-                    textFieldResearcherSalary.setValue("");
+                    textFieldResearcherSalary.setValue(null);
 
                     if (textFieldPercentOrSum.getValue() != null &&
                             !maxCompanyComission.equals(BigDecimal.ZERO) &&
                             !minCompanyComission.equals(BigDecimal.ZERO)) {
 
-                        BigDecimal percent = new BigDecimal(textFieldPercentOrSum.getValue());
+                        if( textFieldResearcherSalaryPercentOrSum.getValue() != null ) {
 
-                        textSalaryMessage = "От " +
-                                minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN) +
-                                " до " +
-                                maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN);
+                            BigDecimal percent = new BigDecimal( textFieldResearcherSalaryPercentOrSum.getValue() );
 
-                        textFieldResearcherSalary.setValue(textSalaryMessage);
+                            textSalaryMessage = "От " +
+                                    minSalary.multiply(percent).divide(hungred)
+                                            .setScale(0, RoundingMode.HALF_EVEN) +
+                                    " до " +
+                                    maxSalary.multiply(percent).divide(hungred)
+                                            .setScale(0, RoundingMode.HALF_EVEN);
+
+                            textFieldResearcherSalary.setValue(textSalaryMessage);
+                        } else {
+                            textFieldResearcherSalary.setValue( null );
+                        }
+                    } else {
+                        textFieldResearcherSalary.setValue( null );
                     }
 
                     break;
             }
+            setResearcherSalaryLabel();
         }
-
-        setResearcherSalaryLabel();
     }
 
     protected void calculateRecrutierSalary() {
@@ -719,40 +727,58 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     textFieldRecrutierPercentOrSum.setVisible(true);
                     textFieldRecrutierSalary.setVisible(true);
                     textFieldRecrutierSalary.setEditable(false);
+                    textFieldRecrutierSalary.setValue(null);
 
                     if (textFieldPercentOrSum.getValue() != null &&
                             !maxCompanyComission.equals(BigDecimal.ZERO) &&
                             !minCompanyComission.equals(BigDecimal.ZERO)) {
+                        if( textFieldRecrutierPercentOrSum.getValue() != null ) {
 
-                        BigDecimal percent = new BigDecimal(textFieldPercentOrSum.getValue());
+                            BigDecimal percent = new BigDecimal(textFieldResearcherSalaryPercentOrSum.getValue());
 
-                        textSalaryMessage = "От " +
-                                minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN) +
-                                " до " +
-                                maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN);
+                            textSalaryMessage = "От " +
+                                    minSalary.multiply(percent).divide(hungred)
+                                            .setScale(0, RoundingMode.HALF_EVEN) +
+                                    " до " +
+                                    maxSalary.multiply(percent).divide(hungred)
+                                            .setScale(0, RoundingMode.HALF_EVEN);
 
-                        textFieldRecrutierSalary.setValue(textSalaryMessage);
+                            textFieldRecrutierSalary.setValue(textSalaryMessage);
+                        } else {
+                            textFieldRecrutierSalary.setValue( null );
+                        }
+                    } else {
+                        textFieldRecrutierSalary.setValue( null );
                     }
 
                     break;
             }
+            setRecrutierSalaryLabel();
         }
+    }
 
-        setRecrutierSalaryLabel();
+    @Subscribe("textFieldRecrutierPercentOrSum")
+    public void onTextFieldRecrutierPercentOrSumValueChange(HasValue.ValueChangeEvent<String> event) {
+        calculateRecrutierSalary();
+    }
+
+    @Subscribe("textFieldResearcherSalaryPercentOrSum")
+    public void onTextFieldResearcherSalaryPercentOrSumValueChange(HasValue.ValueChangeEvent<String> event) {
+        calculateResearcherSalary();
     }
 
     @Subscribe("textFieldRecrutierSalary")
     public void onTextFieldRecrutierSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
-        calculateRecrutierSalary();
+        // calculateRecrutierSalary();
 
-        setRecrutierSalaryLabel();
+        // setRecrutierSalaryLabel();
     }
 
     @Subscribe("textFieldResearcherSalary")
     public void onTextFieldResearcherSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
-        calculateResearcherSalary();
+        // calculateResearcherSalary();
 
-        setResearcherSalaryLabel();
+        // setResearcherSalaryLabel();
     }
 
     private void setResearcherSalaryLabel() {

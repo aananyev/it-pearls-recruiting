@@ -1,0 +1,3 @@
+alter table ITPEARLS_OPEN_POSITION add column TYPE_SALARY_OF_RESEARCHER integer ;
+alter table ITPEARLS_OPEN_POSITION add column TYPE_SALARY_OF_RECRUTIER integer ;
+alter table ITPEARLS_OPEN_POSITION add column TYPE_COMPANY_COMISSION integer ;

@@ -165,7 +165,7 @@ order by e.endDate desc]]>
                 </hbox>
             </tab>
             <tab id="tabPayments" caption="msg://msgPayments" margin="true,false,false,false" spacing="true"
-                 icon="BITCOIN">
+                 icon="BULK_EDIT_ACTION">
                 <groupBox id="groupBoxPaymentsResearcher" orientation="horizontal" spacing="true" caption="msg://msgResearcherPayment">
                     <label id="labelResearcherSalary" htmlEnabled="true"/>
                 </groupBox>
@@ -177,7 +177,7 @@ order by e.endDate desc]]>
                     <hbox spacing="true" width="100%" height="100%">
                         <vbox spacing="true" height="100%" width="33%">
                             <radioButtonGroup id="radioButtonGroupPaymentsType" dataContainer="openPositionDc"
-                                              property="paymentsType" caption="msg://msgPaymentType"/>
+                                              property="typeCompanyComission" caption="msg://msgPaymentType"/>
                             <checkBox id="checkBoxUseNDFL" caption="msg://msgUseNDFL"/>
                             <vbox spacing="true" align="BOTTOM_LEFT">
                                 <textField id="textFieldPercentOrSum" align="BOTTOM_LEFT"
@@ -187,7 +187,8 @@ order by e.endDate desc]]>
                             </vbox>
                         </vbox>
                         <vbox spacing="true" height="100%" width="33%">
-                            <radioButtonGroup id="radioButtonGroupResearcherSalary" caption="msg://msgResearcherSalary"/>
+                            <radioButtonGroup id="radioButtonGroupResearcherSalary" caption="msg://msgResearcherSalary"
+                                              dataContainer="openPositionDc" property="typeSalaryOfRecrutier"/>
                             <vbox spacing="true" align="BOTTOM_LEFT" width="100%">
                                 <textField id="textFieldResearcherSalaryPercentOrSum"
                                            caption="msg://msgResearcherComission" align="BOTTOM_LEFT"/>
@@ -197,7 +198,8 @@ order by e.endDate desc]]>
                         </vbox>
                         <vbox spacing="true" height="100%">
                             <radioButtonGroup
-                                    id="radioButtonGroupRecrutierSalary" caption="msg://msgRecrutierSalary"/>
+                                    id="radioButtonGroupRecrutierSalary" caption="msg://msgRecrutierSalary"
+                                    dataContainer="openPositionDc" property="typeSalaryOfResearcher"/>
                             <vbox spacing="true" width="100%">
                                 <textField id="textFieldRecrutierPercentOrSum" align="BOTTOM_LEFT"
                                            caption="msg://msgRecrutierComission"/>
@@ -221,12 +223,12 @@ order by e.endDate desc]]>
                 </groupBox>
             </tab>
             <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tabJobDescription"
-                 icon="FILE_WORD_O">
+                 icon="DRIVERS_LICENSE">
                 <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="300pt"
                               required="true"/>
             </tab>
             <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true"
-                 icon="BULK_EDIT_ACTION">
+                 icon="FILTER">
                 <groupBox spacing="true">
                     <table id="openPositionSkillsListTable" height="300px" width="100%" dataContainer="openPositionSkillsListsDc">
                         <columns>

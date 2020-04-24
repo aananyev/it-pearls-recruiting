@@ -395,6 +395,9 @@ create table ITPEARLS_OPEN_POSITION (
     COMMENT_ text,
     PRIORITY integer,
     PAYMENTS_TYPE integer,
+    TYPE_COMPANY_COMISSION integer,
+    TYPE_SALARY_OF_RESEARCHER integer,
+    TYPE_SALARY_OF_RECRUTIER integer,
     --
     primary key (ID)
 )^

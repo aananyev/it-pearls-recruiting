@@ -85,6 +85,39 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "PAYMENTS_TYPE")
     protected Integer paymentsType;
 
+    @Column(name = "TYPE_COMPANY_COMISSION")
+    protected Integer typeCompanyComission;
+
+    @Column(name = "TYPE_SALARY_OF_RESEARCHER")
+    protected Integer typeSalaryOfResearcher;
+
+    @Column(name = "TYPE_SALARY_OF_RECRUTIER")
+    protected Integer typeSalaryOfRecrutier;
+
+    public void setTypeSalaryOfRecrutier(Integer typeSalaryOfRecrutier) {
+        this.typeSalaryOfRecrutier = typeSalaryOfRecrutier;
+    }
+
+    public Integer getTypeSalaryOfRecrutier() {
+        return typeSalaryOfRecrutier;
+    }
+
+    public Integer getTypeSalaryOfResearcher() {
+        return typeSalaryOfResearcher;
+    }
+
+    public void setTypeSalaryOfResearcher(Integer typeSalaryOfResearcher) {
+        this.typeSalaryOfResearcher = typeSalaryOfResearcher;
+    }
+
+    public Integer getTypeCompanyComission() {
+        return typeCompanyComission;
+    }
+
+    public void setTypeCompanyComission(Integer typeCompanyComission) {
+        this.typeCompanyComission = typeCompanyComission;
+    }
+
     public Integer getPaymentsType() {
         return paymentsType;
     }

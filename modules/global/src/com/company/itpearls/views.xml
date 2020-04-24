@@ -55,6 +55,9 @@
         <property name="skillsList" fetch="JOIN" view="_local"/>
         <property name="candidates" fetch="BATCH" view="_local"/>
         <property name="paymentsType"/>
+        <property name="typeCompanyComission"/>
+        <property name="typeSalaryOfResearcher"/>
+        <property name="typeSalaryOfRecrutier"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" fetch="JOIN" view="_local"/>
