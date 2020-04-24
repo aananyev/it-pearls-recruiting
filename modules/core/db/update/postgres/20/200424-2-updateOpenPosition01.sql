@@ -1,0 +1,4 @@
+alter table ITPEARLS_OPEN_POSITION add column PERCENT_COMISSION_OF_COMPANY varchar(5) ;
+alter table ITPEARLS_OPEN_POSITION add column PERCENT_SALARY_OF_RECRUTIER varchar(5) ;
+alter table ITPEARLS_OPEN_POSITION add column PERCENT_SALARY_OF_RESEARCHER varchar(5) ;
+alter table ITPEARLS_OPEN_POSITION add column USE_TAX_NDFL boolean ;

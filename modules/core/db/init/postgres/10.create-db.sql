@@ -398,6 +398,10 @@ create table ITPEARLS_OPEN_POSITION (
     TYPE_COMPANY_COMISSION integer,
     TYPE_SALARY_OF_RESEARCHER integer,
     TYPE_SALARY_OF_RECRUTIER integer,
+    USE_TAX_NDFL boolean,
+    PERCENT_COMISSION_OF_COMPANY varchar(5),
+    PERCENT_SALARY_OF_RESEARCHER varchar(5),
+    PERCENT_SALARY_OF_RECRUTIER varchar(5),
     --
     primary key (ID)
 )^

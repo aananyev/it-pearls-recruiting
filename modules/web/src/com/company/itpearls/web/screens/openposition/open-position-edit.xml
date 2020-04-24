@@ -159,9 +159,9 @@ order by e.endDate desc]]>
                 </groupBox>
                 <hbox id="hboxSalary" spacing="true" width="100%">
                     <textField id="openPositionFieldSalaryMin" dataContainer="openPositionDc" property="salaryMin"
-                               caption="mainMsg://msgSalaryMin" width="100%"/>
+                               caption="mainMsg://msgSalaryMin" width="100%" required="true"/>
                     <textField id="openPositionFieldSalaryMax" dataContainer="openPositionDc" property="salaryMax"
-                               caption="msg://msgSalaryMax" width="100%"/>
+                               caption="msg://msgSalaryMax" width="100%" required="true"/>
                 </hbox>
             </tab>
             <tab id="tabPayments" caption="msg://msgPayments" margin="true,false,false,false" spacing="true"
@@ -178,10 +178,12 @@ order by e.endDate desc]]>
                         <vbox spacing="true" height="100%" width="33%">
                             <radioButtonGroup id="radioButtonGroupPaymentsType" dataContainer="openPositionDc"
                                               property="typeCompanyComission" caption="msg://msgPaymentType"/>
-                            <checkBox id="checkBoxUseNDFL" caption="msg://msgUseNDFL"/>
+                            <checkBox id="checkBoxUseNDFL" caption="msg://msgUseNDFL" dataContainer="openPositionDc"
+                                      property="useTaxNDFL"/>
                             <vbox spacing="true" align="BOTTOM_LEFT">
                                 <textField id="textFieldPercentOrSum" align="BOTTOM_LEFT"
-                                           caption="msg://msgPercentOrSum"/>
+                                           caption="msg://msgPercentOrSum" dataContainer="openPositionDc"
+                                           property="percentComissionOfCompany"/>
                                 <textField id="textFieldCompanyPayment" caption="msg://msgCompanyComission"
                                            align="BOTTOM_LEFT"/>
                             </vbox>
@@ -191,7 +193,8 @@ order by e.endDate desc]]>
                                               dataContainer="openPositionDc" property="typeSalaryOfRecrutier"/>
                             <vbox spacing="true" align="BOTTOM_LEFT" width="100%">
                                 <textField id="textFieldResearcherSalaryPercentOrSum"
-                                           caption="msg://msgResearcherComission" align="BOTTOM_LEFT"/>
+                                           caption="msg://msgResearcherComission" align="BOTTOM_LEFT"
+                                           dataContainer="openPositionDc" property="percentSalaryOfResearcher"/>
                                 <textField id="textFieldResearcherSalary" align="BOTTOM_LEFT"
                                            caption="msg://msgResearcherSalary"/>
                             </vbox>
@@ -202,7 +205,8 @@ order by e.endDate desc]]>
                                     dataContainer="openPositionDc" property="typeSalaryOfResearcher"/>
                             <vbox spacing="true" width="100%">
                                 <textField id="textFieldRecrutierPercentOrSum" align="BOTTOM_LEFT"
-                                           caption="msg://msgRecrutierComission"/>
+                                           caption="msg://msgRecrutierComission" dataContainer="openPositionDc"
+                                           property="percentSalaryOfRecrutier"/>
                                 <textField id="textFieldRecrutierSalary" align="BOTTOM_LEFT"
                                            caption="msg://msgRecrutierSalary"/>
                             </vbox>

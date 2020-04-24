@@ -48,6 +48,7 @@
         <property name="positionRuName"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_minimal" systemProperties="true">
+        <property name="openClose"/>
         <property name="cityPosition" fetch="JOIN" view="_local"/>
         <property name="positionType" fetch="JOIN" view="_local"/>
         <property name="projectName" fetch="JOIN" view="_local"/>
@@ -58,6 +59,10 @@
         <property name="typeCompanyComission"/>
         <property name="typeSalaryOfResearcher"/>
         <property name="typeSalaryOfRecrutier"/>
+        <property name="useTaxNDFL"/>
+        <property name="percentComissionOfCompany"/>
+        <property name="percentSalaryOfResearcher"/>
+        <property name="percentSalaryOfRecrutier"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" fetch="JOIN" view="_local"/>

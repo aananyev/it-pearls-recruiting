@@ -131,6 +131,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         booOpenClosePosition = booOpenClosePosition == null ? false : booOpenClosePosition;
     }
 
+    @Subscribe("openPositionFieldSalaryMin")
+    public void onOpenPositionFieldSalaryMinValueChange(HasValue.ValueChangeEvent<BigDecimal> event) {
+        setCalculateCompanyPercentField();
+        calculateResearcherSalary();
+        calculateRecrutierSalary();
+    }
+
+    @Subscribe("openPositionFieldSalaryMax")
+    public void onOpenPositionFieldSalaryMaxValueChange(HasValue.ValueChangeEvent<BigDecimal> event) {
+        setCalculateCompanyPercentField();
+        calculateResearcherSalary();
+        calculateRecrutierSalary();
+    }
+
     @Subscribe("companyDepartamentField")
     public void onCompanyDepartamentFieldValueChange(HasValue.ValueChangeEvent<CompanyDepartament> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
@@ -623,7 +637,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     textFieldResearcherSalaryPercentOrSum.setVisible(true);
                     textFieldResearcherSalary.setEditable(true);
 
-                    textSalaryMessage = textFieldResearcherSalary.getValue() + " рублей.";
+                    textSalaryMessage = textFieldResearcherSalaryPercentOrSum.getValue() + " рублей.";
+                    textFieldResearcherSalary.setValue(textSalaryMessage);
 
                     break;
                 case 1:
@@ -697,7 +712,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     textFieldRecrutierPercentOrSum.setVisible(true);
                     textFieldRecrutierSalary.setEditable(true);
 
-                    textSalaryMessage = textFieldRecrutierSalary.getValue() + " рублей.";
+                    textSalaryMessage = textFieldRecrutierPercentOrSum.getValue() + " рублей.";
+                    textFieldRecrutierSalary.setValue( textSalaryMessage );
 
                     break;
                 case 1:

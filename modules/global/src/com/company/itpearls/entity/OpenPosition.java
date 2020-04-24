@@ -94,6 +94,50 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "TYPE_SALARY_OF_RECRUTIER")
     protected Integer typeSalaryOfRecrutier;
 
+    @Column(name = "USE_TAX_NDFL")
+    protected Boolean useTaxNDFL;
+
+    @Column(name = "PERCENT_COMISSION_OF_COMPANY", length = 5)
+    protected String percentComissionOfCompany;
+
+    @Column(name = "PERCENT_SALARY_OF_RESEARCHER", length = 5)
+    protected String percentSalaryOfResearcher;
+
+    @Column(name = "PERCENT_SALARY_OF_RECRUTIER", length = 5)
+    protected String percentSalaryOfRecrutier;
+
+    public Boolean getUseTaxNDFL() {
+        return useTaxNDFL;
+    }
+
+    public void setUseTaxNDFL(Boolean useTaxNDFL) {
+        this.useTaxNDFL = useTaxNDFL;
+    }
+
+    public String getPercentSalaryOfRecrutier() {
+        return percentSalaryOfRecrutier;
+    }
+
+    public void setPercentSalaryOfRecrutier(String percentSalaryOfRecrutier) {
+        this.percentSalaryOfRecrutier = percentSalaryOfRecrutier;
+    }
+
+    public String getPercentSalaryOfResearcher() {
+        return percentSalaryOfResearcher;
+    }
+
+    public void setPercentSalaryOfResearcher(String percentSalaryOfResearcher) {
+        this.percentSalaryOfResearcher = percentSalaryOfResearcher;
+    }
+
+    public String getPercentComissionOfCompany() {
+        return percentComissionOfCompany;
+    }
+
+    public void setPercentComissionOfCompany(String percentComissionOfCompany) {
+        this.percentComissionOfCompany = percentComissionOfCompany;
+    }
+
     public void setTypeSalaryOfRecrutier(Integer typeSalaryOfRecrutier) {
         this.typeSalaryOfRecrutier = typeSalaryOfRecrutier;
     }
