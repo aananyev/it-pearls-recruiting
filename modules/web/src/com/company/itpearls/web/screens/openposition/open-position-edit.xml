@@ -7,7 +7,16 @@
     <data>
         <instance id="openPositionDc"
                   class="com.company.itpearls.entity.OpenPosition"
-                  view="openPosition-view">
+        >
+            <view extends="_local">
+                <property name="cityPosition" view="_minimal"/>
+                <property name="positionType" view="_minimal"/>
+                <property name="projectName" view="_minimal"/>
+                <property name="companyName" view="_minimal"/>
+                <property name="companyDepartament" view="_minimal"/>
+                <property name="skillsList" view="_minimal"/>
+                <property name="candidates" view="_minimal"/>
+            </view>
             <loader/>
             <collection id="openPositionSkillsListsDc" property="skillsList"/>
             <collection id="openPositionCandidatesesDc" property="candidates"/>

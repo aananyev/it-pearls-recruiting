@@ -9,3 +9,6 @@ modules/*/build/*
 .idea/*
 out
 test-run
+sql/hr.it-pearls.ru.sql
+sql/basebackup_new.tar.gz
+sql/sql/itpearls.sql
