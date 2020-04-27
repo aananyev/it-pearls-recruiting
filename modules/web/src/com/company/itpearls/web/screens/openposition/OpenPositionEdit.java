@@ -166,16 +166,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("companyNameField")
     public void onCompanyNameFieldValueChange(HasValue.ValueChangeEvent<Company> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (getEditedEntity().getCompanyName().getCityOfCompany() != null)
-                getEditedEntity().setCityPosition(getEditedEntity().getCompanyName().getCityOfCompany());
+//            if (getEditedEntity().getCompanyName().getCityOfCompany() != null)
+//                getEditedEntity().setCityPosition(getEditedEntity().getCompanyName().getCityOfCompany());
+            if( companyNameField.getValue().getCityOfCompany() != null )
+                cityOpenPositionField.setValue( companyNameField.getValue().getCityOfCompany() );
         }
     }
 
     @Subscribe("projectNameField")
     public void onProjectNameFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (getEditedEntity().getProjectName().getProjectDepartment() != null)
-                getEditedEntity().setCompanyDepartament(getEditedEntity().getProjectName().getProjectDepartment());
+//            if (getEditedEntity().getProjectName().getProjectDepartment() != null)
+//                getEditedEntity().setCompanyDepartament(getEditedEntity().getProjectName().getProjectDepartment());
+            if( projectNameField.getValue().getProjectDepartment() != null )
+                companyDepartamentField.setValue( projectNameField.getValue().getProjectDepartment() );
         }
     }
 

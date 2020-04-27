@@ -51,8 +51,14 @@
         <property name="openClose"/>
         <property name="cityPosition" fetch="JOIN" view="_local"/>
         <property name="positionType" fetch="JOIN" view="_local"/>
-        <property name="projectName" fetch="JOIN" view="_local"/>
-        <property name="companyName" fetch="BATCH" view="_local"/>
+        <property name="projectName" fetch="JOIN" view="_local">
+            <property name="projectDepartment" view="_local">
+                <property name="companyName" view="_minimal"/>
+            </property>
+        </property>
+        <property name="companyName" fetch="BATCH" view="_local">
+            <property name="cityOfCompany" fetch="JOIN" view="_minimal"/>
+        </property>
         <property name="skillsList" fetch="JOIN" view="_local"/>
         <property name="candidates" fetch="BATCH" view="_local"/>
         <property name="paymentsType"/>
