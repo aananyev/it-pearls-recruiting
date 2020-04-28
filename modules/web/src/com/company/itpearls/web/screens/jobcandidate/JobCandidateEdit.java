@@ -328,7 +328,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             getEditedEntity().setStatus( 0 );
         }
-
         enableDisableContacts();
     }
 
