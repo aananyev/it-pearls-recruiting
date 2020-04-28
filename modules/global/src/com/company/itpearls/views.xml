@@ -34,8 +34,6 @@
             <property name="projectName" view="_minimal">
                 <property name="projectDepartment" view="_minimal"/>
             </property>
-            <property name="companyName" view="_minimal"/>
-            <property name="companyDepartament" view="_minimal"/>
         </property>
         <property name="jobCandidate" view="_local"/>
     </view>
@@ -55,9 +53,6 @@
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_minimal"/>
             </property>
-        </property>
-        <property name="companyName" fetch="BATCH" view="_local">
-            <property name="cityOfCompany" fetch="JOIN" view="_minimal"/>
         </property>
         <property name="skillsList" fetch="JOIN" view="_local"/>
         <property name="candidates" fetch="BATCH" view="_local"/>
@@ -128,8 +123,6 @@
             <property name="cityPosition" view="_minimal"/>
             <property name="positionType" view="_local"/>
             <property name="projectName" view="_minimal"/>
-            <property name="companyName" view="_minimal"/>
-            <property name="companyDepartament" view="_minimal"/>
             <property name="skillsList" view="_minimal"/>
             <property name="candidates" view="_local">
                 <property name="openPosition" view="_local"/>
@@ -243,13 +236,11 @@
             <property name="fullName"/>
         </property>
         <property name="vacancy" fetch="BATCH" view="_local">
-            <property name="projectName" fetch="JOIN" view="_minimal"/>
-            <property name="companyName" fetch="BATCH" view="_local"/>
-            <property name="companyDepartament" fetch="JOIN" view="_local"/>
-        </property>
-        <property name="project" fetch="BATCH" view="_local"/>
-        <property name="companyDepartment" fetch="BATCH" view="_local">
-            <property name="companyName" fetch="JOIN" view="_local"/>
+            <property name="projectName" fetch="JOIN" view="_minimal">
+                <property name="projectDepartment" view="_minimal">
+                    <property name="companyName" view="_minimal"/>
+                </property>
+            </property>
         </property>
         <property name="iteractionType" fetch="BATCH" view="_local"/>
         <property name="recrutier" fetch="JOIN" view="_local"/>
@@ -275,7 +266,6 @@
                 <property name="projectDepartment" view="_minimal"/>
                 <property name="projectOwner" view="_minimal"/>
                 <property name="openPosition" view="_minimal">
-                    <property name="companyName" view="_minimal"/>
                 </property>
                 <property name="jobCandidate" view="_minimal"/>
             </property>
@@ -286,9 +276,6 @@
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
         <property name="projectName" view="_minimal"/>
-        <property name="companyDepartament" view="_minimal">
-            <property name="projectOfDepartment" view="_minimal"/>
-        </property>
         <property name="candidates" view="_local">
             <property name="reacrutier" view="_minimal"/>
             <property name="openPosition" view="_minimal"/>
@@ -367,7 +354,6 @@
         <property name="projectName" view="_minimal">
             <property name="projectDepartment" view="_minimal"/>
         </property>
-        <property name="companyDepartament" view="_minimal"/>
         <property name="candidates" view="_minimal">
             <property name="startDate"/>
             <property name="endDate"/>
@@ -393,9 +379,10 @@
         <property name="personPosition" fetch="JOIN" view="_local"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view-iteraction-list" extends="_local">
-        <property name="companyName" fetch="BATCH" view="_local"/>
-        <property name="companyDepartament" fetch="JOIN" view="_local">
-            <property name="companyName" fetch="JOIN" view="_local"/>
+        <property name="projectName" fetch="JOIN" view="_minimal">
+            <property name="projectDepartment" fetch="JOIN" view="_minimal">
+                <property name="companyName" fetch="JOIN" view="_minimal"/>
+            </property>
         </property>
     </view>
 </views>

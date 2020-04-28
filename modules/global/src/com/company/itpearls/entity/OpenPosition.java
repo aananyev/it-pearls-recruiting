@@ -13,10 +13,9 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
-@NamePattern("%s %s|vacansyName,companyDepartament")
+@NamePattern("%s|vacansyName")
 @Table(name = "ITPEARLS_OPEN_POSITION", indexes = {
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_VACANCY_NAME", columnList = "VACANSY_NAME"),
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_COMPANY_NAME", columnList = "COMPANY_NAME_ID")
+        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_VACANCY_NAME", columnList = "VACANSY_NAME")
 })
 @Entity(name = "itpearls_OpenPosition")
 public class OpenPosition extends StandardEntity {
@@ -28,6 +27,10 @@ public class OpenPosition extends StandardEntity {
     @NotNull
     @Column(name = "VACANSY_NAME", nullable = false, length = 80)
     protected String vacansyName;
+
+    @NotNull
+    @Column(name = "REMOTE_WORK", nullable = false)
+    protected Integer remoteWork;
 
     @Column(name = "SALARY_MIN")
     protected BigDecimal salaryMin;
@@ -50,17 +53,6 @@ public class OpenPosition extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "PROJECT_NAME_ID")
     protected Project projectName;
-
-    @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "COMPANY_NAME_ID")
-    protected Company companyName;
-
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "COMPANY_DEPARTAMENT_ID")
-    protected CompanyDepartament companyDepartament;
 
     @Column(name = "NUMBER_POSITION")
     protected Integer numberPosition;
@@ -105,6 +97,14 @@ public class OpenPosition extends StandardEntity {
 
     @Column(name = "PERCENT_SALARY_OF_RECRUTIER", length = 5)
     protected String percentSalaryOfRecrutier;
+
+    public Integer getRemoteWork() {
+        return remoteWork;
+    }
+
+    public void setRemoteWork(Integer remoteWork) {
+        this.remoteWork = remoteWork;
+    }
 
     public Boolean getUseTaxNDFL() {
         return useTaxNDFL;
@@ -242,28 +242,12 @@ public class OpenPosition extends StandardEntity {
         this.vacansyName = vacansyName;
     }
 
-    public CompanyDepartament getCompanyDepartament() {
-        return companyDepartament;
-    }
-
-    public void setCompanyDepartament(CompanyDepartament companyDepartament) {
-        this.companyDepartament = companyDepartament;
-    }
-
     public Integer getNumberPosition() {
         return numberPosition;
     }
 
     public void setNumberPosition(Integer numberPosition) {
         this.numberPosition = numberPosition;
-    }
-
-    public Company getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(Company companyName) {
-        this.companyName = companyName;
     }
 
     public String getComment() {

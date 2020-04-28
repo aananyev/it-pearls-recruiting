@@ -56,7 +56,7 @@ order by e.secondName, e.firstName]]></query>
             </tab>
             <tab id="tabVacansy" margin="true,false,false,false" spacing="true" caption="msg://msgTabVacancy">
                 <groupBox id="groupBoxVacancy" spacing="true">
-                    <table id="projectOpenPositionTable" height="100px" width="100%" dataContainer="projectOpenPositionsDc">
+                    <table id="projectOpenPositionTable" height="250px" width="100%" dataContainer="projectOpenPositionsDc">
                         <columns>
                             <column id="vacansyName"/>
                             <column id="numberPosition"/>

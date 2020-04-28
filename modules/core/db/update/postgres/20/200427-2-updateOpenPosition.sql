@@ -1,0 +1,8 @@
+alter table ITPEARLS_OPEN_POSITION rename column company_departament_id to company_departament_id__u81683 ;
+alter table ITPEARLS_OPEN_POSITION drop constraint FK_ITPEARLS_OPEN_POSITION_ON_COMPANY_DEPARTAMENT ;
+drop index IDX_ITPEARLS_OPEN_POSITION_ON_COMPANY_DEPARTAMENT ;
+alter table ITPEARLS_OPEN_POSITION rename column company_name_id to company_name_id__u39052 ;
+alter table ITPEARLS_OPEN_POSITION alter column company_name_id__u39052 drop not null ;
+alter table ITPEARLS_OPEN_POSITION drop constraint FK_ITPEARLS_OPEN_POSITION_ON_COMPANY_NAME ;
+drop index IDX_ITPEARLS_OPEN_POSITION_COMPANY_NAME ;
+drop index IDX_ITPEARLS_OPEN_POSITION_ON_COMPANY_NAME ;

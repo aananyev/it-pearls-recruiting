@@ -1,0 +1,2 @@
+alter table ITPEARLS_OPEN_POSITION drop column COMPANY_NAME_ID__U39052 cascade ;
+alter table ITPEARLS_OPEN_POSITION drop column COMPANY_DEPARTAMENT_ID__U81683 cascade ;

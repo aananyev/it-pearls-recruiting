@@ -215,10 +215,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        String labetText = "<h2><b>" + vacancyFiels.getValue().getCompanyName().getCompanyShortName() + "</b>: " +
-                vacancyFiels.getValue().getCompanyDepartament().getDepartamentRuName() + "</h2>";
 
-        companyLabel.setValue( labetText );
+        if( vacancyFiels.getValue() != null ) {
+            String labetText = "<h2><b>" +
+                    vacancyFiels.getValue()
+                            .getProjectName()
+                            .getProjectDepartment()
+                            .getCompanyName()
+                            .getCompanyShortName() +
+                    "</b>: " +
+                    vacancyFiels.getValue()
+                            .getProjectName()
+                            .getProjectDepartment()
+                            .getDepartamentRuName() +
+                    "</h2>";
+
+            companyLabel.setValue(labetText);
+        }
 
         if( !isClosedVacancy() ) {
             BigDecimal a = new BigDecimal("0.0");
@@ -245,7 +258,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 iteractionTypesLc.setParameter("number", "001");
 
                 dialogs.createMessageDialog()
-                        .withCaption("Warnind!")
+                        .withCaption("ВНИМАНИЕ!")
                         .withMessage("С кандидатом начат новый процесс. " +
                                 "Начните взаимодействие с ним с типом из группы \"001 Ресерчинг\"")
                         .withModal( true )
@@ -259,18 +272,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             if( !askFlag2 ) {
                 askFlag2 = true;
 
-                dialogs.createOptionDialog()
-                        .withCaption("WARNING")
-                        .withMessage("Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\n" +
-                                "Отменить действие?")
-                        .withActions(new DialogAction(DialogAction.Type.YES,
-                                        Action.Status.PRIMARY).withHandler(e -> {
-                                    this.vacancyFiels.setValue(null);
-                                    vacancyFiels.focus();
+                if( PersistenceHelper.isNew( getEditedEntity() )) {
+                    dialogs.createOptionDialog()
+                            .withCaption("WARNING")
+                            .withMessage("Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\n" +
+                                    "Отменить действие?")
+                            .withActions(new DialogAction(DialogAction.Type.YES,
+                                            Action.Status.PRIMARY).withHandler(e -> {
+                                        this.vacancyFiels.setValue(null);
+                                        vacancyFiels.focus();
 
-                                }),
-                                new DialogAction(DialogAction.Type.NO))
-                        .show();
+                                    }),
+                                    new DialogAction(DialogAction.Type.NO))
+                            .show();
+                }
             }
         }
         // проверить - подписан ли ресерчер на это позицию
@@ -419,7 +434,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if( commentField.getValue() == null )
             commentField.setValue( "" );
 
-        getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getCompanyDepartament() );
+        getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getProjectName().getProjectDepartment() );
     }
 
     private void sendMessages() {

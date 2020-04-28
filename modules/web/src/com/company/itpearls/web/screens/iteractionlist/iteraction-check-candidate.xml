@@ -56,9 +56,9 @@ order by e.fullName]]>
                     <formatter format="dd-MM-yyyy" useUserTimezone="true"
                                class="com.haulmont.cuba.gui.components.formatters.DateFormatter" type="DATE"/>
                 </column>
-                <column id="vacancy.vacansyName" caption="mainMsg://msgVacancy" width="250"/>
+                <column id="vacancy" caption="mainMsg://msgVacancy" width="250"/>
                 <column id="iteractionType.iterationName" caption="msg://msgIteractionType" width="250"/>
-                <column id="vacancy.projectName" width="150"/>
+                <column id="project" width="150"/>
                 <column id="recrutier.name" caption="msg://msgRecrutier" width="150"/>
             </columns>
             <rowsCount/>

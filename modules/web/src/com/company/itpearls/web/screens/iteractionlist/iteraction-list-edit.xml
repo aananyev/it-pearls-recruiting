@@ -58,7 +58,7 @@
             <hbox spacing="true" width="100%">
                 <hbox width="40%">
                     <textField id="numberIteractionField" dataContainer="iteractionListDc" property="numberIteraction"
-                               editable="false" caption="msg://msgNumber"/>
+                               editable="false" caption="msg://msgNumber" width="80%" align="MIDDLE_CENTER"/>
                     <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
                                editable="false" caption="msg://msgDate"/>
                 </hbox>

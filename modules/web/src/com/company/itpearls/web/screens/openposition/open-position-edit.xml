@@ -6,14 +6,15 @@
         messagesPack="com.company.itpearls.web.screens.openposition" icon="USER_PLUS">
     <data>
         <instance id="openPositionDc"
-                  class="com.company.itpearls.entity.OpenPosition"
-        >
+                  class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local">
                 <property name="cityPosition" view="_minimal"/>
                 <property name="positionType" view="_minimal"/>
-                <property name="projectName" view="_minimal"/>
-                <property name="companyName" view="_minimal"/>
-                <property name="companyDepartament" view="_minimal"/>
+                <property name="projectName" fetch="JOIN" view="_local">
+                    <property name="projectDepartment" fetch="JOIN" view="_minimal">
+                        <property name="companyName" view="_minimal"/>
+                    </property>
+                </property>
                 <property name="skillsList" view="_minimal"/>
                 <property name="candidates" view="_minimal"/>
             </view>
@@ -32,11 +33,22 @@ order by e.positionRuName]]>
         </collection>
         <collection id="projectNamesDc" class="com.company.itpearls.entity.Project" view="_local">
             <loader id="projectNamesLc" cacheable="true">
-                <query><![CDATA[select e from itpearls_Project e where e.projectIsClosed is null
-or e.projectIsClosed=false order by e.projectName]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_Project e
+where e.projectIsClosed is null
+or e.projectIsClosed=false
+order by e.projectName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e.projectDepartment = :department
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
             </loader>
         </collection>
-        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_local">
+        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
             <loader id="companyNamesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e
 order by e.comanyName]]></query>
@@ -46,8 +58,16 @@ order by e.comanyName]]></query>
                     view="companyDepartament-view">
             <loader id="companyDepartamentsLc" cacheable="true">
                 <query>
-                    <![CDATA[select e from itpearls_CompanyDepartament e where e.departamentRuName not like '%(не использовать)%'
+                    <![CDATA[select e from itpearls_CompanyDepartament e
+where e.departamentRuName not like '%(не использовать)%'
 order by e.departamentRuName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e.companyName = :company
+                            </c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -58,7 +78,10 @@ order by e.departamentRuName]]>
         </collection>
         <collection id="cityOfCompanyDc" class="com.company.itpearls.entity.Company" view="_local">
             <loader id="cityOfCompanyDl" cacheable="true">
-                <query><![CDATA[select e from itpearls_Company e]]></query>
+                <query>
+                    <![CDATA[select e from itpearls_Company e
+order by e.comanyName]]>
+                </query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City" view="_local">
@@ -108,16 +131,31 @@ order by e.endDate desc]]>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
+        <groupBox spacing="true">
+            <vbox>
+                <label id="labelOpenPosition" stylename="h2"/>
+                <label id="labelTopComissionRecrutier" stylename="h4" htmlEnabled="true"/>
+                <label id="labelTopComissionResearcher" stylename="h4" htmlEnabled="true"/>
+            </vbox>
+        </groupBox>
         <tabSheet id="tabSheetOpenPosition">
             <tab id="tabOpenPosition" caption="msg://msgNamePosition" margin="true,false,false,false" spacing="true"
                  icon="USERS">
                 <hbox id="hboxProject1" spacing="true" width="100%">
                     <checkBox id="openClosePositionCheckBox" dataContainer="openPositionDc" property="openClose"
                               caption="mainMsg://msgPositionClose" align="MIDDLE_LEFT"/>
-                    <lookupField id="priorityField"
-                                 dataContainer="openPositionDc" property="priority"
-                                 caption="msg://msgPriorityPosition" width="50%" required="true" align="MIDDLE_LEFT">
-                    </lookupField>
+                    <hbox width="100%">
+                        <lookupField id="priorityField"
+                                     dataContainer="openPositionDc" property="priority"
+                                     caption="msg://msgPriorityPosition" required="true" align="MIDDLE_LEFT"
+                                     width="95%">
+                        </lookupField>
+                        <lookupField id="remoteWorkField"
+                                     dataContainer="openPositionDc" property="remoteWork"
+                                     required="true" align="MIDDLE_LEFT" caption="msg://msgRemoteWork" width="95%">
+                        </lookupField>
+
+                    </hbox>
                 </hbox>
                 <groupBox id="groupBoxOpenPosition" spacing="true">
                     <hbox id="hboxVacansy" spacing="true" width="100%">
@@ -140,7 +178,6 @@ order by e.endDate desc]]>
                             </actions>
                         </lookupPickerField>
                         <lookupPickerField id="companyDepartamentField" optionsContainer="companyDepartamentsDc"
-                                           dataContainer="openPositionDc" property="companyDepartament"
                                            caption="msg://msgDepartment" width="100%" required="true">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
@@ -149,7 +186,7 @@ order by e.endDate desc]]>
                     </hbox>
                     <hbox id="hboxCompany" spacing="true" width="100%">
                         <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc"
-                                           dataContainer="openPositionDc" property="companyName" caption="msg://msgCompanyName"
+                                           caption="msg://msgCompanyName"
                                            width="100%" required="true">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
@@ -166,12 +203,14 @@ order by e.endDate desc]]>
                     <textField id="numberPositionField" dataContainer="openPositionDc" property="numberPosition"
                                caption="msg://msgNumberOpenPosition" width="50%"/>
                 </groupBox>
-                <hbox id="hboxSalary" spacing="true" width="100%">
-                    <textField id="openPositionFieldSalaryMin" dataContainer="openPositionDc" property="salaryMin"
-                               caption="mainMsg://msgSalaryMin" width="100%" required="true"/>
-                    <textField id="openPositionFieldSalaryMax" dataContainer="openPositionDc" property="salaryMax"
-                               caption="msg://msgSalaryMax" width="100%" required="true"/>
-                </hbox>
+                <groupBox>
+                    <hbox id="hboxSalary" spacing="true" width="100%">
+                        <textField id="openPositionFieldSalaryMin" dataContainer="openPositionDc" property="salaryMin"
+                                   caption="mainMsg://msgSalaryMin" width="100%" required="true"/>
+                        <textField id="openPositionFieldSalaryMax" dataContainer="openPositionDc" property="salaryMax"
+                                   caption="msg://msgSalaryMax" width="100%" required="true"/>
+                    </hbox>
+                </groupBox>
             </tab>
             <tab id="tabPayments" caption="msg://msgPayments" margin="true,false,false,false" spacing="true"
                  icon="BULK_EDIT_ACTION">
@@ -224,7 +263,7 @@ order by e.endDate desc]]>
                 </groupBox>
                 <groupBox id="groupBoxCompanyContacts" orientation="horizontal" spacing="true"
                           caption="msg://msgCompanyContacts">
-                    <table id="personTable" height="150px" width="100%" dataContainer="personsDc">
+                    <table id="personTable" height="120px" width="100%" dataContainer="personsDc">
                         <columns>
                             <column id="sendResumeToEmail" caption="msg://msgSendResume" width="80" editable="true"/>
                             <column id="secondName"/>
@@ -268,7 +307,6 @@ order by e.endDate desc]]>
                         <column id="endDate"/>
                         <column id="reacrutier.name"/>
                         <column id="openPosition.vacansyName"/>
-                        <column id="openPosition.projectName.projectName"/>
                     </columns>
                     <buttonsPanel>
                         <button action="recrutiesTasksTable.create"/>
