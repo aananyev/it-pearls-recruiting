@@ -3,15 +3,12 @@ buildscript {
     repositories {
         mavenLocal()
         maven {
-            url 'https://repo.cuba-platform.com/content/groups/work'
+            url 'https://dl.bintray.com/cuba-platform/main'
 
-            credentials {
-                username(rootProject.hasProperty('repoUser') ? rootProject['repoUser'] : 'cuba')
-                password(rootProject.hasProperty('repoPass') ? rootProject['repoPass'] : 'cuba123')
-            }
         }
 
 
+        jcenter()
     }
     dependencies {
         classpath "com.haulmont.gradle:cuba-plugin:$cubaVersion"

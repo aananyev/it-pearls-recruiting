@@ -264,7 +264,7 @@ order by e.cityRuName]]>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick" icon="BELL"/>
             <button id="okAndCheck" caption="CheckOK" invoke="onBtnOkAndCheck" icon="OK"/>
-            <button action="windowCommitAndClose"/>
+            <button action="windowCommitAndClose" visible="false"/>
             <button action="windowClose"/>
         </hbox>
     </layout>

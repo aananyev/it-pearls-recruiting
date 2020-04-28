@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.cuba.core.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -11,6 +12,9 @@ import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -95,6 +99,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
        return candidates.size() == 0 ? false : true;
     }
 
+
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
        // основные социальные сети показать
@@ -115,14 +120,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .list();
 
                 for (SocialNetworkType s : socialNetworkType ) {
-                    SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
+                        // SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
+                    SocialNetworkURLs socialNetworkURLs = metadata.create( SocialNetworkURLs.class );
 
-                    if( !type.contains(s) ) {
+                    if (!type.contains(s)) {
                         socialNetworkURLs.setSocialNetworkURL(s);
                         socialNetworkURLs.setNetworkName(s.getSocialNetwork());
                         socialNetworkURLs.setJobCandidate(getEditedEntity());
 
-                        dataManager.commit( socialNetworkURLs );
+                        dataManager.commit(socialNetworkURLs);
                     }
                 }
             }
@@ -146,6 +152,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             dataContext.merge( sn );
         }
+
+        enableDisableContacts();
     }
 
     protected boolean isRequiredAddresField() {
@@ -291,7 +299,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        enableDisableContacts();
 
         if(!PersistenceHelper.isNew(getEditedEntity())) {
            if(!getEditedEntity().getFullName().equals( "" ) ) {
@@ -321,6 +328,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             getEditedEntity().setStatus( 0 );
         }
+
+        enableDisableContacts();
     }
 
     @Subscribe
