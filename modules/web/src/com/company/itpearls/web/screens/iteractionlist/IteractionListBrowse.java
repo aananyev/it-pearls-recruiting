@@ -83,7 +83,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
                         data.setCandidate( iteractionListsTable.getSingleSelected().getCandidate());
                         data.setVacancy( iteractionListsTable.getSingleSelected().getVacancy() );
-                        data.setCompanyDepartment( iteractionListsTable.getSingleSelected().getCompanyDepartment() );
+                        // data.setCompanyDepartment( iteractionListsTable.getSingleSelected().getCompanyDepartment() );
                         data.setProject( iteractionListsTable.getSingleSelected().getProject() );
                     }
                 })

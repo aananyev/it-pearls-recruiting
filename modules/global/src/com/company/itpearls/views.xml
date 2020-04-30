@@ -175,10 +175,10 @@
         </property>
     </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
-        <property name="companyOwnership" view="_minimal"/>
+        <property name="companyOwnership" fetch="JOIN" view="_local"/>
         <property name="companyDirector" view="_minimal"/>
-        <property name="departmentOfCompany" view="_minimal">
-            <property name="projectOfDepartment" view="_minimal"/>
+        <property name="departmentOfCompany" view="_local">
+            <property name="companyName" view="_local"/>
         </property>
         <property name="cityOfCompany" view="city-view"/>
         <property name="regionOfCompany" view="_minimal"/>
@@ -242,6 +242,7 @@
                 </property>
             </property>
         </property>
+        <property name="project" fetch="JOIN" view="_local"/>
         <property name="iteractionType" fetch="BATCH" view="_local"/>
         <property name="recrutier" fetch="JOIN" view="_local"/>
     </view>
