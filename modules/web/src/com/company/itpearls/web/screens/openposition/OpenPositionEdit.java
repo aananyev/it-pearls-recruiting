@@ -128,6 +128,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> labelTopComissionRecrutier;
 
+    static String RESEARCHER = "Researcher";
+    static String RECRUITER = "Recruiter";
+    static String MANAGER = "Manager";
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
@@ -354,7 +358,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                    events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
                             getEditedEntity().getVacansyName()));
 
-                   if( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) ) {
+                   if( getRoleService.isUserRoles( userSession.getUser(), MANAGER ) ) {
                        dialogs.createOptionDialog()
                                .withCaption("Внимание!")
                                .withMessage("Разослать email-оповещение по всем сотрудникам?")
@@ -544,21 +548,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setHiddeField() {
         // скрыть менеджерские пункты
-       if( isUserRoles( userSession.getUser(), "Manager" ) ) {
+       if( isUserRoles( userSession.getUser(), MANAGER ) ) {
            groupBoxPaymentsDetail.setVisible( true );
-           groupBoxPaymentsResearcher.setVisible( false );
-           groupBoxPaymentsRecrutier.setVisible( false );
+           groupBoxPaymentsResearcher.setVisible( true );
+           groupBoxPaymentsRecrutier.setVisible( true );
        } else {
            groupBoxPaymentsDetail.setVisible( false );
+           groupBoxPaymentsRecrutier.setVisible(false);
+           groupBoxPaymentsResearcher.setVisible( false );
 
-           if( isUserRoles( userSession.getUser(), "Researcher" ) ) {
-               groupBoxPaymentsResearcher.setVisible( true );
-               groupBoxPaymentsRecrutier.setVisible( false );
-           } else {
-               if( isUserRoles( userSession.getUser(), "Recrutier" ) ) {
-                   groupBoxPaymentsResearcher.setVisible(false);
-                   groupBoxPaymentsRecrutier.setVisible(true);
-               }
+           if( isUserRoles( userSession.getUser(), RESEARCHER ) ) {
+               groupBoxPaymentsResearcher.setVisible(true);
+           }
+
+           if( isUserRoles( userSession.getUser(), RECRUITER ) ) {
+               groupBoxPaymentsRecrutier.setVisible( true );
            }
        }
     }
@@ -870,14 +874,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setResearcherSalaryLabel() {
         if( radioButtonGroupResearcherSalary.getValue() != null ) {
-            if ((int) radioButtonGroupResearcherSalary.getValue() == 0) {
-                labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
-                        vacansyNameField.getValue() + "</i>\" составит " +
-                        textFieldResearcherSalary.getValue() + " рублей.");
+            if ((int) radioButtonGroupResearcherSalary.getValue() == 0 ) {
+                if( textFieldResearcherSalary.getValue() != null ) {
+                    labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
+                            vacansyNameField.getValue() + "</i>\" составит " +
+                            textFieldResearcherSalary.getValue() + " рублей.");
+
+                    groupBoxPaymentsResearcher.setVisible( true );
+                } else
+                    groupBoxPaymentsResearcher.setVisible( false );
             } else {
-                labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
-                        vacansyNameField.getValue() + "</i>\" составит " +
-                        textFieldResearcherSalary.getValue() + " рублей.");
+                if( textFieldResearcherSalary.getValue() != null ) {
+                    labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
+                            vacansyNameField.getValue() + "</i>\" составит " +
+                            textFieldResearcherSalary.getValue() + " рублей.");
+                    groupBoxPaymentsResearcher.setVisible( true );
+                    groupBoxPaymentsResearcher.setVisible( true );
+                } else
+                    groupBoxPaymentsResearcher.setVisible( false );
             }
         }
     }
@@ -885,15 +899,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void setRecrutierSalaryLabel() {
         if( radioButtonGroupRecrutierSalary.getValue() != null ) {
             if ((int) radioButtonGroupRecrutierSalary.getValue() == 0) {
-                labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
-                        vacansyNameField.getValue() + "</i>\" составит " +
-                        textFieldRecrutierSalary.getValue() + " рублей.");
+                if( textFieldRecrutierSalary.getValue() != null ) {
+                    labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
+                            vacansyNameField.getValue() + "</i>\" составит " +
+                            textFieldRecrutierSalary.getValue() + " рублей.");
+                }
             } else{
-                labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
-                        vacansyNameField.getValue() + "</i>\" составит " +
-                        textFieldRecrutierSalary.getValue() + " рублей.");
+                if( textFieldRecrutierSalary.getValue() != null ) {
+                    labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
+                            vacansyNameField.getValue() + "</i>\" составит " +
+                            textFieldRecrutierSalary.getValue() + " рублей.");
+                }
             }
         }
+
+        setHiddeField();
     }
 
     @Subscribe
@@ -927,21 +947,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     ")" );
 
         // а еще вывести комиссию
-        if( getRoleService.isUserRoles( userSession.getUser(), "Researcher" ) ) {
+        if( getRoleService.isUserRoles( userSession.getUser(), RESEARCHER ) ) {
             labelTopComissionResearcher.setValue( labelResearcherSalary.getValue() );
             labelTopComissionResearcher.setVisible( true );
+
+            labelTopComissionRecrutier.setVisible( false );
         } else {
             labelTopComissionResearcher.setVisible( false );
         }
 
-        if( getRoleService.isUserRoles( userSession.getUser(), "Recrutier" ) ) {
+        if( getRoleService.isUserRoles( userSession.getUser(), RECRUITER ) ) {
             labelTopComissionRecrutier.setValue( labelRecrutierSalary.getValue() );
             labelTopComissionRecrutier.setVisible( true );
+
+            labelTopComissionResearcher.setVisible( false );
         } else {
             labelTopComissionRecrutier.setVisible( false );
         }
 
-        if( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) ) {
+        if( getRoleService.isUserRoles( userSession.getUser(), MANAGER ) ) {
             labelTopComissionRecrutier.setVisible( false );
             labelTopComissionResearcher.setVisible( false );
         }
