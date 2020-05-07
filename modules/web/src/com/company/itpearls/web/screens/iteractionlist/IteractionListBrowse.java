@@ -102,18 +102,4 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             buttonCopy.setEnabled( false );
         
     }
-
-    /* @EventListener
-    public void onUiNotificationEvent(UiNotificationEvent event) {
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withDescription( event.getMessage() )
-                .withCaption("INFO")
-                .show();
-    }
-
-    // screens do not receive non-UI events!
-    @EventListener
-    public void onBeanNotificationEvent(BeanNotificationEvent event) {
-        throw new IllegalStateException("Received " + event);
-    }*/
 }

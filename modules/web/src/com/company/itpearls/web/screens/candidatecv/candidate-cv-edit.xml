@@ -28,7 +28,7 @@ order by e.vacansyName]]>
         <collection id="resumePositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="resumePositionsLc">
                 <query>
-                    <![CDATA[select e from itpearls_Position e order by e.positionRuName]]>
+                    <![CDATA[select e from itpearls_Position e where e.positionRuName not like '%(не использовать)%' order by e.positionRuName]]>
                 </query>
             </loader>
         </collection>
