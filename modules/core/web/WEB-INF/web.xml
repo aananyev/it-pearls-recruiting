@@ -17,7 +17,7 @@
     <context-param>
         <param-name>appComponents</param-name>
         <param-value>com.haulmont.cuba com.haulmont.fts com.haulmont.reports com.haulmont.addon.emailtemplates
-            de.diedavids.cuba.dataimport com.haulmont.addon.globalevents</param-value>
+            de.diedavids.cuba.dataimport com.haulmont.addon.dashboard com.haulmont.addon.globalevents</param-value>
     </context-param>
     <listener>
         <listener-class>com.haulmont.cuba.core.sys.AppContextLoader</listener-class>
