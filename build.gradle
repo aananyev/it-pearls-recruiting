@@ -189,6 +189,11 @@ configure(webModule) {
     task deploy(dependsOn: [assemble, cleanConf], type: CubaDeployment) {
         appName = "${modulePrefix}"
         appJars(modulePrefix + '-global', modulePrefix + '-gui', modulePrefix + '-web')
+        copy {
+            from "images"
+            into "$cuba.tomcat.dir/webapps/${modulePrefix}/VAADIN/images"
+            include "*.png"
+        }
     }
 
     task buildScssThemes(type: CubaWebScssThemeCreation)

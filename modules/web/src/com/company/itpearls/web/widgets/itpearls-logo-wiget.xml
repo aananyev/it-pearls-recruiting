@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout>
+        <image id="itpearlsLogo" alternateText="IT Pearls" height="50px" width="50px" scaleMode="FILL">
+            <relativePath path="VAADIN/images/itpearls-logo.png"/>
+        </image>
+    </layout>
+</fragment>
