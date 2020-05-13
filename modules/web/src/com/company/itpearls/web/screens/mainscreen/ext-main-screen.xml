@@ -1,0 +1,21 @@
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        extends="/com/haulmont/cuba/web/app/main/main-screen.xml"
+        xmlns:dashboard="http://schemas.haulmont.com/cubadshb/ui-component.xsd">
+    <layout>
+        <cssLayout id="horizontalWrap">
+            <workArea id="workArea">
+                <initialLayout>
+                    <vbox id="mainVBox"
+                          expand="mainDashboard"
+                          spacing="true">
+                        <dashboard:dashboard id="mainDashboard"
+                                             code="recruiting-dashboard"
+                                             timerDelay="60"
+                                             width="100%">
+                        </dashboard:dashboard>
+                    </vbox>
+                </initialLayout>
+            </workArea>
+        </cssLayout>
+    </layout>
+</window>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <data>
+        <collection id="calendarDataDc" class="com.company.itpearls.entity.IteractionList"
+                    view="iteractionList-view">
+            <loader id="calendarDataDl">
+                <query>
+                    select e from itpearls_IteractionList e where e.addDate is not null order by e.addDate DESC
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout expand="vBox">
+        <vbox id="vBox" expand="interviewCalendar">
+            <hbox id="hBox" width="100%" align="MIDDLE_CENTER">
+                <label value="Month" align="BOTTOM_LEFT" height="100%"/>
+                <datePicker id="monthPicker" width="100%" height="100%"
+                    resolution="MONTH"/>
+            </hbox>
+            <calendar id="interviewCalendar"
+                      caption="100%"
+                      height="100%"
+                      width="100%"
+                      startDate="2020-05-01"
+                      endDate="2020-05-31"/>
+        </vbox>
+    </layout>
+</fragment>
