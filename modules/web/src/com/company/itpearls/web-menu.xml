@@ -5,6 +5,7 @@
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>
         <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
+        <item screen="itpearls_Interviewcalendar" icon="CALENDAR"/>
     </menu>
     <menu id="application-project" insertAfter="application-hunting">
         <item screen="itpearls_Person.browse" icon="USER"/>
