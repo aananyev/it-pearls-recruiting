@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.interviewcalendar;
 
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.components.Calendar;
+import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.calendar.ListCalendarEventProvider;
 import com.haulmont.cuba.gui.components.calendar.SimpleCalendarEvent;
@@ -23,9 +24,16 @@ public class Interviewcalendar extends Screen {
     private CollectionContainer<IteractionList> calendarDataDc;
     @Inject
     private CollectionLoader<IteractionList> calendarDataDl;
+    @Inject
+    private CheckBox huntingCheckBox;
+    @Inject
+    private CheckBox toConpanyCheckBox;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
+        huntingCheckBox.setValue( true );
+        toConpanyCheckBox.setValue( true );
+
         calendarDataDl.load();
 
         for( IteractionList list : calendarDataDc.getItems() ) {
@@ -44,6 +52,28 @@ public class Interviewcalendar extends Screen {
             interviewCalendar.getEventProvider().addEvent( calendarEvent );
         }
 
+    }
+
+    @Subscribe("huntingCheckBox")
+    public void onHuntingCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if( huntingCheckBox.getValue() ) {
+           calendarDataDl.setParameter( "numberInternal", "2" );
+        } else {
+            calendarDataDl.removeParameter("numberInternal");
+        }
+
+        calendarDataDl.load();
+    }
+
+    @Subscribe("toConpanyCheckBox")
+    public void onToConpanyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if( toConpanyCheckBox.getValue() ) {
+            calendarDataDl.setParameter( "numberExternal", "3" );
+        } else  {
+            calendarDataDl.removeParameter( "numberExternal" );
+        }
+
+        calendarDataDl.load();
     }
 
     @Subscribe("monthPicker")

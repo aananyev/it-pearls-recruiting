@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
-        caption="msg://msgInterviewCalendar"
+        caption="msg://msgInterviewCal"
         messagesPack="com.company.itpearls.web.screens.Interviewcalendar"
         icon="font-icon:CALENDAR">
     <data>
@@ -9,7 +9,24 @@
                     view="iteractionList-view">
             <loader id="calendarDataDl">
                 <query>
-                    select e from itpearls_IteractionList e where e.addDate is not null and e.iteractionType.calendarItem=true order by e.addDate DESC
+                    select e
+                    from itpearls_IteractionList e
+                    where (e.addDate is not null and e.iteractionType.calendarItem=TRUE)
+                    order by e.addDate DESC
+                    <condition>
+                        <or>
+                            <c:jpql>
+                                <c:where>
+                                    e.iteractionType.number = :numberInternal
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.iteractionType.number = :numberExternal
+                                </c:where>
+                            </c:jpql>
+                        </or>
+                    </condition>
                 </query>
             </loader>
         </collection>

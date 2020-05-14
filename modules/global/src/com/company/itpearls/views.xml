@@ -243,7 +243,9 @@
             </property>
         </property>
         <property name="project" fetch="JOIN" view="_local"/>
-        <property name="iteractionType" fetch="BATCH" view="_local"/>
+        <property name="iteractionType" fetch="BATCH" view="_minimal">
+            <property name="iterationName"/>
+        </property>
         <property name="recrutier" fetch="JOIN" view="_local"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"

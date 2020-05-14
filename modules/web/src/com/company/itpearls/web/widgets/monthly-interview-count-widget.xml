@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data>
+        <collection id="iteractionListDc" class="com.company.itpearls.entity.IteractionList" view="iteractionList-view">
+            <loader id="iteractioListDl">
+                <query>
+                    select e
+                    from itpearls_IteractionList e
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.iteractionType.iterationName like :iteractionName
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.dateIteraction between :startDate and :endDate
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <vbox>
+            <label id="labelTitle" width="100%" htmlEnabled="true"/>
+            <label id="labelCountNewContacts" icon="BATTERY_0" width="100%" htmlEnabled="true"/>
+            <label id="labelAssignInternalInterview" icon="BATTERY_1" width="100%" htmlEnabled="true"/>
+            <label id="labelPrepareInternalInterview" icon="BATTERY_2" width="100%" htmlEnabled="true"/>
+            <label id="labelAssignExternalInterview" icon="BATTERY_3" width="100%" htmlEnabled="true"/>
+            <label id="labelPrepareExternalInterview" icon="BATTERY_4" width="100%" htmlEnabled="true"/>
+        </vbox>
+    </layout>
+</fragment>
