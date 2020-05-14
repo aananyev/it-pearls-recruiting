@@ -32,36 +32,96 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     private Label<String> labelPrepareInternalInterview;
     @Inject
     private Label<String> labelTitle;
-
-    private String itemNewContact = "Новый контакт";
     @Inject
     private CollectionLoader<IteractionList> iteractioListDl;
     @Inject
     private CollectionContainer<IteractionList> iteractionListDc;
 
+    private String itemNewContact = "Новый контакт";
+    private String itemAssignInternalInterview = "Назначено собеседование с рекрутером IT Pearls";
+    private String itemPrepareInternalInterview = "Прошел собеседование с рекрутером IT Pearls";
+    private String itemAssignExternalInterview = "Назначено техническое собеседование";
+    private String itemPrepareExternalInterview = "Прошел техническое собеседование";
+    private String itemPrepareDirectorsInterview = "Прошел собеседование с Директором";
+    @Inject
+    private Label<String> labelDirectorsInterview;
+
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         labelTitle.setValue( "<b><u>Взаимодействия за месяц</u></b>" );
 
+        setLabelNewContacts();
+        setLabelAssignInternalInterview();
+        setLabelPrepareInternalInterview();
+        setLabelAssignExternalInterview();
+        setLabelPrepareExternalInterview();
+        setLabelPrepareDirectorsInterview();
+    }
+
+    private void setLabelPrepareDirectorsInterview() {
+        iteractioListDl.setParameter( "iteractionName", itemPrepareDirectorsInterview + "%" );
+        iteractioListDl.load();
+
+        int count = iteractionListDc.getItems().size();
+        labelDirectorsInterview.setValue( itemPrepareDirectorsInterview + " " + count );
+    }
+
+    private void setLabelPrepareExternalInterview() {
+        iteractioListDl.setParameter( "iteractionName", itemPrepareExternalInterview + "%" );
+        iteractioListDl.load();
+
+        int count = iteractionListDc.getItems().size();
+        labelPrepareExternalInterview.setValue( itemPrepareExternalInterview + " " + count );
+    }
+
+    private void setLabelAssignExternalInterview() {
+        iteractioListDl.setParameter( "iteractionName", itemAssignExternalInterview + "%" );
+        iteractioListDl.load();
+
+        int count = iteractionListDc.getItems().size();
+        labelAssignExternalInterview.setValue( itemAssignExternalInterview + " " + count );
+    }
+
+    private void setLabelPrepareInternalInterview() {
+        iteractioListDl.setParameter( "iteractionName", itemPrepareInternalInterview + "%" );
+        iteractioListDl.load();
+
+        int count = iteractionListDc.getItems().size();
+        labelPrepareInternalInterview.setValue( itemPrepareInternalInterview + " " + count );
+    }
+
+
+    private void setLabelNewContacts() {
+        setDateInterval();
+
+        iteractioListDl.setParameter( "iteractionName", itemNewContact + "%" );
+        iteractioListDl.load();
+
+        int countItems = 0;
+        countItems = iteractionListDc.getItems().size();
+
+        labelCountNewContacts.setValue( itemNewContact + " " + countItems );
+    }
+
+    private void setDateInterval() {
         Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
         Date firstDay = cal.getTime();
         cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DATE));
         Date endDay = cal.getTime();
 
         iteractioListDl.setParameter( "startDate", firstDay );
         iteractioListDl.setParameter( "endDate", endDay );
-        iteractioListDl.setParameter( "iteractionName", itemNewContact + "%" );
 
         iteractioListDl.load();
+    }
 
-        int countItems = 0;
-        countItems = iteractionListDc.getItems().size();
+    private void setLabelAssignInternalInterview() {
+        iteractioListDl.setParameter( "iteractionName", itemAssignInternalInterview + "%" );
+        iteractioListDl.load();
 
-/*        for( IteractionList list : iteractionListDc.getItems() ) {
-            countItems ++;
-        } */
-
-        labelCountNewContacts.setValue( itemNewContact + " " + countItems );
+        int count = iteractionListDc.getItems().size();
+        labelAssignInternalInterview.setValue( itemAssignInternalInterview + " " + count );
     }
 
 

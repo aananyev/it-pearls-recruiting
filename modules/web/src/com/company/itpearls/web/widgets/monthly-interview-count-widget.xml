@@ -27,12 +27,15 @@
     </data>
     <layout>
         <vbox>
-            <label id="labelTitle" width="100%" htmlEnabled="true"/>
-            <label id="labelCountNewContacts" icon="BATTERY_0" width="100%" htmlEnabled="true"/>
-            <label id="labelAssignInternalInterview" icon="BATTERY_1" width="100%" htmlEnabled="true"/>
-            <label id="labelPrepareInternalInterview" icon="BATTERY_2" width="100%" htmlEnabled="true"/>
-            <label id="labelAssignExternalInterview" icon="BATTERY_3" width="100%" htmlEnabled="true"/>
-            <label id="labelPrepareExternalInterview" icon="BATTERY_4" width="100%" htmlEnabled="true"/>
+            <groupBox>
+                <label id="labelTitle" width="100%" htmlEnabled="true" align="MIDDLE_CENTER"/>
+                <label id="labelCountNewContacts" icon="BATTERY_0" width="100%" htmlEnabled="true"/>
+                <label id="labelAssignInternalInterview" icon="BATTERY_1" width="100%" htmlEnabled="true"/>
+                <label id="labelPrepareInternalInterview" icon="BATTERY_2" width="100%" htmlEnabled="true"/>
+                <label id="labelAssignExternalInterview" icon="BATTERY_3" width="100%" htmlEnabled="true"/>
+                <label id="labelPrepareExternalInterview" icon="BATTERY_4" width="100%" htmlEnabled="true"/>
+                <label id="labelDirectorsInterview" icon="BATTERY_FULL" width="100%" htmlEnabled="true"/>
+            </groupBox>
         </vbox>
     </layout>
 </fragment>
