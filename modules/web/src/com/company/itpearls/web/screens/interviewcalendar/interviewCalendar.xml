@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://msgInterviewCalendar"
-        messagesPack="com.company.itpearls.web.screens"
+        messagesPack="com.company.itpearls.web.screens.Interviewcalendar"
         icon="font-icon:CALENDAR">
     <data>
         <collection id="calendarDataDc" class="com.company.itpearls.entity.IteractionList"
                     view="iteractionList-view">
             <loader id="calendarDataDl">
                 <query>
-                    select e from itpearls_IteractionList e where e.addDate is not null order by e.addDate DESC
+                    select e from itpearls_IteractionList e where e.addDate is not null and e.iteractionType.calendarItem=true order by e.addDate DESC
                 </query>
             </loader>
         </collection>
@@ -25,11 +26,12 @@
                                 resolution="MONTH"/>
                 </hbox>
                 <calendar id="interviewCalendar"
-                        caption="100%"
-                        height="100%"
-                        width="100%"
-                        startDate="2020-05-01"
-                        endDate="2020-05-31"/>
+                          navigationButtonsVisible="true"
+                          caption="100%"
+                          height="100%"
+                          width="100%"
+                          startDate="2020-05-01"
+                          endDate="2020-05-31"/>
             </groupBox>
             <groupBox id="filterGroupBox" width="100%" height="AUTO">
                 <hbox spacing="true">

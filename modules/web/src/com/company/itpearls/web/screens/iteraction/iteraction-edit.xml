@@ -55,20 +55,35 @@ order by e.number]]>
             </tab>
             <tab id="tabNotifictions" caption="msg://msgNotifications" margin="true,false,false,false" spacing="true"
             >
-                <groupBox height="200pt">
+                <groupBox height="AUTO">
                     <radioButtonGroup id="radioButtonTypeNotifications" dataContainer="iteractionDc"
                                       property="notificationType"/>
                     <textField id="lookupFieldEmails" caseConversion="LOWER" contextHelpText="msg://msgEmailHelpText"/>
                 </groupBox>
             </tab>
             <tab caption="msg://msgSetupFiels" margin="true,false,false,false" spacing="true" id="tabSetup">
-                <groupBox height="200pt">
-                    <checkBox id="checkBoxFlag" caption="msg://msgAdd" dataContainer="iteractionDc" property="addFlag"/>
-                    <radioButtonGroup id="radioButtonAddType" caption="msg://msgRadioButton" width="50%"
-                                      dataContainer="iteractionDc" property="addType"/>
-                    <textField id="textFieldCaption" caption="msg://msgCaption" dataContainer="iteractionDc"
-                               property="addCaption" width="50%"/>
-                </groupBox>
+                <hbox width="100%" height="AUTO">
+                    <groupBox height="AUTO" spacing="true" width="AUTO">
+                        <checkBox id="checkBoxFlag" caption="msg://msgAdd" dataContainer="iteractionDc" property="addFlag"/>
+                        <radioButtonGroup id="radioButtonAddType" caption="msg://msgRadioButton" width="50%"
+                                          dataContainer="iteractionDc" property="addType"/>
+                        <textField id="textFieldCaption" caption="msg://msgCaption" dataContainer="iteractionDc"
+                                   property="addCaption" width="50%"/>
+                    </groupBox>
+                    <groupBox height="AUTO" spacing="true" width="AUTO">
+                        <checkBox id="checkBoxCalendar"
+                                  caption="msg://msgUseCalendar"
+                                  align="TOP_LEFT"
+                                  dataContainer="iteractionDc"
+                                  property="calendarItem"/>
+                        <textField id="textFieldCalendarItemStyle"
+                                   align="TOP_LEFT"
+                                   caseConversion="LOWER"
+                                   caption="msg://msgCalendarItemStyle"
+                                   dataContainer="iteractionDc"
+                                   property="calendarItemStyle"/>
+                    </groupBox>
+                </hbox>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

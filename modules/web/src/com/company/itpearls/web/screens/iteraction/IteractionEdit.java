@@ -18,6 +18,10 @@ import java.util.Map;
 @LoadDataBeforeShow
 public class IteractionEdit extends StandardEditor<Iteraction> {
     @Inject
+    private CheckBox checkBoxCalendar;
+    @Inject
+    private TextField<String> textFieldCalendarItemStyle;
+    @Inject
     private Image embeddedPict;
     @Inject
     private CheckBox checkBoxCallDialog;
@@ -33,8 +37,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private CheckBox checkBoxFlag;
     @Inject
     private TextField textFieldCaption;
-//    @Inject
-//    private TextField textFieldDBFieldName;
     @Inject
     private Label<String> labelItercationName;
     @Inject
@@ -45,6 +47,11 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private RadioButtonGroup radioButtonTypeNotifications;
     @Inject
     private TextField<String> lookupFieldEmails;
+
+    @Subscribe("checkBoxCalendar")
+    public void onCheckBoxCalendarValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        textFieldCalendarItemStyle.setRequired( checkBoxCalendar.getValue() );
+    }
 
     @Subscribe
     public void onInit(InitEvent event) {

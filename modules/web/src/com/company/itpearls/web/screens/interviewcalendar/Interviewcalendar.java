@@ -1,14 +1,16 @@
-package com.company.itpearls.web.screens;
+package com.company.itpearls.web.screens.interviewcalendar;
 
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.components.Calendar;
 import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.components.calendar.ListCalendarEventProvider;
 import com.haulmont.cuba.gui.components.calendar.SimpleCalendarEvent;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -31,6 +33,12 @@ public class Interviewcalendar extends Screen {
             calendarEvent.setCaption( list.getCandidate().getFullName() );
             calendarEvent.setStart( list.getAddDate() );
             calendarEvent.setEnd( list.getAddDate() );
+
+            String itemStyle = list.getIteractionType().getCalendarItemStyle();
+
+            if( list.getIteractionType().getCalendarItemStyle() != null )
+                 calendarEvent.setStyleName( list.getIteractionType().getCalendarItemStyle() );
+
             calendarEvent.setAllDay( true );
 
             interviewCalendar.getEventProvider().addEvent( calendarEvent );

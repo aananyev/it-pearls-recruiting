@@ -59,6 +59,12 @@ public class Iteraction extends StandardEntity {
     @Column(name = "NOTIFICATION_TYPE")
     protected Integer notificationType;
 
+    @Column(name = "CALENDAR_ITEM")
+    protected Boolean calendarItem;
+
+    @Column(name = "CALENDAR_ITEM_STYLE")
+    protected String calendarItemStyle;
+
     public Integer getNotificationType() {
         return notificationType;
     }
@@ -162,4 +168,12 @@ public class Iteraction extends StandardEntity {
     public void setIterationName(String iterationName) {
         this.iterationName = iterationName;
     }
+
+    public void setCalendarItem( Boolean calendarItem ) { this.calendarItem = calendarItem; }
+
+    public Boolean getCalendarItem() { return calendarItem; }
+
+    public void setCalendarItemStyle( String calendarItemStyle ) { this.calendarItemStyle = calendarItemStyle; }
+
+    public String getCalendarItemStyle() { return calendarItemStyle; }
 }
