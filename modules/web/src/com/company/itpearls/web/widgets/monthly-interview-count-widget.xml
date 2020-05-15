@@ -26,46 +26,74 @@
         </collection>
     </data>
     <layout>
-        <vbox>
-            <groupBox>
-                <label id="labelTitle" width="100%" htmlEnabled="true" align="MIDDLE_CENTER"/>
-                <hbox>
-                    <label id="labelCountNewContacts" icon="BATTERY_0" width="AUTO" htmlEnabled="true"/>
-                    <label id="labelCountNewContactsValue" width="AUTO" htmlEnabled="true"/>
-                </hbox>
-                <hbox>
-                    <label id="labelAssignInternalInterview" icon="BATTERY_1" width="100%" htmlEnabled="true"/>
-                    <label id="labelAssignInternalInterviewValue" width="100%" htmlEnabled="true"/>
-                </hbox>
-                <hbox>
-                <label id="labelPrepareInternalInterview" icon="BATTERY_2" width="100%" htmlEnabled="true"/>
-                    <label id="labelPrepareInternalInterviewValus" width="100%" htmlEnabled="true"/>
-                </hbox>
-                <hbox>
-                    <label id="labelAssignExternalInterview" icon="BATTERY_3" width="100%" htmlEnabled="true"/>
-                    <label id="labelAssignExternalInterviewValue" width="100%" htmlEnabled="true"/>
-                </hbox>
-                <hbox>
-                    <label id="labelPrepareExternalInterview" icon="BATTERY_4" width="100%" htmlEnabled="true"/>
-                    <label id="labelPrepareExternalInterviewValue" width="100%" htmlEnabled="true"/>
-                </hbox>
-                <grid spacing="true">
-                    <columns count="2"/>
-                    <rows>
-                        <row>
-                            <label id="labelDirectorsInterview"
-                                   icon="BATTERY_FULL"
-                                   width="95%"
-                                   htmlEnabled="true"
-                                   align="MIDDLE_LEFT"/>
-                            <label id="labelDirectorsInterviewValue"
-                                   width="5%"
-                                   htmlEnabled="true"
-                                   align="MIDDLE_RIGHT"/>
-                        </row>
-                    </rows>
-                </grid>
-            </groupBox>
-        </vbox>
+        <groupBox spacing="true" width="AUTO">
+            <label id="labelTitle" width="AUTO" htmlEnabled="true" align="MIDDLE_CENTER"/>
+            <grid spacing="true">
+                <columns count="2"/>
+                <rows>
+                    <row>
+                        <label id="labelCountNewContacts"
+                               icon="BATTERY_0"
+                               width="AUTO"
+                               htmlEnabled="true"/>
+                        <label id="labelCountNewContactsValue"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"
+                               htmlEnabled="true"/>
+                    </row>
+                    <row>
+                        <label id="labelAssignInternalInterview"
+                               icon="BATTERY_1"
+                               width="AUTO"
+                               htmlEnabled="true"/>
+                        <label id="labelAssignInternalInterviewValue"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"
+                               htmlEnabled="true"/>
+                    </row>
+                    <row>
+                        <label id="labelPrepareInternalInterview"
+                               icon="BATTERY_2"
+                               width="AUTO"
+                               htmlEnabled="true"/>
+                        <label id="labelPrepareInternalInterviewValus"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"
+                               htmlEnabled="true"/>
+                    </row>
+                    <row>
+                        <label id="labelAssignExternalInterview"
+                               icon="BATTERY_3"
+                               width="AUTO"
+                               htmlEnabled="true"/>
+                        <label id="labelAssignExternalInterviewValue"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"
+                               htmlEnabled="true"/>
+                    </row>
+                    <row>
+                        <label id="labelPrepareExternalInterview"
+                               icon="BATTERY_4"
+                               width="AUTO"
+                               htmlEnabled="true"/>
+                        <label id="labelPrepareExternalInterviewValue"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"
+                               htmlEnabled="true"/>
+                    </row>
+                    <row>
+                        <label id="labelDirectorsInterview"
+                               icon="BATTERY_FULL"
+                               width="AUTO"
+                               htmlEnabled="true"
+                               align="MIDDLE_LEFT"/>
+                        <label id="labelDirectorsInterviewValue"
+                               width="AUTO"
+                               htmlEnabled="true"
+                               align="MIDDLE_RIGHT"/>
+                    </row>
+                </rows>
+            </grid>
+        </groupBox>
     </layout>
 </fragment>

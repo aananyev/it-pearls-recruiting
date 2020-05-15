@@ -50,6 +50,8 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     private Label<String> labelCountNewContactsValue;
     @Inject
     private Label<String> labelAssignInternalInterviewValue;
+    @Inject
+    private Label<String> labelDirectorsInterview;
 
     @WidgetParam
     @WindowParam
@@ -63,18 +65,22 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     @WindowParam
     protected String monthName;
 
+    @WidgetParam
+    @WindowParam
+    protected String period;
+
     private String itemNewContact = "Новый контакт";
     private String itemAssignInternalInterview = "Назначено собеседование с рекрутером IT Pearls";
     private String itemPrepareInternalInterview = "Прошел собеседование с рекрутером IT Pearls";
     private String itemAssignExternalInterview = "Назначено техническое собеседование";
     private String itemPrepareExternalInterview = "Прошел техническое собеседование";
     private String itemPrepareDirectorsInterview = "Прошел собеседование с Директором";
-    @Inject
-    private Label<String> labelDirectorsInterview;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
-        labelTitle.setValue( "<b><u>Взаимодействия за " + monthName + " месяц</u></b>" );
+        labelTitle.setValue( "<b><u>Взаимодействия за " +
+                ( monthName != null ? monthName : "текущий" ) +
+                " месяц</u></b>" );
 
         setLabelNewContacts();
         setLabelAssignInternalInterview();
@@ -98,8 +104,8 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelPrepareExternalInterview.setValue( itemPrepareExternalInterview +
-                count );
+        labelPrepareExternalInterview.setValue( itemPrepareExternalInterview );
+        labelPrepareExternalInterviewValue.setValue( String.valueOf( count ));
     }
 
     private void setLabelAssignExternalInterview() {
@@ -107,7 +113,8 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelAssignExternalInterview.setValue( itemAssignExternalInterview + " " + count );
+        labelAssignExternalInterview.setValue( itemAssignExternalInterview );
+        labelAssignExternalInterviewValue.setValue( String.valueOf( count ));
     }
 
     private void setLabelPrepareInternalInterview() {
@@ -115,7 +122,8 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelPrepareInternalInterview.setValue( itemPrepareInternalInterview + " " + count );
+        labelPrepareInternalInterview.setValue( itemPrepareInternalInterview );
+        labelPrepareInternalInterviewValus.setValue( String.valueOf( count ) );
     }
 
 
@@ -128,7 +136,8 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         int countItems = 0;
         countItems = iteractionListDc.getItems().size();
 
-        labelCountNewContacts.setValue( itemNewContact + " " + countItems );
+        labelCountNewContacts.setValue( itemNewContact );
+        labelCountNewContactsValue.setValue( String.valueOf( countItems ) );
     }
 
     public static int getCurrentYear()
@@ -147,7 +156,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     }
 
     private void setDateInterval() {
-        
+
         Calendar firstDayCal = new GregorianCalendar( yearNumber != null ? yearNumber : getCurrentYear(),
                     monthNumber != null ? monthNumber - 1 : getCurrentMonth(), 1);
 
@@ -170,8 +179,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelAssignInternalInterview.setValue( itemAssignInternalInterview + " " + count );
+        labelAssignInternalInterview.setValue( itemAssignInternalInterview );
+        labelAssignInternalInterviewValue.setValue( String.valueOf( count ) );
     }
-
-
 }
