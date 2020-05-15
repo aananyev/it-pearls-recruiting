@@ -245,6 +245,10 @@
         <property name="project" fetch="JOIN" view="_local"/>
         <property name="iteractionType" fetch="BATCH" view="_minimal">
             <property name="iterationName"/>
+            <property name="calendarItemStyle"/>
+            <property name="calendarItem"/>
+            <property name="pic"/>
+            <property name="iteractionTree"/>
         </property>
         <property name="recrutier" fetch="JOIN" view="_local"/>
     </view>

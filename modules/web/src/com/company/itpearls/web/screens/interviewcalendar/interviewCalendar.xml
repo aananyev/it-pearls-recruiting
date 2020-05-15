@@ -17,12 +17,12 @@
                         <or>
                             <c:jpql>
                                 <c:where>
-                                    e.iteractionType.number = :numberInternal
+                                    e.iteractionType.iteractionTree.number like :numberInternal
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>
-                                    e.iteractionType.number = :numberExternal
+                                    e.iteractionType.iteractionTree.number like :numberExternal
                                 </c:where>
                             </c:jpql>
                         </or>
@@ -54,6 +54,7 @@
                 <hbox spacing="true">
                     <checkBox id="huntingCheckBox" caption="msg://huntingCheckBox.msg" align="MIDDLE_LEFT" height="AUTO" width="AUTO"/>
                     <checkBox id="toConpanyCheckBox" caption="msg://toCompanyInterview.msg" align="MIDDLE_LEFT" height="AUTO" width="AUTO"/>
+                    <radioButtonGroup id="typeCalendar" orientation="horizontal"/>
                 </hbox>
             </groupBox>
         </vbox>

@@ -36,6 +36,18 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     private CollectionLoader<IteractionList> iteractioListDl;
     @Inject
     private CollectionContainer<IteractionList> iteractionListDc;
+    @Inject
+    private Label<String> labelAssignExternalInterviewValue;
+    @Inject
+    private Label<String> labelPrepareInternalInterviewValus;
+    @Inject
+    private Label<String> labelPrepareExternalInterviewValue;
+    @Inject
+    private Label<String> labelDirectorsInterviewValue;
+    @Inject
+    private Label<String> labelCountNewContactsValue;
+    @Inject
+    private Label<String> labelAssignInternalInterviewValue;
 
     private String itemNewContact = "Новый контакт";
     private String itemAssignInternalInterview = "Назначено собеседование с рекрутером IT Pearls";
@@ -63,7 +75,8 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelDirectorsInterview.setValue( itemPrepareDirectorsInterview + " " + count );
+        labelDirectorsInterview.setValue( itemPrepareDirectorsInterview );
+        labelDirectorsInterviewValue.setValue( String.valueOf( count ) );
     }
 
     private void setLabelPrepareExternalInterview() {
@@ -71,7 +84,8 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelPrepareExternalInterview.setValue( itemPrepareExternalInterview + " " + count );
+        labelPrepareExternalInterview.setValue( itemPrepareExternalInterview +
+                count );
     }
 
     private void setLabelAssignExternalInterview() {

@@ -4,6 +4,7 @@ import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.components.Calendar;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.components.calendar.CalendarEventProvider;
 import com.haulmont.cuba.gui.components.calendar.ListCalendarEventProvider;
 import com.haulmont.cuba.gui.components.calendar.SimpleCalendarEvent;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -36,44 +37,58 @@ public class Interviewcalendar extends Screen {
 
         calendarDataDl.load();
 
+        updateCalendar();
+    }
+
+    private void updateCalendar() {
+        CalendarEventProvider eventProvider = interviewCalendar.getEventProvider();
+        eventProvider.removeAllEvents();
+
         for( IteractionList list : calendarDataDc.getItems() ) {
             SimpleCalendarEvent calendarEvent = new SimpleCalendarEvent();
             calendarEvent.setCaption( list.getCandidate().getFullName() );
             calendarEvent.setStart( list.getAddDate() );
             calendarEvent.setEnd( list.getAddDate() );
 
-            String itemStyle = list.getIteractionType().getCalendarItemStyle();
-
             if( list.getIteractionType().getCalendarItemStyle() != null )
-                 calendarEvent.setStyleName( list.getIteractionType().getCalendarItemStyle() );
+                calendarEvent.setStyleName( list.getIteractionType().getCalendarItemStyle() );
 
             calendarEvent.setAllDay( true );
 
             interviewCalendar.getEventProvider().addEvent( calendarEvent );
         }
-
     }
 
     @Subscribe("huntingCheckBox")
     public void onHuntingCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if( huntingCheckBox.getValue() ) {
-           calendarDataDl.setParameter( "numberInternal", "2" );
+           calendarDataDl.setParameter( "numberInternal", "002" + "%" );
         } else {
-            calendarDataDl.removeParameter("numberInternal");
+            if( !toConpanyCheckBox.getValue() )
+                calendarDataDl.setParameter( "numberInternal", "nodata" );
+            else
+                calendarDataDl.removeParameter( "numberInternal" );
         }
 
         calendarDataDl.load();
+
+        updateCalendar();
     }
 
     @Subscribe("toConpanyCheckBox")
     public void onToConpanyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if( toConpanyCheckBox.getValue() ) {
-            calendarDataDl.setParameter( "numberExternal", "3" );
+            calendarDataDl.setParameter( "numberExternal", "003" + "%" );
         } else  {
-            calendarDataDl.removeParameter( "numberExternal" );
+            if( !huntingCheckBox.getValue() )
+                calendarDataDl.setParameter( "numberExternal", "nodata" );
+            else
+                calendarDataDl.removeParameter( "numberExternal" );
         }
 
         calendarDataDl.load();
+
+        updateCalendar();
     }
 
     @Subscribe("monthPicker")

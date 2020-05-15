@@ -29,12 +29,30 @@
         <vbox>
             <groupBox>
                 <label id="labelTitle" width="100%" htmlEnabled="true" align="MIDDLE_CENTER"/>
-                <label id="labelCountNewContacts" icon="BATTERY_0" width="100%" htmlEnabled="true"/>
-                <label id="labelAssignInternalInterview" icon="BATTERY_1" width="100%" htmlEnabled="true"/>
+                <hbox>
+                    <label id="labelCountNewContacts" icon="BATTERY_0" width="AUTO" htmlEnabled="true"/>
+                    <label id="labelCountNewContactsValue" width="AUTO" htmlEnabled="true"/>
+                </hbox>
+                <hbox>
+                    <label id="labelAssignInternalInterview" icon="BATTERY_1" width="100%" htmlEnabled="true"/>
+                    <label id="labelAssignInternalInterviewValue" width="100%" htmlEnabled="true"/>
+                </hbox>
+                <hbox>
                 <label id="labelPrepareInternalInterview" icon="BATTERY_2" width="100%" htmlEnabled="true"/>
-                <label id="labelAssignExternalInterview" icon="BATTERY_3" width="100%" htmlEnabled="true"/>
-                <label id="labelPrepareExternalInterview" icon="BATTERY_4" width="100%" htmlEnabled="true"/>
-                <label id="labelDirectorsInterview" icon="BATTERY_FULL" width="100%" htmlEnabled="true"/>
+                    <label id="labelPrepareInternalInterviewValus" width="100%" htmlEnabled="true"/>
+                </hbox>
+                <hbox>
+                    <label id="labelAssignExternalInterview" icon="BATTERY_3" width="100%" htmlEnabled="true"/>
+                    <label id="labelAssignExternalInterviewValue" width="100%" htmlEnabled="true"/>
+                </hbox>
+                <hbox>
+                    <label id="labelPrepareExternalInterview" icon="BATTERY_4" width="100%" htmlEnabled="true"/>
+                    <label id="labelPrepareExternalInterviewValue" width="100%" htmlEnabled="true"/>
+                </hbox>
+                <hbox>
+                    <label id="labelDirectorsInterview" icon="BATTERY_FULL" width="100%" htmlEnabled="true" align="MIDDLE_LEFT"/>
+                    <label id="labelDirectorsInterviewValue" width="100%" htmlEnabled="true" align="MIDDLE_RIGHT"/>
+                </hbox>
             </groupBox>
         </vbox>
     </layout>
