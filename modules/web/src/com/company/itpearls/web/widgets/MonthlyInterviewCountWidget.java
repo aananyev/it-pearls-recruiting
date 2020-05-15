@@ -75,12 +75,15 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     private String itemAssignExternalInterview = "Назначено техническое собеседование";
     private String itemPrepareExternalInterview = "Прошел техническое собеседование";
     private String itemPrepareDirectorsInterview = "Прошел собеседование с Директором";
+    private String WEEK = "неделя";
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         labelTitle.setValue( "<b><u>Взаимодействия за " +
                 ( monthName != null ? monthName : "текущий" ) +
-                " месяц</u></b>" );
+                " " +
+                ( period != null ? period : "месяц" ) +
+                "</u></b>" );
 
         setLabelNewContacts();
         setLabelAssignInternalInterview();
@@ -157,14 +160,29 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
     private void setDateInterval() {
 
+        Integer startDateOfPeriod = 1;
+        Integer endDateOfPeriod = Calendar.DAY_OF_MONTH;
+
+        if( period != null ) {
+            if (period.equals(WEEK)) {
+//                startDateOfPeriod = getStartDateOfWeek();
+            }
+        }
+
         Calendar firstDayCal = new GregorianCalendar( yearNumber != null ? yearNumber : getCurrentYear(),
-                    monthNumber != null ? monthNumber - 1 : getCurrentMonth(), 1);
+                    monthNumber != null ? monthNumber - 1 : getCurrentMonth(), startDateOfPeriod );
 
         Date firstDay = firstDayCal.getTime();
 
+        if( period != null ) {
+            if (period.equals(WEEK)) {
+//                endDateOfPeriod = getEndDateOfWeek();
+            }
+        }
+
         Calendar endDayCal = new GregorianCalendar( yearNumber != null ? yearNumber : getCurrentYear(),
                 monthNumber != null ? monthNumber - 1 : getCurrentMonth(),
-                firstDayCal.getActualMaximum( Calendar.DAY_OF_MONTH ));
+                firstDayCal.getActualMaximum( endDateOfPeriod ));
 
         Date endDay = endDayCal.getTime();
 
@@ -172,6 +190,26 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.setParameter( "endDate", endDay );
 
         iteractioListDl.load();
+    }
+
+    private Integer getEndDateOfWeek() {
+
+        Date date = new Date();
+
+        Calendar calendar = Calendar.getInstance();
+
+        Integer ret = calendar.get( Calendar.DAY_OF_MONTH ) - calendar.get( Calendar.DAY_OF_WEEK ) + 8;
+
+        return ret;
+    }
+
+    private Integer getStartDateOfWeek() {
+        Calendar calendar = Calendar.getInstance();
+
+
+        Integer ret = calendar.get( Calendar.DAY_OF_MONTH ) - calendar.get( Calendar.DAY_OF_WEEK ) + 2;
+
+        return ret;
     }
 
     private void setLabelAssignInternalInterview() {
