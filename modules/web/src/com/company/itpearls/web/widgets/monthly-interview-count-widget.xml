@@ -49,10 +49,22 @@
                     <label id="labelPrepareExternalInterview" icon="BATTERY_4" width="100%" htmlEnabled="true"/>
                     <label id="labelPrepareExternalInterviewValue" width="100%" htmlEnabled="true"/>
                 </hbox>
-                <hbox>
-                    <label id="labelDirectorsInterview" icon="BATTERY_FULL" width="100%" htmlEnabled="true" align="MIDDLE_LEFT"/>
-                    <label id="labelDirectorsInterviewValue" width="100%" htmlEnabled="true" align="MIDDLE_RIGHT"/>
-                </hbox>
+                <grid spacing="true">
+                    <columns count="2"/>
+                    <rows>
+                        <row>
+                            <label id="labelDirectorsInterview"
+                                   icon="BATTERY_FULL"
+                                   width="95%"
+                                   htmlEnabled="true"
+                                   align="MIDDLE_LEFT"/>
+                            <label id="labelDirectorsInterviewValue"
+                                   width="5%"
+                                   htmlEnabled="true"
+                                   align="MIDDLE_RIGHT"/>
+                        </row>
+                    </rows>
+                </grid>
             </groupBox>
         </vbox>
     </layout>

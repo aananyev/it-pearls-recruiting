@@ -2,6 +2,8 @@ package com.company.itpearls.web.widgets;
 
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
+import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
+import com.haulmont.cuba.gui.WindowParam;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -49,6 +51,18 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     @Inject
     private Label<String> labelAssignInternalInterviewValue;
 
+    @WidgetParam
+    @WindowParam
+    protected Integer monthNumber;
+
+    @WidgetParam
+    @WindowParam
+    protected Integer yearNumber;
+
+    @WidgetParam
+    @WindowParam
+    protected String monthName;
+
     private String itemNewContact = "Новый контакт";
     private String itemAssignInternalInterview = "Назначено собеседование с рекрутером IT Pearls";
     private String itemPrepareInternalInterview = "Прошел собеседование с рекрутером IT Pearls";
@@ -60,7 +74,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
-        labelTitle.setValue( "<b><u>Взаимодействия за месяц</u></b>" );
+        labelTitle.setValue( "<b><u>Взаимодействия за " + monthName + " месяц</u></b>" );
 
         setLabelNewContacts();
         setLabelAssignInternalInterview();
@@ -117,12 +131,33 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         labelCountNewContacts.setValue( itemNewContact + " " + countItems );
     }
 
+    public static int getCurrentYear()
+    {
+        java.util.Calendar calendar = java.util.Calendar.getInstance(java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
+        calendar.setTime(new java.util.Date());
+        return calendar.get(java.util.Calendar.YEAR);
+    }
+
+
+    public static int getCurrentMonth()
+    {
+        java.util.Calendar calendar = java.util.Calendar.getInstance(java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
+        calendar.setTime(new java.util.Date());
+        return calendar.get(Calendar.MONTH);
+    }
+
     private void setDateInterval() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        Date firstDay = cal.getTime();
-        cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DATE));
-        Date endDay = cal.getTime();
+        
+        Calendar firstDayCal = new GregorianCalendar( yearNumber != null ? yearNumber : getCurrentYear(),
+                    monthNumber != null ? monthNumber - 1 : getCurrentMonth(), 1);
+
+        Date firstDay = firstDayCal.getTime();
+
+        Calendar endDayCal = new GregorianCalendar( yearNumber != null ? yearNumber : getCurrentYear(),
+                monthNumber != null ? monthNumber - 1 : getCurrentMonth(),
+                firstDayCal.getActualMaximum( Calendar.DAY_OF_MONTH ));
+
+        Date endDay = endDayCal.getTime();
 
         iteractioListDl.setParameter( "startDate", firstDay );
         iteractioListDl.setParameter( "endDate", endDay );
