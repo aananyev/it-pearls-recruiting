@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <data>
+        <collection id="researcherNamesDc" class="com.haulmont.cuba.security.entity.User" view="_local">
+            <loader id="researcherNamesDl">
+                <query>
+                    select e from sec$User where e.active=TRUE order by e.name
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <label id="title" align="MIDDLE_CENTER" width="AUTO" htmlEnabled="true"/>
+    </layout>
+</fragment>

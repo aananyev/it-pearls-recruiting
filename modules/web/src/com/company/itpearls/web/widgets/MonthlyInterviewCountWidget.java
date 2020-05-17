@@ -55,15 +55,15 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
     @WidgetParam
     @WindowParam
-    protected Integer monthNumber;
+    protected Date startDate;
 
     @WidgetParam
     @WindowParam
-    protected Integer yearNumber;
+    protected Date endDate;
 
     @WidgetParam
     @WindowParam
-    protected String monthName;
+    protected String widgetTitle;
 
     @WidgetParam
     @WindowParam
@@ -79,11 +79,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
-        labelTitle.setValue( "<b><u>Взаимодействия за " +
-                ( monthName != null ? monthName : "текущий" ) +
-                " " +
-                ( period != null ? period : "месяц" ) +
-                "</u></b>" );
+        labelTitle.setValue( widgetTitle );
 
         setLabelNewContacts();
         setLabelAssignInternalInterview();
@@ -162,32 +158,24 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
         Integer startDateOfPeriod = 1;
         Integer endDateOfPeriod = Calendar.DAY_OF_MONTH;
+        Calendar firstDay = new GregorianCalendar();
 
-        if( period != null ) {
-            if (period.equals(WEEK)) {
-//                startDateOfPeriod = getStartDateOfWeek();
-            }
+        if( startDate == null ) {
+            firstDay = new GregorianCalendar( getCurrentYear(), getCurrentMonth(), 1 );
+
+            startDate = firstDay.getTime();
         }
 
-        Calendar firstDayCal = new GregorianCalendar( yearNumber != null ? yearNumber : getCurrentYear(),
-                    monthNumber != null ? monthNumber - 1 : getCurrentMonth(), startDateOfPeriod );
+        if( endDate == null ) {
+            Calendar endDayCal = new GregorianCalendar( getCurrentYear(),
+                    getCurrentMonth(),
+                    firstDay.getActualMaximum(endDateOfPeriod) );
 
-        Date firstDay = firstDayCal.getTime();
-
-        if( period != null ) {
-            if (period.equals(WEEK)) {
-//                endDateOfPeriod = getEndDateOfWeek();
-            }
+            endDate = endDayCal.getTime();
         }
 
-        Calendar endDayCal = new GregorianCalendar( yearNumber != null ? yearNumber : getCurrentYear(),
-                monthNumber != null ? monthNumber - 1 : getCurrentMonth(),
-                firstDayCal.getActualMaximum( endDateOfPeriod ));
-
-        Date endDay = endDayCal.getTime();
-
-        iteractioListDl.setParameter( "startDate", firstDay );
-        iteractioListDl.setParameter( "endDate", endDay );
+        iteractioListDl.setParameter( "startDate", startDate );
+        iteractioListDl.setParameter( "endDate", endDate );
 
         iteractioListDl.load();
     }
