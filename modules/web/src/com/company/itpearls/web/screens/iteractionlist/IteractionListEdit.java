@@ -216,22 +216,26 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
 
-        if( vacancyFiels.getValue() != null ) {
-            String labetText = "<h2><b>" +
-                    vacancyFiels.getValue()
-                            .getProjectName()
-                            .getProjectDepartment()
-                            .getCompanyName()
-                            .getCompanyShortName() +
-                    "</b>: " +
-                    vacancyFiels.getValue()
-                            .getProjectName()
-                            .getProjectDepartment()
-                            .getDepartamentRuName() +
-                    "</h2>";
+        if( vacancyFiels.getValue() != null )
+            if( vacancyFiels.getValue().getProjectName() != null )
+                if( vacancyFiels.getValue().getProjectName().getProjectDepartment() != null )
+                    if( vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null )
+                        if( vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName().getCompanyShortName() != null ) {
+                            String labetText = "<h2><b>" +
+                                    vacancyFiels.getValue()
+                                            .getProjectName()
+                                            .getProjectDepartment()
+                                            .getCompanyName()
+                                            .getCompanyShortName() +
+                                    "</b>: " +
+                                    vacancyFiels.getValue()
+                                            .getProjectName()
+                                            .getProjectDepartment()
+                                            .getDepartamentRuName() +
+                                    "</h2>";
 
-            companyLabel.setValue(labetText);
-        }
+                            companyLabel.setValue(labetText);
+                        }
 
         if( !isClosedVacancy() ) {
             BigDecimal a = new BigDecimal("0.0");
@@ -434,7 +438,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if( commentField.getValue() == null )
             commentField.setValue( "" );
 
-        getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getProjectName().getProjectDepartment() );
+//        getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getProjectName().getProjectDepartment() );
     }
 
     private void sendMessages() {
@@ -685,7 +689,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .withInitializer( e -> {
                     e.setCandidate(this.getEditedEntity().getCandidate());
                     e.setVacancy(this.getEditedEntity().getVacancy());
-                    e.setCompanyDepartment(this.getEditedEntity().getCompanyDepartment());
+//                    e.setCompanyDepartment(this.getEditedEntity().getCompanyDepartment());
                 })
                 .build()
                 .show();

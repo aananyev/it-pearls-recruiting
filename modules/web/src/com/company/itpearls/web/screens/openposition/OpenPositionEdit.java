@@ -938,13 +938,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setTopLabel() {
-        if( vacansyNameField.getValue() != null && projectNameField.getValue() != null )
-            labelOpenPosition.setValue( vacansyNameField.getValue() +
+        if( vacansyNameField.getValue() != null && projectNameField.getValue() != null ) {
+            String comanyName = projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName();
+
+            labelOpenPosition.setValue(vacansyNameField.getValue() +
                     " (" +
-                    projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName() +
+                    ( comanyName != null ? comanyName : "" ) +
                     " : " +
                     projectNameField.getValue().getProjectName() +
-                    ")" );
+                    ")");
+        }
 
         // а еще вывести комиссию
         if( getRoleService.isUserRoles( userSession.getUser(), RESEARCHER ) ) {

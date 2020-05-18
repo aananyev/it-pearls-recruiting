@@ -4,12 +4,18 @@
         <collection id="researcherNamesDc" class="com.haulmont.cuba.security.entity.User" view="_local">
             <loader id="researcherNamesDl">
                 <query>
-                    select e from sec$User where e.active=TRUE order by e.name
+                    <![CDATA[select e from sec$User e where e.active is true order by e.name]]>
                 </query>
             </loader>
         </collection>
     </data>
     <layout>
         <label id="title" align="MIDDLE_CENTER" width="AUTO" htmlEnabled="true"/>
+        <groupTable id="researcherList" dataContainer="researcherNamesDc">
+            <columns>
+                <column id="name"/>
+            </columns>
+            <rows/>
+        </groupTable>
     </layout>
 </fragment>

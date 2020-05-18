@@ -39,7 +39,7 @@ order by e.secondName, e.firstName]]></query>
                     <dateField id="endProjectDateField" dataContainer="projectDc" property="endProjectDate"
                                caption="msg://msgProjectEndDate"/>
                     <lookupPickerField id="projectDepartmentField" optionsContainer="projectDepartmentsDc"
-                                       dataContainer="projectDc" property="projectDepartment"
+                                       dataContainer="projectDc" property="projectDepartment" required="true"
                                        caption="msg://msgProjectDepartament">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>

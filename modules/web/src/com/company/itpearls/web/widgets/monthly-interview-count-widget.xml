@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
-          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+          xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://schemas.haulmont.com/charts/charts.xsd">
     <data>
         <collection id="iteractionListDc" class="com.company.itpearls.entity.IteractionList" view="iteractionList-view">
             <loader id="iteractioListDl">
@@ -28,72 +31,184 @@
     <layout>
         <groupBox spacing="true" width="AUTO">
             <label id="labelTitle" width="AUTO" htmlEnabled="true" align="MIDDLE_CENTER"/>
-            <grid spacing="true">
-                <columns count="2"/>
-                <rows>
-                    <row>
-                        <label id="labelCountNewContacts"
-                               icon="BATTERY_0"
-                               width="AUTO"
-                               htmlEnabled="true"/>
-                        <label id="labelCountNewContactsValue"
-                               width="AUTO"
-                               align="MIDDLE_RIGHT"
-                               htmlEnabled="true"/>
-                    </row>
-                    <row>
-                        <label id="labelAssignInternalInterview"
-                               icon="BATTERY_1"
-                               width="AUTO"
-                               htmlEnabled="true"/>
-                        <label id="labelAssignInternalInterviewValue"
-                               width="AUTO"
-                               align="MIDDLE_RIGHT"
-                               htmlEnabled="true"/>
-                    </row>
-                    <row>
-                        <label id="labelPrepareInternalInterview"
-                               icon="BATTERY_2"
-                               width="AUTO"
-                               htmlEnabled="true"/>
-                        <label id="labelPrepareInternalInterviewValus"
-                               width="AUTO"
-                               align="MIDDLE_RIGHT"
-                               htmlEnabled="true"/>
-                    </row>
-                    <row>
-                        <label id="labelAssignExternalInterview"
-                               icon="BATTERY_3"
-                               width="AUTO"
-                               htmlEnabled="true"/>
-                        <label id="labelAssignExternalInterviewValue"
-                               width="AUTO"
-                               align="MIDDLE_RIGHT"
-                               htmlEnabled="true"/>
-                    </row>
-                    <row>
-                        <label id="labelPrepareExternalInterview"
-                               icon="BATTERY_4"
-                               width="AUTO"
-                               htmlEnabled="true"/>
-                        <label id="labelPrepareExternalInterviewValue"
-                               width="AUTO"
-                               align="MIDDLE_RIGHT"
-                               htmlEnabled="true"/>
-                    </row>
-                    <row>
-                        <label id="labelDirectorsInterview"
-                               icon="BATTERY_FULL"
-                               width="AUTO"
-                               htmlEnabled="true"
-                               align="MIDDLE_LEFT"/>
-                        <label id="labelDirectorsInterviewValue"
-                               width="AUTO"
-                               htmlEnabled="true"
-                               align="MIDDLE_RIGHT"/>
-                    </row>
-                </rows>
-            </grid>
+            <hbox>
+                <grid spacing="true">
+                    <columns count="2"/>
+                    <rows>
+                        <row>
+                            <label id="labelCountNewContacts"
+                                   icon="BATTERY_0"
+                                   width="AUTO"
+                                   htmlEnabled="true"/>
+                            <label id="labelCountNewContactsValue"
+                                   width="AUTO"
+                                   align="MIDDLE_RIGHT"
+                                   htmlEnabled="true"/>
+                        </row>
+                        <row>
+                            <label id="labelAssignInternalInterview"
+                                   icon="BATTERY_1"
+                                   width="AUTO"
+                                   htmlEnabled="true"/>
+                            <label id="labelAssignInternalInterviewValue"
+                                   width="AUTO"
+                                   align="MIDDLE_RIGHT"
+                                   htmlEnabled="true"/>
+                        </row>
+                        <row>
+                            <label id="labelPrepareInternalInterview"
+                                   icon="BATTERY_2"
+                                   width="AUTO"
+                                   htmlEnabled="true"/>
+                            <label id="labelPrepareInternalInterviewValus"
+                                   width="AUTO"
+                                   align="MIDDLE_RIGHT"
+                                   htmlEnabled="true"/>
+                        </row>
+                        <row>
+                            <label id="labelAssignExternalInterview"
+                                   icon="BATTERY_3"
+                                   width="AUTO"
+                                   htmlEnabled="true"/>
+                            <label id="labelAssignExternalInterviewValue"
+                                   width="AUTO"
+                                   align="MIDDLE_RIGHT"
+                                   htmlEnabled="true"/>
+                        </row>
+                        <row>
+                            <label id="labelPrepareExternalInterview"
+                                   icon="BATTERY_4"
+                                   width="AUTO"
+                                   htmlEnabled="true"/>
+                            <label id="labelPrepareExternalInterviewValue"
+                                   width="AUTO"
+                                   align="MIDDLE_RIGHT"
+                                   htmlEnabled="true"/>
+                        </row>
+                        <row>
+                            <label id="labelDirectorsInterview"
+                                   icon="BATTERY_FULL"
+                                   width="AUTO"
+                                   htmlEnabled="true"
+                                   align="MIDDLE_LEFT"/>
+                            <label id="labelDirectorsInterviewValue"
+                                   width="AUTO"
+                                   htmlEnabled="true"
+                                   align="MIDDLE_RIGHT"/>
+                        </row>
+                    </rows>
+                </grid>
+                <chart:serialChart id="cylinderChart"
+                                   height="100%"
+                                   width="100%"
+                                   depth3D="100"
+                                   angle="30"
+                                   categoryField="category"
+                                   autoMargins="false"
+                                   marginBottom="100"
+                                   marginRight="300"
+                                   marginLeft="350">
+                    <chart:valueAxes>
+                        <chart:axis stackType="FILL"
+                                    gridAlpha="0"/>
+                    </chart:valueAxes>
+                    <chart:graphs>
+                        <chart:graph type="COLUMN"
+                                     topRadius="1"
+                                     columnWidth="1"
+                                     showOnAxis="true"
+                                     lineThickness="2"
+                                     lineAlpha="0.5"
+                                     lineColor="#FFFFFF"
+                                     fillAlphas="0.8"
+                                     valueField="value1">
+                            <chart:fillColors>
+                                <chart:color value="#e0853a"/>
+                            </chart:fillColors>
+                        </chart:graph>
+                        <chart:graph type="COLUMN"
+                                     topRadius="1"
+                                     columnWidth="0.8"
+                                     showOnAxis="true"
+                                     lineThickness="2"
+                                     lineAlpha="0.5"
+                                     lineColor="#cdcdcd"
+                                     fillAlphas="0.5"
+                                     valueField="value2">
+                            <chart:fillColors>
+                                <chart:color value="#00b012"/>
+                            </chart:fillColors>
+                        </chart:graph>
+                        <chart:graph type="COLUMN"
+                                     topRadius="1"
+                                     columnWidth="0.6"
+                                     showOnAxis="true"
+                                     lineThickness="2"
+                                     lineAlpha="0.8"
+                                     fillAlphas="0.8"
+                                     lineColor="#FFFFFF"
+                                     valueField="value3">
+                            <chart:fillColors>
+                                <chart:color value="#0074c7"/>
+                            </chart:fillColors>
+                        </chart:graph>
+                    </chart:graphs>
+                    <chart:graphs>
+                        <chart:graph type="COLUMN"
+                                     topRadius="1"
+                                     columnWidth="0.4"
+                                     showOnAxis="true"
+                                     lineThickness="2"
+                                     lineAlpha="0.5"
+                                     lineColor="#FFFFFF"
+                                     fillAlphas="0.8"
+                                     valueField="value1">
+                            <chart:fillColors>
+                                <chart:color value="#e0853a"/>
+                            </chart:fillColors>
+                        </chart:graph>
+                        <chart:graph type="COLUMN"
+                                     topRadius="1"
+                                     columnWidth="0.2"
+                                     showOnAxis="true"
+                                     lineThickness="2"
+                                     lineAlpha="0.5"
+                                     lineColor="#cdcdcd"
+                                     fillAlphas="0.5"
+                                     valueField="value2">
+                            <chart:fillColors>
+                                <chart:color value="#00b012"/>
+                            </chart:fillColors>
+                        </chart:graph>
+                        <chart:graph type="COLUMN"
+                                     topRadius="1"
+                                     columnWidth="0.1"
+                                     showOnAxis="true"
+                                     lineThickness="2"
+                                     lineAlpha="0.8"
+                                     fillAlphas="0.8"
+                                     lineColor="#FFFFFF"
+                                     valueField="value3">
+                            <chart:fillColors>
+                                <chart:color value="#0074c7"/>
+                            </chart:fillColors>
+                        </chart:graph>
+                    </chart:graphs>
+                    <chart:categoryAxis axisAlpha="0"
+                                        labelOffset="40"
+                                        gridAlpha="0"
+                                        labelsEnabled="false"/>
+                    <chart:data>
+                        <chart:item>
+                            <chart:property name="category" value="3 layers"/>
+                            <chart:property name="value1" value="35"/>
+                            <chart:property name="value2" value="35"/>
+                            <chart:property name="value3" value="30"/>
+                        </chart:item>
+                    </chart:data>
+                    <chart:export/>
+                </chart:serialChart>
+            </hbox>
         </groupBox>
     </layout>
 </fragment>

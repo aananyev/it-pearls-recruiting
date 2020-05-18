@@ -79,7 +79,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
-        labelTitle.setValue( widgetTitle );
+        labelTitle.setValue( "<div style=\"text-transform: uppercase\"><b><u>" + widgetTitle + "</u></b></div>" );
 
         setLabelNewContacts();
         setLabelAssignInternalInterview();
