@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data>
+        <collection id="iteractionListDc" class="com.company.itpearls.entity.IteractionList" view="iteractionList-view">
+            <loader id="iteractioListDl">
+                <query>
+                    <![CDATA[select count(e) from itpearls_IteractionList e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.iteractionType.iteractionName like :iteractionType
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.dateIteraction between :startDate and :endDate
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <groupBox id="funnelHuntingWindgetGroupBox" spacing="true">
+            <label id="researcherTitle" width="AUTO" align="MIDDLE_CENTER"/>
+        </groupBox>
+    </layout>
+</fragment>

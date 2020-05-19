@@ -28,26 +28,28 @@ order by e.secondName, e.firstName]]></query>
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <tabSheet caption="msg://msgTabProject">
-            <tab caption="Tab" margin="true,false,false,false" spacing="true" id="tabProject">
+            <tab caption="msg://msgProjectName" margin="true,false,false,false" spacing="true" id="tabProject">
                 <groupBox spacing="true">
                     <checkBox id="checkBoxProjectIsClosed" dataContainer="projectDc" property="projectIsClosed"
                               caption="msg://msgProjectIsClosed"/>
                     <textField id="projectNameField" dataContainer="projectDc" property="projectName"
-                               caption="msg://msgProjectName"/>
-                    <dateField id="startProjectDateField" dataContainer="projectDc" property="startProjectDate"
-                               caption="msg://msgProjectStartDate"/>
-                    <dateField id="endProjectDateField" dataContainer="projectDc" property="endProjectDate"
-                               caption="msg://msgProjectEndDate"/>
+                               caption="msg://msgProjectName" width="50%" required="true"/>
+                    <hbox width="50%">
+                        <dateField id="startProjectDateField" dataContainer="projectDc" property="startProjectDate"
+                                   caption="msg://msgProjectStartDate" width="AUTO"/>
+                        <dateField id="endProjectDateField" dataContainer="projectDc" property="endProjectDate"
+                                   caption="msg://msgProjectEndDate" width="AUTO"/>
+                    </hbox>
                     <lookupPickerField id="projectDepartmentField" optionsContainer="projectDepartmentsDc"
                                        dataContainer="projectDc" property="projectDepartment" required="true"
-                                       caption="msg://msgProjectDepartament">
+                                       caption="msg://msgProjectDepartament" width="50%">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
                     <lookupPickerField id="projectOwnerField" optionsContainer="projectOwnersDc"
                                        dataContainer="projectDc" property="projectOwner"
-                                       caption="msg://msgProjectOwner">
+                                       caption="msg://msgProjectOwner" width="50%">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
@@ -60,18 +62,6 @@ order by e.secondName, e.firstName]]></query>
                         <columns>
                             <column id="vacansyName"/>
                             <column id="numberPosition"/>
-                            <column id="comment"/>
-                        </columns>
-                    </table>
-                </groupBox>
-            </tab>
-            <tab id="tabIteraction" caption="msg://msgTabIteraction" margin="true,false,false,false" spacing="true">
-                <groupBox id="groupBoxIteraction" spacing="true">
-                    <table id="projectJobCandidateTable" height="250px" width="100%" dataContainer="projectJobCandidatesDc">
-                        <columns>
-                            <column id="numberIteraction"/>
-                            <column id="dateIteraction"/>
-                            <column id="communicationMethod"/>
                             <column id="comment"/>
                         </columns>
                     </table>
