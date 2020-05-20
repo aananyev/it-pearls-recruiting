@@ -1,12 +1,14 @@
 package com.company.itpearls.web.widgets;
 
+import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WindowParam;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.Link;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -47,6 +49,11 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private String ITRKT_PREPARE_TECH_INTERVIEW = "Прошел техническое собеседование";
     private String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
 
+    @Inject
+    private HBoxLayout boxWidgetTitle;
+    @Inject
+    private DataManager dataManager;
+
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         initListIteraction();
@@ -59,6 +66,8 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private void setResearcherList() {
         for( String a : listIteractionForCheck ) {
 
+            String queryParameter = a;
+
             if( startDate == null || endDate == null ) {
                 iteractioListDl.removeParameter( "startDate" );
                 iteractioListDl.removeParameter( "endDate" );
@@ -67,11 +76,20 @@ public class FunnelHuntingWidget extends ScreenFragment {
                 iteractioListDl.setParameter( "endDate", endDate );
             }
 
-            iteractioListDl.setParameter( "iteractionType", a );
+            Iteraction iteraction = dataManager.load( Iteraction.class )
+                    .query( "select e from itpearls_Iteraction e where e.iterationName like :iterationName")
+                    .parameter( "iterationName", queryParameter )
+                    .view( "iteraction-view" )
+                    .one();
+
+            iteractioListDl.setParameter( "iteractionType", iteraction );
             iteractioListDl.load();
 
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
             label.setValue( a );
+            label.setWidth( "15%" );
+            label.setHeight( Component.AUTO_SIZE );
+            boxWidgetTitle.add( label );
         }
     }
 

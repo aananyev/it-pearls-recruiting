@@ -217,6 +217,7 @@
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">
             <property name="number"/>
+            <property name="iterationName"/>
             <property name="mandatoryIteraction"/>
             <property name="iteractionTree" view="_minimal">
                 <property name="number"/>

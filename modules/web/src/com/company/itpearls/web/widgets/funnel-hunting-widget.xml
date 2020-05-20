@@ -5,12 +5,12 @@
         <collection id="iteractionListDc" class="com.company.itpearls.entity.IteractionList" view="iteractionList-view">
             <loader id="iteractioListDl">
                 <query>
-                    <![CDATA[select count(e) from itpearls_IteractionList e]]>
+                    <![CDATA[select e from itpearls_IteractionList e]]>
                     <condition>
                         <and>
                             <c:jpql>
                                 <c:where>
-                                    e.iteractionType.iteractionName like :iteractionType
+                                    e.iteractionType = :iteractionType
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
@@ -26,7 +26,9 @@
     </data>
     <layout>
         <groupBox id="funnelHuntingWindgetGroupBox" spacing="true">
-            <label id="researcherTitle" width="AUTO" align="MIDDLE_CENTER"/>
+            <hbox id="boxWidgetTitle" spacing="true">
+                <label id="researcherTitle" width="20%" align="MIDDLE_CENTER"/>
+            </hbox>
         </groupBox>
     </layout>
 </fragment>
