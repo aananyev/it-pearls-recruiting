@@ -13,7 +13,8 @@
         <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
-order by e.comanyName]]></query>
+                where e.comanyName not like \"%(не использовать)\"
+                order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="departamentHrDirectorsDc" class="com.company.itpearls.entity.Person" view="_minimal">

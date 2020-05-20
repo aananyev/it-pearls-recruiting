@@ -2,19 +2,21 @@ package com.company.itpearls.web.screens.interviewcalendar;
 
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.Calendar;
 import com.haulmont.cuba.gui.components.calendar.CalendarEventProvider;
 import com.haulmont.cuba.gui.components.calendar.ListCalendarEventProvider;
 import com.haulmont.cuba.gui.components.calendar.SimpleCalendarEvent;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
+import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 import javax.inject.Inject;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.*;
 
 @UiController("itpearls_Interviewcalendar")
 @UiDescriptor("interviewCalendar.xml")
@@ -44,6 +46,23 @@ public class Interviewcalendar extends Screen {
         createTypeCalendarRadioButton();
 
         updateCalendar();
+
+        setDaysOfWeekNames();
+    }
+
+    private void setDaysOfWeekNames() {
+        // Первый день недели - понедельник
+        interviewCalendar.unwrap(com.vaadin.v7.ui.Calendar.class).setFirstDayOfWeek(java.util.Calendar.MONDAY);
+
+        Map<DayOfWeek, String> days = new HashMap<>(7);
+        days.put(DayOfWeek.MONDAY,"Понедельник");
+        days.put(DayOfWeek.TUESDAY,"Вторник");
+        days.put(DayOfWeek.WEDNESDAY,"Среда");
+        days.put(DayOfWeek.THURSDAY,"Четверг");
+        days.put(DayOfWeek.FRIDAY,"Пятница");
+        days.put(DayOfWeek.SATURDAY,"Суббота");
+        days.put(DayOfWeek.SUNDAY,"Воскресенье");
+        interviewCalendar.setDayNames(days);
     }
 
     private void createTypeCalendarRadioButton() {
@@ -56,32 +75,55 @@ public class Interviewcalendar extends Screen {
         typeCalendar.setOptionsMap( typeCalendarRadioButton );
     }
 
+    public static Date atStartOfDay(Date date) {
+        LocalDateTime localDateTime = dateToLocalDateTime(date);
+        LocalDateTime startOfDay = localDateTime.with(LocalTime.MIN);
+        return localDateTimeToDate(startOfDay);
+    }
+
+    public static Date atEndOfDay(Date date) {
+        LocalDateTime localDateTime = dateToLocalDateTime(date);
+        LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
+        return localDateTimeToDate(endOfDay);
+    }
+
+    private static LocalDateTime dateToLocalDateTime(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    }
+
+    private static Date localDateTimeToDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
     @Subscribe("typeCalendar")
     public void onTypeCalendarValueChange(HasValue.ValueChangeEvent event) {
         Date currentDate = new Date();
 
         if( typeCalendar.getValue().equals( 1 ) ) {
-            interviewCalendar.setStartDate( currentDate );
-            interviewCalendar.setEndDate( currentDate );
+            interviewCalendar.setStartDate( atStartOfDay( currentDate ) );
+            interviewCalendar.setEndDate( atEndOfDay( currentDate ));
         }
 
         if( typeCalendar.getValue().equals( 2 ) ) {
-            java.util.Calendar c = new GregorianCalendar();
-            c.setTime( currentDate );
-            c.add( java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(java.util.Calendar.DAY_OF_WEEK));
-            interviewCalendar.setEndDate(c.getTime());
 
-            c.add( java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(java.util.Calendar.DAY_OF_WEEK));
-            interviewCalendar.setStartDate( c.getTime() );
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setFirstDayOfWeek(java.util.Calendar.MONDAY );
+//            calendar.setTime( new Date() );
+
+            int today = calendar.get(java.util.Calendar.DAY_OF_WEEK );
+            calendar.add(java.util.Calendar.DAY_OF_WEEK, -today + java.util.Calendar.MONDAY );
+            interviewCalendar.setStartDate( calendar.getTime() );
+
+            calendar.add( GregorianCalendar.DAY_OF_MONTH, 6 );
+            interviewCalendar.setEndDate( calendar.getTime() );
         }
 
         if( typeCalendar.getValue().equals( 3 ) ) {
             java.util.Calendar c = new GregorianCalendar();
-            c.setTime( currentDate );
-            c.add( java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(java.util.Calendar.DAY_OF_MONTH));
-            interviewCalendar.setEndDate(c.getTime());
+            c.set( java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(c.DAY_OF_MONTH));
+            interviewCalendar.setEndDate( c.getTime() );
 
-            c.add( java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(java.util.Calendar.DAY_OF_MONTH));
+            c.set( java.util.Calendar.DAY_OF_MONTH, c.getActualMinimum(c.DAY_OF_MONTH));
             interviewCalendar.setStartDate( c.getTime() );
         }
 
@@ -98,7 +140,14 @@ public class Interviewcalendar extends Screen {
             SimpleCalendarEvent calendarEvent = new SimpleCalendarEvent();
             calendarEvent.setCaption( list.getCandidate().getFullName() );
             calendarEvent.setStart( list.getAddDate() );
-            calendarEvent.setEnd( list.getAddDate() );
+
+
+            // добавим час по умолчанию
+            java.util.Calendar calendar = java.util.Calendar.getInstance();;
+            calendar.setTime( list.getAddDate() );
+            calendar.add( java.util.Calendar.HOUR, 1 );
+
+            calendarEvent.setEnd( calendar.getTime() );
 
             if( list.getIteractionType().getCalendarItemStyle() != null )
                 calendarEvent.setStyleName( list.getIteractionType().getCalendarItemStyle() );
