@@ -45,11 +45,11 @@ public class IteractionList extends StandardEntity {
     @JoinColumn(name = "PROJECT_ID")
     protected Project project;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
+//    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
 //    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "COMPANY_DEPARTMENT_ID")
-    protected CompanyDepartament companyDepartment;
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "COMPANY_DEPARTMENT_ID")
+//    protected CompanyDepartament companyDepartment;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
@@ -191,13 +191,13 @@ public class IteractionList extends StandardEntity {
         this.iteractionType = iteractionType;
     }
 
-    public CompanyDepartament getCompanyDepartment() {
-        return companyDepartment;
-    }
+//    public CompanyDepartament getCompanyDepartment() {
+//        return companyDepartment;
+//    }
 
-    public void setCompanyDepartment(CompanyDepartament companyDepartment) {
-        this.companyDepartment = companyDepartment;
-    }
+//    public void setCompanyDepartment(CompanyDepartament companyDepartment) {
+//        this.companyDepartment = companyDepartment;
+//    }
 
     public Project getProject() {
         return project;

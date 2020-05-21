@@ -97,7 +97,7 @@
             <property name="currentJobPosition" view="_minimal"/>
             <property name="vacancy" view="_minimal"/>
             <property name="project" view="_minimal"/>
-            <property name="companyDepartment" view="_minimal"/>
+<!--            <property name="companyDepartment" view="_minimal"/> -->
             <property name="iteractionType" view="_minimal">
                 <property name="pic"/>
             </property>
@@ -201,7 +201,8 @@
             <property name="lastName"/>
         </property>
         <property name="lintToCloudFile"/>
-        <property name="fileCV" view="_local">
+        <property name="fileCV" view="_minimal">
+            <property name="name"/>
             <property name="size"/>
             <property name="createTs"/>
             <property name="createdBy"/>
@@ -265,7 +266,7 @@
         <property name="project" view="_minimal">
             <property name="projectDepartment" view="_minimal"/>
         </property>
-        <property name="companyDepartment" view="_minimal">
+        <!-- <property name="companyDepartment" view="_minimal">
             <property name="departamentHrDirector" view="_minimal"/>
             <property name="departamentDirector" view="_minimal"/>
             <property name="departamentDescription"/>
@@ -277,7 +278,7 @@
                 </property>
                 <property name="jobCandidate" view="_minimal"/>
             </property>
-        </property>
+        </property> -->
         <property name="iteractionType" fetch="JOIN" view="_local"/>
         <property name="recrutier" view="_minimal"/>
         <property name="iteractionChain" view="_minimal"/>
@@ -299,7 +300,7 @@
         <property name="project" view="_minimal">
             <property name="projectDepartment" view="_minimal"/>
         </property>
-        <property name="companyDepartment" view="_minimal"/>
+<!--        <property name="companyDepartment" view="_minimal"/> -->
         <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal"/>
         <property name="iteractionChain" view="_minimal"/>
@@ -321,6 +322,7 @@
         <property name="owner" view="_minimal"/>
         <property name="lintToCloudFile"/>
         <property name="fileCV" view="_minimal">
+            <property name="name"/>
             <property name="size"/>
         </property>
         <property name="originalFileCV" view="_minimal"/>
@@ -333,7 +335,7 @@
             <property name="dateIteraction"/>
             <property name="vacancy" view="_minimal"/>
             <property name="project" view="_minimal"/>
-            <property name="companyDepartment" view="_minimal"/>
+<!--            <property name="companyDepartment" view="_minimal"/> -->
             <property name="iteractionType" view="_minimal"/>
             <property name="recrutier" view="_minimal"/>
             <property name="recrutierName"/>
@@ -373,7 +375,7 @@
         </property>
         <property name="fileOwner" view="_local"/>
         <property name="fileType" view="_local"/>
-        <property name="candidateCV" view="_minimal">
+        <property name="candidateCV" view="_local">
             <property name="resumePosition" fetch="AUTO" view="_local"/>
         </property>
     </view>

@@ -21,11 +21,4 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
             getEditedEntity().setFileOwner( userSessionSource.getUserSession().getUser() );
         }
     }
-
-/*    @Subscribe
-    public void onInit(InitEvent event) {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
-//            getEditedEntity().setFileOwner( userSessionSource.getUserSession().getUser() );
-        }
-    } */
 }

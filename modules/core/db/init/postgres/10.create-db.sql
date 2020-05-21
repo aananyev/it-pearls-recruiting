@@ -89,7 +89,6 @@ create table ITPEARLS_ITERACTION_LIST (
     CURRENT_JOB_POSITION_ID uuid,
     VACANCY_ID uuid,
     PROJECT_ID uuid,
-    COMPANY_DEPARTMENT_ID uuid not null,
     ITERACTION_TYPE_ID uuid not null,
     COMMUNICATION_METHOD varchar(80),
     COMMENT_ text,

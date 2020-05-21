@@ -1,0 +1,4 @@
+alter table ITPEARLS_ITERACTION_LIST rename column company_department_id to company_department_id__u23208 ;
+alter table ITPEARLS_ITERACTION_LIST alter column company_department_id__u23208 drop not null ;
+alter table ITPEARLS_ITERACTION_LIST drop constraint FK_ITPEARLS_ITERACTION_LIST_ON_COMPANY_DEPARTMENT ;
+drop index IDX_ITPEARLS_ITERACTION_LIST_ON_COMPANY_DEPARTMENT ;
