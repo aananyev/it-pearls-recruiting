@@ -26,7 +26,10 @@
         </collection>
     </data>
     <layout>
-        <groupBox spacing="true" width="AUTO">
+        <vbox id="borderGroupBox" spacing="true" width="AUTO" stylename="light"
+              css="border: 2px solid #7a7b7e;border-radius: 10px; margin: 5px;"
+              margin="true,true,true,true"
+              icon="ARROW_CIRCLE_RIGHT">
             <label id="labelTitle" width="AUTO" htmlEnabled="true" align="MIDDLE_CENTER"/>
             <hbox spacing="true">
                 <grid spacing="true">
@@ -34,8 +37,8 @@
                     <rows>
                         <row>
                             <label id="labelCountNewContacts"
-                                   icon="BATTERY_0"
-                                   width="AUTO"
+                                   width="90%"
+                                   stylename="v-caption-shift-field"
                                    htmlEnabled="true"/>
                             <label id="labelCountNewContactsValue"
                                    width="AUTO"
@@ -44,8 +47,8 @@
                         </row>
                         <row>
                             <label id="labelAssignInternalInterview"
-                                   icon="BATTERY_1"
-                                   width="AUTO"
+                                   width="90%"
+                                   stylename="v-caption-shift-field"
                                    htmlEnabled="true"/>
                             <label id="labelAssignInternalInterviewValue"
                                    width="AUTO"
@@ -54,8 +57,8 @@
                         </row>
                         <row>
                             <label id="labelPrepareInternalInterview"
-                                   icon="BATTERY_2"
-                                   width="AUTO"
+                                   width="90%"
+                                   stylename="v-caption-shift-field"
                                    htmlEnabled="true"/>
                             <label id="labelPrepareInternalInterviewValus"
                                    width="AUTO"
@@ -64,8 +67,8 @@
                         </row>
                         <row>
                             <label id="labelAssignExternalInterview"
-                                   icon="BATTERY_3"
-                                   width="AUTO"
+                                   stylename="v-caption-shift-field"
+                                   width="90%"
                                    htmlEnabled="true"/>
                             <label id="labelAssignExternalInterviewValue"
                                    width="AUTO"
@@ -74,8 +77,8 @@
                         </row>
                         <row>
                             <label id="labelPrepareExternalInterview"
-                                   icon="BATTERY_4"
-                                   width="AUTO"
+                                   stylename="v-caption-shift-field"
+                                   width="90%"
                                    htmlEnabled="true"/>
                             <label id="labelPrepareExternalInterviewValue"
                                    width="AUTO"
@@ -84,8 +87,8 @@
                         </row>
                         <row>
                             <label id="labelDirectorsInterview"
-                                   icon="BATTERY_FULL"
-                                   width="AUTO"
+                                   width="90%"
+                                   stylename="v-caption-shift-field"
                                    htmlEnabled="true"
                                    align="MIDDLE_LEFT"/>
                             <label id="labelDirectorsInterviewValue"
@@ -96,6 +99,6 @@
                     </rows>
                 </grid>
             </hbox>
-        </groupBox>
+        </vbox>
     </layout>
 </fragment>

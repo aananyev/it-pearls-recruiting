@@ -4,6 +4,7 @@
 .open-position-normal-recruitier {color: black;font-weight: normal}
 .recrutier-tasks-gray {color: grey; text-decoration: line-through}
 .recrutier-tasks-normal {color: black}
+
 .v-calendar-event.event-green {
   background-color: #c8f4c9;
   color: #00e026;
@@ -11,4 +12,13 @@
 .v-calendar-event.event-yellow {
   background-color: #eff5c9;
   color: #cee000;
+}
+
+.widget-border-line {
+        border: 5px solid #7a7b7e;
+        border-radius: 20px;
+}
+
+.v-caption-shift-field {
+    white-space: pre;
 }

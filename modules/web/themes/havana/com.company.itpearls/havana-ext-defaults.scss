@@ -5,6 +5,19 @@
 .recrutier-tasks-gray {color: grey; text-decoration: line-through}
 .recrutier-tasks-normal {color: black}
 
+.widget-border-line {
+        border: 5px solid #7a7b7e;
+        border-radius: 20px;
+}
+
+.v-caption-shift-field {
+    white-space: pre;
+}
+
+.c-fglayout-slot.c-full-height-widget .v-caption-shift-field .v-captiontext {
+    line-height: 15px;
+}
+
 .v-calendar-event.event-red {
   background-color: #f4c8c8;
   color: #e00000;

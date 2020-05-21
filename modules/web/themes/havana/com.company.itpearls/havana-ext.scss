@@ -1,4 +1,15 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-havana-ext {
+    .widget-border-line {
+            border: 5px solid #7a7b7e;
+            border-radius: 20px;
+    }
 
+    .v-caption-shift-field {
+        white-space: pre;
+    }
+
+    .c-fglayout-slot.c-full-height-widget .v-caption-shift-field .v-captiontext {
+        line-height: 15px;
+    }
 }

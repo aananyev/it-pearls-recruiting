@@ -4,6 +4,7 @@ import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.cuba.gui.WindowParam;
+import com.haulmont.cuba.gui.components.GroupBoxLayout;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -14,9 +15,7 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 
 @UiController("itpearls_MonthlyInterviewCountWidget")
 @UiDescriptor("monthly-interview-count-widget.xml")
@@ -79,6 +78,10 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
+        iteractioListDl.removeParameter( "endDate" );
+        iteractioListDl.removeParameter( "startDate" );
+        iteractioListDl.removeParameter( "iteractionName" );
+
         labelTitle.setValue( "<div style=\"text-transform: uppercase\"><b><u>" + widgetTitle + "</u></b></div>" );
 
         setLabelNewContacts();
@@ -128,29 +131,32 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
     private void setLabelNewContacts() {
         setDateInterval();
+        setElementStyle();
 
         iteractioListDl.setParameter( "iteractionName", itemNewContact + "%" );
         iteractioListDl.load();
 
-        int countItems = 0;
-        countItems = iteractionListDc.getItems().size();
+        int countItems = iteractionListDc.getItems().size();
 
         labelCountNewContacts.setValue( itemNewContact );
         labelCountNewContactsValue.setValue( String.valueOf( countItems ) );
     }
 
+    private void setElementStyle() {
+    }
+
     public static int getCurrentYear()
     {
-        java.util.Calendar calendar = java.util.Calendar.getInstance(java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
-        calendar.setTime(new java.util.Date());
-        return calendar.get(java.util.Calendar.YEAR);
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+        calendar.setTime(new Date());
+        return calendar.get(Calendar.YEAR);
     }
 
 
     public static int getCurrentMonth()
     {
-        java.util.Calendar calendar = java.util.Calendar.getInstance(java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
-        calendar.setTime(new java.util.Date());
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+        calendar.setTime(new Date());
         return calendar.get(Calendar.MONTH);
     }
 
