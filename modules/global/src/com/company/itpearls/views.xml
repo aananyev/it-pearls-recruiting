@@ -186,11 +186,9 @@
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="candidate" view="_minimal">
-            <property name="fullName"/>
             <property name="currentCompany" view="_minimal"/>
             <property name="cityOfResidence" view="_minimal"/>
             <property name="positionCountry" view="_minimal"/>
-            <property name="iteractionList" view="_minimal"/>
             <property name="jobHistory" view="_minimal"/>
             <property name="candidateCv" view="_local"/>
         </property>

@@ -89,7 +89,8 @@ public class FunnelHuntingWidget extends ScreenFragment {
             label.setWidth( "15%" );
             label.setHtmlEnabled( true );
             label.setHeight( Component.AUTO_SIZE );
-            label.setValue( "<b><u>" + a + "</b></u>" );
+            label.setValue( "<b>" + a + "</b>" );
+            label.setStyleName( "line-height: 15px;white-space: pre;" );
             label.setStyleName( ".v-label-shift-field" );
             boxWidgetTitle.add( label );
         }
