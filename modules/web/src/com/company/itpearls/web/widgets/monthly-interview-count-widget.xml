@@ -26,12 +26,12 @@
         </collection>
     </data>
     <layout>
-        <vbox id="borderGroupBox" spacing="true" width="AUTO" stylename="light"
-              css="border: 2px solid #7a7b7e;border-radius: 10px; margin: 5px;"
+        <vbox id="borderGroupBox" spacing="true" width="100%" height="AUTO" stylename="light"
+              css="border: 2px solid #7a7b7e;border-radius: 10px; margin: 8px;"
               margin="true,true,true,true"
-              icon="ARROW_CIRCLE_RIGHT">
+              icon="ARROW_CIRCLE_RIGHT" expand="box">
             <label id="labelTitle" width="AUTO" htmlEnabled="true" align="MIDDLE_CENTER"/>
-            <hbox spacing="true">
+            <hbox id="box" spacing="true">
                 <grid spacing="true">
                     <columns count="2"/>
                     <rows>
