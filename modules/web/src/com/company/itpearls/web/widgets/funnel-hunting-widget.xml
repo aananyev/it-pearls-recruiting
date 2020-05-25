@@ -2,32 +2,14 @@
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
           xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
     <data>
-        <collection id="iteractionListDc" class="com.company.itpearls.entity.IteractionList" view="iteractionList-view">
-            <loader id="iteractioListDl">
-                <query>
-                    <![CDATA[select e from itpearls_IteractionList e]]>
-                    <condition>
-                        <and>
-                            <c:jpql>
-                                <c:where>
-                                    e.iteractionType = :iteractionType
-                                </c:where>
-                            </c:jpql>
-                            <c:jpql>
-                                <c:where>
-                                    e.dateIteraction between :startDate and :endDate
-                                </c:where>
-                            </c:jpql>
-                        </and>
-                    </condition>
-                </query>
-            </loader>
-        </collection>
     </data>
     <layout>
         <groupBox id="funnelHuntingWindgetGroupBox" spacing="true">
+            <label id="widgetTitle" stylename="h3"/>
             <hbox id="boxWidgetTitle" spacing="true">
-                <label id="researcherTitle" width="20%" align="MIDDLE_CENTER"/>
+                <vbox id="researcherNameBox" spacing="true">
+                    <label id="researcherTitle" align="BOTTOM_LEFT" height="45px" stylename="v-caption-label"/>
+                </vbox>
             </hbox>
         </groupBox>
     </layout>

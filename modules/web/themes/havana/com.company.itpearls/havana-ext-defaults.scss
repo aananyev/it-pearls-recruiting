@@ -5,9 +5,15 @@
 .recrutier-tasks-gray {color: grey; text-decoration: line-through}
 .recrutier-tasks-normal {color: black}
 
+.v-caption-label {
+        font-weight: bold;
+        white-space: pre-line;
+        text-decoration: underline;
+}
+
 .widget-border-line {
         border: 5px solid #7a7b7e;
-        border-radius: 20px;
+        border-radius: 10px;
 }
 
 .v-caption-shift-field {

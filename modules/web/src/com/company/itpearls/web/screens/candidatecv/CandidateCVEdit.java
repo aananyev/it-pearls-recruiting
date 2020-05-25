@@ -199,12 +199,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 linkITPearlsCV.setVisible( false );
             }
         // отфильтровать файлы кандидата только
-//        if( !PersistenceHelper.isNew( getEditedEntity() ) )
-//            someFilesesDl.setParameter( "candidate", candidateField.getValue() );
-//        else
+        if( !PersistenceHelper.isNew( getEditedEntity() ) )
+            someFilesesDl.setParameter( "candidate", candidateField.getValue() );
+        else
 //           someFilesesDl.setParameter( "candidate", null );
 
-//         someFilesesDl.load();
+         someFilesesDl.load();
     }
 
     @Subscribe
@@ -226,7 +226,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
          webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
     }
-/*
+
     @Subscribe("tabFiles")
     public void onTabFilesLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
         if( PersistenceHelper.isNew( getEditedEntity() ) ) {
@@ -243,7 +243,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     .show();
         }
     }
-*/
+
     public void setUrlITPearlsCV() {
         String value = textFieldITPearlsCV.getValue();
 

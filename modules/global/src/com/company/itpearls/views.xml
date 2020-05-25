@@ -374,6 +374,7 @@
         <property name="fileOwner" view="_local"/>
         <property name="fileType" view="_local"/>
         <property name="candidateCV" view="_local">
+            <property name="candidate" view="_minimal"/>
             <property name="resumePosition" fetch="AUTO" view="_local"/>
         </property>
     </view>

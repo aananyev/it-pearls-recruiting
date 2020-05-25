@@ -5,11 +5,13 @@
             border-radius: 20px;
     }
 
-    .v-caption-shift-field {
-        white-space: pre;
+    .v-caption-label {
+        font-weight: bold;
+        white-space: pre-line;
+        text-decoration: underline;
     }
 
-    .c-fglayout-slot.c-full-height-widget .v-caption-shift-field .v-captiontext {
+    .c-fglayout-slot.c-full-height-widget .v-caption-label .v-captiontext {
         line-height: 15px;
     }
 }
