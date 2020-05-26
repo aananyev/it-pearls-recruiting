@@ -4,10 +4,10 @@
     <data>
     </data>
     <layout>
-        <groupBox id="funnelHuntingWindgetGroupBox" spacing="true">
+        <groupBox id="funnelHuntingWindgetGroupBox" spacing="true" stylename="widget-border-line">
             <label id="widgetTitle" stylename="h3"/>
-            <hbox id="boxWidgetTitle" spacing="true">
-                <vbox id="researcherNameBox" spacing="true">
+            <hbox id="boxWidgetTitle" spacing="true" align="BOTTOM_CENTER">
+                <vbox id="researcherNameBox" spacing="true" align="BOTTOM_LEFT">
                     <label id="researcherTitle" align="BOTTOM_LEFT" height="45px" stylename="v-caption-label"/>
                 </vbox>
             </hbox>

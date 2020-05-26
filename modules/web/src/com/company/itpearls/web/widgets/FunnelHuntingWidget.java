@@ -36,8 +36,6 @@ import java.util.function.Function;
 @DashboardWidget( name = "Funnel Hunting Widget" )
 public class FunnelHuntingWidget extends ScreenFragment {
     @Inject
-    private CollectionLoader<IteractionList> iteractioListDl;
-    @Inject
     private Label<String> researcherTitle;
     @Inject
     private UiComponents uiComponents;
@@ -55,6 +53,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private List<User> reaearchers = new ArrayList<>();
 
     private String ITRKT_NEW_CONTACT = "Новый контакт";
+    private String ITRKT_POPOSE_JOB = "Предложение работы";
     private String ITRKT_ASSIGN_ITPEARKS_INTERVIEW = "Назначено собеседование с рекрутером IT Pearls";
     private String ITRKT_PREPARE_ITPEARKS_INTERVIEW = "Прошел собеседование с рекрутером IT Pearls";
     private String ITRKT_ASSIGN_TECH_INTERVIEW = "Назначено техническое собеседование";
@@ -63,14 +62,12 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
     private String labelHeight = "15px";
     private String iteractionTitleHeight = "45px";
-    private String sizeColumn = "140px";
+    private String sizeColumn = "120px";
 
     @Inject
     private HBoxLayout boxWidgetTitle;
     @Inject
     private DataManager dataManager;
-    @Inject
-    private CollectionContainer<User> researchersDc;
     @Inject
     private VBoxLayout researcherNameBox;
     @Inject
@@ -83,6 +80,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
         researcherTitle.setValue( "Ресерчер" );
         researcherTitle.setWidth(sizeColumn);
         researcherTitle.setHeight(iteractionTitleHeight);
+        researcherTitle.setAlignment(Component.Alignment.BOTTOM_LEFT);
         researcherTitle.setSizeFull();
 
         setDeafaultTimeInterval();
@@ -119,15 +117,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
     }
 
     private void setIteractionTitle() {
-
-        if( startDate == null || endDate == null ) {
-            iteractioListDl.removeParameter( "startDate" );
-            iteractioListDl.removeParameter( "endDate" );
-        } else {
-            iteractioListDl.setParameter( "startDate", startDate );
-            iteractioListDl.setParameter( "endDate", endDate );
-        }
-
         for( String a : listIteractionForCheck ) {
 
             String queryParameter = a;
@@ -136,6 +125,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
             boxWidgetTitle.add( vBox );
 
             vBox.setWidth(sizeColumn);
+            vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
 
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
             vBox.add( label );
@@ -189,6 +179,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
     private void initListIteraction() {
         listIteractionForCheck.add( ITRKT_NEW_CONTACT );
+        listIteractionForCheck.add( ITRKT_POPOSE_JOB );
         listIteractionForCheck.add( ITRKT_ASSIGN_ITPEARKS_INTERVIEW );
         listIteractionForCheck.add( ITRKT_PREPARE_ITPEARKS_INTERVIEW );
         listIteractionForCheck.add( ITRKT_ASSIGN_TECH_INTERVIEW );
