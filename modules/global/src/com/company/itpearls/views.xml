@@ -251,6 +251,10 @@
             <property name="iteractionTree"/>
         </property>
         <property name="recrutier" fetch="JOIN" view="_local"/>
+        <property name="addDate"/>
+        <property name="addInteger"/>
+        <property name="addString"/>
+        <property name="addType"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">

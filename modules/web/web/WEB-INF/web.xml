@@ -16,9 +16,9 @@
     <!--Application components-->
     <context-param>
         <param-name>appComponents</param-name>
-        <param-value>com.haulmont.cuba com.haulmont.fts com.haulmont.reports com.haulmont.addon.emailtemplates
-            com.haulmont.addon.dashboard com.haulmont.addon.globalevents com.haulmont.charts
-            de.diedavids.cuba.dataimport</param-value>
+        <param-value>com.haulmont.cuba com.haulmont.fts com.haulmont.reports com.haulmont.addon.dashboard
+            com.haulmont.addon.globalevents com.haulmont.charts de.diedavids.cuba.dataimport
+            com.haulmont.addon.emailtemplates</param-value>
     </context-param>
     <listener>
         <listener-class>com.vaadin.server.communication.JSR356WebsocketInitializer</listener-class>

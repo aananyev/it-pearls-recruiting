@@ -1,16 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
-          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
     <data>
     </data>
     <layout>
-        <groupBox id="funnelHuntingWindgetGroupBox" spacing="true" stylename="widget-border-line">
-            <label id="widgetTitle" stylename="h3"/>
-            <hbox id="boxWidgetTitle" spacing="true" align="BOTTOM_CENTER">
-                <vbox id="researcherNameBox" spacing="true" align="BOTTOM_LEFT">
-                    <label id="researcherTitle" align="BOTTOM_LEFT" height="45px" stylename="v-caption-label"/>
+        <vbox id="funnelHuntingWindgetGroupBox"
+              width="100%"
+              spacing="false"
+              stylename="widget-border-line">
+            <textArea id="widgetTitle"
+                      width="100%"
+                      height="AUTO"
+                      align="BOTTOM_LEFT"
+                      editable="false"
+                      wordWrap="true"
+                      stylename="widget-header"/>
+            <hbox id="boxWidgetTitle"
+                  spacing="true"
+                  align="BOTTOM_CENTER">
+                <vbox id="researcherNameBox"
+                      spacing="true"
+                      align="BOTTOM_LEFT">
+                    <textArea id="researcherTitle"
+                              align="BOTTOM_LEFT"
+                              width="100%"
+                              editable="false"
+                              stylename="borderless"
+                              height="45px"/>
                 </vbox>
             </hbox>
-        </groupBox>
+        </vbox>
     </layout>
 </fragment>

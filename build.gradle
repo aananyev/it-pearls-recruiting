@@ -43,11 +43,11 @@ dependencies {
     appComponent("com.haulmont.fts:fts-global:$cubaVersion")
     appComponent("com.haulmont.reports:reports-global:$cubaVersion")
     appComponent("com.haulmont.reports:reports-global:$cubaVersion")
-    appComponent('com.haulmont.addon.emailtemplates:yet-global:1.4.0')
     appComponent('com.haulmont.addon.dashboard:dashboard-global:3.2.2')
     appComponent('com.haulmont.addon.globalevents:cubaglevt-global:0.6.1')
     appComponent("com.haulmont.charts:charts-global:$cubaVersion")
     appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.13.0')
+    appComponent('com.haulmont.addon.emailtemplates:yet-global:1.4.1')
 }
 
 def postgres = 'org.postgresql:postgresql:42.2.9'
@@ -117,7 +117,7 @@ configure(coreModule) {
     }
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
-        host = 'hr.it-pearls.ru'
+        host = 'localhost'
         dbName = 'itpearls'
         dbms = 'postgres'
         dbUser = 'cuba'
@@ -125,7 +125,7 @@ configure(coreModule) {
     }
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
-        host = 'hr.it-pearls.ru'
+        host = 'localhost'
         dbName = 'itpearls'
         dbms = 'postgres'
         dbUser = 'cuba'

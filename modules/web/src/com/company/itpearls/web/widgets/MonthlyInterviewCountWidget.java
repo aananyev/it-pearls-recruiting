@@ -4,8 +4,10 @@ import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.cuba.gui.WindowParam;
-import com.haulmont.cuba.gui.components.GroupBoxLayout;
+import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.TextArea;
+import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
@@ -14,7 +16,6 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 
 import javax.inject.Inject;
-import java.math.BigDecimal;
 import java.util.*;
 
 @UiController("itpearls_MonthlyInterviewCountWidget")
@@ -23,8 +24,6 @@ import java.util.*;
 public class MonthlyInterviewCountWidget extends ScreenFragment {
     @Inject
     private Label<String> labelAssignExternalInterview;
-    @Inject
-    private Label<String> labelAssignInternalInterview;
     @Inject
     private Label<String> labelCountNewContacts;
     @Inject
@@ -48,8 +47,6 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     @Inject
     private Label<String> labelCountNewContactsValue;
     @Inject
-    private Label<String> labelAssignInternalInterviewValue;
-    @Inject
     private Label<String> labelDirectorsInterview;
 
     @WidgetParam
@@ -69,15 +66,25 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     protected String period;
 
     private String itemNewContact = "Новый контакт";
+    private String itemProposeJob = "Предложение работы";
     private String itemAssignInternalInterview = "Назначено собеседование с рекрутером IT Pearls";
     private String itemPrepareInternalInterview = "Прошел собеседование с рекрутером IT Pearls";
     private String itemAssignExternalInterview = "Назначено техническое собеседование";
     private String itemPrepareExternalInterview = "Прошел техническое собеседование";
     private String itemPrepareDirectorsInterview = "Прошел собеседование с Директором";
     private String WEEK = "неделя";
+    @Inject
+    private Label<String> labelCountProposeJob;
+    @Inject
+    private Label<String> labelCountProposeJobValue;
+    @Inject
+    private Label<String> labelAssignInternalInterview;
+    @Inject
+    private Label<String> labelAssignInternalInterviewValue;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
+
         iteractioListDl.removeParameter( "endDate" );
         iteractioListDl.removeParameter( "startDate" );
         iteractioListDl.removeParameter( "iteractionName" );
@@ -85,11 +92,22 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         labelTitle.setValue( "<div style=\"text-transform: uppercase\"><b><u>" + widgetTitle + "</u></b></div>" );
 
         setLabelNewContacts();
+        setLabelProposeJob();
         setLabelAssignInternalInterview();
         setLabelPrepareInternalInterview();
         setLabelAssignExternalInterview();
         setLabelPrepareExternalInterview();
         setLabelPrepareDirectorsInterview();
+    }
+
+    private void setLabelProposeJob() {
+        iteractioListDl.setParameter( "iteractionName", itemProposeJob + "%" );
+        iteractioListDl.load();
+
+        int count = iteractionListDc.getItems().size();
+        labelCountProposeJob.setValue( itemProposeJob );
+        labelCountProposeJob.setStyleName( "label_type.v-label.v-widget" );
+        labelCountProposeJobValue.setValue( String.valueOf( count ) );
     }
 
     private void setLabelPrepareDirectorsInterview() {

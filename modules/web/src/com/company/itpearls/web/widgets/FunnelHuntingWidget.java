@@ -26,8 +26,6 @@ import java.util.List;
 @DashboardWidget( name = "Funnel Hunting Widget" )
 public class FunnelHuntingWidget extends ScreenFragment {
     @Inject
-    private Label<String> researcherTitle;
-    @Inject
     private UiComponents uiComponents;
 
     @WidgetParam
@@ -39,7 +37,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
     protected Date endDate;
 
     private List<String> listIteractionForCheck = new ArrayList<String>();
-    private List<Label> researcherLabelList = new ArrayList<Label>();
     private List<User> reaearchers = new ArrayList<>();
 
     private String ITRKT_NEW_CONTACT = "Новый контакт";
@@ -51,8 +48,8 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
 
     private String labelHeight = "15px";
-    private String iteractionTitleHeight = "45px";
-    private String sizeColumn = "120px";
+//    private String iteractionTitleHeight = "45px";
+    private String sizeColumn = "115px";
 
     @Inject
     private HBoxLayout boxWidgetTitle;
@@ -61,17 +58,16 @@ public class FunnelHuntingWidget extends ScreenFragment {
     @Inject
     private VBoxLayout researcherNameBox;
     @Inject
-    private Label<String> widgetTitle;
+    private TextArea<String> researcherTitle;
+    @Inject
+    private TextArea<String> widgetTitle;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         initListIteraction();
 
         researcherTitle.setValue( "Ресерчер" );
-        researcherTitle.setWidth(sizeColumn);
-        researcherTitle.setHeight(iteractionTitleHeight);
-        researcherTitle.setAlignment(Component.Alignment.BOTTOM_LEFT);
-        researcherTitle.setSizeFull();
+        researcherTitle.setStyleName("widget-header");
 
         setDeafaultTimeInterval();
         setWidgetTitle();
@@ -86,6 +82,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
         widgetTitle.setValue( title + df.format(startDate) + " - " + df.format(endDate) );
+        widgetTitle.setStyleName( "widget-header" );
     }
 
     private void getResearchersList() {
@@ -117,17 +114,18 @@ public class FunnelHuntingWidget extends ScreenFragment {
             vBox.setWidth(sizeColumn);
             vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
 
-            Label<String> label = uiComponents.create(Label.TYPE_STRING);
-            vBox.add( label );
+            TextArea<String> label = uiComponents.create(TextArea.TYPE_STRING);
             vBox.setSpacing( true );
 
-            label.setHeight( iteractionTitleHeight );
+//            label.setHeight( iteractionTitleHeight );
+            label.setEditable( false );
             label.setWidth( "100%" );
-            label.setHeightFull();
-            label.setWidthFull();
+            label.setSizeFull();
             label.setValue( a );
-            label.setAlignment( Component.Alignment.BOTTOM_CENTER );
+            label.setAlignment(Component.Alignment.BOTTOM_CENTER );
             label.setStyleName( "v-caption-label" );
+
+            vBox.add( label );
 
             for( User user : reaearchers ) {
                String queryCounter = "select count(e) from itpearls_IteractionList e " +
@@ -143,14 +141,14 @@ public class FunnelHuntingWidget extends ScreenFragment {
                        .one();
 
                Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
-               vBox.add( labelCount );
 
                labelCount.setValue( iteractionCount );
+               labelCount.setStyleName( "v-widget" );
                labelCount.setAlignment( Component.Alignment.MIDDLE_CENTER );
                labelCount.setWidth( "100%" );
                labelCount.setHeight( labelHeight );
-               labelCount.setHeightFull();
-               labelCount.setWidthFull();
+
+               vBox.add( labelCount );
             }
         }
     }
@@ -160,7 +158,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
             Label<String> label = uiComponents.create( Label.TYPE_STRING );
             researcherNameBox.add( label );
 
-            label.setAlignment( Component.Alignment.MIDDLE_LEFT);
+            label.setAlignment( Component.Alignment.MIDDLE_LEFT );
             label.setHeight(labelHeight);
             label.setValue( a.getName() );
 

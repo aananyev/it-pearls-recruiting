@@ -1,17 +1,138 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-havana-ext {
-    .widget-border-line {
-            border: 5px solid #7a7b7e;
-            border-radius: 20px;
-    }
+/* Override global theme constants or define new ones here */
+.open-position-job-recruitier {color: blue;font-weight: normal}
+.open-position-empty-recruitier {color: green;font-weight: normal}
+.open-position-normal-recruitier {color: black;font-weight: normal}
+.recrutier-tasks-gray {color: grey; text-decoration: line-through}
+.recrutier-tasks-normal {color: black}
 
-    .v-caption-label {
+.widget-border {
+    border: 2px solid #7a7b7e;
+    border-radius: 6px;
+}
+
+.widget-header {
+        font-weight: bold;
+        text-decoration: underline;
+        padding: 5px;
+        margin: "0 auto";
+}
+
+.label_type.v-label.v-widget {
+    color: red;
+    background-color: lightyellow;
+    line-height: 1.5;
+    margin: 5px;
+}
+
+.v-caption-label {
+        border: none;
+        margin: "0 auto";
+        text-align: center;
         font-weight: bold;
         white-space: pre-line;
         text-decoration: underline;
-    }
+        background: #bea6ff;
+}
 
-    .c-fglayout-slot.c-full-height-widget .v-caption-label .v-captiontext {
-        line-height: 15px;
-    }
+.widget-mountly-interview-table-1 {
+            white-space: pre-line;
+            font-style: italic;
+            background: #ababab;
+}
+
+.widget-mountly-interview-table-2 {
+            white-space: pre-line;
+            font-style: italic;
+            background: #7d7d7d;
+}
+
+.widget-table-value {
+            font-style: italic;
+            background: #878787;
+}
+
+.widget-border-line {
+        border: 1px solid #7a7b7e;
+        border-radius: 6px;
+}
+
+.widget-title {
+    text-align: center;
+}
+
+.v-caption-shift-field {
+    white-space: pre;
+}
+
+.c-fglayout-slot.c-full-height-widget .v-caption-shift-field .v-captiontext {
+    line-height: 15px;
+}
+
+.v-calendar-event.event-red {
+  background-color: #f4c8c8;
+  color: #e00000;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-red, .v-calendar-event-event-red:before {
+  color: #e00000;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-red .v-calendar-event-content {
+  background-color: #f4c8c8;
+}
+
+.v-calendar-event.event-green {
+  background-color: #c8f4c9;
+  color: #037516;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-green, .v-calendar-event-event-green:before {
+  color: #037516;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-green .v-calendar-event-content {
+  background-color: #c8f4c9;
+}
+
+.v-calendar-event.event-blue {
+  background-color: #c8daf4;
+  color: #0300e0;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-blue, .v-calendar-event-event-blue:before {
+  color: #0300e0;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-blue .v-calendar-event-content {
+  background-color: #c8daf4;
+}
+
+.v-calendar-event.event-yellow {
+  background-color: #f4efc8;
+  color: #5f5c41;
+}
+
+.event-yellow {
+  background-color: #f4efc8;
+  color: #5f5c41;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-yellow, .v-calendar-event-event-yellow:before {
+  color: #5f5c41;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-yellow .v-calendar-event-content {
+  background-color: #f4efc8;
+}
+
+.v-calendar-header-week .v-calendar-back, .v-calendar-header-week .v-calendar-next {
+  display: none;
+}
+
+.v-label-shift-field {
+    white-space: pre;
+}
+
 }
