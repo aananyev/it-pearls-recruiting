@@ -2,18 +2,18 @@
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
     <data>
     </data>
-    <layout>
+    <layout stylename="widget-border"
+            width="100%"
+            height="100%">
         <vbox id="funnelHuntingWindgetGroupBox"
               width="100%"
-              spacing="false"
-              stylename="widget-border-line">
-            <textArea id="widgetTitle"
-                      width="100%"
-                      height="AUTO"
-                      align="BOTTOM_LEFT"
-                      editable="false"
-                      wordWrap="true"
-                      stylename="widget-header"/>
+              spacing="false">
+            <label id="widgetTitle"
+                   htmlEnabled="true"
+                   width="100%"
+                   height="AUTO"
+                   align="BOTTOM_LEFT"
+                   stylename="widget-header"/>
             <hbox id="boxWidgetTitle"
                   spacing="true"
                   align="BOTTOM_CENTER">

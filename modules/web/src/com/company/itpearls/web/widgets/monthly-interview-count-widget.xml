@@ -45,7 +45,10 @@
                   align="MIDDLE_CENTER">
                 <vbox spacing="false"
                       width="100%">
-                        <hbox stylename="widget-mountly-interview-table-1" width="100%" height="AUTO">
+                        <hbox stylename="widget-mountly-interview-table-1"
+                              expand="labelCountNewContacts"
+                              width="100%"
+                              height="AUTO">
                                 <label id="labelCountNewContacts"
                                        width="AUTO"
                                        css="white-space: pre-line;"
@@ -54,7 +57,10 @@
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                                 </hbox>
-                        <hbox stylename="widget-mountly-interview-table-2" width="100%" height="AUTO">
+                        <hbox stylename="widget-mountly-interview-table-2"
+                              expand="labelCountProposeJob"
+                              width="100%"
+                              height="AUTO">
                                 <label id="labelCountProposeJob"
                                        width="AUTO"
                                        css="white-space: pre-line;"
@@ -63,7 +69,10 @@
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
-                        <hbox stylename="widget-mountly-interview-table-1" width="100%" height="AUTO">
+                        <hbox stylename="widget-mountly-interview-table-1"
+                              expand="labelAssignInternalInterview"
+                              width="100%"
+                              height="AUTO">
                                 <label id="labelAssignInternalInterview"
                                        width="AUTO"
                                        css="white-space: pre-line;"
@@ -72,7 +81,10 @@
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
-                        <hbox stylename="widget-mountly-interview-table-2" width="100%" height="100%">
+                        <hbox stylename="widget-mountly-interview-table-2"
+                              expand="labelPrepareInternalInterview"
+                              width="100%"
+                              height="100%">
                                 <label id="labelPrepareInternalInterview"
                                        width="AUTO"
                                        css="white-space: pre-line;"
@@ -81,7 +93,10 @@
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
-                        <hbox stylename="widget-mountly-interview-table-1" width="100%" height="100%">
+                        <hbox stylename="widget-mountly-interview-table-1"
+                              expand="labelAssignExternalInterview"
+                              width="100%"
+                              height="100%">
                                 <label id="labelAssignExternalInterview"
                                        width="AUTO"
                                        css="white-space: pre-line;"
@@ -90,7 +105,10 @@
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
-                        <hbox stylename="widget-mountly-interview-table-2" width="100%" height="100%">
+                        <hbox stylename="widget-mountly-interview-table-2"
+                              expand="labelPrepareExternalInterview"
+                              width="100%"
+                              height="100%">
                                 <label id="labelPrepareExternalInterview"
                                        width="AUTO"
                                        css="white-space: pre-line;"
@@ -99,15 +117,18 @@
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
-                        <hbox stylename="widget-mountly-interview-table-1" width="100%" height="100%">
+                        <hbox stylename="widget-mountly-interview-table-1"
+                              expand="labelDirectorsInterview"
+                              width="100%"
+                              height="100%">
                                 <label id="labelDirectorsInterview"
                                        width="AUTO"
                                        css="white-space: pre-line;"
                                        align="TOP_LEFT"/>
-                        <label id="labelDirectorsInterviewValue"
-                               width="AUTO"
-                               htmlEnabled="true"
-                               align="TOP_RIGHT"/>
+                                <label id="labelDirectorsInterviewValue"
+                                       width="AUTO"
+                                       htmlEnabled="true"
+                                       align="TOP_RIGHT"/>
                     </hbox>
                 </vbox>
             </hbox>

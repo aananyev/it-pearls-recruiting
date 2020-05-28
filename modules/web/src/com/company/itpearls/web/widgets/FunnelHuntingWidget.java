@@ -60,7 +60,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
     @Inject
     private TextArea<String> researcherTitle;
     @Inject
-    private TextArea<String> widgetTitle;
+    private Label<String> widgetTitle;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -81,7 +81,9 @@ public class FunnelHuntingWidget extends ScreenFragment {
         String title = "Статистика по рекрутерам за: ";
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
-        widgetTitle.setValue( title + df.format(startDate) + " - " + df.format(endDate) );
+        widgetTitle.setValue( "<div style=\"text-transform: uppercase\"><b><u>" +
+                title + df.format(startDate) + " - " +
+                df.format(endDate) + "</u></b></div>" );
         widgetTitle.setStyleName( "widget-header" );
     }
 
