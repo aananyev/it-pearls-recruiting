@@ -3,10 +3,12 @@
     <data>
     </data>
     <layout stylename="widget-border"
+            expand="funnelHuntingWindgetGroupBox"
             width="100%"
             height="100%">
         <vbox id="funnelHuntingWindgetGroupBox"
               width="100%"
+              expand="boxWidgetTitle"
               spacing="false">
             <label id="widgetTitle"
                    htmlEnabled="true"
@@ -15,17 +17,23 @@
                    align="BOTTOM_LEFT"
                    stylename="widget-header"/>
             <hbox id="boxWidgetTitle"
-                  spacing="true"
+                  expand="researcherNameBox"
+                  spacing="false"
                   align="BOTTOM_CENTER">
                 <vbox id="researcherNameBox"
-                      spacing="true"
+                      expand="researcherList"
+                      width="AUTO"
+                      spacing="false"
                       align="BOTTOM_LEFT">
-                    <textArea id="researcherTitle"
-                              align="BOTTOM_LEFT"
-                              width="100%"
-                              editable="false"
-                              stylename="borderless"
-                              height="45px"/>
+                    <hbox id="researcherList" height="45px"
+                          expand="researcherTitle"
+                          stylename="widget-header"
+                          width="100%">
+                        <label id="researcherTitle"
+                                  align="BOTTOM_LEFT"
+                                  width="100%"
+                                  height="45px"/>
+                    </hbox>
                 </vbox>
             </hbox>
         </vbox>

@@ -8,6 +8,7 @@
 .recrutier-tasks-normal {color: black}
 
 .widget-border {
+    padding: 2px;
     border: 2px solid #7a7b7e;
     border-radius: 6px;
 }
@@ -37,12 +38,14 @@
 }
 
 .widget-mountly-interview-table-1 {
+            padding: 0px, 10px, 0px, 10px;
             white-space: pre-line;
             font-style: italic;
             background: #ababab;
 }
 
 .widget-mountly-interview-table-2 {
+            padding: 0px, 10px, 0px, 10px;
             white-space: pre-line;
             font-style: italic;
             background: #9c9c9c;

@@ -58,9 +58,9 @@ public class FunnelHuntingWidget extends ScreenFragment {
     @Inject
     private VBoxLayout researcherNameBox;
     @Inject
-    private TextArea<String> researcherTitle;
-    @Inject
     private Label<String> widgetTitle;
+    @Inject
+    private Label<String> researcherTitle;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -117,9 +117,8 @@ public class FunnelHuntingWidget extends ScreenFragment {
             vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
 
             TextArea<String> label = uiComponents.create(TextArea.TYPE_STRING);
-            vBox.setSpacing( true );
+            vBox.setSpacing( false );
 
-//            label.setHeight( iteractionTitleHeight );
             label.setEditable( false );
             label.setWidth( "100%" );
             label.setSizeFull();
@@ -129,7 +128,19 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
             vBox.add( label );
 
+            Integer styleCount = 2;
+
             for( User user : reaearchers ) {
+                HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
+                boxLayout.setWidth( "100%" );
+
+                if( styleCount == 2 )
+                    styleCount = 1;
+                else
+                    styleCount = 2;
+
+                vBox.add( boxLayout );
+
                String queryCounter = "select count(e) from itpearls_IteractionList e " +
                        "where e.dateIteraction between :startDate and :endDate and " +
                        "e.recrutier = :recrutier and " +
@@ -145,25 +156,39 @@ public class FunnelHuntingWidget extends ScreenFragment {
                Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
 
                labelCount.setValue( iteractionCount );
-               labelCount.setStyleName( "v-widget" );
+               labelCount.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
                labelCount.setAlignment( Component.Alignment.MIDDLE_CENTER );
                labelCount.setWidth( "100%" );
                labelCount.setHeight( labelHeight );
 
-               vBox.add( labelCount );
+               boxLayout.add( labelCount );
             }
         }
     }
 
     private void setResearcherList() {
-        for( User a : reaearchers ) {
-            Label<String> label = uiComponents.create( Label.TYPE_STRING );
-            researcherNameBox.add( label );
+        Integer styleCount = 2;
 
+        for( User a : reaearchers ) {
+            HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
+            boxLayout.setWidth( "100%" );
+            boxLayout.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
+            if( styleCount == 2 )
+                styleCount = 1;
+            else
+                styleCount = 2;
+
+            boxLayout.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
+
+            Label<String> label = uiComponents.create( Label.TYPE_STRING );
             label.setAlignment( Component.Alignment.MIDDLE_LEFT );
-            label.setHeight(labelHeight);
+            label.setWidth( "100%" );
+            label.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
             label.setValue( a.getName() );
 
+            boxLayout.add( label );
+            researcherNameBox.add( boxLayout );
         }
     }
 
