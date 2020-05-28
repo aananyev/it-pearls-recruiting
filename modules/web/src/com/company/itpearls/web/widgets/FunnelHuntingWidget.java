@@ -60,8 +60,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private Label<String> widgetTitle;
     @Inject
     private Label<String> researcherTitle;
-    @Inject
-    private HBoxLayout researcherList;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -79,10 +77,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
         String title = "Статистика по рекрутерам за: ";
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
-        widgetTitle.setValue( "<div style=\"text-transform: uppercase\"><b><u>" +
-                title + df.format(startDate) + " - " +
-                df.format(endDate) + "</u></b></div>" );
-        widgetTitle.setStyleName( "widget-header" );
+        widgetTitle.setValue( title + df.format(startDate) + " - " + df.format(endDate) );
     }
 
     private void getResearchersList() {
@@ -110,6 +105,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
             vBox.setWidth( sizeColumn );
             vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
             vBox.setSpacing( false );
+            vBox.setStyleName( "v-caption-label" );
 
             boxWidgetTitle.add( vBox );
             boxWidgetTitle.expand( vBox );
@@ -126,7 +122,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
             label.setWidth( "100%" );
-            label.setSizeFull();
+            label.setHeightAuto();
             label.setValue( a );
             label.setAlignment(Component.Alignment.BOTTOM_CENTER );
             label.setStyleName( "v-caption-label" );
@@ -139,6 +135,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
             for( User user : reaearchers ) {
                 HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
                 boxLayout.setWidth( "100%" );
+                boxLayout.setHeightFull();
                 boxLayout.setStyleName( "v-caption-label" );
                 boxLayout.setSpacing( false );
 
@@ -167,7 +164,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
                labelCount.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
                labelCount.setAlignment( Component.Alignment.MIDDLE_CENTER );
                labelCount.setWidth( "100%" );
-               labelCount.setHeight( labelHeight );
+//               labelCount.setHeight( labelHeight );
 
                boxLayout.add( labelCount );
             }
@@ -185,6 +182,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
             HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
             boxLayout.setWidthFull();
+            boxLayout.setSpacing( false );
             boxLayout.setAlignment(Component.Alignment.BOTTOM_LEFT);
             boxLayout.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
 

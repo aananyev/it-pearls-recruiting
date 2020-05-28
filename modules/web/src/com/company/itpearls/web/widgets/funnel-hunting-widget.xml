@@ -4,16 +4,22 @@
     </data>
     <layout stylename="widget-border"
             expand="funnelHuntingWindgetGroupBox"
+            spacing="false"
             width="100%">
         <vbox id="funnelHuntingWindgetGroupBox"
               width="100%"
               expand="boxWidgetTitle"
               spacing="false">
-            <label id="widgetTitle"
-                   htmlEnabled="true"
-                   width="100%"
-                   height="AUTO"
-                   stylename="widget-title"/>
+            <hbox id="widgetTitleBox"
+                  width="100%"
+                  height="AUTO"
+                  spacing="false"
+                  stylename="widget-title">
+                <label id="widgetTitle"
+                        width="100%"
+                        height="AUTO"
+                        stylename="widget-title"/>
+            </hbox>
             <hbox id="boxWidgetTitle"
                   expand="researcherNameBox"
                   width="100%"
@@ -23,11 +29,14 @@
                 <vbox id="researcherNameBox"
                       expand="researcherList"
                       width="AUTO"
+                      height="100%"
                       spacing="false"
                       align="BOTTOM_LEFT">
-                    <hbox id="researcherList"
-                          height="45px"
+                    <vbox id="researcherList"
+                          height="100%"
                           expand="researcherTitle"
+                          align="BOTTOM_LEFT"
+                          spacing="false"
                           stylename="v-caption-label"
                           width="100%">
                         <label id="researcherTitle"
@@ -35,7 +44,7 @@
                                align="BOTTOM_LEFT"
                                stylename="v-caption-label"
                                height="100%"/>
-                    </hbox>
+                    </vbox>
                 </vbox>
             </hbox>
         </vbox>

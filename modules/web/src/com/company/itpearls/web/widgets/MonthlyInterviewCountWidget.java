@@ -89,7 +89,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.removeParameter( "startDate" );
         iteractioListDl.removeParameter( "iteractionName" );
 
-        labelTitle.setValue( "<div style=\"text-transform: uppercase\"><b><u>" + widgetTitle + "</u></b></div>" );
+        labelTitle.setValue(  widgetTitle );
 
         setLabelNewContacts();
         setLabelProposeJob();

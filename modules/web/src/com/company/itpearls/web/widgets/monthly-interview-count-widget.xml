@@ -37,9 +37,8 @@
               expand="box">
             <label id="labelTitle"
                    width="AUTO"
-                   htmlEnabled="true"
-                   stylename="widget-title"
-                   align="MIDDLE_CENTER"/>
+                   htmlEnabled="false"
+                   stylename="widget-title"/>
             <hbox id="box"
                   spacing="true"
                   width="100%"
