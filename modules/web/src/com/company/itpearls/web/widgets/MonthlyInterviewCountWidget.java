@@ -106,7 +106,6 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
         int count = iteractionListDc.getItems().size();
         labelCountProposeJob.setValue( itemProposeJob );
-        labelCountProposeJob.setStyleName( "label_type.v-label.v-widget" );
         labelCountProposeJobValue.setValue( String.valueOf( count ) );
     }
 

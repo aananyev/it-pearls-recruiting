@@ -7,17 +7,35 @@
 .recrutier-tasks-gray {color: grey; text-decoration: line-through}
 .recrutier-tasks-normal {color: black}
 
+
+.widget-table-item-title {
+    white-space: pre-line;
+    font-style: normal;
+}
+
+.widget-table-item-value {
+    white-space: pre-line;
+    font-style: normal;
+}
+
 .widget-border {
     padding: 2px;
     border: 2px solid #7a7b7e;
     border-radius: 6px;
 }
 
+.widget-title {
+    font-weight: bold;
+    padding: 2px;
+    background: #2c6b9e;
+    color: #ffffff;
+    text-align: center;
+}
+
 .widget-header {
         font-weight: bold;
         text-decoration: underline;
         padding: 5px;
-        margin: "0 auto";
 }
 
 .label_type.v-label.v-widget {
@@ -29,7 +47,6 @@
 
 .v-caption-label {
         border: none;
-        margin: "0 auto";
         text-align: center;
         font-weight: bold;
         white-space: pre-line;
@@ -42,6 +59,7 @@
             white-space: pre-line;
             font-style: italic;
             background: #ababab;
+            font-style: normal;
 }
 
 .widget-mountly-interview-table-2 {
@@ -49,6 +67,7 @@
             white-space: pre-line;
             font-style: italic;
             background: #9c9c9c;
+            font-style: normal;
 }
 
 .widget-table-value {
@@ -59,10 +78,6 @@
 .widget-border-line {
         border: 1px solid #7a7b7e;
         border-radius: 6px;
-}
-
-.widget-title {
-    text-align: center;
 }
 
 .v-caption-shift-field {

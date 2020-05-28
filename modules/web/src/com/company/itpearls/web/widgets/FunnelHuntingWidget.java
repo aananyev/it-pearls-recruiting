@@ -48,7 +48,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
 
     private String labelHeight = "15px";
-//    private String iteractionTitleHeight = "45px";
     private String sizeColumn = "115px";
 
     @Inject
@@ -61,13 +60,12 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private Label<String> widgetTitle;
     @Inject
     private Label<String> researcherTitle;
+    @Inject
+    private HBoxLayout researcherList;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         initListIteraction();
-
-        researcherTitle.setValue( "Ресерчер" );
-        researcherTitle.setStyleName("widget-header");
 
         setDeafaultTimeInterval();
         setWidgetTitle();
@@ -107,32 +105,42 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
     private void setIteractionTitle() {
         for( String a : listIteractionForCheck ) {
-
-            String queryParameter = a;
-
-            VBoxLayout    vBox = uiComponents.create(VBoxLayout.class);
-            boxWidgetTitle.add( vBox );
-
-            vBox.setWidth(sizeColumn);
+            // бокс вертикальный для набора статистики
+            VBoxLayout vBox = uiComponents.create(VBoxLayout.class);
+            vBox.setWidth( sizeColumn );
             vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
-
-            TextArea<String> label = uiComponents.create(TextArea.TYPE_STRING);
             vBox.setSpacing( false );
 
-            label.setEditable( false );
+            boxWidgetTitle.add( vBox );
+            boxWidgetTitle.expand( vBox );
+            // бокс для фона элемента
+            VBoxLayout titleBox = uiComponents.create( VBoxLayout.class );
+            titleBox.setWidth( "100%" );
+            titleBox.setHeightFull();
+            titleBox.setSpacing( false );
+            titleBox.setStyleName( "v-caption-label");
+
+            vBox.add( titleBox );
+            vBox.expand( titleBox );
+            // заголовок
+
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
             label.setWidth( "100%" );
             label.setSizeFull();
             label.setValue( a );
             label.setAlignment(Component.Alignment.BOTTOM_CENTER );
             label.setStyleName( "v-caption-label" );
 
-            vBox.add( label );
+            titleBox.add( label );
+            titleBox.expand( label );
 
             Integer styleCount = 2;
 
             for( User user : reaearchers ) {
                 HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
                 boxLayout.setWidth( "100%" );
+                boxLayout.setStyleName( "v-caption-label" );
+                boxLayout.setSpacing( false );
 
                 if( styleCount == 2 )
                     styleCount = 1;
@@ -170,20 +178,19 @@ public class FunnelHuntingWidget extends ScreenFragment {
         Integer styleCount = 2;
 
         for( User a : reaearchers ) {
-            HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
-            boxLayout.setWidth( "100%" );
-            boxLayout.setAlignment(Component.Alignment.MIDDLE_LEFT);
-
             if( styleCount == 2 )
                 styleCount = 1;
             else
                 styleCount = 2;
 
+            HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
+            boxLayout.setWidthFull();
+            boxLayout.setAlignment(Component.Alignment.BOTTOM_LEFT);
             boxLayout.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
 
             Label<String> label = uiComponents.create( Label.TYPE_STRING );
             label.setAlignment( Component.Alignment.MIDDLE_LEFT );
-            label.setWidth( "100%" );
+            label.setWidthFull();
             label.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
             label.setValue( a.getName() );
 
