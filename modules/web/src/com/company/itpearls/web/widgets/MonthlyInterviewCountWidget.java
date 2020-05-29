@@ -31,7 +31,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     @Inject
     private Label<String> labelPrepareInternalInterview;
     @Inject
-    private Label<String> labelTitle;
+    private Label<String> labelWidgetTitle;
     @Inject
     private CollectionLoader<IteractionList> iteractioListDl;
     @Inject
@@ -89,7 +89,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         iteractioListDl.removeParameter( "startDate" );
         iteractioListDl.removeParameter( "iteractionName" );
 
-        labelTitle.setValue(  widgetTitle );
+        labelWidgetTitle.setValue(  widgetTitle );
 
         setLabelNewContacts();
         setLabelProposeJob();

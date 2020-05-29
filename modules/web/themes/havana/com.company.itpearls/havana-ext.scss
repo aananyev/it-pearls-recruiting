@@ -1,43 +1,73 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-havana-ext {
 /* Override global theme constants or define new ones here */
-.open-position-job-recruitier {color: blue;font-weight: normal}
-.open-position-empty-recruitier {color: green;font-weight: normal}
-.open-position-normal-recruitier {color: black;font-weight: normal}
-.recrutier-tasks-gray {color: grey; text-decoration: line-through}
-.recrutier-tasks-normal {color: black}
+    .open-position-job-recruitier {
+        color: blue;
+        font-weight: normal;
+    }
+
+    .open-position-empty-recruitier {
+        color: green;
+        font-weight: normal;
+    }
+
+    .open-position-normal-recruitier {
+        color: black;
+        font-weight: normal;
+    }
+
+    .recrutier-tasks-gray {
+        color: grey;
+        text-decoration: line-through;
+    }
+
+    .recrutier-tasks-normal {
+        color: black;
+    }
 
 
-.widget-table-item-title {
-    white-space: pre-line;
-    font-style: normal;
-}
+    .widget-table-item-title {
+        font-weight: normal;
+        font-style: normal;
+        font-transform: none;
+        white-space: pre-line;
+        font-style: normal;
+    }
 
-.widget-table-item-value {
-    white-space: pre-line;
-    font-style: normal;
-}
+    .widget-table-item-value {
+        font-weight: normal;
+        font-style: normal;
+        font-transform: none;
+        white-space: pre-line;
+        font-style: normal;
+    }
 
-.widget-border {
-    padding: 2px;
-    border: 2px solid #7a7b7e;
-    border-radius: 6px;
-}
+    .widget-table-value {
+        font-style: italic;
+        background: #878787;
+    }
 
-.widget-title {
-    font-weight: bold;
-    padding: 2px;
-    background: #2c6b9e;
-    color: #ffffff;
-    text-align: center;
-    text-transform: uppercase;
-}
+    .widget-border {
+        padding: 2px;
+        border: 2px solid #7a7b7e;
+        border-radius: 6px;
+        box-shadow: 2px 2px 20px grey;
+    }
 
-.widget-header {
+    .widget-title {
         font-weight: bold;
-        text-decoration: underline;
-        padding: 5px;
-}
+        padding: 2px;
+        background: #2c6b9e;
+        color: #ffffff;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    .widget-header {
+            font-weight: bold;
+            text-decoration: underline;
+            padding: 5px;
+    }
 
 .label_type.v-label.v-widget {
     color: red;
@@ -56,25 +86,23 @@
 }
 
 .widget-mountly-interview-table-1 {
-            padding: 0px, 10px, 0px, 10px;
+            font-weight: normal;
             white-space: pre-line;
             font-style: italic;
             background: #ababab;
             font-style: normal;
+            text-transform: none;
 }
 
 .widget-mountly-interview-table-2 {
-            padding: 0px, 10px, 0px, 10px;
+            font-weight: normal;
             white-space: pre-line;
             font-style: italic;
             background: #9c9c9c;
             font-style: normal;
+            text-transform: none;
 }
 
-.widget-table-value {
-            font-style: italic;
-            background: #878787;
-}
 
 .widget-border-line {
         border: 1px solid #7a7b7e;
@@ -85,11 +113,11 @@
     white-space: pre;
 }
 
-.c-fglayout-slot.c-full-height-widget .v-caption-shift-field .v-captiontext {
+.c-fglayout-slot .c-full-height-widget .v-caption-shift-field .v-captiontext {
     line-height: 15px;
 }
 
-.v-calendar-event.event-red {
+.v-calendar-event .event-red {
   background-color: #f4c8c8;
   color: #e00000;
 }
@@ -102,7 +130,7 @@
   background-color: #f4c8c8;
 }
 
-.v-calendar-event.event-green {
+.v-calendar-event .event-green {
   background-color: #c8f4c9;
   color: #037516;
 }
@@ -115,7 +143,7 @@
   background-color: #c8f4c9;
 }
 
-.v-calendar-event.event-blue {
+.v-calendar-event .event-blue {
   background-color: #c8daf4;
   color: #0300e0;
 }
@@ -128,7 +156,7 @@
   background-color: #c8daf4;
 }
 
-.v-calendar-event.event-yellow {
+.v-calendar-event .event-yellow {
   background-color: #f4efc8;
   color: #5f5c41;
 }

@@ -14,11 +14,11 @@
                   width="100%"
                   height="AUTO"
                   spacing="false"
+                  expand="widgetTitle"
                   stylename="widget-title">
                 <label id="widgetTitle"
                         width="100%"
-                        height="AUTO"
-                        stylename="widget-title"/>
+                        height="100%"/>
             </hbox>
             <hbox id="boxWidgetTitle"
                   expand="researcherNameBox"

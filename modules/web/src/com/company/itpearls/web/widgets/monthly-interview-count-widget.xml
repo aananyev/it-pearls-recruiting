@@ -33,12 +33,17 @@
               spacing="true"
               width="100%"
               height="100%"
-              stylename="widget-title"
               expand="box">
-            <label id="labelTitle"
-                   width="AUTO"
-                   htmlEnabled="false"
-                   stylename="widget-title"/>
+            <hbox width="100%"
+                  height="AUTO"
+                  spacing="false"
+                  stylename="widget-title"
+                  expand="labelWidgetTitle">
+                <label id="labelWidgetTitle"
+                       width="AUTO"
+                       height="100%"
+                       htmlEnabled="false"/>
+            </hbox>
             <hbox id="box"
                   spacing="true"
                   width="100%"
@@ -65,9 +70,10 @@
                               height="AUTO">
                                 <label id="labelCountProposeJob"
                                        width="AUTO"
-                                       css="white-space: pre-line;"
+                                       stylename="widget-table-item-title"
                                        align="TOP_LEFT"/>
                                 <label id="labelCountProposeJobValue"
+                                       stylename="widget-table-item-value"
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
@@ -77,9 +83,10 @@
                               height="AUTO">
                                 <label id="labelAssignInternalInterview"
                                        width="AUTO"
-                                       css="white-space: pre-line;"
+                                       stylename="widget-table-item-title"
                                        align="TOP_LEFT"/>
                                 <label id="labelAssignInternalInterviewValue"
+                                       stylename="widget-table-item-value"
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
@@ -89,9 +96,10 @@
                               height="100%">
                                 <label id="labelPrepareInternalInterview"
                                        width="AUTO"
-                                       css="white-space: pre-line;"
+                                       stylename="widget-table-item-title"
                                        align="TOP_LEFT"/>
                                 <label id="labelPrepareInternalInterviewValus"
+                                       stylename="widget-table-item-value"
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
@@ -101,9 +109,10 @@
                               height="100%">
                                 <label id="labelAssignExternalInterview"
                                        width="AUTO"
-                                       css="white-space: pre-line;"
+                                       stylename="widget-table-item-title"
                                        align="TOP_LEFT"/>
                                 <label id="labelAssignExternalInterviewValue"
+                                       stylename="widget-table-item-value"
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
@@ -113,9 +122,10 @@
                               height="100%">
                                 <label id="labelPrepareExternalInterview"
                                        width="AUTO"
-                                       css="white-space: pre-line;"
+                                       stylename="widget-table-item-title"
                                        align="TOP_LEFT"/>
                                 <label id="labelPrepareExternalInterviewValue"
+                                       stylename="widget-table-item-value"
                                        width="AUTO"
                                        align="TOP_RIGHT"/>
                             </hbox>
@@ -125,9 +135,10 @@
                               height="100%">
                                 <label id="labelDirectorsInterview"
                                        width="AUTO"
-                                       css="white-space: pre-line;"
+                                       stylename="widget-table-item-title"
                                        align="TOP_LEFT"/>
                                 <label id="labelDirectorsInterviewValue"
+                                       stylename="widget-table-item-value"
                                        width="AUTO"
                                        htmlEnabled="true"
                                        align="TOP_RIGHT"/>
