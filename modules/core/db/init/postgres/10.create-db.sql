@@ -394,6 +394,8 @@ create table ITPEARLS_OPEN_POSITION (
     NUMBER_POSITION integer,
     COMMENT_ text,
     TEMPLATE_LETTER text,
+    EXERCISE text,
+    NEED_EXERCISE boolean,
     PRIORITY integer,
     PAYMENTS_TYPE integer,
     TYPE_COMPANY_COMISSION integer,

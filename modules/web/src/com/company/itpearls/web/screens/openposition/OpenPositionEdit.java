@@ -42,6 +42,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private LookupPickerField<Position> positionTypeField;
     @Inject
+    private CheckBox needExerciseCheckBox;
+    @Inject
+    private RichTextArea exerciseRichTextArea;
+
+    @Inject
     private LookupPickerField<Project> projectNameField;
     @Inject
     private TextField<String> vacansyNameField;
@@ -63,7 +68,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Boolean booOpenClosePosition = false;
     private Boolean entityIsChanged = false;
     private EmailInfo emailInfo;
-    private String  emails = "";
+    private String emails = "";
     private Boolean setOK;
 
     @Inject
@@ -151,12 +156,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setDisableTwoField();
     }
 
+    @Subscribe("needExerciseCheckBox")
+    public void onNeedExerciseCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if( needExerciseCheckBox.getValue() != null ) {
+            exerciseRichTextArea.setEditable(needExerciseCheckBox.getValue());
+            exerciseRichTextArea.setRequired(needExerciseCheckBox.getValue());
+        } else {
+            exerciseRichTextArea.setRequired( false );
+            exerciseRichTextArea.setEditable( false );
+        }
+    }
+
     private void setDisableTwoField() {
     }
 
     @Subscribe("vacansyNameField")
     public void onVacansyNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-       setTopLabel();
+        setTopLabel();
     }
 
     @Subscribe("openPositionFieldSalaryMin")
@@ -174,22 +190,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setCompanyDepartmentFromProject() {
-        if( projectNameField.getValue() != null ) {
-            companyDepartamentField.setValue( projectNameField.getValue().getProjectDepartment() );
+        if (projectNameField.getValue() != null) {
+            companyDepartamentField.setValue(projectNameField.getValue().getProjectDepartment());
         }
     }
 
     private void setCompanyNameFromDepartment() {
-        if( companyDepartamentField.getValue() != null ) {
-            companyNameField.setValue( companyDepartamentField.getValue().getCompanyName() );
+        if (companyDepartamentField.getValue() != null) {
+            companyNameField.setValue(companyDepartamentField.getValue().getCompanyName());
         }
     }
 
     @Subscribe("companyDepartamentField")
     public void onCompanyDepartamentFieldValueChange(HasValue.ValueChangeEvent<CompanyDepartament> event) {
         // сократить список проектов
-        if( projectNameField.getValue() == null ) {
-            if( companyDepartamentField.getValue() != null ) {
+        if (projectNameField.getValue() == null) {
+            if (companyDepartamentField.getValue() != null) {
                 projectNamesLc.setParameter("department", companyDepartamentField.getValue());
             } else {
                 setCompanyNameFromDepartment();
@@ -222,7 +238,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void setCityNameOfCompany() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (companyNameField.getValue() != null && cityOpenPositionField.getValue() == null) {
-                    cityOpenPositionField.setValue( companyNameField.getValue().getCityOfCompany() );
+                cityOpenPositionField.setValue(companyNameField.getValue().getCityOfCompany());
             }
         }
     }
@@ -230,7 +246,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("companyNameField")
     public void onCompanyNameFieldValueChange(HasValue.ValueChangeEvent<Company> event) {
         // сократить список департаментов
-        if( companyNameField.getValue() != null ) {
+        if (companyNameField.getValue() != null) {
             companyDepartamentsLc.setParameter("company", companyNameField.getValue());
         } else {
             companyDepartamentsLc.removeParameter("company");
@@ -282,7 +298,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // нотификация
         if (PersistenceHelper.isNew(getEditedEntity())) {
             // пошлем по почте
-            EmailInfo emailInfo = new EmailInfo( getSubscriberMaillist(getEditedEntity()) +
+            EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
                     ";" + getRecrutiersMaillist(),
                     openPosition.getVacansyName(),
                     null, "com/company/itpearls/templates/create_new_pos.html",
@@ -295,7 +311,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
                     getEditedEntity().getVacansyName()));
         } else {
-            if( entityIsChanged ) {
+            if (entityIsChanged) {
                 EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
                         ";" + getRecrutiersMaillist(),
                         openPosition.getVacansyName(),
@@ -319,21 +335,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
 
         // если что-то изменилось
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             emails = getAllSubscibers();
             // позиция открылась
             events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
                     getEditedEntity().getVacansyName()));
 
             dialogs.createOptionDialog()
-                    .withCaption( "Внимание!" )
-                    .withMessage( "Разослать email-оповещение по всем сотрудникам об открытии новой позиции?")
-                    .withActions( new DialogAction(DialogAction.Type.YES,
+                    .withCaption("Внимание!")
+                    .withMessage("Разослать email-оповещение по всем сотрудникам об открытии новой позиции?")
+                    .withActions(new DialogAction(DialogAction.Type.YES,
                                     Action.Status.PRIMARY).withHandler(e -> {
-                                this.emailInfo = new EmailInfo( this.emails,
+                                this.emailInfo = new EmailInfo(this.emails,
                                         "Открыта позиция " + openPosition.getVacansyName(),
                                         null, "com/company/itpearls/templates/open_position.html",
-                                        Collections.singletonMap( "openPosition", openPosition ) );
+                                        Collections.singletonMap("openPosition", openPosition));
 
                                 emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
@@ -350,68 +366,68 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             r = true;
         } else {
-            if( a != b ) {
-               if( !getEditedEntity().getOpenClose() ) {
+            if (a != b) {
+                if (!getEditedEntity().getOpenClose()) {
 
-                   emails = getAllSubscibers();
-                   // позиция открылась
-                   events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
+                    emails = getAllSubscibers();
+                    // позиция открылась
+                    events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
                             getEditedEntity().getVacansyName()));
 
-                   if( getRoleService.isUserRoles( userSession.getUser(), MANAGER ) ) {
-                       dialogs.createOptionDialog()
-                               .withCaption("Внимание!")
-                               .withMessage("Разослать email-оповещение по всем сотрудникам?")
-                               .withActions(new DialogAction(DialogAction.Type.YES,
-                                               Action.Status.PRIMARY).withHandler(e -> {
-                                           this.emailInfo = new EmailInfo(this.emails,
-                                                   "Открыта позиция " + openPosition.getVacansyName(),
-                                                   null, "com/company/itpearls/templates/open_position.html",
-                                                   Collections.singletonMap("openPosition", openPosition));
+                    if (getRoleService.isUserRoles(userSession.getUser(), MANAGER)) {
+                        dialogs.createOptionDialog()
+                                .withCaption("Внимание!")
+                                .withMessage("Разослать email-оповещение по всем сотрудникам?")
+                                .withActions(new DialogAction(DialogAction.Type.YES,
+                                                Action.Status.PRIMARY).withHandler(e -> {
+                                            this.emailInfo = new EmailInfo(this.emails,
+                                                    "Открыта позиция " + openPosition.getVacansyName(),
+                                                    null, "com/company/itpearls/templates/open_position.html",
+                                                    Collections.singletonMap("openPosition", openPosition));
 
-                                           this.setOK = true;
+                                            this.setOK = true;
 
-                                           emailInfo.setBodyContentType("text/html; charset=UTF-8");
+                                            emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
-                                           emailService.sendEmailAsync(emailInfo);
+                                            emailService.sendEmailAsync(emailInfo);
 
-                                           notifications.create(Notifications.NotificationType.TRAY)
-                                                   .withCaption("Рассылка обновлений позиции")
-                                                   .withDescription("Рассылка по адресам: " + emails)
-                                                   .show();
+                                            notifications.create(Notifications.NotificationType.TRAY)
+                                                    .withCaption("Рассылка обновлений позиции")
+                                                    .withDescription("Рассылка по адресам: " + emails)
+                                                    .show();
 
-                                       }),
-                                       new DialogAction(DialogAction.Type.NO).withHandler(f -> {
-                                           this.setOK = false;
-                                       }))
-                               .show();
-                   }
+                                        }),
+                                        new DialogAction(DialogAction.Type.NO).withHandler(f -> {
+                                            this.setOK = false;
+                                        }))
+                                .show();
+                    }
 
-                   r = true;
-               } else {
-                   // позиция закрылась
-                   events.publish(new UiNotificationEvent(this, "Закрыта позиция: " +
-                           getEditedEntity().getVacansyName()));
+                    r = true;
+                } else {
+                    // позиция закрылась
+                    events.publish(new UiNotificationEvent(this, "Закрыта позиция: " +
+                            getEditedEntity().getVacansyName()));
 
-                   emails = getSubscriberMaillist(getEditedEntity()) +
-                           ";" + getRecrutiersMaillist();
+                    emails = getSubscriberMaillist(getEditedEntity()) +
+                            ";" + getRecrutiersMaillist();
 
-                   emailInfo = new EmailInfo( emails,
-                           "Закрыта позиция " + openPosition.getVacansyName(),
+                    emailInfo = new EmailInfo(emails,
+                            "Закрыта позиция " + openPosition.getVacansyName(),
                             null, "com/company/itpearls/templates/close_position.html",
                             Collections.singletonMap("openPosition", openPosition));
 
-                   emailInfo.setBodyContentType("text/html; charset=UTF-8");
+                    emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
-                   emailService.sendEmailAsync(emailInfo);
+                    emailService.sendEmailAsync(emailInfo);
 
-                   notifications.create(Notifications.NotificationType.TRAY)
-                           .withCaption("Рассылка обновлений позиции")
-                           .withDescription("Рассылка по адресам: " + emails)
-                           .show();
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption("Рассылка обновлений позиции")
+                            .withDescription("Рассылка по адресам: " + emails)
+                            .show();
 
-                   setOK = true;
-               }
+                    setOK = true;
+                }
 
                 r = true;
             } else
@@ -425,15 +441,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         // если не изменился статус открыто/закрыто
-        if( !sendOpenCloseMessage() ) {
+        if (!sendOpenCloseMessage()) {
             // отослать сооьщение об изменении позиции
             if (entityIsChanged) {
                 sendMessage();
             }
         }
 
-        if( openClosePositionCheckBox.getValue() == null )
-            openClosePositionCheckBox.setValue( false );
+        if (openClosePositionCheckBox.getValue() == null)
+            openClosePositionCheckBox.setValue(false);
         // отправить глобальный мессагу
 /*        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
             events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
@@ -446,47 +462,45 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private String getAllSubscibers() {
         LoadContext<User> loadContext = LoadContext.create(User.class)
-                .setQuery(LoadContext.createQuery("select e from sec$User e" ));
+                .setQuery(LoadContext.createQuery("select e from sec$User e"));
 
-        List<User> listManagers = dataManager.loadList(loadContext );
+        List<User> listManagers = dataManager.loadList(loadContext);
 
         String maillist = "";
 
-        for( User user : listManagers ) {
-            if( user.getEmail() != null && user.getActive() )
-            maillist = maillist + user.getEmail() + ";";
+        for (User user : listManagers) {
+            if (user.getEmail() != null && user.getActive())
+                maillist = maillist + user.getEmail() + ";";
         }
 
         return maillist;
     }
 
-    private String getSubscriberMaillist(Entity entity)
-    {
+    private String getSubscriberMaillist(Entity entity) {
         List<RecrutiesTasks> listResearchers = dataManager.load(RecrutiesTasks.class)
                 .query("select e " +
-                    "from itpearls_RecrutiesTasks e " +
-                    "where e.endDate  >= :currentDate and " +
-                        "e.openPosition = :openPosition" )
-                .parameter( "currentDate", new Date() )
-                .parameter( "openPosition", entity )
+                        "from itpearls_RecrutiesTasks e " +
+                        "where e.endDate  >= :currentDate and " +
+                        "e.openPosition = :openPosition")
+                .parameter("currentDate", new Date())
+                .parameter("openPosition", entity)
                 .view("recrutiesTasks-view")
                 .list();
-
 
 
         String maillist = "";
         Boolean subs = false;
 
-        for( RecrutiesTasks address : listResearchers ) {
+        for (RecrutiesTasks address : listResearchers) {
             String email = address.getReacrutier().getEmail();
 
-            if( address.getSubscribe() == null ? false : address.getSubscribe() )
+            if (address.getSubscribe() == null ? false : address.getSubscribe())
                 // if( address.getSubscribe() )
-                if( email != null )
+                if (email != null)
                     maillist = maillist + email + ";";
         }
 
-       return maillist;
+        return maillist;
     }
 
     private String getRecrutiersMaillist() {
@@ -515,79 +529,79 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         priorityMap.put("High", 3);
         priorityMap.put("Critical", 4);
 
-        priorityField.setOptionsMap( priorityMap );
+        priorityField.setOptionsMap(priorityMap);
 
         Map<String, Integer> paymentsType = new LinkedHashMap<>();
-        paymentsType.put( "Фиксированная оплата", 0);
-        paymentsType.put( "Процент от годового оклада", 1);
-        paymentsType.put( "Процент от месячной зарплаты", 2);
+        paymentsType.put("Фиксированная оплата", 0);
+        paymentsType.put("Процент от годового оклада", 1);
+        paymentsType.put("Процент от месячной зарплаты", 2);
 
-        radioButtonGroupPaymentsType.setOptionsMap( paymentsType );
+        radioButtonGroupPaymentsType.setOptionsMap(paymentsType);
 
         Map<String, Integer> researcherSalary = new LinkedHashMap<>();
-        researcherSalary.put( "Фиксированная комиссия", 0 );
-        researcherSalary.put( "Процент комиссии компании, 20%", 1 );
-        researcherSalary.put( "Процент комиссии компании", 2 );
+        researcherSalary.put("Фиксированная комиссия", 0);
+        researcherSalary.put("Процент комиссии компании, 20%", 1);
+        researcherSalary.put("Процент комиссии компании", 2);
 
-        radioButtonGroupResearcherSalary.setOptionsMap( researcherSalary );
+        radioButtonGroupResearcherSalary.setOptionsMap(researcherSalary);
 
         Map<String, Integer> recrutierSalary = new LinkedHashMap<>();
-        recrutierSalary.put( "Фиксированная комиссия", 0 );
-        recrutierSalary.put( "Процент комиссии компании, 10%", 1 );
-        recrutierSalary.put( "Процент комиссии компании", 2 );
+        recrutierSalary.put("Фиксированная комиссия", 0);
+        recrutierSalary.put("Процент комиссии компании, 10%", 1);
+        recrutierSalary.put("Процент комиссии компании", 2);
 
-        radioButtonGroupRecrutierSalary.setOptionsMap( recrutierSalary );
+        radioButtonGroupRecrutierSalary.setOptionsMap(recrutierSalary);
 
         Map<String, Integer> remoteWork = new LinkedHashMap<>();
-        remoteWork.put( "Нет", 0);
-        remoteWork.put( "Удаленная работа", 1);
-        remoteWork.put( "Частично 50/50", 2);
+        remoteWork.put("Нет", 0);
+        remoteWork.put("Удаленная работа", 1);
+        remoteWork.put("Частично 50/50", 2);
 
-        remoteWorkField.setOptionsMap( remoteWork );
+        remoteWorkField.setOptionsMap(remoteWork);
     }
 
     private void setHiddeField() {
         // скрыть менеджерские пункты
-       if( isUserRoles( userSession.getUser(), MANAGER ) ) {
-           groupBoxPaymentsDetail.setVisible( true );
-           groupBoxPaymentsResearcher.setVisible( true );
-           groupBoxPaymentsRecrutier.setVisible( true );
-       } else {
-           groupBoxPaymentsDetail.setVisible( false );
-           groupBoxPaymentsRecrutier.setVisible(false);
-           groupBoxPaymentsResearcher.setVisible( false );
+        if (isUserRoles(userSession.getUser(), MANAGER)) {
+            groupBoxPaymentsDetail.setVisible(true);
+            groupBoxPaymentsResearcher.setVisible(true);
+            groupBoxPaymentsRecrutier.setVisible(true);
+        } else {
+            groupBoxPaymentsDetail.setVisible(false);
+            groupBoxPaymentsRecrutier.setVisible(false);
+            groupBoxPaymentsResearcher.setVisible(false);
 
-           if( isUserRoles( userSession.getUser(), RESEARCHER ) ) {
-               groupBoxPaymentsResearcher.setVisible(true);
-           }
+            if (isUserRoles(userSession.getUser(), RESEARCHER)) {
+                groupBoxPaymentsResearcher.setVisible(true);
+            }
 
-           if( isUserRoles( userSession.getUser(), RECRUITER ) ) {
-               groupBoxPaymentsRecrutier.setVisible( true );
-           }
-       }
+            if (isUserRoles(userSession.getUser(), RECRUITER)) {
+                groupBoxPaymentsRecrutier.setVisible(true);
+            }
+        }
     }
 
     @Subscribe("radioButtonGroupPaymentsType")
     public void onRadioButtonGroupPaymentsTypeValueChange(HasValue.ValueChangeEvent<Integer> event) {
 
-        switch ( (int) radioButtonGroupPaymentsType.getValue() ) {
+        switch ((int) radioButtonGroupPaymentsType.getValue()) {
             case 0:
                 textFieldPercentOrSum.setCaption("Сумма комиссии");
-                textFieldPercentOrSum.setVisible( false );
-                textFieldCompanyPayment.setVisible( true );
-                textFieldCompanyPayment.setEditable( true );
+                textFieldPercentOrSum.setVisible(false);
+                textFieldCompanyPayment.setVisible(true);
+                textFieldCompanyPayment.setEditable(true);
                 break;
             case 1:
                 textFieldPercentOrSum.setCaption("Процент, %");
-                textFieldCompanyPayment.setVisible( true );
-                textFieldPercentOrSum.setVisible( true );
-                textFieldCompanyPayment.setEditable( false );
+                textFieldCompanyPayment.setVisible(true);
+                textFieldPercentOrSum.setVisible(true);
+                textFieldCompanyPayment.setEditable(false);
                 break;
             case 2:
                 textFieldPercentOrSum.setCaption("Процент, %");
-                textFieldCompanyPayment.setVisible( true );
-                textFieldPercentOrSum.setVisible( true );
-                textFieldCompanyPayment.setEditable( false );
+                textFieldCompanyPayment.setVisible(true);
+                textFieldPercentOrSum.setVisible(true);
+                textFieldCompanyPayment.setEditable(false);
                 break;
         }
 
@@ -605,7 +619,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
 
-
     @Subscribe("textFieldPercentOrSum")
     public void onTextFieldPercentOrSumValueChange(HasValue.ValueChangeEvent<String> event) {
         setCalculateCompanyPercentField();
@@ -614,7 +627,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     protected void setCalculateCompanyPercentField() {
-        if( textFieldPercentOrSum.getValue() != null ) {
+        if (textFieldPercentOrSum.getValue() != null) {
             textFieldCompanyPayment.setValue(calculateComission(textFieldPercentOrSum.getValue(),
                     (Integer) radioButtonGroupPaymentsType.getValue(),
                     checkBoxUseNDFL.getValue(),
@@ -625,59 +638,58 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
 
-    
-    protected BigDecimal minCompanyComission = new BigDecimal( BigInteger.ZERO );
-    protected BigDecimal maxCompanyComission = new BigDecimal( BigInteger.ZERO );
+    protected BigDecimal minCompanyComission = new BigDecimal(BigInteger.ZERO);
+    protected BigDecimal maxCompanyComission = new BigDecimal(BigInteger.ZERO);
 
-    protected String calculateComission( String percent, Integer type, boolean ndflFlag, BigDecimal minSalary, BigDecimal maxSalary ) {
+    protected String calculateComission(String percent, Integer type, boolean ndflFlag, BigDecimal minSalary, BigDecimal maxSalary) {
 
         String retValue = new String("");
-        BigDecimal  p = new BigDecimal( percent );
-        BigDecimal  ndfl = new BigDecimal( 1.13 );
-        BigDecimal  mounths = new BigDecimal( 12 );
-        BigDecimal  hungred = new BigDecimal( 100 );
+        BigDecimal p = new BigDecimal(percent);
+        BigDecimal ndfl = new BigDecimal(1.13);
+        BigDecimal mounths = new BigDecimal(12);
+        BigDecimal hungred = new BigDecimal(100);
 
-        if( minSalary == null )
+        if (minSalary == null)
             minSalary = BigDecimal.ZERO;
 
-        if( maxSalary == null )
+        if (maxSalary == null)
             maxSalary = BigDecimal.ZERO;
 
-        switch ( type ) {
+        switch (type) {
             case 0:
                 retValue = percent;
                 minSalary = new BigDecimal(percent);
                 maxSalary = new BigDecimal(percent);
-                
+
                 break;
             case 1:
-                minSalary = minSalary.multiply( p ).multiply(mounths).divide(hungred)
+                minSalary = minSalary.multiply(p).multiply(mounths).divide(hungred)
                         .multiply(ndflFlag ? ndfl : BigDecimal.ONE);
-                maxSalary = maxSalary.multiply( p ).multiply(mounths).divide(hungred)
+                maxSalary = maxSalary.multiply(p).multiply(mounths).divide(hungred)
                         .multiply(ndflFlag ? ndfl : BigDecimal.ONE);
 
-                minSalary = minSalary.setScale(0, RoundingMode.HALF_EVEN );
-                maxSalary = maxSalary.setScale(0, RoundingMode.HALF_EVEN );
-                
+                minSalary = minSalary.setScale(0, RoundingMode.HALF_EVEN);
+                maxSalary = maxSalary.setScale(0, RoundingMode.HALF_EVEN);
+
                 retValue = "От " +
                         minSalary.toString() +
-                          " до " +
+                        " до " +
                         maxSalary.toString();
                 break;
             case 2:
-                minSalary = minSalary.multiply( p ).multiply(ndflFlag ? ndfl : BigDecimal.ONE).divide( hungred );
-                maxSalary = maxSalary.multiply( p ).multiply(ndflFlag ? ndfl : BigDecimal.ONE).divide( hungred );
+                minSalary = minSalary.multiply(p).multiply(ndflFlag ? ndfl : BigDecimal.ONE).divide(hungred);
+                maxSalary = maxSalary.multiply(p).multiply(ndflFlag ? ndfl : BigDecimal.ONE).divide(hungred);
 
-                minSalary = minSalary.setScale(0, RoundingMode.HALF_EVEN );
-                maxSalary = maxSalary.setScale(0, RoundingMode.HALF_EVEN );
+                minSalary = minSalary.setScale(0, RoundingMode.HALF_EVEN);
+                maxSalary = maxSalary.setScale(0, RoundingMode.HALF_EVEN);
 
                 retValue = "От " +
                         minSalary.toString() +
-                          " до " +
+                        " до " +
                         maxSalary.toString();
                 break;
         }
-        
+
         minCompanyComission = minSalary;
         maxCompanyComission = maxSalary;
 
@@ -699,12 +711,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     protected void calculateResearcherSalary() {
-        BigDecimal hungred = new BigDecimal( 100 );
+        BigDecimal hungred = new BigDecimal(100);
         BigDecimal minSalary = new BigDecimal(String.valueOf(minCompanyComission));
         BigDecimal maxSalary = new BigDecimal(String.valueOf(maxCompanyComission));
         String textSalaryMessage = null;
 
-        if( radioButtonGroupResearcherSalary.getValue() != null ) {
+        if (radioButtonGroupResearcherSalary.getValue() != null) {
             switch ((int) radioButtonGroupResearcherSalary.getValue()) {
                 case 0:
                     textFieldResearcherSalaryPercentOrSum.setCaption("Сумма комиссии");
@@ -748,9 +760,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             !maxCompanyComission.equals(BigDecimal.ZERO) &&
                             !minCompanyComission.equals(BigDecimal.ZERO)) {
 
-                        if( textFieldResearcherSalaryPercentOrSum.getValue() != null ) {
+                        if (textFieldResearcherSalaryPercentOrSum.getValue() != null) {
 
-                            BigDecimal percent = new BigDecimal( textFieldResearcherSalaryPercentOrSum.getValue() );
+                            BigDecimal percent = new BigDecimal(textFieldResearcherSalaryPercentOrSum.getValue());
 
                             textSalaryMessage = "От " +
                                     minSalary.multiply(percent).divide(hungred)
@@ -761,10 +773,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                             textFieldResearcherSalary.setValue(textSalaryMessage);
                         } else {
-                            textFieldResearcherSalary.setValue( null );
+                            textFieldResearcherSalary.setValue(null);
                         }
                     } else {
-                        textFieldResearcherSalary.setValue( null );
+                        textFieldResearcherSalary.setValue(null);
                     }
 
                     break;
@@ -774,12 +786,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     protected void calculateRecrutierSalary() {
-        BigDecimal hungred = new BigDecimal( 100 );
+        BigDecimal hungred = new BigDecimal(100);
         BigDecimal minSalary = new BigDecimal(String.valueOf(minCompanyComission));
         BigDecimal maxSalary = new BigDecimal(String.valueOf(maxCompanyComission));
         String textSalaryMessage = null;
 
-        if( radioButtonGroupRecrutierSalary.getValue() != null ) {
+        if (radioButtonGroupRecrutierSalary.getValue() != null) {
             switch ((int) radioButtonGroupRecrutierSalary.getValue()) {
                 case 0:
                     textFieldRecrutierPercentOrSum.setCaption("Сумма комиссии");
@@ -788,7 +800,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     textFieldRecrutierSalary.setEditable(true);
 
                     textSalaryMessage = textFieldRecrutierPercentOrSum.getValue() + " рублей.";
-                    textFieldRecrutierSalary.setValue( textSalaryMessage );
+                    textFieldRecrutierSalary.setValue(textSalaryMessage);
 
                     break;
                 case 1:
@@ -823,7 +835,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     if (textFieldPercentOrSum.getValue() != null &&
                             !maxCompanyComission.equals(BigDecimal.ZERO) &&
                             !minCompanyComission.equals(BigDecimal.ZERO)) {
-                        if( textFieldRecrutierPercentOrSum.getValue() != null ) {
+                        if (textFieldRecrutierPercentOrSum.getValue() != null) {
 
                             BigDecimal percent = new BigDecimal(textFieldResearcherSalaryPercentOrSum.getValue());
 
@@ -836,10 +848,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                             textFieldRecrutierSalary.setValue(textSalaryMessage);
                         } else {
-                            textFieldRecrutierSalary.setValue( null );
+                            textFieldRecrutierSalary.setValue(null);
                         }
                     } else {
-                        textFieldRecrutierSalary.setValue( null );
+                        textFieldRecrutierSalary.setValue(null);
                     }
 
                     break;
@@ -873,39 +885,39 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setResearcherSalaryLabel() {
-        if( radioButtonGroupResearcherSalary.getValue() != null ) {
-            if ((int) radioButtonGroupResearcherSalary.getValue() == 0 ) {
-                if( textFieldResearcherSalary.getValue() != null ) {
+        if (radioButtonGroupResearcherSalary.getValue() != null) {
+            if ((int) radioButtonGroupResearcherSalary.getValue() == 0) {
+                if (textFieldResearcherSalary.getValue() != null) {
                     labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
                             vacansyNameField.getValue() + "</i>\" составит " +
                             textFieldResearcherSalary.getValue() + " рублей.");
 
-                    groupBoxPaymentsResearcher.setVisible( true );
+                    groupBoxPaymentsResearcher.setVisible(true);
                 } else
-                    groupBoxPaymentsResearcher.setVisible( false );
+                    groupBoxPaymentsResearcher.setVisible(false);
             } else {
-                if( textFieldResearcherSalary.getValue() != null ) {
+                if (textFieldResearcherSalary.getValue() != null) {
                     labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
                             vacansyNameField.getValue() + "</i>\" составит " +
                             textFieldResearcherSalary.getValue() + " рублей.");
-                    groupBoxPaymentsResearcher.setVisible( true );
-                    groupBoxPaymentsResearcher.setVisible( true );
+                    groupBoxPaymentsResearcher.setVisible(true);
+                    groupBoxPaymentsResearcher.setVisible(true);
                 } else
-                    groupBoxPaymentsResearcher.setVisible( false );
+                    groupBoxPaymentsResearcher.setVisible(false);
             }
         }
     }
 
     private void setRecrutierSalaryLabel() {
-        if( radioButtonGroupRecrutierSalary.getValue() != null ) {
+        if (radioButtonGroupRecrutierSalary.getValue() != null) {
             if ((int) radioButtonGroupRecrutierSalary.getValue() == 0) {
-                if( textFieldRecrutierSalary.getValue() != null ) {
+                if (textFieldRecrutierSalary.getValue() != null) {
                     labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
                             vacansyNameField.getValue() + "</i>\" составит " +
                             textFieldRecrutierSalary.getValue() + " рублей.");
                 }
-            } else{
-                if( textFieldRecrutierSalary.getValue() != null ) {
+            } else {
+                if (textFieldRecrutierSalary.getValue() != null) {
                     labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
                             vacansyNameField.getValue() + "</i>\" составит " +
                             textFieldRecrutierSalary.getValue() + " рублей.");
@@ -919,69 +931,69 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
         // показываем или нет все строки ввода в оплаты
-        if( radioButtonGroupPaymentsType.getValue() == null ) {
-            textFieldPercentOrSum.setVisible( false );
-            textFieldCompanyPayment.setVisible( false );
+        if (radioButtonGroupPaymentsType.getValue() == null) {
+            textFieldPercentOrSum.setVisible(false);
+            textFieldCompanyPayment.setVisible(false);
         }
 
-        if( radioButtonGroupResearcherSalary.getValue() == null ) {
-            textFieldResearcherSalaryPercentOrSum.setVisible( false );
-            textFieldResearcherSalary.setVisible( false );
+        if (radioButtonGroupResearcherSalary.getValue() == null) {
+            textFieldResearcherSalaryPercentOrSum.setVisible(false);
+            textFieldResearcherSalary.setVisible(false);
         }
 
-        if( radioButtonGroupRecrutierSalary.getValue() == null ) {
-            textFieldRecrutierPercentOrSum.setVisible( false );
-            textFieldRecrutierSalary.setVisible( false );
+        if (radioButtonGroupRecrutierSalary.getValue() == null) {
+            textFieldRecrutierPercentOrSum.setVisible(false);
+            textFieldRecrutierSalary.setVisible(false);
         }
 
         setTopLabel();
     }
 
     private void setTopLabel() {
-        if( vacansyNameField.getValue() != null && projectNameField.getValue() != null ) {
+        if (vacansyNameField.getValue() != null && projectNameField.getValue() != null) {
             String comanyName = projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName();
 
             labelOpenPosition.setValue(vacansyNameField.getValue() +
                     " (" +
-                    ( comanyName != null ? comanyName : "" ) +
+                    (comanyName != null ? comanyName : "") +
                     " : " +
                     projectNameField.getValue().getProjectName() +
                     ")");
         }
 
         // а еще вывести комиссию
-        if( getRoleService.isUserRoles( userSession.getUser(), RESEARCHER ) ) {
-            labelTopComissionResearcher.setValue( labelResearcherSalary.getValue() );
-            labelTopComissionResearcher.setVisible( true );
+        if (getRoleService.isUserRoles(userSession.getUser(), RESEARCHER)) {
+            labelTopComissionResearcher.setValue(labelResearcherSalary.getValue());
+            labelTopComissionResearcher.setVisible(true);
 
-            labelTopComissionRecrutier.setVisible( false );
+            labelTopComissionRecrutier.setVisible(false);
         } else {
-            labelTopComissionResearcher.setVisible( false );
+            labelTopComissionResearcher.setVisible(false);
         }
 
-        if( getRoleService.isUserRoles( userSession.getUser(), RECRUITER ) ) {
-            labelTopComissionRecrutier.setValue( labelRecrutierSalary.getValue() );
-            labelTopComissionRecrutier.setVisible( true );
+        if (getRoleService.isUserRoles(userSession.getUser(), RECRUITER)) {
+            labelTopComissionRecrutier.setValue(labelRecrutierSalary.getValue());
+            labelTopComissionRecrutier.setVisible(true);
 
-            labelTopComissionResearcher.setVisible( false );
+            labelTopComissionResearcher.setVisible(false);
         } else {
-            labelTopComissionRecrutier.setVisible( false );
+            labelTopComissionRecrutier.setVisible(false);
         }
 
-        if( getRoleService.isUserRoles( userSession.getUser(), MANAGER ) ) {
-            labelTopComissionRecrutier.setVisible( false );
-            labelTopComissionResearcher.setVisible( false );
+        if (getRoleService.isUserRoles(userSession.getUser(), MANAGER)) {
+            labelTopComissionRecrutier.setVisible(false);
+            labelTopComissionResearcher.setVisible(false);
         }
     }
 
     @Subscribe("labelRecrutierSalary")
     public void onLabelRecrutierSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
-       setTopLabel();
+        setTopLabel();
     }
 
     @Subscribe("labelResearcherSalary")
     public void onLabelResearcherSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
-       setTopLabel();
+        setTopLabel();
     }
 
     @Subscribe
@@ -994,7 +1006,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         String icon = null;
 
-        switch ( integer ) {
+        switch (integer) {
             case 0: //"Paused"
                 icon = "icons/remove.png";
                 break;
@@ -1022,10 +1034,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     public void subscribePosition() {
         Screen opScreen = screenBuilders
-                .editor( RecrutiesTasks.class, this )
+                .editor(RecrutiesTasks.class, this)
                 .newEntity()
-                .withInitializer( data -> {
-                    data.setOpenPosition( this.getEditedEntity() );
+                .withInitializer(data -> {
+                    data.setOpenPosition(this.getEditedEntity());
                 })
                 .newEntity()
                 .withScreenId("itpearls_RecrutiesTasks.edit")

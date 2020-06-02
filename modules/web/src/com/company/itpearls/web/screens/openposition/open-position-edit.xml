@@ -214,7 +214,8 @@ order by e.endDate desc]]>
             </tab>
             <tab id="tabPayments" caption="msg://msgPayments" margin="true,false,false,false" spacing="true"
                  icon="BULK_EDIT_ACTION">
-                <groupBox id="groupBoxPaymentsResearcher" orientation="horizontal" spacing="true" caption="msg://msgResearcherPayment">
+                <groupBox id="groupBoxPaymentsResearcher" orientation="horizontal" spacing="true"
+                          caption="msg://msgResearcherPayment">
                     <label id="labelResearcherSalary" htmlEnabled="true"/>
                 </groupBox>
                 <groupBox id="groupBoxPaymentsRecrutier" spacing="true" caption="msg://msgRecrutierSalary">
@@ -274,19 +275,33 @@ order by e.endDate desc]]>
                     </table>
                 </groupBox>
             </tab>
-            <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true" id="tabJobDescription"
+            <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true"
+                 id="tabJobDescription"
                  icon="DRIVERS_LICENSE">
-                <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="300pt"
+                <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment"
+                              width="100%" height="300pt"
                               required="true"/>
             </tab>
-            <tab id="tabTemplateLetter" caption="msg://msgTemplateLetter" margin="true,false,false,false" spacing="true" icon="font-icon:MAIL_FORWARD">
-                <richTextArea id="templateLetterRichTextArea" dataContainer="openPositionDc" property="templateLetter" width="100%" height="300pt"
+            <tab id="tabExercise" caption="msg://msgExercise" margin="true,false,false,false" spacing="true"
+                 icon="ADJUST">
+                <vbox>
+                    <checkBox id="needExerciseCheckBox" dataContainer="openPositionDc" property="needExercise"
+                              caption="msg://msgNeedExercice"/>
+                    <richTextArea id="exerciseRichTextArea" dataContainer="openPositionDc" property="exercise"
+                                  caption="msg://msgExercise" width="100%" height="300px"/>
+                </vbox>
+            </tab>
+            <tab id="tabTemplateLetter" caption="msg://msgTemplateLetter" margin="true,false,false,false" spacing="true"
+                 icon="font-icon:MAIL_FORWARD">
+                <richTextArea id="templateLetterRichTextArea" dataContainer="openPositionDc" property="templateLetter"
+                              width="100%" height="300pt"
                               required="false"/>
             </tab>
             <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true"
                  icon="FILTER">
                 <groupBox spacing="true">
-                    <table id="openPositionSkillsListTable" height="300px" width="100%" dataContainer="openPositionSkillsListsDc">
+                    <table id="openPositionSkillsListTable" height="300px" width="100%"
+                           dataContainer="openPositionSkillsListsDc">
                         <columns>
                             <column id="skillName"/>
                         </columns>

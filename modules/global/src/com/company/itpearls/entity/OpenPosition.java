@@ -65,6 +65,13 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "TEMPLATE_LETTER")
     protected String templateLetter;
 
+    @Lob
+    @Column(name = "EXERCISE")
+    protected String exercise;
+
+    @Column(name = "NEED_EXERCISE")
+    protected Boolean needExercise;
+
     @Column(name = "PRIORITY")
     protected Integer priority;
 
@@ -262,12 +269,32 @@ public class OpenPosition extends StandardEntity {
         this.comment = comment;
     }
 
-    public String getTemplateLetter() { return  templateLetter; }
+    public String getTemplateLetter() {
+        return templateLetter;
+    }
 
-    public void setTemplateLetter(String templateLetter) {this.templateLetter = templateLetter; }
+    public void setTemplateLetter(String templateLetter) {
+        this.templateLetter = templateLetter;
+    }
 
     public Project getProjectName() {
         return projectName;
+    }
+
+    public String getExercise() {
+        return exercise;
+    }
+
+    public void setExercise(String exercise) {
+        this.exercise = exercise;
+    }
+
+    public Boolean getNeedExercise() {
+        return needExercise;
+    }
+
+    public void setNeedExercise(Boolean needExercise) {
+        this.needExercise = needExercise;
     }
 
     public void setProjectName(Project projectName) {
