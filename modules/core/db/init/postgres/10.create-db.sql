@@ -393,6 +393,7 @@ create table ITPEARLS_OPEN_POSITION (
     PROJECT_NAME_ID uuid not null,
     NUMBER_POSITION integer,
     COMMENT_ text,
+    TEMPLATE_LETTER text,
     PRIORITY integer,
     PAYMENTS_TYPE integer,
     TYPE_COMPANY_COMISSION integer,

@@ -2,9 +2,7 @@ package com.company.itpearls.web.screens.candidatecv;
 
 import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.SomeFiles;
+import com.company.itpearls.entity.*;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.AppBeans;
@@ -16,7 +14,6 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.CandidateCV;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.gui.WebBrowserTools;
@@ -64,20 +61,24 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private LookupPickerField<JobCandidate> candidateField;
     @Inject
     private Dialogs dialogs;
+    @Inject
+    private RichTextArea candidateCVRichTextArea;
+    @Inject
+    private RichTextArea letterRichTextArea;
 
     @Subscribe
     public void onInit(InitEvent event) {
         AppUI ui = AppBeans.get(AppUI.class);
         webBrowserTools = ui.getWebBrowserTools();
 
-        fileOriginalCVField.addFileUploadSucceedListener( uploadSucceedEvent -> {
+        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
             File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
 
             commitChanges();
 
-            notifications.create( Notifications.NotificationType.TRAY )
-                    .withCaption("Commit changes of " + candidateField.getValue().getFullName() )
-                    .withDescription( "INFO" )
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Commit changes of " + candidateField.getValue().getFullName())
+                    .withDescription("INFO")
                     .show();
 
             if (file != null) {
@@ -115,13 +116,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             candidateCVFieldOpenPosition.setValue( exchange.getOpenPosition() );
         } */
     }
-    
-    void openURL( String url) {
-        
+
+    void openURL(String url) {
+
         String mylaunch = url;
         String os = System.getProperty("os.name").toLowerCase();
 
-        if( os.indexOf( "win" ) >= 0 ) {
+        if (os.indexOf("win") >= 0) {
             try {
                 Runtime rt = Runtime.getRuntime();
                 rt.exec("rundll32 url.dll,FileProtocolHandler " + mylaunch);
@@ -145,11 +146,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             try {
                 Runtime rt = Runtime.getRuntime();
                 String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
-                            "netscape", "opera", "links", "lynx"};
+                        "netscape", "opera", "links", "lynx"};
                 StringBuffer cmd = new StringBuffer();
 
                 for (int i = 0; i < browsers.length; i++)
-                    cmd.append((i == 0 ? "" : " || ") + browsers[i] +" \"" + mylaunch + "\" ");
+                    cmd.append((i == 0 ? "" : " || ") + browsers[i] + " \"" + mylaunch + "\" ");
 
                 rt.exec(new String[]{"sh", "-c", cmd.toString()});
             } catch (IOException e) {
@@ -161,75 +162,93 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("linkOriginalCV")
     public void onLinkOriginalCVClick(Button.ClickEvent event) {
-        openURL( textFieldIOriginalCV.getValue() );
+        openURL(textFieldIOriginalCV.getValue());
     }
 
     @Subscribe("linkITPearlsCV")
     public void onLinkITPearlsCVClick(Button.ClickEvent event) {
-            openURL( textFieldITPearlsCV.getValue() );
+        openURL(textFieldITPearlsCV.getValue());
     }
 
     @Subscribe("textFieldIOriginalCV")
     public void onTextFieldIOriginalCVValueChange(HasValue.ValueChangeEvent<String> event) {
-        if( textFieldIOriginalCV.getValue() != null )
-            linkOriginalCV.setVisible( true );
+        if (textFieldIOriginalCV.getValue() != null)
+            linkOriginalCV.setVisible(true);
         else
-            linkOriginalCV.setVisible( false );
+            linkOriginalCV.setVisible(false);
     }
 
     @Subscribe("textFieldITPearlsCV")
     public void onTextFieldITPearlsCVValueChange(HasValue.ValueChangeEvent<String> event) {
-        if( textFieldITPearlsCV.getValue() != null )
-            linkITPearlsCV.setVisible(( true ));
+        if (textFieldITPearlsCV.getValue() != null)
+            linkITPearlsCV.setVisible((true));
         else
-            linkITPearlsCV.setVisible( false );
+            linkITPearlsCV.setVisible(false);
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if( textFieldIOriginalCV.getValue() != null ) {
-                linkOriginalCV.setVisible( true );
+        if (textFieldIOriginalCV.getValue() != null) {
+            linkOriginalCV.setVisible(true);
         } else {
-                linkOriginalCV.setVisible( false );
+            linkOriginalCV.setVisible(false);
         }
 
-        if( textFieldITPearlsCV.getValue() != null ) {
-                linkITPearlsCV.setVisible( true );
-            } else {
-                linkITPearlsCV.setVisible( false );
-            }
+        if (textFieldITPearlsCV.getValue() != null) {
+            linkITPearlsCV.setVisible(true);
+        } else {
+            linkITPearlsCV.setVisible(false);
+        }
         // отфильтровать файлы кандидата только
-        if( !PersistenceHelper.isNew( getEditedEntity() ) )
-            someFilesesDl.setParameter( "candidate", candidateField.getValue() );
+        if (!PersistenceHelper.isNew(getEditedEntity()))
+            someFilesesDl.setParameter("candidate", candidateField.getValue());
         else
-//           someFilesesDl.setParameter( "candidate", null );
+            someFilesesDl.removeParameter("candidate");
 
-         someFilesesDl.load();
+        someFilesesDl.load();
+        // добавить шаблон сопроводительного письма
+        setTemplateLetter();
+
+    }
+
+    private void setTemplateLetter() {
+        if (candidateCVFieldOpenPosition.getValue() != null ) {
+            if (getEditedEntity().getLetter() == null) {
+                if (candidateCVFieldOpenPosition.getValue().getTemplateLetter() != null) {
+                    letterRichTextArea.setValue(candidateCVFieldOpenPosition.getValue().getTemplateLetter());
+                }
+            }
+        }
+    }
+
+    @Subscribe("candidateCVFieldOpenPosition")
+    public void onCandidateCVFieldOpenPositionValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
+        setTemplateLetter();
     }
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        if(PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setDatePost( new Date() );
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setDatePost(new Date());
 
             getEditedEntity().setOwner(userSession.getUser());
         }
     }
 
     public void setUrlOriginalCV() {
-         String value = textFieldIOriginalCV.getValue();
+        String value = textFieldIOriginalCV.getValue();
 
-         if (value == null)
-             return;
-         if (!value.startsWith("http://"))
-             value = "http://" + value;
+        if (value == null)
+            return;
+        if (!value.startsWith("http://"))
+            value = "http://" + value;
 
-         webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
+        webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
     }
 
     @Subscribe("tabFiles")
     public void onTabFilesLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()
                     .withCaption("Warning")
                     .withMessage("Сохранить резюме кандидата?")
@@ -255,15 +274,14 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
     }
 
-    public void setParameter( CandidateCV entity ) {
-        candidateCVFieldOpenPosition.setValue( entity.getToVacancy() );
-        candidateField.setValue( entity.getCandidate() );
+    public void setParameter(CandidateCV entity) {
+        candidateCVFieldOpenPosition.setValue(entity.getToVacancy());
+        candidateField.setValue(entity.getCandidate());
     }
 
     @Subscribe("candidateField")
     public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
-//        someFilesesDl.setParameter( "candidate", candidateField.getValue() );
-
-//        someFilesesDl.load();
+        someFilesesDl.setParameter("candidate", candidateField.getValue());
+        someFilesesDl.load();
     }
 }

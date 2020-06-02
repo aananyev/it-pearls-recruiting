@@ -23,7 +23,7 @@ import java.util.List;
 
 @UiController("itpearls_FunnelHuntingWidget")
 @UiDescriptor("funnel-hunting-widget.xml")
-@DashboardWidget( name = "Funnel Hunting Widget" )
+@DashboardWidget(name = "Funnel Hunting Widget")
 public class FunnelHuntingWidget extends ScreenFragment {
     @Inject
     private UiComponents uiComponents;
@@ -58,8 +58,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private VBoxLayout researcherNameBox;
     @Inject
     private Label<String> widgetTitle;
-    @Inject
-    private Label<String> researcherTitle;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -77,7 +75,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
         String title = "Статистика по рекрутерам за: ";
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
-        widgetTitle.setValue( title + df.format(startDate) + " - " + df.format(endDate) );
+        widgetTitle.setValue(title + df.format(startDate) + " - " + df.format(endDate));
     }
 
     private void getResearchersList() {
@@ -87,7 +85,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
     }
 
     private void setDeafaultTimeInterval() {
-        if( startDate == null || endDate == null ) {
+        if (startDate == null || endDate == null) {
             GregorianCalendar calendar = new GregorianCalendar();
 
             calendar.set(GregorianCalendar.DATE, 1);
@@ -99,74 +97,67 @@ public class FunnelHuntingWidget extends ScreenFragment {
     }
 
     private void setIteractionTitle() {
-        for( String a : listIteractionForCheck ) {
+
+        for (String a : listIteractionForCheck) {
             // бокс вертикальный для набора статистики
-            VBoxLayout vBox = uiComponents.create(VBoxLayout.class);
-            vBox.setWidth( sizeColumn );
+            CssLayout vBox = uiComponents.create(CssLayout.class);
+            vBox.setWidth(sizeColumn);
+            vBox.setHeight("100%");
             vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
-            vBox.setSpacing( false );
-            vBox.setStyleName( "v-caption-label" );
 
-            boxWidgetTitle.add( vBox );
-            boxWidgetTitle.expand( vBox );
+            boxWidgetTitle.add(vBox);
+            boxWidgetTitle.expand(vBox);
             // бокс для фона элемента
-            VBoxLayout titleBox = uiComponents.create( VBoxLayout.class );
-            titleBox.setWidth( "100%" );
-            titleBox.setHeightFull();
-            titleBox.setSpacing( false );
-            titleBox.setStyleName( "v-caption-label");
+            CssLayout titleBox = uiComponents.create(CssLayout.class);
+            titleBox.setWidth("100%");
+            titleBox.setHeight("100%");
+            titleBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            titleBox.setStyleName("widget-table-header");
 
-            vBox.add( titleBox );
-            vBox.expand( titleBox );
+            vBox.add(titleBox);
             // заголовок
-
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
-            label.setWidth( "100%" );
-            label.setHeightAuto();
-            label.setValue( a );
-            label.setAlignment(Component.Alignment.BOTTOM_CENTER );
-            label.setStyleName( "v-caption-label" );
+            label.setWidthAuto();
+            label.setHeight("100%");
+            label.setValue(a);
 
-            titleBox.add( label );
-            titleBox.expand( label );
+            titleBox.add(label);
 
             Integer styleCount = 2;
 
-            for( User user : reaearchers ) {
-                HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
-                boxLayout.setWidth( "100%" );
+            for (User user : reaearchers) {
+                CssLayout boxLayout = uiComponents.create(CssLayout.class);
+                boxLayout.setWidth("100%");
                 boxLayout.setHeightFull();
-                boxLayout.setStyleName( "v-caption-label" );
-                boxLayout.setSpacing( false );
+                boxLayout.setStyleName("widget-table-header");
 
-                if( styleCount == 2 )
+                if (styleCount == 2)
                     styleCount = 1;
                 else
                     styleCount = 2;
 
-                vBox.add( boxLayout );
+                vBox.add(boxLayout);
 
-               String queryCounter = "select count(e) from itpearls_IteractionList e " +
-                       "where e.dateIteraction between :startDate and :endDate and " +
-                       "e.recrutier = :recrutier and " +
-                       "e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName )";
+                String queryCounter = "select count(e) from itpearls_IteractionList e " +
+                        "where e.dateIteraction between :startDate and :endDate and " +
+                        "e.recrutier = :recrutier and " +
+                        "e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName )";
 
-               int  iteractionCount = dataManager.loadValue( queryCounter, Integer.class)
-                       .parameter( "startDate", startDate )
-                       .parameter( "endDate", endDate )
-                       .parameter( "recrutier", user )
-                       .parameter( "iteractionName", a )
-                       .one();
+                int iteractionCount = dataManager.loadValue(queryCounter, Integer.class)
+                        .parameter("startDate", startDate)
+                        .parameter("endDate", endDate)
+                        .parameter("recrutier", user)
+                        .parameter("iteractionName", a)
+                        .one();
 
-               Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
+                Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
 
-               labelCount.setValue( iteractionCount );
-               labelCount.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
-               labelCount.setAlignment( Component.Alignment.MIDDLE_CENTER );
-               labelCount.setWidth( "100%" );
-//               labelCount.setHeight( labelHeight );
+                labelCount.setValue(iteractionCount);
+                labelCount.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+                labelCount.setAlignment(Component.Alignment.MIDDLE_CENTER);
+                labelCount.setWidth("100%");
 
-               boxLayout.add( labelCount );
+                boxLayout.add(labelCount);
             }
         }
     }
@@ -174,36 +165,35 @@ public class FunnelHuntingWidget extends ScreenFragment {
     private void setResearcherList() {
         Integer styleCount = 2;
 
-        for( User a : reaearchers ) {
-            if( styleCount == 2 )
+        for (User a : reaearchers) {
+            if (styleCount == 2)
                 styleCount = 1;
             else
                 styleCount = 2;
 
-            HBoxLayout boxLayout = uiComponents.create(HBoxLayout.class);
+            CssLayout boxLayout = uiComponents.create(CssLayout.class);
             boxLayout.setWidthFull();
-            boxLayout.setSpacing( false );
             boxLayout.setAlignment(Component.Alignment.BOTTOM_LEFT);
-            boxLayout.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
+            boxLayout.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
 
-            Label<String> label = uiComponents.create( Label.TYPE_STRING );
-            label.setAlignment( Component.Alignment.MIDDLE_LEFT );
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            label.setAlignment(Component.Alignment.MIDDLE_LEFT);
             label.setWidthFull();
-            label.setStyleName( "widget-mountly-interview-table-" + styleCount.toString() );
-            label.setValue( a.getName() );
+            label.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+            label.setValue(a.getName());
 
-            boxLayout.add( label );
-            researcherNameBox.add( boxLayout );
+            boxLayout.add(label);
+            researcherNameBox.add(boxLayout);
         }
     }
 
     private void initListIteraction() {
-        listIteractionForCheck.add( ITRKT_NEW_CONTACT );
-        listIteractionForCheck.add( ITRKT_POPOSE_JOB );
-        listIteractionForCheck.add( ITRKT_ASSIGN_ITPEARKS_INTERVIEW );
-        listIteractionForCheck.add( ITRKT_PREPARE_ITPEARKS_INTERVIEW );
-        listIteractionForCheck.add( ITRKT_ASSIGN_TECH_INTERVIEW );
-        listIteractionForCheck.add( ITRKT_PREPARE_TECH_INTERVIEW );
-        listIteractionForCheck.add( ITRKT_PREPARE_DIRECTOR_INTERVIEW );
+        listIteractionForCheck.add(ITRKT_NEW_CONTACT);
+        listIteractionForCheck.add(ITRKT_POPOSE_JOB);
+        listIteractionForCheck.add(ITRKT_ASSIGN_ITPEARKS_INTERVIEW);
+        listIteractionForCheck.add(ITRKT_PREPARE_ITPEARKS_INTERVIEW);
+        listIteractionForCheck.add(ITRKT_ASSIGN_TECH_INTERVIEW);
+        listIteractionForCheck.add(ITRKT_PREPARE_TECH_INTERVIEW);
+        listIteractionForCheck.add(ITRKT_PREPARE_DIRECTOR_INTERVIEW);
     }
 }

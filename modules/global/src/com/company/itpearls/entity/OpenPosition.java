@@ -61,6 +61,10 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "COMMENT_")
     protected String comment;
 
+    @Lob
+    @Column(name = "TEMPLATE_LETTER")
+    protected String templateLetter;
+
     @Column(name = "PRIORITY")
     protected Integer priority;
 
@@ -257,6 +261,10 @@ public class OpenPosition extends StandardEntity {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+    public String getTemplateLetter() { return  templateLetter; }
+
+    public void setTemplateLetter(String templateLetter) {this.templateLetter = templateLetter; }
 
     public Project getProjectName() {
         return projectName;

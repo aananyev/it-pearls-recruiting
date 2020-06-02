@@ -163,7 +163,7 @@ order by e.vacansyName]]>
                         </table>
                     </tab>
                     <tab id="tabLetter" caption="msg://msgLetter" margin="true,false,false,false" spacing="true">
-                        <richTextArea dataContainer="candidateCVDc" property="letter" width="100%" height="300pt"/>
+                        <richTextArea id="letterRichTextArea" dataContainer="candidateCVDc" property="letter" width="100%" height="300pt"/>
                     </tab>
                 </tabSheet>
             </column>

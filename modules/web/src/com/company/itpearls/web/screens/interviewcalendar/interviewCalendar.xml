@@ -38,9 +38,9 @@
             <groupBox id="calendarGroupBox" height="AUTO" width="100%" expand="interviewCalendar"
                       caption="mainMsg://msgInterviewCalendar">
                 <hbox id="hBox" width="100%" align="MIDDLE_CENTER">
-                    <label value="Month" align="BOTTOM_LEFT" height="100%"/>
+                    <label value="Текущий месяц" align="BOTTOM_LEFT" height="100%" stylename="h2"/>
                     <datePicker id="monthPicker" width="100%" height="100%"
-                                resolution="MONTH"/>
+                                resolution="MONTH" visible="false"/>
                 </hbox>
                 <calendar id="interviewCalendar"
                           navigationButtonsVisible="true"

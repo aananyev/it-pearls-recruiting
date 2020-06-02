@@ -1,123 +1,119 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-havana-ext {
 /* Override global theme constants or define new ones here */
-    .open-position-job-recruitier {
-        color: blue;
-        font-weight: normal;
-    }
+.open-position-job-recruitier {
+    color: blue;
+    font-weight: normal;
+}
 
-    .open-position-empty-recruitier {
-        color: green;
-        font-weight: normal;
-    }
+.open-position-empty-recruitier {
+    color: green;
+    font-weight: normal;
+}
 
-    .open-position-normal-recruitier {
-        color: black;
-        font-weight: normal;
-    }
+.open-position-normal-recruitier {
+    color: black;
+    font-weight: normal;
+}
 
-    .recrutier-tasks-gray {
-        color: grey;
-        text-decoration: line-through;
-    }
+.recrutier-tasks-gray {
+    color: grey;
+    text-decoration: line-through;
+}
 
-    .recrutier-tasks-normal {
-        color: black;
-    }
+.recrutier-tasks-normal {
+    color: black;
+}
 
+.widget-table-item-title {
+    white-space: pre-line;
+}
 
-    .widget-table-item-title {
-        font-weight: normal;
-        font-style: normal;
-        font-transform: none;
-        white-space: pre-line;
-        font-style: normal;
-    }
+.widget-table-item-value {
+    white-space: pre-line;
+    text-align: center;
+}
 
-    .widget-table-item-value {
-        font-weight: normal;
-        font-style: normal;
-        font-transform: none;
-        white-space: pre-line;
-        font-style: normal;
-    }
+.widget-table-value {
+    font-style: italic;
+    background: #878787;
+}
 
-    .widget-table-value {
-        font-style: italic;
-        background: #878787;
-    }
+.widget-border {
+    padding: 5px;
+    border: 2px solid #7a7b7e;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
+}
 
-    .widget-border {
-        padding: 2px;
-        border: 2px solid #7a7b7e;
-        border-radius: 6px;
-        box-shadow: 2px 2px 20px grey;
-    }
+.widget-title {
+    font-weight: bold;
+    padding: 2px;
+    background: #2c6b9e;
+    color: #ffffff;
+    text-align: center;
+    text-transform: uppercase;
+}
 
-    .widget-title {
-        font-weight: bold;
-        padding: 2px;
-        background: #2c6b9e;
-        color: #ffffff;
-        text-align: center;
-        text-transform: uppercase;
-    }
+.widget-header {
+    font-weight: bold;
+    text-decoration: underline;
+    padding: 5px;
+}
 
-    .widget-header {
-            font-weight: bold;
-            text-decoration: underline;
-            padding: 5px;
-    }
+.widget-table-header {
+    border: none;
+    white-space: pre-line;
+    text-align: center;
+    font-weight: bold;
+    text-decoration: underline;
+    background: #bea6ff;
+}
 
-.label_type.v-label.v-widget {
+.label_type {
     color: red;
-    background-color: lightyellow;
+    background-color: yellow;
     line-height: 1.5;
     margin: 5px;
 }
 
 .v-caption-label {
-        border: none;
-        text-align: center;
-        font-weight: bold;
-        white-space: pre-line;
-        text-decoration: underline;
-        background: #bea6ff;
+    border: none;
+    text-align: center;
+    font-weight: bold;
+    white-space: pre-line;
+    text-decoration: underline;
+    background: #bea6ff;
 }
 
 .widget-mountly-interview-table-1 {
-            font-weight: normal;
-            white-space: pre-line;
-            font-style: italic;
-            background: #ababab;
-            font-style: normal;
-            text-transform: none;
+    font-weight: normal;
+    white-space: pre-line;
+    font-style: italic;
+    background: #ababab;
+    font-style: normal;
+    text-transform: none;
 }
 
 .widget-mountly-interview-table-2 {
-            font-weight: normal;
-            white-space: pre-line;
-            font-style: italic;
-            background: #9c9c9c;
-            font-style: normal;
-            text-transform: none;
+    font-weight: normal;
+    white-space: pre-line;
+    font-style: italic;
+    background: #9c9c9c;
+    font-style: normal;
+    text-transform: none;
 }
 
 
 .widget-border-line {
-        border: 1px solid #7a7b7e;
-        border-radius: 6px;
+    border: 1px solid #7a7b7e;
+    border-radius: 6px;
 }
 
 .v-caption-shift-field {
     white-space: pre;
 }
-
-.c-fglayout-slot .c-full-height-widget .v-caption-shift-field .v-captiontext {
-    line-height: 15px;
-}
-
-.v-calendar-event .event-red {
+.v-calendar-event.event-red {
   background-color: #f4c8c8;
   color: #e00000;
 }
@@ -130,7 +126,7 @@
   background-color: #f4c8c8;
 }
 
-.v-calendar-event .event-green {
+.v-calendar-event.event-green {
   background-color: #c8f4c9;
   color: #037516;
 }
@@ -143,7 +139,7 @@
   background-color: #c8f4c9;
 }
 
-.v-calendar-event .event-blue {
+.v-calendar-event.event-blue {
   background-color: #c8daf4;
   color: #0300e0;
 }
@@ -156,12 +152,7 @@
   background-color: #c8daf4;
 }
 
-.v-calendar-event .event-yellow {
-  background-color: #f4efc8;
-  color: #5f5c41;
-}
-
-.event-yellow {
+.v-calendar-event.event-yellow {
   background-color: #f4efc8;
   color: #5f5c41;
 }
@@ -177,9 +168,4 @@
 .v-calendar-header-week .v-calendar-back, .v-calendar-header-week .v-calendar-next {
   display: none;
 }
-
-.v-label-shift-field {
-    white-space: pre;
-}
-
 }

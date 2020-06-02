@@ -4,10 +4,7 @@ import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.cuba.gui.WindowParam;
-import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.TextArea;
-import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
@@ -85,11 +82,11 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
 
-        iteractioListDl.removeParameter( "endDate" );
-        iteractioListDl.removeParameter( "startDate" );
-        iteractioListDl.removeParameter( "iteractionName" );
+        iteractioListDl.removeParameter("endDate");
+        iteractioListDl.removeParameter("startDate");
+        iteractioListDl.removeParameter("iteractionName");
 
-        labelWidgetTitle.setValue(  widgetTitle );
+        labelWidgetTitle.setValue(widgetTitle);
 
         setLabelNewContacts();
         setLabelProposeJob();
@@ -101,48 +98,48 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     }
 
     private void setLabelProposeJob() {
-        iteractioListDl.setParameter( "iteractionName", itemProposeJob + "%" );
+        iteractioListDl.setParameter("iteractionName", itemProposeJob + "%");
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelCountProposeJob.setValue( itemProposeJob );
-        labelCountProposeJobValue.setValue( String.valueOf( count ) );
+        labelCountProposeJob.setValue(itemProposeJob);
+        labelCountProposeJobValue.setValue(String.valueOf(count));
     }
 
     private void setLabelPrepareDirectorsInterview() {
-        iteractioListDl.setParameter( "iteractionName", itemPrepareDirectorsInterview + "%" );
+        iteractioListDl.setParameter("iteractionName", itemPrepareDirectorsInterview + "%");
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelDirectorsInterview.setValue( itemPrepareDirectorsInterview );
-        labelDirectorsInterviewValue.setValue( String.valueOf( count ) );
+        labelDirectorsInterview.setValue(itemPrepareDirectorsInterview);
+        labelDirectorsInterviewValue.setValue(String.valueOf(count));
     }
 
     private void setLabelPrepareExternalInterview() {
-        iteractioListDl.setParameter( "iteractionName", itemPrepareExternalInterview + "%" );
+        iteractioListDl.setParameter("iteractionName", itemPrepareExternalInterview + "%");
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelPrepareExternalInterview.setValue( itemPrepareExternalInterview );
-        labelPrepareExternalInterviewValue.setValue( String.valueOf( count ));
+        labelPrepareExternalInterview.setValue(itemPrepareExternalInterview);
+        labelPrepareExternalInterviewValue.setValue(String.valueOf(count));
     }
 
     private void setLabelAssignExternalInterview() {
-        iteractioListDl.setParameter( "iteractionName", itemAssignExternalInterview + "%" );
+        iteractioListDl.setParameter("iteractionName", itemAssignExternalInterview + "%");
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelAssignExternalInterview.setValue( itemAssignExternalInterview );
-        labelAssignExternalInterviewValue.setValue( String.valueOf( count ));
+        labelAssignExternalInterview.setValue(itemAssignExternalInterview);
+        labelAssignExternalInterviewValue.setValue(String.valueOf(count));
     }
 
     private void setLabelPrepareInternalInterview() {
-        iteractioListDl.setParameter( "iteractionName", itemPrepareInternalInterview + "%" );
+        iteractioListDl.setParameter("iteractionName", itemPrepareInternalInterview + "%");
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelPrepareInternalInterview.setValue( itemPrepareInternalInterview );
-        labelPrepareInternalInterviewValus.setValue( String.valueOf( count ) );
+        labelPrepareInternalInterview.setValue(itemPrepareInternalInterview);
+        labelPrepareInternalInterviewValus.setValue(String.valueOf(count));
     }
 
 
@@ -150,28 +147,26 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         setDateInterval();
         setElementStyle();
 
-        iteractioListDl.setParameter( "iteractionName", itemNewContact + "%" );
+        iteractioListDl.setParameter("iteractionName", itemNewContact + "%");
         iteractioListDl.load();
 
         int countItems = iteractionListDc.getItems().size();
 
-        labelCountNewContacts.setValue( itemNewContact );
-        labelCountNewContactsValue.setValue( String.valueOf( countItems ) );
+        labelCountNewContacts.setValue(itemNewContact);
+        labelCountNewContactsValue.setValue(String.valueOf(countItems));
     }
 
     private void setElementStyle() {
     }
 
-    public static int getCurrentYear()
-    {
+    public static int getCurrentYear() {
         Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
         calendar.setTime(new Date());
         return calendar.get(Calendar.YEAR);
     }
 
 
-    public static int getCurrentMonth()
-    {
+    public static int getCurrentMonth() {
         Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
         calendar.setTime(new Date());
         return calendar.get(Calendar.MONTH);
@@ -183,22 +178,22 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         Integer endDateOfPeriod = Calendar.DAY_OF_MONTH;
         Calendar firstDay = new GregorianCalendar();
 
-        if( startDate == null ) {
-            firstDay = new GregorianCalendar( getCurrentYear(), getCurrentMonth(), 1 );
+        if (startDate == null) {
+            firstDay = new GregorianCalendar(getCurrentYear(), getCurrentMonth(), 1);
 
             startDate = firstDay.getTime();
         }
 
-        if( endDate == null ) {
-            Calendar endDayCal = new GregorianCalendar( getCurrentYear(),
+        if (endDate == null) {
+            Calendar endDayCal = new GregorianCalendar(getCurrentYear(),
                     getCurrentMonth(),
-                    firstDay.getActualMaximum(endDateOfPeriod) );
+                    firstDay.getActualMaximum(endDateOfPeriod));
 
             endDate = endDayCal.getTime();
         }
 
-        iteractioListDl.setParameter( "startDate", startDate );
-        iteractioListDl.setParameter( "endDate", endDate );
+        iteractioListDl.setParameter("startDate", startDate);
+        iteractioListDl.setParameter("endDate", endDate);
 
         iteractioListDl.load();
     }
@@ -209,7 +204,7 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
         Calendar calendar = Calendar.getInstance();
 
-        Integer ret = calendar.get( Calendar.DAY_OF_MONTH ) - calendar.get( Calendar.DAY_OF_WEEK ) + 8;
+        Integer ret = calendar.get(Calendar.DAY_OF_MONTH) - calendar.get(Calendar.DAY_OF_WEEK) + 8;
 
         return ret;
     }
@@ -218,17 +213,17 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         Calendar calendar = Calendar.getInstance();
 
 
-        Integer ret = calendar.get( Calendar.DAY_OF_MONTH ) - calendar.get( Calendar.DAY_OF_WEEK ) + 2;
+        Integer ret = calendar.get(Calendar.DAY_OF_MONTH) - calendar.get(Calendar.DAY_OF_WEEK) + 2;
 
         return ret;
     }
 
     private void setLabelAssignInternalInterview() {
-        iteractioListDl.setParameter( "iteractionName", itemAssignInternalInterview + "%" );
+        iteractioListDl.setParameter("iteractionName", itemAssignInternalInterview + "%");
         iteractioListDl.load();
 
         int count = iteractionListDc.getItems().size();
-        labelAssignInternalInterview.setValue( itemAssignInternalInterview );
-        labelAssignInternalInterviewValue.setValue( String.valueOf( count ) );
+        labelAssignInternalInterview.setValue(itemAssignInternalInterview);
+        labelAssignInternalInterviewValue.setValue(String.valueOf(count));
     }
 }

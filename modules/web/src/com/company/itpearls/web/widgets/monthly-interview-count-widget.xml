@@ -26,125 +26,115 @@
         </collection>
     </data>
     <layout expand="borderGroupBox"
-            width="100%"
+            width="AUTO"
+            responsive="true"
             height="100%"
+            margin="10px"
             stylename="widget-border">
         <vbox id="borderGroupBox"
-              spacing="true"
               width="100%"
-              height="100%"
-              expand="box">
-            <hbox width="100%"
-                  height="AUTO"
-                  spacing="false"
-                  stylename="widget-title"
-                  expand="labelWidgetTitle">
+              height="100%">
+            <cssLayout width="100%"
+                       height="AUTO"
+                       stylename="widget-title">
                 <label id="labelWidgetTitle"
                        width="AUTO"
                        height="100%"
+                       align="MIDDLE_CENTER"
                        htmlEnabled="false"/>
-            </hbox>
-            <hbox id="box"
-                  spacing="true"
-                  width="100%"
-                  height="100%"
-                  align="MIDDLE_CENTER">
-                <vbox spacing="false"
-                      width="100%">
-                        <hbox stylename="widget-mountly-interview-table-1"
-                              expand="labelCountNewContacts"
-                              width="100%"
-                              height="AUTO">
-                                <label id="labelCountNewContacts"
-                                       stylename="widget-table-item-title"
-                                       width="AUTO"
-                                       align="MIDDLE_LEFT"/>
-                                <label id="labelCountNewContactsValue"
-                                       stylename="widget-table-item-value"
-                                       width="AUTO"
-                                       align="TOP_RIGHT"/>
-                                </hbox>
-                        <hbox stylename="widget-mountly-interview-table-2"
-                              expand="labelCountProposeJob"
-                              width="100%"
-                              height="AUTO">
-                                <label id="labelCountProposeJob"
-                                       width="AUTO"
-                                       stylename="widget-table-item-title"
-                                       align="TOP_LEFT"/>
-                                <label id="labelCountProposeJobValue"
-                                       stylename="widget-table-item-value"
-                                       width="AUTO"
-                                       align="TOP_RIGHT"/>
-                            </hbox>
-                        <hbox stylename="widget-mountly-interview-table-1"
-                              expand="labelAssignInternalInterview"
-                              width="100%"
-                              height="AUTO">
-                                <label id="labelAssignInternalInterview"
-                                       width="AUTO"
-                                       stylename="widget-table-item-title"
-                                       align="TOP_LEFT"/>
-                                <label id="labelAssignInternalInterviewValue"
-                                       stylename="widget-table-item-value"
-                                       width="AUTO"
-                                       align="TOP_RIGHT"/>
-                            </hbox>
-                        <hbox stylename="widget-mountly-interview-table-2"
-                              expand="labelPrepareInternalInterview"
-                              width="100%"
-                              height="100%">
-                                <label id="labelPrepareInternalInterview"
-                                       width="AUTO"
-                                       stylename="widget-table-item-title"
-                                       align="TOP_LEFT"/>
-                                <label id="labelPrepareInternalInterviewValus"
-                                       stylename="widget-table-item-value"
-                                       width="AUTO"
-                                       align="TOP_RIGHT"/>
-                            </hbox>
-                        <hbox stylename="widget-mountly-interview-table-1"
-                              expand="labelAssignExternalInterview"
-                              width="100%"
-                              height="100%">
-                                <label id="labelAssignExternalInterview"
-                                       width="AUTO"
-                                       stylename="widget-table-item-title"
-                                       align="TOP_LEFT"/>
-                                <label id="labelAssignExternalInterviewValue"
-                                       stylename="widget-table-item-value"
-                                       width="AUTO"
-                                       align="TOP_RIGHT"/>
-                            </hbox>
-                        <hbox stylename="widget-mountly-interview-table-2"
-                              expand="labelPrepareExternalInterview"
-                              width="100%"
-                              height="100%">
-                                <label id="labelPrepareExternalInterview"
-                                       width="AUTO"
-                                       stylename="widget-table-item-title"
-                                       align="TOP_LEFT"/>
-                                <label id="labelPrepareExternalInterviewValue"
-                                       stylename="widget-table-item-value"
-                                       width="AUTO"
-                                       align="TOP_RIGHT"/>
-                            </hbox>
-                        <hbox stylename="widget-mountly-interview-table-1"
-                              expand="labelDirectorsInterview"
-                              width="100%"
-                              height="100%">
-                                <label id="labelDirectorsInterview"
-                                       width="AUTO"
-                                       stylename="widget-table-item-title"
-                                       align="TOP_LEFT"/>
-                                <label id="labelDirectorsInterviewValue"
-                                       stylename="widget-table-item-value"
-                                       width="AUTO"
-                                       htmlEnabled="true"
-                                       align="TOP_RIGHT"/>
-                    </hbox>
-                </vbox>
-            </hbox>
+            </cssLayout>
+            <vbox spacing="false"
+                  width="100%">
+                <hbox width="100%">
+                <cssLayout stylename="widget-mountly-interview-table-1"
+                           width="90%"
+                           height="AUTO">
+                    <label id="labelCountNewContacts"
+                           stylename="widget-table-item-title"
+                           align="MIDDLE_LEFT"/>
+                </cssLayout>
+                <cssLayout stylename="widget-mountly-interview-table-1"
+                           width="AUTO"
+                           height="AUTO">
+                    <label id="labelCountNewContactsValue"
+                           stylename="widget-table-item-value"
+                           align="MIDDLE_RIGHT"/>
+                </cssLayout>
+                </hbox>
+                <cssLayout stylename="widget-mountly-interview-table-2"
+                           width="100%"
+                           height="AUTO">
+                    <label id="labelCountProposeJob"
+                           width="90%"
+                           stylename="widget-table-item-title"
+                           align="MIDDLE_LEFT"/>
+                    <label id="labelCountProposeJobValue"
+                           stylename="widget-table-item-value"
+                           width="AUTO"
+                           align="MIDDLE_RIGHT"/>
+                </cssLayout>
+                <cssLayout stylename="widget-mountly-interview-table-1"
+                           width="100%"
+                           height="AUTO">
+                    <label id="labelAssignInternalInterview"
+                           width="90%"
+                           stylename="widget-table-item-title"
+                           align="MIDDLE_LEFT"/>
+                    <label id="labelAssignInternalInterviewValue"
+                           stylename="widget-table-item-value"
+                           width="AUTO"
+                           align="MIDDLE_RIGHT"/>
+                </cssLayout>
+                <cssLayout stylename="widget-mountly-interview-table-2"
+                           width="100%"
+                           height="100%">
+                    <label id="labelPrepareInternalInterview"
+                           width="90%"
+                           stylename="widget-table-item-title"
+                           align="MIDDLE_LEFT"/>
+                    <label id="labelPrepareInternalInterviewValus"
+                           stylename="widget-table-item-value"
+                           width="AUTO"
+                           align="MIDDLE_RIGHT"/>
+                </cssLayout>
+                <cssLayout stylename="widget-mountly-interview-table-1"
+                           width="100%"
+                           height="100%">
+                    <label id="labelAssignExternalInterview"
+                           width="90%"
+                           stylename="widget-table-item-title"
+                           align="MIDDLE_LEFT"/>
+                    <label id="labelAssignExternalInterviewValue"
+                           stylename="widget-table-item-value"
+                           width="AUTO"
+                           align="MIDDLE_RIGHT"/>
+                </cssLayout>
+                <cssLayout stylename="widget-mountly-interview-table-2"
+                           width="100%"
+                           height="100%">
+                    <label id="labelPrepareExternalInterview"
+                           width="90%"
+                           stylename="widget-table-item-title"
+                           align="MIDDLE_LEFT"/>
+                    <label id="labelPrepareExternalInterviewValue"
+                           stylename="widget-table-item-value"
+                           width="AUTO"
+                           align="MIDDLE_RIGHT"/>
+                </cssLayout>
+                <cssLayout stylename="widget-mountly-interview-table-1"
+                           width="100%"
+                           height="100%">
+                    <label id="labelDirectorsInterview"
+                           width="90%"
+                           stylename="widget-table-item-title"
+                           align="MIDDLE_LEFT"/>
+                    <label id="labelDirectorsInterviewValue"
+                           stylename="widget-table-item-value"
+                           width="AUTO"
+                           htmlEnabled="true"
+                           align="MIDDLE_RIGHT"/>
+                </cssLayout>
+            </vbox>
         </vbox>
     </layout>
 </fragment>
