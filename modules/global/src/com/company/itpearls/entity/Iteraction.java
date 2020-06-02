@@ -65,6 +65,13 @@ public class Iteraction extends StandardEntity {
     @Column(name = "CALENDAR_ITEM_STYLE")
     protected String calendarItemStyle;
 
+    @Column(name = "FIND_TO_DIC")
+    protected Boolean findToDic;
+
+    public Boolean getFindToDic() { return findToDic; }
+
+    public void setFindToDic( Boolean findToDic ) { this.findToDic = findToDic; }
+
     public Integer getNotificationType() {
         return notificationType;
     }

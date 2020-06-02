@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://browseCaption"
+        focusComponent="candidateCVsTable"
+        messagesPack="com.company.itpearls.web.screens.candidatecv">
+    <data readOnly="true">
+        <collection id="candidateCVsDc"
+                    class="com.company.itpearls.entity.CandidateCV"
+                    view="_local">
+            <loader id="candidateCVsDl">
+                <query>
+                    <![CDATA[select e from itpearls_CandidateCV e]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidate = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="candidateCVsTable"
+            spacing="true">
+        <dataGrid id="candidateCVsTable"
+                  width="100%"
+                  dataContainer="candidateCVsDc">
+            <actions>
+            </actions>
+            <columns>
+                <column property="resumePosition"/>
+                <column property="datePost" id="datePost"/>
+            </columns>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="okButton" caption="msg://okButton"/>
+                <button id="cancelButton" caption="msg://cancelButton"/>
+            </buttonsPanel>
+        </dataGrid>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

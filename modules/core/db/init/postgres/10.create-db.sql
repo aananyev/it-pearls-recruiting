@@ -197,6 +197,7 @@ create table ITPEARLS_ITERACTION (
     NOTIFICATION_TYPE integer,
     CALENDAR_ITEM boolean,
     CALENDAR_ITEM_STYLE varchar(255),
+    FIND_TO_DIC boolean,
     --
     primary key (ID)
 )^

@@ -5,12 +5,14 @@ import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVChoiseBrowse;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -102,10 +104,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> companyLabel;
     @Inject
     private InstanceLoader<IteractionList> iteractionListDl;
+    @Inject
+    private Screens screens;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             setIteractionNumber();
             setCurrentDate();
             setCurrentUserName(); // имя пользователя в нередактируемое поле
@@ -126,67 +130,67 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         try {
             _addType = iteractionTypeField.getValue().getAddType();
-        } catch ( NullPointerException e ) {
+        } catch (NullPointerException e) {
             _addType = 0;
         }
 
         try {
             _addFlag = iteractionTypeField.getValue().getAddFlag();
-        } catch ( NullPointerException e ) {
+        } catch (NullPointerException e) {
             _addFlag = false;
         }
 
-        if( _addFlag ) {
-            if( _addType != 0 ) {
-                switch ( _addType ) {
+        if (_addFlag) {
+            if (_addType != 0) {
+                switch (_addType) {
                     case 1:
-                        addDate.setVisible( true );
-                        addDate.setRequired( true );
-                        addDate.setCaption( iteractionTypeField.getValue().getAddCaption() );
-                        addDate.setRequired( true );
+                        addDate.setVisible(true);
+                        addDate.setRequired(true);
+                        addDate.setCaption(iteractionTypeField.getValue().getAddCaption());
+                        addDate.setRequired(true);
 
-                        addString.setVisible( false );
-                        addInteger.setVisible( false );
-                        buttonCallAction.setVisible( false );
+                        addString.setVisible(false);
+                        addInteger.setVisible(false);
+                        buttonCallAction.setVisible(false);
                         break;
                     case 2:
-                        addDate.setVisible( false );
-                        addString.setVisible( true );
-                        addString.setRequired( true );
-                        addString.setCaption( iteractionTypeField.getValue().getAddCaption() );
-                        addString.setRequired( true );
+                        addDate.setVisible(false);
+                        addString.setVisible(true);
+                        addString.setRequired(true);
+                        addString.setCaption(iteractionTypeField.getValue().getAddCaption());
+                        addString.setRequired(true);
 
-                        addInteger.setVisible( false );
-                        buttonCallAction.setVisible( false );
+                        addInteger.setVisible(false);
+                        buttonCallAction.setVisible(false);
                         break;
                     case 3:
-                        addDate.setVisible( false );
-                        addString.setVisible( false );
-                        addInteger.setVisible( true );
+                        addDate.setVisible(false);
+                        addString.setVisible(false);
+                        addInteger.setVisible(true);
 
                         try {
                             addInteger.setCaption(iteractionTypeField.getValue().getAddCaption());
-                        } catch ( NullPointerException e ) {
-                            addInteger.setCaption( iteractionTypeField.getValue().getIterationName() );
+                        } catch (NullPointerException e) {
+                            addInteger.setCaption(iteractionTypeField.getValue().getIterationName());
                         }
-                        addInteger.setRequired( true );
+                        addInteger.setRequired(true);
 
-                        addInteger.setRequired( true );
-                        buttonCallAction.setVisible( false );
+                        addInteger.setRequired(true);
+                        buttonCallAction.setVisible(false);
                         break;
                     default:
-                        addDate.setVisible( false );
-                        addString.setVisible( false );
-                        addInteger.setVisible( false );
-                        addDate.setVisible( false );
+                        addDate.setVisible(false);
+                        addString.setVisible(false);
+                        addInteger.setVisible(false);
+                        addDate.setVisible(false);
 
-                        addDate.setRequired( false );
-                        addInteger.setRequired( false );
-                        addString.setRequired( false );
+                        addDate.setRequired(false);
+                        addInteger.setRequired(false);
+                        addString.setRequired(false);
 
-                        addDate.setCaption( "" );
-                        addInteger.setCaption( "" );
-                        addString.setCaption( "" );
+                        addDate.setCaption("");
+                        addInteger.setCaption("");
+                        addString.setCaption("");
                         break;
                 }
             }
@@ -195,20 +199,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             try {
                 callForm = iteractionTypeField.getValue().getCallForm();
-            } catch ( NullPointerException e ) {
+            } catch (NullPointerException e) {
                 callForm = false;
             }
 
-            if( callForm ) {
-                addDate.setVisible( false );
-                addString.setVisible( false );
-                addInteger.setVisible( false );
-                buttonCallAction.setVisible( true );
+            if (callForm) {
+                addDate.setVisible(false);
+                addString.setVisible(false);
+                addInteger.setVisible(false);
+                buttonCallAction.setVisible(true);
             } else {
-                addDate.setVisible( false );
-                addString.setVisible( false );
-                addInteger.setVisible( false );
-                buttonCallAction.setVisible( false );
+                addDate.setVisible(false);
+                addString.setVisible(false);
+                addInteger.setVisible(false);
+                buttonCallAction.setVisible(false);
             }
         }
     }
@@ -216,11 +220,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
 
-        if( vacancyFiels.getValue() != null )
-            if( vacancyFiels.getValue().getProjectName() != null )
-                if( vacancyFiels.getValue().getProjectName().getProjectDepartment() != null )
-                    if( vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null )
-                        if( vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName().getCompanyShortName() != null ) {
+        if (vacancyFiels.getValue() != null)
+            if (vacancyFiels.getValue().getProjectName() != null)
+                if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null)
+                    if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null)
+                        if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName().getCompanyShortName() != null) {
                             String labetText = "<h2><b>" +
                                     vacancyFiels.getValue()
                                             .getProjectName()
@@ -237,7 +241,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             companyLabel.setValue(labetText);
                         }
 
-        if( !isClosedVacancy() ) {
+        if (!isClosedVacancy()) {
             BigDecimal a = new BigDecimal("0.0");
 
             // проверка на наличие записей по этой вакансии
@@ -265,7 +269,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         .withCaption("ВНИМАНИЕ!")
                         .withMessage("С кандидатом начат новый процесс. " +
                                 "Начните взаимодействие с ним с типом из группы \"001 Ресерчинг\"")
-                        .withModal( true )
+                        .withModal(true)
                         .show();
             } else {
                 iteractionTypesLc.removeParameter("number");
@@ -273,10 +277,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             iteractionTypesLc.load();
         } else {
-            if( !askFlag2 ) {
+            if (!askFlag2) {
                 askFlag2 = true;
 
-                if( PersistenceHelper.isNew( getEditedEntity() )) {
+                if (PersistenceHelper.isNew(getEditedEntity())) {
                     dialogs.createOptionDialog()
                             .withCaption("WARNING")
                             .withMessage("Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\n" +
@@ -293,12 +297,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         }
         // проверить - подписан ли ресерчер на это позицию
-        if( getRoleService.isUserRoles( userSession.getUser(), "Researcher" ) )
-            isUnsubscribedPosition( getEditedEntity().getVacancy() );
+        if (getRoleService.isUserRoles(userSession.getUser(), "Researcher"))
+            isUnsubscribedPosition(getEditedEntity().getVacancy());
     }
 
-    private void isUnsubscribedPosition( OpenPosition op ) {
-        if( !askFlag ) {
+    private void isUnsubscribedPosition(OpenPosition op) {
+        if (!askFlag) {
             // ну типа уже спрашивали
             askFlag = true;
 
@@ -312,7 +316,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .parameter("nowDate", new Date())
                     .one();
 
-            if ( a == 0 ) {
+            if (a == 0) {
                 if (vacancyFiels.getValue() != null) {
 
                     dialogs.createOptionDialog()
@@ -344,32 +348,32 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         Boolean r = true;
         Boolean oc;
 
-            if (vacancyFiels.getValue() != null) {
-                // if( !PersistenceHelper.isDetached( getEditedEntity().getVacancy() ) )
-                    r = getEditedEntity().getVacancy().getOpenClose();
-            } else
-                r = false;
+        if (vacancyFiels.getValue() != null) {
+            // if( !PersistenceHelper.isDetached( getEditedEntity().getVacancy() ) )
+            r = getEditedEntity().getVacancy().getOpenClose();
+        } else
+            r = false;
 
         return r == null ? false : r;
     }
 
     private BigDecimal getCountIteraction() {
-        IteractionList e = dataManager.load( IteractionList.class )
-                .query( "select e from itpearls_IteractionList e where e.numberIteraction = " +
-                        "(select max(f.numberIteraction) from itpearls_IteractionList f)" )
-                .view( "iteractionList-view" )
-                .cacheable( true )
+        IteractionList e = dataManager.load(IteractionList.class)
+                .query("select e from itpearls_IteractionList e where e.numberIteraction = " +
+                        "(select max(f.numberIteraction) from itpearls_IteractionList f)")
+                .view("iteractionList-view")
+                .cacheable(true)
                 .one();
 
-        return e.getNumberIteraction().add( BigDecimal.ONE );
+        return e.getNumberIteraction().add(BigDecimal.ONE);
     }
 
     protected void setIteractionNumber() {
-        numberIteractionField.setValue( getCountIteraction() );
+        numberIteractionField.setValue(getCountIteraction());
     }
 
     protected void setCurrentDate() {
-        dateIteractionField.setValue( new Date() );
+        dateIteractionField.setValue(new Date());
     }
 
     // не могу получить имя пользователя и записать его в базу
@@ -380,13 +384,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     void copyAndCheckCandidate() {
-        if( yourCandidate() ) {
-            if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if (yourCandidate()) {
+            if (PersistenceHelper.isNew(getEditedEntity())) {
                 // сколько записей есть по этому кандидату
                 if (getIteractionCount() != 0) {
                     // ввели кандидата - предложи скопировать предыдущую запись
                     OpenPosition op = getEditedEntity().getVacancy();
-                    if ( op == null ) {
+                    if (op == null) {
                         dialogs.createOptionDialog()
                                 .withCaption("Warning")
                                 .withMessage("Скопировать предыдущую запись кандидата?")
@@ -402,7 +406,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         } else {
-            if( PersistenceHelper.isNew( getEditedEntity() )) {
+            if (PersistenceHelper.isNew(getEditedEntity())) {
                 String msg = "С этим кандидатом " + oldIteraction.getRecrutier().getName() + " контактировал " +
                         oldIteraction.getDateIteraction().toString() + " МЕНЕЕ МЕСЯЦА НАЗАД!";
 
@@ -423,7 +427,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if( iteractionTypeField.getValue().getNumber() != null ) {
+        if (iteractionTypeField.getValue().getNumber() != null) {
             String s = iteractionTypeField.getValue().getNumber();
             Integer i = Integer.parseInt(s);
 
@@ -435,37 +439,37 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        if( commentField.getValue() == null )
-            commentField.setValue( "" );
+        if (commentField.getValue() == null)
+            commentField.setValue("");
 
 //        getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getProjectName().getProjectDepartment() );
     }
 
     private void sendMessages() {
         LoadContext<SubscribeCandidateAction> loadContext = LoadContext.create(SubscribeCandidateAction.class)
-                .setQuery( LoadContext.createQuery("select e from itpearls_SubscribeCandidateAction e " +
+                .setQuery(LoadContext.createQuery("select e from itpearls_SubscribeCandidateAction e " +
                         "where e.candidate = :candidate and " +
                         "e.subscriber = :subscriber and " +
-                        ":curDate between e.startDate and e.endDate" )
-                        .setCacheable( true )
-                .setParameter( "candidate", candidateField.getValue() )
-                .setParameter( "subscriber", userSession.getUser() )
-                .setParameter( "curDate", new Date() ) )
-                .setView( "subscribeCandidateAction-view" );
+                        ":curDate between e.startDate and e.endDate")
+                        .setCacheable(true)
+                        .setParameter("candidate", candidateField.getValue())
+                        .setParameter("subscriber", userSession.getUser())
+                        .setParameter("curDate", new Date()))
+                .setView("subscribeCandidateAction-view");
 
-        if( dataManager.getCount( loadContext )  != 0 ) {
+        if (dataManager.getCount(loadContext) != 0) {
             EmailInfo emailInfo = new EmailInfo(userSession.getUser().getEmail(),
                     candidateField.getValue().getFullName() + " : " +
-                    iteractionTypeField.getValue().getIterationName(), null,
+                            iteractionTypeField.getValue().getIterationName(), null,
                     "com/company/itpearls/templates/iteraction.html",
-                    Collections.singletonMap( "IteractionList", getEditedEntity() ) );
+                    Collections.singletonMap("IteractionList", getEditedEntity()));
 
             emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
             emailService.sendEmailAsync(emailInfo);
         }
-            // высплывающее сообщение
-        if( iteractionTypeField.getValue().getNotificationType() != null ) {
+        // высплывающее сообщение
+        if (iteractionTypeField.getValue().getNotificationType() != null) {
             switch (iteractionTypeField.getValue().getNotificationType()) {
                 case 0: // ???
                     break;
@@ -500,40 +504,40 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         BigDecimal numberIteraction;
         // проверка прошлого взаимодействия
         try {
-            numberIteraction = dataManager.loadValue( "select e.numberIteraction " +
+            numberIteraction = dataManager.loadValue("select e.numberIteraction " +
                     "from itpearls_IteractionList e " +
                     "where e.candidate = :candidate and " +
                     "e.numberIteraction = " +
                     "(select max(f.numberIteraction) " +
                     "from itpearls_IteractionList f " +
-                    "where f.candidate = :candidate)", BigDecimal.class )
-                    .parameter( "candidate", candidateField.getValue() )
+                    "where f.candidate = :candidate)", BigDecimal.class)
+                    .parameter("candidate", candidateField.getValue())
                     .one();
-        } catch ( IllegalStateException e) {
+        } catch (IllegalStateException e) {
             // не было взаимодействий с кандидатом
             numberIteraction = null;
 
             myClient = true;
         }
 
-        if( numberIteraction != null ) {
+        if (numberIteraction != null) {
             // больше месяца назад?
             try {
                 oldIteraction = dataManager.load(IteractionList.class).query("select e " +
                         "from itpearls_IteractionList e " +
                         "where e.numberIteraction = :number")
                         .parameter("number", numberIteraction)
-                        .view( "iteractionList-view" )
+                        .view("iteractionList-view")
                         .one();
-            } catch ( IllegalStateException e ) {
+            } catch (IllegalStateException e) {
                 myClient = false;
             }
 
-            if( oldIteraction.getDateIteraction().before( new Date(System.currentTimeMillis() - 2628000000l)  ) ) {
+            if (oldIteraction.getDateIteraction().before(new Date(System.currentTimeMillis() - 2628000000l))) {
                 // все зашибись и кандидат свободен
                 myClient = true;
             } else {
-                if( oldIteraction.getRecrutier().equals( userSession.getUser() ) ) {
+                if (oldIteraction.getRecrutier().equals(userSession.getUser())) {
                     myClient = true;
                 } else {
                     myClient = false;
@@ -553,9 +557,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             "from itpearls_IteractionList e " +
                             "where e.candidate = :candidate",
                     Integer.class)
-                    .parameter("candidate", candidateField.getValue() )
+                    .parameter("candidate", candidateField.getValue())
                     .one();
-        } catch ( NullPointerException | IllegalStateException e ) {
+        } catch (NullPointerException | IllegalStateException e) {
             d = 0;
         }
 
@@ -579,16 +583,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             "(select max(f.numberIteraction) " +
                             "from itpearls_IteractionList f " +
                             "where f.candidate = :candidate)")
-                    .parameter("candidate", getEditedEntity().getCandidate() )
+                    .parameter("candidate", getEditedEntity().getCandidate())
                     .view("iteractionList-view")
-                    .cacheable( true )
+                    .cacheable(true)
                     .one();
-        } catch ( IllegalStateException e ) {
+        } catch (IllegalStateException e) {
             duplicateIteraction = null;
         }
         // а вдруг пустое поле?
-        if( duplicateIteraction.getVacancy() != null ) {
-            vacancyFiels.setValue( duplicateIteraction.getVacancy() );
+        if (duplicateIteraction.getVacancy() != null) {
+            vacancyFiels.setValue(duplicateIteraction.getVacancy());
         }
     }
 
@@ -607,8 +611,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        if(PersistenceHelper.isNew(getEditedEntity())) {
-            recrutierField.setValue( userSession.getUser() );
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            recrutierField.setValue(userSession.getUser());
         }
     }
 
@@ -621,12 +625,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
         changeField();
         // надпись на кнопке
-        if( iteractionTypeField.getValue().getCallButtonText() != null )
+        if (iteractionTypeField.getValue().getCallButtonText() != null)
             buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
         // если установлен тип взаиподейтвия и нужно действие
-        if( iteractionTypeField.getValue() != null )
-            if( iteractionTypeField.getValue().getCallForm() != null )
-                if(iteractionTypeField.getValue().getCallForm())
+        if (iteractionTypeField.getValue() != null)
+            if (iteractionTypeField.getValue().getCallForm() != null)
+                if (iteractionTypeField.getValue().getCallForm())
                     buttonCallAction.setVisible(true);
                 else
                     buttonCallAction.setVisible(false);
@@ -634,16 +638,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     @Subscribe
-    public void onInit( InitEvent event ) {
+    public void onInit(InitEvent event) {
         // изначально предполагаем, что это продолжение проекта
         newProject = false;
         // вся сортировка в поле IteractionType
         iteractionTypesLc.removeParameter("number");
 
-        addDate.setVisible( false );
-        addString.setVisible( false );
-        addInteger.setVisible( false );
-        addDate.setVisible( false );
+        addDate.setVisible(false);
+        addString.setVisible(false);
+        addInteger.setVisible(false);
+        addDate.setVisible(false);
 
         askFlag = false;
         askFlag2 = false;
@@ -658,23 +662,32 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         String calledClass = iteractionTypeField.getValue().getCallClass();
         // еслп установлено разрешение в Iteraction показать кнопку и установить на ней надпсит
-        if( iteractionTypeField.getValue() != null)
-            if( iteractionTypeField.getValue().getCallForm() != null )
-                if(!iteractionTypeField.getValue().getCallForm() ) {
+        if (iteractionTypeField.getValue() != null)
+            if (iteractionTypeField.getValue().getCallForm() != null)
+                if (!iteractionTypeField.getValue().getCallForm()) {
+                } else {
+                    // Это лишнее - тут надо вызов формы сиска резюме или других документов
+                    if (getEditedEntity().getIteractionType().getFindToDic()) {
+                        Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+                                .newEntity()
+                                .withScreenId(calledClass + ".edit")
+                                .withLaunchMode(OpenMode.NEW_TAB)
+                                .withInitializer(e -> {
+                                })
+                                .build();
+                    } else {
+                        Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+                                .newEntity()
+                                .withScreenId(calledClass + ".edit")
+                                .withLaunchMode(OpenMode.NEW_TAB)
+                                .withInitializer(e -> {
+                                    // e.setValue( "exchange", exchangeBean );
+                                })
+                                .build();
+
+                        a.show();
+                    }
                 }
-                else {
-
-                    Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
-                            .newEntity()
-                            .withScreenId(calledClass + ".edit")
-                            .withLaunchMode(OpenMode.NEW_TAB)
-                            .withInitializer( e -> {
-                                // e.setValue( "exchange", exchangeBean );
-                            })
-                            .build();
-
-                            a.show();
-        }
     }
 
     public void addNewIteraction() {
@@ -682,11 +695,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         closeWithCommit();
 
-        screenBuilders.editor( IteractionList.class, this )
+        screenBuilders.editor(IteractionList.class, this)
                 .newEntity()
-                .withScreenClass( IteractionListEdit.class )
-                .withLaunchMode( OpenMode.NEW_TAB )
-                .withInitializer( e -> {
+                .withScreenClass(IteractionListEdit.class)
+                .withLaunchMode(OpenMode.NEW_TAB)
+                .withInitializer(e -> {
                     e.setCandidate(this.getEditedEntity().getCandidate());
                     e.setVacancy(this.getEditedEntity().getVacancy());
 //                    e.setCompanyDepartment(this.getEditedEntity().getCompanyDepartment());
@@ -697,7 +710,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         iteractionListDl.load();
     }
 
-    public void setTransferFlag( Boolean flag ) {
+    public void setTransferFlag(Boolean flag) {
         transferFlag = flag;
     }
 
@@ -706,27 +719,27 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     public void onButtonSubscribeClick() {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()
-                    .withCaption( "WARNING!" )
-                    .withMessage( "Сохранить изменения?" )
-                    .withActions( new DialogAction(DialogAction.Type.YES,
+                    .withCaption("WARNING!")
+                    .withMessage("Сохранить изменения?")
+                    .withActions(new DialogAction(DialogAction.Type.YES,
                                     Action.Status.PRIMARY).withHandler(e -> {
-                                        commitChanges();
+                                commitChanges();
 
-                                         screenBuilders.editor(SubscribeCandidateAction.class, this)
-                                                .newEntity()
-                                                .withInitializer(k -> {
-                                                    k.setCandidate(candidateField.getValue());
-                                                    k.setSubscriber(userSession.getUser());
-                                                    k.setStartDate(new Date());
-                                                })
-                                                .withOpenMode(OpenMode.DIALOG)
-                                                .build()
-                                                .show();
+                                screenBuilders.editor(SubscribeCandidateAction.class, this)
+                                        .newEntity()
+                                        .withInitializer(k -> {
+                                            k.setCandidate(candidateField.getValue());
+                                            k.setSubscriber(userSession.getUser());
+                                            k.setStartDate(new Date());
+                                        })
+                                        .withOpenMode(OpenMode.DIALOG)
+                                        .build()
+                                        .show();
 
                             }),
-                            new DialogAction(DialogAction.Type.NO) )
+                            new DialogAction(DialogAction.Type.NO))
                     .show();
 
         } else {

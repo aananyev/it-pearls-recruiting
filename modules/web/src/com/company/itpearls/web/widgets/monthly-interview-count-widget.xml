@@ -45,95 +45,147 @@
             </cssLayout>
             <vbox spacing="false"
                   width="100%">
-                <hbox width="100%">
-                <cssLayout stylename="widget-mountly-interview-table-1"
-                           width="90%"
-                           height="AUTO">
-                    <label id="labelCountNewContacts"
-                           stylename="widget-table-item-title"
-                           align="MIDDLE_LEFT"/>
-                </cssLayout>
-                <cssLayout stylename="widget-mountly-interview-table-1"
-                           width="AUTO"
-                           height="AUTO">
-                    <label id="labelCountNewContactsValue"
-                           stylename="widget-table-item-value"
-                           align="MIDDLE_RIGHT"/>
-                </cssLayout>
+                <!-- Новый контакт -->
+                <hbox width="100%"
+                      expand="countNewContactCssLayout">
+                    <cssLayout id="countNewContactCssLayout"
+                               stylename="widget-mountly-interview-table-1"
+                               width="80%"
+                               height="AUTO">
+                        <label id="labelCountNewContacts"
+                               align="MIDDLE_LEFT"/>
+                    </cssLayout>
+                    <cssLayout stylename="widget-mountly-interview-table-1"
+                               width="AUTO"
+                               height="100%">
+                        <label id="labelCountNewContactsValue"/>
+                    </cssLayout>
                 </hbox>
-                <cssLayout stylename="widget-mountly-interview-table-2"
-                           width="100%"
-                           height="AUTO">
-                    <label id="labelCountProposeJob"
-                           width="90%"
-                           stylename="widget-table-item-title"
-                           align="MIDDLE_LEFT"/>
-                    <label id="labelCountProposeJobValue"
-                           stylename="widget-table-item-value"
-                           width="AUTO"
-                           align="MIDDLE_RIGHT"/>
-                </cssLayout>
-                <cssLayout stylename="widget-mountly-interview-table-1"
-                           width="100%"
-                           height="AUTO">
-                    <label id="labelAssignInternalInterview"
-                           width="90%"
-                           stylename="widget-table-item-title"
-                           align="MIDDLE_LEFT"/>
-                    <label id="labelAssignInternalInterviewValue"
-                           stylename="widget-table-item-value"
-                           width="AUTO"
-                           align="MIDDLE_RIGHT"/>
-                </cssLayout>
-                <cssLayout stylename="widget-mountly-interview-table-2"
-                           width="100%"
-                           height="100%">
-                    <label id="labelPrepareInternalInterview"
-                           width="90%"
-                           stylename="widget-table-item-title"
-                           align="MIDDLE_LEFT"/>
-                    <label id="labelPrepareInternalInterviewValus"
-                           stylename="widget-table-item-value"
-                           width="AUTO"
-                           align="MIDDLE_RIGHT"/>
-                </cssLayout>
-                <cssLayout stylename="widget-mountly-interview-table-1"
-                           width="100%"
-                           height="100%">
-                    <label id="labelAssignExternalInterview"
-                           width="90%"
-                           stylename="widget-table-item-title"
-                           align="MIDDLE_LEFT"/>
-                    <label id="labelAssignExternalInterviewValue"
-                           stylename="widget-table-item-value"
-                           width="AUTO"
-                           align="MIDDLE_RIGHT"/>
-                </cssLayout>
-                <cssLayout stylename="widget-mountly-interview-table-2"
-                           width="100%"
-                           height="100%">
-                    <label id="labelPrepareExternalInterview"
-                           width="90%"
-                           stylename="widget-table-item-title"
-                           align="MIDDLE_LEFT"/>
-                    <label id="labelPrepareExternalInterviewValue"
-                           stylename="widget-table-item-value"
-                           width="AUTO"
-                           align="MIDDLE_RIGHT"/>
-                </cssLayout>
-                <cssLayout stylename="widget-mountly-interview-table-1"
-                           width="100%"
-                           height="100%">
-                    <label id="labelDirectorsInterview"
-                           width="90%"
-                           stylename="widget-table-item-title"
-                           align="MIDDLE_LEFT"/>
-                    <label id="labelDirectorsInterviewValue"
-                           stylename="widget-table-item-value"
-                           width="AUTO"
-                           htmlEnabled="true"
-                           align="MIDDLE_RIGHT"/>
-                </cssLayout>
+                <!-- Предложение работы -->
+                <hbox width="100%"
+                      expand="countProposeCssLayout">
+                    <cssLayout id="countProposeCssLayout"
+                               stylename="widget-mountly-interview-table-2"
+                               width="80%"
+                               height="AUTO">
+                        <label id="labelCountProposeJob"
+                               width="90%"
+                               stylename="widget-table-item-title"
+                               align="MIDDLE_LEFT"/>
+                    </cssLayout>
+                    <cssLayout stylename="widget-mountly-interview-table-2"
+                               width="AUTO"
+                               height="AUTO">
+                        <label id="labelCountProposeJobValue"
+                               stylename="widget-table-item-value"
+                               width="AUTO"
+                               height="100%"
+                               align="MIDDLE_RIGHT"/>
+                    </cssLayout>
+                </hbox>
+                <!-- Назначено собеседование с рекрутером IT Pearls -->
+                <hbox width="100%"
+                      expand="assignInternalInterviewCssLayout">
+                    <cssLayout id="assignInternalInterviewCssLayout"
+                               stylename="widget-mountly-interview-table-1"
+                               width="100%"
+                               height="AUTO">
+                        <label id="labelAssignInternalInterview"
+                               width="90%"
+                               stylename="widget-table-item-title"
+                               align="MIDDLE_LEFT"/>
+                    </cssLayout>
+                    <cssLayout stylename="widget-mountly-interview-table-1"
+                               width="AUTO"
+                               height="100%">
+                        <label id="labelAssignInternalInterviewValue"
+                               stylename="widget-table-item-value"
+                               width="AUTO"
+                               height="100%"
+                               align="MIDDLE_RIGHT"/>
+                    </cssLayout>
+                </hbox>
+                <!-- Прошел собеседование с рекрутером IT -->
+                <hbox width="100%"
+                      expand="prepareInternalInterview">
+                    <cssLayout id="prepareInternalInterview" stylename="widget-mountly-interview-table-2"
+                               width="100%"
+                               height="100%">
+                        <label id="labelPrepareInternalInterview"
+                               width="90%"
+                               stylename="widget-table-item-title"
+                               align="MIDDLE_LEFT"/>
+                    </cssLayout>
+                    <cssLayout stylename="widget-mountly-interview-table-2"
+                               width="AUTO"
+                               height="AUTO">
+                        <label id="labelPrepareInternalInterviewValus"
+                               stylename="widget-table-item-value"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"/>
+                    </cssLayout>
+                </hbox>
+                <!-- Назначено техническое собеседование -->
+                <hbox width="100%"
+                      expand="assignExternalInterviewSccLayout">
+                    <cssLayout id="assignExternalInterviewSccLayout" stylename="widget-mountly-interview-table-1"
+                               width="100%"
+                               height="100%">
+                        <label id="labelAssignExternalInterview"
+                               width="90%"
+                               stylename="widget-table-item-title"
+                               align="MIDDLE_LEFT"/>
+                    </cssLayout>
+                    <cssLayout stylename="widget-mountly-interview-table-1"
+                               width="AUTO"
+                               height="AUTO">
+                        <label id="labelAssignExternalInterviewValue"
+                               stylename="widget-table-item-value"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"/>
+                    </cssLayout>
+                </hbox>
+                <!-- Прошел техническое собеседование -->
+                <hbox width="100%"
+                      expand="prepareExternalInterviewCssLayout">
+                    <cssLayout id="prepareExternalInterviewCssLayout" stylename="widget-mountly-interview-table-2"
+                               width="100%"
+                               height="100%">
+                        <label id="labelPrepareExternalInterview"
+                               width="90%"
+                               stylename="widget-table-item-title"
+                               align="MIDDLE_LEFT"/>
+                    </cssLayout>
+                    <cssLayout stylename="widget-mountly-interview-table-2"
+                               width="AUTO"
+                               height="AUTO">
+                        <label id="labelPrepareExternalInterviewValue"
+                               stylename="widget-table-item-value"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"/>
+                    </cssLayout>
+                </hbox>
+                <!-- Прошел собеседование с Директором -->
+                <hbox width="100%"
+                      expand="directorsInterview">
+                    <cssLayout id="directorsInterview" stylename="widget-mountly-interview-table-1"
+                               width="100%"
+                               height="100%">
+                        <label id="labelDirectorsInterview"
+                               width="90%"
+                               stylename="widget-table-item-title"
+                               align="MIDDLE_LEFT"/>
+                    </cssLayout>
+                    <cssLayout stylename="widget-mountly-interview-table-1"
+                               width="AUTO"
+                               height="AUTO">
+                        <label id="labelDirectorsInterviewValue"
+                               stylename="widget-table-item-value"
+                               width="AUTO"
+                               htmlEnabled="true"
+                               align="MIDDLE_RIGHT"/>
+                    </cssLayout>
+                </hbox>
             </vbox>
         </vbox>
     </layout>
