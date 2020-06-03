@@ -9,6 +9,7 @@
             width="100%">
         <vbox id="funnelHuntingWindgetGroupBox"
               width="100%"
+              height="100%"
               expand="boxWidgetTitle"
               spacing="false">
             <cssLayout id="widgetTitleBox"
@@ -18,7 +19,6 @@
                 <label id="widgetTitle"
                        width="100%"
                        htmlEnabled="false"
-                       align="MIDDLE_CENTER"
                        height="100%"/>
             </cssLayout>
             <hbox id="boxWidgetTitle"
@@ -34,14 +34,14 @@
                       expand="researcherTitleColumn"
                       align="BOTTOM_LEFT">
                     <cssLayout id="researcherTitleColumn"
-                               height="AUTO"
+                               height="100%"
                                stylename="widget-table-header"
                                width="100%">
                         <label id="researcherTitle"
                                width="100%"
                                value="Ресерчер"
                                stylename="widget-table-header"
-                               height="AUTO"/>
+                               height="100%"/>
                     </cssLayout>
                 </vbox>
             </hbox>

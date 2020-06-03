@@ -35,12 +35,23 @@
                 width="800"/>
     <layout expand="vboxMain" spacing="true">
         <vbox id="vboxMain" width="100%" expand="calendarGroupBox">
-            <groupBox id="calendarGroupBox" height="AUTO" width="100%" expand="interviewCalendar"
+            <groupBox id="calendarGroupBox"
+                      height="AUTO"
+                      width="100%"
+                      expand="interviewCalendar"
                       caption="mainMsg://msgInterviewCalendar">
-                <hbox id="hBox" width="100%" align="MIDDLE_CENTER">
-                    <label value="msg://msgCurrentMounth" align="BOTTOM_LEFT" height="100%" stylename="h2"/>
-                    <datePicker id="monthPicker" width="100%" height="100%"
-                                resolution="MONTH" visible="false"/>
+                <hbox id="hBox"
+                      width="100%"
+                      align="MIDDLE_CENTER">
+                    <label value="msg://msgCurrentMounth"
+                           align="BOTTOM_LEFT"
+                           height="100%"
+                           stylename="h2"/>
+                    <datePicker id="monthPicker"
+                                width="100%"
+                                height="100%"
+                                resolution="MONTH"
+                                visible="false"/>
                 </hbox>
                 <calendar id="interviewCalendar"
                           navigationButtonsVisible="true"
@@ -51,11 +62,26 @@
                           startDate="2020-05-01"
                           endDate="2020-05-31"/>
             </groupBox>
-            <groupBox id="filterGroupBox" width="100%" height="AUTO">
+            <groupBox id="filterGroupBox"
+                      width="100%"
+                      height="AUTO">
                 <hbox spacing="true">
-                    <checkBox id="huntingCheckBox" caption="msg://huntingCheckBox.msg" align="MIDDLE_LEFT" height="AUTO" width="AUTO"/>
-                    <checkBox id="toConpanyCheckBox" caption="msg://toCompanyInterview.msg" align="MIDDLE_LEFT" height="AUTO" width="AUTO"/>
-                    <radioButtonGroup id="typeCalendar" orientation="horizontal" align="MIDDLE_RIGHT" height="AUTO" width="AUTO" visible="false"/>
+                    <checkBox id="huntingCheckBox"
+                              caption="msg://huntingCheckBox.msg"
+                              align="MIDDLE_LEFT"
+                              height="AUTO"
+                              width="AUTO"/>
+                    <checkBox id="toConpanyCheckBox"
+                              caption="msg://toCompanyInterview.msg"
+                              align="MIDDLE_LEFT"
+                              height="AUTO"
+                              width="AUTO"/>
+                    <radioButtonGroup id="typeCalendar"
+                                      orientation="horizontal"
+                                      align="MIDDLE_RIGHT"
+                                      height="AUTO"
+                                      width="AUTO"
+                                      visible="true"/>
                 </hbox>
             </groupBox>
         </vbox>

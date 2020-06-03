@@ -246,6 +246,7 @@
         <property name="iteractionType" fetch="BATCH" view="_minimal">
             <property name="iterationName"/>
             <property name="calendarItemStyle"/>
+            <property name="calendarItemDescription"/>
             <property name="calendarItem"/>
             <property name="pic"/>
             <property name="iteractionTree"/>

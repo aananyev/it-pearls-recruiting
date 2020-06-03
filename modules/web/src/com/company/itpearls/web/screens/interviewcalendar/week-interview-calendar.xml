@@ -52,9 +52,16 @@
             </groupBox>
             <groupBox id="filterGroupBox" width="100%" height="AUTO">
                 <hbox spacing="true">
-                    <checkBox id="huntingCheckBox" caption="msg://huntingCheckBox.msg" align="MIDDLE_LEFT" height="AUTO" width="AUTO"/>
-                    <checkBox id="toConpanyCheckBox" caption="msg://toCompanyInterview.msg" align="MIDDLE_LEFT" height="AUTO" width="AUTO"/>
-                    <radioButtonGroup id="typeCalendar" orientation="horizontal" align="MIDDLE_RIGHT" height="AUTO" width="AUTO" visible="false"/>
+                    <checkBox id="huntingCheckBox"
+                              caption="msg://huntingCheckBox.msg"
+                              align="MIDDLE_LEFT"
+                              height="AUTO"
+                              width="AUTO"/>
+                    <checkBox id="toConpanyCheckBox"
+                              caption="msg://toCompanyInterview.msg"
+                              align="MIDDLE_LEFT"
+                              height="AUTO"
+                              width="AUTO"/>
                 </hbox>
             </groupBox>
         </vbox>

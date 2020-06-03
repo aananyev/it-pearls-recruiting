@@ -105,6 +105,12 @@ order by e.number]]>
                                        caption="msg://msgCalendarItemStyle"
                                        dataContainer="iteractionDc"
                                        property="calendarItemStyle"/>
+                            <textField id="calendarItemDescriptionTextField"
+                                       align="TOP_LEFT"
+                                       width="100%"
+                                       caption="msg://msgCalendarItemDescription"
+                                       dataContainer="iteractionDc"
+                                       property="calendarItemDescription"/>
                         </groupBox>
                     </hbox>
                 </groupBox>

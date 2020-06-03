@@ -65,6 +65,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "CALENDAR_ITEM_STYLE")
     protected String calendarItemStyle;
 
+    @Column(name = "CALENDAR_ITEM_DESCRIPTION", length = 80)
+    protected String calendarItemDescription;
+
     @Column(name = "FIND_TO_DIC")
     protected Boolean findToDic;
 
@@ -174,6 +177,14 @@ public class Iteraction extends StandardEntity {
 
     public void setIterationName(String iterationName) {
         this.iterationName = iterationName;
+    }
+
+    public String getCalendarItemDescription() {
+        return calendarItemDescription;
+    }
+
+    public void setCalendarItemDescription(String calendarItemDescription) {
+        this.calendarItemDescription = calendarItemDescription;
     }
 
     public void setCalendarItem( Boolean calendarItem ) { this.calendarItem = calendarItem; }

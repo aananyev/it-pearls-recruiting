@@ -40,8 +40,8 @@ public class Interviewcalendar extends Screen {
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
-        huntingCheckBox.setValue( true );
-        toConpanyCheckBox.setValue( true );
+        huntingCheckBox.setValue(true);
+        toConpanyCheckBox.setValue(true);
 
 
         calendarDataDl.load();
@@ -58,25 +58,25 @@ public class Interviewcalendar extends Screen {
         interviewCalendar.unwrap(com.vaadin.v7.ui.Calendar.class).setFirstDayOfWeek(java.util.Calendar.MONDAY);
 
         Map<DayOfWeek, String> days = new HashMap<>(7);
-        days.put(DayOfWeek.MONDAY,"Понедельник");
-        days.put(DayOfWeek.TUESDAY,"Вторник");
-        days.put(DayOfWeek.WEDNESDAY,"Среда");
-        days.put(DayOfWeek.THURSDAY,"Четверг");
-        days.put(DayOfWeek.FRIDAY,"Пятница");
-        days.put(DayOfWeek.SATURDAY,"Суббота");
-        days.put(DayOfWeek.SUNDAY,"Воскресенье");
+        days.put(DayOfWeek.MONDAY, "Понедельник");
+        days.put(DayOfWeek.TUESDAY, "Вторник");
+        days.put(DayOfWeek.WEDNESDAY, "Среда");
+        days.put(DayOfWeek.THURSDAY, "Четверг");
+        days.put(DayOfWeek.FRIDAY, "Пятница");
+        days.put(DayOfWeek.SATURDAY, "Суббота");
+        days.put(DayOfWeek.SUNDAY, "Воскресенье");
         interviewCalendar.setDayNames(days);
     }
 
     private void createTypeCalendarRadioButton() {
         Map<String, Integer> typeCalendarRadioButton = new LinkedHashMap<>();
 
-        typeCalendarRadioButton.put( "День", 1 );
-        typeCalendarRadioButton.put( "Неделя", 2 );
-        typeCalendarRadioButton.put( "Месяц", 3 );
+        typeCalendarRadioButton.put("День", 1);
+        typeCalendarRadioButton.put("Неделя", 2);
+        typeCalendarRadioButton.put("Месяц", 3);
 
-        typeCalendar.setOptionsMap( typeCalendarRadioButton );
-        typeCalendar.setValue( 3 );
+        typeCalendar.setOptionsMap(typeCalendarRadioButton);
+        typeCalendar.setValue(3);
     }
 
     public static Date atStartOfDay(Date date) {
@@ -108,38 +108,38 @@ public class Interviewcalendar extends Screen {
     private void reformatCalendar() {
         Date currentDate = new Date();
 
-        if( typeCalendar.getValue().equals( 1 ) ) {
-            interviewCalendar.setStartDate( atStartOfDay( currentDate ) );
-            interviewCalendar.setEndDate( atEndOfDay( currentDate ));
+        if (typeCalendar.getValue().equals(1)) {
+            interviewCalendar.setStartDate(atStartOfDay(currentDate));
+            interviewCalendar.setEndDate(atEndOfDay(currentDate));
 
-            monthPicker.setResolution( DatePicker.Resolution.DAY );
+            monthPicker.setResolution(DatePicker.Resolution.DAY);
         }
 
-        if( typeCalendar.getValue().equals( 2 ) ) {
+        if (typeCalendar.getValue().equals(2)) {
 
             GregorianCalendar calendar = new GregorianCalendar();
-            calendar.setFirstDayOfWeek(java.util.Calendar.MONDAY );
+            calendar.setFirstDayOfWeek(java.util.Calendar.MONDAY);
 //            calendar.setTime( new Date() );
 
-            int today = calendar.get(java.util.Calendar.DAY_OF_WEEK );
-            calendar.add(java.util.Calendar.DAY_OF_WEEK, -today + java.util.Calendar.MONDAY );
-            interviewCalendar.setStartDate( calendar.getTime() );
+            int today = calendar.get(java.util.Calendar.DAY_OF_WEEK);
+            calendar.add(java.util.Calendar.DAY_OF_WEEK, -today + java.util.Calendar.MONDAY);
+            interviewCalendar.setStartDate(calendar.getTime());
 
-            calendar.add( GregorianCalendar.DAY_OF_MONTH, 6 );
-            interviewCalendar.setEndDate( calendar.getTime() );
+            calendar.add(GregorianCalendar.DAY_OF_MONTH, 6);
+            interviewCalendar.setEndDate(calendar.getTime());
 
-            monthPicker.setResolution( DatePicker.Resolution.MONTH );
+            monthPicker.setResolution(DatePicker.Resolution.MONTH);
         }
 
-        if( typeCalendar.getValue().equals( 3 ) ) {
+        if (typeCalendar.getValue().equals(3)) {
             java.util.Calendar c = new GregorianCalendar();
-            c.set( java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(c.DAY_OF_MONTH));
-            interviewCalendar.setEndDate( c.getTime() );
+            c.set(java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(c.DAY_OF_MONTH));
+            interviewCalendar.setEndDate(c.getTime());
 
-            c.set( java.util.Calendar.DAY_OF_MONTH, c.getActualMinimum(c.DAY_OF_MONTH));
-            interviewCalendar.setStartDate( c.getTime() );
+            c.set(java.util.Calendar.DAY_OF_MONTH, c.getActualMinimum(c.DAY_OF_MONTH));
+            interviewCalendar.setStartDate(c.getTime());
 
-            monthPicker.setResolution( DatePicker.Resolution.MONTH);
+            monthPicker.setResolution(DatePicker.Resolution.MONTH);
         }
 
         // updateCalendar();
@@ -149,40 +149,41 @@ public class Interviewcalendar extends Screen {
         CalendarEventProvider eventProvider = interviewCalendar.getEventProvider();
         eventProvider.removeAllEvents();
 
-        for( IteractionList list : calendarDataDc.getItems() ) {
+        for (IteractionList list : calendarDataDc.getItems()) {
             Date eventDate = list.getAddDate();
 
             SimpleCalendarEvent calendarEvent = new SimpleCalendarEvent();
-            calendarEvent.setCaption( list.getCandidate().getFullName() );
-            calendarEvent.setStart( eventDate );
+            calendarEvent.setCaption(list.getCandidate().getFullName());
+            calendarEvent.setStart(eventDate);
 
             // добавим час по умолчанию
-            GregorianCalendar calendar = new GregorianCalendar();;
+            GregorianCalendar calendar = new GregorianCalendar();
+            ;
 
-            calendar.setTime( eventDate );
-            calendar.add( GregorianCalendar.HOUR, 1 );
+            calendar.setTime(eventDate);
+            calendar.add(GregorianCalendar.HOUR, 1);
             eventDate = calendar.getTime();
 
-            calendarEvent.setEnd( eventDate );
+            calendarEvent.setEnd(eventDate);
 
-            if( list.getIteractionType().getCalendarItemStyle() != null )
-                calendarEvent.setStyleName( list.getIteractionType().getCalendarItemStyle() );
+            if (list.getIteractionType().getCalendarItemStyle() != null)
+                calendarEvent.setStyleName(list.getIteractionType().getCalendarItemStyle());
 
-            calendarEvent.setAllDay( true );
+            calendarEvent.setAllDay(false);
 
-            interviewCalendar.getEventProvider().addEvent( calendarEvent );
+            interviewCalendar.getEventProvider().addEvent(calendarEvent);
         }
     }
 
     @Subscribe("huntingCheckBox")
     public void onHuntingCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if( huntingCheckBox.getValue() ) {
-           calendarDataDl.setParameter( "numberInternal", "002" + "%" );
+        if (huntingCheckBox.getValue()) {
+            calendarDataDl.setParameter("numberInternal", "002" + "%");
         } else {
-            if( !toConpanyCheckBox.getValue() )
-                calendarDataDl.setParameter( "numberInternal", "nodata" );
+            if (!toConpanyCheckBox.getValue())
+                calendarDataDl.setParameter("numberInternal", "nodata");
             else
-                calendarDataDl.removeParameter( "numberInternal" );
+                calendarDataDl.removeParameter("numberInternal");
         }
 
         calendarDataDl.load();
@@ -192,13 +193,13 @@ public class Interviewcalendar extends Screen {
 
     @Subscribe("toConpanyCheckBox")
     public void onToConpanyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if( toConpanyCheckBox.getValue() ) {
-            calendarDataDl.setParameter( "numberExternal", "003" + "%" );
-        } else  {
-            if( !huntingCheckBox.getValue() )
-                calendarDataDl.setParameter( "numberExternal", "nodata" );
+        if (toConpanyCheckBox.getValue()) {
+            calendarDataDl.setParameter("numberExternal", "003" + "%");
+        } else {
+            if (!huntingCheckBox.getValue())
+                calendarDataDl.setParameter("numberExternal", "nodata");
             else
-                calendarDataDl.removeParameter( "numberExternal" );
+                calendarDataDl.removeParameter("numberExternal");
         }
 
         calendarDataDl.load();
@@ -209,8 +210,8 @@ public class Interviewcalendar extends Screen {
     @Subscribe("monthPicker")
     public void onMonthPickerValueChange(HasValue.ValueChangeEvent<java.sql.Date> event) {
         java.util.Calendar c = new GregorianCalendar();
-        c.setTime( event.getValue() );
-        c.add( java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(java.util.Calendar.DAY_OF_MONTH));
+        c.setTime(event.getValue());
+        c.add(java.util.Calendar.DAY_OF_MONTH, c.getActualMaximum(java.util.Calendar.DAY_OF_MONTH));
         interviewCalendar.setStartDate((event.getValue()));
         interviewCalendar.setEndDate(c.getTime());
 
