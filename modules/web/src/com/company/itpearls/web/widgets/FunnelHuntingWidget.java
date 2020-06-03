@@ -100,25 +100,24 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
         for (String a : listIteractionForCheck) {
             // бокс вертикальный для набора статистики
-            CssLayout vBox = uiComponents.create(CssLayout.class);
+            VBoxLayout vBox = uiComponents.create(VBoxLayout.class);
+            vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
+            vBox.setSpacing(false);
             vBox.setWidth(sizeColumn);
             vBox.setHeight("100%");
-            vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
 
             boxWidgetTitle.add(vBox);
-            boxWidgetTitle.expand(vBox);
             // бокс для фона элемента
             CssLayout titleBox = uiComponents.create(CssLayout.class);
-            titleBox.setWidth("100%");
-            titleBox.setHeight("100%");
-            titleBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            titleBox.setWidthFull();
+            titleBox.setHeightFull();
             titleBox.setStyleName("widget-table-header");
 
             vBox.add(titleBox);
             // заголовок
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
-            label.setWidthAuto();
             label.setHeight("100%");
+            label.setStyleName("widget-table-item-title");
             label.setValue(a);
 
             titleBox.add(label);
@@ -126,15 +125,16 @@ public class FunnelHuntingWidget extends ScreenFragment {
             Integer styleCount = 2;
 
             for (User user : reaearchers) {
-                CssLayout boxLayout = uiComponents.create(CssLayout.class);
-                boxLayout.setWidth("100%");
-                boxLayout.setHeightFull();
-                boxLayout.setStyleName("widget-table-header");
+
 
                 if (styleCount == 2)
                     styleCount = 1;
                 else
                     styleCount = 2;
+
+                CssLayout boxLayout = uiComponents.create(CssLayout.class);
+                boxLayout.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+                boxLayout.setWidthFull();
 
                 vBox.add(boxLayout);
 
@@ -153,9 +153,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
                 Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
 
                 labelCount.setValue(iteractionCount);
-                labelCount.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
-                labelCount.setAlignment(Component.Alignment.MIDDLE_CENTER);
-                labelCount.setWidth("100%");
+                labelCount.setStyleName("widget-table-item-value");
 
                 boxLayout.add(labelCount);
             }

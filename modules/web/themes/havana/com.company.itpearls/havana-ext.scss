@@ -31,6 +31,9 @@
 
 .widget-table-item-value {
     white-space: pre-line;
+    margin-left: auto;
+    margin-right: auto;
+    font-decoration: italic;
 }
 
 .widget-table-value {
@@ -54,35 +57,19 @@
     text-transform: uppercase;
 }
 
-.widget-header {
-    font-weight: bold;
-    text-decoration: underline;
-    padding: 5px;
-}
-
 .widget-table-header {
-    border: none;
-    white-space: pre-line;
     text-align: center;
+    white-space: pre-line;
     font-weight: bold;
     text-decoration: underline;
     background: #bea6ff;
 }
 
-.label_type {
+.label_type1 {
     color: red;
     background-color: yellow;
     line-height: 1.5;
     margin: 5px;
-}
-
-.v-caption-label {
-    border: none;
-    text-align: center;
-    font-weight: bold;
-    white-space: pre-line;
-    text-decoration: underline;
-    background: #bea6ff;
 }
 
 .widget-mountly-interview-table-1 {
