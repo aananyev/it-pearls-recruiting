@@ -2,6 +2,7 @@
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <menu id="application-hunting" insertBefore="application-hadbook">
         <item screen="itpearls_Interviewcalendar" icon="CALENDAR"/>
+        <item screen="itpearls_WeekInterviewCalendar" icon="CALENDAR"/>
         <item screen="itpearls_OpenPosition.browse" icon="USER_PLUS"/>
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>

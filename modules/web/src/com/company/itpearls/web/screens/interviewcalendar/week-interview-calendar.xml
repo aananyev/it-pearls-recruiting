@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
-        caption="msg://msgInterviewCal"
-        messagesPack="com.company.itpearls.web.screens.interviewcalendar"
-        icon="font-icon:CALENDAR">
+        caption="msg://caption"
+        messagesPack="com.company.itpearls.web.screens.interviewcalendar">
     <data>
         <collection id="calendarDataDc" class="com.company.itpearls.entity.IteractionList"
                     view="iteractionList-view">
@@ -38,7 +37,7 @@
             <groupBox id="calendarGroupBox" height="AUTO" width="100%" expand="interviewCalendar"
                       caption="mainMsg://msgInterviewCalendar">
                 <hbox id="hBox" width="100%" align="MIDDLE_CENTER">
-                    <label value="msg://msgCurrentMounth" align="BOTTOM_LEFT" height="100%" stylename="h2"/>
+                    <label value="msg://msgCurrentWeek" align="BOTTOM_LEFT" height="100%" stylename="h2"/>
                     <datePicker id="monthPicker" width="100%" height="100%"
                                 resolution="MONTH" visible="false"/>
                 </hbox>
@@ -48,8 +47,8 @@
                           caption="100%"
                           height="100%"
                           width="100%"
-                          startDate="2020-05-01"
-                          endDate="2020-05-31"/>
+                          startDate="2020-06-01"
+                          endDate="2020-06-07"/>
             </groupBox>
             <groupBox id="filterGroupBox" width="100%" height="AUTO">
                 <hbox spacing="true">
