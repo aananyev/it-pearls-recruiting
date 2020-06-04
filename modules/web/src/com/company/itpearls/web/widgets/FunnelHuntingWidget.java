@@ -112,6 +112,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
             titleBox.setWidthFull();
             titleBox.setHeightFull();
             titleBox.setStyleName("widget-table-header");
+            titleBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
             vBox.add(titleBox);
             // заголовок
@@ -134,6 +135,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
                 CssLayout boxLayout = uiComponents.create(CssLayout.class);
                 boxLayout.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+                boxLayout.setAlignment(Component.Alignment.MIDDLE_CENTER);
                 boxLayout.setWidthFull();
 
                 vBox.add(boxLayout);

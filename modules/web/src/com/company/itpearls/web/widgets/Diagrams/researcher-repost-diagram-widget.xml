@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+          xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
+    <data>
+    </data>
+    <layout>
+        <chart:serialChart id="makeInterview"
+                           categoryField="date"
+                           width="100%"
+                           plotAreaBorderAlpha="0"
+                           height="100%">
+            <chart:valueScrollbar offset="50"
+                                  oppositeAxis="false"
+                                  scrollbarHeight="10"/>
+            <chart:balloon adjustBorderColor="true"
+                           color="WHITE"
+                           horizontalPadding="10"
+                           verticalPadding="8"/>
+            <chart:graphs>
+                <chart:graph id="g1"
+                             valueField="count"/>
+            </chart:graphs>
+        </chart:serialChart>
+    </layout>
+</fragment>
