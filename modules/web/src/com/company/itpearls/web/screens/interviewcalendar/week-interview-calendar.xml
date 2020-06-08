@@ -39,14 +39,15 @@
                 <hbox id="hBox" width="100%" align="MIDDLE_CENTER">
                     <label value="msg://msgCurrentWeek" align="BOTTOM_LEFT" height="100%" stylename="h2"/>
                     <datePicker id="monthPicker" width="100%" height="100%"
-                                resolution="MONTH" visible="false"/>
+                                resolution="DAY" visible="false"/>
                 </hbox>
                 <calendar id="interviewCalendar"
                           navigationButtonsVisible="true"
                           timeFormat="24H"
-                          caption="100%"
                           height="100%"
                           width="100%"
+                          firstVisibleHourOfDay="8"
+                          lastVisibleHourOfDay="23"
                           startDate="2020-06-01"
                           endDate="2020-06-07"/>
             </groupBox>
@@ -59,6 +60,11 @@
                               width="AUTO"/>
                     <checkBox id="toConpanyCheckBox"
                               caption="msg://toCompanyInterview.msg"
+                              align="MIDDLE_LEFT"
+                              height="AUTO"
+                              width="AUTO"/>
+                    <checkBox id="showAllHour"
+                              caption="msg://msgShowAllHour"
                               align="MIDDLE_LEFT"
                               height="AUTO"
                               width="AUTO"/>

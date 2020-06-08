@@ -50,17 +50,46 @@ public class WeekInterviewCalendar extends Screen {
     private String typeIteraction = "Тип: ";
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private CheckBox showAllHour;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         huntingCheckBox.setValue(true);
         toConpanyCheckBox.setValue(true);
+        showAllHour.setValue(false);
 
         calendarDataDl.load();
 
+        setCurrentWeek();
         updateCalendar();
         setCalendarEventListener();
         setDaysOfWeekNames();
+    }
+
+    @Subscribe("showAllHour")
+    public void onShowAllHourValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+       if(showAllHour.getValue()) {
+           interviewCalendar.setFirstVisibleHourOfDay(8);
+           interviewCalendar.setLastVisibleHourOfDay(22);
+       } else {
+           interviewCalendar.setFirstVisibleHourOfDay(0);
+           interviewCalendar.setLastVisibleHourOfDay(24);
+       }
+    }
+
+    private void setCurrentWeek() {
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setFirstDayOfWeek(java.util.Calendar.MONDAY);
+
+        int today = calendar.get(java.util.Calendar.DAY_OF_WEEK);
+        calendar.add(java.util.Calendar.DAY_OF_WEEK, -today + java.util.Calendar.MONDAY);
+        interviewCalendar.setStartDate(calendar.getTime());
+
+        calendar.add(GregorianCalendar.DAY_OF_MONTH, 6);
+        interviewCalendar.setEndDate(calendar.getTime());
+
+        monthPicker.setResolution(DatePicker.Resolution.DAY);
     }
 
     String getTime(Date date) {

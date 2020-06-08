@@ -1,25 +1,18 @@
 package com.company.itpearls.web.widgets.Diagrams;
 
-import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Table;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.charts.gui.components.charts.SerialChart;
-import com.haulmont.charts.gui.data.DataItem;
 import com.haulmont.charts.gui.data.ListDataProvider;
 import com.haulmont.charts.gui.data.MapDataItem;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.gui.WindowParam;
-import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import com.haulmont.cuba.security.entity.User;
 import org.graalvm.compiler.debug.DebugContext;
 import org.graalvm.compiler.graph.Graph;
 import org.graalvm.compiler.options.OptionValues;
@@ -45,7 +38,6 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     private String ITRKT_PREPARE_TECH_INTERVIEW = "Прошел техническое собеседование";
     private String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
 
-//    Table<String, String, String> tableGraph = HashBasedTable.create();
     List<GraphTable>    tableGraph = new ArrayList<>();
 
     @WidgetParam
@@ -65,16 +57,11 @@ public class ResearcherDiagramWidget extends ScreenFragment {
         setValueDiagramData();
     }
 
-    List<Graph> graphs = new ArrayList<>();
-
     private void setGraphs() {
-/*        for(GraphTable a : tableGraph ) {
-            OptionValues option new OptionValues();
-            DebugContext debug;
 
-            Graph graph = new Graph(a.getGraphName(),option,debug);
-            graphs.
-        }*/
+        for(GraphTable a : tableGraph ) {
+        }
+
     }
 
     class GraphTable {
