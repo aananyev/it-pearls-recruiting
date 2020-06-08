@@ -1,4 +1,4 @@
-package com.company.itpearls.web.widgets;
+package com.company.itpearls.web.widgets.others;
 
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.cuba.gui.screen.ScreenFragment;

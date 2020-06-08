@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
           xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
+    <data>
+        <collection id="selectDataDc" class="com.company.itpearls.entity.IteractionList">
+            <loader id="selectDataDl">
+            </loader>
+        </collection>
+    </data>
     <layout width="100%" height="100%">
         <chart:serialChart id="makeInterview"
                            categoryField="date"

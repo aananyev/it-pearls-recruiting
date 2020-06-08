@@ -104,24 +104,17 @@ public class FunnelHuntingWidget extends ScreenFragment {
             vBox.setAlignment(Component.Alignment.BOTTOM_CENTER);
             vBox.setSpacing(false);
             vBox.setWidth(sizeColumn);
-            vBox.setHeight("100%");
 
             boxWidgetTitle.add(vBox);
-            // бокс для фона элемента
-            CssLayout titleBox = uiComponents.create(CssLayout.class);
-            titleBox.setWidthFull();
-            titleBox.setHeightFull();
-            titleBox.setStyleName("widget-table-header");
-            titleBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-            vBox.add(titleBox);
             // заголовок
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
-            label.setHeight("100%");
-            label.setStyleName("widget-table-item-title");
+            label.setWidthFull();
+            label.setHeightFull();
+            label.setStyleName("widget-table-header");
             label.setValue(a);
 
-            titleBox.add(label);
+            vBox.add(label);
+            vBox.expand(label);
 
             Integer styleCount = 2;
 
@@ -132,13 +125,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
                     styleCount = 1;
                 else
                     styleCount = 2;
-
-                CssLayout boxLayout = uiComponents.create(CssLayout.class);
-                boxLayout.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
-                boxLayout.setAlignment(Component.Alignment.MIDDLE_CENTER);
-                boxLayout.setWidthFull();
-
-                vBox.add(boxLayout);
 
                 String queryCounter = "select count(e) from itpearls_IteractionList e " +
                         "where e.dateIteraction between :startDate and :endDate and " +
@@ -155,9 +141,11 @@ public class FunnelHuntingWidget extends ScreenFragment {
                 Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
 
                 labelCount.setValue(iteractionCount);
-                labelCount.setStyleName("widget-table-item-value");
+                labelCount.setWidthFull();
+                labelCount.setHeightFull();
+                labelCount.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
 
-                boxLayout.add(labelCount);
+                vBox.add(labelCount);
             }
         }
     }

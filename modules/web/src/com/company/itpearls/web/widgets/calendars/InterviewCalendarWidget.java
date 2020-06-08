@@ -1,4 +1,4 @@
-package com.company.itpearls.web.widgets;
+package com.company.itpearls.web.widgets.calendars;
 
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;

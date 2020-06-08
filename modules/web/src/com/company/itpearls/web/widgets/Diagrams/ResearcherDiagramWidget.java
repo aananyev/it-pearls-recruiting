@@ -3,12 +3,14 @@ package com.company.itpearls.web.widgets.Diagrams;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
+import com.haulmont.charts.gui.amcharts.model.GraphType;
 import com.haulmont.charts.gui.components.charts.SerialChart;
 import com.haulmont.charts.gui.data.ListDataProvider;
 import com.haulmont.charts.gui.data.MapDataItem;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.gui.WindowParam;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -58,8 +60,12 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     }
 
     private void setGraphs() {
-
         for(GraphTable a : tableGraph ) {
+            com.haulmont.charts.gui.amcharts.model.Graph graph = new com.haulmont.charts.gui.amcharts.model.Graph();
+            graph.setType(GraphType.LINE);
+            graph.setDescriptionField(a.getGraphName());
+            graph.setValueField(a.getDataFieldName());
+            graph.setColorField(a.getGraphColor());
         }
 
     }
@@ -67,16 +73,27 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     class GraphTable {
         String  graphName;
         String  dataFieldName;
+        String  graphColor;
         String  query;
 
-        GraphTable(String graphName, String dataFieldName, String query) {
-            put(graphName, dataFieldName, query);
+        GraphTable(String graphName, String graphColor, String dataFieldName, String query) {
+            put(graphName, graphColor, dataFieldName, query);
         }
 
-        public void put(String graphName, String dataFieldName, String query) {
+        public void put(String graphName, String graphColor, String dataFieldName, String query) {
             setGraphName(graphName);
             setDataFieldNamw(dataFieldName);
             setQuery(query);
+            setGraphColor(graphColor);
+
+        }
+
+        public String getGraphColor() {
+            return graphColor;
+        }
+
+        public void setGraphColor(String graphColor) {
+            this.graphColor = graphColor;
         }
 
         public String getGraphName() {
@@ -105,13 +122,13 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     }
 
     private void setInitHasTable() {
-       tableGraph.add(new GraphTable("new-contacts","new_contacts", ITRKT_NEW_CONTACT));
-       tableGraph.add(new GraphTable("propose-job", "propose_job", ITRKT_PROPOSE_JOB));
-       tableGraph.add(new GraphTable("assign-internal-interview", "assign_internal_interview", ITRKT_ASSIGN_ITPEARKS_INTERVIEW));
-       tableGraph.add(new GraphTable("prepare-internal-interview", "prepare_internal_interview", ITRKT_PREPARE_ITPEARKS_INTERVIEW));
-       tableGraph.add(new GraphTable("assign-tech-interview", "assign_tech_interview", ITRKT_ASSIGN_TECH_INTERVIEW));
-       tableGraph.add(new GraphTable("prepare-tech-interview", "prepare_tech_interview", ITRKT_PREPARE_TECH_INTERVIEW));
-       tableGraph.add(new GraphTable("prepare-director-interview", "prepare_director_interview", ITRKT_PREPARE_DIRECTOR_INTERVIEW));
+       tableGraph.add(new GraphTable("new-contacts","YELLOW", "new_contacts", ITRKT_NEW_CONTACT));
+       tableGraph.add(new GraphTable("propose-job", "YELLOW", "propose_job", ITRKT_PROPOSE_JOB));
+       tableGraph.add(new GraphTable("assign-internal-interview", "GREEN", "assign_internal_interview", ITRKT_ASSIGN_ITPEARKS_INTERVIEW));
+       tableGraph.add(new GraphTable("prepare-internal-interview", "GREEN", "prepare_internal_interview", ITRKT_PREPARE_ITPEARKS_INTERVIEW));
+       tableGraph.add(new GraphTable("assign-tech-interview", "GREEN", "assign_tech_interview", ITRKT_ASSIGN_TECH_INTERVIEW));
+       tableGraph.add(new GraphTable("prepare-tech-interview", "GREEN", "prepare_tech_interview", ITRKT_PREPARE_TECH_INTERVIEW));
+       tableGraph.add(new GraphTable("prepare-director-interview", "GREEN", "prepare_director_interview", ITRKT_PREPARE_DIRECTOR_INTERVIEW));
     }
 
     private void setValueDiagramData() {
