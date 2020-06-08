@@ -1,7 +1,10 @@
 package com.company.itpearls.web.widgets.Diagrams;
 
+import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Table;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.charts.gui.components.charts.SerialChart;
@@ -17,6 +20,9 @@ import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.entity.User;
+import org.graalvm.compiler.debug.DebugContext;
+import org.graalvm.compiler.graph.Graph;
+import org.graalvm.compiler.options.OptionValues;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -31,6 +37,16 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     protected Date startDate;
 
     private List<IteractionList> iteractionList = new ArrayList<>();
+    private String ITRKT_NEW_CONTACT = "Новый контакт";
+    private String ITRKT_PROPOSE_JOB = "Предложение работы";
+    private String ITRKT_ASSIGN_ITPEARKS_INTERVIEW = "Назначено собеседование с рекрутером IT Pearls";
+    private String ITRKT_PREPARE_ITPEARKS_INTERVIEW = "Прошел собеседование с рекрутером IT Pearls";
+    private String ITRKT_ASSIGN_TECH_INTERVIEW = "Назначено техническое собеседование";
+    private String ITRKT_PREPARE_TECH_INTERVIEW = "Прошел техническое собеседование";
+    private String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
+
+//    Table<String, String, String> tableGraph = HashBasedTable.create();
+    List<GraphTable>    tableGraph = new ArrayList<>();
 
     @WidgetParam
     @WindowParam
@@ -42,8 +58,73 @@ public class ResearcherDiagramWidget extends ScreenFragment {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        setInitHasTable();
         setDeafaultTimeInterval();
+
+        setGraphs();
         setValueDiagramData();
+    }
+
+    List<Graph> graphs = new ArrayList<>();
+
+    private void setGraphs() {
+/*        for(GraphTable a : tableGraph ) {
+            OptionValues option new OptionValues();
+            DebugContext debug;
+
+            Graph graph = new Graph(a.getGraphName(),option,debug);
+            graphs.
+        }*/
+    }
+
+    class GraphTable {
+        String  graphName;
+        String  dataFieldName;
+        String  query;
+
+        GraphTable(String graphName, String dataFieldName, String query) {
+            put(graphName, dataFieldName, query);
+        }
+
+        public void put(String graphName, String dataFieldName, String query) {
+            setGraphName(graphName);
+            setDataFieldNamw(dataFieldName);
+            setQuery(query);
+        }
+
+        public String getGraphName() {
+            return graphName;
+        }
+
+        public String getDataFieldName() {
+            return dataFieldName;
+        }
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setDataFieldNamw(String dataFieldName) {
+            this.dataFieldName = dataFieldName;
+        }
+
+        public void setGraphName(String graphName) {
+            this.graphName = graphName;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
+        }
+    }
+
+    private void setInitHasTable() {
+       tableGraph.add(new GraphTable("new-contacts","new_contacts", ITRKT_NEW_CONTACT));
+       tableGraph.add(new GraphTable("propose-job", "propose_job", ITRKT_PROPOSE_JOB));
+       tableGraph.add(new GraphTable("assign-internal-interview", "assign_internal_interview", ITRKT_ASSIGN_ITPEARKS_INTERVIEW));
+       tableGraph.add(new GraphTable("prepare-internal-interview", "prepare_internal_interview", ITRKT_PREPARE_ITPEARKS_INTERVIEW));
+       tableGraph.add(new GraphTable("assign-tech-interview", "assign_tech_interview", ITRKT_ASSIGN_TECH_INTERVIEW));
+       tableGraph.add(new GraphTable("prepare-tech-interview", "prepare_tech_interview", ITRKT_PREPARE_TECH_INTERVIEW));
+       tableGraph.add(new GraphTable("prepare-director-interview", "prepare_director_interview", ITRKT_PREPARE_DIRECTOR_INTERVIEW));
     }
 
     private void setValueDiagramData() {
@@ -51,17 +132,24 @@ public class ResearcherDiagramWidget extends ScreenFragment {
                 "from itpearls_IteractionList f " +
                 "where f.dateIteraction between :startDate and :endDate " +
                 "order by f.dateIteraction";
+        String QUERY_FOR_DIAGRAMM_NEW_CONTACTS = "select f " +
+                "from itpearls_IteractionList f " +
+                "where (f.dateIteraction between :startDate and :endDate) and " +
+                "f.iteractionType = (select e from itpearls_Iteraction e where e.iterationName like  \'" +
+                ITRKT_NEW_CONTACT+ "\') "+
+                "order by f.dateIteraction";
+        String QUERY_FOR_DIAGRAMM_ITERACTION_TYPE = "select f " +
+                "from itpearls_IteractionList f " +
+                "where (f.dateIteraction between :startDate and :endDate) and " +
+                "f.iteractionType = (select e from itpearls_Iteraction e where e.iterationName like  \'" +
+                ITRKT_ASSIGN_ITPEARKS_INTERVIEW + "\') "+
+                "order by f.dateIteraction";
 
         ListDataProvider dataProvider = new ListDataProvider();
 
-/*
-        iteractionList = dataManager.load(IteractionList.class)
-                .query(QUERY_FOR_DIAGRAMM)
-                .parameter("startDate", startDate)
-                .parameter("endDate", endDate)
-                .list(); */
-
         Date d = startDate;
+
+        List<Graph> graphs = new ArrayList<>();
 
         do {
             GregorianCalendar calendar = new GregorianCalendar();
@@ -69,20 +157,26 @@ public class ResearcherDiagramWidget extends ScreenFragment {
             calendar.add(Calendar.DAY_OF_MONTH,1);
 
             Date endDay = calendar.getTime();
-
-            LoadContext<IteractionList> loadContext = LoadContext.create(IteractionList.class)
-                    .setQuery(LoadContext.createQuery(QUERY_FOR_DIAGRAMM)
-                            .setParameter("startDate", d)
-                            .setParameter("endDate", endDay))
-                    .setView("iteractionList-view");
-
             d = calendar.getTime();
 
-            iteractionList = dataManager.loadList(loadContext);
+            MapDataItem dataItem = new MapDataItem();
 
-            Integer iteractionCount = iteractionList.size();
+            for(GraphTable a: tableGraph ) {
+                List<IteractionList> iteraction = new ArrayList<>();
 
-            dataProvider.addItem(new MapDataItem(ImmutableMap.of("date", d, "count", iteractionCount)));
+                LoadContext<IteractionList> loadCont  = LoadContext.create(IteractionList.class)
+                        .setQuery(LoadContext.createQuery(a.getQuery())
+                                .setParameter("startDate", d)
+                                .setParameter("endDate", endDay))
+                        .setView("iteractionList-view");
+                iteraction = dataManager.loadList(loadCont);
+
+                Integer count = iteraction.size();
+
+                dataItem.add(a.dataFieldName, count);
+            }
+
+            dataProvider.addItem(dataItem);
         } while (d.before(endDate));
 
         makeInterview.setDataProvider(dataProvider);
@@ -99,5 +193,4 @@ public class ResearcherDiagramWidget extends ScreenFragment {
             endDate = calendar.getTime();
         }
     }
-
 }

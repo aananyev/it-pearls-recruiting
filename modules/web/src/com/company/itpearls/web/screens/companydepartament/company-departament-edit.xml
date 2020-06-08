@@ -13,7 +13,7 @@
         <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
-                where e.comanyName not like \"%(не использовать)\"
+                where e.comanyName not like '%(не использовать)'
                 order by e.comanyName]]></query>
             </loader>
         </collection>

@@ -14,7 +14,7 @@
         <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="projectDepartmentsLc">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
-                where e.departamentRuName not like \"%(не использовать)\"
+                where e.departamentRuName not like '%(не использовать)'
                 order by e.departamentRuName]]></query>
             </loader>
         </collection>

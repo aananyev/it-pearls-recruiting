@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
-          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
           xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
     <layout width="100%" height="100%">
         <chart:serialChart id="makeInterview"
@@ -15,10 +14,27 @@
                            color="BLACK"
                            horizontalPadding="10"
                            verticalPadding="8"/>
+            <chart:valueAxes>
+                <chart:axis gridAlpha="0.07"
+                            position="LEFT"
+                            stackType="REGULAR"
+                            title="Количество взаимодействий"/>
+            </chart:valueAxes>
+            <chart:categoryAxis axisColor="#DADADA"
+                                gridAlpha="0.07"
+                                startOnAxis="true">
+            </chart:categoryAxis>
             <chart:graphs>
-                <chart:graph id="g1"
+<!--                <chart:graph id="allCountIteraction"
                              type="COLUMN"
-                             valueField="count"/>
+                             color="PURPLE"
+                             valueField="count"/> -->
+                <chart:graph id="internalInterviewGraph"
+                             type="SMOOTHED_LINE"
+                             color="GREEN"
+                             valueField="iinternalInterview"/>
+                <chart:graph id="newContacts"
+                             type="COLUMN"
             </chart:graphs>
         </chart:serialChart>
     </layout>
