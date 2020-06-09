@@ -1,0 +1,1 @@
+alter table ITPEARLS_ITEARCTION_REQUIREMENTS add column REQUIREMENT boolean ;

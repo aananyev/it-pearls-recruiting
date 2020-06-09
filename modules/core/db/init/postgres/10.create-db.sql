@@ -574,3 +574,22 @@ create table ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK (
     primary key (OPEN_POSITION_ID, RECRUTIES_TASKS_ID)
 )^
 -- end ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK
+-- begin ITPEARLS_ITEARCTION_REQUIREMENTS
+create table ITPEARLS_ITEARCTION_REQUIREMENTS (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    ITERACTION_ID uuid,
+    REQUIREMENT boolean,
+    REQUIREMENT_ALL boolean,
+    ITERACTION_REQUIREMEN_ID uuid,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_ITEARCTION_REQUIREMENTS

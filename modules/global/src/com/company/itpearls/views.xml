@@ -399,4 +399,9 @@
             </property>
         </property>
     </view>
+    <view entity="itpearls_ItearctionRequirements" name="itearctionRequirements-view" extends="_local">
+        <property name="iteraction" fetch="JOIN" view="_local"/>
+        <property name="iteractionRequirement" fetch="JOIN" view="_local"/>
+        <property name="requirement" fetch="AUTO"/>
+    </view>
 </views>

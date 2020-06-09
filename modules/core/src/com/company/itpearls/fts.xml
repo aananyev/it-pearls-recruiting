@@ -79,5 +79,8 @@
         <entity class="com.company.itpearls.entity.SubscribeCandidateAction">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.ItearctionRequirements">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>
