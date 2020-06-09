@@ -191,6 +191,7 @@ create table ITPEARLS_ITERACTION (
     CALL_CLASS varchar(30),
     CALL_FORM boolean,
     ADD_FLAG boolean,
+    SET_DATE_TIME boolean,
     ADD_TYPE integer,
     ADD_FIELD varchar(40),
     ADD_CAPTION varchar(80),

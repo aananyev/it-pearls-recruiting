@@ -47,10 +47,12 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private RadioButtonGroup radioButtonTypeNotifications;
     @Inject
     private TextField<String> lookupFieldEmails;
+    @Inject
+    private CheckBox checkBoxSetDefaultDateTime;
 
     @Subscribe("checkBoxCalendar")
     public void onCheckBoxCalendarValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        textFieldCalendarItemStyle.setRequired( checkBoxCalendar.getValue() );
+        textFieldCalendarItemStyle.setRequired(checkBoxCalendar.getValue());
     }
 
     @Subscribe
@@ -63,19 +65,23 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         radioButtonAddType.setOptionsMap(mapAddType);
 
         Map<String, Integer> mapTypeNotifications = new LinkedHashMap<>();
-        mapTypeNotifications.put( "Нет", 1);
-        mapTypeNotifications.put( "Только менеджеру", 2 );
-        mapTypeNotifications.put( "Подписчику вакансии", 3);
-        mapTypeNotifications.put( "Подписчику кандидата", 4);
-        mapTypeNotifications.put( "Определенным адресам (список)", 5 );
-        mapTypeNotifications.put( "Всем", 6 );
+        mapTypeNotifications.put("Нет", 1);
+        mapTypeNotifications.put("Только менеджеру", 2);
+        mapTypeNotifications.put("Подписчику вакансии", 3);
+        mapTypeNotifications.put("Подписчику кандидата", 4);
+        mapTypeNotifications.put("Определенным адресам (список)", 5);
+        mapTypeNotifications.put("Всем", 6);
 
-        radioButtonTypeNotifications.setOptionsMap( mapTypeNotifications );
+        radioButtonTypeNotifications.setOptionsMap(mapTypeNotifications);
     }
 
     @Subscribe("radioButtonAddType")
     public void onRadioButtonAddTypeValueChange(HasValue.ValueChangeEvent<Integer> event) {
-//       textFieldDBFieldName.setValue(radioButtonAddType.getLookupSelectedItems().getClass());
+        if (radioButtonAddType.getValue() == 1) {
+            checkBoxSetDefaultDateTime.setEnabled(true);
+        } else {
+            checkBoxSetDefaultDateTime.setEnabled(false);
+        }
     }
 
     @Subscribe
@@ -84,68 +90,68 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
             // embeddedPict.setIcon(getEditedEntity().getPic());
         } */
 
-        if( !PersistenceHelper.isNew( getEditedEntity() ) )
-            labelItercationName.setValue( getEditedEntity().getIterationName() );
+        if (!PersistenceHelper.isNew(getEditedEntity()))
+            labelItercationName.setValue(getEditedEntity().getIterationName());
 
-        labelWarning.setValue( messages.getMessage( getClass(), "msgForAdmin") );
+        labelWarning.setValue(messages.getMessage(getClass(), "msgForAdmin"));
 
         disablePicAndButton();
 
         setDisableElements();
 
-        if( radioButtonTypeNotifications.getValue() != null )
-            lookupFieldEmails.setEditable( radioButtonTypeNotifications.getValue().equals( 5 ) );
+        if (radioButtonTypeNotifications.getValue() != null)
+            lookupFieldEmails.setEditable(radioButtonTypeNotifications.getValue().equals(5));
         else
-            lookupFieldEmails.setEditable( false );
+            lookupFieldEmails.setEditable(false);
     }
 
     @Subscribe("radioButtonTypeNotifications")
     public void onRadioButtonTypeNotificationsValueChange(HasValue.ValueChangeEvent event) {
-        lookupFieldEmails.setEditable( radioButtonTypeNotifications.getValue().equals( 5 ) );
+        lookupFieldEmails.setEditable(radioButtonTypeNotifications.getValue().equals(5));
     }
 
     @Subscribe("checkBoxFlag")
     public void onCheckBoxFlagValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if( checkBoxFlag.getValue() ) {
+        if (checkBoxFlag.getValue()) {
             checkBoxCallDialog.setValue(false);
         }
 
-        radioButtonAddType.setRequired( checkBoxFlag.getValue() );
-        textFieldCaption.setRequired( checkBoxFlag.getValue() );
+        radioButtonAddType.setRequired(checkBoxFlag.getValue());
+        textFieldCaption.setRequired(checkBoxFlag.getValue());
 
         setDisableElements();
     }
 
     protected void setDisableElements() {
-        textFieldCaption.setEditable( checkBoxFlag.getValue() );
+        textFieldCaption.setEditable(checkBoxFlag.getValue());
 //        textFieldDBFieldName.setEditable( checkBoxFlag.getValue() );
-        radioButtonAddType.setEditable( checkBoxFlag.getValue() );
+        radioButtonAddType.setEditable(checkBoxFlag.getValue());
     }
 
     @Subscribe("checkBoxCallDialog")
     public void onCheckBoxCallDialogValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if( checkBoxCallDialog.getValue() )
-            checkBoxFlag.setValue( false );
+        if (checkBoxCallDialog.getValue())
+            checkBoxFlag.setValue(false);
 
         disablePicAndButton();
     }
 
     private void disablePicAndButton() {
-        if( !checkBoxCallDialog.getValue() ) {
-            textFieldCallButtonText.setEditable( false );
-            textFieldCallForm.setEditable( false );
+        if (!checkBoxCallDialog.getValue()) {
+            textFieldCallButtonText.setEditable(false);
+            textFieldCallForm.setEditable(false);
             // iteractionFieldPic.setEditable( false );
         } else {
-            textFieldCallButtonText.setEditable( true );
-            textFieldCallForm.setEditable( true );
+            textFieldCallButtonText.setEditable(true);
+            textFieldCallForm.setEditable(true);
             // iteractionFieldPic.setEditable( true );
         }
     }
 
     @Subscribe("iteractionFieldPic")
     public void onIteractionFieldPicValueChange(HasValue.ValueChangeEvent<String> event) {
-        String  iconURL = iteractionFieldPic.getValue();
-        embeddedPict.setSource(ThemeResource.class).setPath( iconURL );
+        String iconURL = iteractionFieldPic.getValue();
+        embeddedPict.setSource(ThemeResource.class).setPath(iconURL);
     }
 
     @Inject
@@ -155,9 +161,9 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-       if(PersistenceHelper.isNew(getEditedEntity())) {
-           getEditedEntity().setMandatoryIteraction(false);
-       }
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setMandatoryIteraction(false);
+        }
     }
 
     @Subscribe("iteractionCheckBoxMandatory")

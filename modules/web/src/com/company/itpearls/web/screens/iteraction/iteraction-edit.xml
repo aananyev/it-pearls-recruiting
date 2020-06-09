@@ -87,8 +87,17 @@ order by e.number]]>
                         <groupBox height="AUTO" spacing="true" width="100%">
                             <checkBox id="checkBoxFlag" caption="msg://msgAdd" dataContainer="iteractionDc"
                                       property="addFlag"/>
-                            <radioButtonGroup id="radioButtonAddType" caption="msg://msgRadioButton" width="50%"
-                                              dataContainer="iteractionDc" property="addType"/>
+                            <hbox expand="radioButtonAddType">
+                                <radioButtonGroup id="radioButtonAddType"
+                                                  caption="msg://msgRadioButton"
+                                                  width="AUTO"
+                                                  dataContainer="iteractionDc"
+                                                  property="addType"/>
+                                <checkBox id="checkBoxSetDefaultDateTime"
+                                          caption="msg://msgSetDefaultDateTime"
+                                          dataContainer="iteractionDc"
+                                          property="setDateTime"/>
+                            </hbox>
                             <textField id="textFieldCaption" caption="msg://msgCaption" dataContainer="iteractionDc"
                                        property="addCaption" width="100%"/>
                         </groupBox>

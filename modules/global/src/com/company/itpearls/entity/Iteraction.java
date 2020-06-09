@@ -47,6 +47,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "ADD_FLAG")
     protected Boolean addFlag;
 
+    @Column(name = "SET_DATE_TIME")
+    protected Boolean setDateTime;
+
     @Column(name = "ADD_TYPE")
     protected Integer addType;
 
@@ -109,6 +112,14 @@ public class Iteraction extends StandardEntity {
 
     public Boolean getAddFlag() {
         return addFlag;
+    }
+
+    public Boolean getSetDateTime() {
+        return setDateTime;
+    }
+
+    public void setSetDateTime(Boolean setDateTime) {
+        this.setDateTime = setDateTime;
     }
 
     public void setAddFlag(Boolean addFlag) {
