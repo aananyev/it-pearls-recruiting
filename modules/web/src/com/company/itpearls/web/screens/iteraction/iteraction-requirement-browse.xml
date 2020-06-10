@@ -52,24 +52,25 @@
                       expand="iteractionsTable"
                       height="100%">
                     <label stylename="h2" value="Источник"/>
-                    <dataGrid id="iteractionsTable"
+                    <treeDataGrid id="iteractionsTable"
                               width="100%"
                               height="100%"
+                              hierarchyProperty="iteractionTree"
                               columnsCollapsingAllowed="true"
                               dataContainer="iteractionsDc">
                         <columns>
-                            <column property="number"
+<!--                            <column property="number"
                                     id="number"
                                     width="50"
-                                    caption="msg://magNumberIteraction"/>
+                                    caption="msg://magNumberIteraction"/> -->
                             <column property="iteractionTree"
                                     id="iteractionTree"
-                                    collapsed="true"/>
+                                    collapsed="false"/>
                             <column property="iterationName"
                                     id="iterationName"
                                     caption="msg://msgIteraction"/>
                         </columns>
-                    </dataGrid>
+                    </treeDataGrid>
                 </vbox>
                 <vbox spacing="true"
                       width="100%"
@@ -80,6 +81,7 @@
                               width="100%"
                               height="100%"
                               editorEnabled="true"
+                              editorBuffered="true"
                               dataContainer="iteractionRequirementDc">
                         <columns>
                             <column property="iteractionRequirement"
