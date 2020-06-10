@@ -951,39 +951,47 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setTopLabel() {
         if (vacansyNameField.getValue() != null && projectNameField.getValue() != null) {
-            if (projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName() != null) {
-                String comanyName = projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName();
+            if (projectNameField.getValue() != null) {
+                if (projectNameField.getValue().getProjectDepartment() != null) {
+                    if (projectNameField.getValue().getProjectDepartment().getCompanyName() != null) {
+                        if (projectNameField.getValue().getProjectDepartment().getCompanyName() != null) {
+                            if (projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName() != null) {
+                                String comanyName = projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName();
 
-                labelOpenPosition.setValue(vacansyNameField.getValue() +
-                        " (" +
-                        (comanyName != null ? comanyName : "") +
-                        " : " +
-                        projectNameField.getValue().getProjectName() +
-                        ")");
-            }
+                                labelOpenPosition.setValue(vacansyNameField.getValue() +
+                                        " (" +
+                                        (comanyName != null ? comanyName : "") +
+                                        " : " +
+                                        projectNameField.getValue().getProjectName() +
+                                        ")");
+                            }
 
-            // а еще вывести комиссию
-            if (getRoleService.isUserRoles(userSession.getUser(), RESEARCHER)) {
-                labelTopComissionResearcher.setValue(labelResearcherSalary.getValue());
-                labelTopComissionResearcher.setVisible(true);
+                            // а еще вывести комиссию
+                            if (getRoleService.isUserRoles(userSession.getUser(), RESEARCHER)) {
+                                labelTopComissionResearcher.setValue(labelResearcherSalary.getValue());
+                                labelTopComissionResearcher.setVisible(true);
 
-                labelTopComissionRecrutier.setVisible(false);
-            } else {
-                labelTopComissionResearcher.setVisible(false);
-            }
+                                labelTopComissionRecrutier.setVisible(false);
+                            } else {
+                                labelTopComissionResearcher.setVisible(false);
+                            }
 
-            if (getRoleService.isUserRoles(userSession.getUser(), RECRUITER)) {
-                labelTopComissionRecrutier.setValue(labelRecrutierSalary.getValue());
-                labelTopComissionRecrutier.setVisible(true);
+                            if (getRoleService.isUserRoles(userSession.getUser(), RECRUITER)) {
+                                labelTopComissionRecrutier.setValue(labelRecrutierSalary.getValue());
+                                labelTopComissionRecrutier.setVisible(true);
 
-                labelTopComissionResearcher.setVisible(false);
-            } else {
-                labelTopComissionRecrutier.setVisible(false);
-            }
+                                labelTopComissionResearcher.setVisible(false);
+                            } else {
+                                labelTopComissionRecrutier.setVisible(false);
+                            }
 
-            if (getRoleService.isUserRoles(userSession.getUser(), MANAGER)) {
-                labelTopComissionRecrutier.setVisible(false);
-                labelTopComissionResearcher.setVisible(false);
+                            if (getRoleService.isUserRoles(userSession.getUser(), MANAGER)) {
+                                labelTopComissionRecrutier.setVisible(false);
+                                labelTopComissionResearcher.setVisible(false);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
