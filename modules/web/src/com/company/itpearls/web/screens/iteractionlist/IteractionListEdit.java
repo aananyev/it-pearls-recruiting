@@ -635,10 +635,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 else
                     buttonCallAction.setVisible(false);
 
-                if(iteractionTypeField.getValue().getSetDateTime()) {
-                    Date date = new Date();
+                if(iteractionTypeField.getValue() != null ) {
+                    if (iteractionTypeField.getValue().getSetDateTime()) {
+                        Date date = new Date();
 
-                    addDate.setValue(date);
+                        addDate.setValue(date);
+                    }
                 }
 
     }

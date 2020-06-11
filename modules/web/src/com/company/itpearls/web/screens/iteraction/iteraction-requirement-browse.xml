@@ -59,10 +59,10 @@
                               columnsCollapsingAllowed="true"
                               dataContainer="iteractionsDc">
                         <columns>
-<!--                            <column property="number"
+                            <column property="number"
                                     id="number"
                                     width="50"
-                                    caption="msg://magNumberIteraction"/> -->
+                                    caption="msg://magNumberIteraction"/>
                             <column property="iteractionTree"
                                     id="iteractionTree"
                                     collapsed="false"/>
