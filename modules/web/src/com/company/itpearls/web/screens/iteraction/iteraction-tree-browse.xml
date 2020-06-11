@@ -22,7 +22,10 @@ order by e.number]]></query>
                 dataLoader="iteractionsDl">
             <properties include=".*"/>
         </filter>
-        <treeTable id="iteractionTreeTable" height="200px" width="100%" dataContainer="iteractionsTreeDc"
+        <treeTable id="iteractionTreeTable"
+                   height="200px"
+                   width="100%"
+                   dataContainer="iteractionsTreeDc"
                    hierarchyProperty="iteractionTree">
             <columns>
                 <column id="number" width="70" align="CENTER"/>

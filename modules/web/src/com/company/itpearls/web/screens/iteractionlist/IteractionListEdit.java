@@ -1,11 +1,9 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
-import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
-import com.company.itpearls.web.screens.candidatecv.CandidateCVChoiseBrowse;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
@@ -21,17 +19,10 @@ import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import org.eclipse.persistence.jpa.jpql.parser.DateTime;
-import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.Date;
 
@@ -40,8 +31,6 @@ import java.util.Date;
 @EditedEntityContainer("iteractionListDc")
 @LoadDataBeforeShow
 public class IteractionListEdit extends StandardEditor<IteractionList> {
-    @Inject
-    private DataManager iteractionListEditDataManager;
     @Inject
     private UserSession userSession;
     @Inject
@@ -83,8 +72,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private EmailService emailService;
     @Inject
-    private Notifications notifications;
-    @Inject
     private ScreenBuilders screenBuilders;
     @Inject
     private Metadata metadata;
@@ -104,8 +91,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> companyLabel;
     @Inject
     private InstanceLoader<IteractionList> iteractionListDl;
-    @Inject
-    private Screens screens;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {

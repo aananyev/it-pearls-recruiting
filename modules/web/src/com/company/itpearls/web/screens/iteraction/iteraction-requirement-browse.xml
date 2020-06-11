@@ -10,7 +10,7 @@
                     view="iteraction-view">
             <loader id="iteractionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Iteraction e where e.iteractionTree is not null order by e.number, e.iterationName]]>
+                    <![CDATA[select e from itpearls_Iteraction e order by e.number]]>
                 </query>
             </loader>
         </collection>
@@ -56,20 +56,21 @@
                               width="100%"
                               height="100%"
                               hierarchyProperty="iteractionTree"
-                              columnsCollapsingAllowed="true"
                               dataContainer="iteractionsDc">
                         <columns>
                             <column property="number"
                                     id="number"
                                     width="50"
                                     caption="msg://magNumberIteraction"/>
-                            <column property="iteractionTree"
-                                    id="iteractionTree"
-                                    collapsed="false"/>
                             <column property="iterationName"
                                     id="iterationName"
                                     caption="msg://msgIteraction"/>
                         </columns>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
                     </treeDataGrid>
                 </vbox>
                 <vbox spacing="true"
