@@ -19,7 +19,7 @@
                     view="itearctionRequirements-view">
             <loader id="iteractionRequirementDl">
                 <query>
-                    <![CDATA[select f from itpearls_ItearctionRequirements f order by f.iteraction]]>
+                    <![CDATA[select f from itpearls_ItearctionRequirements f]]>
                     <condition>
                         <c:jpql>
                             <c:where>f.iteraction = :iteraction</c:where>
@@ -53,17 +53,19 @@
                       height="100%">
                     <label stylename="h2" value="Источник"/>
                     <treeDataGrid id="iteractionsTable"
-                              width="100%"
-                              height="100%"
-                              hierarchyProperty="iteractionTree"
-                              dataContainer="iteractionsDc">
+                                  width="100%"
+                                  height="100%"
+                                  editorBuffered="false"
+                                  editorEnabled="false"
+                                  hierarchyProperty="iteractionTree"
+                                  dataContainer="iteractionsDc">
                         <columns>
-                            <column property="number"
-                                    id="number"
-                                    width="50"
+                            <column id="number"
+                                    property="number"
+                                    width="80"
                                     caption="msg://magNumberIteraction"/>
-                            <column property="iterationName"
-                                    id="iterationName"
+                            <column id="iterationName"
+                                    property="iterationName"
                                     caption="msg://msgIteraction"/>
                         </columns>
                         <actions>
@@ -71,6 +73,11 @@
                             <action id="edit" type="edit"/>
                             <action id="remove" type="remove"/>
                         </actions>
+                        <buttonsPanel id="treeDataGridIteraction">
+                            <button id="addButton" action="iteractionsTable.add"/>
+                            <button id="editButton" action="iteractionsTable.edit"/>
+                            <button id="removeButton" action="iteractionsTable.remove"/>
+                        </buttonsPanel>
                     </treeDataGrid>
                 </vbox>
                 <vbox spacing="true"
@@ -82,11 +89,13 @@
                               width="100%"
                               height="100%"
                               editorEnabled="true"
-                              editorBuffered="true"
+                              editorBuffered="false"
+                              align="TOP_LEFT"
                               dataContainer="iteractionRequirementDc">
                         <columns>
                             <column property="iteractionRequirement"
                                     id="iteractionRequirement"
+                                    editable="false"
                                     caption="msg://msgIteractionRequirement"/>
                             <column property="requirement"
                                     id="requirement"
@@ -99,6 +108,14 @@
                                     editable="true"
                                     caption="msg://msgRequiredAll"/>
                         </columns>
+                        <actions>
+                            <action id="edit" type="edit"/>
+                        </actions>
+                        <buttonsPanel id="buttonPanelRequirements">
+                            <button id="editRequirementButton"
+                                    action="iteractionRequirementsTable.edit"
+                                    enable="false"/>
+                        </buttonsPanel>
                     </dataGrid>
                 </vbox>
             </hbox>

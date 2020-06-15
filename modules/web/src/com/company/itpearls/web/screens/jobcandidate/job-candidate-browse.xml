@@ -45,6 +45,7 @@ order by e.secondName, e.firstName]]>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
+                <action id="excel" type="excel"/>
             </actions>
             <columns>
                 <column id="fullName" caption="mainMsg://msgFullName"/>
@@ -64,6 +65,10 @@ order by e.secondName, e.firstName]]>
                 <button id="removeBtn" action="jobCandidatesTable.remove"/>
                 <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick"
                         icon="BELL"/>
+                <button id="buttonExcel"
+                        action="jobCandidatesTable.excel"
+                        visible="false"
+                        enable="false"/>
             </buttonsPanel>
         </groupTable>
         <groupBox orientation="horizontal" spacing="true">

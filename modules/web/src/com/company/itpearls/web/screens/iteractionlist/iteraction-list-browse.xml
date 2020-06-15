@@ -56,7 +56,12 @@
                 <button id="buttonCopy" caption="msg://msgCopyButton" invoke="onButtonCopyClick" icon="COPY"/>
                 <button id="editBtn" action="iteractionListsTable.edit"/>
                 <button id="removeBtn" action="iteractionListsTable.remove"/>
-                <button id="buttonExcel" action="iteractionListsTable.excel" caption="mainMsg://msgExcelExport" icon="FILE_EXCEL_O"/>
+                <button id="buttonExcel"
+                        action="iteractionListsTable.excel"
+                        enable="false"
+                        visible="false"
+                        caption="mainMsg://msgExcelExport"
+                        icon="FILE_EXCEL_O"/>
             </buttonsPanel>
         </groupTable>
         <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>

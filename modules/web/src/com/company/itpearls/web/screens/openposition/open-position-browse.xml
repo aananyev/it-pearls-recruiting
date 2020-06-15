@@ -67,7 +67,11 @@
                 <button id="editBtn" action="openPositionsTable.edit"/>
                 <button id="removeBtn" action="openPositionsTable.remove"/>
                 <button id="buttonSubscribe" caption="msg://mshSubscibe" invoke="subscribePosition" icon="BELL"/>
-                <button id="buttonExcel" action="openPositionsTable.excel" icon="EXCEL_ACTION"/>
+                <button id="buttonExcel"
+                        action="openPositionsTable.excel"
+                        icon="EXCEL_ACTION"
+                        enable="false"
+                        visible="false"/>
             </buttonsPanel>
         </table>
         <hbox spacing="true">

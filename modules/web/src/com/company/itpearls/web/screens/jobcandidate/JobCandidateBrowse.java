@@ -4,6 +4,7 @@ import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.SubscribeCandidateAction;
+import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FluentValuesLoader;
 import com.haulmont.cuba.gui.Dialogs;
@@ -44,6 +45,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private GroupTable<JobCandidate> jobCandidatesTable;
     @Inject
     private Notifications notifications;
+    @Inject
+    private GetRoleService getRoleService;
+    @Inject
+    private Button buttonExcel;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -59,6 +64,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidatesDl.removeParameter( "param3" );
 
         jobCandidatesDl.load();
+
+        buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
     }
 
     @Subscribe("checkBoxOnWork")
@@ -164,6 +171,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withOpenMode( OpenMode.DIALOG )
                 .build()
                 .show();
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+
     }
 
     /* @EventListener

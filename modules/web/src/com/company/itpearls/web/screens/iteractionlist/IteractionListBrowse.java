@@ -100,6 +100,6 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             buttonCopy.setEnabled( true );
         else
             buttonCopy.setEnabled( false );
-        
+
     }
 }

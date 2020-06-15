@@ -4,6 +4,9 @@ import com.company.itpearls.entity.ItearctionRequirements;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.components.DataGrid;
+import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.components.TreeDataGrid;
+import com.haulmont.cuba.gui.components.TreeTable;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -20,8 +23,6 @@ public class IteractionRequirementBrowse extends StandardLookup<Iteraction> {
     @Inject
     private CollectionLoader<ItearctionRequirements> iteractionRequirementDl;
     @Inject
-    private DataGrid<Iteraction> iteractionsTable;
-    @Inject
     private CollectionContainer<ItearctionRequirements> iteractionRequirementDc;
     @Inject
     private CollectionContainer<Iteraction> iteractionsDc;
@@ -29,10 +30,14 @@ public class IteractionRequirementBrowse extends StandardLookup<Iteraction> {
     private Metadata metadata;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private TreeDataGrid<Iteraction> iteractionsTable;
+    @Inject
+    private DataGrid<ItearctionRequirements> iteractionRequirementsTable;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-       setRequirement();
+        setRequirement();
     }
 
     private void setRequirement() {
@@ -56,8 +61,6 @@ public class IteractionRequirementBrowse extends StandardLookup<Iteraction> {
                         dataManager.commit(itearctionRequirements);
                     }
                 }
-
-                iteractionRequirementDl.load();
             }
         }
     }
@@ -66,7 +69,4 @@ public class IteractionRequirementBrowse extends StandardLookup<Iteraction> {
     public void onIteractionsTableSelection(DataGrid.SelectionEvent<Iteraction> event) {
         setRequirement();
     }
-
-
-
 }
