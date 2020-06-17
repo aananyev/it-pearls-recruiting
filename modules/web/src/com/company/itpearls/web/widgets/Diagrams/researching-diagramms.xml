@@ -2,43 +2,29 @@
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
           xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
     <data>
-        <collection id="selectDataDc" class="com.company.itpearls.entity.IteractionList">
-            <loader id="selectDataDl">
-            </loader>
-        </collection>
     </data>
-    <layout width="100%" height="100%">
+    <layout height="100%" width="100%">
         <chart:serialChart id="makeInterview"
                            categoryField="date"
-                           width="100%"
-                           plotAreaBorderAlpha="0"
-                           height="100%">
+                           width="100%">
             <chart:valueScrollbar offset="50"
                                   oppositeAxis="false"
                                   scrollbarHeight="10"/>
             <chart:balloon adjustBorderColor="true"
                            color="BLACK"
                            horizontalPadding="10"
-                           verticalPadding="8"/>
+                           verticalPadding="10"/>
             <chart:valueAxes>
                 <chart:axis gridAlpha="0.07"
                             position="LEFT"
                             stackType="REGULAR"
-                            title="Количество взаимодействий"/>
+                            title="Количество организованных собеседований"/>
             </chart:valueAxes>
-            <chart:categoryAxis axisColor="#DADADA"
-                                gridAlpha="0.07"
-                                startOnAxis="true">
-            </chart:categoryAxis>
             <chart:graphs>
-                <chart:graph id="allCountIteraction"
+                <chart:graph id="interviewGraph"
                              type="COLUMN"
-                             color="PURPLE"
-                             valueField="count"/>
-                <chart:graph id="internalInterviewGraph"
-                             type="SMOOTHED_LINE"
                              color="GREEN"
-                             valueField="iinternalInterview"/>
+                             valueField="count"/>
             </chart:graphs>
         </chart:serialChart>
     </layout>
