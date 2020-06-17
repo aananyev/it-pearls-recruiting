@@ -1,6 +1,7 @@
 package com.company.itpearls.web.widgets.Diagrams;
 
 import com.company.itpearls.entity.IteractionList;
+import com.company.itpearls.service.GetRoleService;
 import com.google.common.collect.ImmutableMap;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
@@ -54,6 +55,8 @@ public class Reserachereffectivity extends ScreenFragment {
     private SerialChart countIteractionChart;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private GetRoleService getRoleService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -108,14 +111,19 @@ public class Reserachereffectivity extends ScreenFragment {
                             .size();
                 }
 
-                dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
-                        a.getFirstName() + "\n" + a.getLastName())));
-
+                if(userRole != null) {
+                    if (getRoleService.checkUserRoles(a, userRole)) {
+                        dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
+                                a.getFirstName() + "\n" + a.getLastName())));
+                    }
+                } else {
+                    dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
+                            a.getFirstName() + "\n" + a.getLastName())));
+                }
             }
         }
 
         return dataProvider;
-
     }
 
     private void setDeafaultTimeInterval() {

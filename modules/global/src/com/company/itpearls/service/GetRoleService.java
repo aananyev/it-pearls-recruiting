@@ -8,4 +8,5 @@ public interface GetRoleService {
     String NAME = "itpearls_GetRoleService";
 
     Boolean isUserRoles(User user, String role);
+    Boolean checkUserRoles(User user, String role);
 }
