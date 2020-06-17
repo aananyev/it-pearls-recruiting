@@ -17,7 +17,7 @@ import java.util.*;
 
 @UiController("itpearls_MonthlyInterviewCountWidget")
 @UiDescriptor("monthly-interview-count-widget.xml")
-@DashboardWidget(name = "Mountly Iteraction Count")
+@DashboardWidget(name = "Mountly Iteraction Count") //+
 public class MonthlyInterviewCountWidget extends ScreenFragment {
     @Inject
     private Label<String> labelAssignExternalInterview;

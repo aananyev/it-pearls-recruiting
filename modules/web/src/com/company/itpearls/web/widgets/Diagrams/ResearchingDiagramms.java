@@ -30,7 +30,7 @@ import java.util.*;
 
 @UiController("itpearls_ResearchingDiagramms")
 @UiDescriptor("researching-diagramms.xml")
-@DashboardWidget(name = "Count interview diagramm")
+@DashboardWidget(name = "Count interview diagramm") // ++
 public class ResearchingDiagramms extends ScreenFragment {
 
     @WidgetParam
