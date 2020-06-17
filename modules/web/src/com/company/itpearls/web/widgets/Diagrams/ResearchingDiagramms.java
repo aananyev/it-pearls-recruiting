@@ -5,6 +5,8 @@ import com.company.itpearls.entity.IteractionList;
 import com.google.common.collect.ImmutableMap;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
+import com.haulmont.charts.gui.amcharts.model.Color;
+import com.haulmont.charts.gui.amcharts.model.Title;
 import com.haulmont.charts.gui.components.charts.SerialChart;
 import com.haulmont.charts.gui.data.DataProvider;
 import com.haulmont.charts.gui.data.ListDataProvider;
@@ -23,6 +25,7 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import jdk.jfr.ValueDescriptor;
 
 import javax.inject.Inject;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @UiController("itpearls_ResearchingDiagramms")
@@ -49,53 +52,41 @@ public class ResearchingDiagramms extends ScreenFragment {
 
     private static String GRAPH_X = "date";
     private static String GRAPH_Y = "count";
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.mm.yyyy");
 
     @Subscribe
     public void onInit(InitEvent event) {
-/*        String queryGraph = "select cast(e.dateIteraction as date), count(e) " +
-                "from itpearls_IteractionList e " +
-                "where (e.dateIteraction between :startDate and :endDate) and " +
-                "e.iteractionType = :iteraction " +
-                "group by date(e.dateIteraction) " +
-                "order by date(e.dateIteraction)";
-*/
         setDeafaultTimeInterval();
         makeInterview.setCategoryField(GRAPH_X);
-/*
-        Iteraction iteraction = dataManager.load(Iteraction.class)
-                .query("select f from itpearls_Iteraction f where f.iterationName = :iteractionName")
-                .parameter("iteractionName", iteractionName)
-                .view("_minimal")
-                .one();
-
-        ValueLoadContext loadContext = ValueLoadContext.create()
-                .setQuery(ValueLoadContext.createQuery(queryGraph)
-                        .setParameter("iteraction", iteraction)
-                        .setParameter("startDate", startDate)
-                        .setParameter("endDate", endDate))
-                .addProperty(GRAPH_X)
-                .addProperty(GRAPH_Y);
-
-        List<KeyValueEntity> iteractionCount = dataManager.loadValues(loadContext);
-*/
         makeInterview.setDataProvider(valueGraphs());
+        setDiagramTitle();
+    }
+
+    private void setDiagramTitle() {
+        List<Title> titles = new ArrayList<>();
+        titles.add(new Title().setText("Количество взаимодействий с кандидатами IT Pearls").setAlpha(1.0).setColor(Color.BLACK));
+        titles.add(new Title().setText(iteractionName).setAlpha(1.0).setColor(Color.GRAY).setSize(12));
+        titles.add(new Title().setText(dateFormat.format(startDate) + " - " +
+                dateFormat.format(endDate)).setAlpha(1.0).setColor(Color.BROWN).setSize(12));
+
+        makeInterview.setTitles(titles);
     }
 
     private ListDataProvider valueGraphs() {
-        String queryGraph = "select count(e) " +
+        String queryGraph = "select e " +
                 "from itpearls_IteractionList e " +
                 "where (e.dateIteraction between :startDate and :endDate) and " +
-                "e.iteractionType = :iteractionType";
+                "e.iteractionType in :iteractionType";
         ListDataProvider dataProvider = new ListDataProvider();
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.setTime(startDate);
 
-        Iteraction iteraction = dataManager.load(Iteraction.class)
-                .query("select f from itpearls_Iteraction f where f.iterationName = :iteractionName")
+        List<Iteraction> iteraction = dataManager.load(Iteraction.class)
+                .query("select f from itpearls_Iteraction f where f.iterationName like :iteractionName")
                 .parameter("iteractionName", iteractionName)
                 .view("_minimal")
-                .one();
+                .list();
 
         do {
 
