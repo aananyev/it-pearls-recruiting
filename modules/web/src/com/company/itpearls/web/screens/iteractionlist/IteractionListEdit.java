@@ -662,7 +662,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (!iteractionTypeField.getValue().getCallForm()) {
                 } else {
                     // Это лишнее - тут надо вызов формы сиска резюме или других документов
-                    if (getEditedEntity().getIteractionType().getFindToDic()) {
+                    if (iteractionTypeField.getValue().getFindToDic()) {
                         Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
                                 .newEntity()
                                 .withScreenId(calledClass + ".edit")

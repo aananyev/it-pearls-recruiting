@@ -6,6 +6,7 @@
     <layout height="100%" width="100%">
         <chart:serialChart id="makeInterview"
                            dataDateFormat="DD.MM"
+                           balloonDateFormat="dd.MM"
                            categoryField="date"
                            width="100%">
             <chart:valueScrollbar offset="50"
@@ -15,8 +16,6 @@
                            color="BLACK"
                            horizontalPadding="10"
                            verticalPadding="10"/>
-            <chart:titles>
-            </chart:titles>
             <chart:valueAxes>
                 <chart:axis gridAlpha="0.07"
                             position="LEFT"
@@ -31,6 +30,16 @@
                              color="GREEN"
                              valueField="count"/>
             </chart:graphs>
+            <chart:chartCursor cursorAlpha="1"
+                               cursorColor="#258cbb"
+                               cursorPosition="MOUSE"
+                               limitToGraph="g1"
+                               pan="true"
+                               valueLineAlpha="0.2"
+                               valueLineEnabled="true"
+                               valueLineBalloonEnabled="true"
+                               valueZoomable="true"/>
+            <chart:export/>
         </chart:serialChart>
     </layout>
 </fragment>

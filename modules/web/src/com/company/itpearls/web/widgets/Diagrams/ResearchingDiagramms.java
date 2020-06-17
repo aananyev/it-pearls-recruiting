@@ -45,6 +45,10 @@ public class ResearchingDiagramms extends ScreenFragment {
     @WindowParam
     protected String iteractionName;
 
+    @WidgetParam
+    @WindowParam
+    protected String baloonColor;
+
     @Inject
     private DataManager dataManager;
     @Inject
@@ -52,19 +56,20 @@ public class ResearchingDiagramms extends ScreenFragment {
 
     private static String GRAPH_X = "date";
     private static String GRAPH_Y = "count";
-    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.mm.yyyy");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     @Subscribe
     public void onInit(InitEvent event) {
         setDeafaultTimeInterval();
         makeInterview.setCategoryField(GRAPH_X);
         makeInterview.setDataProvider(valueGraphs());
+
         setDiagramTitle();
     }
 
     private void setDiagramTitle() {
         List<Title> titles = new ArrayList<>();
-        titles.add(new Title().setText("Количество взаимодействий с кандидатами IT Pearls").setAlpha(1.0).setColor(Color.BLACK));
+        titles.add(new Title().setText("Количество взаимодействий").setAlpha(1.0).setColor(Color.BLACK));
         titles.add(new Title().setText(iteractionName).setAlpha(1.0).setColor(Color.GRAY).setSize(12));
         titles.add(new Title().setText(dateFormat.format(startDate) + " - " +
                 dateFormat.format(endDate)).setAlpha(1.0).setColor(Color.BROWN).setSize(12));
