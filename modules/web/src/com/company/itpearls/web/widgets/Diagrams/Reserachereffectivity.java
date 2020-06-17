@@ -42,6 +42,10 @@ public class Reserachereffectivity extends ScreenFragment {
     @WindowParam
     protected String iteractionName;
 
+    @WidgetParam
+    @WindowParam
+    protected String userRole;
+
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static String GRAPH_X = "recrutier";
     private static String GRAPH_Y = "count";
@@ -63,22 +67,46 @@ public class Reserachereffectivity extends ScreenFragment {
 
     private DataProvider valueGraphs() {
         ListDataProvider dataProvider = new ListDataProvider();
-        String queryCount = "select e from itpearls_IteractionList e " +
-                "where e.recrutier = :user  and " +
-                "(e.dateIteraction between :startDate and :endDate) " +
-                "order by e.recrutier.name";
+        String queryCount;
+
+        if (iteractionName == null) {
+            queryCount = "select e from itpearls_IteractionList e " +
+                    "where e.recrutier = :user  and " +
+                    "(e.dateIteraction between :startDate and :endDate) " +
+                    "order by e.recrutier.name";
+        } else {
+            queryCount = "select e from itpearls_IteractionList e " +
+                    "where e.recrutier = :user  and " +
+                    "(e.dateIteraction between :startDate and :endDate) and " +
+                    "e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName)" +
+                    "order by e.recrutier.name";
+        }
+
         List<User> users = dataManager.load(User.class).list();
 
         for (User a : users) {
             if (a.getActive() & a.getFirstName() != null & a.getLastName() != null) {
-                int count = dataManager.load(IteractionList.class)
-                        .query(queryCount)
-                        .view("iteractionList-view")
-                        .parameter("user", a)
-                        .parameter("startDate", startDate)
-                        .parameter("endDate", endDate)
-                        .list()
-                        .size();
+                int count;
+                if (iteractionName == null) {
+                    count = dataManager.load(IteractionList.class)
+                            .query(queryCount)
+                            .view("iteractionList-view")
+                            .parameter("user", a)
+                            .parameter("startDate", startDate)
+                            .parameter("endDate", endDate)
+                            .list()
+                            .size();
+                } else {
+                    count = dataManager.load(IteractionList.class)
+                            .query(queryCount)
+                            .view("iteractionList-view")
+                            .parameter("user", a)
+                            .parameter("iteractionName", iteractionName)
+                            .parameter("startDate", startDate)
+                            .parameter("endDate", endDate)
+                            .list()
+                            .size();
+                }
 
                 dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
                         a.getFirstName() + "\n" + a.getLastName())));
@@ -106,7 +134,11 @@ public class Reserachereffectivity extends ScreenFragment {
         iteractionName = iteractionName == null ? "" : iteractionName;
 
         List<Title> titles = new ArrayList<>();
-        titles.add(new Title().setText("Взаимодействия рекрутеров " + iteractionName).setAlpha(1.0).setColor(Color.BLACK));
+        titles.add(new Title()
+                .setText("Взаимодействия рекрутеров" +
+                        (iteractionName != null ? ": " : "") + iteractionName)
+                .setAlpha(1.0)
+                .setColor(Color.BLACK));
         titles.add(new Title().setText(dateFormat.format(startDate) + " - " +
                 dateFormat.format(endDate)).setAlpha(1.0).setColor(Color.BROWN).setSize(12));
 
