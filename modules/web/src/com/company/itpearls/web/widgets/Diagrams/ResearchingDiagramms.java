@@ -69,8 +69,7 @@ public class ResearchingDiagramms extends ScreenFragment {
 
     private void setDiagramTitle() {
         List<Title> titles = new ArrayList<>();
-        titles.add(new Title().setText("Количество взаимодействий").setAlpha(1.0).setColor(Color.BLACK));
-        titles.add(new Title().setText(iteractionName).setAlpha(1.0).setColor(Color.GRAY).setSize(12));
+        titles.add(new Title().setText("Количество взаимодействий: " + iteractionName).setAlpha(1.0).setColor(Color.BLACK));
         titles.add(new Title().setText(dateFormat.format(startDate) + " - " +
                 dateFormat.format(endDate)).setAlpha(1.0).setColor(Color.BROWN).setSize(12));
 
@@ -89,7 +88,7 @@ public class ResearchingDiagramms extends ScreenFragment {
 
         List<Iteraction> iteraction = dataManager.load(Iteraction.class)
                 .query("select f from itpearls_Iteraction f where f.iterationName like :iteractionName")
-                .parameter("iteractionName", iteractionName)
+                .parameter("iteractionName", iteractionName + "%")
                 .view("_minimal")
                 .list();
 
@@ -109,7 +108,7 @@ public class ResearchingDiagramms extends ScreenFragment {
 
             List<KeyValueEntity> iteractionCount = dataManager.loadValues(loadContext);
 
-            Date date = sDate.getTime();
+            String date = dateFormat.format(sDate.getTime());
             int count = iteractionCount.size();
             dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X, date)));
         } while (gregorianCalendar.getTime().before(endDate));

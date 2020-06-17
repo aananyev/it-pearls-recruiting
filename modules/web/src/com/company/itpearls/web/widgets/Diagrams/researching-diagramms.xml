@@ -3,15 +3,13 @@
           xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
     <data>
     </data>
-    <layout height="100%" width="100%">
+    <layout>
         <chart:serialChart id="makeInterview"
                            dataDateFormat="DD.MM"
                            balloonDateFormat="dd.MM"
                            categoryField="date"
+                           height="100%"
                            width="100%">
-            <chart:valueScrollbar offset="50"
-                                  oppositeAxis="false"
-                                  scrollbarHeight="10"/>
             <chart:balloon adjustBorderColor="true"
                            color="BLACK"
                            horizontalPadding="10"
@@ -20,7 +18,7 @@
                 <chart:axis gridAlpha="0.07"
                             position="LEFT"
                             stackType="REGULAR"
-                            title="Количество организованных собеседований"/>
+                            title="Количество"/>
             </chart:valueAxes>
             <chart:graphs>
                 <chart:graph id="interviewGraph"
@@ -31,6 +29,7 @@
                              valueField="count"/>
             </chart:graphs>
             <chart:chartCursor cursorAlpha="1"
+                               categoryBalloonDateFormat="DD.mm"
                                cursorColor="#258cbb"
                                cursorPosition="MOUSE"
                                limitToGraph="g1"
@@ -39,7 +38,6 @@
                                valueLineEnabled="true"
                                valueLineBalloonEnabled="true"
                                valueZoomable="true"/>
-            <chart:export/>
         </chart:serialChart>
     </layout>
 </fragment>
