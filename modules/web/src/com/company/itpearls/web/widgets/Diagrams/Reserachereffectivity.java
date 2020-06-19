@@ -17,7 +17,9 @@ import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.security.entity.Role;
 import com.haulmont.cuba.security.entity.User;
+import com.haulmont.cuba.security.entity.UserRole;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
@@ -112,7 +114,7 @@ public class Reserachereffectivity extends ScreenFragment {
                 }
 
                 if(userRole != null) {
-                    if (getRoleService.checkUserRoles(a, userRole)) {
+                    if (checkUserRoles(a, userRole)) {
                         dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
                                 a.getFirstName() + "\n" + a.getLastName())));
                     }
@@ -143,7 +145,7 @@ public class Reserachereffectivity extends ScreenFragment {
 
         List<Title> titles = new ArrayList<>();
         titles.add(new Title()
-                .setText("Взаимодействия рекрутеров" +
+                .setText("Взаимодействия" +
                         (iteractionName != null ? ": " : "") + iteractionName)
                 .setAlpha(1.0)
                 .setColor(Color.BLACK));
@@ -151,5 +153,20 @@ public class Reserachereffectivity extends ScreenFragment {
                 dateFormat.format(endDate)).setAlpha(1.0).setColor(Color.BROWN).setSize(12));
 
         countIteractionChart.setTitles(titles);
+    }
+
+    public Boolean checkUserRoles(User user, String role) {
+        Role s = dataManager.load(Role.class)
+                .query("select e from sec$Role e where e.name like :roleName")
+                .parameter("roleName", role)
+                .one();
+
+        if(role != null) {
+            if( user.getUserRoles() != null )
+                return user.getUserRoles().contains(s);
+            else
+                return false;
+        } else
+            return false;
     }
 }

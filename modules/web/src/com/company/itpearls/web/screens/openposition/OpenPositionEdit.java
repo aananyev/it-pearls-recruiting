@@ -136,6 +136,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     static String RESEARCHER = "Researcher";
     static String RECRUITER = "Recruiter";
     static String MANAGER = "Manager";
+    @Inject
+    private RadioButtonGroup workExperienceRadioButton;
+    @Inject
+    private RadioButtonGroup commanExperienceRadioButton;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -154,6 +158,32 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setTopLabel();
         setHiddeField();
         setDisableTwoField();
+        setWorkExperienceRadioButton();
+        setCommandExperienceRadioButton();
+    }
+
+    private void setCommandExperienceRadioButton() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("Нет требований", 0);
+        map.put("Без опыта работы в команде", 1);
+        map.put("1 год", 2);
+        map.put("3 года", 3);
+        map.put( "5 лет и более", 4);
+        map.put( "Управление командой", 5);
+
+        commanExperienceRadioButton.setOptionsMap(map);
+    }
+
+    private void setWorkExperienceRadioButton() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("Нет требований", 0);
+        map.put("Без опыта", 1);
+        map.put("1 год", 2);
+        map.put("2 года", 3);
+        map.put( "3 года", 4);
+        map.put( "5 лет и более", 5);
+
+        workExperienceRadioButton.setOptionsMap(map);
     }
 
     @Subscribe("needExerciseCheckBox")

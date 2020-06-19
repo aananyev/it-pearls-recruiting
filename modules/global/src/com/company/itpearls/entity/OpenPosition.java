@@ -57,6 +57,13 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "NUMBER_POSITION")
     protected Integer numberPosition;
 
+    @Column(name = "WORK_EXPERIENCE")
+    protected Integer workExperience;
+
+
+    @Column(name = "COMMAND_EXPERIENCE")
+    protected Integer commandExperience;
+
     @Lob
     @Column(name = "COMMENT_")
     protected String comment;
@@ -299,5 +306,21 @@ public class OpenPosition extends StandardEntity {
 
     public void setProjectName(Project projectName) {
         this.projectName = projectName;
+    }
+
+    public void setWorkExperience(Integer workExperience) {
+        this.workExperience = workExperience;
+    }
+
+    public Integer getWorkExperience() {
+        return workExperience;
+    }
+
+    public void setCommandExperience(Integer commandExperience) {
+        this.commandExperience = commandExperience;
+    }
+
+    public Integer getCommandExperience() {
+        return commandExperience;
     }
 }
