@@ -7,7 +7,7 @@
     <data>
         <instance id="openPositionDc"
                   class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local">
+            <view extends="openPosition-view">
                 <property name="cityPosition"
                           fetch="JOIN"
                           view="_minimal"/>
@@ -38,8 +38,7 @@
         <collection id="positionTypesDc"
                     class="com.company.itpearls.entity.Position"
                     view="_local">
-            <loader id="positionTypesLc"
-                    cacheable="true">
+            <loader id="positionTypesLc">
                 <query>
                     <![CDATA[select e from itpearls_Position e
                     where e.positionRuName not like '%(не использовать)%'
