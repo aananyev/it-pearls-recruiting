@@ -92,6 +92,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private InstanceLoader<IteractionList> iteractionListDl;
 
+    static String RESEARCHER = "Researcher";
+    static String RECRUITER = "Recruiter";
+    static String MANAGER = "Manager";
+    static String ADMINISTRATOR = "Administrators";
+
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
@@ -588,10 +593,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         candidate = candidateField.getValue();
 
         changeField();
-
-/*        if( getEditedEntity().getIteractionType() != null )
-            if( getEditedEntity().getIteractionType().getNotificationType() == null )
-                iteractionTypeField.getValue().setNotificationType( 1 ); */
     }
 
     @Subscribe

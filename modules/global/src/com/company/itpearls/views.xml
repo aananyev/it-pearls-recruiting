@@ -238,6 +238,7 @@
             <property name="fullName"/>
         </property>
         <property name="vacancy" fetch="BATCH" view="_local">
+            <property name="internalProject"/>
             <property name="projectName" fetch="JOIN" view="_local">
                 <property name="projectDepartment" view="_local">
                     <property name="companyName" view="_local"/>

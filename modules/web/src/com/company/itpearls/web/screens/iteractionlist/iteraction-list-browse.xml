@@ -10,11 +10,20 @@
                     view="iteractionList-view">
             <loader id="iteractionListsDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
-                <condition>
-                    <c:jpql>
-                        <c:where>e.createdBy like :userName</c:where>
-                    </c:jpql>
-                </condition>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.createdBy like :userName
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.vacancy.internalProject = :internalProject
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>

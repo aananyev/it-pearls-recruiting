@@ -46,6 +46,11 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Inject
     private Notifications notifications;
 
+    static String RESEARCHER = "Researcher";
+    static String RECRUITER = "Recruiter";
+    static String MANAGER = "Manager";
+    static String ADMINISTRATOR = "Administrators";
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
@@ -57,6 +62,19 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             checkBoxShowOnlyMy.setEditable( false );
             iteractionListsDl.load();
         }
+
+        filterInternalProject();
+    }
+
+    private void filterInternalProject() {
+        if (getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+            iteractionListsDl.removeParameter("internalProject");
+        } else {
+            iteractionListsDl.setParameter("internalProject", false);
+        }
+
+        iteractionListsDl.load();
     }
 
     @Subscribe("checkBoxShowOnlyMy")
