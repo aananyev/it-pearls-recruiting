@@ -107,6 +107,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "USE_TAX_NDFL")
     protected Boolean useTaxNDFL;
 
+    @Column(name = "INTERNAL_PROJECT")
+    protected Boolean internalProject;
+
     @Column(name = "PERCENT_COMISSION_OF_COMPANY", length = 5)
     protected String percentComissionOfCompany;
 
@@ -115,6 +118,14 @@ public class OpenPosition extends StandardEntity {
 
     @Column(name = "PERCENT_SALARY_OF_RECRUTIER", length = 5)
     protected String percentSalaryOfRecrutier;
+
+    public Boolean getInternalProject() {
+        return internalProject;
+    }
+
+    public void setInternalProject(Boolean internalProject) {
+        this.internalProject = internalProject;
+    }
 
     public Integer getRemoteWork() {
         return remoteWork;

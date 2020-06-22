@@ -85,27 +85,39 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         checkBoxOnlyOpenedPosition.setValue(true); // только открытые позиции
-        buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
+        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
 
+        setInternalProjectFilter();
         setSubcribersFilter();
 
     }
 
+    private void setInternalProjectFilter() {
+        if (getRoleService.isUserRoles(userSession.getUser(), "Manager") ||
+                getRoleService.isUserRoles(userSession.getUser(), "Administrators")) {
+            openPositionsDl.removeParameter("internalProject");
+        } else {
+            openPositionsDl.setParameter("internalProject", false);
+        }
+
+        openPositionsDl.load();
+    }
+
     private void setSubcribersFilter() {
-       if( checkBoxOnlyMySubscribe.getValue() ) {
-           openPositionsDl.setParameter( "recrutier", userSession.getUser() );
-           openPositionsDl.setParameter( "nowDate", new Date() );
-       } else {
-           openPositionsDl.removeParameter( "recrutier" );
-           openPositionsDl.removeParameter( "nowDate" );
-       }
-       
-       openPositionsDl.load();
+        if (checkBoxOnlyMySubscribe.getValue()) {
+            openPositionsDl.setParameter("recrutier", userSession.getUser());
+            openPositionsDl.setParameter("nowDate", new Date());
+        } else {
+            openPositionsDl.removeParameter("recrutier");
+            openPositionsDl.removeParameter("nowDate");
+        }
+
+        openPositionsDl.load();
     }
 
     @Subscribe("checkBoxOnlyMySubscribe")
     public void onCheckBoxOnlyMySubscribeValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-       setSubcribersFilter();
+        setSubcribersFilter();
     }
 
     @Subscribe("checkBoxOnlyOpenedPosition")
@@ -153,17 +165,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     public void subscribePosition() {
-       Screen opScreen = screenBuilders
-               .editor(RecrutiesTasks.class, this)
-               .newEntity()
-               .withInitializer( data -> {
-                   data.setOpenPosition( openPositionsTable.getSingleSelected() );
-               })
-               .withScreenId("itpearls_RecrutiesTasks.edit")
-               .withLaunchMode(OpenMode.DIALOG)
-               .build();
+        Screen opScreen = screenBuilders
+                .editor(RecrutiesTasks.class, this)
+                .newEntity()
+                .withInitializer(data -> {
+                    data.setOpenPosition(openPositionsTable.getSingleSelected());
+                })
+                .withScreenId("itpearls_RecrutiesTasks.edit")
+                .withLaunchMode(OpenMode.DIALOG)
+                .build();
 
-       opScreen.show();
+        opScreen.show();
     }
 
     /*@EventListener

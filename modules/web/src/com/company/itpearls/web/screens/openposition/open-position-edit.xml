@@ -12,16 +12,16 @@
                           fetch="JOIN"
                           view="_minimal"/>
                 <property name="positionType"
-                          fetch="JOIN"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="projectName"
-                          fetch="JOIN"
                           view="_local">
                     <property name="projectDepartment"
-                              fetch="JOIN"
-                              view="_minimal">
+                              view="_local">
                         <property name="companyName"
-                                  view="_minimal"/>
+                                  view="_local">
+                            <property name="cityOfCompany"
+                                      view="_local"/>
+                        </property>
                     </property>
                 </property>
                 <property name="skillsList"
@@ -199,11 +199,18 @@
                 <hbox id="hboxProject1"
                       spacing="true"
                       width="100%">
-                    <checkBox id="openClosePositionCheckBox"
-                              dataContainer="openPositionDc"
-                              property="openClose"
-                              caption="mainMsg://msgPositionClose"
-                              align="MIDDLE_LEFT"/>
+                    <hbox width="100%">
+                        <checkBox id="openClosePositionCheckBox"
+                                  dataContainer="openPositionDc"
+                                  property="openClose"
+                                  caption="mainMsg://msgPositionClose"
+                                  align="MIDDLE_LEFT"/>
+                        <checkBox id="internalProjectCheckBox"
+                                  dataContainer="openPositionDc"
+                                  property="internalProject"
+                                  caption="msg://msgInternalProject"
+                                  align="MIDDLE_LEFT"/>
+                    </hbox>
                     <hbox width="100%">
                         <lookupField id="priorityField"
                                      dataContainer="openPositionDc"
@@ -419,22 +426,25 @@
                               caption="msg://msgWorkExperience"
                               spacing="true"
                               width="100%">
-                        <hbox expand="workExperienceRadioButton">
-                            <radioButtonGroup id="workExperienceRadioButton"
-                                              height="25%"
-                                              required="true"
-                                              description="msg://msgWorkExperience"
-                                              dataContainer="openPositionDc"
-                                              property="workExperience"
-                                              caption="msg://msgWorkExperience"/>
-                            <radioButtonGroup id="commanExperienceRadioButton"
-                                              height="25%"
-                                              required="true"
-                                              description="msg://msgCommandExperience"
-                                              dataContainer="openPositionDc"
-                                              property="commandExperience"
-                                              caption="msg://msgCommandExperience"/>
-                        </hbox>
+                        <grid spacing="true">
+                            <columns count="4"/>
+                            <rows>
+                                <row>
+                                    <radioButtonGroup id="workExperienceRadioButton"
+                                                      required="true"
+                                                      description="msg://msgWorkExperience"
+                                                      dataContainer="openPositionDc"
+                                                      property="workExperience"
+                                                      caption="msg://msgWorkExperience"/>
+                                    <radioButtonGroup id="commanExperienceRadioButton"
+                                                      required="true"
+                                                      description="msg://msgCommandExperience"
+                                                      dataContainer="openPositionDc"
+                                                      property="commandExperience"
+                                                      caption="msg://msgCommandExperience"/>
+                                </row>
+                            </rows>
+                        </grid>
                     </groupBox>
                     <richTextArea id="openPositionRichTextArea"
                                   dataContainer="openPositionDc"

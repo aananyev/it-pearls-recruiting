@@ -51,7 +51,9 @@
         <property name="positionType" fetch="JOIN" view="_local"/>
         <property name="projectName" fetch="JOIN" view="_local">
             <property name="projectDepartment" view="_local">
-                <property name="companyName" view="_minimal"/>
+                <property name="companyName" view="_local">
+                    <property name="cityOfCompany" view="_local"/>
+                </property>
             </property>
         </property>
         <property name="skillsList" fetch="JOIN" view="_local"/>
