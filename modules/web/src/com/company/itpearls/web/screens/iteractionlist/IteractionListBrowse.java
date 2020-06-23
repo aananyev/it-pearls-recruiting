@@ -3,6 +3,8 @@ package com.company.itpearls.web.screens.iteractionlist;
 import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.service.GetRoleService;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -18,6 +20,7 @@ import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 @UiController("itpearls_IteractionList.browse")
@@ -50,6 +53,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     static String RECRUITER = "Recruiter";
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

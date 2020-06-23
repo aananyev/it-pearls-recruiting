@@ -398,6 +398,7 @@ create table ITPEARLS_OPEN_POSITION (
     WORK_EXPERIENCE integer,
     COMMAND_EXPERIENCE integer,
     COMMENT_ text,
+    SHORT_DESCRIPTION varchar(80),
     TEMPLATE_LETTER text,
     EXERCISE text,
     NEED_EXERCISE boolean,

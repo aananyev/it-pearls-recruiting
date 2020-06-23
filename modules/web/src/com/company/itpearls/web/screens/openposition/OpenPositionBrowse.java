@@ -4,6 +4,7 @@ import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.ValueLoadContext;
@@ -60,6 +61,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     protected void onInit(InitEvent event) {
 
+        setDescriptionOnSubcsribers();
+
         openPositionsTable.setStyleProvider((openPositions, property) -> {
             Integer s = dataManager.loadValue("select count(e.reacrutier) " +
                     "from itpearls_RecrutiesTasks e " +
@@ -79,6 +82,38 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             else
                 return "open-position-job-recruitier";
         });
+    }
+
+    private void setDescriptionOnSubcsribers() {
+        openPositionsTable.setItemDescriptionProvider(((openPosition, s) -> {
+            Date curDate = new Date();
+            String QUERY = "select e.name from sec$User e, itpearls_RecrutiesTasks f " +
+                    "where f.reacrutier = e and f.openPosition = :openPosition and f.endDate > :currentDate";
+            String returnData = "";
+
+            List<String> recritierList = dataManager.loadValue(QUERY,String.class)
+                    .parameter("openPosition", openPosition)
+                    .parameter("currentDate", curDate)
+                    .list();
+
+            if(openPosition.getShortDescription() != null) {
+                returnData = returnData + "\n\n" + "Кратко: " + openPosition.getShortDescription();
+            }
+
+            if(recritierList.size() != 0) {
+                returnData = returnData + " (";
+
+                for (String a : recritierList) {
+                    returnData = returnData + a + ",";
+                }
+
+                returnData = returnData + ")";
+            }
+
+
+            return returnData;
+
+        }));
     }
 
     @Subscribe

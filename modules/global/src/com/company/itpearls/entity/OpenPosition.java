@@ -68,6 +68,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "COMMENT_")
     protected String comment;
 
+    @Column(name = "SHORT_DESCRIPTION", length = 80)
+    protected String shortDescription;
+
     @Lob
     @Column(name = "TEMPLATE_LETTER")
     protected String templateLetter;
@@ -121,6 +124,14 @@ public class OpenPosition extends StandardEntity {
 
     public Boolean getInternalProject() {
         return internalProject;
+    }
+
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
+    }
+
+    public String getShortDescription() {
+        return shortDescription;
     }
 
     public void setInternalProject(Boolean internalProject) {
