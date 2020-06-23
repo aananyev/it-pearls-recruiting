@@ -22,7 +22,8 @@ order by e.projectIsClosed desc, e.projectName]]>
         <filter id="filter"
                 applyTo="projectsTable"
                 dataLoader="projectsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="projectsTable"
                     width="100%"

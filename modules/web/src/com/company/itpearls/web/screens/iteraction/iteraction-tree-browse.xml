@@ -2,6 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://browseCaption"
         focusComponent="iteractionTreeTable"
+        icon="REFRESH_ACTION"
         messagesPack="com.company.itpearls.web.screens.iteraction">
     <data readOnly="true">
         <collection id="iteractionsTreeDc"
@@ -20,7 +21,9 @@ order by e.number]]></query>
         <filter id="filter"
                 applyTo="iteractionTreeTable"
                 dataLoader="iteractionsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        exclude="id|addDate|addInteger|addString|addFlag|addType|number|pic|addCaption|addField|iteractionTree|notificationType|callClass|mandatoryIteraction|callButtonText|calendarItem|calendarItemDescription|findToDic|setDateTime|calendarItemStyle|callForm"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <treeTable id="iteractionTreeTable"
                    height="200px"

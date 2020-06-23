@@ -69,10 +69,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .parameter("currentDate", new Date())
                     .one();
 
-            // это если есть подписка
-//            if (property == null) {
-                // это внутренний проект компании
-            if(openPositions.getInternalProject() != null ) {
+            if (openPositions.getInternalProject() != null) {
                 if (openPositions.getInternalProject())
                     return "open-position-internal-project";
             }
@@ -81,16 +78,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 return "open-position-empty-recrutier";
             else
                 return "open-position-job-recruitier";
-/*            } else {
-                // это внутренний проект компании
-                if(openPositions.getInternalProject())
-                    return "open-position-internal-project";
-
-                if (s == 0)
-                    return "open-position-empty-recrutier";
-                else
-                    return "open-position-job-recruitier";
-            }*/
         });
     }
 
@@ -189,19 +176,5 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         opScreen.show();
     }
-
-    /*@EventListener
-    public void onUiNotificationEvent(UiNotificationEvent event) {
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withDescription( event.getMessage() )
-                .withCaption("INFO")
-                .show();
-    }
-
-    // screens do not receive non-UI events!
-    @EventListener
-    public void onBeanNotificationEvent(BeanNotificationEvent event) {
-        throw new IllegalStateException("Received " + event);
-    }*/
 }
 

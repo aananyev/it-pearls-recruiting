@@ -22,7 +22,8 @@ order by e.countryRuName]]>
         <filter id="filter"
                 applyTo="countriesTable"
                 dataLoader="countriesDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="countriesTable"
                     width="100%"

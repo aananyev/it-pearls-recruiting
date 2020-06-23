@@ -29,7 +29,8 @@
         <filter id="filter"
                 applyTo="subscribeCandidateActionsTable"
                 dataLoader="subscribeCandidateActionsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="subscribeCandidateActionsTable"
                     width="100%"

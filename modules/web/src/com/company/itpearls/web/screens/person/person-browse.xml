@@ -21,7 +21,8 @@
         <filter id="filter"
                 applyTo="personsTable"
                 dataLoader="personsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="personsTable"
                     width="100%"

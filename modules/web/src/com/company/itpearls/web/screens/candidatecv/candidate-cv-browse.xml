@@ -27,7 +27,9 @@
         <filter id="filter"
                 applyTo="candidateCVsTable"
                 dataLoader="candidateCVsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        exclude="letter|lintToCloudFile|textCV|fileCV|linkItPearlsCV|linkOriginalCv|originalFileCV|id"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="candidateCVsTable"
                     width="100%"

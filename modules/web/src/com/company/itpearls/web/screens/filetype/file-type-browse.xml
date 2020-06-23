@@ -21,7 +21,8 @@
         <filter id="filter"
                 applyTo="fileTypesTable"
                 dataLoader="fileTypesDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="fileTypesTable"
                     width="100%"

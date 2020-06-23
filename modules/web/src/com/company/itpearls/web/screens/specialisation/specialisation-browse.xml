@@ -20,7 +20,8 @@ order by e.specRuName]]></query>
         <filter id="filter"
                 applyTo="specialisationsTable"
                 dataLoader="specialisationsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="specialisationsTable"
                     width="100%"

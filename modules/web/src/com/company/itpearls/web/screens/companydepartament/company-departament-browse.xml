@@ -22,7 +22,8 @@ order by e.departamentRuName]]>
         <filter id="filter"
                 applyTo="companyDepartamentsTable"
                 dataLoader="companyDepartamentsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="companyDepartamentsTable"
                     width="100%"

@@ -3,12 +3,17 @@
 /* Override global theme constants or define new ones here */
 .open-position-job-recruitier {
     color: blue;
-    font-weight: normal;
+    font-weight: bold;
 }
 
 .open-position-empty-recruitier {
     color: green;
     font-weight: normal;
+}
+
+.open-position-internal-project {
+    color: brown;
+    font-weight: bold;
 }
 
 .open-position-normal-recruitier {

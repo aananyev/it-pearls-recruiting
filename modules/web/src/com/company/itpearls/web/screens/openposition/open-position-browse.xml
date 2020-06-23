@@ -20,13 +20,13 @@
                                 <c:where>
                                     e.vacansyName like
                                     (select
-                                        f.openPosition.vacansyName
+                                    f.openPosition.vacansyName
                                     from
-                                        itpearls_RecrutiesTasks f
+                                    itpearls_RecrutiesTasks f
                                     where
-                                        f.reacrutier = :recrutier and
-                                        :nowDate between f.startDate and f.endDate and
-                                        f.openPosition.vacansyName like e.vacansyName )
+                                    f.reacrutier = :recrutier and
+                                    :nowDate between f.startDate and f.endDate and
+                                    f.openPosition.vacansyName like e.vacansyName )
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
@@ -45,7 +45,9 @@
         <filter id="filter"
                 applyTo="openPositionsTable"
                 dataLoader="openPositionsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        exclude="id|birdhDate|email|id|whatsupName"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <table id="openPositionsTable"
                width="100%"
@@ -78,8 +80,10 @@
             </buttonsPanel>
         </table>
         <hbox spacing="true">
-            <checkBox id="checkBoxOnlyOpenedPosition" description="msg://msgOnlyOpenedVacansy" caption="msg://msgOnlyOpenedVacansy"/>
-            <checkBox id="checkBoxOnlyMySubscribe" description="msg://msgOnlyMySubscribe" caption="msg://msgOnlyMySubscribe"/>
+            <checkBox id="checkBoxOnlyOpenedPosition" description="msg://msgOnlyOpenedVacansy"
+                      caption="msg://msgOnlyOpenedVacansy"/>
+            <checkBox id="checkBoxOnlyMySubscribe" description="msg://msgOnlyMySubscribe"
+                      caption="msg://msgOnlyMySubscribe"/>
         </hbox>
         <hbox id="lookupActions" spacing="true" visible="false" align="TOP_RIGHT">
             <button action="lookupSelectAction"/>

@@ -3,7 +3,8 @@
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="mainMsg://msgIteractionList"
         focusComponent="iteractionListsTable"
-        messagesPack="com.company.itpearls.web.screens.iteractionlist" icon="REORDER">
+        messagesPack="com.company.itpearls.web.screens.iteractionlist"
+        icon="REORDER">
     <data readOnly="true">
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList"
@@ -35,7 +36,9 @@
         <filter id="filter"
                 applyTo="iteractionListsTable"
                 dataLoader="iteractionListsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        exclude="addDate|addInteger|addString|addType|communicationMethod|ID|iteractionChain|numberIteraction|recrutierName"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="iteractionListsTable"
                     width="100%"

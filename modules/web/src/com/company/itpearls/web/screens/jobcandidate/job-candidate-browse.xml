@@ -36,7 +36,10 @@ order by e.secondName, e.firstName]]>
         <filter id="filter"
                 applyTo="jobCandidatesTable"
                 dataLoader="jobCandidatesDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        exclude="id"
+                        excludeRecursively="true"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="jobCandidatesTable"
                     width="100%"

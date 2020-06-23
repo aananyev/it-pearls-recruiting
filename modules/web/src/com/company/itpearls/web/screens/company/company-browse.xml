@@ -28,7 +28,8 @@ order by e.comanyName]]>
         <filter id="filter"
                 applyTo="companiesTable"
                 dataLoader="companiesDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="companiesTable"
                     width="100%"

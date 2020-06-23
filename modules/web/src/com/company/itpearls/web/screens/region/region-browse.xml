@@ -22,7 +22,8 @@ order by e.regionRuName]]>
         <filter id="filter"
                 applyTo="regionsTable"
                 dataLoader="regionsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="regionsTable"
                     width="100%"

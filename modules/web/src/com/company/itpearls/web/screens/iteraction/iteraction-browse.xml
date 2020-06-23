@@ -20,7 +20,8 @@ order by e.number]]></query>
         <filter id="filter"
                 applyTo="iteractionsTable"
                 dataLoader="iteractionsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="iteractionsTable"
                     width="100%"

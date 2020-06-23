@@ -21,7 +21,8 @@
         <filter id="filter"
                 applyTo="skillTreesTable"
                 dataLoader="skillTreesDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <treeTable id="skillTreesTable"
                    width="100%"
