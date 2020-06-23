@@ -318,6 +318,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             positionTypeField.setEditable(false);
             projectNameField.setEditable(false);
             vacansyNameField.setEditable(false);
+            companyDepartamentField.setEditable(false);
         } else {
             cityOpenPositionField.setEditable(true);
             companyDepartamentField.setEditable(true);
@@ -326,6 +327,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             positionTypeField.setEditable(true);
             projectNameField.setEditable(true);
             vacansyNameField.setEditable(true);
+            companyDepartamentField.setEditable(true);
         }
     }
 
@@ -342,29 +344,38 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         // нотификация
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            // пошлем по почте
-            EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
-                    ";" + getRecrutiersMaillist(),
-                    openPosition.getVacansyName(),
-                    null, "com/company/itpearls/templates/create_new_pos.html",
-                    Collections.singletonMap("openPosition", openPosition));
+            if (!getRoleService.isUserRoles(userSession.getUser(), MANAGER) &&
+                    // это не врунтренний проект компании
+                    !internalProjectCheckBox.getValue()) {
+                // пошлем по почте
+                EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
+                        ";" + getRecrutiersMaillist(),
+                        openPosition.getVacansyName(),
+                        null, "com/company/itpearls/templates/create_new_pos.html",
+                        Collections.singletonMap("openPosition", openPosition));
 
-            emailInfo.setBodyContentType("text/html; charset=UTF-8");
+                emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
-            emailService.sendEmailAsync(emailInfo);
+                emailService.sendEmailAsync(emailInfo);
+            }
             // высплывающее сообщение
             events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
                     getEditedEntity().getVacansyName()));
         } else {
             if (entityIsChanged) {
-                EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
-                        ";" + getRecrutiersMaillist(),
-                        openPosition.getVacansyName(),
-                        null, "com/company/itpearls/templates/edit_open_pos.html",
-                        Collections.singletonMap("openPosition", openPosition));
-                emailInfo.setBodyContentType("text/html; charset=UTF-8");
+                // если от имени Admin то не слать
+                if (!getRoleService.isUserRoles(userSession.getUser(), MANAGER) &&
+                        // и это не внутренний проект компании
+                        !internalProjectCheckBox.getValue()) {
+                    EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
+                            ";" + getRecrutiersMaillist(),
+                            openPosition.getVacansyName(),
+                            null, "com/company/itpearls/templates/edit_open_pos.html",
+                            Collections.singletonMap("openPosition", openPosition));
+                    emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
-                emailService.sendEmailAsync(emailInfo);
+                    emailService.sendEmailAsync(emailInfo);
+                }
             }
         }
     }
@@ -380,7 +391,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
 
         // Админ пусть правит без последствий
-        if(!getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+        if (!getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
             // если что-то изменилось
             if (PersistenceHelper.isNew(getEditedEntity())) {
                 emails = getAllSubscibers();
@@ -502,7 +513,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (openClosePositionCheckBox.getValue() == null)
             openClosePositionCheckBox.setValue(false);
 
-        if(internalProjectCheckBox.getValue() == null)
+        if (internalProjectCheckBox.getValue() == null)
             internalProjectCheckBox.setValue(false);
     }
 

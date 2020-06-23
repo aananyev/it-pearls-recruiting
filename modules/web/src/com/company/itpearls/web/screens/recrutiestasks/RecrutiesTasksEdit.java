@@ -173,15 +173,24 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
         EmailInfo   emailInfo;
 
-        if( !email.isEmpty() ) {
-            emailInfo = new EmailInfo(email,
-                    "Вы подписаны на вакансию " + openPositionField.getValue().getVacansyName(),
-                    null, "com/company/itpearls/templates/subscribe_to_position.html",
-                    Collections.singletonMap("RecrutierTask", getEditedEntity()));
+        if(email != null) {
+            if (!email.isEmpty()) {
+                emailInfo = new EmailInfo(email,
+                        "Вы подписаны на вакансию " + openPositionField.getValue().getVacansyName(),
+                        null, "com/company/itpearls/templates/subscribe_to_position.html",
+                        Collections.singletonMap("RecrutierTask", getEditedEntity()));
 
-            emailInfo.setBodyContentType("text/html; charset=UTF-8");
+                emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
-            emailService.sendEmailAsync(emailInfo);
+                emailService.sendEmailAsync(emailInfo);
+            }
+        } else {
+            notifications.create()
+                    .withCaption("У Вас не зарегистрирован в профиле адрес электронной почты!")
+                    .withDescription("Потдписка невозможна!")
+                    .withPosition(Notifications.Position.MIDDLE_CENTER)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
         }
     }
 

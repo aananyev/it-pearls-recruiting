@@ -2,7 +2,7 @@
 @mixin com_company_itpearls-halo-ext {
 .open-position-job-recruitier {
     color: blue;
-    font-weight: normal;
+    font-weight: bold;
 }
 
 .open-position-empty-recruitier {
@@ -13,6 +13,11 @@
 .open-position-normal-recruitier {
     color: black;
     font-weight: normal;
+}
+
+.open-position-internal-project {
+    color: brown;
+    font-weight: bold;
 }
 
 .recrutier-tasks-gray {

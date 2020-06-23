@@ -59,6 +59,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     protected void onInit(InitEvent event) {
+
         openPositionsTable.setStyleProvider((openPositions, property) -> {
             Integer s = dataManager.loadValue("select count(e.reacrutier) " +
                     "from itpearls_RecrutiesTasks e " +
@@ -68,17 +69,28 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .parameter("currentDate", new Date())
                     .one();
 
-            if (property == null) {
-                if (s == 0)
-                    return "open-position-empty-recrutier";
-                else
-                    return "open-position-job-recruitier";
-            } else {
-                if (s == 0)
-                    return "open-position-empty-recrutier";
-                else
-                    return "open-position-job-recruitier";
+            // это если есть подписка
+//            if (property == null) {
+                // это внутренний проект компании
+            if(openPositions.getInternalProject() != null ) {
+                if (openPositions.getInternalProject())
+                    return "open-position-internal-project";
             }
+
+            if (s == 0)
+                return "open-position-empty-recrutier";
+            else
+                return "open-position-job-recruitier";
+/*            } else {
+                // это внутренний проект компании
+                if(openPositions.getInternalProject())
+                    return "open-position-internal-project";
+
+                if (s == 0)
+                    return "open-position-empty-recrutier";
+                else
+                    return "open-position-job-recruitier";
+            }*/
         });
     }
 
