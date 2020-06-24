@@ -107,6 +107,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     returnData = returnData + a + ",";
                 }
 
+                returnData = returnData.substring(0, returnData.length() - 1);
                 returnData = returnData + ")";
             }
 

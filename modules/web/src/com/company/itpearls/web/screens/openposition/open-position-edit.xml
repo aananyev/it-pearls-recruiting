@@ -98,7 +98,9 @@
                     class="com.company.itpearls.entity.Project"
                     view="_local">
             <loader id="companyOfDepatmentDl" cacheable="true">
-                <query><![CDATA[select e from itpearls_Project e where e.endProjectDate is not null]]></query>
+                <query><![CDATA[select e
+                from itpearls_Project e
+                where e.endProjectDate is not null]]></query>
             </loader>
         </collection>
         <collection id="cityOfCompanyDc"
@@ -107,7 +109,8 @@
             <loader id="cityOfCompanyDl"
                     cacheable="true">
                 <query>
-                    <![CDATA[select e from itpearls_Company e
+                    <![CDATA[select e
+                    from itpearls_Company e
                     order by e.comanyName]]>
                 </query>
             </loader>
@@ -117,7 +120,9 @@
                     view="_local">
             <loader id="citiesDl"
                     cacheable="true">
-                <query><![CDATA[select e from itpearls_City e order by e.cityRuName]]></query>
+                <query><![CDATA[select e
+                from itpearls_City e
+                order by e.cityRuName]]></query>
             </loader>
         </collection>
         <collection id="taskRecrutior"
@@ -416,17 +421,33 @@
                     </table>
                 </groupBox>
             </tab>
-            <tab caption="mainMsg://msgJobDescription" margin="true,false,false,false" spacing="true"
+            <tab caption="mainMsg://msgJobDescription"
+                 margin="true,false,false,false"
+                 expand="jobDescriptionVBox"
+                 spacing="true"
                  id="tabJobDescription"
                  icon="DRIVERS_LICENSE">
-                <vbox expand="vboxTextAreas">
+                <vbox id="jobDescriptionVBox"
+                      expand="vboxTextAreas"
+                      spacing="true"
+                      width="100%"
+                      height="100%">
                     <groupBox collapsable="true"
                               collapsed="true"
                               caption="msg://msgWorkExperience"
                               spacing="true"
+                              expand="experienceRadioButtonGrid"
                               width="100%">
-                        <grid spacing="true">
-                            <columns count="4"/>
+                        <grid id="experienceRadioButtonGrid"
+                              spacing="true"
+                              width="100%"
+                              height="100%">
+                            <columns>
+                                <column flex="1"/>
+                                <column flex="1"/>
+                                <column flex="1"/>
+                                <column flex="1"/>
+                            </columns>
                             <rows>
                                 <row>
                                     <radioButtonGroup id="workExperienceRadioButton"
@@ -445,18 +466,22 @@
                             </rows>
                         </grid>
                     </groupBox>
-                    <vbox id="vboxTextAreas" width="100%" expand="openPositionRichTextArea" height="100%">
+                    <vbox id="vboxTextAreas"
+                          width="100%"
+                          spacing="true"
+                          expand="openPositionRichTextArea"
+                          height="100%">
                         <richTextArea id="openPositionRichTextArea"
                                       dataContainer="openPositionDc"
                                       property="comment"
-                                      width="100%" height="280px"
+                                      width="100%"
+                                      height="AUTO"
                                       required="true"/>
-                        <textArea id="shortDescriptionTextArea"
-                                  height="30px"
+                        <textField id="shortDescriptionTextArea"
                                   dataContainer="openPositionDc"
                                   caption="msg://msgShortCaption"
                                   property="shortDescription"
-                                  maxLength="80"
+                                  maxLength="160"
                                   width="100%"/>
                     </vbox>
                 </vbox>

@@ -68,7 +68,7 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "COMMENT_")
     protected String comment;
 
-    @Column(name = "SHORT_DESCRIPTION", length = 80)
+    @Column(name = "SHORT_DESCRIPTION", length = 160)
     protected String shortDescription;
 
     @Lob
