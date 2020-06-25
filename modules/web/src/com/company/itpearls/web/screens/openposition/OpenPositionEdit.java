@@ -45,7 +45,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CheckBox needExerciseCheckBox;
     @Inject
     private RichTextArea exerciseRichTextArea;
-
     @Inject
     private LookupPickerField<Project> projectNameField;
     @Inject
@@ -179,7 +178,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void setCommandExperienceRadioButton() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("Нет требований", 0);
-        map.put("Без опыта работы в команде", 1);
+        map.put("Без опыта", 1);
         map.put("1 год", 2);
         map.put("3 года", 3);
         map.put("5 лет и более", 4);
@@ -606,7 +605,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setHiddeField() {
         // скрыть менеджерские пункты
-        if (isUserRoles(userSession.getUser(), MANAGER)) {
+        if (isUserRoles(userSession.getUser(), MANAGER) || isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
             groupBoxPaymentsDetail.setVisible(true);
             groupBoxPaymentsResearcher.setVisible(true);
             groupBoxPaymentsRecrutier.setVisible(true);

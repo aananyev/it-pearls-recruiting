@@ -355,6 +355,8 @@
                 </groupBox>
                 <groupBox id="groupBoxPaymentsDetail"
                           orientation="horizontal"
+                          collapsable="true"
+                          collapsed="true"
                           spacing="true"
                           caption="msg://msgPaymentsDetail"
                           width="100%">
@@ -427,64 +429,43 @@
                  spacing="true"
                  id="tabJobDescription"
                  icon="DRIVERS_LICENSE">
-                <vbox id="jobDescriptionVBox"
-                      expand="vboxTextAreas"
-                      spacing="true"
-                      width="100%"
-                      height="100%">
+                <scrollBox id="jobDescriptionVBox"
+                      box.expandRatio="1"
+                      spacing="true">
                     <groupBox collapsable="true"
                               collapsed="true"
                               caption="msg://msgWorkExperience"
                               spacing="true"
-                              expand="experienceRadioButtonGrid"
                               width="100%">
-                        <grid id="experienceRadioButtonGrid"
-                              spacing="true"
-                              width="100%"
-                              height="100%">
-                            <columns>
-                                <column flex="1"/>
-                                <column flex="1"/>
-                                <column flex="1"/>
-                                <column flex="1"/>
-                            </columns>
-                            <rows>
-                                <row>
-                                    <radioButtonGroup id="workExperienceRadioButton"
-                                                      required="true"
-                                                      description="msg://msgWorkExperience"
-                                                      dataContainer="openPositionDc"
-                                                      property="workExperience"
-                                                      caption="msg://msgWorkExperience"/>
-                                    <radioButtonGroup id="commanExperienceRadioButton"
-                                                      required="true"
-                                                      description="msg://msgCommandExperience"
-                                                      dataContainer="openPositionDc"
-                                                      property="commandExperience"
-                                                      caption="msg://msgCommandExperience"/>
-                                </row>
-                            </rows>
-                        </grid>
+                        <radioButtonGroup id="workExperienceRadioButton"
+                                          orientation="horizontal"
+                                          required="true"
+                                          description="msg://msgWorkExperience"
+                                          dataContainer="openPositionDc"
+                                          property="workExperience"
+                                          caption="msg://msgWorkExperience"/>
+                        <radioButtonGroup id="commanExperienceRadioButton"
+                                          orientation="horizontal"
+                                          required="true"
+                                          description="msg://msgCommandExperience"
+                                          dataContainer="openPositionDc"
+                                          property="commandExperience"
+                                          caption="msg://msgCommandExperience"/>
                     </groupBox>
-                    <vbox id="vboxTextAreas"
-                          width="100%"
-                          spacing="true"
-                          expand="openPositionRichTextArea"
-                          height="AUTO">
-                        <richTextArea id="openPositionRichTextArea"
-                                      dataContainer="openPositionDc"
-                                      property="comment"
-                                      width="100%"
-                                      height="AUTO"
-                                      required="true"/>
-                        <textField id="shortDescriptionTextArea"
+                    <richTextArea id="openPositionRichTextArea"
                                   dataContainer="openPositionDc"
-                                  caption="msg://msgShortCaption"
-                                  property="shortDescription"
-                                  maxLength="160"
-                                  width="100%"/>
-                    </vbox>
-                </vbox>
+                                  property="comment"
+                                  width="100%"
+                                  box.expandRatio="1"
+                                  height="400px"
+                                  required="true"/>
+                    <textField id="shortDescriptionTextArea"
+                               dataContainer="openPositionDc"
+                               caption="msg://msgShortCaption"
+                               property="shortDescription"
+                               maxLength="160"
+                               width="100%"/>
+                </scrollBox>
             </tab>
             <tab id="tabExercise" caption="msg://msgExercise" margin="true,false,false,false" spacing="true"
                  icon="ADJUST">

@@ -624,13 +624,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (iteractionTypeField.getValue() != null) {
             if (iteractionTypeField.getValue().getSetDateTime() != null) {
                 if (iteractionTypeField.getValue().getSetDateTime()) {
-                    Date date = new Date();
-
-                    addDate.setValue(date);
+                    if( addDate.getValue() == null) {
+                        Date date = new Date();
+                        addDate.setValue(date);
+                    }
                 }
             }
         }
-
     }
 
     @Subscribe
