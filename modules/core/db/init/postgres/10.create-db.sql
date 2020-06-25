@@ -392,7 +392,7 @@ create table ITPEARLS_OPEN_POSITION (
     SALARY_MIN decimal(19, 2),
     SALARY_MAX decimal(19, 2),
     CITY_POSITION_ID uuid,
-    POSITION_TYPE_ID uuid,
+    POSITION_TYPE_ID uuid not null,
     PROJECT_NAME_ID uuid not null,
     NUMBER_POSITION integer,
     WORK_EXPERIENCE integer,

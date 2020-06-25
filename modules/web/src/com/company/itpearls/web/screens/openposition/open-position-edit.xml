@@ -470,7 +470,7 @@
                           width="100%"
                           spacing="true"
                           expand="openPositionRichTextArea"
-                          height="100%">
+                          height="AUTO">
                         <richTextArea id="openPositionRichTextArea"
                                       dataContainer="openPositionDc"
                                       property="comment"
