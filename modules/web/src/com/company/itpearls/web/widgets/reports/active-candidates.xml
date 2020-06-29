@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <data>
+        <collection id="activeCandidateaDc"
+                    class="com.company.itpearls.entity.JobCandidate"
+                    view="jobCandidate-view">
+            <loader id="activeCandidatesDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e
+order by e.secondName, e.firstName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout stylename="wifget-borders"
+            expand="activeCandidatesScrollBox"
+            width="100%"
+            spacing="false"
+            height="100%">
+        <cssLayout id="widgetTitleBox"
+                   width="100%"
+                   height="AUTO"
+                   stylename="widget-title">
+        <label id="widgetTitle"
+               width="100%"
+               htmlEnabled="false"
+               height="100%"/>
+        </cssLayout>
+        <scrollBox id="activeCandidatesScrollBox"
+                   width="100%"
+                   height="100%"
+                   spacing="false">
+            <dataGrid id="activeCandidatesDataGrid"
+                      width="100%"
+                      height="100%"
+                      dataContainer="activeCandidateaDc">
+                <columns>
+                    <column id="fullName" property="fullName"/>
+                    <column id="personPosition" property="personPosition"/>
+                </columns>
+                <rowsCount autoLoad="true"/>
+            </dataGrid>
+
+        </scrollBox>
+    </layout>
+</fragment>
