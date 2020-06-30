@@ -1,34 +1,19 @@
 package com.company.itpearls.web.screens.openposition;
 
-import com.company.itpearls.BeanNotificationEvent;
-import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
-import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.LoadContext;
-import com.haulmont.cuba.core.global.ValueLoadContext;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.UiComponents;
-import com.haulmont.cuba.gui.actions.list.CreateAction;
-import com.haulmont.cuba.gui.builders.ScreenBuilderProcessor;
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
-import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.management.Query;
-import javax.persistence.Persistence;
-import javax.validation.constraints.Null;
-import java.awt.*;
 import java.util.Date;
 import java.util.List;
 
@@ -42,8 +27,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private CheckBox checkBoxOnlyOpenedPosition;
     @Inject
-    private Table<OpenPosition> openPositionsTable;
-    @Inject
     private DataManager dataManager;
     @Inject
     private ScreenBuilders screenBuilders;
@@ -52,75 +35,105 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private UserSession userSession;
     @Inject
-    private com.haulmont.cuba.gui.components.Button buttonExcel;
+    private Button buttonExcel;
     @Inject
     private GetRoleService getRoleService;
     @Inject
     private Notifications notifications;
+    @Inject
+    private DataGrid<OpenPosition> openPositionsTable;
+
+    private String ROLE_MANAGER = "Manager";
+    private String ROLE_ADMINISTRATOR = "Administrators";
 
     @Subscribe
     protected void onInit(InitEvent event) {
+        addIconColumn();
+    }
 
-        setDescriptionOnSubcsribers();
+    private void addIconColumn() {
+        DataGrid.Column iconColumn = openPositionsTable.addGeneratedColumn("icon",
+                new DataGrid.ColumnGenerator<OpenPosition, String>() {
+                    @Override
+                    public String getValue(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+                        return getIcon(event.getItem());
+                    }
 
-        openPositionsTable.setStyleProvider((openPositions, property) -> {
-            Integer s = dataManager.loadValue("select count(e.reacrutier) " +
-                    "from itpearls_RecrutiesTasks e " +
-                    "where e.openPosition = :openPos and " +
-                    "e.endDate >= :currentDate", Integer.class)
-                    .parameter("openPos", openPositions)
-                    .parameter("currentDate", new Date())
-                    .one();
+                    @Override
+                    public Class<String> getType() {
+                        return String.class;
+                    }
+                });
 
-            if (openPositions.getInternalProject() != null) {
-                if (openPositions.getInternalProject())
-                    return "open-position-internal-project";
+        iconColumn.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class));
+    }
+
+    @Install(to = "openPositionsTable.vacansyName", subject = "descriptionProvider")
+    private String openPositionsTableVacansyNameDescriptionProvider(OpenPosition openPosition) {
+        Date curDate = new Date();
+        String QUERY = "select e.name from sec$User e, itpearls_RecrutiesTasks f " +
+                "where f.reacrutier = e and f.openPosition = :openPosition and f.endDate > :currentDate";
+        String returnData = "";
+
+        List<String> recritierList = dataManager.loadValue(QUERY, String.class)
+                .parameter("openPosition", openPosition)
+                .parameter("currentDate", curDate)
+                .list();
+
+        if (openPosition.getShortDescription() != null) {
+            returnData = returnData + "Кратко: " + openPosition.getShortDescription() + "\n";
+        }
+
+        if (recritierList.size() != 0) {
+            returnData = returnData + "В работе у: ";
+
+            for (String a : recritierList) {
+                returnData = returnData + a + ",";
             }
 
+            returnData = returnData.substring(0, returnData.length() - 1);
+            returnData = returnData + ")";
+        }
+
+
+        return returnData;
+    }
+
+    @Install(to = "openPositionsTable", subject = "rowStyleProvider")
+    private String openPositionsTableRowStyleProvider(OpenPosition openPosition) {
+        Integer s = dataManager.loadValue("select count(e.reacrutier) " +
+                "from itpearls_RecrutiesTasks e " +
+                "where e.openPosition = :openPos and " +
+                "e.endDate >= :currentDate", Integer.class)
+                .parameter("openPos", openPosition)
+                .parameter("currentDate", new Date())
+                .one();
+
+        if (openPosition.getInternalProject() != null) {
+            if (openPosition.getInternalProject()) {
+                if (s == 0) {
+                    return "open-position-internal-project";
+                } else {
+                    return "open-position-internal-project-job-recrutier";
+                }
+            } else {
+                if (s == 0)
+                    return "open-position-empty-recrutier";
+                else
+                    return "open-position-job-recruitier";
+            }
+        } else {
             if (s == 0)
                 return "open-position-empty-recrutier";
             else
                 return "open-position-job-recruitier";
-        });
-    }
-
-    private void setDescriptionOnSubcsribers() {
-        openPositionsTable.setItemDescriptionProvider(((openPosition, s) -> {
-            Date curDate = new Date();
-            String QUERY = "select e.name from sec$User e, itpearls_RecrutiesTasks f " +
-                    "where f.reacrutier = e and f.openPosition = :openPosition and f.endDate > :currentDate";
-            String returnData = "";
-
-            List<String> recritierList = dataManager.loadValue(QUERY,String.class)
-                    .parameter("openPosition", openPosition)
-                    .parameter("currentDate", curDate)
-                    .list();
-
-            if(openPosition.getShortDescription() != null) {
-                returnData = returnData + "\n\n" + "Кратко: " + openPosition.getShortDescription();
-            }
-
-            if(recritierList.size() != 0) {
-                returnData = returnData + " (";
-
-                for (String a : recritierList) {
-                    returnData = returnData + a + ",";
-                }
-
-                returnData = returnData.substring(0, returnData.length() - 1);
-                returnData = returnData + ")";
-            }
-
-
-            return returnData;
-
-        }));
+        }
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         checkBoxOnlyOpenedPosition.setValue(true); // только открытые позиции
-        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
+        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER));
 
         setInternalProjectFilter();
         setSubcribersFilter();
@@ -128,8 +141,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setInternalProjectFilter() {
-        if (getRoleService.isUserRoles(userSession.getUser(), "Manager") ||
-                getRoleService.isUserRoles(userSession.getUser(), "Administrators")) {
+        if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), ROLE_ADMINISTRATOR)) {
             openPositionsDl.removeParameter("internalProject");
         } else {
             openPositionsDl.setParameter("internalProject", false);
@@ -159,16 +172,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     public void onCheckBoxOnlyOpenedPositionValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (checkBoxOnlyOpenedPosition.getValue()) {
             openPositionsDl.setParameter("openClosePos", false);
+            openPositionsTable.getColumn("openClose").setCollapsed(true);
         } else {
             openPositionsDl.removeParameter("openClosePos");
+            openPositionsTable.getColumn("openClose").setCollapsed(false);
         }
 
         openPositionsDl.load();
     }
 
-    @Install(to = "openPositionsTable", subject = "iconProvider")
-    private String openPositionsTableIconProvider(OpenPosition openPosition) {
-
+    private String getIcon(OpenPosition openPosition) {
         String icon = null;
 
         Integer priority = openPosition.getPriority();
@@ -193,7 +206,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     break;
             }
         } else {
-            icon = "icons/question-white.png";
+            icon = "VAADIN/themes/halo/icons/question-white.png";
         }
 
         return icon;

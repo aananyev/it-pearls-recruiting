@@ -1,12 +1,12 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 .open-position-job-recruitier {
-    color: blue;
+    color: black;
     font-weight: bold;
 }
 
 .open-position-empty-recruitier {
-    color: green;
+    color: black;
     font-weight: normal;
 }
 
@@ -16,6 +16,11 @@
 }
 
 .open-position-internal-project {
+    color: brown;
+    font-weight: normal;
+}
+
+.open-position-internal-project-job-recrutier {
     color: brown;
     font-weight: bold;
 }

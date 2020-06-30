@@ -3,15 +3,19 @@
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
-        messagesPack="com.company.itpearls.web.screens.iteractionlist"  icon="REORDER">
+        messagesPack="com.company.itpearls.web.screens.iteractionlist"
+        icon="REORDER">
     <data>
         <instance id="iteractionListDc"
                   class="com.company.itpearls.entity.IteractionList"
                   view="iteractionList-view">
             <loader id="iteractionListDl"/>
         </instance>
-        <collection id="iteractionTypesDc" class="com.company.itpearls.entity.Iteraction" view="iteraction-view">
-            <loader id="iteractionTypesLc" cacheable="true">
+        <collection id="iteractionTypesDc"
+                    class="com.company.itpearls.entity.Iteraction"
+                    view="iteraction-view">
+            <loader id="iteractionTypesLc"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Iteraction e order by e.iterationName]]>
                         <condition>
@@ -24,13 +28,19 @@
                     </query>
                 </loader>
             </collection>
-        <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
-            <loader id="candidatesLc" cacheable="true">
+        <collection id="candidatesDc"
+                    class="com.company.itpearls.entity.JobCandidate"
+                    view="_minimal">
+            <loader id="candidatesLc"
+                    cacheable="true">
                 <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
-        <collection id="vacancyDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view-iteraction-list">
-            <loader id="openPositionsDl" cacheable="true">
+        <collection id="vacancyDc"
+                    class="com.company.itpearls.entity.OpenPosition"
+                    view="openPosition-view-iteraction-list">
+            <loader id="openPositionsDl"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]>
                     <condition>
@@ -43,92 +53,158 @@
                 </query>
             </loader>
         </collection>
-        <collection id="usersDc" class="com.haulmont.cuba.security.entity.User" view="_local">
+        <collection id="usersDc"
+                    class="com.haulmont.cuba.security.entity.User"
+                    view="_local">
             <loader id="usersDl">
                 <query>
-                    <![CDATA[select e from sec$User e]]>
+                    <![CDATA[select e from sec$User e order by e.name]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
+    <layout expand="editActions"
+            spacing="true">
         <groupBox spacing="true">
-            <hbox spacing="true" width="100%">
+            <hbox spacing="true"
+                  width="100%">
                 <hbox width="40%">
-                    <textField id="numberIteractionField" dataContainer="iteractionListDc" property="numberIteraction"
-                               editable="false" caption="msg://msgNumber" width="80%" align="MIDDLE_CENTER"/>
-                    <dateField id="dateIteractionField" dataContainer="iteractionListDc" property="dateIteraction"
-                               editable="false" caption="msg://msgDate"/>
+                    <textField id="numberIteractionField"
+                               dataContainer="iteractionListDc"
+                               property="numberIteraction"
+                               editable="false"
+                               caption="msg://msgNumber"
+                               width="80%"
+                               align="MIDDLE_CENTER"/>
+                    <dateField id="dateIteractionField"
+                               dataContainer="iteractionListDc"
+                               property="dateIteraction"
+                               editable="false"
+                               caption="msg://msgDate"/>
                 </hbox>
                 <hbox>
-                    <label id="companyLabel" align="MIDDLE_LEFT" htmlEnabled="true"/>
+                    <label id="companyLabel"
+                           align="MIDDLE_LEFT"
+                           htmlEnabled="true"/>
                 </hbox>
             </hbox>
         </groupBox>
         <groupBox id="groupBoxIterationData">
-            <grid id="gridIterationData" spacing="true" width="100%">
+            <grid id="gridIterationData"
+                  spacing="true"
+                  width="100%">
                 <columns count="2"/>
                 <rows>
                     <row id="row">
-                        <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
-                                           rowspan="1" colspan="1" caption="msg://msgCandidate" width="100%"
-                                           dataContainer="iteractionListDc" property="candidate" required="true">
+                        <lookupPickerField id="candidateField"
+                                           optionsContainer="candidatesDc"
+                                           rowspan="1"
+                                           colspan="1"
+                                           caption="msg://msgCandidate"
+                                           width="100%"
+                                           dataContainer="iteractionListDc"
+                                           property="candidate"
+                                           required="true">
                             <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                                <action id="open" type="picker_open"/>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                                <action id="open"
+                                        type="picker_open"/>
                             </actions>
                         </lookupPickerField>
-                        <lookupPickerField id="vacancyFiels" caption="mainMsg://msgVacancy" width="100%"
-                                           dataContainer="iteractionListDc" optionsContainer="vacancyDc"
+                        <lookupPickerField id="vacancyFiels"
+                                           caption="mainMsg://msgVacancy"
+                                           width="100%"
+                                           dataContainer="iteractionListDc"
+                                           optionsContainer="vacancyDc"
                                            property="vacancy">
                             <actions>
-                                <action id="lookup" type="picker_lookup"/>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
                     </row>
                     <row>
-                        <lookupPickerField id="iteractionTypeField" optionsContainer="iteractionTypesDc"
-                                           caption="msg://msgIteractionType" width="100%"
-                                           dataContainer="iteractionListDc" property="iteractionType" colspan="1">
+                        <lookupPickerField id="iteractionTypeField"
+                                           optionsContainer="iteractionTypesDc"
+                                           caption="msg://msgIteractionType"
+                                           width="100%"
+                                           dataContainer="iteractionListDc"
+                                           property="iteractionType"
+                                           colspan="1">
                             <actions>
-                                <action id="lookup" type="picker_lookup"/>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
-                        <buttonsPanel id="buttonsPanelCallAction" width="100%" align="BOTTOM_CENTER">
+                        <buttonsPanel id="buttonsPanelCallAction"
+                                      width="100%"
+                                      align="BOTTOM_CENTER">
                             <vbox>
-                                <button id="buttonCallAction" invoke="callActionEntity" align="BOTTOM_CENTER" width="100%"/>
-                                <textField id="addString" dataContainer="iteractionListDc" property="addString" width="100%"/>
-                                <dateField id="addDate" dataContainer="iteractionListDc" property="addDate" width="100%" />
-                                <textField id="addInteger" dataContainer="iteractionListDc" property="addInteger" width="100%"/>
+                                <button id="buttonCallAction"
+                                        invoke="callActionEntity"
+                                        align="BOTTOM_CENTER"
+                                        width="100%"/>
+                                <textField id="addString"
+                                           dataContainer="iteractionListDc"
+                                           property="addString"
+                                           width="100%"/>
+                                <dateField id="addDate" dataContainer="iteractionListDc"
+                                           property="addDate"
+                                           width="100%" />
+                                <textField id="addInteger"
+                                           dataContainer="iteractionListDc"
+                                           property="addInteger"
+                                           width="100%"/>
                             </vbox>
                         </buttonsPanel>
                     </row>
                     <row>
-                        <textField id="communicationMethodField" width="100%"
-                                   caption="msg://msgCommunicationMethod" dataContainer="iteractionListDc"
+                        <textField id="communicationMethodField"
+                                   width="100%"
+                                   caption="msg://msgCommunicationMethod"
+                                   dataContainer="iteractionListDc"
                                    property="communicationMethod"/>
                         <lookupPickerField id="recrutierField"
-                                           caption="msg://msgRecrutier" width="100%" dataContainer="iteractionListDc"
-                                           property="recrutier" optionsContainer="usersDc">
+                                           caption="msg://msgRecrutier"
+                                           width="100%"
+                                           dataContainer="iteractionListDc"
+                                           property="recrutier"
+                                           optionsContainer="usersDc">
                             <actions>
-                                <action id="lookup" type="picker_lookup"/>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
                     </row>
                 </rows>
             </grid>
-            <textArea id="commentField" property="comment" rows="3" width="100%" dataContainer="iteractionListDc"
-                      caption="msg://msgComment" height="150pt"/>
+            <textArea id="commentField"
+                      property="comment"
+                      rows="3"
+                      width="100%"
+                      dataContainer="iteractionListDc"
+                      caption="msg://msgComment"
+                      height="150pt"/>
         </groupBox>
-        <form id="form" dataContainer="iteractionListDc" width="100%">
+        <form id="form"
+              dataContainer="iteractionListDc"
+              width="100%">
             <column width="250px">
             </column>
         </form>
-        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
-            <button id="subscribeButton" invoke="onButtonSubscribeClick" caption="mainMsg://msgSubscribe" icon="BELL"/>
-            <button id="buttonAddNewIteraction" invoke="addNewIteraction" caption="msg://msgAddNewIteraction"
+        <hbox id="editActions"
+              spacing="true"
+              align="BOTTOM_RIGHT">
+            <button id="subscribeButton"
+                    invoke="onButtonSubscribeClick"
+                    caption="mainMsg://msgSubscribe"
+                    icon="BELL"/>
+            <button id="buttonAddNewIteraction"
+                    invoke="addNewIteraction"
+                    caption="msg://msgAddNewIteraction"
                     icon="COPY"/>
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

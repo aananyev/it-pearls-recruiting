@@ -21,6 +21,7 @@ public class ActiveCandidates extends ScreenFragment {
     @Subscribe
     public void onInit(InitEvent event) {
        setTitle();
+
     }
 
     private void setTitle() {
