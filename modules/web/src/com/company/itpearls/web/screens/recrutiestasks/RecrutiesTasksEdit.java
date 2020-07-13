@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.DataManager;
@@ -62,6 +63,10 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private DataManager dataManager;
     @Inject
     private SubscribeDateService subscribeDateService;
+    @Inject
+    private GetRoleService getRoleService;
+
+    private String MANAGER = "Manager";
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
@@ -206,7 +211,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                 ruDateFormatSymbols );
 
         // проверить, а вдруг вы уже подписаны на эту вакансию?
-        if( checkSubscribePosition() ) {
+        if( checkSubscribePosition() && !getRoleService.isUserRoles( userSession.getUser(), MANAGER)) {
             dialogs.createMessageDialog()
                     .withCaption( "Внимание" )
                     .withModal( true )
@@ -215,11 +220,9 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                             " по " + dateFormat.format( endDateField.getValue() ) )
                    .show();
 
-//            closeWithDiscard();
             close(WINDOW_DISCARD_AND_CLOSE_ACTION);
         } else
             closeWithCommit();
-//            close(WINDOW_COMMIT_AND_CLOSE_ACTION);
     }
 
 }

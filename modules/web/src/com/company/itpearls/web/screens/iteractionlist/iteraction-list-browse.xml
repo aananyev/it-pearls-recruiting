@@ -40,9 +40,15 @@
                         exclude="addDate|addInteger|addString|addType|communicationMethod|ID|iteractionChain|numberIteraction|recrutierName"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="iteractionListsTable"
-                    width="100%"
-                    dataContainer="iteractionListsDc">
+        <dataGrid id="iteractionListsTable"
+                  width="100%"
+                  editorEnabled="false"
+                  headerVisible="true"
+                  contextMenuEnabled="false"
+                  textSelectionEnabled="false"
+                  selectionMode="SINGLE"
+                  reorderingAllowed="true"
+                  dataContainer="iteractionListsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
@@ -50,18 +56,18 @@
                 <action id="excel" type="excel"/>
             </actions>
             <columns>
-                <column id="numberIteraction" caption="msg://msgNumber" align="CENTER"/>
-                <column id="candidate.fullName" caption="msg://msgCandidate" width="200"/>
-                <column id="iteractionType" caption="msg://msgIteractionType" width="250"/>
-                <column id="vacancy.projectName.projectName" caption="msg://msgCompanyShortName" width="200"/>
-                <column id="vacancy" caption="mainMsg://msgVacancy" width="250"/>
-                <column id="recrutier" caption="msg://msgRecrutier"/>
-                <column id="dateIteraction" caption="msg://msgDate">
+                <column id="icon" width="48px" resizable="false" caption=""/>
+                <column id="numberIteraction" property="numberIteraction" caption="msg://msgNumber"/>
+                <column id="candidate.fullName" property="candidate.fullName" caption="msg://msgCandidate" width="200px"/>
+                <column id="iteractionType" property="iteractionType" caption="msg://msgIteractionType" width="250px"/>
+                <column id="vacancy.projectName.projectName" property="vacancy.projectName.projectName" caption="msg://msgCompanyShortName" width="200px"/>
+                <column id="vacancy" property="vacancy" caption="mainMsg://msgVacancy" width="250px"/>
+                <column id="recrutier" property="recrutier" caption="msg://msgRecrutier"/>
+                <column id="dateIteraction" property="dateIteraction" caption="msg://msgDate">
                     <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                 </column>
-                <column id="project" visible="false"/>
             </columns>
-            <rowsCount/>
+            <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
                 <button id="createBtn" action="iteractionListsTable.create"/>
@@ -75,7 +81,7 @@
                         caption="mainMsg://msgExcelExport"
                         icon="FILE_EXCEL_O"/>
             </buttonsPanel>
-        </groupTable>
+        </dataGrid>
         <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>

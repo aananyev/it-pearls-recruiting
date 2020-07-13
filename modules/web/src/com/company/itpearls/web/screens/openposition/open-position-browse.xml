@@ -10,7 +10,8 @@
                     view="openPosition-view">
             <loader id="openPositionsDl" cacheable="true">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                    order by e.vacansyName]]>
                     <condition>
                         <and>
                             <c:jpql>

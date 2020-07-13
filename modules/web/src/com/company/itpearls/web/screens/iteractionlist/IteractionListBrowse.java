@@ -1,27 +1,17 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
-import com.company.itpearls.BeanNotificationEvent;
-import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.service.GetRoleService;
-import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
-import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
-import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import org.junit.platform.commons.logging.LoggerFactory;
-import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Logger;
 
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
@@ -37,8 +27,6 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
-    private GroupTable<IteractionList> iteractionListsTable;
-    @Inject
     private Button buttonCopy;
     @Inject
     private UserSessionSource userSessionSource;
@@ -46,29 +34,35 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private Button buttonExcel;
     @Inject
     private GetRoleService getRoleService;
-    @Inject
-    private Notifications notifications;
 
     static String RESEARCHER = "Researcher";
     static String RECRUITER = "Recruiter";
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
+    static String STAGER = "Стажер";
+
     @Inject
     private DataManager dataManager;
+    @Inject
+    private DataGrid<IteractionList> iteractionListsTable;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
+        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), MANAGER));
 
-        if( userSession.getUser().getGroup().getName().equals("Стажер") ) {
-            iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
+        filterStagerField();
+        filterInternalProject();
+    }
 
-            checkBoxShowOnlyMy.setValue( true );
-            checkBoxShowOnlyMy.setEditable( false );
+    private void filterStagerField() {
+        if (userSession.getUser().getGroup().getName().equals(STAGER)) {
+            iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+
+            checkBoxShowOnlyMy.setValue(true);
+            checkBoxShowOnlyMy.setEditable(false);
+
             iteractionListsDl.load();
         }
-
-        filterInternalProject();
     }
 
     private void filterInternalProject() {
@@ -84,8 +78,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if(checkBoxShowOnlyMy.getValue()) {
-           iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+        if (checkBoxShowOnlyMy.getValue()) {
+            iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
         } else {
             iteractionListsDl.removeParameter("userName");
         }
@@ -93,36 +87,49 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         iteractionListsDl.load();
     }
 
-    @Install(to = "iteractionListsTable", subject = "iconProvider")
-    private String iteractionListsTableIconProvider(IteractionList iteractionList) {
-        return iteractionList.getIteractionType().getPic();
-    }
-
     public void onButtonCopyClick() {
         Screen screen = screenBuilders.editor(iteractionListsTable)
                 .newEntity()
-                .withInitializer( data -> {
-                    if( iteractionListsTable.getSingleSelected() != null ) {
+                .withInitializer(data -> {
+                    if (iteractionListsTable.getSingleSelected() != null) {
 
-                        data.setCandidate( iteractionListsTable.getSingleSelected().getCandidate());
-                        data.setVacancy( iteractionListsTable.getSingleSelected().getVacancy() );
+                        data.setCandidate(iteractionListsTable.getSingleSelected().getCandidate());
+                        data.setVacancy(iteractionListsTable.getSingleSelected().getVacancy());
                         // data.setCompanyDepartment( iteractionListsTable.getSingleSelected().getCompanyDepartment() );
-                        data.setProject( iteractionListsTable.getSingleSelected().getProject() );
+                        data.setProject(iteractionListsTable.getSingleSelected().getProject());
                     }
                 })
-                .withScreenClass( IteractionListEdit.class )
-                .withLaunchMode( OpenMode.THIS_TAB )
+                .withScreenClass(IteractionListEdit.class)
+                .withLaunchMode(OpenMode.THIS_TAB)
                 .build();
 
-                screen.show();
+        screen.show();
     }
 
-    @Subscribe("iteractionListsTable")
-    public void onIteractionListsTableSelection(Table.SelectionEvent<IteractionList> event) {
-        if( iteractionListsTable.isFocusable() )
-            buttonCopy.setEnabled( true );
-        else
-            buttonCopy.setEnabled( false );
+    private void addIconColumn() {
+        DataGrid.Column iconColumn = iteractionListsTable.addGeneratedColumn("icon",
+                new DataGrid.ColumnGenerator<IteractionList, String>() {
+                    @Override
+                    public String getValue(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+                        return getIcon(event.getItem());
+                    }
 
+                    @Override
+                    public Class<String> getType() {
+                        return String.class;
+                    }
+                });
+
+        iconColumn.setRenderer(iteractionListsTable.createRenderer(DataGrid.ImageRenderer.class));
+    }
+
+
+    private String getIcon(IteractionList item) {
+        return item.getIteractionType().getPic();
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        addIconColumn();
     }
 }
