@@ -189,7 +189,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             switch (priority) {
                 case 0: //"Paused"
-                    icon = "icons/remove.png";
+                    icon = "icons/minus.png";
                     break;
                 case 1: //"Low"
                     icon = "icons/traffic-lights_blue.png";
@@ -205,7 +205,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     break;
             }
         } else {
-            icon = "VAADIN/themes/halo/icons/question-white.png";
+            icon = "icons/question-white.png";
         }
 
         return icon;

@@ -91,6 +91,14 @@
                         property="numberPosition"
                         width="50px"
                         caption="msg://msgNumberOpenPosition"/>
+                <column id="createTs"
+                        property="createTs"
+                        width="100px"
+                        collapsed="false"
+                        caption="msg://msgCreatedTs">
+                        <formatter format="dd.MM.yyyy"
+                                   class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                </column>
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"
