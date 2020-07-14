@@ -462,21 +462,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                         r = true;
                     } else {
-                        // позиция закрылась
-                        events.publish(new UiNotificationEvent(this, "Закрыта позиция: " +
-                                getEditedEntity().getVacansyName()));
-
-                        emails = getSubscriberMaillist(getEditedEntity()) +
-                                ";" + getRecrutiersMaillist();
-
-                        emailInfo = new EmailInfo(emails,
-                                "Закрыта позиция " + openPosition.getVacansyName(),
-                                null, "com/company/itpearls/templates/close_position.html",
-                                Collections.singletonMap("openPosition", openPosition));
-
-                        emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
-                        emailService.sendEmailAsync(emailInfo);
+                        dialogs.createOptionDialog()
+                                .withCaption("Confirm")
+                                .withMessage("Are you sure?")
+                                .withActions(
+                                        new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                                            sendClosePositionEmail(openPosition);
+                                        }),
+                                        new DialogAction(DialogAction.Type.NO)
+                                )
+                                .show();
 
                         notifications.create(Notifications.NotificationType.TRAY)
                                 .withCaption("Рассылка обновлений позиции")
@@ -493,6 +488,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         return r;
+    }
+
+    private void sendClosePositionEmail(OpenPosition openPosition) {
+        // позиция закрылась
+        events.publish(new UiNotificationEvent(this, "Закрыта позиция: " +
+                getEditedEntity().getVacansyName()));
+
+        emails = getSubscriberMaillist(getEditedEntity()) +
+                ";" + getRecrutiersMaillist();
+
+        emailInfo = new EmailInfo(emails,
+                "Закрыта позиция " + openPosition.getVacansyName(),
+                null, "com/company/itpearls/templates/close_position.html",
+                Collections.singletonMap("openPosition", openPosition));
+
+        emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
+        emailService.sendEmailAsync(emailInfo);
     }
 
 
