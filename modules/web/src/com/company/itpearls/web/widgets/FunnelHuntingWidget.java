@@ -49,6 +49,8 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
     private String labelHeight = "15px";
     private String sizeColumn = "115px";
+    private String RESEARCHER = "Ресерчинг";
+    private String RESEARCHER_INTERN = "Стажер";
 
     @Inject
     private HBoxLayout boxWidgetTitle;
@@ -80,7 +82,13 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
     private void getResearchersList() {
         LoadContext<User> loadContext = LoadContext.create(User.class)
-                .setQuery(LoadContext.createQuery("select e from sec$User e where e.active=true and e.name not like \'Anonymous\' and e.name not like \'%Test%\' and e.name not like \'Administrator\' order by e.name"));
+                .setQuery(LoadContext.createQuery("select e from sec$User e " +
+                        "where e.active=true and " +
+                        "e.name not like \'Anonymous\' and " +
+                        "e.name not like \'%Test%\' and " +
+                        "e.name not like \'Administrator\' " +
+                        "order by e.name"))
+                .setView("user-view");
         reaearchers = dataManager.loadList(loadContext);
     }
 
@@ -138,14 +146,20 @@ public class FunnelHuntingWidget extends ScreenFragment {
                         .parameter("iteractionName", a)
                         .one();
 
-                Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
 
-                labelCount.setValue(iteractionCount);
-                labelCount.setWidthFull();
-                labelCount.setHeightFull();
-                labelCount.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+                if(user.getGroup() != null) {
+                    if (user.getGroup().getName().equals(RESEARCHER) || user.getGroup().getName().equals(RESEARCHER_INTERN)) {
 
-                vBox.add(labelCount);
+                        Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
+
+                        labelCount.setValue(iteractionCount);
+                        labelCount.setWidthFull();
+                        labelCount.setHeightFull();
+                        labelCount.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+
+                        vBox.add(labelCount);
+                    }
+                }
             }
         }
     }
@@ -170,8 +184,12 @@ public class FunnelHuntingWidget extends ScreenFragment {
             label.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
             label.setValue(a.getName());
 
-            boxLayout.add(label);
-            researcherNameBox.add(boxLayout);
+            if(a.getGroup() != null) {
+                if (a.getGroup().getName().equals(RESEARCHER) || a.getGroup().getName().equals(RESEARCHER_INTERN)) {
+                    boxLayout.add(label);
+                    researcherNameBox.add(boxLayout);
+                }
+            }
         }
     }
 

@@ -52,6 +52,8 @@ public class Reserachereffectivity extends ScreenFragment {
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static String GRAPH_X = "recrutier";
     private static String GRAPH_Y = "count";
+    private String RESEARCHER = "Ресерчинг";
+    private String RESEARCHER_INTERN = "Стажер";
 
     @Inject
     private SerialChart countIteractionChart;
@@ -87,40 +89,44 @@ public class Reserachereffectivity extends ScreenFragment {
                     "order by e.recrutier.name";
         }
 
-        List<User> users = dataManager.load(User.class).list();
+        List<User> users = dataManager.load(User.class).view("user-view").list();
 
         for (User a : users) {
-            if (a.getActive() & a.getFirstName() != null & a.getLastName() != null) {
-                int count;
-                if (iteractionName == null) {
-                    count = dataManager.load(IteractionList.class)
-                            .query(queryCount)
-                            .view("iteractionList-view")
-                            .parameter("user", a)
-                            .parameter("startDate", startDate)
-                            .parameter("endDate", endDate)
-                            .list()
-                            .size();
-                } else {
-                    count = dataManager.load(IteractionList.class)
-                            .query(queryCount)
-                            .view("iteractionList-view")
-                            .parameter("user", a)
-                            .parameter("iteractionName", iteractionName)
-                            .parameter("startDate", startDate)
-                            .parameter("endDate", endDate)
-                            .list()
-                            .size();
-                }
+            if(a.getGroup() != null) {
+                if (a.getGroup().getName().equals(RESEARCHER) || a.getGroup().getName().equals(RESEARCHER_INTERN)) {
+                    if (a.getActive() & a.getFirstName() != null & a.getLastName() != null) {
+                        int count;
+                        if (iteractionName == null) {
+                            count = dataManager.load(IteractionList.class)
+                                    .query(queryCount)
+                                    .view("iteractionList-view")
+                                    .parameter("user", a)
+                                    .parameter("startDate", startDate)
+                                    .parameter("endDate", endDate)
+                                    .list()
+                                    .size();
+                        } else {
+                            count = dataManager.load(IteractionList.class)
+                                    .query(queryCount)
+                                    .view("iteractionList-view")
+                                    .parameter("user", a)
+                                    .parameter("iteractionName", iteractionName)
+                                    .parameter("startDate", startDate)
+                                    .parameter("endDate", endDate)
+                                    .list()
+                                    .size();
+                        }
 
-                if(userRole != null) {
-                    if (checkUserRoles(a, userRole)) {
-                        dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
-                                a.getFirstName() + "\n" + a.getLastName())));
+                        if (userRole != null) {
+                            if (checkUserRoles(a, userRole)) {
+                                dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
+                                        a.getFirstName() + "\n" + a.getLastName())));
+                            }
+                        } else {
+                            dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
+                                    a.getFirstName() + "\n" + a.getLastName())));
+                        }
                     }
-                } else {
-                    dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
-                            a.getFirstName() + "\n" + a.getLastName())));
                 }
             }
         }

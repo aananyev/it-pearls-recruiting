@@ -189,7 +189,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             switch (priority) {
                 case 0: //"Paused"
-                    icon = "icons/minus.png";
+                    icon = "icons/remove.png";
                     break;
                 case 1: //"Low"
                     icon = "icons/traffic-lights_blue.png";

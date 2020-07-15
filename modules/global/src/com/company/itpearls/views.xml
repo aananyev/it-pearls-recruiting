@@ -238,7 +238,6 @@
             <property name="fullName"/>
         </property>
         <property name="vacancy" fetch="BATCH" view="_local">
-            <property name="internalProject"/>
             <property name="projectName" fetch="JOIN" view="_local">
                 <property name="projectDepartment" view="_local">
                     <property name="companyName" view="_local"/>
@@ -247,18 +246,14 @@
         </property>
         <property name="project" fetch="JOIN" view="_local"/>
         <property name="iteractionType" fetch="BATCH" view="_minimal">
-            <property name="iterationName"/>
+            <property name="iteractionTree"/>
+            <property name="pic"/>
+            <property name="addCaption"/>
+            <property name="calendarItem"/>
             <property name="calendarItemStyle"/>
             <property name="calendarItemDescription"/>
-            <property name="calendarItem"/>
-            <property name="pic"/>
-            <property name="iteractionTree"/>
         </property>
         <property name="recrutier" fetch="JOIN" view="_local"/>
-        <property name="addDate"/>
-        <property name="addInteger"/>
-        <property name="addString"/>
-        <property name="addType"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">
@@ -406,5 +401,9 @@
         <property name="iteraction" fetch="JOIN" view="_local"/>
         <property name="iteractionRequirement" fetch="JOIN" view="_local"/>
         <property name="requirement" fetch="AUTO"/>
+    </view>
+    <view entity="sec$User" name="user-view" extends="_local">
+        <property name="name"/>
+        <property name="group" fetch="JOIN" view="_local"/>
     </view>
 </views>

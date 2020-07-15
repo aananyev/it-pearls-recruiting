@@ -12,6 +12,8 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
@@ -63,6 +65,24 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
             iteractionListsDl.load();
         }
+    }
+
+    @Install(to = "iteractionListsTable.iteractionType", subject = "descriptionProvider")
+    private String iteractionListsTableIteractionTypeDescriptionProvider(IteractionList iteractionList) {
+        String add = "";
+
+        if(iteractionList.getAddDate() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy H:m");
+            add = dateFormat.format(iteractionList.getAddDate());
+        }
+
+        if(iteractionList.getAddString() != null)
+            add = iteractionList.getAddString();
+
+        if(iteractionList.getAddInteger() != null)
+            add = iteractionList.getAddInteger().toString();
+
+        return iteractionList.getComment() != null ? iteractionList.getComment() : "" + add;
     }
 
     private void filterInternalProject() {
