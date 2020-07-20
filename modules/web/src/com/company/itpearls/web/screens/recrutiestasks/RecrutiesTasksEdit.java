@@ -97,7 +97,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                 recrutiesTasksFieldUser.setEnabled(true);
             // поставить следующий понедельник
             LocalDate currentDate = LocalDate.now();
-            LocalDate nextMonday = currentDate.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+            LocalDate nextMonday = currentDate.with(TemporalAdjusters.next(DayOfWeek.SUNDAY));
 
             Instant instant = nextMonday
                     .atStartOfDay(ZoneId.systemDefault())

@@ -2,8 +2,6 @@ package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.config.defaults.Default;
-import com.haulmont.cuba.core.config.defaults.DefaultBoolean;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -23,8 +21,9 @@ import java.util.List;
 public class OpenPosition extends StandardEntity {
     private static final long serialVersionUID = -4276280250460057561L;
 
+    @NotNull
     @Column(name = "OPEN_CLOSE")
-    protected Boolean openClose;
+    protected Boolean openClose = false;
 
     @NotNull
     @Column(name = "VACANSY_NAME", nullable = false, length = 80)
@@ -112,8 +111,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "USE_TAX_NDFL")
     protected Boolean useTaxNDFL;
 
+    @NotNull
     @Column(name = "INTERNAL_PROJECT")
-    protected Boolean internalProject;
+    protected Boolean internalProject = false;
 
     @Column(name = "PERCENT_COMISSION_OF_COMPANY", length = 5)
     protected String percentComissionOfCompany;

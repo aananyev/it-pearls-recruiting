@@ -47,6 +47,10 @@ public class Reserachereffectivity extends ScreenFragment {
 
     @WidgetParam
     @WindowParam
+    protected String userGroup;
+
+    @WidgetParam
+    @WindowParam
     protected String userRole;
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
@@ -59,8 +63,6 @@ public class Reserachereffectivity extends ScreenFragment {
     private SerialChart countIteractionChart;
     @Inject
     private DataManager dataManager;
-    @Inject
-    private GetRoleService getRoleService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -69,7 +71,15 @@ public class Reserachereffectivity extends ScreenFragment {
         countIteractionChart.setCategoryField(GRAPH_X);
         countIteractionChart.setDataProvider(valueGraphs());
 
+        setUserGroup();
+
         setDiagramTitle();
+    }
+
+    private void setUserGroup() {
+        if(userGroup == null) {
+            userGroup = RESEARCHER;
+        }
     }
 
     private DataProvider valueGraphs() {

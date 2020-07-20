@@ -1,4 +1,4 @@
-package com.company.itpearls.web.widgets;
+package com.company.itpearls.web.widgets.reports;
 
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
@@ -21,10 +21,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-@UiController("itpearls_FunnelHuntingWidget")
-@UiDescriptor("funnel-hunting-widget.xml")
-@DashboardWidget(name = "Funnel Hunting Widget")
-public class FunnelHuntingWidget extends ScreenFragment {
+@UiController("itpearls_FunnelHuntingRecrutierWidget")
+@UiDescriptor("funnel-hunting-recrutier-widget.xml")
+@DashboardWidget(name = "Funnel Hunting Recruter Widget")
+public class FunnelHuntingRecrutierWidget extends ScreenFragment {
     @Inject
     private UiComponents uiComponents;
 
@@ -49,8 +49,8 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
     private String labelHeight = "15px";
     private String sizeColumn = "115px";
-    private String RESEARCHER = "Ресерчинг";
-    private String RESEARCHER_INTERN = "Стажер";
+    private String HEADHUNTER = "Хантинг";
+    private String MANAGER = "Менеджмент";
 
     @Inject
     private HBoxLayout boxWidgetTitle;
@@ -128,27 +128,22 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
             for (User user : reaearchers) {
 
+                if (user.getGroup() != null) {
+                    if (user.getGroup().getName().equals(HEADHUNTER) || user.getGroup().getName().equals(MANAGER)) {
+                        styleCount = styleCount == 2 ? 1 : 2;
 
-                if (styleCount == 2)
-                    styleCount = 1;
-                else
-                    styleCount = 2;
+                        String queryCounter = "select count(e) from itpearls_IteractionList e " +
+                                "where e.dateIteraction between :startDate and :endDate and " +
+                                "e.recrutier = :recrutier and " +
+                                "e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName )";
 
-                String queryCounter = "select count(e) from itpearls_IteractionList e " +
-                        "where e.dateIteraction between :startDate and :endDate and " +
-                        "e.recrutier = :recrutier and " +
-                        "e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName )";
+                        int iteractionCount = dataManager.loadValue(queryCounter, Integer.class)
+                                .parameter("startDate", startDate)
+                                .parameter("endDate", endDate)
+                                .parameter("recrutier", user)
+                                .parameter("iteractionName", a)
+                                .one();
 
-                int iteractionCount = dataManager.loadValue(queryCounter, Integer.class)
-                        .parameter("startDate", startDate)
-                        .parameter("endDate", endDate)
-                        .parameter("recrutier", user)
-                        .parameter("iteractionName", a)
-                        .one();
-
-
-                if(user.getGroup() != null) {
-                    if (user.getGroup().getName().equals(RESEARCHER) || user.getGroup().getName().equals(RESEARCHER_INTERN)) {
 
                         Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
 
@@ -168,24 +163,22 @@ public class FunnelHuntingWidget extends ScreenFragment {
         Integer styleCount = 2;
 
         for (User a : reaearchers) {
-            if (styleCount == 2)
-                styleCount = 1;
-            else
-                styleCount = 2;
 
-            CssLayout boxLayout = uiComponents.create(CssLayout.class);
-            boxLayout.setWidthFull();
-            boxLayout.setAlignment(Component.Alignment.BOTTOM_LEFT);
-            boxLayout.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+            if (a.getGroup() != null) {
+                if (a.getGroup().getName().equals(HEADHUNTER) || a.getGroup().getName().equals(MANAGER)) {
+                    styleCount = styleCount == 2 ? 1 : 2;
 
-            Label<String> label = uiComponents.create(Label.TYPE_STRING);
-            label.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            label.setWidthFull();
-            label.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
-            label.setValue(a.getName());
+                    CssLayout boxLayout = uiComponents.create(CssLayout.class);
+                    boxLayout.setWidthFull();
+                    boxLayout.setAlignment(Component.Alignment.BOTTOM_LEFT);
+                    boxLayout.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
 
-            if(a.getGroup() != null) {
-                if (a.getGroup().getName().equals(RESEARCHER) || a.getGroup().getName().equals(RESEARCHER_INTERN)) {
+                    Label<String> label = uiComponents.create(Label.TYPE_STRING);
+                    label.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                    label.setWidthFull();
+                    label.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+                    label.setValue(a.getName());
+
                     boxLayout.add(label);
                     researcherNameBox.add(boxLayout);
                 }
@@ -194,11 +187,11 @@ public class FunnelHuntingWidget extends ScreenFragment {
     }
 
     private void initListIteraction() {
-        listIteractionForCheck.add(ITRKT_NEW_CONTACT);
-        listIteractionForCheck.add(ITRKT_POPOSE_JOB);
-        listIteractionForCheck.add(ITRKT_ASSIGN_ITPEARKS_INTERVIEW);
+//        listIteractionForCheck.add(ITRKT_NEW_CONTACT);
+//        listIteractionForCheck.add(ITRKT_POPOSE_JOB);
+//        listIteractionForCheck.add(ITRKT_ASSIGN_ITPEARKS_INTERVIEW);
         listIteractionForCheck.add(ITRKT_PREPARE_ITPEARKS_INTERVIEW);
-        listIteractionForCheck.add(ITRKT_ASSIGN_TECH_INTERVIEW);
+//        listIteractionForCheck.add(ITRKT_ASSIGN_TECH_INTERVIEW);
         listIteractionForCheck.add(ITRKT_PREPARE_TECH_INTERVIEW);
         listIteractionForCheck.add(ITRKT_PREPARE_DIRECTOR_INTERVIEW);
     }

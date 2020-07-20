@@ -1,4 +1,7 @@
-package com.company.itpearls.web.widgets;
+/*
+Это виджет прямоугольный статистика агрегированная
+*/
+package com.company.itpearls.web.widgets.reports;
 
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
