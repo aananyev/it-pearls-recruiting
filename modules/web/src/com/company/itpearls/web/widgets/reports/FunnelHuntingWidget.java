@@ -16,10 +16,7 @@ import com.haulmont.cuba.security.entity.User;
 import javax.inject.Inject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
 @UiController("itpearls_FunnelHuntingWidget")
 @UiDescriptor("funnel-hunting-widget.xml")
@@ -199,5 +196,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
 //        listIteractionForCheck.add(ITRKT_ASSIGN_TECH_INTERVIEW);
 //        listIteractionForCheck.add(ITRKT_PREPARE_TECH_INTERVIEW);
 //        listIteractionForCheck.add(ITRKT_PREPARE_DIRECTOR_INTERVIEW);
+
+        Collections.sort(listIteractionForCheck);
     }
 }

@@ -16,10 +16,7 @@ import com.haulmont.cuba.security.entity.User;
 import javax.inject.Inject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
 @UiController("itpearls_FunnelHuntingRecrutierWidget")
 @UiDescriptor("funnel-hunting-recrutier-widget.xml")
@@ -187,11 +184,7 @@ public class FunnelHuntingRecrutierWidget extends ScreenFragment {
     }
 
     private void initListIteraction() {
-//        listIteractionForCheck.add(ITRKT_NEW_CONTACT);
-//        listIteractionForCheck.add(ITRKT_POPOSE_JOB);
-//        listIteractionForCheck.add(ITRKT_ASSIGN_ITPEARKS_INTERVIEW);
         listIteractionForCheck.add(ITRKT_PREPARE_ITPEARKS_INTERVIEW);
-//        listIteractionForCheck.add(ITRKT_ASSIGN_TECH_INTERVIEW);
         listIteractionForCheck.add(ITRKT_PREPARE_TECH_INTERVIEW);
         listIteractionForCheck.add(ITRKT_PREPARE_DIRECTOR_INTERVIEW);
     }
