@@ -98,6 +98,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return returnData;
     }
 
+    @Install(to = "openPositionsTable.projectName", subject = "descriptionProvider")
+    private String openPositionsTableProjectNameDescriptionProvider(OpenPosition openPosition) {
+        return openPosition.getProjectName().getProjectDescription();
+    }
+
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")
     private String openPositionsTableRowStyleProvider(OpenPosition openPosition) {
         Integer s = dataManager.loadValue("select count(e.reacrutier) " +

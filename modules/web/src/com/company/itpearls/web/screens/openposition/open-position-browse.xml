@@ -78,7 +78,7 @@
                         resizable="true"
                         property="positionType"
                         caption="msg://msgPositionType"/>
-                <column id="projectName.projectName"
+                <column id="projectName"
                         resizable="true"
                         property="projectName"
                         caption="msg://msgProjectName"/>
