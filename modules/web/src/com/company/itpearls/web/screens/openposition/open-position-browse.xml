@@ -33,6 +33,12 @@
                             <c:jpql>
                                 <c:where>e.internalProject = :internalProject</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select g.openPosition
+                                    from itpearls_RecrutiesTasks g
+                                    where g.reacrutier = :recrutier)
+                                </c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>

@@ -91,7 +91,14 @@ public class ProjectEdit extends StandardEditor<Project> {
            startProjectDateField.setValue( date );
        }
 
+       setStartDateOfProject();
        getOpenedPosition();
+    }
+
+    private void setStartDateOfProject() {
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            startProjectDateField.setValue(new Date());
+        }
     }
 
     private void getOpenedPosition() {

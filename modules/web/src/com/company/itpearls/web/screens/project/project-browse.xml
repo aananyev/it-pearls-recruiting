@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://browseCaption"
         focusComponent="projectsTable"
         messagesPack="com.company.itpearls.web.screens.project" icon="ARCHIVE">
@@ -11,6 +12,13 @@
                 <query>
                     <![CDATA[select e from itpearls_Project e
 order by e.projectIsClosed desc, e.projectName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e.projectIsClosed = :projectClosed
+                            </c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -49,6 +57,9 @@ order by e.projectIsClosed desc, e.projectName]]>
                 <button id="removeBtn" action="projectsTable.remove"/>
             </buttonsPanel>
         </groupTable>
+        <groupBox>
+            <checkBox id="onlyOpenProjectCheckBox" caption="msg://msgOnlyOpenedProject"/>
+        </groupBox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

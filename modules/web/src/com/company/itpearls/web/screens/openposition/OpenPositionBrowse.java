@@ -49,6 +49,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     protected void onInit(InitEvent event) {
         addIconColumn();
+        filterSubscribedRecrutier();
+    }
+
+    private void filterSubscribedRecrutier() {
+        openPositionsDl.setParameter("recrutier", userSession.getUser());
+        openPositionsDl.load();
     }
 
     private void addIconColumn() {
@@ -141,7 +147,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         setInternalProjectFilter();
         setSubcribersFilter();
-
     }
 
     private void setInternalProjectFilter() {

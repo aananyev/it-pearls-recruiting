@@ -24,7 +24,7 @@ public class Project extends StandardEntity {
     protected String projectName;
 
     @Column(name = "PROJECT_IS_CLOSED")
-    protected Boolean projectIsClosed;
+    protected Boolean projectIsClosed = false;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "START_PROJECT_DATE")
