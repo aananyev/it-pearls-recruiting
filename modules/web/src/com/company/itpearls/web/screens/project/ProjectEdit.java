@@ -62,7 +62,7 @@ public class ProjectEdit extends StandardEditor<Project> {
                             new DialogAction((DialogAction.Type.NO)
                             ))
                     .show();
-            
+
             setEndDateProject();
         }
 
