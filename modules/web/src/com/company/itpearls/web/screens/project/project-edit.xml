@@ -27,34 +27,62 @@ order by e.secondName, e.firstName]]></query>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
+    <layout expand="editActions"
+            spacing="true">
         <tabSheet caption="msg://msgTabProject">
             <tab caption="msg://msgProjectName" margin="true,false,false,false" spacing="true" id="tabProject">
-                <groupBox spacing="true">
-                    <checkBox id="checkBoxProjectIsClosed" dataContainer="projectDc" property="projectIsClosed"
+                <groupBox spacing="true"
+                          width="100%"
+                          height="100%"
+                          expand="projectDescriptionRichTextArea">
+                    <checkBox id="checkBoxProjectIsClosed"
+                              dataContainer="projectDc" property="projectIsClosed"
                               caption="msg://msgProjectIsClosed"/>
-                    <textField id="projectNameField" dataContainer="projectDc" property="projectName"
-                               caption="msg://msgProjectName" width="50%" required="true"/>
+                    <textField id="projectNameField"
+                               dataContainer="projectDc"
+                               property="projectName"
+                               caption="msg://msgProjectName"
+                               width="50%"
+                               required="true"/>
                     <hbox width="50%">
-                        <dateField id="startProjectDateField" dataContainer="projectDc" property="startProjectDate"
-                                   caption="msg://msgProjectStartDate" width="AUTO"/>
-                        <dateField id="endProjectDateField" dataContainer="projectDc" property="endProjectDate"
-                                   caption="msg://msgProjectEndDate" width="AUTO"/>
+                        <dateField id="startProjectDateField"
+                                   dataContainer="projectDc"
+                                   property="startProjectDate"
+                                   caption="msg://msgProjectStartDate"
+                                   width="AUTO"/>
+                        <dateField id="endProjectDateField"
+                                   dataContainer="projectDc"
+                                   property="endProjectDate"
+                                   caption="msg://msgProjectEndDate"
+                                   width="AUTO"/>
                     </hbox>
-                    <lookupPickerField id="projectDepartmentField" optionsContainer="projectDepartmentsDc"
-                                       dataContainer="projectDc" property="projectDepartment" required="true"
-                                       caption="msg://msgProjectDepartament" width="50%">
+                    <lookupPickerField id="projectDepartmentField"
+                                       optionsContainer="projectDepartmentsDc"
+                                       dataContainer="projectDc"
+                                       property="projectDepartment"
+                                       required="true"
+                                       caption="msg://msgProjectDepartament"
+                                       width="50%">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <lookupPickerField id="projectOwnerField" optionsContainer="projectOwnersDc"
-                                       dataContainer="projectDc" property="projectOwner"
-                                       caption="msg://msgProjectOwner" width="50%">
+                    <lookupPickerField id="projectOwnerField"
+                                       optionsContainer="projectOwnersDc"
+                                       dataContainer="projectDc"
+                                       property="projectOwner"
+                                       caption="msg://msgProjectOwner"
+                                       width="50%">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
+                    <richTextArea id="projectDescriptionRichTextArea"
+                                  dataContainer="projectDc"
+                                  property="projectDescription"
+                                  width="100%"
+                                  height="AUTO"
+                                  caption="msg://msgProjectDescription"/>
                 </groupBox>
             </tab>
             <tab id="tabVacansy" margin="true,false,false,false" spacing="true" caption="msg://msgTabVacancy">

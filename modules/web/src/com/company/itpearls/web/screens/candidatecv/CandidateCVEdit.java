@@ -62,8 +62,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private Dialogs dialogs;
     @Inject
-    private RichTextArea candidateCVRichTextArea;
-    @Inject
     private RichTextArea letterRichTextArea;
 
     @Subscribe
@@ -72,34 +70,36 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         webBrowserTools = ui.getWebBrowserTools();
 
         fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
-            File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+            if(fileOriginalCVField.getFileId() != null ) {
+                File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
 
-            commitChanges();
+                commitChanges();
 
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Commit changes of " + candidateField.getValue().getFullName())
-                    .withDescription("INFO")
-                    .show();
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Commit changes of " + candidateField.getValue().getFullName())
+                        .withDescription("INFO")
+                        .show();
 
-            if (file != null) {
+                if (file != null) {
+                    notifications.create()
+                            .withCaption("File is uploaded to temporary storage at " + file.getAbsolutePath())
+                            .show();
+                }
+
+                FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
+
+                try {
+                    fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
+                } catch (FileStorageException e) {
+                    throw new RuntimeException("Error saving file to FileStorage", e);
+                }
+
+                dataManager.commit(fd);
+
                 notifications.create()
-                        .withCaption("File is uploaded to temporary storage at " + file.getAbsolutePath())
+                        .withCaption("Uploaded file: " + fileOriginalCVField.getFileName())
                         .show();
             }
-
-            FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
-
-            try {
-                fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
-            } catch (FileStorageException e) {
-                throw new RuntimeException("Error saving file to FileStorage", e);
-            }
-
-            dataManager.commit(fd);
-
-            notifications.create()
-                    .withCaption("Uploaded file: " + fileOriginalCVField.getFileName())
-                    .show();
         });
 
         fileOriginalCVField.addFileUploadErrorListener(uploadErrorEvent ->

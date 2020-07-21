@@ -54,6 +54,18 @@ public class Project extends StandardEntity {
     @OneToMany(mappedBy = "project")
     protected List<IteractionList> jobCandidate;
 
+    @Lob
+    @Column(name = "PROJECT_DESCRIPTION")
+    protected String projectDescription;
+
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
+    }
+
     public List<IteractionList> getJobCandidate() {
         return jobCandidate;
     }

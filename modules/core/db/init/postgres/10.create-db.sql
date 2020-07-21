@@ -239,6 +239,7 @@ create table ITPEARLS_PROJECT (
     END_PROJECT_DATE date,
     PROJECT_DEPARTMENT_ID uuid,
     PROJECT_OWNER_ID uuid,
+    PROJECT_DESCRIPTION text,
     --
     primary key (ID)
 )^
