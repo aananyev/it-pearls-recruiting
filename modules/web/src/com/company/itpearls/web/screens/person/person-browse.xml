@@ -9,7 +9,7 @@
                     view="person-view">
             <loader id="personsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Person e]]>
+                    <![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]>
                 </query>
             </loader>
         </collection>
@@ -33,9 +33,9 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="secondName"/>
                 <column id="firstName"/>
                 <column id="middleName"/>
-                <column id="secondName"/>
                 <column id="birdhDate"/>
                 <column id="email"/>
                 <column id="phone"/>

@@ -44,34 +44,38 @@ public class ProjectEdit extends StandardEditor<Project> {
     public void onCheckBoxProjectIsClosedValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
         String opeedPositionList = "";
 
-        for(OpenPosition a : openPositions) {
+        for (OpenPosition a : openPositions) {
             opeedPositionList = a.getVacansyName() + "<br>" + opeedPositionList;
         }
 
-        if(checkBoxProjectIsClosed.getValue()) {
-            dialogs.createOptionDialog()
-                    .withCaption("ВНИМАНИЕ")
-                    .withType(Dialogs.MessageType.WARNING)
-                    .withContentMode(ContentMode.HTML)
-                    .withMessage("<b>Закрыть вакансии на этом проекте?</b><br>Открыты позиции: <br><i>" +
-                            opeedPositionList + "</i>")
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                                closeAllVacansies();
-                            }),
-                            new DialogAction((DialogAction.Type.NO)
-                            ))
-                    .show();
-
-            setEndDateProject();
+        if (!opeedPositionList.equals("")) {
+            if (checkBoxProjectIsClosed.getValue()) {
+                dialogs.createOptionDialog()
+                        .withCaption("ВНИМАНИЕ")
+                        .withType(Dialogs.MessageType.WARNING)
+                        .withContentMode(ContentMode.HTML)
+                        .withMessage("<b>Закрыть вакансии на этом проекте?</b><br>Открыты позиции: <br><i>" +
+                                opeedPositionList + "</i>")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                                    closeAllVacansies();
+                                }),
+                                new DialogAction((DialogAction.Type.NO)
+                                ))
+                        .show();
+            }
         }
 
+        setEndDateProject();
     }
 
     private void setEndDateProject() {
         Date date = new Date();
 
-        endProjectDateField.setValue(date);
+        if (checkBoxProjectIsClosed.getValue())
+            endProjectDateField.setValue(date);
+        else
+            endProjectDateField.setValue(null);
     }
 
     private void closeAllVacansies() {
@@ -85,18 +89,18 @@ public class ProjectEdit extends StandardEditor<Project> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-       if(PersistenceHelper.isNew( getEditedEntity() ) ) {
-           Date date = new Date();
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            Date date = new Date();
 
-           startProjectDateField.setValue( date );
-       }
+            startProjectDateField.setValue(date);
+        }
 
-       setStartDateOfProject();
-       getOpenedPosition();
+        setStartDateOfProject();
+        getOpenedPosition();
     }
 
     private void setStartDateOfProject() {
-        if(PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             startProjectDateField.setValue(new Date());
         }
     }
@@ -113,18 +117,18 @@ public class ProjectEdit extends StandardEditor<Project> {
 
     @Subscribe("checkBoxProjectIsClosed")
     public void onCheckBoxProjectIsClosedValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if( checkBoxProjectIsClosed.getValue() ) {
-            projectNameField.setEditable( false );
-            startProjectDateField.setEditable( false );
-            endProjectDateField.setEditable( false );
-            projectDepartmentField.setEditable( false );
-            projectOwnerField.setEditable( false );
+        if (checkBoxProjectIsClosed.getValue()) {
+            projectNameField.setEditable(false);
+            startProjectDateField.setEditable(false);
+            endProjectDateField.setEditable(false);
+            projectDepartmentField.setEditable(false);
+            projectOwnerField.setEditable(false);
         } else {
-            projectNameField.setEditable( true );
-            startProjectDateField.setEditable( true );
-            endProjectDateField.setEditable( true );
-            projectDepartmentField.setEditable( true );
-            projectOwnerField.setEditable( true );
+            projectNameField.setEditable(true);
+            startProjectDateField.setEditable(true);
+            endProjectDateField.setEditable(true);
+            projectDepartmentField.setEditable(true);
+            projectOwnerField.setEditable(true);
         }
 
     }

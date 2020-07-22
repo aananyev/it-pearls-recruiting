@@ -12,6 +12,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import org.apache.tools.ant.taskdefs.Javadoc;
 
 import javax.inject.Inject;
 import java.util.Date;
