@@ -20,9 +20,12 @@
                             <c:jpql>
                                 <c:where>
                                     e.vacansyName like
-                                    (select f.openPosition.vacansyName
-                                    from itpearls_RecrutiesTasks f
-                                    where f.reacrutier = :recrutier and
+                                    (select
+                                    f.openPosition.vacansyName
+                                    from
+                                    itpearls_RecrutiesTasks f
+                                    where
+                                    f.reacrutier = :recrutier and
                                     :nowDate between f.startDate and f.endDate and
                                     f.openPosition.vacansyName like e.vacansyName )
                                 </c:where>
@@ -31,10 +34,9 @@
                                 <c:where>e.internalProject = :internalProject</c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>(select g
+                                <c:where>e in (select g.openPosition
                                     from itpearls_RecrutiesTasks g
                                     where g.reacrutier = :recrutier)
-                                    member of g.openPosition
                                 </c:where>
                             </c:jpql>
                         </and>
