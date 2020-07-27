@@ -16,7 +16,9 @@ import org.apache.tools.ant.taskdefs.Javadoc;
 
 import javax.inject.Inject;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @UiController("itpearls_OpenPosition.browse")
 @UiDescriptor("open-position-browse.xml")
@@ -234,6 +236,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .build();
 
         opScreen.show();
+    }
+
+    @Install(to = "openPositionsTable.remiteWork", subject = "columnGenerator")
+    private Object openPositionsTableRemiteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+
+        Map<String, Integer> remoteWork = new LinkedHashMap<>();
+        remoteWork.put("Нет", 0);
+        remoteWork.put("Удаленная работа", 1);
+        remoteWork.put("Частично 50/50", 2);
+
+        return remoteWork.get(event.getItem().getRemoteWork());
     }
 }
 

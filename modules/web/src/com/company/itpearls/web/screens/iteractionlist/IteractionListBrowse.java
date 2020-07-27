@@ -71,18 +71,19 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private String iteractionListsTableIteractionTypeDescriptionProvider(IteractionList iteractionList) {
         String add = "";
 
-        if(iteractionList.getAddDate() != null) {
+        if (iteractionList.getAddDate() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy H:m");
             add = dateFormat.format(iteractionList.getAddDate());
         }
 
-        if(iteractionList.getAddString() != null)
+        if (iteractionList.getAddString() != null)
             add = iteractionList.getAddString();
 
-        if(iteractionList.getAddInteger() != null)
+        if (iteractionList.getAddInteger() != null)
             add = iteractionList.getAddInteger().toString();
 
-        return iteractionList.getComment() != null ? iteractionList.getComment() : "" + add;
+
+        return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
     }
 
     private void filterInternalProject() {

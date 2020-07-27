@@ -8,6 +8,7 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Project;
 
@@ -39,6 +40,8 @@ public class ProjectEdit extends StandardEditor<Project> {
     private DataManager dataManager;
 
     List<OpenPosition> openPositions = new ArrayList<>();
+    @Inject
+    private CollectionLoader<OpenPosition> projectOpenPositionsDl;
 
     @Subscribe("checkBoxProjectIsClosed")
     public void onCheckBoxProjectIsClosedValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
@@ -95,8 +98,19 @@ public class ProjectEdit extends StandardEditor<Project> {
             startProjectDateField.setValue(date);
         }
 
+        filterOpenPositionOnProject();
         setStartDateOfProject();
         getOpenedPosition();
+    }
+
+    private void filterOpenPositionOnProject() {
+        if(!PersistenceHelper.isNew(getEditedEntity())) {
+            projectOpenPositionsDl.setParameter("project", getEditedEntity());
+        } else {
+            projectOpenPositionsDl.removeParameter("project");
+        }
+
+        projectOpenPositionsDl.load();
     }
 
     private void setStartDateOfProject() {

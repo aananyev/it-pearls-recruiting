@@ -20,25 +20,22 @@
                             <c:jpql>
                                 <c:where>
                                     e.vacansyName like
-                                    (select
-                                    f.openPosition.vacansyName
-                                    from
-                                    itpearls_RecrutiesTasks f
-                                    where
-                                    f.reacrutier = :recrutier and
-                                    :nowDate between f.startDate and f.endDate and
-                                    f.openPosition.vacansyName like e.vacansyName )
+                                    (select f.openPosition.vacansyName
+                                    from itpearls_RecrutiesTasks f
+                                    where f.reacrutier = :recrutier and :nowDate between f.startDate and f.endDate and
+                                    f.openPosition.vacansyName like e.vacansyName)
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.internalProject = :internalProject</c:where>
                             </c:jpql>
-                            <c:jpql>
-                                <c:where>e in (select g.openPosition
+<!--                            <c:jpql>
+                                <c:where>e.createdBy = (select g.reacrutier
                                     from itpearls_RecrutiesTasks g
                                     where g.reacrutier = :recrutier)
+                                    member of g.openPosition
                                 </c:where>
-                            </c:jpql>
+                            </c:jpql> -->
                         </and>
                     </condition>
                 </query>
@@ -88,6 +85,9 @@
                         resizable="true"
                         property="projectName"
                         caption="msg://msgProjectName"/>
+                <column id="remiteWork"
+                        resizable="true"
+                        caption="msg://msgRemoteWork"/>
                 <column id="openClose"
                         collapsible="true"
                         collapsed="true"

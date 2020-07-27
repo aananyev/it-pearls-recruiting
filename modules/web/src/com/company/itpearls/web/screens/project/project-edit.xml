@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         focusComponent="projectNameField"
         messagesPack="com.company.itpearls.web.screens.project" icon="ARCHIVE">
@@ -8,9 +9,24 @@
                   class="com.company.itpearls.entity.Project"
                   view="project-view">
             <loader/>
-            <collection id="projectOpenPositionsDc" property="openPosition"/>
             <collection id="projectJobCandidatesDc" property="jobCandidate"/>
         </instance>
+        <collection id="projectOpenPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
+            <loader id="projectOpenPositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                    where (e.openClose = false or e.openClose is null)
+                    order by e.vacansyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.projectName = :project</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="projectDepartmentsLc">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
