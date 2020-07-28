@@ -13,6 +13,7 @@ import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.tools.ant.taskdefs.Javadoc;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.Date;
@@ -52,14 +53,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     protected void onInit(InitEvent event) {
         addIconColumn();
-        filterSubscribedRecrutier();
     }
-
+/*
     private void filterSubscribedRecrutier() {
         openPositionsDl.setParameter("recrutier", userSession.getUser());
         openPositionsDl.load();
     }
-
+*/
     private void addIconColumn() {
         DataGrid.Column iconColumn = openPositionsTable.addGeneratedColumn("icon",
                 new DataGrid.ColumnGenerator<OpenPosition, String>() {
@@ -103,13 +103,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             returnData = returnData.substring(0, returnData.length() - 1);
         }
 
+        returnData = returnData != null ? Jsoup.parse(returnData).text() : "";
 
         return returnData;
     }
 
     @Install(to = "openPositionsTable.projectName", subject = "descriptionProvider")
     private String openPositionsTableProjectNameDescriptionProvider(OpenPosition openPosition) {
-        return openPosition.getProjectName().getProjectDescription();
+        String textReturn = openPosition.getProjectName().getProjectDescription();
+        String a = textReturn != null ? Jsoup.parse(textReturn).text() : "";
+
+        //return openPosition.getProjectName().getProjectDescription();
+        return a;
     }
 
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")
@@ -150,6 +155,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         setInternalProjectFilter();
         setSubcribersFilter();
+//        filterSubscribedRecrutier();
     }
 
     private void setInternalProjectFilter() {

@@ -9,11 +9,11 @@
         <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
     </menu>
     <menu id="application-project" insertAfter="application-hunting">
-        <item screen="itpearls_Person.browse" icon="USER"/>
-        <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
-        <item screen="itpearls_CompanyDepartament.browse" icon="GROUP"/>
         <item screen="itpearls_Project.browse" icon="ARCHIVE"/>
+        <item screen="itpearls_Person.browse" icon="USER"/>
+        <item screen="itpearls_CompanyDepartament.browse" icon="GROUP"/>
         <item screen="itpearls_Company.browse" icon="BUILDING"/>
+        <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
     </menu>
     <menu id="application-researching" insertAfter="application-project">
         <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>
