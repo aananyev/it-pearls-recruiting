@@ -3,7 +3,6 @@ package com.company.itpearls.web.screens.openposition;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
@@ -12,7 +11,6 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
-import org.apache.tools.ant.taskdefs.Javadoc;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -43,8 +41,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private GetRoleService getRoleService;
     @Inject
-    private Notifications notifications;
-    @Inject
     private DataGrid<OpenPosition> openPositionsTable;
 
     private String ROLE_MANAGER = "Manager";
@@ -53,14 +49,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     protected void onInit(InitEvent event) {
         addIconColumn();
+        addIconRemoteWork();
     }
-/*
-    private void filterSubscribedRecrutier() {
-        openPositionsDl.setParameter("recrutier", userSession.getUser());
-        openPositionsDl.load();
-    }
-*/
+
     private void addIconColumn() {
+        //  обавление светофорчика
         DataGrid.Column iconColumn = openPositionsTable.addGeneratedColumn("icon",
                 new DataGrid.ColumnGenerator<OpenPosition, String>() {
                     @Override
@@ -75,6 +68,24 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 });
 
         iconColumn.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class));
+    }
+
+    private void addIconRemoteWork() {
+        // добавление удаленнной работы
+        DataGrid.Column iconRemoteWork = openPositionsTable.addGeneratedColumn("remoteWork",
+                new DataGrid.ColumnGenerator<OpenPosition, String>() {
+                    @Override
+                    public String getValue(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+                        return getIconRemoteWork(event.getItem());
+                    }
+
+                    @Override
+                    public Class<String> getType() {
+                        return String.class;
+                    }
+                });
+
+        iconRemoteWork.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class));
     }
 
     @Install(to = "openPositionsTable.vacansyName", subject = "descriptionProvider")
@@ -113,7 +124,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String textReturn = openPosition.getProjectName().getProjectDescription();
         String a = textReturn != null ? Jsoup.parse(textReturn).text() : "";
 
-        //return openPosition.getProjectName().getProjectDescription();
         return a;
     }
 
@@ -199,6 +209,33 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
+    private String getIconRemoteWork(OpenPosition openPosition) {
+        String icon = "";
+
+        Integer remoteWork = openPosition.getRemoteWork();
+
+        if (remoteWork != null) {
+            switch (remoteWork) {
+                case 0:
+                    icon = "icons/plus-btn.png";
+                    break;
+                case 1:
+                    icon = "icons/minus.png";
+                    break;
+                case 2:
+                    icon = "icons/to-client.png";
+                    break;
+                default:
+                    icon = "icons/question-white.png";
+                    break;
+            }
+        } else {
+            icon = "icons/question-white.png";
+        }
+
+        return icon;
+    }
+
     private String getIcon(OpenPosition openPosition) {
         String icon = null;
 
@@ -230,6 +267,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return icon;
     }
 
+
     public void subscribePosition() {
         Screen opScreen = screenBuilders
                 .editor(RecrutiesTasks.class, this)
@@ -243,9 +281,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         opScreen.show();
     }
+/*
+    @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
+    private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        Map<String, Integer> remoteWork = new LinkedHashMap<>();
+        remoteWork.put("Нет", 0);
+        remoteWork.put("Удаленная работа", 1);
+        remoteWork.put("Частично 50/50", 2);
 
-    @Install(to = "openPositionsTable.remiteWork", subject = "columnGenerator")
-    private Object openPositionsTableRemiteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        return remoteWork.get(event.getItem().getRemoteWork());
+    }
+
+
+    @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
+    private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
 
         Map<String, Integer> remoteWork = new LinkedHashMap<>();
         remoteWork.put("Нет", 0);
@@ -254,5 +303,26 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         return remoteWork.get(event.getItem().getRemoteWork());
     }
+
+    @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
+    private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        // добавление удаленнной работы
+        DataGrid.Column iconRemoteWork = openPositionsTable.addGeneratedColumn("remoteWork",
+                new DataGrid.ColumnGenerator<OpenPosition, String>() {
+                    @Override
+                    public String getValue(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+                        return getIconRemoteWork(event.getItem());
+                    }
+
+                    @Override
+                    public Class<String> getType() {
+                        return String.class;
+                    }
+                });
+        iconRemoteWork.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class));
+        return iconRemoteWork;
+    }
+*/
+
 }
 

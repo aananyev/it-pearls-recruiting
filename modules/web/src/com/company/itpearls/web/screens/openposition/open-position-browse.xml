@@ -28,13 +28,6 @@
                             <c:jpql>
                                 <c:where>e.internalProject = :internalProject</c:where>
                             </c:jpql>
-<!--                            <c:jpql>
-                                <c:where>e.createdBy = (select g.reacrutier
-                                    from itpearls_RecrutiesTasks g
-                                    where g.reacrutier = :recrutier)
-                                    member of g.openPosition
-                                </c:where>
-                            </c:jpql> -->
                         </and>
                     </condition>
                 </query>
@@ -60,6 +53,7 @@
                textSelectionEnabled="false"
                selectionMode="SINGLE"
                reorderingAllowed="true"
+
                dataContainer="openPositionsDc">
             <actions>
                 <action id="create" type="create"/>
@@ -69,23 +63,29 @@
             </actions>
             <columns>
                 <column id="icon"
-                        resizable="false"
+                        resizable="true"
                         width="35px"
+                        minimumWidth="35px"
                         caption=""/>
                 <column id="vacansyName"
                         property="vacansyName"
                         resizable="true"
+                        maximumWidth="400px"
                         caption="msg://msgVacancy"/>
                 <column id="positionType"
                         resizable="true"
                         property="positionType"
+                        maximumWidth="300px"
                         caption="msg://msgPositionType"/>
                 <column id="projectName"
                         resizable="true"
                         property="projectName"
+                        maximumWidth="300px"
                         caption="msg://msgProjectName"/>
-                <column id="remiteWork"
+                <column id="remoteWork"
+                        property="remoteWork"
                         resizable="true"
+                        maximumWidth="100px"
                         caption="msg://msgRemoteWork"/>
                 <column id="openClose"
                         collapsible="true"
