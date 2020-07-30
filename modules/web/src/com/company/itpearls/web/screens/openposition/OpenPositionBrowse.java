@@ -6,6 +6,8 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
@@ -14,6 +16,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
+import javax.swing.*;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -165,7 +168,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         setInternalProjectFilter();
         setSubcribersFilter();
-//        filterSubscribedRecrutier();
     }
 
     private void setInternalProjectFilter() {

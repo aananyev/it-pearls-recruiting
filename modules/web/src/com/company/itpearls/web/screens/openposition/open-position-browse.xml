@@ -53,7 +53,6 @@
                textSelectionEnabled="false"
                selectionMode="SINGLE"
                reorderingAllowed="true"
-
                dataContainer="openPositionsDc">
             <actions>
                 <action id="create" type="create"/>
@@ -84,6 +83,7 @@
                         caption="msg://msgProjectName"/>
                 <column id="remoteWork"
                         property="remoteWork"
+                        sortable="false"
                         resizable="true"
                         maximumWidth="100px"
                         caption="msg://msgRemoteWork"/>
