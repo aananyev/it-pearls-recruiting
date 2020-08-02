@@ -72,10 +72,43 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             default:
                 returnIcon = "QUESTION_CIRCLE";
                 break;
-
         }
 
         return CubaIcon.valueOf(returnIcon);
+    }
+
+    @Install(to = "openPositionsTable.icon", subject = "styleProvider")
+    private String openPositionsTableIconStyleProvider(OpenPosition openPosition) {
+        return "open-position-pic-center";
+    }
+
+    @Install(to = "openPositionsTable.remoteWork", subject = "styleProvider")
+    private String openPositionsTableRemoteWorkStyleProvider(OpenPosition openPosition) {
+        String style = "";
+
+        switch (openPosition.getRemoteWork()) {
+            case 1:
+                style = "open-position-pic-center-large-green";
+                break;
+            case 2:
+                style = "open-position-pic-center-large-red";
+                break;
+            case 0:
+                style = "open-position-pic-center-large-yellow";
+                break;
+        }
+
+        return style;
+    }
+
+    @Install(to = "openPositionsTable.openClose", subject = "styleProvider")
+    private String openPositionsTableOpenCloseStyleProvider(OpenPosition openPosition) {
+        return "open-position-pic-center";
+    }
+
+    @Install(to = "openPositionsTable.numberPosition", subject = "styleProvider")
+    private String openPositionsTableNumberPositionStyleProvider(OpenPosition openPosition) {
+        return "open-position-pic-center";
     }
 
     private void addIconColumn() {

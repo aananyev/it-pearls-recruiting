@@ -1,3 +1,35 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-hover-ext {
+.open-position-pic-center {
+    text-align: center;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large {
+    text-align: center;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-green {
+    text-align: center;
+    text-color: green;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-yellow {
+     text-align: center;
+     text-color: yellow;
+     font-size: large;
+     margin: 0 auto;
+}
+
+.open-position-pic-center-large-red {
+    text-align: center;
+    text-color: red;
+    font-size: large;
+    margin: 0 auto;
+}
+
 }

@@ -93,10 +93,11 @@
                         collapsible="true"
                         collapsed="true"
                         property="openClose"
+                        width="85px"
                         caption="mainMsg://msgOpecnClosePosition"/>
                 <column id="numberPosition"
                         property="numberPosition"
-                        width="100px"
+                        width="85px"
                         caption="msg://msgNumberOpenPosition"/>
                 <column id="createTs"
                         property="createTs"
