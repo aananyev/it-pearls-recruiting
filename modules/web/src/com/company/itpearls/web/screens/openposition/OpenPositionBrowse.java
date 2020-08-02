@@ -60,10 +60,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String  returnIcon = "";
 
         switch (event.getItem().getRemoteWork()) {
-            case 0:
+            case 1:
                 returnIcon = "PLUS_CIRCLE";
                 break;
-            case 1:
+            case 0:
                 returnIcon = "MINUS_CIRCLE";
                 break;
             case 2:
