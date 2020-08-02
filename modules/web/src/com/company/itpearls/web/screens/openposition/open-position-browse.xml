@@ -63,13 +63,13 @@
             <columns>
                 <column id="icon"
                         resizable="true"
-                        width="35px"
+                        width="40px"
                         minimumWidth="35px"
                         caption=""/>
                 <column id="vacansyName"
                         property="vacansyName"
                         resizable="true"
-                        maximumWidth="400px"
+                        maximumWidth="500px"
                         caption="msg://msgVacancy"/>
                 <column id="positionType"
                         resizable="true"
@@ -85,8 +85,10 @@
                         property="remoteWork"
                         sortable="false"
                         resizable="true"
-                        maximumWidth="100px"
-                        caption="msg://msgRemoteWork"/>
+                        maximumWidth="85px"
+                        caption="msg://msgRemoteWork">
+                    <iconRenderer/>
+                </column>
                 <column id="openClose"
                         collapsible="true"
                         collapsed="true"
@@ -94,7 +96,7 @@
                         caption="mainMsg://msgOpecnClosePosition"/>
                 <column id="numberPosition"
                         property="numberPosition"
-                        width="50px"
+                        width="100px"
                         caption="msg://msgNumberOpenPosition"/>
                 <column id="createTs"
                         property="createTs"

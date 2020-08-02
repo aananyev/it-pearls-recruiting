@@ -52,7 +52,30 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     protected void onInit(InitEvent event) {
         addIconColumn();
-        addIconRemoteWork();
+        // addIconRemoteWork();
+    }
+
+    @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
+    private Icons.Icon openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String  returnIcon = "";
+
+        switch (event.getItem().getRemoteWork()) {
+            case 0:
+                returnIcon = "PLUS_CIRCLE";
+                break;
+            case 1:
+                returnIcon = "MINUS_CIRCLE";
+                break;
+            case 2:
+                returnIcon = "QUESTION_CIRCLE";
+                break;
+            default:
+                returnIcon = "QUESTION_CIRCLE";
+                break;
+
+        }
+
+        return CubaIcon.valueOf(returnIcon);
     }
 
     private void addIconColumn() {
