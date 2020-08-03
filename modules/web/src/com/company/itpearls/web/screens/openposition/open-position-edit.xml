@@ -50,7 +50,7 @@
                     class="com.company.itpearls.entity.Project"
                     view="_local">
             <loader id="projectNamesLc"
-                    cacheable="true">
+                    cacheable="false">
                 <query>
                     <![CDATA[select e from itpearls_Project e
                     where e.projectIsClosed is null

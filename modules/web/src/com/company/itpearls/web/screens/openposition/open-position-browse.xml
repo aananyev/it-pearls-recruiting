@@ -8,7 +8,7 @@
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition"
                     view="openPosition-view">
-            <loader id="openPositionsDl" cacheable="true">
+            <loader id="openPositionsDl" cacheable="false">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                     order by e.vacansyName]]>
@@ -86,6 +86,7 @@
                         sortable="false"
                         resizable="true"
                         maximumWidth="85px"
+                        minimumWidth="85px"
                         caption="msg://msgRemoteWork">
                     <iconRenderer/>
                 </column>
@@ -94,10 +95,14 @@
                         collapsed="true"
                         property="openClose"
                         width="85px"
+                        maximumWidth="85px"
+                        minimumWidth="85px"
                         caption="mainMsg://msgOpecnClosePosition"/>
                 <column id="numberPosition"
                         property="numberPosition"
                         width="85px"
+                        maximumWidth="85px"
+                        minimumWidth="85px"
                         caption="msg://msgNumberOpenPosition"/>
                 <column id="createTs"
                         property="createTs"

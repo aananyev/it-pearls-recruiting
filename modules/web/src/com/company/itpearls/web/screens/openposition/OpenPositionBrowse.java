@@ -48,11 +48,24 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private String ROLE_MANAGER = "Manager";
     private String ROLE_ADMINISTRATOR = "Administrators";
+    Map<String, Integer> remoteWork = new LinkedHashMap<>();
 
     @Subscribe
     protected void onInit(InitEvent event) {
         addIconColumn();
         // addIconRemoteWork();
+        initRemoteWorkMap();
+    }
+
+    @Install(to = "openPositionsTable.remoteWork", subject = "descriptionProvider")
+    private String openPositionsTableRemoteWorkDescriptionProvider(OpenPosition openPosition) {
+        return String.valueOf(remoteWork.get(openPosition.getRemoteWork()));
+    }
+
+    private void initRemoteWorkMap() {
+        remoteWork.put("Нет", 0);
+        remoteWork.put("Удаленная работа", 1);
+        remoteWork.put("Частично 50/50", 2);
     }
 
     @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
