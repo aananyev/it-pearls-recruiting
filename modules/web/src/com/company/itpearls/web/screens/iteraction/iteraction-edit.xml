@@ -124,6 +124,16 @@ order by e.number]]>
                     </hbox>
                 </groupBox>
             </tab>
+            <tab id="setupWidgets" spacing="true" caption="msg://msgWidgetsSetup" expand="widgetSetupGroupBox">
+                <groupBox id="widgetSetupGroupBox">
+                    <accordion id="widgetSetupAccordion" height="100%">
+                        <tab id="widgetPausedTab" margin="trus" spacing="true" caption="msg://msgWidgetPaused">
+                        </tab>
+                        <tab id="widgetGraph" margin="true" spacing="true" caption="msg://msgGraph">
+                        </tab>
+                    </accordion>
+                </groupBox>
+            </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data readOnly="true">
+        <collection id="candidatesPausedDc"
+                    class="com.company.itpearls.entity.IteractionList"
+                    view="iteractionList-view">
+            <loader id="candidatesPausedDl">
+                <query><![CDATA[select e from itpearls_IteractionList e
+                        order by e.numberIteraction desc]]>
+                <condition>
+                    <and>
+                        <c:jpql>
+                            <c:where>e.createdBy = :userName</c:where>
+                        </c:jpql>
+                        <c:jpql>
+                            <c:where>e.iteractionType = (select f
+                                from itpearls_Iteraction f
+                                where f.iterationName like :iteractionTypeName</c:where>
+                        </c:jpql>
+                    </and>
+                </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout stylename="widget-border"
+            spacing="false"
+            height="100%"
+            width="100%"
+            expand="listCandidateInPause">
+        <vbox id="listCandidateInPause"
+              spacing="false"
+              height="100%"
+              expand="iteractionInPausedDataGrid"
+              width="100%">
+            <cssLayout id="widgetTitleBox"
+                       width="100%"
+                       stylename="widget-table-header"
+                       height="AUTO">
+                <label id="widgetTitle"
+                       width="100%"
+                       stylename="widget-table-header"
+                       htmlEnabled="false"
+                       height="100%"/>
+            </cssLayout>
+            <dataGrid id="iteractionInPausedDataGrid"
+                      width="100%"
+                      headerVisible="false"
+                      selectionMode="NONE"
+                      reorderingAllowed="false"
+                      editorEnabled="false"
+                      height="100%"
+                      dataContainer="candidatesPausedDc">
+                <columns>
+                    <column id="createdBy"/>
+                    <column id="iteractionType"/>
+                    <column id="addDate"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+    </layout>
+</fragment>
