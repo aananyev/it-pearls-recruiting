@@ -237,6 +237,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         setInternalProjectFilter();
         setSubcribersFilter();
+
+        openPositionsTable.getColumn("openClose").setCollapsed(true);
     }
 
     private void setInternalProjectFilter() {

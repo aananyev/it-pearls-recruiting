@@ -44,6 +44,22 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="someFilesDc" width="100%">
             <column width="100%">
+                <lookupPickerField id="fileTypeField"
+                                   optionsContainer="fileTypesDc"
+                                   property="fileType"
+                                   required="true" width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="candidateCVField"
+                                   optionsContainer="candidateCVsDc"
+                                   property="candidateCV"
+                                   width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
                 <textField id="fileDescriptionField" property="fileDescription" required="true" width="100%"/>
                 <textField id="fileLinkField" property="fileLink" width="100%"
                            caption="msg://msgFileLink"/>
@@ -56,18 +72,7 @@
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <lookupPickerField id="fileTypeField" optionsContainer="fileTypesDc" property="fileType"
-                                   required="true" width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="candidateCVField" optionsContainer="candidateCVsDc" property="candidateCV"
-                                   width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
+
             </column>
         </form>
         <hbox id="editActions" spacing="true">
