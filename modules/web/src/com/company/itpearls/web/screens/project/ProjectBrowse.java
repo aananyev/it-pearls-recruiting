@@ -25,6 +25,11 @@ public class ProjectBrowse extends StandardLookup<Project> {
         setProjectClosedFilter();
     }
 
+    @Install(to = "projectsTable", subject = "itemDescriptionProvider")
+    private String projectsTableItemDescriptionProvider(Project project, String string) {
+        return project.getProjectDescription() != null ? project.getProjectDescription() : "";
+    }
+
     private void setProjectClosedFilter() {
         if (onlyOpenProjectCheckBox.getValue()) {
             projectsDl.removeParameter("projectClosed");

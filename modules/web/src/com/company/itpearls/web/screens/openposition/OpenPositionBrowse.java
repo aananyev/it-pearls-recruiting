@@ -239,6 +239,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setSubcribersFilter();
 
         openPositionsTable.getColumn("openClose").setCollapsed(true);
+        openPositionsTable.getColumn("openClose").setCollapsible(true);
+        openPositionsTable.getColumn("openClose").setVisible(true);
     }
 
     private void setInternalProjectFilter() {
@@ -274,9 +276,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (checkBoxOnlyOpenedPosition.getValue()) {
             openPositionsDl.setParameter("openClosePos", false);
             openPositionsTable.getColumn("openClose").setCollapsed(true);
+            openPositionsTable.getColumn("openClose").setVisible(false);
         } else {
             openPositionsDl.removeParameter("openClosePos");
             openPositionsTable.getColumn("openClose").setCollapsed(false);
+            openPositionsTable.getColumn("openClose").setVisible(true);
         }
 
         openPositionsDl.load();

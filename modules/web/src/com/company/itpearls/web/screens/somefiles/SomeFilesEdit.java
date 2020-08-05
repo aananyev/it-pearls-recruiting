@@ -29,20 +29,20 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
-            getEditedEntity().setFileOwner( userSessionSource.getUserSession().getUser() );
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setFileOwner(userSessionSource.getUserSession().getUser());
         }
     }
 
     @Subscribe("fileTypeField")
     public void onFileTypeFieldValueChange(HasValue.ValueChangeEvent<FileType> event) {
-        if(fileDescriptionField.getValue() == null) {
+        if (fileDescriptionField.getValue() == null) {
             fileDescriptionField.setValue(fileTypeField.getValue().getNameFileType());
         } else {
             if (candidateCVField.getValue() != null) {
                 if (fileDescriptionField.getValue().equals(candidateCVField.getValue().getCandidate().getFullName())) {
                     fileDescriptionField.setValue(fileTypeField.getValue().getNameFileType() + " / " +
-                             fileDescriptionField.getValue());
+                            fileDescriptionField.getValue());
                 }
             }
         }
@@ -55,8 +55,8 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
         } else {
             if (fileDescriptionField.getValue() != null) {
                 if (fileDescriptionField.getValue().equals(fileTypeField.getValue().getNameFileType())) {
-                    fileDescriptionField.setValue( fileDescriptionField.getValue() + " / " +
-                             candidateCVField.getValue().getCandidate().getFullName());
+                    fileDescriptionField.setValue(fileDescriptionField.getValue() + " / " +
+                            candidateCVField.getValue().getCandidate().getFullName());
                 }
             }
         }
