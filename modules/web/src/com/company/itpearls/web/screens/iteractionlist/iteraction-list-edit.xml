@@ -202,10 +202,10 @@
                     invoke="onButtonSubscribeClick"
                     caption="mainMsg://msgSubscribe"
                     icon="BELL"/>
-            <button id="buttonAddNewIteraction"
+<!--            <button id="buttonAddNewIteraction"
                     invoke="addNewIteraction"
                     caption="msg://msgAddNewIteraction"
-                    icon="COPY"/>
+                    icon="COPY"/> -->
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

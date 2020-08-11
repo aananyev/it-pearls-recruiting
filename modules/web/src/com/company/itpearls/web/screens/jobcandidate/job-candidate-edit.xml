@@ -212,7 +212,15 @@ order by e.cityRuName]]>
                             <action type="create" id="create"/>
                         </actions>
                         <buttonsPanel>
-                            <button id="addButton" action="jobCandidateIteractionListTable.create"/>
+<!--                            <button id="addButton" action="jobCandidateIteractionListTable.create"/> -->
+                            <button id="addIteractionButton"
+                                    caption="msg://msgCreate"
+                                    icon="ADD_ACTION"
+                                    invoke="addIteractionJobCandidate"/>
+                            <button id="copyIteractionButton"
+                                    caption="msg://msgCopy"
+                                    icon="COPY"
+                                    invoke="copyIteractionJobCandidate"/>
                         </buttonsPanel>
                         <columns>
                             <column id="numberIteraction"/>

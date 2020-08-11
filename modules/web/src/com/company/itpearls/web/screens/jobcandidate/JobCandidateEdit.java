@@ -3,7 +3,9 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Label;
@@ -83,44 +85,48 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataContext dataContext;
     @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
+    @Inject
+    private Screens screens;
+    @Inject
+    private Notifications notifications;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
-       // вдруг такой кандидат уже есть
-       List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
-               .query("select e from itpearls_JobCandidate e where e.firstName like :firstName and " +
-                       "e.secondName like :secondName")
-               .parameter("firstName", firstNameField.getValue() )
-               .parameter("secondName", secondNameField.getValue() )
-               .view("jobCandidate-view")
-               .list();
+        // вдруг такой кандидат уже есть
+        List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
+                .query("select e from itpearls_JobCandidate e where e.firstName like :firstName and " +
+                        "e.secondName like :secondName")
+                .parameter("firstName", firstNameField.getValue())
+                .parameter("secondName", secondNameField.getValue())
+                .view("jobCandidate-view")
+                .list();
 
-       return candidates.size() == 0 ? false : true;
+        return candidates.size() == 0 ? false : true;
     }
 
 
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
-       // основные социальные сети показать
+        // основные социальные сети показать
         List<SocialNetworkURLs> socialNetwork = getEditedEntity().getSocialNetwork();
         List<SocialNetworkType> socialNetworkType = dataManager.load(SocialNetworkType.class)
                 .list();
 
         // тут либо если не новая запись, то проверить на наличие других записей, либо если новая запись, то пофигу
-        if( !PersistenceHelper.isNew(getEditedEntity() ) ) {
-            if (socialNetwork.size() < socialNetworkType.size() ) {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            if (socialNetwork.size() < socialNetworkType.size()) {
 
                 List<SocialNetworkType> type = dataManager
                         .load(SocialNetworkType.class)
-                        .query( "select e.socialNetworkURL " +
+                        .query("select e.socialNetworkURL " +
                                 "from itpearls_SocialNetworkURLs e " +
-                                "where e.jobCandidate = :candidate" )
-                        .parameter( "candidate", getEditedEntity() )
+                                "where e.jobCandidate = :candidate")
+                        .parameter("candidate", getEditedEntity())
                         .list();
 
-                for (SocialNetworkType s : socialNetworkType ) {
-                        // SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
-                    SocialNetworkURLs socialNetworkURLs = metadata.create( SocialNetworkURLs.class );
+                for (SocialNetworkType s : socialNetworkType) {
+                    // SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
+                    SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
 
                     if (!type.contains(s)) {
                         socialNetworkURLs.setSocialNetworkURL(s);
@@ -134,22 +140,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         } else {
             List<SocialNetworkURLs> sn = new ArrayList<SocialNetworkURLs>();
 
-            for( SocialNetworkType s : socialNetworkType ) {
+            for (SocialNetworkType s : socialNetworkType) {
                 SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
 
                 socialNetworkURLs.setSocialNetworkURL(s);
                 socialNetworkURLs.setNetworkName(s.getSocialNetwork());
                 socialNetworkURLs.setJobCandidate(getEditedEntity());
 
-                jobCandidateSocialNetworksDc.getMutableItems().add( socialNetworkURLs );
+                jobCandidateSocialNetworksDc.getMutableItems().add(socialNetworkURLs);
                 sn.add(socialNetworkURLs);
             }
 
             DataContext dc = socialNetworkURLsesDl.getDataContext();
 
-            dc.setParent( dataContext );
+            dc.setParent(dataContext);
 
-            dataContext.merge( sn );
+            dataContext.merge(sn);
         }
 
         enableDisableContacts();
@@ -158,21 +164,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     protected boolean isRequiredAddresField() {
         Boolean isEmptySN = false;
 
-        for( SocialNetworkURLs a : jobCandidateSocialNetworksDc.getItems() ) {
-            if( a.getNetworkURLS() != null) {
+        for (SocialNetworkURLs a : jobCandidateSocialNetworksDc.getItems()) {
+            if (a.getNetworkURLS() != null) {
                 isEmptySN = true;
                 break;
             }
         }
 
-        return  ( ( emailField.getValue() == null ) &&
-                ( skypeNameField.getValue() == null ) &&
-                ( phoneField.getValue() == null ) ) && !isEmptySN ;
+        return ((emailField.getValue() == null) &&
+                (skypeNameField.getValue() == null) &&
+                (phoneField.getValue() == null)) && !isEmptySN;
     }
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if( PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             CommitContext commitContext = new CommitContext(getEditedEntity());
 
             for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
@@ -183,7 +189,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    private AtomicReference<Boolean> returnE = new AtomicReference<>(false );
+    private AtomicReference<Boolean> returnE = new AtomicReference<>(false);
 
     @Subscribe("tabIteraction")
     public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
@@ -202,47 +208,44 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        setLabelFullName( setFullName( getEditedEntity().getFirstName(), null, null) );
+        setLabelFullName(setFullName(getEditedEntity().getFirstName(), null, null));
     }
 
     @Subscribe("middleNameField")
     public void onMiddleNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        setLabelFullName( setFullName( null, getEditedEntity().getMiddleName(), null ) );
+        setLabelFullName(setFullName(null, getEditedEntity().getMiddleName(), null));
     }
 
     @Subscribe("secondNameField")
     public void onSecondNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        setLabelFullName( setFullName( null, null, getEditedEntity().getSecondName() ) );
+        setLabelFullName(setFullName(null, null, getEditedEntity().getSecondName()));
     }
 
     private String setFullName(String firstName, String middleName, String secondName) {
         String fullName = "", localFirstName = "", localMiddleName = "", localSecondName = "";
 
-        if( getEditedEntity().getFirstName() != null )
+        if (getEditedEntity().getFirstName() != null)
             localFirstName = getEditedEntity().getFirstName();
-        else
-            if( firstName != null )
-                localFirstName = firstName;
+        else if (firstName != null)
+            localFirstName = firstName;
 
-        if( getEditedEntity().getSecondName() != null )
+        if (getEditedEntity().getSecondName() != null)
             localSecondName = getEditedEntity().getSecondName();
-        else
-            if( secondName != null )
-                localSecondName = secondName;
+        else if (secondName != null)
+            localSecondName = secondName;
 
-        if( getEditedEntity().getMiddleName() != null )
+        if (getEditedEntity().getMiddleName() != null)
             localMiddleName = getEditedEntity().getMiddleName();
-        else
-            if( middleName != null )
-                localMiddleName = middleName;
+        else if (middleName != null)
+            localMiddleName = middleName;
 
         fullName = localSecondName + " " + localFirstName + " " + localMiddleName;
 
-       return fullName;
+        return fullName;
     }
 
-    private void setLabelFullName(String fullName ) {
-        getEditedEntity().setFullName( fullName );
+    private void setLabelFullName(String fullName) {
+        getEditedEntity().setFullName(fullName);
     }
 
     @Subscribe
@@ -254,7 +257,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // вычислить процент заполнения карточки кандидата
         Integer qualityPercent = setQualityPercent() * 100 / 14;
 
-        if( !PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
             labelQualityPercent.setValue("| Процент заполнения карточки: " + qualityPercent.toString()
                     + "%");
         }
@@ -281,10 +284,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
 
-
     protected void enableDisableContacts() {
         // ХОТЯ БЫ ОДИН КОНТАКТ
-        if( isRequiredAddresField() ) {
+        if (isRequiredAddresField()) {
             skypeNameField.setRequired(true);
             phoneField.setRequired(true);
             emailField.setRequired(true);
@@ -299,23 +301,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
 
-        if(!PersistenceHelper.isNew(getEditedEntity())) {
-           if(!getEditedEntity().getFullName().equals( "" ) ) {
-                if( getEditedEntity().getFullName() == null )
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            if (!getEditedEntity().getFullName().equals("")) {
+                if (getEditedEntity().getFullName() == null)
                     getEditedEntity().setFullName("");
-           } else {
-           }
-           // заблокировать вкладки с резюме и итеракицями
-           tabIteraction.setVisible( true );
-           tabResume.setVisible( true );
-       } else {
-           // заблокировать вкладки с резюме и итеракицями
-           tabIteraction.setVisible( false );
-           tabResume.setVisible( false );
-       }
+            } else {
+            }
+            // заблокировать вкладки с резюме и итеракицями
+            tabIteraction.setVisible(true);
+            tabResume.setVisible(true);
+        } else {
+            // заблокировать вкладки с резюме и итеракицями
+            tabIteraction.setVisible(false);
+            tabResume.setVisible(false);
+        }
 
-       // если есть резюме, то поставить галку
-        if( !PersistenceHelper.isNew( getEditedEntity() ) ) {
+        // если есть резюме, то поставить галку
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
                 labelCV.setValue("| Резюме: НЕТ");
             } else {
@@ -324,74 +326,74 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         // обнулить статус для вновь создаваемного кандидата
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
-            getEditedEntity().setStatus( 0 );
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setStatus(0);
         }
         enableDisableContacts();
     }
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-       secondNameField.setValue( replaceE_E(secondNameField.getValue() ) );
-       firstNameField.setValue( replaceE_E(firstNameField.getValue() ) );
+        secondNameField.setValue(replaceE_E(secondNameField.getValue()));
+        firstNameField.setValue(replaceE_E(firstNameField.getValue()));
 
-       if( middleNameField.getValue() != null )
-           middleNameField.setValue( replaceE_E(middleNameField.getValue() ) );
+        if (middleNameField.getValue() != null)
+            middleNameField.setValue(replaceE_E(middleNameField.getValue()));
     }
 
-    String replaceE_E( String str ) {
-        return str.replace( 'ё', 'e' );
+    String replaceE_E(String str) {
+        return str.replace('ё', 'e');
     }
 
     @Subscribe(target = Target.DATA_CONTEXT)
     public void onChange(DataContext.ChangeEvent event) {
-       setPercentLabel();
+        setPercentLabel();
     }
 
 
     public Integer setQualityPercent() {
         Integer qPercent = 0;
 
-        if( birdhDateField.getValue() != null )         // 1
+        if (birdhDateField.getValue() != null)         // 1
             qPercent = ++qPercent;
 
-        if( currentCompanyField.getValue() != null )    // 2
+        if (currentCompanyField.getValue() != null)    // 2
             qPercent = ++qPercent;
 
-        if( emailField.getValue() != null )             // 3
+        if (emailField.getValue() != null)             // 3
             qPercent = ++qPercent;
 
-        if( firstNameField.getValue() != null )         // 4
+        if (firstNameField.getValue() != null)         // 4
             qPercent = ++qPercent;
 
-        if( middleNameField.getValue() != null )        // 5
+        if (middleNameField.getValue() != null)        // 5
             qPercent = ++qPercent;
 
-        if( secondNameField.getValue() != null )        // 6
+        if (secondNameField.getValue() != null)        // 6
             qPercent = ++qPercent;
 
-        if( jobCandidateSpecialisationField != null )   // 7
+        if (jobCandidateSpecialisationField != null)   // 7
             qPercent = ++qPercent;
 
-        if( jobCityCandidateField.getValue() != null )  // 8
+        if (jobCityCandidateField.getValue() != null)  // 8
             qPercent = ++qPercent;
 
-        if( personPositionField.getValue() != null )    // 9
+        if (personPositionField.getValue() != null)    // 9
             qPercent = ++qPercent;
 
-        if( phoneField.getValue() != null )             // 10
+        if (phoneField.getValue() != null)             // 10
             qPercent = ++qPercent;
 
-        if( skypeNameField.getValue() != null )         // 12
+        if (skypeNameField.getValue() != null)         // 12
             qPercent = ++qPercent;
 
-        if( telegramNameField.getValue() != null )      // 13
+        if (telegramNameField.getValue() != null)      // 13
             qPercent = ++qPercent;
 
-        if( whatsupNameField.getValue() != null )       // 14
+        if (whatsupNameField.getValue() != null)       // 14
             qPercent = ++qPercent;
 
-        if( wiberNameField.getValue() != null )         // 15
+        if (wiberNameField.getValue() != null)         // 15
             qPercent = ++qPercent;
 
         return qPercent;
@@ -408,23 +410,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setFullNameCandidate();
     }
 
-    private void setFullNameCandidate(){
+    private void setFullNameCandidate() {
         String space = " ";
 
-        if(getEditedEntity().getSecondName() != null &&
-            getEditedEntity().getFirstName() != null ) {
-                getEditedEntity().setFullName(
+        if (getEditedEntity().getSecondName() != null &&
+                getEditedEntity().getFirstName() != null) {
+            getEditedEntity().setFullName(
                     getEditedEntity().getSecondName() + space +
                             getEditedEntity().getFirstName());
-                
+
         }
     }
 
     public void onButtonSubscribeClick() {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()
-                    .withCaption( "WARNING!" )
-                    .withMessage( "Записать изменения?" )
+                    .withCaption("WARNING!")
+                    .withMessage("Записать изменения?")
                     .withActions(
                             new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
                                     .withHandler(e -> {
@@ -488,12 +490,66 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void onBtnOkAndCheck() {
-        if( PersistenceHelper.isNew( getEditedEntity() ) ) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             needDublicateDialog();
             return;
         } else {
             close(StandardOutcome.COMMIT);
             return;
+        }
+    }
+
+    public void addIteractionJobCandidate() {
+        screenBuilders.editor(IteractionList.class, this)
+                .withOpenMode(OpenMode.DIALOG)
+                .withInitializer(candidate -> {
+                    candidate.setCandidate(getEditedEntity());
+                })
+                .newEntity()
+                .build()
+                .show();
+    }
+
+    public void copyIteractionJobCandidate() {
+        String QUERY_GET_LAST_ITERACTION = "select e " +
+                "from itpearls_IteractionList e " +
+                "where e.candidate = :candidate and " +
+                "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
+
+        IteractionList lastIteraction = null;
+
+        try {
+            lastIteraction = dataManager.load(IteractionList.class)
+                    .query(QUERY_GET_LAST_ITERACTION)
+                    .parameter("candidate", getEditedEntity())
+                    .view("iteractionList-view")
+                    .one();
+        } catch (IllegalStateException e) {
+            lastIteraction = null;
+        }
+
+        if (lastIteraction != null) {
+            IteractionList finalLastIteraction = lastIteraction;
+            screenBuilders.editor(IteractionList.class, this)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .withInitializer(candidate -> {
+                        candidate.setCandidate(getEditedEntity());
+                        candidate.setVacancy(finalLastIteraction.getVacancy());
+                    })
+                    .newEntity()
+                    .build()
+                    .show();
+        } else {
+            dialogs.createOptionDialog()
+                    .withCaption("Нет взаимодействий с кандидатом")
+                    .withMessage("Назначить новое взаимодействие?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler( e -> {
+                                addIteractionJobCandidate();
+                            }),
+                            new DialogAction(DialogAction.Type.NO)
+                    )
+                    .show();
         }
     }
 }
