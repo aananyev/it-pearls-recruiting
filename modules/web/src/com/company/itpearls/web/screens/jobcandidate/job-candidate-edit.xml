@@ -89,6 +89,37 @@ order by e.cityRuName]]>
                     </row>
                 </rows>
             </grid>
+            <grid spacing="true">
+                <columns count="4"/>
+                <rows>
+                    <row>
+                        <label id="emailLabel"
+                               description="msg://msgEmail"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="email"/>
+                        <label id="phoneLabel"
+                               description="msg://msgPhone"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="phone"/>
+                        <label id="skypuLabel"
+                               description="msg://msgSkype"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="skypeName"/>
+                        <label id="telegramLabel"
+                               description="msg://msgTelegram"
+                               dataContainer="jobCandidateDc"
+                               property="telegramName"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"/>
+                    </row>
+                </rows>
+            </grid>
         </groupBox>
         <tabSheet id="tabSheetSocialNetworks" description="mainMsg://msgSocialNetworks">
             <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
@@ -186,21 +217,11 @@ order by e.cityRuName]]>
                         <columns>
                             <column id="numberIteraction"/>
                             <column id="dateIteraction"/>
-                            <column id="candidate"/>
-                            <column id="currentJobPosition"/>
                             <column id="vacancy"/>
                             <column id="project"/>
                             <column id="companyDepartment"/>
                             <column id="iteractionType"/>
-                            <column id="communicationMethod"/>
-                            <column id="comment"/>
                             <column id="recrutier"/>
-                            <column id="recrutierName"/>
-                            <column id="iteractionChain"/>
-                            <column id="addType"/>
-                            <column id="addDate"/>
-                            <column id="addString"/>
-                            <column id="addInteger"/>
                         </columns>
                     </table>
                 </groupBox>

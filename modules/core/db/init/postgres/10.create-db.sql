@@ -193,6 +193,7 @@ create table ITPEARLS_ITERACTION (
     ADD_FLAG boolean,
     SET_DATE_TIME boolean,
     ADD_TYPE integer,
+    CHECK_TRACE integer,
     ADD_FIELD varchar(40),
     ADD_CAPTION varchar(80),
     NOTIFICATION_TYPE integer,

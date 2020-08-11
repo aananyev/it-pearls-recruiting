@@ -18,6 +18,15 @@ order by e.number]]>
                 </query>
             </loader>
         </collection>
+        <collection id="iteractionElementsDc"
+                    class="com.company.itpearls.entity.Iteraction"
+                    view="_local">
+            <loader id="iteractionElementDl">
+                <query>
+                    <![CDATA[select e from itpearls_Iteraction e where e.iteractionTree is not null order by e.iterationName]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -133,6 +142,43 @@ order by e.number]]>
                         </tab>
                     </accordion>
                 </groupBox>
+            </tab>
+            <tab id="checkTrace"
+                 caption="msg://msgCheckTrace"
+                 spacing="true"
+                 expand="traceHBox">
+                    <vbox id="traceHBox"
+                          width="AUTO"
+                          expand="checkTraceTwinGroupBox"
+                          height="100%"
+                          spacing="true">
+                        <groupBox id="checkTraceOption"
+                                  expand="typeTraceRadioButtons"
+                                  spacing="true"
+                                  captionAsHtml="true"
+                                  caption="msg://msgTypeOptions"
+                                  width="100%"
+                                  height="100%">
+                            <radioButtonGroup id="typeTraceRadioButtons"
+                                              dataContainer="iteractionsTreeDc"
+                                              width="AUTO"
+                                              property="checkTrace"/>
+                        </groupBox>
+                        <groupBox id="checkTraceTwinGroupBox"
+                                  expand="checkTraceTwinColumn"
+                                  caption="msg://msgTraceTwinColumn"
+                                  height="100%"
+                                  width="100%"
+                                  spacing="true">
+                            <twinColumn id="checkTraceTwinColumn"
+                                        addAllBtnEnabled="true"
+                                        width="AUTO"
+                                        columns="20"
+                                        height="100%"
+                                        reorderable="true"
+                                        optionsContainer="iteractionElementsDc"/>
+                        </groupBox>
+                    </vbox>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

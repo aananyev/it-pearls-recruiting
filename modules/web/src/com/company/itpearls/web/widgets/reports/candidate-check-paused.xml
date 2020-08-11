@@ -8,7 +8,7 @@
             <loader id="candidatesPausedDl">
                 <query><![CDATA[select e from itpearls_IteractionList e
                         order by e.numberIteraction desc]]>
-                <condition>
+<!--                <condition>
                     <and>
                         <c:jpql>
                             <c:where>e.createdBy = :userName</c:where>
@@ -19,7 +19,7 @@
                                 where f.iterationName like :iteractionTypeName</c:where>
                         </c:jpql>
                     </and>
-                </condition>
+                </condition> -->
                 </query>
             </loader>
         </collection>
@@ -53,6 +53,7 @@
                       height="100%"
                       dataContainer="candidatesPausedDc">
                 <columns>
+                    <column id="numberIteraction"/>
                     <column id="createdBy"/>
                     <column id="iteractionType"/>
                     <column id="addDate"/>

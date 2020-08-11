@@ -44,8 +44,8 @@ public class CandidateCheckPaused extends ScreenFragment {
     @Subscribe
     public void onInit(InitEvent event) {
         setWidgetTitle();
-        setRecrutier();
-        setIteractionName();
+//        setRecrutier();
+//        setIteractionName();
     }
 
     private void setIteractionName() {
@@ -53,12 +53,11 @@ public class CandidateCheckPaused extends ScreenFragment {
             candidatesPausedDl.setParameter("iteractionTypeName", iteractionName);
         else
             candidatesPausedDl.removeParameter("iteractionTypeName");
-
         candidatesPausedDl.load();
     }
 
     private void setRecrutier() {
-//        candidatesPausedDl.setParameter("userName", userSession.getUser());
+        candidatesPausedDl.setParameter("userName", userSession.getUser());
         candidatesPausedDl.removeParameter("userName");
         candidatesPausedDl.load();
     }

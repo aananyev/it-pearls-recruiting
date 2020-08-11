@@ -50,6 +50,14 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     @Inject
     private CheckBox checkBoxSetDefaultDateTime;
 
+    private Map<String, Integer> mapAddType = new LinkedHashMap<>();
+    private Map<String, Integer> mapTypeNotifications = new LinkedHashMap<>();
+    private Map<String, Integer> mapCheckTrace = new LinkedHashMap<>();
+    @Inject
+    private RadioButtonGroup typeTraceRadioButtons;
+    @Inject
+    private TwinColumn checkTraceTwinColumn;
+
     @Subscribe("checkBoxCalendar")
     public void onCheckBoxCalendarValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         textFieldCalendarItemStyle.setRequired(checkBoxCalendar.getValue());
@@ -57,14 +65,38 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        Map<String, Integer> mapAddType = new LinkedHashMap<>();
-        mapAddType.put("Data", 1);
-        mapAddType.put("String", 2);
-        mapAddType.put("Integer", 3);
+        addRadioButtonAddType();
+        addTypeNotifications();
+        addCheckTrace();
+    }
 
-        radioButtonAddType.setOptionsMap(mapAddType);
+    private void addCheckTrace() {
+        mapCheckTrace.put("Нет отслеживания", 1);
+        mapCheckTrace.put("Отслеживание до появления события по октрытой позиции", 2);
+        mapCheckTrace.put("Отслеживание по всем позициям", 3);
 
-        Map<String, Integer> mapTypeNotifications = new LinkedHashMap<>();
+        typeTraceRadioButtons.setOptionsMap(mapCheckTrace);
+    }
+
+    @Subscribe("typeTraceRadioButtons")
+    public void onTypeTraceRadioButtonsValueChange(HasValue.ValueChangeEvent<Integer> event) {
+        switch (event.getValue()) {
+            case 1:
+                checkTraceTwinColumn.setEnabled(false);
+                break;
+            case 2:
+                checkTraceTwinColumn.setEnabled(true);
+                break;
+            case 3:
+                checkTraceTwinColumn.setEnabled(true);
+                break;
+            default:
+                checkTraceTwinColumn.setEnabled(false);
+                break;
+        }
+    }
+
+    private void addTypeNotifications() {
         mapTypeNotifications.put("Нет", 1);
         mapTypeNotifications.put("Только менеджеру", 2);
         mapTypeNotifications.put("Подписчику вакансии", 3);
@@ -73,6 +105,14 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         mapTypeNotifications.put("Всем", 6);
 
         radioButtonTypeNotifications.setOptionsMap(mapTypeNotifications);
+    }
+
+    private void addRadioButtonAddType() {
+        mapAddType.put("Data", 1);
+        mapAddType.put("String", 2);
+        mapAddType.put("Integer", 3);
+
+        radioButtonAddType.setOptionsMap(mapAddType);
     }
 
     @Subscribe("radioButtonAddType")

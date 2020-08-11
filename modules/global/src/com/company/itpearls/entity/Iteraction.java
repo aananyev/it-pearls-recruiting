@@ -53,6 +53,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "ADD_TYPE")
     protected Integer addType;
 
+    @Column(name = "CHECK_TRACE")
+    protected  Integer checkTrace = 1;
+
     @Column(name = "ADD_FIELD", length = 40)
     protected String addField;
 
@@ -205,4 +208,12 @@ public class Iteraction extends StandardEntity {
     public void setCalendarItemStyle( String calendarItemStyle ) { this.calendarItemStyle = calendarItemStyle; }
 
     public String getCalendarItemStyle() { return calendarItemStyle; }
+
+    public Integer getCheckTrace() {
+        return checkTrace;
+    }
+
+    public void setCheckTrace(Integer checkTrace) {
+        this.checkTrace = checkTrace;
+    }
 }
