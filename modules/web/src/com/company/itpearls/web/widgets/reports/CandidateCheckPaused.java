@@ -1,15 +1,16 @@
 package com.company.itpearls.web.widgets.reports;
 
 import com.company.itpearls.entity.Iteraction;
+import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.WindowParam;
+import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.screen.ScreenFragment;
-import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.UiController;
-import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
@@ -35,16 +36,18 @@ public class CandidateCheckPaused extends ScreenFragment {
     protected String iteractionName;
 
     @Inject
-    private Label<String> widgetTitle;
-    @Inject
     private CollectionLoader<Iteraction> candidatesPausedDl;
     @Inject
     private UserSession userSession;
+    @Inject
+    private CollectionContainer<IteractionList> candidatesPausedDc;
+    @Inject
+    private Label<String> widgetTitle;
 
     @Subscribe
     public void onInit(InitEvent event) {
         setWidgetTitle();
-//        setRecrutier();
+        setRecrutier();
 //        setIteractionName();
     }
 
@@ -57,8 +60,17 @@ public class CandidateCheckPaused extends ScreenFragment {
     }
 
     private void setRecrutier() {
-        candidatesPausedDl.setParameter("userName", userSession.getUser());
-        candidatesPausedDl.removeParameter("userName");
+        candidatesPausedDl.setParameter("user", userSession.getUser().getName());
+        candidatesPausedDl.load();
+    }
+
+    @Subscribe
+    public void onAttach(AttachEvent event) {
+        candidatesPausedDl.load();
+    }
+
+    @Subscribe
+    public void onAfterInit(AfterInitEvent event) {
         candidatesPausedDl.load();
     }
 

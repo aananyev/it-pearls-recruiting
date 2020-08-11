@@ -49,8 +49,7 @@
         <collection id="projectNamesDc"
                     class="com.company.itpearls.entity.Project"
                     view="_local">
-            <loader id="projectNamesLc"
-                    cacheable="false">
+            <loader id="projectNamesLc">
                 <query>
                     <![CDATA[select e from itpearls_Project e
                     where e.projectIsClosed is null
@@ -69,8 +68,7 @@
         <collection id="companyNamesDc"
                     class="com.company.itpearls.entity.Company"
                     view="_minimal">
-            <loader id="companyNamesLc"
-                    cacheable="true">
+            <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
                         order by e.comanyName]]></query>
             </loader>
@@ -78,8 +76,7 @@
         <collection id="companyDepartamentsDc"
                     class="com.company.itpearls.entity.CompanyDepartament"
                     view="companyDepartament-view">
-            <loader id="companyDepartamentsLc"
-                    cacheable="true">
+            <loader id="companyDepartamentsLc">
                 <query>
                     <![CDATA[select e from itpearls_CompanyDepartament e
                     where e.departamentRuName not like '%(не использовать)%'
@@ -97,7 +94,7 @@
         <collection id="projectDc"
                     class="com.company.itpearls.entity.Project"
                     view="_local">
-            <loader id="companyOfDepatmentDl" cacheable="true">
+            <loader id="companyOfDepatmentDl">
                 <query><![CDATA[select e
                 from itpearls_Project e
                 where e.endProjectDate is not null]]></query>
@@ -106,8 +103,7 @@
         <collection id="cityOfCompanyDc"
                     class="com.company.itpearls.entity.Company"
                     view="_local">
-            <loader id="cityOfCompanyDl"
-                    cacheable="true">
+            <loader id="cityOfCompanyDl">
                 <query>
                     <![CDATA[select e
                     from itpearls_Company e
@@ -118,8 +114,7 @@
         <collection id="citiesDc"
                     class="com.company.itpearls.entity.City"
                     view="_local">
-            <loader id="citiesDl"
-                    cacheable="true">
+            <loader id="citiesDl">
                 <query><![CDATA[select e
                 from itpearls_City e
                 order by e.cityRuName]]></query>
@@ -135,8 +130,7 @@
                           fetch="BATCH"
                           view="_local"/>
             </view>
-            <loader id="recrutiesTasksesDl"
-                    cacheable="true">
+            <loader id="recrutiesTasksesDl">
                 <query>
                     <![CDATA[select e from itpearls_RecrutiesTasks e
                     where CURRENT_DATE between e.startDate and e.endDate
