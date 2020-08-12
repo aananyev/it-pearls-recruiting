@@ -100,8 +100,9 @@
             </property>
             <property name="currentJobPosition" view="_minimal"/>
             <property name="vacancy" view="_minimal"/>
-            <property name="project" view="_minimal"/>
-<!--            <property name="companyDepartment" view="_minimal"/> -->
+            <property name="project" view="_minimal">
+                <property name="projectDepartment" view="_minimal"/>
+            </property>
             <property name="iteractionType" view="_minimal">
                 <property name="pic"/>
             </property>

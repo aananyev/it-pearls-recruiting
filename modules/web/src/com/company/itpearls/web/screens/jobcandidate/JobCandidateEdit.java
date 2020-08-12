@@ -89,6 +89,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Screens screens;
     @Inject
     private Notifications notifications;
+    @Inject
+    private CollectionPropertyContainer<IteractionList> jobCandidateIteractionListsDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();

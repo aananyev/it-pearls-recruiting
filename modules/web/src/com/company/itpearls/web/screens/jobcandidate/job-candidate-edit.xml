@@ -9,7 +9,8 @@
                   class="com.company.itpearls.entity.JobCandidate"
                   view="jobCandidate-view">
             <loader/>
-            <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
+            <collection id="jobCandidateIteractionListsDc" property="iteractionList">
+            </collection>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork">
@@ -20,8 +21,8 @@
             <loader id="personPositionsLc">
                 <query>
                     <![CDATA[select e from itpearls_Position e
-where e.positionRuName not like '%(не использовать)%'
-order by e.positionRuName]]>
+                            where e.positionRuName not like '%(не использовать)%'
+                            order by e.positionRuName]]>
                 </query>
             </loader>
         </collection>
@@ -206,13 +207,13 @@ order by e.cityRuName]]>
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
-                    <table id="jobCandidateIteractionListTable" dataContainer="jobCandidateIteractionListsDc"
+                    <table id="jobCandidateIteractionListTable"
+                           dataContainer="jobCandidateIteractionListsDc"
                            width="100%" height="350px">
                         <actions>
                             <action type="create" id="create"/>
                         </actions>
                         <buttonsPanel>
-<!--                            <button id="addButton" action="jobCandidateIteractionListTable.create"/> -->
                             <button id="addIteractionButton"
                                     caption="msg://msgCreate"
                                     icon="ADD_ACTION"
@@ -223,11 +224,20 @@ order by e.cityRuName]]>
                                     invoke="copyIteractionJobCandidate"/>
                         </buttonsPanel>
                         <columns>
-                            <column id="numberIteraction"/>
-                            <column id="dateIteraction"/>
+                            <column id="numberIteraction"
+                                    sort="DESCENDING"/>
+                            <column id="dateIteraction"
+                                    caption="msg://msgDate">
+                                <formatter format="dd.MM.yyyy"
+                                           class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                            </column>
                             <column id="vacancy"/>
-                            <column id="project"/>
-                            <column id="companyDepartment"/>
+                            <column id="project.projectName"
+                                    caption="msg://msgProject"
+                                    description="msg://msgProject"/>
+                            <column id="project.projectDepartment.departamentRuName"
+                                    caption="msg://msgDepartament"
+                                    description="msg://msgDepartament"/>
                             <column id="iteractionType"/>
                             <column id="recrutier"/>
                         </columns>
