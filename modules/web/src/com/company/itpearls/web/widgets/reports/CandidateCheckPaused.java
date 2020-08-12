@@ -7,6 +7,7 @@ import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.WindowParam;
 import com.haulmont.cuba.gui.components.DataGrid;
+import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -48,19 +49,20 @@ public class CandidateCheckPaused extends ScreenFragment {
     public void onInit(InitEvent event) {
         setWidgetTitle();
         setRecrutier();
-//        setIteractionName();
+        setIteractionName();
     }
 
     private void setIteractionName() {
         if(iteractionName != null)
-            candidatesPausedDl.setParameter("iteractionTypeName", iteractionName);
+            candidatesPausedDl.setParameter("iteractionName", iteractionName);
         else
-            candidatesPausedDl.removeParameter("iteractionTypeName");
+            candidatesPausedDl.removeParameter("iteractionName");
+
         candidatesPausedDl.load();
     }
 
     private void setRecrutier() {
-        candidatesPausedDl.setParameter("user", userSession.getUser().getName());
+        candidatesPausedDl.setParameter("recrutier", userSession.getUser());
         candidatesPausedDl.load();
     }
 

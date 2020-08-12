@@ -11,7 +11,14 @@
                 <condition>
                     <and>
                         <c:jpql>
-                            <c:where>e.createdBy like :user</c:where>
+                            <c:where>
+                                e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName)
+                            </c:where>
+                        </c:jpql>
+                        <c:jpql>
+                            <c:where>
+                                e.recrutier = :recrutier
+                            </c:where>
                         </c:jpql>
                     </and>
                 </condition>
@@ -39,22 +46,21 @@
                        htmlEnabled="false"
                        height="100%"/>
             </cssLayout>
-            <dataGrid id="iteractionInPausedDataGrid"
-                      width="100%"
-                      headerVisible="false"
-                      selectionMode="NONE"
-                      reorderingAllowed="false"
-                      editorEnabled="false"
-                      dataContainer="candidatesPausedDc"
-                      height="100%">
+            <table id="iteractionInPausedDataGrid"
+
+                   dataContainer="candidatesPausedDc"
+                   height="100%">
                 <columns>
                     <column id="numberIteraction"/>
-                    <column id="createdBy"/>
+                    <column id="candidate"/>
                     <column id="iteractionType"/>
-                    <column id="addDate"/>
+                    <column id="addDate">
+                        <formatter format="dd.MM.yyyy"
+                                   class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                    </column>
                 </columns>
                 <rowsCount/>
-            </dataGrid>
+            </table>
         </vbox>
     </layout>
 </fragment>
