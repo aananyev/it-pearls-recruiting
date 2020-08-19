@@ -172,7 +172,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setOpenCloseButton() {
-        if(openClosePositionCheckBox.getValue()) {
+        if (openClosePositionCheckBox.getValue()) {
             openClosePosition.setCaption("Открыть вакансию");
             openClosePosition.setIcon("OPEN");
         } else {
@@ -315,11 +315,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         companyDepartamentsLc.load();
 
         setTopLabel();
-    }
-
-    @Subscribe("projectNameField")
-    public void onProjectNameFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
-        setCompanyDepartmentFromProject();
     }
 
     @Subscribe("openClosePositionCheckBox")
@@ -1020,17 +1015,64 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("positionTypeField")
     public void onPositionTypeFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
-        if(vacansyNameField.getValue() == null || vacansyNameField.getValue() == "") {
-            vacansyNameField.setValue(positionTypeField.getValue().getPositionEnName()
-                    + " \\ "
-                    + positionTypeField.getValue().getPositionRuName());
+        if (vacansyNameField.getValue() == null || vacansyNameField.getValue() == "") {
+            vacansyNameField.setValue(generatePositionName());
         }
+    }
+
+    @Subscribe("projectNameField")
+    public void onProjectNameFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
+        vacansyNameField.setValue(generatePositionNameInProject());
+
+        setCompanyDepartmentFromProject();
+    }
+
+    private String generatePositionNameInProject() {
+        String retValue = vacansyNameField.getValue();
+
+        if(vacansyNameField.getValue() != null) {
+            if(generatePositionName().equals(retValue)) {
+                retValue = retValue + " (" + projectNameField.getValue().getProjectName() + ")";
+            }
+        }
+
+        return retValue;
+    }
+
+    private String generatePositionNameCity() {
+        String retValue = vacansyNameField.getValue();
+
+        if(cityOpenPositionField.getValue() != null) {
+            if(generatePositionNameInProject().equals(retValue)) {
+                retValue = retValue.substring(0, retValue.length() - 1) + ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+            }
+        }
+
+        return retValue;
+    }
+
+    @Subscribe("cityOpenPositionField")
+    public void onCityOpenPositionFieldValueChange(HasValue.ValueChangeEvent<City> event) {
+        vacansyNameField.setValue(generatePositionNameCity());
+    }
+
+    protected String generatePositionName() {
+        String retPosName = "";
+
+        if(positionTypeField.getValue() != null) {
+            retPosName =
+                    (positionTypeField.getValue().getPositionRuName() != null ? positionTypeField.getValue().getPositionRuName() : "")
+                            + " \\ "
+                            + (positionTypeField.getValue().getPositionEnName() != null ? positionTypeField.getValue().getPositionEnName() : "");
+        }
+
+        return retPosName;
     }
 
     public void openClosePosition() {
         String message = "";
 
-        if(!openClosePositionCheckBox.getValue())
+        if (!openClosePositionCheckBox.getValue())
             message = "Закрыть";
         else
             message = "Открыть";
@@ -1038,10 +1080,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         dialogs.createOptionDialog()
                 .withMessage(message + " позицию \"" + vacansyNameField.getValue() + "\"?")
                 .withCaption("ВНИМАНИЕ!")
-                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler( e -> {
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                     openCloseButtonSetCaption();
 
-                    if(this.openClosePositionCheckBox.getValue())
+                    if (this.openClosePositionCheckBox.getValue())
                         this.closeWithCommit();
                     return;
 
@@ -1050,7 +1092,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void openCloseButtonSetCaption() {
-        if(openClosePositionCheckBox.getValue()) {
+        if (openClosePositionCheckBox.getValue()) {
             openClosePosition.setCaption("Открыть вакансию");
             openClosePosition.setIcon("OPEN");
             openClosePositionCheckBox.setValue(false);
