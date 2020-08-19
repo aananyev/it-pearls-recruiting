@@ -13,9 +13,13 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
+        <groupBox>
+            <label id="textPositionName" stylename="h1"/>
+        </groupBox>
         <form id="form" dataContainer="positionDc">
             <column width="250px">
-                <textField id="positionRuNameField" property="positionRuName"/>
+                <textField id="positionRuNameField" property="positionRuName" caption="msg://msgPositionRuName"/>
+                <textField id="positionEnNameField" property="positionEnName" caption="msg://msgPositionEnName"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

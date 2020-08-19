@@ -24,11 +24,22 @@ public class Position extends StandardEntity {
     @Column(name = "POSITION_RU_NAME", nullable = false, unique = true, length = 80)
     protected String positionRuName;
 
+    @Column(name = "POSITION_EN_NAME", unique = true, length = 80)
+    protected String positionEnName;
+
     public String getPositionRuName() {
         return positionRuName;
     }
 
     public void setPositionRuName(String positionRuName) {
         this.positionRuName = positionRuName;
+    }
+
+    public void setPositionEnName(String positionEnName) {
+        this.positionEnName = positionEnName;
+    }
+
+    public String getPositionEnName() {
+        return positionEnName;
     }
 }

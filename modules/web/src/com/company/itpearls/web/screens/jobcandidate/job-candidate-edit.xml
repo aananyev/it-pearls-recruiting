@@ -8,15 +8,29 @@
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate"
                   view="jobCandidate-view">
-            <loader/>
-            <collection id="jobCandidateIteractionListsDc" property="iteractionList">
-            </collection>
+            <loader id="jobCandidateDl"/>
+            <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork">
             </collection>
             <collection id="jobCandidateSkillsesDc" property="skills"/>
         </instance>
+        <collection id="jobCandidateIteractionListDataGridDc"
+                    class="com.company.itpearls.entity.IteractionList"
+                    view="iteractionList-view">
+            <loader id="jobCandidateIteractionListDataGridDl">
+                <query>
+                    <![CDATA[select e from itpearls_IteractionList e
+                    order by e.numberIteraction desc]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidate = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_local">
             <loader id="personPositionsLc">
                 <query>
@@ -122,7 +136,7 @@ order by e.cityRuName]]>
                 </rows>
             </grid>
         </groupBox>
-        <tabSheet id="tabSheetSocialNetworks" description="mainMsg://msgSocialNetworks">
+        <tabSheet id="tabSheetSocialNetworks">
             <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
                     <grid spacing="true" width="100%">
@@ -206,42 +220,63 @@ order by e.cityRuName]]>
                 </groupBox>
             </tab>
             <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
-                <groupBox spacing="true">
-                    <table id="jobCandidateIteractionListTable"
-                           dataContainer="jobCandidateIteractionListsDc"
-                           width="100%" height="350px">
+                <groupBox spacing="true" expand="jobCandidateIteractionListTable">
+                    <dataGrid id="jobCandidateIteractionListTable"
+                              dataContainer="jobCandidateIteractionListDataGridDc"
+                              width="100%"
+                              contextMenuEnabled="false"
+                              textSelectionEnabled="false"
+                              reorderingAllowed="true"
+                              height="350px">
                         <actions>
                             <action type="create" id="create"/>
+                            <action type="edit" id="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="refresh" type="refresh"/>
                         </actions>
                         <buttonsPanel>
                             <button id="addIteractionButton"
                                     caption="msg://msgCreate"
+                                    action="jobCandidateIteractionListTable.create"
                                     icon="ADD_ACTION"
                                     invoke="addIteractionJobCandidate"/>
                             <button id="copyIteractionButton"
                                     caption="msg://msgCopy"
+                                    action="jobCandidateIteractionListTable.create"
                                     icon="COPY"
                                     invoke="copyIteractionJobCandidate"/>
+                            <button action="jobCandidateIteractionListTable.edit"/>
+                            <button action="jobCandidateIteractionListTable.remove"/>
                         </buttonsPanel>
                         <columns>
+                            <column id="icon" width="48px" caption=""/>
                             <column id="numberIteraction"
-                                    sort="DESCENDING"/>
+                                    property="numberIteraction"
+                                    sortable="true"/>
+
+                            <column id="vacancy"
+                                    property="vacancy"/>
+                            <column id="iteractionType"
+                                    property="iteractionType"/>
+                            <column id="projectName"
+                                    property="vacancy.projectName"
+                                    caption="msg://msgProject"/>
+                            <column id="companyName"
+                                    property="vacancy.projectName.projectDepartment.companyName"/>
+                            <column id="departamentRuName"
+                                    property="vacancy.projectName.projectDepartment.departamentRuName"
+                                    caption="msg://msgDepartament"/>
+                            <column id="recrutier"
+                                    property="recrutier"/>
                             <column id="dateIteraction"
+                                    property="dateIteraction"
                                     caption="msg://msgDate">
                                 <formatter format="dd.MM.yyyy"
                                            class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                             </column>
-                            <column id="vacancy"/>
-                            <column id="project.projectName"
-                                    caption="msg://msgProject"
-                                    description="msg://msgProject"/>
-                            <column id="project.projectDepartment.departamentRuName"
-                                    caption="msg://msgDepartament"
-                                    description="msg://msgDepartament"/>
-                            <column id="iteractionType"/>
-                            <column id="recrutier"/>
                         </columns>
-                    </table>
+                        <rowsCount/>
+                    </dataGrid>
                 </groupBox>
             </tab>
             <tab id="tabSkills" caption="msg://msgSkills" margin="true,false,false,false" spacing="true">
@@ -275,10 +310,30 @@ order by e.cityRuName]]>
             </tab>
             <tab id="tabResume" caption="msg://msgResume" margin="true,false,false,false" spacing="true">
                 <groupBox id="groupBoxCV" spacing="true">
-                    <table id="jobCandidateCandidateCvTable" height="300px" width="100%" dataContainer="jobCandidateCandidateCvsDc">
+                    <dataGrid id="jobCandidateCandidateCvTable"
+                           height="300px"
+                           width="100%"
+                           dataContainer="jobCandidateCandidateCvsDc">
                         <columns>
-                            <column id="datePost" caption="msg://msgDatePost"/>
-                            <column id="resumePosition"/>
+                            <column id="datePost"
+                                    width="150px"
+                                    property="datePost"
+                                    caption="msg://msgDatePost"/>
+                            <column id="resumePosition"
+                                    property="resumePosition" caption="msg://msgToPosition"/>
+                            <column id="toVacancy"
+                                    property="toVacancy"
+                                    caption="msg://msgToVacansy"/>
+                            <column id="iconOriginalCVFile"
+                                    width="100px"
+                                    caption="msg://msgOriginalCV">
+                                <iconRenderer/>
+                            </column>
+                            <column id="iconITPearlsCVFile"
+                                    width="100px"
+                                    caption="msg://msgITPearlsCV">
+                                <iconRenderer/>
+                            </column>
                         </columns>
                         <actions>
                             <action type="create" id="create"/>
@@ -290,7 +345,7 @@ order by e.cityRuName]]>
                             <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
                             <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
                         </buttonsPanel>
-                    </table>
+                    </dataGrid>
                 </groupBox>
             </tab>
         </tabSheet>
@@ -302,8 +357,8 @@ order by e.cityRuName]]>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick" icon="BELL"/>
-            <button id="okAndCheck" caption="CheckOK" invoke="onBtnOkAndCheck" icon="OK"/>
-            <button action="windowCommitAndClose" visible="false"/>
+            <button id="okAndCheck" caption="OK" invoke="onBtnOkAndCheck" icon="OK"/>
+<!--            <button action="windowCommitAndClose" visible="false"/> -->
             <button action="windowClose"/>
         </hbox>
     </layout>

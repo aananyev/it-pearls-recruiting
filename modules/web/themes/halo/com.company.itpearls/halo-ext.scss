@@ -1,5 +1,48 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
+
+.text-field-title-form {
+        font-size: medium;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        padding: 5px;
+}
+
+.pic-center {
+    text-align: center;
+    margin: 0 auto;
+}
+
+.pic-center-large-green {
+    color: green;
+    text-align: center;
+    text-color: green;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large-yellow {
+    color: orange;
+    text-align: center;
+     text-color: orange;
+     font-size: large;
+     margin: 0 auto;
+}
+
+.pic-center-large-red {
+    color: red;
+    text-align: center;
+    text-color: red;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large {
+    font-size: large;
+    text-align: center;
+    margin: 0 auto;
+}
+
 .open-position-pic-center {
     text-align: center;
     margin: 0 auto;

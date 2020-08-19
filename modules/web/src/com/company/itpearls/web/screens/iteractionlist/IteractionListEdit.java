@@ -7,10 +7,7 @@ import com.company.itpearls.service.SubscribeDateService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -31,6 +28,8 @@ import java.util.Date;
 @EditedEntityContainer("iteractionListDc")
 @LoadDataBeforeShow
 public class IteractionListEdit extends StandardEditor<IteractionList> {
+    protected Boolean noSubscribe = false;
+
     @Inject
     private UserSession userSession;
     @Inject
@@ -96,6 +95,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     static String RECRUITER = "Recruiter";
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
+    @Inject
+    private Notifications notifications;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -647,11 +648,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         askFlag = false;
         askFlag2 = false;
+        
+        getScreenOptionsNoSubscribers(event);
     }
+    // получить параметны экрана
+    private void getScreenOptionsNoSubscribers(InitEvent event) {
+        ScreenOptions options = event.getOptions();
 
-    @Subscribe("vacancyFiels")
-    public void onVacancyFielsValueChange1(HasValue.ValueChangeEvent<OpenPosition> event) {
-
+        if(options instanceof IteracionListScreenOptions) {
+            noSubscribe = ((IteracionListScreenOptions) options).getNoSubscribers();
+        }
     }
 
     public void callActionEntity() {
@@ -684,6 +690,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         a.show();
                     }
                 }
+    }
+
+    @Subscribe("vacancyFiels")
+    public void onVacancyFielsValueChange1(HasValue.ValueChangeEvent<OpenPosition> event) {
+        if(vacancyFiels.getValue() != null)
+            if(vacancyFiels.getValue().getProjectName() != null) {
+                getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
+
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withContentMode(ContentMode.TEXT)
+                        .withCaption("Проект")
+                        .withDescription(vacancyFiels.getValue().getProjectName().getProjectName())
+                        .withHideDelayMs(5000)
+                        .show();
+            }
+
     }
 
     public void addNewIteraction() {

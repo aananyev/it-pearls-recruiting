@@ -216,29 +216,23 @@
                                      caption="msg://msgPriorityPosition"
                                      required="true"
                                      align="MIDDLE_LEFT"
-                                     width="95%">
+                                     width="100%">
                         </lookupField>
-                        <lookupField id="remoteWorkField"
-                                     dataContainer="openPositionDc"
-                                     property="remoteWork"
-                                     required="true"
-                                     align="MIDDLE_LEFT"
-                                     caption="msg://msgRemoteWork"
-                                     width="95%">
-                        </lookupField>
+
                     </hbox>
                 </hbox>
                 <groupBox id="groupBoxOpenPosition"
                           spacing="true">
+                    <textField id="vacansyNameField"
+                               dataContainer="openPositionDc"
+                               property="vacansyName"
+                               caption="msg://msgVacansy"
+                               stylename="text-field-title-form"
+                               width="100%"
+                               required="true"/>
                     <hbox id="hboxVacansy"
                           spacing="true"
                           width="100%">
-                        <textField id="vacansyNameField"
-                                   dataContainer="openPositionDc"
-                                   property="vacansyName"
-                                   caption="msg://msgVacansy"
-                                   width="100%"
-                                   required="true"/>
                         <lookupPickerField id="positionTypeField"
                                            optionsContainer="positionTypesDc"
                                            dataContainer="openPositionDc"
@@ -251,6 +245,14 @@
                                         type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
+                        <lookupField id="remoteWorkField"
+                                     dataContainer="openPositionDc"
+                                     property="remoteWork"
+                                     required="true"
+                                     align="MIDDLE_LEFT"
+                                     caption="msg://msgRemoteWork"
+                                     width="50%">
+                        </lookupField>
                     </hbox>
                     <hbox id="hboxProject"
                           spacing="true"
@@ -520,6 +522,7 @@
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+            <button id="openClosePosition" invoke="openClosePosition" icon="CLOSE"/>
             <button invoke="subscribePosition" caption="msg://msgSubscribe" icon="BELL"/>
             <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
             <button action="windowClose"/>

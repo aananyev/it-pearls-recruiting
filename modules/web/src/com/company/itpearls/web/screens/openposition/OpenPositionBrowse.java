@@ -344,7 +344,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return icon;
     }
 
-
     public void subscribePosition() {
         Screen opScreen = screenBuilders
                 .editor(RecrutiesTasks.class, this)
@@ -358,48 +357,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         opScreen.show();
     }
-/*
-    @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
-    private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        Map<String, Integer> remoteWork = new LinkedHashMap<>();
-        remoteWork.put("Нет", 0);
-        remoteWork.put("Удаленная работа", 1);
-        remoteWork.put("Частично 50/50", 2);
-
-        return remoteWork.get(event.getItem().getRemoteWork());
-    }
-
-
-    @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
-    private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-
-        Map<String, Integer> remoteWork = new LinkedHashMap<>();
-        remoteWork.put("Нет", 0);
-        remoteWork.put("Удаленная работа", 1);
-        remoteWork.put("Частично 50/50", 2);
-
-        return remoteWork.get(event.getItem().getRemoteWork());
-    }
-
-    @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
-    private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        // добавление удаленнной работы
-        DataGrid.Column iconRemoteWork = openPositionsTable.addGeneratedColumn("remoteWork",
-                new DataGrid.ColumnGenerator<OpenPosition, String>() {
-                    @Override
-                    public String getValue(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-                        return getIconRemoteWork(event.getItem());
-                    }
-
-                    @Override
-                    public Class<String> getType() {
-                        return String.class;
-                    }
-                });
-        iconRemoteWork.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class));
-        return iconRemoteWork;
-    }
-*/
 
 }
 

@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
@@ -10,6 +11,8 @@ import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -19,6 +22,7 @@ import com.haulmont.cuba.core.global.Metadata;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -76,8 +80,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private UserSession userSession;
     @Inject
-    private Table<SocialNetworkURLs> socialNetworkTable;
-    @Inject
     private Metadata metadata;
     @Inject
     private CollectionPropertyContainer<SocialNetworkURLs> jobCandidateSocialNetworksDc;
@@ -86,11 +88,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
     @Inject
-    private Screens screens;
+    private InstanceLoader<JobCandidate> jobCandidateDl;
     @Inject
-    private Notifications notifications;
+    private CollectionLoader<IteractionList> jobCandidateIteractionListDataGridDl;
     @Inject
-    private CollectionPropertyContainer<IteractionList> jobCandidateIteractionListsDc;
+    private InstanceContainer<JobCandidate> jobCandidateDc;
+    @Inject
+    private DataGrid<IteractionList> jobCandidateIteractionListTable;
+    @Inject
+    private CollectionContainer<IteractionList> jobCandidateIteractionListDataGridDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -161,6 +167,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         enableDisableContacts();
+
     }
 
     protected boolean isRequiredAddresField() {
@@ -442,6 +449,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                                     g.setStartDate(new Date());
                                                 })
                                                 .withOpenMode(OpenMode.DIALOG)
+                                                .withParentDataContext(dataContext)
                                                 .build()
                                                 .show();
                                     }),
@@ -454,15 +462,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         } else {
             screenBuilders.editor(SubscribeCandidateAction.class, this)
                     .newEntity()
+                    .withOpenMode(OpenMode.DIALOG)
+                    .withParentDataContext(dataContext)
                     .withInitializer(e -> {
                         e.setCandidate(getEditedEntity());
                         e.setSubscriber(userSession.getUser());
                         e.setStartDate(new Date());
                     })
-                    .withOpenMode(OpenMode.DIALOG)
                     .build()
                     .show();
         }
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        addIconColumn();
     }
 
     private Boolean needDublicateDialog() {
@@ -504,12 +518,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void addIteractionJobCandidate() {
         screenBuilders.editor(IteractionList.class, this)
                 .withOpenMode(OpenMode.DIALOG)
+                .withOptions(new JobCandidateScreenOptions(false))
+                .withParentDataContext(dataContext)
+                .withContainer(jobCandidateIteractionListDataGridDc)
                 .withInitializer(candidate -> {
                     candidate.setCandidate(getEditedEntity());
                 })
                 .newEntity()
                 .build()
                 .show();
+
+        jobCandidateIteractionListDataGridDl.load();
     }
 
     public void copyIteractionJobCandidate() {
@@ -532,8 +551,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if (lastIteraction != null) {
             IteractionList finalLastIteraction = lastIteraction;
+
             screenBuilders.editor(IteractionList.class, this)
                     .withOpenMode(OpenMode.DIALOG)
+                    .withParentDataContext(dataContext)
+                    .withContainer(jobCandidateIteractionListDataGridDc)
                     .withInitializer(candidate -> {
                         candidate.setCandidate(getEditedEntity());
                         candidate.setVacancy(finalLastIteraction.getVacancy());
@@ -546,12 +568,103 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withCaption("Нет взаимодействий с кандидатом")
                     .withMessage("Назначить новое взаимодействие?")
                     .withActions(
-                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler( e -> {
+                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                                 addIteractionJobCandidate();
                             }),
                             new DialogAction(DialogAction.Type.NO)
                     )
                     .show();
         }
+    }
+
+
+    @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "styleProvider")
+    private String jobCandidateCandidateCvTableIconITPearlsCVFileStyleProvider(CandidateCV candidateCV) {
+        String style = "";
+
+        if (candidateCV.getLinkItPearlsCV() != null) {
+            style = "pic-center-large-green";
+        } else {
+            style = "pic-center-large-red";
+        }
+
+        return style;
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "styleProvider")
+    private String jobCandidateCandidateCvTableIconOriginalCVFileStyleProvider(CandidateCV candidateCV) {
+        String style = "";
+
+        if (candidateCV.getLinkOriginalCv() != null) {
+            style = "pic-center-large-green";
+        } else {
+            style = "pic-center-large-red";
+        }
+
+        return style;
+    }
+
+    private String getIcon(IteractionList item) {
+        return item.getIteractionType().getPic();
+    }
+
+    private void addIconColumn() {
+        DataGrid.Column iconColumn = jobCandidateIteractionListTable.addGeneratedColumn("icon",
+                new DataGrid.ColumnGenerator<IteractionList, String>() {
+                    @Override
+                    public String getValue(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+                        return getIcon(event.getItem());
+                    }
+
+                    @Override
+                    public Class<String> getType() {
+                        return String.class;
+                    }
+                });
+
+        iconColumn.setRenderer(jobCandidateIteractionListTable.createRenderer(DataGrid.ImageRenderer.class));
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "columnGenerator")
+    private Icons.Icon jobCandidateCandidateCvTableIconOriginalCVFileColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        return event.getItem().getLinkOriginalCv() != null ?
+                CubaIcon.valueOf("PLUS_CIRCLE") :
+                CubaIcon.valueOf("MINUS_CIRCLE");
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "columnGenerator")
+    private Icons.Icon jobCandidateCandidateCvTableiconITPearlsCVFileColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        return event.getItem().getLinkItPearlsCV() != null ?
+                CubaIcon.valueOf("PLUS_CIRCLE") :
+                CubaIcon.valueOf("MINUS_CIRCLE");
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.iteractionType", subject = "descriptionProvider")
+    private String jobCandidateIteractionListTableIteractionTypeDescriptionProvider(IteractionList iteractionList) {
+        String add = "";
+
+        if (iteractionList.getAddDate() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy H:m");
+            add = dateFormat.format(iteractionList.getAddDate());
+        }
+
+        if (iteractionList.getAddString() != null)
+            add = iteractionList.getAddString();
+
+        if (iteractionList.getAddInteger() != null)
+            add = iteractionList.getAddInteger().toString();
+
+
+        return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
+    }
+
+    @Subscribe
+    public void onBeforeShow2(BeforeShowEvent event) {
+        setCandidateInTables();
+    }
+
+    private void setCandidateInTables() {
+        jobCandidateIteractionListDataGridDl.setParameter("candidate", getEditedEntity());
+        jobCandidateIteractionListDataGridDl.load();
     }
 }

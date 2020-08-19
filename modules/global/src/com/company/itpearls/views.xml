@@ -46,6 +46,7 @@
     </view>
     <view entity="itpearls_Position" name="position-view" extends="_minimal">
         <property name="positionRuName"/>
+        <property name="positionEnName"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_minimal" systemProperties="true">
         <property name="openClose"/>
@@ -249,7 +250,6 @@
         </property>
         <property name="project" fetch="JOIN" view="_local"/>
         <property name="iteractionType" fetch="BATCH" view="_minimal">
-            <property name="iteractionTree"/>
             <property name="pic"/>
             <property name="addCaption"/>
             <property name="calendarItem"/>

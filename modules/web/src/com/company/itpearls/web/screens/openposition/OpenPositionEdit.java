@@ -143,6 +143,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private RadioButtonGroup commanExperienceRadioButton;
     @Inject
     private CheckBox internalProjectCheckBox;
+    @Inject
+    private Button openClosePosition;
+    @Inject
+    private DataContext dataContext;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -164,6 +168,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setDisableTwoField();
         setWorkExperienceRadioButton();
         setCommandExperienceRadioButton();
+        setOpenCloseButton();
+    }
+
+    private void setOpenCloseButton() {
+        if(openClosePositionCheckBox.getValue()) {
+            openClosePosition.setCaption("Открыть вакансию");
+            openClosePosition.setIcon("OPEN");
+        } else {
+            openClosePosition.setCaption("Закрыть вакансию");
+            openClosePosition.setIcon("CLOSE");
+        }
     }
 
     private void setInternalProject() {
@@ -338,45 +353,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void sendMessage() {
-        // по почте
-        OpenPosition openPosition = getEditedEntity();
-
-        // нотификация
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (!getRoleService.isUserRoles(userSession.getUser(), MANAGER) &&
-                    // это не врунтренний проект компании
-                    !internalProjectCheckBox.getValue()) {
-                // пошлем по почте
-                EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
-                        ";" + getRecrutiersMaillist(),
-                        openPosition.getVacansyName(),
-                        null, "com/company/itpearls/templates/create_new_pos.html",
-                        Collections.singletonMap("openPosition", openPosition));
-
-                emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
-                emailService.sendEmailAsync(emailInfo);
-            }
-            // высплывающее сообщение
-            events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
-                    getEditedEntity().getVacansyName()));
-        } else {
-            if (entityIsChanged) {
-                // если от имени Admin то не слать
-                if (!getRoleService.isUserRoles(userSession.getUser(), MANAGER) &&
-                        // и это не внутренний проект компании
-                        !internalProjectCheckBox.getValue()) {
-                    EmailInfo emailInfo = new EmailInfo(getSubscriberMaillist(getEditedEntity()) +
-                            ";" + getRecrutiersMaillist(),
-                            openPosition.getVacansyName(),
-                            null, "com/company/itpearls/templates/edit_open_pos.html",
-                            Collections.singletonMap("openPosition", openPosition));
-                    emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
-                    emailService.sendEmailAsync(emailInfo);
-                }
-            }
-        }
+        events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
+                getEditedEntity().getVacansyName()));
     }
 
     private Boolean sendOpenCloseMessage() {
@@ -397,30 +375,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 // позиция открылась
                 events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
                         getEditedEntity().getVacansyName()));
-
-                dialogs.createOptionDialog()
-                        .withCaption("Внимание!")
-                        .withMessage("Разослать email-оповещение по всем сотрудникам об открытии новой позиции?")
-                        .withActions(new DialogAction(DialogAction.Type.YES,
-                                        Action.Status.PRIMARY).withHandler(e -> {
-                                    this.emailInfo = new EmailInfo(this.emails,
-                                            "Открыта позиция " + openPosition.getVacansyName(),
-                                            null, "com/company/itpearls/templates/open_position.html",
-                                            Collections.singletonMap("openPosition", openPosition));
-
-                                    emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
-                                    emailService.sendEmailAsync(emailInfo);
-
-                                    notifications.create(Notifications.NotificationType.TRAY)
-                                            .withCaption("Рассылка обновлений позиции")
-                                            .withDescription("Рассылка по адресам: " + emails)
-                                            .show();
-
-                                }),
-                                new DialogAction(DialogAction.Type.NO))
-                        .show();
-
                 r = true;
             } else {
                 if (a != b) {
@@ -431,53 +385,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                         events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
                                 getEditedEntity().getVacansyName()));
 
-                        if (getRoleService.isUserRoles(userSession.getUser(), MANAGER)) {
-                            dialogs.createOptionDialog()
-                                    .withCaption("Внимание!")
-                                    .withMessage("Разослать email-оповещение по всем сотрудникам?")
-                                    .withActions(new DialogAction(DialogAction.Type.YES,
-                                                    Action.Status.PRIMARY).withHandler(e -> {
-                                                this.emailInfo = new EmailInfo(this.emails,
-                                                        "Открыта позиция " + openPosition.getVacansyName(),
-                                                        null, "com/company/itpearls/templates/open_position.html",
-                                                        Collections.singletonMap("openPosition", openPosition));
-
-                                                this.setOK = true;
-
-                                                emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
-                                                emailService.sendEmailAsync(emailInfo);
-
-                                                notifications.create(Notifications.NotificationType.TRAY)
-                                                        .withCaption("Рассылка обновлений позиции")
-                                                        .withDescription("Рассылка по адресам: " + emails)
-                                                        .show();
-
-                                            }),
-                                            new DialogAction(DialogAction.Type.NO).withHandler(f -> {
-                                                this.setOK = false;
-                                            }))
-                                    .show();
-                        }
-
                         r = true;
                     } else {
-                        dialogs.createOptionDialog()
-                                .withCaption("Confirm")
-                                .withMessage("Are you sure?")
-                                .withActions(
-                                        new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                                            sendClosePositionEmail(openPosition);
-                                        }),
-                                        new DialogAction(DialogAction.Type.NO)
-                                )
-                                .show();
-
-                        notifications.create(Notifications.NotificationType.TRAY)
-                                .withCaption("Рассылка обновлений позиции")
-                                .withDescription("Рассылка по адресам: " + emails)
-                                .show();
-
                         setOK = true;
                     }
 
@@ -489,25 +398,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         return r;
     }
-
-    private void sendClosePositionEmail(OpenPosition openPosition) {
-        // позиция закрылась
-        events.publish(new UiNotificationEvent(this, "Закрыта позиция: " +
-                getEditedEntity().getVacansyName()));
-
-        emails = getSubscriberMaillist(getEditedEntity()) +
-                ";" + getRecrutiersMaillist();
-
-        emailInfo = new EmailInfo(emails,
-                "Закрыта позиция " + openPosition.getVacansyName(),
-                null, "com/company/itpearls/templates/close_position.html",
-                Collections.singletonMap("openPosition", openPosition));
-
-        emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
-        emailService.sendEmailAsync(emailInfo);
-    }
-
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
@@ -573,7 +463,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private String getRecrutiersMaillist() {
-        return "alan@itpearls.ru;tmd@itpearls.ru;tdg@itpearls.ru";
+        return "alan@itpearls.ru;tmd@itpearls.ru";
     }
 
     private void setRadioButtons() {
@@ -1106,6 +996,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     data.setOpenPosition(this.getEditedEntity());
                 })
                 .newEntity()
+                .withParentDataContext(dataContext)
                 .withScreenId("itpearls_RecrutiesTasks.edit")
                 .withLaunchMode(OpenMode.DIALOG)
                 .build();
@@ -1125,5 +1016,51 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
         }
         return c;
+    }
+
+    @Subscribe("positionTypeField")
+    public void onPositionTypeFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
+        if(vacansyNameField.getValue() == null || vacansyNameField.getValue() == "") {
+            vacansyNameField.setValue(positionTypeField.getValue().getPositionEnName()
+                    + " \\ "
+                    + positionTypeField.getValue().getPositionRuName());
+        }
+    }
+
+    public void openClosePosition() {
+        String message = "";
+
+        if(!openClosePositionCheckBox.getValue())
+            message = "Закрыть";
+        else
+            message = "Открыть";
+
+        dialogs.createOptionDialog()
+                .withMessage(message + " позицию \"" + vacansyNameField.getValue() + "\"?")
+                .withCaption("ВНИМАНИЕ!")
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler( e -> {
+                    openCloseButtonSetCaption();
+
+                    if(this.openClosePositionCheckBox.getValue())
+                        this.closeWithCommit();
+                    return;
+
+                }), new DialogAction(DialogAction.Type.NO))
+                .show();
+    }
+
+    private void openCloseButtonSetCaption() {
+        if(openClosePositionCheckBox.getValue()) {
+            openClosePosition.setCaption("Открыть вакансию");
+            openClosePosition.setIcon("OPEN");
+            openClosePositionCheckBox.setValue(false);
+        } else {
+            openClosePosition.setCaption("Закрыть вакансию");
+            openClosePosition.setIcon("CLOSE");
+            openClosePositionCheckBox.setValue(true);
+
+            openClosePosition();
+        }
+
     }
 }

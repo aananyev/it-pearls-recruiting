@@ -32,7 +32,8 @@ order by e.positionRuName]]></query>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="positionRuName"/>
+                <column id="positionRuName" caption="msg://msgPositionRuName"/>
+                <column id="positionEnName" caption="msg://msgPositionEnName"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

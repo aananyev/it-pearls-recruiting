@@ -257,6 +257,7 @@ create table ITPEARLS_POSITION (
     DELETED_BY varchar(50),
     --
     POSITION_RU_NAME varchar(80) not null,
+    POSITION_EN_NAME varchar(80) not null,
     --
     primary key (ID)
 )^
