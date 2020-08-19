@@ -517,6 +517,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public void addIteractionJobCandidate() {
         screenBuilders.editor(IteractionList.class, this)
+                .newEntity()
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new JobCandidateScreenOptions(false))
                 .withParentDataContext(dataContext)
@@ -524,7 +525,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .withInitializer(candidate -> {
                     candidate.setCandidate(getEditedEntity());
                 })
-                .newEntity()
                 .build()
                 .show();
 
@@ -532,47 +532,61 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void copyIteractionJobCandidate() {
-        String QUERY_GET_LAST_ITERACTION = "select e " +
-                "from itpearls_IteractionList e " +
-                "where e.candidate = :candidate and " +
-                "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
+        if(jobCandidateIteractionListTable.getSingleSelected() == null) {
+            String QUERY_GET_LAST_ITERACTION = "select e " +
+                    "from itpearls_IteractionList e " +
+                    "where e.candidate = :candidate and " +
+                    "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
 
-        IteractionList lastIteraction = null;
+            IteractionList lastIteraction = null;
 
-        try {
-            lastIteraction = dataManager.load(IteractionList.class)
-                    .query(QUERY_GET_LAST_ITERACTION)
-                    .parameter("candidate", getEditedEntity())
-                    .view("iteractionList-view")
-                    .one();
-        } catch (IllegalStateException e) {
-            lastIteraction = null;
-        }
+            try {
+                lastIteraction = dataManager.load(IteractionList.class)
+                        .query(QUERY_GET_LAST_ITERACTION)
+                        .parameter("candidate", getEditedEntity())
+                        .view("iteractionList-view")
+                        .one();
+            } catch (IllegalStateException e) {
+                lastIteraction = null;
+            }
 
-        if (lastIteraction != null) {
-            IteractionList finalLastIteraction = lastIteraction;
+            if (lastIteraction != null) {
+                IteractionList finalLastIteraction = lastIteraction;
 
+                screenBuilders.editor(IteractionList.class, this)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .withParentDataContext(dataContext)
+                        .withContainer(jobCandidateIteractionListDataGridDc)
+                        .withInitializer(candidate -> {
+                            candidate.setCandidate(getEditedEntity());
+                            candidate.setVacancy(finalLastIteraction.getVacancy());
+                        })
+                        .newEntity()
+                        .build()
+                        .show();
+            } else {
+                dialogs.createOptionDialog()
+                        .withCaption("Нет взаимодействий с кандидатом")
+                        .withMessage("Назначить новое взаимодействие?")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                                    addIteractionJobCandidate();
+                                }),
+                                new DialogAction(DialogAction.Type.NO)
+                        )
+                        .show();
+            }
+        } else {
             screenBuilders.editor(IteractionList.class, this)
                     .withOpenMode(OpenMode.DIALOG)
                     .withParentDataContext(dataContext)
                     .withContainer(jobCandidateIteractionListDataGridDc)
                     .withInitializer(candidate -> {
-                        candidate.setCandidate(getEditedEntity());
-                        candidate.setVacancy(finalLastIteraction.getVacancy());
+                        candidate.setCandidate(jobCandidateIteractionListTable.getSingleSelected().getCandidate());
+                        candidate.setVacancy(jobCandidateIteractionListTable.getSingleSelected().getVacancy());
                     })
                     .newEntity()
                     .build()
-                    .show();
-        } else {
-            dialogs.createOptionDialog()
-                    .withCaption("Нет взаимодействий с кандидатом")
-                    .withMessage("Назначить новое взаимодействие?")
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                                addIteractionJobCandidate();
-                            }),
-                            new DialogAction(DialogAction.Type.NO)
-                    )
                     .show();
         }
     }

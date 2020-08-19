@@ -58,6 +58,7 @@ order by e.vacansyName]]>
         </collection>
     </data>
     <dialogMode height="600"
+                modal="true"
                 width="800"/>
     <layout expand="editActions" spacing="true">
         <groupBox spacing="true">

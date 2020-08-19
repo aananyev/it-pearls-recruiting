@@ -9,7 +9,7 @@
                   class="com.company.itpearls.entity.JobCandidate"
                   view="jobCandidate-view">
             <loader id="jobCandidateDl"/>
-            <collection id="jobCandidateIteractionListsDc" property="iteractionList"/>
+            <!-- <collection id="jobCandidateIteractionListsDc" property="iteractionList"/> -->
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork">
@@ -229,7 +229,6 @@ order by e.cityRuName]]>
                               reorderingAllowed="true"
                               height="350px">
                         <actions>
-                            <action type="create" id="create"/>
                             <action type="edit" id="edit"/>
                             <action id="remove" type="remove"/>
                             <action id="refresh" type="refresh"/>
@@ -237,12 +236,10 @@ order by e.cityRuName]]>
                         <buttonsPanel>
                             <button id="addIteractionButton"
                                     caption="msg://msgCreate"
-                                    action="jobCandidateIteractionListTable.create"
                                     icon="ADD_ACTION"
                                     invoke="addIteractionJobCandidate"/>
                             <button id="copyIteractionButton"
                                     caption="msg://msgCopy"
-                                    action="jobCandidateIteractionListTable.create"
                                     icon="COPY"
                                     invoke="copyIteractionJobCandidate"/>
                             <button action="jobCandidateIteractionListTable.edit"/>
