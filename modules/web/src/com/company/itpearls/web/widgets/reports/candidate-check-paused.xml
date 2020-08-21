@@ -46,21 +46,21 @@
                        htmlEnabled="false"
                        height="100%"/>
             </cssLayout>
-            <table id="iteractionInPausedDataGrid"
+            <dataGrid id="iteractionInPausedDataGrid"
 
                    dataContainer="candidatesPausedDc"
                    height="100%">
                 <columns>
-                    <column id="numberIteraction"/>
-                    <column id="candidate"/>
-                    <column id="iteractionType"/>
-                    <column id="addDate">
+                    <column id="numberIteraction" property="numberIteraction"/>
+                    <column id="candidate" property="candidate"/>
+                    <column id="iteractionType" property="iteractionType"/>
+                    <column id="addDate" property="addDate">
                         <formatter format="dd.MM.yyyy"
                                    class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                     </column>
                 </columns>
                 <rowsCount/>
-            </table>
+            </dataGrid>
         </vbox>
     </layout>
 </fragment>

@@ -75,7 +75,7 @@ order by e.vacansyName]]>
         </groupBox>
         <form id="form" dataContainer="candidateCVDc" width="100%">
             <column width="100%">
-                <tabSheet id="tabSheet">
+                <tabSheet id="tabSheet" stylename="framed">
                     <tab id="tabCandidate" caption="msg://msgCandidate" spacing="true">
                         <groupBox id="groupBox" spacing="true">
                             <vbox>

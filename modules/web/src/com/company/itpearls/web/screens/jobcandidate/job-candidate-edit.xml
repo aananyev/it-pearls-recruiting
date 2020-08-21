@@ -9,7 +9,6 @@
                   class="com.company.itpearls.entity.JobCandidate"
                   view="jobCandidate-view">
             <loader id="jobCandidateDl"/>
-            <!-- <collection id="jobCandidateIteractionListsDc" property="iteractionList"/> -->
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork">
@@ -136,7 +135,14 @@ order by e.cityRuName]]>
                 </rows>
             </grid>
         </groupBox>
-        <tabSheet id="tabSheetSocialNetworks">
+        <tabSheet id="tabSheetSocialNetworks" stylename="framed">
+            <tab id="jobCandidateCard" caption="msg://msgJobCard" margin="true,false,false,false" spacing="true" icon="ID_CARD">
+                <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h2"/>
+                <label dataContainer="jobCandidateDc" property="email" stylename="h3"/>
+                <label dataContainer="jobCandidateDc" property="phone" stylename="h3"/>
+                <label dataContainer="jobCandidateDc" property="telegramName" stylename="h3"/>
+                <label dataContainer="jobCandidateDc" property="skypeName" stylename="h3"/>
+            </tab>
             <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
                 <groupBox spacing="true">
                     <grid spacing="true" width="100%">
@@ -331,6 +337,15 @@ order by e.cityRuName]]>
                                     caption="msg://msgITPearlsCV">
                                 <iconRenderer/>
                             </column>
+                            <column id="letter"
+                                    width="100px"
+                                    caption="msg://msgCoverLetter">
+                                <iconRenderer/>
+                            </column>
+                            <column id="createdBy"
+                                    property="createdBy"
+                                    width="200px"
+                                    caption="msg://msgCreatedBy"/>
                         </columns>
                         <actions>
                             <action type="create" id="create"/>

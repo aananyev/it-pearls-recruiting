@@ -97,6 +97,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataGrid<IteractionList> jobCandidateIteractionListTable;
     @Inject
     private CollectionContainer<IteractionList> jobCandidateIteractionListDataGridDc;
+    @Named("tabSheetSocialNetworks.jobCandidateCard")
+    private VBoxLayout jobCandidateCard;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -168,6 +170,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         enableDisableContacts();
 
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+        }
     }
 
     protected boolean isRequiredAddresField() {
@@ -532,7 +536,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void copyIteractionJobCandidate() {
-        if(jobCandidateIteractionListTable.getSingleSelected() == null) {
+        if (jobCandidateIteractionListTable.getSingleSelected() == null) {
             String QUERY_GET_LAST_ITERACTION = "select e " +
                     "from itpearls_IteractionList e " +
                     "where e.candidate = :candidate and " +
@@ -618,6 +622,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return style;
     }
 
+    @Install(to = "jobCandidateCandidateCvTable.letter", subject = "styleProvider")
+    private String jobCandidateCandidateCvTableLetterStyleProvider(CandidateCV candidateCV) {
+        String style = "";
+
+        if (candidateCV.getLetter() != null) {
+            style = "pic-center-large-green";
+        } else {
+            style = "pic-center-large-red";
+        }
+
+        return style;
+    }
+
     private String getIcon(IteractionList item) {
         return item.getIteractionType().getPic();
     }
@@ -639,15 +656,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         iconColumn.setRenderer(jobCandidateIteractionListTable.createRenderer(DataGrid.ImageRenderer.class));
     }
 
+    @Install(to = "jobCandidateCandidateCvTable.letter", subject = "columnGenerator")
+    private Icons.Icon jobCandidateCandidateCvTableLetterColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        return event.getItem().getLetter() != null ?
+                CubaIcon.valueOf("PLUS_CIRCLE") :
+                CubaIcon.valueOf("MINUS_CIRCLE");
+    }
+
     @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "columnGenerator")
-    private Icons.Icon jobCandidateCandidateCvTableIconOriginalCVFileColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+    private Icons.Icon jobCandidateCandidateCvTableIconOriginalCVFileColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         return event.getItem().getLinkOriginalCv() != null ?
                 CubaIcon.valueOf("PLUS_CIRCLE") :
                 CubaIcon.valueOf("MINUS_CIRCLE");
     }
 
     @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "columnGenerator")
-    private Icons.Icon jobCandidateCandidateCvTableiconITPearlsCVFileColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+    private Icons.Icon jobCandidateCandidateCvTableiconITPearlsCVFileColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         return event.getItem().getLinkItPearlsCV() != null ?
                 CubaIcon.valueOf("PLUS_CIRCLE") :
                 CubaIcon.valueOf("MINUS_CIRCLE");

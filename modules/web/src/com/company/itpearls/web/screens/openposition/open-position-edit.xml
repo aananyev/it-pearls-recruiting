@@ -188,7 +188,7 @@
                        htmlEnabled="true"/>
             </vbox>
         </groupBox>
-        <tabSheet id="tabSheetOpenPosition">
+        <tabSheet id="tabSheetOpenPosition" stylename="framed">
             <tab id="tabOpenPosition"
                  caption="msg://msgNamePosition"
                  margin="true,false,false,false"

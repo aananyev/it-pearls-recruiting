@@ -10,14 +10,14 @@ import com.haulmont.cuba.core.global.FluentValuesLoader;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.GroupTable;
-import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.JobCandidate;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 import org.springframework.context.event.EventListener;
 
@@ -42,13 +42,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
-    private GroupTable<JobCandidate> jobCandidatesTable;
-    @Inject
     private Notifications notifications;
     @Inject
     private GetRoleService getRoleService;
     @Inject
     private Button buttonExcel;
+    @Inject
+    private GroupTable<JobCandidate> jobCandidatesTable;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -124,11 +124,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return "icons/question-white.png";
     }
-/*
-    private Integer getPictString(JobCandidate jobCandidate) {
-        return jobCandidate.getStatus();
-    }
-*/
 
     private Integer getPictString(JobCandidate jobCandidate ) {
         // если только имя и отчество - красный сигнал светофора
