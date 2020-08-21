@@ -99,6 +99,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionContainer<IteractionList> jobCandidateIteractionListDataGridDc;
     @Named("tabSheetSocialNetworks.jobCandidateCard")
     private VBoxLayout jobCandidateCard;
+    @Inject
+    private Label<String> personPositionTitle;
+    @Inject
+    private Label<String> emailTitle;
+    @Inject
+    private Label<String> phoneTitle;
+    @Inject
+    private Label<String> telegramTitle;
+    @Inject
+    private Label<String> skypeTitle;
+    @Inject
+    private Label<String> jobTitleTitle;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -170,8 +182,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         enableDisableContacts();
 
+        setLabelTitle();
+
         if (PersistenceHelper.isNew(getEditedEntity())) {
         }
+    }
+
+    private void setLabelTitle() {
+        String BEFORE = "<u>";
+        String AFTER = ":</u>&nbsp";
+
+        jobTitleTitle.setValue(BEFORE + jobTitleTitle.getValue() + AFTER);
+        personPositionTitle.setValue(BEFORE + personPositionTitle.getRawValue() + AFTER);
+        emailTitle.setValue(BEFORE + emailTitle.getValue() + AFTER);
+        phoneTitle.setValue(BEFORE + phoneTitle.getValue() + AFTER);
+        telegramTitle.setValue(BEFORE + telegramTitle.getValue() + AFTER);
+        skypeTitle.setValue(BEFORE + skypeTitle.getValue() + AFTER);
     }
 
     protected boolean isRequiredAddresField() {
@@ -611,28 +637,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "styleProvider")
     private String jobCandidateCandidateCvTableIconOriginalCVFileStyleProvider(CandidateCV candidateCV) {
-        String style = "";
-
-        if (candidateCV.getLinkOriginalCv() != null) {
-            style = "pic-center-large-green";
-        } else {
-            style = "pic-center-large-red";
-        }
-
-        return style;
+        return candidateCV.getLinkOriginalCv() != null ? "pic-center-large-green" : "pic-center-large-red";
     }
 
     @Install(to = "jobCandidateCandidateCvTable.letter", subject = "styleProvider")
     private String jobCandidateCandidateCvTableLetterStyleProvider(CandidateCV candidateCV) {
-        String style = "";
-
-        if (candidateCV.getLetter() != null) {
-            style = "pic-center-large-green";
-        } else {
-            style = "pic-center-large-red";
-        }
-
-        return style;
+        return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
     }
 
     private String getIcon(IteractionList item) {

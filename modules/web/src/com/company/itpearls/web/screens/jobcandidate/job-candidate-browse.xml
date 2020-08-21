@@ -51,8 +51,6 @@ order by e.secondName, e.firstName]]>
                 <action id="excel" type="excel"/>
             </actions>
             <columns>
-                <column id="candidateStatus">
-                </column>
                 <column id="fullName" caption="mainMsg://msgFullName"/>
                 <column id="personPosition" caption="msg://msgPersonPosition"/>
                 <column id="currentCompany" caption="msg://msgCompany"/>

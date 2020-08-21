@@ -88,7 +88,7 @@ order by e.cityRuName]]>
     </data>
     <dialogMode height="600"
                 width="800"/>
-<!--    <tabSheet/>  -->
+    <!--    <tabSheet/>  -->
     <layout expand="editActions" spacing="true">
         <groupBox spacing="true">
             <grid spacing="true">
@@ -136,85 +136,111 @@ order by e.cityRuName]]>
             </grid>
         </groupBox>
         <tabSheet id="tabSheetSocialNetworks" stylename="framed">
-            <tab id="jobCandidateCard" caption="msg://msgJobCard" margin="true,false,false,false" spacing="true" icon="ID_CARD">
-                <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h2"/>
-                <label dataContainer="jobCandidateDc" property="email" stylename="h3"/>
-                <label dataContainer="jobCandidateDc" property="phone" stylename="h3"/>
-                <label dataContainer="jobCandidateDc" property="telegramName" stylename="h3"/>
-                <label dataContainer="jobCandidateDc" property="skypeName" stylename="h3"/>
+            <tab id="jobCandidateCard" caption="msg://msgJobCard" margin="true,true,true,true" spacing="true"
+                 icon="ID_CARD">
+                <hbox>
+                    <label id="jobTitleTitle" value="msg://msgFIO" stylename="h2" htmlEnabled="true"/>
+                    <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h2"/>
+                    <label value="," stylename="h2" htmlEnabled="true"/>
+                    <label dataContainer="jobCandidateDc" property="cityOfResidence" stylename="h2" htmlEnabled="true"/>
+                </hbox>
+                <hbox>
+                    <label id="personPositionTitle" value="msg://msgPosition" stylename="h2" htmlEnabled="true"/>
+                    <label dataContainer="jobCandidateDc" property="personPosition" stylename="h3"/>
+                </hbox>
+                <hbox>
+                    <label id="emailTitle" value="msg://msgEmail" stylename="h3" htmlEnabled="true"/>
+                    <label dataContainer="jobCandidateDc" property="email" stylename="h3"/>
+                </hbox>
+                <hbox>
+                    <label id="phoneTitle" value="msg://msgPhone" stylename="h3" htmlEnabled="true"/>
+                    <label dataContainer="jobCandidateDc" property="phone" stylename="h3"/>
+                </hbox>
+                <hbox>
+                    <label id="telegramTitle" value="msg://msgTelegram" stylename="h3" htmlEnabled="true"/>
+                    <label dataContainer="jobCandidateDc" property="telegramName" stylename="h3"/>
+                </hbox>
+                <hbox>
+                    <label id="skypeTitle" value="msg://msgSkype" stylename="h3" htmlEnabled="true"/>
+                    <label dataContainer="jobCandidateDc" property="skypeName" stylename="h3"/>
+                </hbox>
             </tab>
-            <tab id="tabCandidate" caption="msg://candidate" margin="true,false,false,false" spacing="true">
-                <groupBox spacing="true">
-                    <grid spacing="true" width="100%">
-                        <columns count="2"/>
-                        <rows>
-                            <row>
-                                <textField id="firstNameField" dataContainer="jobCandidateDc" property="firstName" width="100%"
-                                           caption="msg://msgFirstName" rowspan="1" colspan="1" required="true"/>
-                                <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
-                                                   dataContainer="jobCandidateDc" property="currentCompany" width="100%"
-                                                   caption="msg://msgCorrentCompany" required="true">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                    </actions>
-                                </lookupPickerField>
-                            </row>
-                            <row>
-                                <textField id="middleNameField" dataContainer="jobCandidateDc" property="middleName" width="100%"
-                                           caption="msg://msgMiddleName"/>
-                                <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
-                                                   dataContainer="jobCandidateDc" property="personPosition" width="100%"
-                                                   caption="msg://msgPersonPosition" required="true">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                    </actions>
-                                </lookupPickerField>
-                            </row>
-                            <row>
-                                <textField id="secondNameField" dataContainer="jobCandidateDc" property="secondName" width="100%"
-                                           caption="msg://msgSecondName" required="true"/>
-                                <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc" width="100%"
-                                                   caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
-                                                   property="cityOfResidence" required="true">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                    </actions>
-                                </lookupPickerField>
-                            </row>
-                            <row>
-                                <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate" width="100%"
-                                           caption="msg://msgBirthDate"/>
-                            </row>
-                        </rows>
-                    </grid>
-                </groupBox>
+            <tab id="tabCandidate" caption="msg://candidate" margin="true,true,true,true" spacing="true">
+                <grid spacing="true" width="100%">
+                    <columns count="2"/>
+                    <rows>
+                        <row>
+                            <textField id="firstNameField" dataContainer="jobCandidateDc" property="firstName"
+                                       width="100%"
+                                       caption="msg://msgFirstName" rowspan="1" colspan="1" required="true"/>
+                            <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
+                                               dataContainer="jobCandidateDc" property="currentCompany" width="100%"
+                                               caption="msg://msgCorrentCompany" required="true">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                        </row>
+                        <row>
+                            <textField id="middleNameField" dataContainer="jobCandidateDc" property="middleName"
+                                       width="100%"
+                                       caption="msg://msgMiddleName"/>
+                            <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
+                                               dataContainer="jobCandidateDc" property="personPosition" width="100%"
+                                               caption="msg://msgPersonPosition" required="true">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                        </row>
+                        <row>
+                            <textField id="secondNameField" dataContainer="jobCandidateDc" property="secondName"
+                                       width="100%"
+                                       caption="msg://msgSecondName" required="true"/>
+                            <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc"
+                                               width="100%"
+                                               caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
+                                               property="cityOfResidence" required="true">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                        </row>
+                        <row>
+                            <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate"
+                                       width="100%"
+                                       caption="msg://msgBirthDate"/>
+                        </row>
+                    </rows>
+                </grid>
             </tab>
-            <tab id="tabContactInfo" caption="msg://msgTabContactInfo" margin="true,false,false,false" spacing="true">
-                <groupBox spacing="true" caption="msg://msgContactInfo">
-                    <grid spacing="true" width="100%">
-                        <columns count="2"/>
-                        <rows>
-                            <row>
-                                <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="100%"
-                                           caption="msg://msgEmail" required="true"/>
-                                <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
-                                           width="100%" caption="msg://msgTelegramAccount"/>
-                            </row>
-                            <row>
-                                <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="100%"
-                                           caption="msg://msgPhone" required="true"/>
-                                <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName" width="100%"
-                                           caption="msg://msgViberAccount"/>
-                            </row>
-                            <row>
-                                <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName" width="100%"
-                                           caption="msg://msgSkypeAccaunt" required="true"/>
-                                <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName" width="100%"
-                                           caption="msg://msgWhatsAppAccount"/>
-                            </row>
-                        </rows>
-                    </grid>
-                </groupBox>
+            <tab id="tabContactInfo" caption="msg://msgTabContactInfo" margin="true,true,true,true" spacing="true">
+                <grid spacing="true" width="100%">
+                    <columns count="2"/>
+                    <rows>
+                        <row>
+                            <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="100%"
+                                       caption="msg://msgEmail" required="true"/>
+                            <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
+                                       width="100%" caption="msg://msgTelegramAccount"/>
+                        </row>
+                        <row>
+                            <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="100%"
+                                       caption="msg://msgPhone" required="true"/>
+                            <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName"
+                                       width="100%"
+                                       caption="msg://msgViberAccount"/>
+                        </row>
+                        <row>
+                            <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName"
+                                       width="100%"
+                                       caption="msg://msgSkypeAccaunt" required="true"/>
+                            <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName"
+                                       width="100%"
+                                       caption="msg://msgWhatsAppAccount"/>
+                        </row>
+                    </rows>
+                </grid>
                 <groupBox>
                     <table id="socialNetworkTable" height="160px" width="100%"
                            editable="true" dataContainer="jobCandidateSocialNetworksDc">
@@ -225,152 +251,147 @@ order by e.cityRuName]]>
                     </table>
                 </groupBox>
             </tab>
-            <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,false,false,false" spacing="true">
-                <groupBox spacing="true" expand="jobCandidateIteractionListTable">
-                    <dataGrid id="jobCandidateIteractionListTable"
-                              dataContainer="jobCandidateIteractionListDataGridDc"
-                              width="100%"
-                              contextMenuEnabled="false"
-                              textSelectionEnabled="false"
-                              reorderingAllowed="true"
-                              height="350px">
-                        <actions>
-                            <action type="edit" id="edit"/>
-                            <action id="remove" type="remove"/>
-                            <action id="refresh" type="refresh"/>
-                        </actions>
-                        <buttonsPanel>
-                            <button id="addIteractionButton"
-                                    caption="msg://msgCreate"
-                                    icon="ADD_ACTION"
-                                    invoke="addIteractionJobCandidate"/>
-                            <button id="copyIteractionButton"
-                                    caption="msg://msgCopy"
-                                    icon="COPY"
-                                    invoke="copyIteractionJobCandidate"/>
-                            <button action="jobCandidateIteractionListTable.edit"/>
-                            <button action="jobCandidateIteractionListTable.remove"/>
-                        </buttonsPanel>
-                        <columns>
-                            <column id="icon" width="48px" caption=""/>
-                            <column id="numberIteraction"
-                                    property="numberIteraction"
-                                    sortable="true"/>
+            <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,true,true,true" spacing="true">
+                <dataGrid id="jobCandidateIteractionListTable"
+                          dataContainer="jobCandidateIteractionListDataGridDc"
+                          width="100%"
+                          contextMenuEnabled="false"
+                          textSelectionEnabled="false"
+                          reorderingAllowed="true"
+                          height="350px">
+                    <actions>
+                        <action type="edit" id="edit"/>
+                        <action id="remove" type="remove"/>
+                        <action id="refresh" type="refresh"/>
+                    </actions>
+                    <buttonsPanel>
+                        <button id="addIteractionButton"
+                                caption="msg://msgCreate"
+                                icon="ADD_ACTION"
+                                invoke="addIteractionJobCandidate"/>
+                        <button id="copyIteractionButton"
+                                caption="msg://msgCopy"
+                                icon="COPY"
+                                invoke="copyIteractionJobCandidate"/>
+                        <button action="jobCandidateIteractionListTable.edit"/>
+                        <button action="jobCandidateIteractionListTable.remove"/>
+                    </buttonsPanel>
+                    <columns>
+                        <column id="icon" width="48px" caption=""/>
+                        <column id="numberIteraction"
+                                property="numberIteraction"
+                                sortable="true"/>
 
-                            <column id="vacancy"
-                                    property="vacancy"/>
-                            <column id="iteractionType"
-                                    property="iteractionType"/>
-                            <column id="projectName"
-                                    property="vacancy.projectName"
-                                    caption="msg://msgProject"/>
-                            <column id="companyName"
-                                    property="vacancy.projectName.projectDepartment.companyName"/>
-                            <column id="departamentRuName"
-                                    property="vacancy.projectName.projectDepartment.departamentRuName"
-                                    caption="msg://msgDepartament"/>
-                            <column id="recrutier"
-                                    property="recrutier"/>
-                            <column id="dateIteraction"
-                                    property="dateIteraction"
-                                    caption="msg://msgDate">
-                                <formatter format="dd.MM.yyyy"
-                                           class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
-                            </column>
-                        </columns>
-                        <rowsCount/>
-                    </dataGrid>
-                </groupBox>
+                        <column id="vacancy"
+                                property="vacancy"/>
+                        <column id="iteractionType"
+                                property="iteractionType"/>
+                        <column id="projectName"
+                                property="vacancy.projectName"
+                                caption="msg://msgProject"/>
+                        <column id="companyName"
+                                property="vacancy.projectName.projectDepartment.companyName"/>
+                        <column id="departamentRuName"
+                                property="vacancy.projectName.projectDepartment.departamentRuName"
+                                caption="msg://msgDepartament"/>
+                        <column id="recrutier"
+                                property="recrutier"/>
+                        <column id="dateIteraction"
+                                property="dateIteraction"
+                                caption="msg://msgDate">
+                            <formatter format="dd.MM.yyyy"
+                                       class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                        </column>
+                    </columns>
+                    <rowsCount/>
+                </dataGrid>
             </tab>
-            <tab id="tabSkills" caption="msg://msgSkills" margin="true,false,false,false" spacing="true">
-                <groupBox id="groupBoxSpecialistion" spacing="true">
-                    <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc" property="specialisation"
-                                       caption="msg://msgSpecialisation" width="50%">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="open" type="picker_open"/>
-                        </actions>
-                    </lookupPickerField>
-                    <groupBox spacing="true">
-                        <groupTable id="jobCandidateSkillListTable" height="300px" width="100%"
-                                    dataContainer="jobCandidateSkillsesDc">
-                            <columns>
-                                <column id="skillName" caption="mainMsg://msgSkills"/>
-                            </columns>
-                            <actions>
-                                <action id="add" type="add"/>
-                                <action id="edit" type="edit"/>
-                                <action id="remove" type="remove"/>
-                            </actions>
-                            <buttonsPanel>
-                                <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
-                                <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
-                                <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
-                            </buttonsPanel>
-                        </groupTable>
-                    </groupBox>
-                </groupBox>
-            </tab>
-            <tab id="tabResume" caption="msg://msgResume" margin="true,false,false,false" spacing="true">
-                <groupBox id="groupBoxCV" spacing="true">
-                    <dataGrid id="jobCandidateCandidateCvTable"
-                           height="300px"
-                           width="100%"
-                           dataContainer="jobCandidateCandidateCvsDc">
+            <tab id="tabSkills" caption="msg://msgSkills" margin="true,true,true,true" spacing="true">
+                <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc"
+                                   property="specialisation"
+                                   caption="msg://msgSpecialisation" width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                    </actions>
+                </lookupPickerField>
+                <groupBox spacing="true">
+                    <groupTable id="jobCandidateSkillListTable" height="300px" width="100%"
+                                dataContainer="jobCandidateSkillsesDc">
                         <columns>
-                            <column id="datePost"
-                                    width="150px"
-                                    property="datePost"
-                                    caption="msg://msgDatePost"/>
-                            <column id="resumePosition"
-                                    property="resumePosition" caption="msg://msgToPosition"/>
-                            <column id="toVacancy"
-                                    property="toVacancy"
-                                    caption="msg://msgToVacansy"/>
-                            <column id="iconOriginalCVFile"
-                                    width="100px"
-                                    caption="msg://msgOriginalCV">
-                                <iconRenderer/>
-                            </column>
-                            <column id="iconITPearlsCVFile"
-                                    width="100px"
-                                    caption="msg://msgITPearlsCV">
-                                <iconRenderer/>
-                            </column>
-                            <column id="letter"
-                                    width="100px"
-                                    caption="msg://msgCoverLetter">
-                                <iconRenderer/>
-                            </column>
-                            <column id="createdBy"
-                                    property="createdBy"
-                                    width="200px"
-                                    caption="msg://msgCreatedBy"/>
+                            <column id="skillName" caption="mainMsg://msgSkills"/>
                         </columns>
                         <actions>
-                            <action type="create" id="create"/>
+                            <action id="add" type="add"/>
                             <action id="edit" type="edit"/>
                             <action id="remove" type="remove"/>
                         </actions>
                         <buttonsPanel>
-                            <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
-                            <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
-                            <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
+                            <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
+                            <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
+                            <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
                         </buttonsPanel>
-                    </dataGrid>
+                    </groupTable>
                 </groupBox>
+            </tab>
+            <tab id="tabResume" caption="msg://msgResume" margin="true,true,true,true" spacing="true">
+                <dataGrid id="jobCandidateCandidateCvTable"
+                          height="300px"
+                          width="100%"
+                          dataContainer="jobCandidateCandidateCvsDc">
+                    <columns>
+                        <column id="datePost"
+                                width="150px"
+                                property="datePost"
+                                caption="msg://msgDatePost"/>
+                        <column id="resumePosition"
+                                property="resumePosition" caption="msg://msgToPosition"/>
+                        <column id="toVacancy"
+                                property="toVacancy"
+                                caption="msg://msgToVacansy"/>
+                        <column id="iconOriginalCVFile"
+                                width="100px"
+                                caption="msg://msgOriginalCV">
+                            <iconRenderer/>
+                        </column>
+                        <column id="iconITPearlsCVFile"
+                                width="100px"
+                                caption="msg://msgITPearlsCV">
+                            <iconRenderer/>
+                        </column>
+                        <column id="letter"
+                                width="100px"
+                                caption="msg://msgCoverLetter">
+                            <iconRenderer/>
+                        </column>
+                        <column id="createdBy"
+                                property="createdBy"
+                                width="100px"
+                                caption="msg://msgCreatedBy"/>
+                    </columns>
+                    <actions>
+                        <action type="create" id="create"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
+                    <buttonsPanel>
+                        <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
+                        <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
+                        <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
+                    </buttonsPanel>
+                </dataGrid>
             </tab>
         </tabSheet>
         <form id="form" dataContainer="jobCandidateDc">
             <column width="100%">
-                <textField id="jobCandidateFieldCreatedBy" dataContainer="jobCandidateDc" property="createdBy" width="50%"
+                <textField id="jobCandidateFieldCreatedBy" dataContainer="jobCandidateDc" property="createdBy"
+                           width="50%"
                            editable="false" enable="false" align="BOTTOM_RIGHT"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick" icon="BELL"/>
             <button id="okAndCheck" caption="OK" invoke="onBtnOkAndCheck" icon="OK"/>
-<!--            <button action="windowCommitAndClose" visible="false"/> -->
             <button action="windowClose"/>
         </hbox>
     </layout>
