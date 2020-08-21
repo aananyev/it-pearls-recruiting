@@ -41,7 +41,7 @@ order by e.secondName, e.firstName]]>
                         excludeRecursively="true"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="jobCandidatesTable"
+        <dataGrid id="jobCandidatesTable" icon="ID_CARD"
                     width="100%"
                     dataContainer="jobCandidatesDc">
             <actions>
@@ -51,11 +51,14 @@ order by e.secondName, e.firstName]]>
                 <action id="excel" type="excel"/>
             </actions>
             <columns>
-                <column id="fullName" caption="mainMsg://msgFullName"/>
-                <column id="personPosition" caption="msg://msgPersonPosition"/>
-                <column id="currentCompany" caption="msg://msgCompany"/>
-                <column id="cityOfResidence" caption="msg://msgCityOfResidence"/>
-                <column id="createTs" caption="msg://msgDate">
+                <column id="status" width="50px">
+                    <iconRenderer/>
+                </column>
+                <column id="fullName" caption="mainMsg://msgFullName" property="fullName"/>
+                <column id="personPosition" caption="msg://msgPersonPosition" property="personPosition"/>
+                <column id="currentCompany" caption="msg://msgCompany" property="currentCompany"/>
+                <column id="cityOfResidence" caption="msg://msgCityOfResidence" property="cityOfResidence"/>
+                <column id="createTs" caption="msg://msgDate" property="createTs">
                     <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter" format="dd.MM.yyyy"
                                useUserTimezone="true"/>
                 </column>
@@ -73,7 +76,7 @@ order by e.secondName, e.firstName]]>
                         visible="false"
                         enable="false"/>
             </buttonsPanel>
-        </groupTable>
+        </dataGrid>
         <groupBox orientation="horizontal" spacing="true">
             <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
             <checkBox id="checkBoxOnWork" caption="msg://msgCandidateOnWork"/>

@@ -48,7 +48,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private Button buttonExcel;
     @Inject
-    private GroupTable<JobCandidate> jobCandidatesTable;
+    private DataGrid<JobCandidate> jobCandidatesTable;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -94,6 +94,88 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidatesDl.load();
     }
 
+    @Install(to = "jobCandidatesTable.status", subject = "styleProvider")
+    private String jobCandidatesTableStatusStyleProvider(JobCandidate jobCandidate) {
+        Integer s = getPictString(jobCandidate);
+        String retStr = "";
+
+        if( s != null ) {
+            switch ( s ) {
+                case 0: // WHITE
+                    retStr = "pic-center-large-grey";
+                    break;
+                case 1: // red
+                    retStr = "pic-center-large-red";
+                    break;
+                case 2: // yellow
+                    retStr = "pic-center-large-yellow";
+                    break;
+                case 3: // green
+                    retStr = "pic-center-large-green";
+                    break;
+                case 4: // to client
+                    retStr = "pic-center-large-grey";
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10: // recruiting
+                    retStr = "pic-center-large-grey";
+                    break;
+                default:
+                    retStr = "pic-center-large";
+                    break;
+            }
+        }
+
+        return retStr;
+    }
+
+
+
+    @Install(to = "jobCandidatesTable.status", subject = "columnGenerator")
+    private Icons.Icon jobCandidatesTableStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Integer s = getPictString( event.getItem() );
+        String retStr = "";
+
+        if( s != null ) {
+            switch ( s ) {
+                case 0: // WHITE
+                    retStr = "QUESTION_CIRCLE";
+                    break;
+                case 1: // red
+                    retStr = "BOMB";
+                    break;
+                case 2: // yellow
+                    retStr = "BOMB";
+                    break;
+                case 3: // green
+                    retStr = "BOMB";
+                    break;
+                case 4: // to client
+                    retStr = "BOMB";
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10: // recruiting
+                    retStr = "BOMB";
+                    break;
+                default:
+                    retStr = "QUESTION_CIRCLE";
+                    break;
+            }
+        }
+
+        return CubaIcon.valueOf(retStr);
+    }
+
+
+/*
     @Install(to = "jobCandidatesTable", subject = "iconProvider")
     private String jobCandidatesTableIconProvider(JobCandidate jobCandidate) {
         Integer s = getPictString( jobCandidate );
@@ -124,7 +206,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return "icons/question-white.png";
     }
-
+*/
     private Integer getPictString(JobCandidate jobCandidate ) {
         // если только имя и отчество - красный сигнал светофора
         // если имя, день рождения и один из контактов - желтый
