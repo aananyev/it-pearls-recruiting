@@ -2,6 +2,7 @@ package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -121,6 +122,19 @@ public class JobCandidate extends StandardEntity {
 
     @Column(name = "STATUS")
     protected Integer status;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_IMAGE_FACE")
+    protected FileDescriptor fileImageFace;
+
+    public FileDescriptor getFileImageFace() {
+        return fileImageFace;
+    }
+
+    public void setFileImageFace(FileDescriptor fileImageFace) {
+        this.fileImageFace = fileImageFace;
+    }
 
     public Integer getStatus() {
         return status;

@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
@@ -11,6 +12,7 @@ import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.data.ValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
@@ -22,6 +24,7 @@ import com.haulmont.cuba.core.global.Metadata;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -111,6 +114,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> skypeTitle;
     @Inject
     private Label<String> jobTitleTitle;
+    @Inject
+    private Image candidatePic;
+    @Inject
+    private FileUploadField fileImageFaceUpload;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -183,9 +190,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
 
         setLabelTitle();
+        setImageListener();
 
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-        }
+    }
+
+    private void setImageListener() {
+        candidatePic.addClickListener(clickEvent -> {
+            if(clickEvent.isDoubleClick()) {
+
+            }
+        });
     }
 
     private void setLabelTitle() {
@@ -672,6 +686,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return event.getItem().getLetter() != null ?
                 CubaIcon.valueOf("PLUS_CIRCLE") :
                 CubaIcon.valueOf("MINUS_CIRCLE");
+    }
+
+    @Subscribe("fileImageFaceUpload")
+    public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
+                .setFileDescriptor(fileImageFaceUpload.getFileDescriptor());
+
+        candidatePic.setSource(fileDescriptorResource);
     }
 
     @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "columnGenerator")

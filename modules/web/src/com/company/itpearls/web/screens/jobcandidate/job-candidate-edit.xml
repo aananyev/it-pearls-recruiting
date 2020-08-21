@@ -135,34 +135,73 @@ order by e.cityRuName]]>
                 </rows>
             </grid>
         </groupBox>
-        <tabSheet id="tabSheetSocialNetworks" stylename="framed">
-            <tab id="jobCandidateCard" caption="msg://msgJobCard" margin="true,true,true,true" spacing="true"
-                 icon="ID_CARD">
-                <hbox>
-                    <label id="jobTitleTitle" value="msg://msgFIO" stylename="h2" htmlEnabled="true"/>
-                    <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h2"/>
-                    <label value="," stylename="h2" htmlEnabled="true"/>
-                    <label dataContainer="jobCandidateDc" property="cityOfResidence" stylename="h2" htmlEnabled="true"/>
-                </hbox>
-                <hbox>
-                    <label id="personPositionTitle" value="msg://msgPosition" stylename="h2" htmlEnabled="true"/>
-                    <label dataContainer="jobCandidateDc" property="personPosition" stylename="h3"/>
-                </hbox>
-                <hbox>
-                    <label id="emailTitle" value="msg://msgEmail" stylename="h3" htmlEnabled="true"/>
-                    <label dataContainer="jobCandidateDc" property="email" stylename="h3"/>
-                </hbox>
-                <hbox>
-                    <label id="phoneTitle" value="msg://msgPhone" stylename="h3" htmlEnabled="true"/>
-                    <label dataContainer="jobCandidateDc" property="phone" stylename="h3"/>
-                </hbox>
-                <hbox>
-                    <label id="telegramTitle" value="msg://msgTelegram" stylename="h3" htmlEnabled="true"/>
-                    <label dataContainer="jobCandidateDc" property="telegramName" stylename="h3"/>
-                </hbox>
-                <hbox>
-                    <label id="skypeTitle" value="msg://msgSkype" stylename="h3" htmlEnabled="true"/>
-                    <label dataContainer="jobCandidateDc" property="skypeName" stylename="h3"/>
+        <tabSheet id="tabSheetSocialNetworks"
+                  stylename="framed">
+            <tab id="jobCandidateCard"
+                 caption="msg://msgJobCard"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 icon="ID_CARD"
+                 expand="cardBox">
+                <hbox id="cardBox"
+                      spacing="true"
+                      expand="dropZone"
+                      height="100%"
+                      width="100%">
+                    <groupBox id="cardTextBox"
+                              width="AUTO"
+                              spacing="true"
+                              height="AUTO">
+                        <hbox spacing="true">
+                            <label id="jobTitleTitle" value="msg://msgFIO" stylename="h2" htmlEnabled="true"/>
+                            <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h2"/>
+                            <label value="," stylename="h2" htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc" property="cityOfResidence" stylename="h2"
+                                   htmlEnabled="true"/>
+                        </hbox>
+                        <hbox spacing="true">
+                            <label id="personPositionTitle" value="msg://msgPosition" stylename="h2"
+                                   htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc" property="personPosition" stylename="h3"/>
+                        </hbox>
+                        <hbox spacing="true">
+                            <label id="emailTitle" value="msg://msgEmail" stylename="h3" htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc" property="email" stylename="h3"/>
+                        </hbox>
+                        <hbox spacing="true">
+                            <label id="phoneTitle" value="msg://msgPhone" stylename="h3" htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc" property="phone" stylename="h3"/>
+                        </hbox>
+                        <hbox spacing="true">
+                            <label id="telegramTitle" value="msg://msgTelegram" stylename="h3" htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc" property="telegramName" stylename="h3"/>
+                        </hbox>
+                        <hbox spacing="true">
+                            <label id="skypeTitle" value="msg://msgSkype" stylename="h3" htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc" property="skypeName" stylename="h3"/>
+                        </hbox>
+                    </groupBox>
+                    <vbox id="dropZone"
+                          width="300px"
+                          align="BOTTOM_RIGHT"
+                          height="100%"
+                          spacing="true"
+                          stylename="dropzone-container"
+                          expand="candidatePic">
+                        <image id="candidatePic"
+                               dataContainer="jobCandidateDc"
+                               property="fileImageFace"
+                               width="AUTO"
+                               align="TOP_RIGHT"
+                               height="AUTO"
+                               scaleMode="CONTAIN"/>
+                        <upload id="fileImageFaceUpload"
+                                fileStoragePutMode="IMMEDIATE"
+                                dataContainer="jobCandidateDc"
+                                dropZone="dropZone"
+                                showClearButton="true"
+                                property="fileImageFace"/>
+                    </vbox>
                 </hbox>
             </tab>
             <tab id="tabCandidate" caption="msg://candidate" margin="true,true,true,true" spacing="true">
