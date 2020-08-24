@@ -118,6 +118,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Image candidatePic;
     @Inject
     private FileUploadField fileImageFaceUpload;
+    @Inject
+    private VBoxLayout dropZone;
+    @Inject
+    private HBoxLayout cardBox;
+    @Inject
+    private GroupBoxLayout cardTextBox;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();

@@ -145,13 +145,13 @@ order by e.cityRuName]]>
                  expand="cardBox">
                 <hbox id="cardBox"
                       spacing="true"
-                      expand="dropZone"
-                      height="100%"
-                      width="100%">
+                      width="100%"
+                      expand="cardTextBox">
                     <groupBox id="cardTextBox"
                               width="AUTO"
                               spacing="true"
-                              height="AUTO">
+                              stylename="light"
+                              height="100%">
                         <hbox spacing="true">
                             <label id="jobTitleTitle" value="msg://msgFIO" stylename="h2" htmlEnabled="true"/>
                             <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h2"/>
@@ -182,30 +182,39 @@ order by e.cityRuName]]>
                         </hbox>
                     </groupBox>
                     <vbox id="dropZone"
-                          width="300px"
-                          align="BOTTOM_RIGHT"
-                          height="100%"
                           spacing="true"
-                          stylename="dropzone-container"
-                          expand="candidatePic">
+                          width="AUTO"
+                          height="100%"
+                          align="BOTTOM_RIGHT"
+                          expand="candidatePic"
+                          stylename="dropzone-container">
                         <image id="candidatePic"
                                dataContainer="jobCandidateDc"
                                property="fileImageFace"
-                               width="AUTO"
+                               width="200px"
                                align="TOP_RIGHT"
-                               height="AUTO"
-                               scaleMode="CONTAIN"/>
+                               height="100%"
+                               scaleMode="FILL"/>
                         <upload id="fileImageFaceUpload"
                                 fileStoragePutMode="IMMEDIATE"
                                 dataContainer="jobCandidateDc"
+                                align="BOTTOM_CENTER"
+                                showFileName="false"
                                 dropZone="dropZone"
                                 showClearButton="true"
                                 property="fileImageFace"/>
                     </vbox>
                 </hbox>
             </tab>
-            <tab id="tabCandidate" caption="msg://candidate" margin="true,true,true,true" spacing="true">
-                <grid spacing="true" width="100%">
+            <tab id="tabCandidate"
+                 caption="msg://candidate"
+                 margin="true,true,true,true"
+                 expand="tabCabdidateGrid"
+                 spacing="true">
+                <grid id="tabCabdidateGrid"
+                      height="100%"
+                      spacing="true"
+                      width="100%">
                     <columns count="2"/>
                     <rows>
                         <row>
@@ -253,8 +262,12 @@ order by e.cityRuName]]>
                     </rows>
                 </grid>
             </tab>
-            <tab id="tabContactInfo" caption="msg://msgTabContactInfo" margin="true,true,true,true" spacing="true">
-                <grid spacing="true" width="100%">
+            <tab id="tabContactInfo"
+                 caption="msg://msgTabContactInfo"
+                 margin="true,true,true,true"
+                 expand="socialNetworkTable"
+                 spacing="true">
+                <grid id="contactInfoGrid" spacing="true" width="100%">
                     <columns count="2"/>
                     <rows>
                         <row>
@@ -280,17 +293,19 @@ order by e.cityRuName]]>
                         </row>
                     </rows>
                 </grid>
-                <groupBox>
-                    <table id="socialNetworkTable" height="160px" width="100%"
-                           editable="true" dataContainer="jobCandidateSocialNetworksDc">
-                        <columns>
-                            <column id="networkName"/>
-                            <column id="networkURLS" editable="true"/>
-                        </columns>
-                    </table>
-                </groupBox>
+                <table id="socialNetworkTable" height="160px" width="100%"
+                       editable="true" dataContainer="jobCandidateSocialNetworksDc">
+                    <columns>
+                        <column id="networkName"/>
+                        <column id="networkURLS" editable="true"/>
+                    </columns>
+                </table>
             </tab>
-            <tab id="tabIteraction" caption="msg://candidateIteration" margin="true,true,true,true" spacing="true">
+            <tab id="tabIteraction"
+                 caption="msg://candidateIteration"
+                 margin="true,true,true,true"
+                 expand="jobCandidateIteractionListTable"
+                 spacing="true">
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionListDataGridDc"
                           width="100%"
@@ -345,7 +360,11 @@ order by e.cityRuName]]>
                     <rowsCount/>
                 </dataGrid>
             </tab>
-            <tab id="tabSkills" caption="msg://msgSkills" margin="true,true,true,true" spacing="true">
+            <tab id="tabSkills"
+                 caption="msg://msgSkills"
+                 margin="true,true,true,true"
+                 expand="jobCandidateSkillListTable"
+                 spacing="true">
                 <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc"
                                    property="specialisation"
                                    caption="msg://msgSpecialisation" width="50%">
@@ -354,28 +373,30 @@ order by e.cityRuName]]>
                         <action id="open" type="picker_open"/>
                     </actions>
                 </lookupPickerField>
-                <groupBox spacing="true">
-                    <groupTable id="jobCandidateSkillListTable" height="300px" width="100%"
-                                dataContainer="jobCandidateSkillsesDc">
-                        <columns>
-                            <column id="skillName" caption="mainMsg://msgSkills"/>
-                        </columns>
-                        <actions>
-                            <action id="add" type="add"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
-                        <buttonsPanel>
-                            <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
-                            <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
-                            <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
-                        </buttonsPanel>
-                    </groupTable>
-                </groupBox>
+                <dataGrid id="jobCandidateSkillListTable"
+                            width="100%"
+                            dataContainer="jobCandidateSkillsesDc">
+                    <columns>
+                        <column id="skillName" caption="mainMsg://msgSkills" property="skillName"/>
+                    </columns>
+                    <actions>
+                        <action id="add" type="add"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
+                    <buttonsPanel>
+                        <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
+                        <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
+                        <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
+                    </buttonsPanel>
+                </dataGrid>
             </tab>
-            <tab id="tabResume" caption="msg://msgResume" margin="true,true,true,true" spacing="true">
+            <tab id="tabResume"
+                 caption="msg://msgResume"
+                 margin="true,true,true,true"
+                 expand="jobCandidateCandidateCvTable"
+                 spacing="true">
                 <dataGrid id="jobCandidateCandidateCvTable"
-                          height="300px"
                           width="100%"
                           dataContainer="jobCandidateCandidateCvsDc">
                     <columns>
