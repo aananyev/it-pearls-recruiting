@@ -76,6 +76,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "TEMPLATE_LETTER")
     protected String templateLetter;
 
+    @Column(name = "NEED_LETTER")
+    protected Boolean needLetter;
+
     @Lob
     @Column(name = "EXERCISE")
     protected String exercise;
@@ -346,5 +349,13 @@ public class OpenPosition extends StandardEntity {
 
     public Integer getCommandExperience() {
         return commandExperience;
+    }
+
+    public Boolean getNeedLetter() {
+        return needLetter;
+    }
+
+    public void setNeedLetter(Boolean needLetter) {
+        this.needLetter = needLetter;
     }
 }

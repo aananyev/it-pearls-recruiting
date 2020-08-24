@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
-        focusComponent="groupBoxOpenPosition"
+        focusComponent="positionTypeField"
         messagesPack="com.company.itpearls.web.screens.openposition" icon="USER_PLUS">
     <data>
         <instance id="openPositionDc"
@@ -162,7 +162,8 @@
             </view>
             <loader id="personsDl">
                 <query>
-                    <![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]>
+                    <![CDATA[select e from itpearls_Person e, itpearls_Project f
+                        order by e.secondName, e.firstName]]>
                     <condition>
                         <c:jpql>
                             <c:where>e.companyDepartment = :companyDepartment</c:where>
@@ -188,16 +189,18 @@
                        htmlEnabled="true"/>
             </vbox>
         </groupBox>
-        <tabSheet id="tabSheetOpenPosition" stylename="framed">
+        <tabSheet id="tabSheetOpenPosition"
+                  stylename="framed">
             <tab id="tabOpenPosition"
                  caption="msg://msgNamePosition"
-                 margin="true,false,false,false"
+                 margin="true,true,true,true"
                  spacing="true"
                  icon="USERS">
                 <hbox id="hboxProject1"
                       spacing="true"
                       width="100%">
-                    <hbox width="100%">
+                    <hbox id="openPostTab1"
+                          width="100%">
                         <checkBox id="openClosePositionCheckBox"
                                   dataContainer="openPositionDc"
                                   property="openClose"
@@ -221,119 +224,115 @@
 
                     </hbox>
                 </hbox>
-                <groupBox id="groupBoxOpenPosition"
-                          spacing="true">
-                    <textField id="vacansyNameField"
+                <textField id="vacansyNameField"
+                           dataContainer="openPositionDc"
+                           property="vacansyName"
+                           caption="msg://msgVacansy"
+                           stylename="text-field-title-form"
+                           width="100%"
+                           required="true"/>
+                <hbox id="hboxVacansy"
+                      spacing="true"
+                      width="100%">
+                    <lookupPickerField id="positionTypeField"
+                                       optionsContainer="positionTypesDc"
+                                       dataContainer="openPositionDc"
+                                       property="positionType"
+                                       caption="msg://msgPositionType"
+                                       width="100%"
+                                       required="true">
+                        <actions>
+                            <action id="lookup"
+                                    type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupField id="remoteWorkField"
+                                 dataContainer="openPositionDc"
+                                 property="remoteWork"
+                                 required="true"
+                                 align="MIDDLE_LEFT"
+                                 caption="msg://msgRemoteWork"
+                                 width="50%">
+                    </lookupField>
+                </hbox>
+                <hbox id="hboxProject"
+                      spacing="true"
+                      width="100%">
+                    <lookupPickerField id="projectNameField"
+                                       optionsContainer="projectNamesDc"
+                                       dataContainer="openPositionDc"
+                                       property="projectName"
+                                       caption="msg://msgNamePosition"
+                                       width="100%"
+                                       required="true">
+                        <actions>
+                            <action id="lookup"
+                                    type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="companyDepartamentField"
+                                       optionsContainer="companyDepartamentsDc"
+                                       caption="msg://msgDepartment"
+                                       width="100%"
+                                       required="true">
+                        <actions>
+                            <action id="lookup"
+                                    type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                </hbox>
+                <hbox id="hboxCompany"
+                      spacing="true"
+                      width="100%">
+                    <lookupPickerField id="companyNameField"
+                                       optionsContainer="companyNamesDc"
+                                       caption="msg://msgCompanyName"
+                                       width="100%"
+                                       required="true">
+                        <actions>
+                            <action id="lookup"
+                                    type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="cityOpenPositionField"
+                                       dataContainer="openPositionDc"
+                                       optionsContainer="citiesDc"
+                                       property="cityPosition"
+                                       width="100%"
+                                       caption="mainMsg://msgCity"
+                                       required="true">
+                        <actions>
+                            <action id="lookup"
+                                    type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                </hbox>
+                <textField id="numberPositionField"
+                           dataContainer="openPositionDc"
+                           property="numberPosition"
+                           caption="msg://msgNumberOpenPosition"
+                           width="50%"/>
+                <hbox id="hboxSalary"
+                      spacing="true"
+                      width="100%">
+                    <textField id="openPositionFieldSalaryMin"
                                dataContainer="openPositionDc"
-                               property="vacansyName"
-                               caption="msg://msgVacansy"
-                               stylename="text-field-title-form"
+                               property="salaryMin"
+                               caption="mainMsg://msgSalaryMin"
                                width="100%"
                                required="true"/>
-                    <hbox id="hboxVacansy"
-                          spacing="true"
-                          width="100%">
-                        <lookupPickerField id="positionTypeField"
-                                           optionsContainer="positionTypesDc"
-                                           dataContainer="openPositionDc"
-                                           property="positionType"
-                                           caption="msg://msgPositionType"
-                                           width="100%"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupField id="remoteWorkField"
-                                     dataContainer="openPositionDc"
-                                     property="remoteWork"
-                                     required="true"
-                                     align="MIDDLE_LEFT"
-                                     caption="msg://msgRemoteWork"
-                                     width="50%">
-                        </lookupField>
-                    </hbox>
-                    <hbox id="hboxProject"
-                          spacing="true"
-                          width="100%">
-                        <lookupPickerField id="projectNameField"
-                                           optionsContainer="projectNamesDc"
-                                           dataContainer="openPositionDc"
-                                           property="projectName"
-                                           caption="msg://msgNamePosition"
-                                           width="100%"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="companyDepartamentField"
-                                           optionsContainer="companyDepartamentsDc"
-                                           caption="msg://msgDepartment"
-                                           width="100%"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                    </hbox>
-                    <hbox id="hboxCompany"
-                          spacing="true"
-                          width="100%">
-                        <lookupPickerField id="companyNameField"
-                                           optionsContainer="companyNamesDc"
-                                           caption="msg://msgCompanyName"
-                                           width="100%"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="cityOpenPositionField"
-                                           dataContainer="openPositionDc"
-                                           optionsContainer="citiesDc"
-                                           property="cityPosition"
-                                           width="100%"
-                                           caption="mainMsg://msgCity"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                    </hbox>
-                    <textField id="numberPositionField"
+                    <textField id="openPositionFieldSalaryMax"
                                dataContainer="openPositionDc"
-                               property="numberPosition"
-                               caption="msg://msgNumberOpenPosition"
-                               width="50%"/>
-                </groupBox>
-                <groupBox>
-                    <hbox id="hboxSalary"
-                          spacing="true"
-                          width="100%">
-                        <textField id="openPositionFieldSalaryMin"
-                                   dataContainer="openPositionDc"
-                                   property="salaryMin"
-                                   caption="mainMsg://msgSalaryMin"
-                                   width="100%"
-                                   required="true"/>
-                        <textField id="openPositionFieldSalaryMax"
-                                   dataContainer="openPositionDc"
-                                   property="salaryMax"
-                                   caption="msg://msgSalaryMax"
-                                   width="100%"
-                                   required="true"/>
-                    </hbox>
-                </groupBox>
+                               property="salaryMax"
+                               caption="msg://msgSalaryMax"
+                               width="100%"
+                               required="true"/>
+                </hbox>
             </tab>
             <tab id="tabPayments"
                  caption="msg://msgPayments"
-                 margin="true,false,false,false"
+                 margin="tue,true,true,true"
+                 expand="personTable"
                  spacing="true"
                  icon="BULK_EDIT_ACTION">
                 <groupBox id="groupBoxPaymentsResearcher"
@@ -406,28 +405,36 @@
                         </vbox>
                     </hbox>
                 </groupBox>
-                <groupBox id="groupBoxCompanyContacts" orientation="horizontal" spacing="true"
-                          caption="msg://msgCompanyContacts">
-                    <table id="personTable" height="120px" width="100%" dataContainer="personsDc">
-                        <columns>
-                            <column id="sendResumeToEmail" caption="msg://msgSendResume" width="80" editable="true"/>
-                            <column id="secondName"/>
-                            <column id="firstName"/>
-                            <column id="personPosition.positionRuName"/>
-                            <column id="positionCountry.countryRuName"/>
-                        </columns>
-                    </table>
-                </groupBox>
+                <dataGrid id="personTable"
+                          width="100%"
+                          dataContainer="personsDc">
+                    <columns>
+                        <column id="sendResumeToEmail"
+                                property="sendResumeToEmail"
+                                caption="msg://msgSendResume"
+                                width="80px"
+                                editable="true"/>
+                        <column id="secondName"
+                                property="secondName"/>
+                        <column id="firstName"
+                                property="firstName"/>
+                        <column id="personPosition.positionRuName"
+                                property="personPosition"/>
+                        <column id="positionCountry.countryRuName"
+                                property="positionCountry"/>
+                    </columns>
+                    <rowsCount/>
+                </dataGrid>
             </tab>
             <tab caption="mainMsg://msgJobDescription"
-                 margin="true,false,false,false"
+                 margin="true,true,true,true"
                  expand="jobDescriptionVBox"
                  spacing="true"
                  id="tabJobDescription"
                  icon="DRIVERS_LICENSE">
                 <scrollBox id="jobDescriptionVBox"
-                      box.expandRatio="1"
-                      spacing="true">
+                           box.expandRatio="1"
+                           spacing="true">
                     <groupBox collapsable="true"
                               collapsed="true"
                               caption="msg://msgWorkExperience"
@@ -463,51 +470,92 @@
                                width="100%"/>
                 </scrollBox>
             </tab>
-            <tab id="tabExercise" caption="msg://msgExercise" margin="true,false,false,false" spacing="true"
+            <tab id="tabExercise"
+                 caption="msg://msgExercise"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="exerciseRichTextArea"
                  icon="ADJUST">
-                <vbox>
-                    <checkBox id="needExerciseCheckBox" dataContainer="openPositionDc" property="needExercise"
-                              caption="msg://msgNeedExercice"/>
-                    <richTextArea id="exerciseRichTextArea" dataContainer="openPositionDc" property="exercise"
-                                  caption="msg://msgExercise" width="100%" height="300px"/>
+                <checkBox id="needExerciseCheckBox"
+                          dataContainer="openPositionDc"
+                          property="needExercise"
+                          caption="msg://msgNeedExercice"/>
+                <richTextArea id="exerciseRichTextArea"
+                              dataContainer="openPositionDc"
+                              property="exercise"
+                              width="100%"/>
+            </tab>
+            <tab id="tabTemplateLetter"
+                 caption="msg://msgTemplateLetter"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="templateLetterBox"
+                 icon="font-icon:MAIL_FORWARD">
+                <vbox id="templateLetterBox"
+                      width="100%"
+                      height="100%"
+                      expand="templateLetterRichTextArea">
+                    <checkBox id="needLetterCheckBox"
+                              dataContainer="openPositionDc"
+                              property="needLetter"
+                              caption="msg://msgNeedLetter"/>
+                    <richTextArea id="templateLetterRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  box.expandRatio="1"
+                                  property="templateLetter"
+                                  width="100%"
+                                  required="false"/>
                 </vbox>
             </tab>
-            <tab id="tabTemplateLetter" caption="msg://msgTemplateLetter" margin="true,false,false,false" spacing="true"
-                 icon="font-icon:MAIL_FORWARD">
-                <richTextArea id="templateLetterRichTextArea" dataContainer="openPositionDc" property="templateLetter"
-                              width="100%" height="300pt"
-                              required="false"/>
-            </tab>
-            <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true,false,false,false" spacing="true"
+            <tab id="tabSkills"
+                 caption="msg://msgSkilsPosition"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="openPositionSkillsListTable"
                  icon="FILTER">
-                <groupBox spacing="true">
-                    <table id="openPositionSkillsListTable" height="300px" width="100%"
-                           dataContainer="openPositionSkillsListsDc">
-                        <columns>
-                            <column id="skillName"/>
-                        </columns>
-                        <actions>
-                            <action id="add" type="add"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
-                        <buttonsPanel>
-                            <button action="openPositionSkillsListTable.add"/>
-                            <button action="openPositionSkillsListTable.edit"/>
-                            <button action="openPositionSkillsListTable.remove"/>
-                        </buttonsPanel>
-                    </table>
-                </groupBox>
-            </tab>
-            <tab caption="mainMsg://msgResrutierTask" margin="true,false,false,false" spacing="true" id="tabRecrutior"
-                 icon="ANDROID">
-                <table id="recrutiesTasksTable" height="300px" width="100%" dataContainer="taskRecrutior">
+                <dataGrid id="openPositionSkillsListTable"
+                          height="300px"
+                          width="100%"
+                          dataContainer="openPositionSkillsListsDc">
                     <columns>
-                        <column id="startDate"/>
-                        <column id="endDate"/>
-                        <column id="reacrutier.name"/>
-                        <column id="openPosition.vacansyName"/>
+                        <column id="skillName" property="skillName"/>
                     </columns>
+                    <rowsCount/>
+                    <actions>
+                        <action id="add"
+                                type="add"/>
+                        <action id="edit"
+                                type="edit"/>
+                        <action id="remove"
+                                type="remove"/>
+                    </actions>
+                    <buttonsPanel>
+                        <button action="openPositionSkillsListTable.add"/>
+                        <button action="openPositionSkillsListTable.edit"/>
+                        <button action="openPositionSkillsListTable.remove"/>
+                    </buttonsPanel>
+                </dataGrid>
+            </tab>
+            <tab caption="mainMsg://msgResrutierTask"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 id="tabRecrutior"
+                 expand="recrutiesTasksTable"
+                 icon="ANDROID">
+                <dataGrid id="recrutiesTasksTable"
+                          width="100%"
+                          dataContainer="taskRecrutior">
+                    <columns>
+                        <column id="startDate"
+                                property="startDate"/>
+                        <column id="endDate"
+                                property="endDate"/>
+                        <column id="reacrutier.name"
+                                property="recrutierName"/>
+                        <column id="openPosition.vacansyName"
+                                property="openPosition"/>
+                    </columns>
+                    <rowsCount/>
                     <buttonsPanel>
                         <button action="recrutiesTasksTable.create"/>
                         <button action="recrutiesTasksTable.edit"/>
@@ -518,7 +566,7 @@
                         <action type="edit" id="edit"/>
                         <action id="remove" type="remove"/>
                     </actions>
-                </table>
+                </dataGrid>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="TOP_RIGHT">

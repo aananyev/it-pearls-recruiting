@@ -43,11 +43,18 @@ order by e.secondName, e.firstName]]></query>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions"
+    <layout expand="projectTab"
             spacing="true">
-        <tabSheet caption="msg://msgTabProject">
-            <tab caption="msg://msgProjectName" margin="true,false,false,false" spacing="true" id="tabProject">
-                <groupBox spacing="true"
+        <tabSheet id="projectTab"
+                  caption="msg://msgTabProject"
+                  stylename="framed">
+            <tab caption="msg://msgProjectName"
+                 margin="true,false,false,false"
+                 spacing="true"
+                 expand="projectNameBox"
+                 id="tabProject">
+                <groupBox id="projectNameBox"
+                          spacing="true"
                           width="100%"
                           height="100%"
                           expand="projectDescriptionRichTextArea">
@@ -101,15 +108,37 @@ order by e.secondName, e.firstName]]></query>
                                   caption="msg://msgProjectDescription"/>
                 </groupBox>
             </tab>
-            <tab id="tabVacansy" margin="true,false,false,false" spacing="true" caption="msg://msgTabVacancy">
-                <groupBox id="groupBoxVacancy" spacing="true">
-                    <table id="projectOpenPositionTable" height="250px" width="100%" dataContainer="projectOpenPositionsDc">
+            <tab id="tabVacansy"
+                 margin="true,false,false,false"
+                 spacing="true"
+                 expand="groupBoxVacancy"
+                 caption="msg://msgTabVacancy">
+                <groupBox id="groupBoxVacancy"
+                          expand="projectOpenPositionTable"
+                          spacing="true">
+                    <dataGrid id="projectOpenPositionTable"
+                              height="250px" width="100%"
+                              dataContainer="projectOpenPositionsDc">
                         <columns>
-                            <column id="vacansyName"/>
-                            <column id="numberPosition"/>
-                            <column id="comment"/>
+                            <column id="openClose"
+                                    property="openClose"
+                                    width="35px"/>
+                            <column id="vacansyName"
+                                    property="vacansyName"/>
+                            <column id="projectName"
+                                    property="projectName"/>
+                            <column id="numberPosition"
+                                    property="numberPosition"/>
+                            <column id="positionType"
+                                    caption="msg://msgNumberPosition"
+                                    property="positionType"/>
+                            <column property="createTs" id="createTs">
+                                <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
+                                           format="dd.MM.yyyy"
+                                           useUserTimezone="true"/>
+                            </column>
                         </columns>
-                    </table>
+                    </dataGrid>
                 </groupBox>
             </tab>
         </tabSheet>

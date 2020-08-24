@@ -82,8 +82,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CollectionLoader<Person> personsDl;
     @Inject
-    private Table<Person> personTable;
-    @Inject
     private RadioButtonGroup radioButtonGroupPaymentsType;
     @Inject
     private RadioButtonGroup radioButtonGroupResearcherSalary;
@@ -147,6 +145,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Button openClosePosition;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private DataGrid<Person> personTable;
+    @Inject
+    private DataGrid<RecrutiesTasks> recrutiesTasksTable;
+    @Inject
+    private RichTextArea templateLetterRichTextArea;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
