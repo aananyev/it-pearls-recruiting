@@ -153,14 +153,14 @@ order by e.cityRuName]]>
                               stylename="light"
                               height="100%">
                         <hbox spacing="true">
-                            <label id="jobTitleTitle" value="msg://msgFIO" stylename="h2" htmlEnabled="true"/>
-                            <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h2"/>
-                            <label value="," stylename="h2" htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc" property="cityOfResidence" stylename="h2"
+                            <label id="jobTitleTitle" value="msg://msgFIO" stylename="h3" htmlEnabled="true"/>
+                            <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h3"/>
+                            <label value="," stylename="h3" htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc" property="cityOfResidence" stylename="h3"
                                    htmlEnabled="true"/>
                         </hbox>
                         <hbox spacing="true">
-                            <label id="personPositionTitle" value="msg://msgPosition" stylename="h2"
+                            <label id="personPositionTitle" value="msg://msgPosition" stylename="h3"
                                    htmlEnabled="true"/>
                             <label dataContainer="jobCandidateDc" property="personPosition" stylename="h3"/>
                         </hbox>
@@ -183,15 +183,15 @@ order by e.cityRuName]]>
                     </groupBox>
                     <vbox id="dropZone"
                           spacing="true"
-                          width="AUTO"
-                          height="100%"
+                          width="200px"
+                          height="266px"
                           align="BOTTOM_RIGHT"
                           expand="candidatePic"
                           stylename="dropzone-container">
                         <image id="candidatePic"
                                dataContainer="jobCandidateDc"
                                property="fileImageFace"
-                               width="200px"
+                               width="100%"
                                align="TOP_RIGHT"
                                height="100%"
                                stylename="widget-border"

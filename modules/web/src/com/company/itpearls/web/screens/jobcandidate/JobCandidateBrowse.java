@@ -25,6 +25,8 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import com.sun.org.apache.bcel.internal.generic.LADD;
+import org.springframework.beans.factory.ListableBeanFactoryExtensionsKt;
 import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
@@ -257,26 +259,31 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         if(entity.getEmail() != null) {
             Label email = uiComponents.create(Label.NAME);
-            email.setValue(entity.getEmail());
+            email.setValue("Email: " + entity.getEmail());
             contacts.add(email);
         }
 
         if(entity.getPhone() != null) {
             Label phone = uiComponents.create(Label.NAME);
-            phone.setValue(entity.getPhone());
+            phone.setValue("Phone: " + entity.getPhone());
             contacts.add(phone);
         }
 
         if(entity.getTelegramName() != null) {
             Label skype = uiComponents.create(Label.NAME);
-            skype.setValue(entity.getSkypeName());
+            skype.setValue("Skype: " + entity.getSkypeName());
             contacts.add(skype);
         }
 
         if(entity.getWhatsupName() != null) {
             Label watsup = uiComponents.create(Label.NAME);
-            watsup.setValue(entity.getSkypeName());
+            watsup.setValue("WhatsApp: " + entity.getSkypeName());
             contacts.add(watsup);
+        }
+
+        if(entity.getWiberName() != null) {
+            Label viber = uiComponents.create(Label.NAME);
+            viber.setValue("Viber: " + entity.getWiberName());
         }
 
         HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.NAME);

@@ -209,8 +209,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setLabelTitle() {
-        String BEFORE = "<u>";
-        String AFTER = ":</u>&nbsp";
+        String BEFORE = "";
+        String AFTER = "&nbsp";
 
         jobTitleTitle.setValue(BEFORE + jobTitleTitle.getValue() + AFTER);
         personPositionTitle.setValue(BEFORE + personPositionTitle.getRawValue() + AFTER);
