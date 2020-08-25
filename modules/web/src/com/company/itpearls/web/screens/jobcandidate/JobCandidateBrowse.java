@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.SubscribeCandidateAction;
 import com.company.itpearls.service.GetRoleService;
@@ -49,6 +50,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Button buttonExcel;
     @Inject
     private DataGrid<JobCandidate> jobCandidatesTable;
+    @Inject
+    private DataManager dataManager;
+
+    private String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -128,6 +133,66 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     retStr = "pic-center-large";
                     break;
             }
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "jobCandidatesTable.photo", subject = "columnGenerator")
+    private Icons.Icon jobCandidatesTablePhotoColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        String retStr = "";
+
+        if (event.getItem().getFileImageFace() == null) {
+            retStr = "MINUS_CIRCLE";
+        } else {
+            retStr = "PLUS_CIRCLE";
+        }
+
+        return CubaIcon.valueOf(retStr);
+    }
+
+    @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")
+    private Icons.Icon jobCandidatesTableResumeColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        String retStr = "";
+
+        if(dataManager.loadValues(QUERY_RESUME)
+                .parameter("candidate", event.getItem())
+                .list()
+                .size() == 0) {
+            retStr = "MINUS_CIRCLE";
+        } else {
+            retStr = "PLUS_CIRCLE";
+        }
+
+        return CubaIcon.valueOf(retStr);
+    }
+
+    @Install(to = "jobCandidatesTable.resume", subject = "styleProvider")
+    private String jobCandidatesTableResumeStyleProvider(JobCandidate jobCandidate) {
+        String retStr = "";
+
+        if(dataManager.loadValues(QUERY_RESUME)
+                .parameter("candidate", jobCandidate)
+                .list()
+                .size() == 0) {
+            retStr = "pic-center-large-red";
+        } else {
+            retStr = "pic-center-large-green";
+        }
+
+        return retStr;
+    }
+
+
+
+    @Install(to = "jobCandidatesTable.photo", subject = "styleProvider")
+    private String jobCandidatesTablePhotoStyleProvider(JobCandidate jobCandidate) {
+        String retStr = "";
+
+        if (jobCandidate.getFileImageFace() == null) {
+            retStr = "pic-center-large-red";
+        } else {
+            retStr = "pic-center-large-green";
         }
 
         return retStr;

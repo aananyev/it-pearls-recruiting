@@ -54,10 +54,17 @@ order by e.secondName, e.firstName]]>
                 <column id="status" width="50px">
                     <iconRenderer/>
                 </column>
+
                 <column id="fullName" caption="mainMsg://msgFullName" property="fullName"/>
                 <column id="personPosition" caption="msg://msgPersonPosition" property="personPosition"/>
                 <column id="currentCompany" caption="msg://msgCompany" property="currentCompany"/>
                 <column id="cityOfResidence" caption="msg://msgCityOfResidence" property="cityOfResidence"/>
+                <column id="photo" caption="msg://msgPhotoCandidate" width="50px">
+                    <iconRenderer/>
+                </column>
+                <column id="resume" caption="msg://msgResume" width="50px">
+                    <iconRenderer/>
+                </column>
                 <column id="createTs" caption="msg://msgDate" property="createTs">
                     <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter" format="dd.MM.yyyy"
                                useUserTimezone="true"/>
