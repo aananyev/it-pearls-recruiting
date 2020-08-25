@@ -5,12 +5,14 @@ import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.GetUserRoleService;
+import com.company.itpearls.web.screens.position.PositionEdit;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
@@ -151,6 +153,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private DataGrid<RecrutiesTasks> recrutiesTasksTable;
     @Inject
     private RichTextArea templateLetterRichTextArea;
+    @Inject
+    private CollectionLoader<Position> positionTypesLc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1063,7 +1067,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     protected String generatePositionName() {
         String retPosName = "";
 
+
         if(positionTypeField.getValue() != null) {
+            if(positionTypeField.getValue().getPositionEnName() == null) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withHideDelayMs(3000)
+                        .withDescription("Не заполнено наименование типа позиции")
+                        .show();
+
+                screenBuilders.editor(positionTypeField)
+                        .editEntity(positionTypeField.getValue())
+                        .withScreenClass(PositionEdit.class)
+                        .withLaunchMode(OpenMode.DIALOG)
+                        .build()
+                        .show();
+
+                positionTypesLc.load();
+            }
+
             retPosName =
                     (positionTypeField.getValue().getPositionRuName() != null ? positionTypeField.getValue().getPositionRuName() : "")
                             + " \\ "
