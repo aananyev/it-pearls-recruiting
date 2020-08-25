@@ -6,12 +6,17 @@ import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.SubscribeCandidateAction;
 import com.company.itpearls.service.GetRoleService;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FluentValuesLoader;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.ValueSource;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -23,6 +28,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.util.Date;
 
 @UiController("itpearls_JobCandidate.browse")
@@ -54,6 +60,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private DataManager dataManager;
 
     private String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -198,7 +206,120 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return retStr;
     }
 
+    @Install(to = "jobCandidatesTable", subject = "detailsGenerator")
+    private Component jobCandidatesTableDetailsGenerator(JobCandidate entity) {
+        VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
+        mainLayout.setWidth("100%");
+        mainLayout.setMargin(true);
 
+        Image candidatePhoto = uiComponents.create(Image.NAME);
+        candidatePhoto.setAlignment(Component.Alignment.TOP_RIGHT);
+        candidatePhoto.setHeight("100%");
+        candidatePhoto.setHeight("100%");
+        candidatePhoto.setStyleName("widget-border");
+
+        FileDescriptor fileDescriptor = entity.getFileImageFace();
+
+        if(fileDescriptor != null) {
+            FileDescriptorResource fileDescriptorResource = candidatePhoto.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(fileDescriptor);
+            candidatePhoto.setSource(fileDescriptorResource);
+            candidatePhoto.setVisible(true);
+        } else {
+            candidatePhoto.setVisible(false);
+        }
+
+        HBoxLayout headerBox = uiComponents.create(HBoxLayout.NAME);
+        headerBox.setWidth("100%");
+        headerBox.setHeight("100%");
+
+        HBoxLayout header2Box = uiComponents.create(HBoxLayout.NAME);
+        header2Box.setWidth("100%");
+        header2Box.setHeight("100%");
+
+        Label infoLabel = uiComponents.create(Label.NAME);
+        infoLabel.setHtmlEnabled(true);
+        infoLabel.setStyleName("h3");
+        infoLabel.setValue("Информация о кандидате:");
+
+        Label personPosition = uiComponents.create(Label.NAME);
+        personPosition.setHtmlEnabled(true);
+        personPosition.setStyleName("h4");
+        personPosition.setValue(entity.getPersonPosition().getPositionRuName()
+                + (entity.getPersonPosition().getPositionEnName() != null ? "/" + entity.getPersonPosition().getPositionEnName() : "")
+                + ", " + entity.getCityOfResidence().getCityRuName());
+
+        header2Box.add(personPosition);
+
+        VBoxLayout contacts = uiComponents.create(VBoxLayout.NAME);
+        contacts.setHeight("100%");
+        contacts.setHeight("100%");
+
+        if(entity.getEmail() != null) {
+            Label email = uiComponents.create(Label.NAME);
+            email.setValue(entity.getEmail());
+            contacts.add(email);
+        }
+
+        if(entity.getPhone() != null) {
+            Label phone = uiComponents.create(Label.NAME);
+            phone.setValue(entity.getPhone());
+            contacts.add(phone);
+        }
+
+        if(entity.getTelegramName() != null) {
+            Label skype = uiComponents.create(Label.NAME);
+            skype.setValue(entity.getSkypeName());
+            contacts.add(skype);
+        }
+
+        if(entity.getWhatsupName() != null) {
+            Label watsup = uiComponents.create(Label.NAME);
+            watsup.setValue(entity.getSkypeName());
+            contacts.add(watsup);
+        }
+
+        HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.NAME);
+        hBoxLayout.setHeight("100%");
+        hBoxLayout.setWidth("100%");
+        hBoxLayout.add(contacts);
+        hBoxLayout.add(candidatePhoto);
+        hBoxLayout.expand(contacts);
+
+        Component closeButton = createCloseButton(entity);
+        headerBox.add(infoLabel);
+        headerBox.add(closeButton);
+        headerBox.expand(infoLabel);
+
+        mainLayout.add(headerBox);
+        mainLayout.add(header2Box);
+        mainLayout.add(hBoxLayout);
+        mainLayout.expand(hBoxLayout);
+
+        return mainLayout;
+    }
+
+    private Label setContacts(String labelName) {
+        Label label = uiComponents.create(Label.NAME);
+
+        if(labelName != null) {
+            label.setValue(labelName);
+        }
+
+        return label;
+    }
+
+
+    private Component createCloseButton(JobCandidate entity) {
+        Button closeButton = uiComponents.create(Button.class);
+        closeButton.setIcon("icons/close.png");
+        BaseAction closeAction = new BaseAction("closeAction")
+                .withHandler(actionPerformedEvent ->
+                        jobCandidatesTable.setDetailsVisible(entity, false))
+                .withCaption("");
+        closeButton.setAction(closeAction);
+        return closeButton;
+    }
 
     @Install(to = "jobCandidatesTable.status", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -239,39 +360,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return CubaIcon.valueOf(retStr);
     }
 
-
-/*
-    @Install(to = "jobCandidatesTable", subject = "iconProvider")
-    private String jobCandidatesTableIconProvider(JobCandidate jobCandidate) {
-        Integer s = getPictString( jobCandidate );
-
-        if( s != null ) {
-            switch ( s ) {
-                case 0:
-                    return "icons/question-white.png";
-                case 1:
-                    return "icons/resume-red.png";
-                case 2:
-                    return "icons/resume-yellow.png";
-                case 3:
-                    return "icons/resume-green.png";
-                case 4:
-                    return "icons/to-client.png";
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
-                case 10:
-                    return "icons/recruiting.png";
-                default:
-                    return "";
-            }
-        }
-
-        return "icons/question-white.png";
-    }
-*/
     private Integer getPictString(JobCandidate jobCandidate ) {
         // если только имя и отчество - красный сигнал светофора
         // если имя, день рождения и один из контактов - желтый
@@ -317,20 +405,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe
     public void onInit(InitEvent event) {
-
+        jobCandidatesTable.setItemClickAction(new BaseAction("itemClickAction")
+            .withHandler(actionPerformedEvent -> {
+                jobCandidatesTable.setDetailsVisible(jobCandidatesTable.getSingleSelected(), true);
+            }));
     }
-
-    /* @EventListener
-    public void onUiNotificationEvent(UiNotificationEvent event) {
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withDescription( event.getMessage() )
-                .withCaption("WARNING")
-                .show();
-    }
-
-    // screens do not receive non-UI events!
-    @EventListener
-    public void onBeanNotificationEvent(BeanNotificationEvent event) {
-        throw new IllegalStateException("Received " + event);
-    } */
 }

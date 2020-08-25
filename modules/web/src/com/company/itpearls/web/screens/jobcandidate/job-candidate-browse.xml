@@ -41,7 +41,7 @@ order by e.secondName, e.firstName]]>
                         excludeRecursively="true"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <dataGrid id="jobCandidatesTable" icon="ID_CARD"
+        <dataGrid id="jobCandidatesTable"
                     width="100%"
                     dataContainer="jobCandidatesDc">
             <actions>

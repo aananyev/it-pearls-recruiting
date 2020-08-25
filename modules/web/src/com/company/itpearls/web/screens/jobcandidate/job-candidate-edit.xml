@@ -194,6 +194,7 @@ order by e.cityRuName]]>
                                width="200px"
                                align="TOP_RIGHT"
                                height="100%"
+                               stylename="widget-border"
                                scaleMode="FILL"/>
                         <upload id="fileImageFaceUpload"
                                 fileStoragePutMode="IMMEDIATE"

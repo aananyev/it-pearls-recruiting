@@ -128,6 +128,7 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "FILE_IMAGE_FACE")
     protected FileDescriptor fileImageFace;
 
+
     public FileDescriptor getFileImageFace() {
         return fileImageFace;
     }
