@@ -214,8 +214,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         Image candidatePhoto = uiComponents.create(Image.NAME);
         candidatePhoto.setAlignment(Component.Alignment.TOP_RIGHT);
-        candidatePhoto.setHeight("100%");
-        candidatePhoto.setHeight("100%");
+        candidatePhoto.setHeight("150px");
+        candidatePhoto.setScaleMode(Image.ScaleMode.FILL);
         candidatePhoto.setStyleName("widget-border");
 
         FileDescriptor fileDescriptor = entity.getFileImageFace();
