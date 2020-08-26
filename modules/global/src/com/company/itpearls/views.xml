@@ -303,12 +303,18 @@
         <property name="currentJobPosition" view="_minimal"/>
         <property name="vacancy" view="_minimal"/>
         <property name="project" view="_minimal">
+            <property name="projectName"/>
             <property name="projectDepartment" view="_minimal"/>
         </property>
 <!--        <property name="companyDepartment" view="_minimal"/> -->
         <property name="iteractionType" view="iteraction-view"/>
-        <property name="recrutier" view="_minimal"/>
+        <property name="recrutier" view="_minimal">
+            <property name="group" view="_minimal">
+                <property name="name"/>
+            </property>
+        </property>
         <property name="iteractionChain" view="_minimal"/>
+        <property name="dateIteraction"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_base">
         <property name="iteractionTree" fetch="BATCH" view="_minimal">

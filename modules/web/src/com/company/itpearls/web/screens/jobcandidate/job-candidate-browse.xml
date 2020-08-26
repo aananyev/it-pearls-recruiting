@@ -59,10 +59,10 @@ order by e.secondName, e.firstName]]>
                 <column id="personPosition" caption="msg://msgPersonPosition" property="personPosition"/>
                 <column id="currentCompany" caption="msg://msgCompany" property="currentCompany"/>
                 <column id="cityOfResidence" caption="msg://msgCityOfResidence" property="cityOfResidence"/>
-                <column id="photo" caption="msg://msgPhotoCandidate" width="50px">
+                <column id="photo" caption="msg://msgPhotoCandidate" width="60px">
                     <iconRenderer/>
                 </column>
-                <column id="resume" caption="msg://msgResume" width="50px">
+                <column id="resume" caption="msg://msgResume" width="60px">
                     <iconRenderer/>
                 </column>
                 <column id="createTs" caption="msg://msgDate" property="createTs">

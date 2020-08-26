@@ -1,43 +1,37 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.BeanNotificationEvent;
-import com.company.itpearls.UiNotificationEvent;
-import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.Iteraction;
-import com.company.itpearls.entity.SubscribeCandidateAction;
+import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.FluentValuesLoader;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.ValueSource;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
-import com.sun.org.apache.bcel.internal.generic.LADD;
-import org.springframework.beans.factory.ListableBeanFactoryExtensionsKt;
-import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
-import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @UiController("itpearls_JobCandidate.browse")
 @UiDescriptor("job-candidate-browse.xml")
 @LookupComponent("jobCandidatesTable")
 @LoadDataBeforeShow
 public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
+    private static final String RECRUTIER_GROUP = "Хантинг";
+    private static final String RESEARCHER_GROUP = "Ресерчинг";
+
     @Inject
     private CheckBox checkBoxShowOnlyMy;
     @Inject
@@ -65,44 +59,45 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private UiComponents uiComponents;
 
+    private List<IteractionList> iteractionList = new ArrayList<>();
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if( userSession.getUser().getGroup().getName().equals("Стажер") ) {
-            jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%" );
+        if (userSession.getUser().getGroup().getName().equals("Стажер")) {
+            jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
 
-            checkBoxShowOnlyMy.setValue( true );
-            checkBoxShowOnlyMy.setEditable( false );
+            checkBoxShowOnlyMy.setValue(true);
+            checkBoxShowOnlyMy.setEditable(false);
         }
 
-        checkBoxOnWork.setValue( false );
-        jobCandidatesDl.removeParameter( "param1" );
-        jobCandidatesDl.removeParameter( "param3" );
+        checkBoxOnWork.setValue(false);
+        jobCandidatesDl.removeParameter("param1");
+        jobCandidatesDl.removeParameter("param3");
 
         jobCandidatesDl.load();
 
-        buttonExcel.setVisible( getRoleService.isUserRoles( userSession.getUser(), "Manager" ) );
+        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
     }
 
     @Subscribe("checkBoxOnWork")
     public void onCheckBoxOnWorkValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if( !checkBoxOnWork.getValue() ) {
-            jobCandidatesDl.removeParameter( "param1" );
-            jobCandidatesDl.removeParameter( "param3" );
+        if (!checkBoxOnWork.getValue()) {
+            jobCandidatesDl.removeParameter("param1");
+            jobCandidatesDl.removeParameter("param3");
         } else {
-            jobCandidatesDl.setParameter( "param1", null );
-            jobCandidatesDl.setParameter( "param3", 10 );
+            jobCandidatesDl.setParameter("param1", null);
+            jobCandidatesDl.setParameter("param3", 10);
         }
 
         jobCandidatesDl.load();
-        
+
     }
 
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if(checkBoxShowOnlyMy.getValue()) {
-           jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
-        }
-        else {
+        if (checkBoxShowOnlyMy.getValue()) {
+            jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+        } else {
             jobCandidatesDl.removeParameter("userName");
         }
 
@@ -114,8 +109,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Integer s = getPictString(jobCandidate);
         String retStr = "";
 
-        if( s != null ) {
-            switch ( s ) {
+        if (s != null) {
+            switch (s) {
                 case 0: // WHITE
                     retStr = "pic-center-large-grey";
                     break;
@@ -165,7 +160,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Icons.Icon jobCandidatesTableResumeColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         String retStr = "";
 
-        if(dataManager.loadValues(QUERY_RESUME)
+        if (dataManager.loadValues(QUERY_RESUME)
                 .parameter("candidate", event.getItem())
                 .list()
                 .size() == 0) {
@@ -181,7 +176,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private String jobCandidatesTableResumeStyleProvider(JobCandidate jobCandidate) {
         String retStr = "";
 
-        if(dataManager.loadValues(QUERY_RESUME)
+        if (dataManager.loadValues(QUERY_RESUME)
                 .parameter("candidate", jobCandidate)
                 .list()
                 .size() == 0) {
@@ -192,7 +187,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return retStr;
     }
-
 
 
     @Install(to = "jobCandidatesTable.photo", subject = "styleProvider")
@@ -222,7 +216,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         FileDescriptor fileDescriptor = entity.getFileImageFace();
 
-        if(fileDescriptor != null) {
+        if (fileDescriptor != null) {
             FileDescriptorResource fileDescriptorResource = candidatePhoto.createResource(FileDescriptorResource.class)
                     .setFileDescriptor(fileDescriptor);
             candidatePhoto.setSource(fileDescriptorResource);
@@ -254,47 +248,80 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         header2Box.add(personPosition);
 
         VBoxLayout contacts = uiComponents.create(VBoxLayout.NAME);
-        contacts.setHeight("100%");
+        contacts.setHeightAuto();
         contacts.setHeight("100%");
 
-        if(entity.getEmail() != null) {
+        VBoxLayout iteraction = uiComponents.create(VBoxLayout.NAME);
+        iteraction.setHeightAuto();
+        iteraction.setWidth("100%");
+
+        if (entity.getEmail() != null) {
             Label email = uiComponents.create(Label.NAME);
             email.setValue("Email: " + entity.getEmail());
             contacts.add(email);
         }
 
-        if(entity.getPhone() != null) {
+        if (entity.getPhone() != null) {
             Label phone = uiComponents.create(Label.NAME);
             phone.setValue("Phone: " + entity.getPhone());
             contacts.add(phone);
         }
 
-        if(entity.getTelegramName() != null) {
+        if (entity.getTelegramName() != null) {
             Label skype = uiComponents.create(Label.NAME);
             skype.setValue("Skype: " + entity.getSkypeName());
             contacts.add(skype);
         }
 
-        if(entity.getWhatsupName() != null) {
+        if (entity.getWhatsupName() != null) {
             Label watsup = uiComponents.create(Label.NAME);
             watsup.setValue("WhatsApp: " + entity.getSkypeName());
             contacts.add(watsup);
         }
 
-        if(entity.getWiberName() != null) {
+        if (entity.getWiberName() != null) {
             Label viber = uiComponents.create(Label.NAME);
             viber.setValue("Viber: " + entity.getWiberName());
         }
 
+        iteractionList = getIteractionLists(jobCandidatesTable.getSingleSelected());
+
+        Label lastProject = uiComponents.create(Label.NAME);
+        lastProject.setValue(getLastProject(iteractionList));
+        lastProject.setStyleName("h4");
+
+        Label vacansyName = uiComponents.create(Label.NAME);
+        vacansyName.setValue(getLastVacansy(iteractionList));
+        vacansyName.setStyleName("h4");
+
+        Label lastRecrutier = uiComponents.create(Label.NAME);
+        lastRecrutier.setValue(RECRUTIER_GROUP
+                + ": " + getLastContacter(iteractionList, RECRUTIER_GROUP)
+                + " (" + getLastIteraction(iteractionList, RECRUTIER_GROUP) + ")");
+
+        Label lastResearcher = uiComponents.create(Label.NAME);
+        lastResearcher.setValue(RESEARCHER_GROUP
+                + ": " + getLastContacter(iteractionList, RESEARCHER_GROUP)
+                + " (" + getLastIteraction(iteractionList, RESEARCHER_GROUP) + ")");
+
+        iteraction.add(lastProject);
+        iteraction.add(vacansyName);
+        iteraction.add(lastRecrutier);
+        iteraction.add(lastResearcher);
+
         HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.NAME);
         hBoxLayout.setHeight("100%");
         hBoxLayout.setWidth("100%");
+
         hBoxLayout.add(contacts);
+        hBoxLayout.add(iteraction);
         hBoxLayout.add(candidatePhoto);
-        hBoxLayout.expand(contacts);
+//        hBoxLayout.expand(iteraction);
 
         Component closeButton = createCloseButton(entity);
+        Component editButton = createEditButton(entity);
         headerBox.add(infoLabel);
+        headerBox.add(editButton);
         headerBox.add(closeButton);
         headerBox.expand(infoLabel);
 
@@ -306,10 +333,79 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return mainLayout;
     }
 
+    private Object getLastProject(List<IteractionList> iteractionList) {
+        for (IteractionList a : iteractionList) {
+            return a.getProject().getProjectName();
+        }
+
+        return null;
+    }
+
+    private String getLastContacter(List<IteractionList> iteractionList, String contecter) {
+        for (IteractionList a : iteractionList) {
+            if (a.getRecrutier().getGroup().getName() != null) {
+                if (a.getRecrutier().getGroup().getName().equals(contecter)) {
+                    return a.getRecrutier().getName();
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    private String getLastVacansy(List<IteractionList> iteractionList) {
+        for (IteractionList a : iteractionList) {
+            return a.getVacancy().getVacansyName();
+        }
+
+        return null;
+    }
+
+    private String getLastIteraction(List<IteractionList> iteractionList, String contecter) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        for (IteractionList a : iteractionList) {
+            if (a.getRecrutier().getGroup().getName() != null) {
+                if (a.getRecrutier().getGroup().getName().equals(contecter)) {
+                    return simpleDateFormat.format(a.getDateIteraction());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private List<IteractionList> getIteractionLists(JobCandidate singleSelected) {
+        String QUERY_GET_LASTRECRUTIER = "select e from itpearls_IteractionList e " +
+                "where e.candidate = :candidate " +
+                "order by e.numberIteraction desc";
+
+        List<IteractionList> listIteracion = dataManager.load(IteractionList.class)
+                .query(QUERY_GET_LASTRECRUTIER)
+                .parameter("candidate", singleSelected)
+                .view("iteractionList-job-candidate")
+                .list();
+
+        return listIteracion;
+
+    }
+
+    private Component createEditButton(JobCandidate entity) {
+        Button editButton = uiComponents.create(Button.class);
+        editButton.setCaption("Редактирование");
+        BaseAction editAction = new BaseAction("edit")
+                .withHandler(actionPerformedEvent ->
+                        jobCandidatesTable.setDetailsVisible(entity, false))
+                .withCaption("");
+        editButton.setAction(editAction);
+        return editButton;
+    }
+
     private Label setContacts(String labelName) {
         Label label = uiComponents.create(Label.NAME);
 
-        if(labelName != null) {
+        if (labelName != null) {
             label.setValue(labelName);
         }
 
@@ -330,11 +426,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.status", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        Integer s = getPictString( event.getItem() );
+        Integer s = getPictString(event.getItem());
         String retStr = "";
 
-        if( s != null ) {
-            switch ( s ) {
+        if (s != null) {
+            switch (s) {
                 case 0: // WHITE
                     retStr = "QUESTION_CIRCLE";
                     break;
@@ -367,15 +463,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return CubaIcon.valueOf(retStr);
     }
 
-    private Integer getPictString(JobCandidate jobCandidate ) {
+    private Integer getPictString(JobCandidate jobCandidate) {
         // если только имя и отчество - красный сигнал светофора
         // если имя, день рождения и один из контактов - желтый
         // если больше двух контактов - зеленый, если нет др - все равно желтый
-        if( ( ( jobCandidate.getEmail() != null && jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null ) ||
-                ( jobCandidate.getEmail() != null && jobCandidate.getPhone() != null ) ||
-                ( jobCandidate.getEmail() != null && jobCandidate.getSkypeName() != null ) ||
-                ( jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null ) ) &&
-                jobCandidate.getBirdhDate() != null ) {
+        if (((jobCandidate.getEmail() != null && jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null) ||
+                (jobCandidate.getEmail() != null && jobCandidate.getPhone() != null) ||
+                (jobCandidate.getEmail() != null && jobCandidate.getSkypeName() != null) ||
+                (jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null)) &&
+                jobCandidate.getBirdhDate() != null) {
             return 3;
         } else {
             if (jobCandidate.getPhone() != null ||
@@ -383,12 +479,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     jobCandidate.getSkypeName() != null) {
                 return 2;
             } else {
-                if ( jobCandidate.getFirstName() == null ||
+                if (jobCandidate.getFirstName() == null ||
                         jobCandidate.getMiddleName() == null ||
                         jobCandidate.getCityOfResidence() == null ||
                         jobCandidate.getCurrentCompany() == null ||
                         jobCandidate.getPersonPosition() == null ||
-                        jobCandidate.getPositionCountry() == null ) {
+                        jobCandidate.getPositionCountry() == null) {
                     return 0;
                 }
             }
@@ -398,14 +494,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     public void onButtonSubscribeClick() {
-        screenBuilders.editor( SubscribeCandidateAction.class, this)
+        screenBuilders.editor(SubscribeCandidateAction.class, this)
                 .newEntity()
-                .withInitializer( e -> {
-                    e.setCandidate( jobCandidatesTable.getSingleSelected() );
-                    e.setSubscriber( userSession.getUser() );
-                    e.setStartDate( new Date() );
+                .withInitializer(e -> {
+                    e.setCandidate(jobCandidatesTable.getSingleSelected());
+                    e.setSubscriber(userSession.getUser());
+                    e.setStartDate(new Date());
                 })
-                .withOpenMode( OpenMode.DIALOG )
+                .withOpenMode(OpenMode.DIALOG)
                 .build()
                 .show();
     }
@@ -413,8 +509,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Subscribe
     public void onInit(InitEvent event) {
         jobCandidatesTable.setItemClickAction(new BaseAction("itemClickAction")
-            .withHandler(actionPerformedEvent -> {
-                jobCandidatesTable.setDetailsVisible(jobCandidatesTable.getSingleSelected(), true);
-            }));
+                .withHandler(actionPerformedEvent -> {
+                    jobCandidatesTable.setDetailsVisible(jobCandidatesTable.getSingleSelected(), true);
+                }));
     }
 }
