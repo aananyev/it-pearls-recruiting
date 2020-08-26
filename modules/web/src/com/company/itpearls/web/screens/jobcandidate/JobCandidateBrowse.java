@@ -245,8 +245,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 + (entity.getPersonPosition().getPositionEnName() != null ? "/" + entity.getPersonPosition().getPositionEnName() : "")
                 + ", " + entity.getCityOfResidence().getCityRuName());
 
-        header2Box.add(personPosition);
-
         VBoxLayout contacts = uiComponents.create(VBoxLayout.NAME);
         contacts.setHeightAuto();
         contacts.setHeight("100%");
@@ -254,6 +252,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         VBoxLayout iteraction = uiComponents.create(VBoxLayout.NAME);
         iteraction.setHeightAuto();
         iteraction.setWidth("100%");
+
+        contacts.add(personPosition);
 
         if (entity.getEmail() != null) {
             Label email = uiComponents.create(Label.NAME);
