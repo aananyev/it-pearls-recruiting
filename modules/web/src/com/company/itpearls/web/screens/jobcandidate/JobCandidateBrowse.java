@@ -335,10 +335,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Object getLastProject(List<IteractionList> iteractionList) {
         for (IteractionList a : iteractionList) {
-            return a.getProject().getProjectName();
+            if (a.getProject() != null)
+                return a.getProject().getProjectName();
+            else
+                return "";
         }
 
-        return null;
+        return "";
     }
 
     private String getLastContacter(List<IteractionList> iteractionList, String contecter) {
@@ -350,7 +353,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             }
         }
 
-        return null;
+        return "";
     }
 
 
@@ -359,7 +362,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             return a.getVacancy().getVacansyName();
         }
 
-        return null;
+        return "";
     }
 
     private String getLastIteraction(List<IteractionList> iteractionList, String contecter) {
@@ -373,7 +376,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             }
         }
 
-        return null;
+        return "";
     }
 
     private List<IteractionList> getIteractionLists(JobCandidate singleSelected) {
