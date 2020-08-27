@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
@@ -237,8 +238,34 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private HBoxLayout setInfoOpenPositionBix(OpenPosition entity) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.NAME);
         VBoxLayout projectBox = getProjectBox(entity);
+        VBoxLayout companyLogo = getCompanyLogo(entity);
 
         retBox.add(projectBox);
+
+        return retBox;
+    }
+
+    private VBoxLayout getCompanyLogo(OpenPosition entity) {
+        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
+
+        Image companyLogo = uiComponents.create(Image.NAME);
+        companyLogo.setAlignment(Component.Alignment.TOP_RIGHT);
+        companyLogo.setHeight("150px");
+        companyLogo.setScaleMode(Image.ScaleMode.FILL);
+        companyLogo.setStyleName("widget-border");
+
+        FileDescriptor fileDescriptor = entity.getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo();
+
+        if (fileDescriptor != null) {
+            FileDescriptorResource fileDescriptorResource = companyLogo.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(fileDescriptor);
+            companyLogo.setSource(fileDescriptorResource);
+            companyLogo.setVisible(true);
+        } else {
+            companyLogo.setVisible(false);
+        }
+
+        retBox.add(companyLogo);
 
         return retBox;
     }
@@ -260,13 +287,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retBox.add(departaMentName);
 
         Label projectName  = uiComponents.create(Label.NAME);
-        projectName.setValue("Ппроект: " + entity.getProjectName().getProjectName());
+        projectName.setValue("Проект: " + entity.getProjectName().getProjectName());
         retBox.add(projectName);
 
-        Label projectOwner = uiComponents.create(Label.NAME);
-        projectOwner.setValue("Владелец проекта: " + entity.getProjectName().getProjectOwner().getSecondName()
-                + " "
-                + entity.getProjectName().getProjectOwner().getFirstName());
+        if(entity.getProjectName().getProjectOwner() != null) {
+            Label projectOwner = uiComponents.create(Label.NAME);
+            projectOwner.setValue("Владелец проекта: " + entity.getProjectName().getProjectOwner().getSecondName()
+                    + " "
+                    + entity.getProjectName().getProjectOwner().getFirstName()
+                    + (entity.getProjectName().getProjectOwner().getMiddleName() != null ?
+                    " " + entity.getProjectName().getProjectOwner().getMiddleName() : ""));
+            retBox.add(projectOwner);
+        }
 
         return retBox;
     }

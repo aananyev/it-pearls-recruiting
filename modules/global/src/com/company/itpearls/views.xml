@@ -50,13 +50,18 @@
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_minimal" systemProperties="true">
         <property name="openClose"/>
-        <property name="cityPosition" fetch="JOIN" view="_local"/>
-        <property name="positionType" fetch="JOIN" view="_local"/>
-        <property name="projectName" fetch="JOIN" view="_local">
-            <property name="projectOwner" view="_local"/>
+        <property name="cityPosition" view="_local"/>
+        <property name="positionType" view="_local"/>
+        <property name="projectName" view="_local">
+            <property name="projectOwner" view="_local">
+                <property name="firstName"/>
+                <property name="secondName"/>
+                <property name="middleName"/>
+            </property>
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local">
                     <property name="cityOfCompany" view="_local"/>
+                    <property name="fileCompanyLogo" view="_minimal"/>
                 </property>
             </property>
         </property>
