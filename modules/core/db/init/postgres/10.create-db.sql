@@ -149,6 +149,7 @@ create table ITPEARLS_COMPANY (
     CITY_OF_COMPANY_ID uuid,
     REGION_OF_COMPANY_ID uuid,
     COUNTRY_OF_COMPANY_ID uuid,
+    FILE_COMPANY_LOGO uuid,
     ADDRESS_OF_COMPANY text,
     --
     primary key (ID)

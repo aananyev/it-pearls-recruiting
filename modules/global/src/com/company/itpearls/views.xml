@@ -53,6 +53,7 @@
         <property name="cityPosition" fetch="JOIN" view="_local"/>
         <property name="positionType" fetch="JOIN" view="_local"/>
         <property name="projectName" fetch="JOIN" view="_local">
+            <property name="projectOwner" view="_local"/>
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local">
                     <property name="cityOfCompany" view="_local"/>
@@ -190,6 +191,7 @@
         <property name="cityOfCompany" view="city-view"/>
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
+        <property name="fileCompanyLogo" view="_minimal"/>
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="candidate" view="_minimal">

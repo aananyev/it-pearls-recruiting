@@ -4,8 +4,10 @@ import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -49,12 +51,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String ROLE_MANAGER = "Manager";
     private String ROLE_ADMINISTRATOR = "Administrators";
     Map<String, Integer> remoteWork = new LinkedHashMap<>();
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     protected void onInit(InitEvent event) {
         addIconColumn();
         // addIconRemoteWork();
         initRemoteWorkMap();
+
+        initTableGenerator();
+    }
+
+    private void initTableGenerator() {
+        openPositionsTable.setItemClickAction(new BaseAction("itemClickAction")
+                .withHandler(actionPerformedEvent ->
+                        openPositionsTable.setDetailsVisible(openPositionsTable.getSingleSelected(), true)));
+
     }
 
     @Install(to = "openPositionsTable.remoteWork", subject = "descriptionProvider")
@@ -197,6 +210,96 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String a = textReturn != null ? Jsoup.parse(textReturn).text() : "";
 
         return a;
+    }
+
+    @Install(to = "openPositionsTable", subject = "detailsGenerator")
+    private Component openPositionsTableDetailsGenerator(OpenPosition entity) {
+        VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
+        mainLayout.setWidth("100%");
+        mainLayout.setMargin(true);
+
+        HBoxLayout headerBox = setHeaderBox(entity);
+        HBoxLayout infoBox = setInfoOpenPositionBix(entity);
+        HBoxLayout projectDescription = setProjectDescription(entity);
+
+        mainLayout.add(headerBox);
+        mainLayout.add(infoBox);
+        if(projectDescription != null) mainLayout.add(projectDescription);
+
+
+        return mainLayout;
+    }
+
+    private HBoxLayout setProjectDescription(OpenPosition entity) {
+        return null;
+    }
+
+    private HBoxLayout setInfoOpenPositionBix(OpenPosition entity) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.NAME);
+        VBoxLayout projectBox = getProjectBox(entity);
+
+        retBox.add(projectBox);
+
+        return retBox;
+    }
+
+    private VBoxLayout getProjectBox(OpenPosition entity) {
+        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
+
+        Label   title = uiComponents.create(Label.NAME);
+        title.setStyleName("h3");
+        title.setValue("Проект и компания");
+        retBox.add(title);
+
+        Label companyName = uiComponents.create(Label.NAME);
+        companyName.setValue("Компания: " + entity.getProjectName().getProjectDepartment().getCompanyName().getComanyName());
+        retBox.add(companyName);
+
+        Label departaMentName = uiComponents.create(Label.NAME);
+        departaMentName.setValue("Департамент: " + entity.getProjectName().getProjectDepartment().getDepartamentRuName());
+        retBox.add(departaMentName);
+
+        Label projectName  = uiComponents.create(Label.NAME);
+        projectName.setValue("Ппроект: " + entity.getProjectName().getProjectName());
+        retBox.add(projectName);
+
+        Label projectOwner = uiComponents.create(Label.NAME);
+        projectOwner.setValue("Владелец проекта: " + entity.getProjectName().getProjectOwner().getSecondName()
+                + " "
+                + entity.getProjectName().getProjectOwner().getFirstName());
+
+        return retBox;
+    }
+
+
+    private Component createCloseButton(OpenPosition entity) {
+        Button closeButton = uiComponents.create(Button.class);
+        closeButton.setIcon("icons/close.png");
+        BaseAction closeAction = new BaseAction("closeAction")
+                .withHandler(actionPerformedEvent ->
+                        openPositionsTable.setDetailsVisible(entity, false))
+                .withCaption("");
+        closeButton.setAction(closeAction);
+        return closeButton;
+    }
+
+    private HBoxLayout setHeaderBox(OpenPosition openPosition) {
+        HBoxLayout ret = uiComponents.create(HBoxLayout.NAME);
+
+        ret.setWidth("100%");
+        ret.setHeight("100%");
+
+        Label infoLabel = uiComponents.create(Label.NAME);
+        infoLabel.setHtmlEnabled(true);
+        infoLabel.setStyleName("h3");
+        infoLabel.setValue("Информация о вакансии:");
+
+        Component closeButton = createCloseButton(openPosition);
+        closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
+        ret.add(infoLabel);
+        ret.add(closeButton);
+
+        return ret;
     }
 
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")

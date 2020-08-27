@@ -253,6 +253,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         iteraction.setHeightAuto();
         iteraction.setWidth("100%");
 
+        VBoxLayout statistics = uiComponents.create(VBoxLayout.NAME);
+        statistics.setHeightAuto();
+        statistics.setWidth("100%");
+
+        Label titleContacts = uiComponents.create(Label.NAME);
+        titleContacts.setValue("Контактная информация");
+        titleContacts.setStyleName("h3");
+
+        Label titleIteraction = uiComponents.create(Label.NAME);
+        titleIteraction.setValue("Последнее взаимодействия с кандидатом на позицию");
+        titleIteraction.setStyleName("h3");
+
+        contacts.add(titleContacts);
         contacts.add(personPosition);
 
         if (entity.getEmail() != null) {
@@ -294,20 +307,30 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         vacansyName.setValue(getLastVacansy(iteractionList));
         vacansyName.setStyleName("h4");
 
+        String getLastContacter = getLastContacter(iteractionList, RECRUTIER_GROUP);
+
         Label lastRecrutier = uiComponents.create(Label.NAME);
-        lastRecrutier.setValue(RECRUTIER_GROUP
-                + ": " + getLastContacter(iteractionList, RECRUTIER_GROUP)
-                + " (" + getLastIteraction(iteractionList, RECRUTIER_GROUP) + ")");
+        lastRecrutier.setValue( !getLastContacter.equals("") ?
+                ( RECRUTIER_GROUP
+                + ": " + getLastContacter
+                + " (" + getLastIteraction(iteractionList, RECRUTIER_GROUP) + ")") :
+                "");
 
+        getLastContacter = getLastContacter(iteractionList, RESEARCHER_GROUP);
         Label lastResearcher = uiComponents.create(Label.NAME);
-        lastResearcher.setValue(RESEARCHER_GROUP
-                + ": " + getLastContacter(iteractionList, RESEARCHER_GROUP)
-                + " (" + getLastIteraction(iteractionList, RESEARCHER_GROUP) + ")");
+        lastResearcher.setValue( !getLastContacter.equals("") ?
+                (RESEARCHER_GROUP
+                + ": " + getLastContacter
+                + " (" + getLastIteraction(iteractionList, RESEARCHER_GROUP) + ")" ): "");
 
+        iteraction.add(titleIteraction);
         iteraction.add(lastProject);
         iteraction.add(vacansyName);
-        iteraction.add(lastRecrutier);
-        iteraction.add(lastResearcher);
+        if(!lastRecrutier.getValue().equals("")) iteraction.add(lastRecrutier);
+        if(!lastResearcher.getValue().equals("")) iteraction.add(lastResearcher);
+
+        setIteraction(iteraction);
+        setStatistics(statistics);
 
         HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.NAME);
         hBoxLayout.setHeight("100%");
@@ -316,7 +339,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         hBoxLayout.add(contacts);
         hBoxLayout.add(iteraction);
         hBoxLayout.add(candidatePhoto);
-//        hBoxLayout.expand(iteraction);
+        hBoxLayout.add(statistics);
 
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
@@ -331,6 +354,17 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         mainLayout.expand(hBoxLayout);
 
         return mainLayout;
+    }
+
+    private void setIteraction(VBoxLayout iteraction) {
+    }
+
+    private void setStatistics(VBoxLayout statistics) {
+        Label titleStatistics = uiComponents.create(Label.NAME);
+        titleStatistics.setValue("Статистика по кандидату");
+        titleStatistics.setStyleName("h3");
+
+        statistics.add(titleStatistics);
     }
 
     private Object getLastProject(List<IteractionList> iteractionList) {

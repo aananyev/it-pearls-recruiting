@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
+        focusComponent="companyOwnershipField"
         messagesPack="com.company.itpearls.web.screens.company" icon="BUILDING">
     <data>
         <instance id="companyDc"
@@ -48,74 +48,156 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <tabSheet>
-            <tab caption="mainMsg://msgCompanyDetail" margin="true,false,false,false" spacing="true" id="tabConpanyDetails">
-                <form id="form" dataContainer="companyDc" width="100%">
-                    <column width="250px">
-                        <checkBox id="checkBoxOurClient" caption="mainMsg://msgOurClient" dataContainer="companyDc"
+    <layout spacing="true">
+        <tabSheet stylename="framed">
+            <tab caption="mainMsg://msgCompanyDetail"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="mainCompany"
+                 id="tabConpanyDetails">
+                <hbox id="mainCompany"
+                      expand="companyInfo"
+                      height="100%"
+                      spacing="true"
+                      width="100%">
+                    <vbox id="companyInfo"
+                          height="100%"
+                          spacing="true"
+                          expand="addressOfCompanyField"
+                          width="AUTO">
+                        <checkBox id="checkBoxOurClient"
+                                  caption="mainMsg://msgOurClient"
+                                  dataContainer="companyDc"
                                   property="ourClient"/>
-                        <lookupPickerField id="companyOwnershipField" optionsContainer="companyOwnershipsDc"
-                                           property="companyOwnership" caption="mainMsg://msgOwnership">
+                        <lookupPickerField id="companyOwnershipField"
+                                           optionsContainer="companyOwnershipsDc"
+                                           dataContainer="companyDc"
+                                           property="companyOwnership"
+                                           caption="mainMsg://msgOwnership">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
-                        <textField id="comanyNameField" property="comanyName" caption="msg://msgCompanyName"/>
-                        <textField id="companyShortNameField" property="companyShortName"
+                        <textField id="comanyNameField"
+                                   dataContainer="companyDc"
+                                   property="comanyName"
+                                   width="100%"
+                                   caption="msg://msgCompanyName"/>
+                        <textField id="companyShortNameField"
+                                   dataContainer="companyDc"
+                                   width="100%"
+                                   property="companyShortName"
                                    caption="mainMsg://msgCountryShortName"/>
-                        <lookupPickerField id="companyDirectorField" optionsContainer="companyDirectorsDc"
-                                           property="companyDirector" caption="msg://msgDirector">
+                        <lookupPickerField id="companyDirectorField"
+                                           dataContainer="companyDc"
+                                           optionsContainer="companyDirectorsDc"
+                                           property="companyDirector"
+                                           width="100%"
+                                           caption="msg://msgDirector">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
-                        <lookupPickerField id="cityOfCompanyField" optionsContainer="cityOfCompaniesDc"
-                                           property="cityOfCompany" caption="msg://msgCityOfCompany" required="true">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="regionOfCompanyField" optionsContainer="regionOfCompaniesDc"
-                                           property="regionOfCompany" caption="msg://msgRegionOfCompany"
+                        <lookupPickerField id="cityOfCompanyField"
+                                           dataContainer="companyDc"
+                                           optionsContainer="cityOfCompaniesDc"
+                                           property="cityOfCompany"
+                                           width="100%"
+                                           caption="msg://msgCityOfCompany"
                                            required="true">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
-                        <lookupPickerField id="countryOfCompanyField" optionsContainer="countryOfCompaniesDc"
-                                           property="countryOfCompany" caption="msg://msgCountryOfCompany"
+                        <lookupPickerField id="regionOfCompanyField"
+                                           dataContainer="companyDc"
+                                           optionsContainer="regionOfCompaniesDc"
+                                           property="regionOfCompany"
+                                           width="100%"
+                                           caption="msg://msgRegionOfCompany"
                                            required="true">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
-                        <textArea id="addressOfCompanyField" property="addressOfCompany" rows="5"
+                        <lookupPickerField id="countryOfCompanyField"
+                                           dataContainer="companyDc"
+                                           optionsContainer="countryOfCompaniesDc"
+                                           property="countryOfCompany"
+                                           width="100%"
+                                           caption="msg://msgCountryOfCompany"
+                                           required="true">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <textArea id="addressOfCompanyField"
+                                  dataContainer="companyDc"
+                                  property="addressOfCompany"
+                                  width="100%"
+                                  rows="5"
                                   caption="msg://mshCompanyAddress"/>
-                    </column>
-                </form>
+                    </vbox>
+                    <vbox align="TOP_RIGHT"
+                          width="AUTO"
+                          spacing="true"
+                          height="100%">
+                        <vbox id="dropZone"
+                              spacing="true"
+                              width="200px"
+                              height="266px"
+                              align="BOTTOM_RIGHT"
+                              expand="companyLogoFileImage"
+                              stylename="dropzone-container">
+                            <image id="companyLogoFileImage"
+                                   dataContainer="companyDc"
+                                   property="fileCompanyLogo"
+                                   width="100%"
+                                   align="TOP_RIGHT"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <upload id="companyLogoFileUpload"
+                                    fileStoragePutMode="IMMEDIATE"
+                                    dataContainer="companyDc"
+                                    align="BOTTOM_CENTER"
+                                    showFileName="false"
+                                    dropZone="dropZone"
+                                    showClearButton="true"
+                                    property="fileCompanyLogo"/>
+                        </vbox>
+                    </vbox>
+                </hbox>
             </tab>
-            <tab caption="mainMsg://msgCompanyDepartament" margin="true,false,false,false" spacing="true" id="tabCompanyDepartament">
-                <groupBox id="departmentOfCompanyBox" caption="msg://com.company.itpearls.entity/Company.departmentOfCompany">
-                    <table id="departmentOfCompanyTable" dataContainer="departmentOfCompanyDc" width="100%" height="200px">
-                        <actions>
-                            <action id="create" type="create"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
-                        <columns>
-                            <column id="departamentRuName"/>
-                        </columns>
-                        <buttonsPanel>
-                            <button action="departmentOfCompanyTable.create"/>
-                            <button action="departmentOfCompanyTable.edit"/>
-                            <button action="departmentOfCompanyTable.remove"/>
-                        </buttonsPanel>
-                    </table>
-                </groupBox>
+            <tab caption="mainMsg://msgCompanyDepartament"
+                 margin="true,true,true,true"
+                 expand="departmentOfCompanyTable"
+                 spacing="true"
+                 id="tabCompanyDepartament">
+                <dataGrid id="departmentOfCompanyTable"
+                       dataContainer="departmentOfCompanyDc"
+                       width="100%">
+                    <actions>
+                        <action id="create" type="create"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
+                    <columns>
+                        <column id="departamentRuName" property="departamentRuName"/>
+                        <column id="departamentDirector" property="departamentDirector"/>
+                        <column id="departamentHrDirector" property="departamentHrDirector"/>
+                    </columns>
+                    <buttonsPanel>
+                        <button action="departmentOfCompanyTable.create"/>
+                        <button action="departmentOfCompanyTable.edit"/>
+                        <button action="departmentOfCompanyTable.remove"/>
+                    </buttonsPanel>
+                </dataGrid>
             </tab>
         </tabSheet>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions"
+              spacing="true"
+              align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

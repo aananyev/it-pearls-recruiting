@@ -2,6 +2,7 @@ package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -57,6 +58,11 @@ public class Company extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COUNTRY_OF_COMPANY_ID")
     protected Country countryOfCompany;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_COMPANY_LOGO")
+    protected FileDescriptor fileCompanyLogo;
+
 
     @Lob
     @Column(name = "ADDRESS_OF_COMPANY")
@@ -140,5 +146,13 @@ public class Company extends StandardEntity {
 
     public void setComanyName(String comanyName) {
         this.comanyName = comanyName;
+    }
+
+    public void setFileCompanyLogo(FileDescriptor fileCompanyLogo) {
+        this.fileCompanyLogo = fileCompanyLogo;
+    }
+
+    public FileDescriptor getFileCompanyLogo() {
+        return fileCompanyLogo;
     }
 }
