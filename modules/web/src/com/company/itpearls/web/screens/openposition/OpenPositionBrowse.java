@@ -84,7 +84,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
     private Icons.Icon openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        String  returnIcon = "";
+        String returnIcon = "";
 
         switch (event.getItem().getRemoteWork()) {
             case 1:
@@ -216,37 +216,71 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable", subject = "detailsGenerator")
     private Component openPositionsTableDetailsGenerator(OpenPosition entity) {
         VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
+        mainLayout.setSpacing(true);
         mainLayout.setWidth("100%");
         mainLayout.setMargin(true);
 
         HBoxLayout headerBox = setHeaderBox(entity);
-        HBoxLayout infoBox = setInfoOpenPositionBix(entity);
-        HBoxLayout projectDescription = setProjectDescription(entity);
+        HBoxLayout bodyBox = uiComponents.create(HBoxLayout.NAME);
+
+        VBoxLayout infoBox = setInfoOpenPositionBix(entity);
+        infoBox.setSpacing(true);
+
+        VBoxLayout projectDescription = setProjectDescription(entity);
+        projectDescription.setWidthFull();
+        projectDescription.setSpacing(true);
+
+        bodyBox.add(infoBox);
+        if (projectDescription != null) bodyBox.add(projectDescription);
+
+        bodyBox.expand(projectDescription);
 
         mainLayout.add(headerBox);
-        mainLayout.add(infoBox);
-        if(projectDescription != null) mainLayout.add(projectDescription);
-
+        mainLayout.add(bodyBox);
 
         return mainLayout;
     }
 
-    private HBoxLayout setProjectDescription(OpenPosition entity) {
-        return null;
+    private VBoxLayout setProjectDescription(OpenPosition entity) {
+        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
+        retBox.setWidthFull();
+
+        if (entity.getProjectName().getProjectDescription() != null) {
+            Label title = uiComponents.create(Label.NAME);
+            title.setStyleName("h3");
+            title.setValue("Краткое описание проекта");
+
+            retBox.add(title);
+
+            TextArea description = uiComponents.create(TextArea.NAME);
+            description.setValue(Jsoup.parse(entity.getProjectName().getProjectDescription()).text());
+            description.setWidthAuto();
+            description.setWordWrap(true);
+            description.setStyleName("borderless");
+
+            retBox.add(description);
+            retBox.expand(description);
+        }
+
+        return retBox;
     }
 
-    private HBoxLayout setInfoOpenPositionBix(OpenPosition entity) {
-        HBoxLayout retBox = uiComponents.create(HBoxLayout.NAME);
+    private VBoxLayout setInfoOpenPositionBix(OpenPosition entity) {
+        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
+        retBox.setSpacing(true);
+
         VBoxLayout projectBox = getProjectBox(entity);
         VBoxLayout companyLogo = getCompanyLogo(entity);
 
         retBox.add(projectBox);
+        if(companyLogo != null ) retBox.add(companyLogo);
 
         return retBox;
     }
 
     private VBoxLayout getCompanyLogo(OpenPosition entity) {
         VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
+        retBox.setSpacing(true);
 
         Image companyLogo = uiComponents.create(Image.NAME);
         companyLogo.setAlignment(Component.Alignment.TOP_RIGHT);
@@ -261,19 +295,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .setFileDescriptor(fileDescriptor);
             companyLogo.setSource(fileDescriptorResource);
             companyLogo.setVisible(true);
+            retBox.add(companyLogo);
+            return retBox;
         } else {
             companyLogo.setVisible(false);
+            return null;
         }
 
-        retBox.add(companyLogo);
-
-        return retBox;
     }
 
     private VBoxLayout getProjectBox(OpenPosition entity) {
         VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
 
-        Label   title = uiComponents.create(Label.NAME);
+        Label title = uiComponents.create(Label.NAME);
         title.setStyleName("h3");
         title.setValue("Проект и компания");
         retBox.add(title);
@@ -286,11 +320,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         departaMentName.setValue("Департамент: " + entity.getProjectName().getProjectDepartment().getDepartamentRuName());
         retBox.add(departaMentName);
 
-        Label projectName  = uiComponents.create(Label.NAME);
+        Label projectName = uiComponents.create(Label.NAME);
         projectName.setValue("Проект: " + entity.getProjectName().getProjectName());
         retBox.add(projectName);
 
-        if(entity.getProjectName().getProjectOwner() != null) {
+        if (entity.getProjectName().getProjectOwner() != null) {
             Label projectOwner = uiComponents.create(Label.NAME);
             projectOwner.setValue("Владелец проекта: " + entity.getProjectName().getProjectOwner().getSecondName()
                     + " "
@@ -317,6 +351,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private HBoxLayout setHeaderBox(OpenPosition openPosition) {
         HBoxLayout ret = uiComponents.create(HBoxLayout.NAME);
+        ret.setSpacing(true);
 
         ret.setWidth("100%");
         ret.setHeight("100%");
@@ -328,7 +363,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         Component closeButton = createCloseButton(openPosition);
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
-        ret.add(infoLabel);
+//        ret.add(infoLabel);
         ret.add(closeButton);
 
         return ret;
