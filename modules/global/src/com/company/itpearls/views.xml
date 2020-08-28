@@ -189,7 +189,6 @@
     </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" fetch="JOIN" view="_local"/>
-        <property name="companyDirector" view="_minimal"/>
         <property name="departmentOfCompany" view="_local">
             <property name="companyName" view="_local"/>
         </property>
@@ -197,6 +196,7 @@
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
         <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="companyDirector" view="_local"/>
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="candidate" view="_minimal">

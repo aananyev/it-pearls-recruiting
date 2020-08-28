@@ -1,9 +1,11 @@
 package com.company.itpearls.web.screens.openposition;
 
+import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
@@ -24,6 +26,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.company.itpearls.web.screens.openposition.OpenPositionEdit.ADMINISTRATOR;
 
 @UiController("itpearls_OpenPosition.browse")
 @UiDescriptor("open-position-browse.xml")
@@ -48,12 +52,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private GetRoleService getRoleService;
     @Inject
     private DataGrid<OpenPosition> openPositionsTable;
-
-    private String ROLE_MANAGER = "Manager";
-    private String ROLE_ADMINISTRATOR = "Administrators";
-    Map<String, Integer> remoteWork = new LinkedHashMap<>();
     @Inject
     private UiComponents uiComponents;
+
+    private String ROLE_MANAGER = "Manager";
+    private static final String MANAGEMENT_GROUP = "Менеджмент";
+    private static final String HUNTING_GROUP = "Хантинг";
+    private String ROLE_ADMINISTRATOR = "Administrators";
+    private Map<String, Integer> remoteWork = new LinkedHashMap<>();
+    @Inject
+    private UserSessionSource userSessionSource;
+
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -221,19 +230,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         mainLayout.setMargin(true);
 
         HBoxLayout headerBox = setHeaderBox(entity);
+        headerBox.setWidth("100%");
+        headerBox.setHeight("100%");
+
         HBoxLayout bodyBox = uiComponents.create(HBoxLayout.NAME);
 
-        VBoxLayout infoBox = setInfoOpenPositionBix(entity);
+        HBoxLayout infoBox = setInfoOpenPositionBix(entity);
         infoBox.setSpacing(true);
 
-        VBoxLayout projectDescription = setProjectDescription(entity);
-        projectDescription.setWidthFull();
-        projectDescription.setSpacing(true);
-
         bodyBox.add(infoBox);
-        if (projectDescription != null) bodyBox.add(projectDescription);
-
-        bodyBox.expand(projectDescription);
 
         mainLayout.add(headerBox);
         mainLayout.add(bodyBox);
@@ -243,7 +248,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private VBoxLayout setProjectDescription(OpenPosition entity) {
         VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
-        retBox.setWidthFull();
+        retBox.setWidthAuto();
 
         if (entity.getProjectName().getProjectDescription() != null) {
             Label title = uiComponents.create(Label.NAME);
@@ -265,15 +270,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retBox;
     }
 
-    private VBoxLayout setInfoOpenPositionBix(OpenPosition entity) {
-        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
-        retBox.setSpacing(true);
+    private HBoxLayout setInfoOpenPositionBix(OpenPosition entity) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.NAME);
 
         VBoxLayout projectBox = getProjectBox(entity);
+        projectBox.setWidthAuto();
+
+        VBoxLayout projectDescription = setProjectDescription(entity);
+        projectDescription.setWidthAuto();
+
         VBoxLayout companyLogo = getCompanyLogo(entity);
 
         retBox.add(projectBox);
-        if(companyLogo != null ) retBox.add(companyLogo);
+        if (projectDescription != null) retBox.add(projectDescription);
+        retBox.expand(projectDescription);
+
+        if (companyLogo != null) retBox.add(companyLogo);
 
         return retBox;
     }
@@ -337,6 +349,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retBox;
     }
 
+    private Component createEditButton(OpenPosition entity) {
+        Button editButton = uiComponents.create(Button.class);
+        editButton.setCaption("Редактирование");
+        editButton.setAlignment(Component.Alignment.TOP_RIGHT);
+
+        BaseAction editAction = new BaseAction("edit")
+                .withHandler(actionPerformedEvent -> {
+                    screenBuilders.editor(OpenPosition.class, this)
+                            .editEntity(entity)
+                            .build()
+                            .show();
+                })
+                .withCaption("");
+        editButton.setAction(editAction);
+        return editButton;
+    }
 
     private Component createCloseButton(OpenPosition entity) {
         Button closeButton = uiComponents.create(Button.class);
@@ -361,10 +389,29 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         infoLabel.setStyleName("h3");
         infoLabel.setValue("Информация о вакансии:");
 
+        HBoxLayout buttonBox = uiComponents.create(HBoxLayout.NAME);
+        buttonBox.setSpacing(true);
         Component closeButton = createCloseButton(openPosition);
+        Component editButton = createEditButton(openPosition);
+
+        buttonBox.add(editButton);
+        buttonBox.add(closeButton);
+
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
-//        ret.add(infoLabel);
-        ret.add(closeButton);
+        editButton.setAlignment(Component.Alignment.TOP_RIGHT);
+
+        if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
+                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP) ||
+                userSession.getUser().getName().equals(ADMINISTRATOR)) {
+            editButton.setVisible(true);
+        } else {
+            editButton.setVisible(false);
+        }
+
+        // ret.add(editButton);
+        // ret.add(closeButton);
+        ret.add(buttonBox);
+        buttonBox.setAlignment(Component.Alignment.TOP_RIGHT);
 
         return ret;
     }

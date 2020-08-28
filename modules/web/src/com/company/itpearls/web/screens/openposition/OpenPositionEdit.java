@@ -1079,6 +1079,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                         .editEntity(positionTypeField.getValue())
                         .withScreenClass(PositionEdit.class)
                         .withLaunchMode(OpenMode.DIALOG)
+                        .withParentDataContext(dataContext)
                         .build()
                         .show();
 

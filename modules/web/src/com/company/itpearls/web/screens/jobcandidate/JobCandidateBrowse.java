@@ -18,6 +18,7 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import javax.security.auth.callback.LanguageCallback;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -262,7 +263,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         titleContacts.setStyleName("h3");
 
         Label titleIteraction = uiComponents.create(Label.NAME);
-        titleIteraction.setValue("Последнее взаимодействия с кандидатом на позицию");
+        titleIteraction.setValue("Последнее взаимодействия");
         titleIteraction.setStyleName("h3");
 
         contacts.add(titleContacts);
@@ -310,24 +311,25 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         String getLastContacter = getLastContacter(iteractionList, RECRUTIER_GROUP);
 
         Label lastRecrutier = uiComponents.create(Label.NAME);
-        lastRecrutier.setValue( !getLastContacter.equals("") ?
-                ( RECRUTIER_GROUP
-                + ": " + getLastContacter
-                + " (" + getLastIteraction(iteractionList, RECRUTIER_GROUP) + ")") :
+        lastRecrutier.setValue(!getLastContacter.equals("") ?
+                (RECRUTIER_GROUP
+                        + ": " + getLastContacter
+                        + " (" + getLastIteraction(iteractionList, RECRUTIER_GROUP) + ")") :
                 "");
 
         getLastContacter = getLastContacter(iteractionList, RESEARCHER_GROUP);
         Label lastResearcher = uiComponents.create(Label.NAME);
-        lastResearcher.setValue( !getLastContacter.equals("") ?
+        lastResearcher.setValue(!getLastContacter.equals("") ?
                 (RESEARCHER_GROUP
-                + ": " + getLastContacter
-                + " (" + getLastIteraction(iteractionList, RESEARCHER_GROUP) + ")" ): "");
+                        + ": " + getLastContacter
+                        + " (" + getLastIteraction(iteractionList, RESEARCHER_GROUP) + ")") : "");
 
         iteraction.add(titleIteraction);
-        iteraction.add(lastProject);
+        if(!getLastProject(iteractionList).equals("")) iteraction.add(lastProject);
         iteraction.add(vacansyName);
-        if(!lastRecrutier.getValue().equals("")) iteraction.add(lastRecrutier);
-        if(!lastResearcher.getValue().equals("")) iteraction.add(lastResearcher);
+        iteraction.add(getLastIteraction(iteractionList));
+        if (!lastRecrutier.getValue().equals("")) iteraction.add(lastRecrutier);
+        if (!lastResearcher.getValue().equals("")) iteraction.add(lastResearcher);
 
         setIteraction(iteraction);
         setStatistics(statistics);
@@ -347,6 +349,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         headerBox.add(editButton);
         headerBox.add(closeButton);
         headerBox.expand(infoLabel);
+        headerBox.setSpacing(true);
 
         mainLayout.add(headerBox);
         mainLayout.add(header2Box);
@@ -354,6 +357,34 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         mainLayout.expand(hBoxLayout);
 
         return mainLayout;
+    }
+
+    private HBoxLayout getLastIteraction(List<IteractionList> iteractionList) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.NAME);
+        Label dateIteraction = uiComponents.create(Label.NAME);
+        Label retLab = uiComponents.create(Label.NAME);
+        Label add = uiComponents.create((Label.NAME));
+        String addInfo = "";
+
+        if (iteractionList.size() != 0) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+            dateIteraction.setValue(simpleDateFormat.format(iteractionList.get(0).getDateIteraction()) + ":");
+            retLab.setValue(iteractionList.get(0).getIteractionType().getIterationName());
+
+            if (iteractionList.get(0).getAddDate() != null) {
+                add.setValue(" (" + simpleDateFormat.format(iteractionList.get(0).getAddDate()) + ")");
+            }
+        } else {
+            return null;
+        }
+
+        retBox.add(dateIteraction);
+        retBox.add(retLab);
+        if (!addInfo.equals(""))
+            retBox.add(add);
+
+        return retBox;
     }
 
     private void setIteraction(VBoxLayout iteraction) {
@@ -367,15 +398,17 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         statistics.add(titleStatistics);
     }
 
-    private Object getLastProject(List<IteractionList> iteractionList) {
+    private String getLastProject(List<IteractionList> iteractionList) {
+        String retStr = "";
+
         for (IteractionList a : iteractionList) {
             if (a.getProject() != null)
-                return a.getProject().getProjectName();
+                retStr = a.getProject().getProjectName();
             else
-                return "";
+                retStr = "";
         }
 
-        return "";
+        return retStr;
     }
 
     private String getLastContacter(List<IteractionList> iteractionList, String contecter) {
@@ -432,8 +465,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Button editButton = uiComponents.create(Button.class);
         editButton.setCaption("Редактирование");
         BaseAction editAction = new BaseAction("edit")
-                .withHandler(actionPerformedEvent ->
-                        jobCandidatesTable.setDetailsVisible(entity, false))
+                .withHandler(actionPerformedEvent -> {
+                    screenBuilders.editor(JobCandidate.class, this)
+                            .editEntity(entity)
+                            .build()
+                            .show();
+                })
                 .withCaption("");
         editButton.setAction(editAction);
         return editButton;

@@ -33,8 +33,12 @@ order by e.secondName, e.firstName]]></query>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <tabSheet id="tabSheetDepartment">
-            <tab id="tabEditProject" caption="msg://TabProject" margin="true,false,false,false" spacing="true">
+        <tabSheet id="tabSheetDepartment"
+                  stylename="framed">
+            <tab id="tabEditProject"
+                 caption="msg://TabProject"
+                 margin="true,true,true,true"
+                 spacing="true">
                 <groupBox spacing="true" height="80%">
                     <textField id="departamentRuNameField" width="50%"
                                caption="msg://msgDepartamentName" dataContainer="companyDepartamentDc"

@@ -87,9 +87,14 @@ order by e.vacansyName]]>
                                     <action id="open" type="picker_open"/>
                                 </actions>
                             </lookupPickerField>
-                            <lookupPickerField id="resumePositionField" optionsContainer="resumePositionsDc"
-                                               dataContainer="candidateCVDc" property="resumePosition"
-                                               caption="msg://msgPosition" height="50%" width="70%">
+                            <lookupPickerField id="resumePositionField"
+                                               optionsContainer="resumePositionsDc"
+                                               dataContainer="candidateCVDc"
+                                               property="resumePosition"
+                                               caption="msg://msgPosition"
+                                               height="50%"
+                                               required="true"
+                                               width="70%">
                                 <actions>
                                     <action id="lookup" type="picker_lookup"/>
                                 </actions>
