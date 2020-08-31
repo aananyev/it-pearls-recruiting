@@ -6,6 +6,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.GetUserRoleService;
 import com.company.itpearls.web.screens.position.PositionEdit;
+import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
@@ -71,6 +72,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private EmailInfo emailInfo;
     private String emails = "";
     private Boolean setOK;
+    private static final String MANAGEMENT_GROUP = "Менеджмент";
+    private static final String HUNTING_GROUP = "Хантинг";
 
     @Inject
     private Dialogs dialogs;
@@ -155,6 +158,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private RichTextArea templateLetterRichTextArea;
     @Inject
     private CollectionLoader<Position> positionTypesLc;
+    @Inject
+    private Screens screens;
+    @Inject
+    private Button groupSubscribe;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -513,6 +520,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // скрыть менеджерские пункты
         if (isUserRoles(userSession.getUser(), MANAGER) || isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
             groupBoxPaymentsDetail.setVisible(true);
+            groupBoxPaymentsDetail.setCollapsable(true);
             groupBoxPaymentsResearcher.setVisible(true);
             groupBoxPaymentsRecrutier.setVisible(true);
         } else {
@@ -958,6 +966,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onInit(InitEvent event) {
         setRadioButtons();
+        setGroupSubscribeButton();
+    }
+
+    private void setGroupSubscribeButton() {
+        groupSubscribe.setVisible(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
+                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP));
     }
 
     @Install(to = "priorityField", subject = "optionIconProvider")
@@ -1050,9 +1064,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private String generatePositionNameCity() {
         String retValue = vacansyNameField.getValue();
 
-        if(cityOpenPositionField.getValue() != null) {
-            if(generatePositionNameInProject().equals(retValue)) {
-                retValue = retValue.substring(0, retValue.length() - 1) + ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            if (cityOpenPositionField.getValue() != null) {
+                if (generatePositionNameInProject().equals(retValue)) {
+                    retValue = retValue.substring(0, retValue.length() - 1) + ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+                }
             }
         }
 
@@ -1130,5 +1146,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             openClosePosition();
         }
 
+    }
+
+    public void groupSubscribe() {
+        screens.create(RecrutiesTasksGroupSubscribeBrowse.class).show();
     }
 }

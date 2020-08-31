@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd"
         caption="msg://editorCaption"
         focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.jobcandidate" icon="USER">
@@ -80,6 +81,23 @@ order by e.cityRuName]]>
                     <condition>
                         <c:jpql>
                             <c:where>e.jobCandidate = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="iteractionCandidateGanttDc" class="com.company.itpearls.entity.IteractionList">
+            <view extends="iteractionList-view">
+                <property name="project" view="_local"/>
+                <property name="dateIteraction"/>
+                <property name="vacancy" view="_local"/>
+            </view>
+            <loader id="iteractionCandidateGanttDl">
+                <query>
+                    <![CDATA[select e from itpearls_IteractionList e group by e.project]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidate = :candidate</c:where>
                         </c:jpql>
                     </condition>
                 </query>
@@ -205,7 +223,44 @@ order by e.cityRuName]]>
                                 showClearButton="true"
                                 property="fileImageFace"/>
                     </vbox>
+                    <chart:ganttChart id="jobIteractionHistoryGantt"
+                                      additionalSegmentFields="task"
+                                      balloonDateFormat="JJ:NN"
+                                      brightnessStep="7"
+                                      categoryField="project"
+                                      colorField="color"
+                                      columnWidth="0.5"
+                                      dataContainer="iteractionCandidateGanttDc"
+                                      endDateField="end"
+                                      height="100%"
+                                      marginRight="70"
+                                      period="DAYS"
+                                      rotate="true"
+                                      segmentsField="iteractionType"
+                                      startDate="2016-01-01"
+                                      startDateField="start"
+                                      theme="LIGHT"
+                                      width="100%">
+                        <chart:graph balloonText="&lt;strong&gt;[[task]]&lt;/strong&gt;: [[open]] - [[value]]"
+                                     fillAlphas="1"
+                                     lineAlpha="1"
+                                     lineColor="WHITE"/>
+                        <chart:valueAxis type="DATE"/>
+                        <chart:valueScrollbar autoGridCount="true"
+                                              color="BLACK"/>
+                        <chart:chartCursor cursorAlpha="0"
+                                           cursorColor="#55bb76"
+                                           fullWidth="true"
+                                           valueLineAlpha="0.5"
+                                           valueBalloonsEnabled="false"
+                                           valueLineBalloonEnabled="true"
+                                           valueLineEnabled="true"
+                                           valueZoomable="true"
+                                           zoomable="false"/>
+                        <chart:export/>
+                    </chart:ganttChart>
                 </hbox>
+
             </tab>
             <tab id="tabCandidate"
                  caption="msg://candidate"
@@ -375,8 +430,8 @@ order by e.cityRuName]]>
                     </actions>
                 </lookupPickerField>
                 <dataGrid id="jobCandidateSkillListTable"
-                            width="100%"
-                            dataContainer="jobCandidateSkillsesDc">
+                          width="100%"
+                          dataContainer="jobCandidateSkillsesDc">
                     <columns>
                         <column id="skillName" caption="mainMsg://msgSkills" property="skillName"/>
                     </columns>

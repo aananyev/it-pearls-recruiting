@@ -18,6 +18,8 @@
     <menu id="application-researching" insertAfter="application-project">
         <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>
         <item screen="itpearls_SubscribeCandidateAction.browse" icon="CLONE"/>
+        <item screen="itpearls_RecrutiesGroupSubscribeTasks.browse"
+              caption="mainMsg://menu_config.itpearls_RecrutiesGroupSubscribeTasks.browse"/>
     </menu>
     <menu id="application-hadbook" insertAfter="application-researching">
         <item screen="itpearls_Iteraction._tree.browse" icon="REFRESH_ACTION"/>

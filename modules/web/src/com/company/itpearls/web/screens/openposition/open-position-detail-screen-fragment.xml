@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <data>
+        <collection id="openPositionsDc"
+                    class="com.company.itpearls.entity.OpenPosition"
+                    provided="true"/>
+    </data>
+    <layout expand="bodyInfoVBox">
+            <hbox id="bodyInfoVBox"
+                  spacing="true"
+                  expand="projectDescriptionVBox">
+                <vbox id="projectCompanyVBox">
+                    <label id="projectCompanyTitleLabel"
+                           stylename="h3"
+                           value="msg://msgProjectCompany"/>
+                    <field>
+                    <textField id="projectCompanyTitleTextField" align="TOP_LEFT"
+                               editable="false"
+                               caption="msg://msgVacansy"
+                               dataContainer="openPositionsDc"
+                               stylename="borderless"
+                               property="positionType"/>
+                    <textField id="conpanyTextField"
+                               editable="false"
+                               caption="msg://msgCompany"
+                               dataContainer="openPositionsDc"
+                               stylename="borderless"
+                               property="projectName.projectDepartment.companyName"/>
+                    <textField id="departamentTextField"
+                               editable="false"
+                               caption="msg://msgDepartament"
+                               dataContainer="openPositionsDc"
+                               stylename="borderless"
+                               property="projectName.projectDepartment"/>
+                    <textField id="projectTextField"
+                               editable="false"
+                               caption="msg://msgProject"
+                               dataContainer="openPositionsDc"
+                               stylename="borderless"
+                               property="projectName"/>
+                    </field>
+                </vbox>
+                <vbox id="projectDetailVbox">
+                    <label id="projectDetailTitleLabel" stylename="h3" value="msg://msgProjectDetailTitle"/>
+                </vbox>
+                <vbox id="projectDescriptionVBox"
+                      expand="shortDescriptionTextArea">
+                    <label id="projectDescriptionLabel" stylename="h3" value="msg://mspProjectDescription"/>
+                    <textArea id="shortDescriptionTextArea"
+                              stylename="borderless"
+                              editable="false"
+                              width="100%"
+                              height="100%"
+                              dataContainer="openPositionsDc"
+                              property="shortDescription"/>
+                </vbox>
+                <vbox id="companyLogoVBox" align="TOP_RIGHT">
+                    <image id="companyLogoImage"
+                           align="TOP_RIGHT"
+                           stylename="widget-border"
+                           width="150px"
+                           dataContainer="openPositionsDc"
+                           scaleMode="FILL"
+                           property="projectName.projectDepartment.companyName.fileCompanyLogo"/>
+                </vbox>
+            </hbox>
+    </layout>
+</fragment>

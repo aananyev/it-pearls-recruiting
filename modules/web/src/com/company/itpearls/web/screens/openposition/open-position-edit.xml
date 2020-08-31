@@ -483,6 +483,7 @@
                 <richTextArea id="exerciseRichTextArea"
                               dataContainer="openPositionDc"
                               property="exercise"
+                              height="AUTO"
                               width="100%"/>
             </tab>
             <tab id="tabTemplateLetter"
@@ -501,9 +502,9 @@
                               caption="msg://msgNeedLetter"/>
                     <richTextArea id="templateLetterRichTextArea"
                                   dataContainer="openPositionDc"
-                                  box.expandRatio="1"
                                   property="templateLetter"
                                   width="100%"
+                                  height="AUTO"
                                   required="false"/>
                 </vbox>
             </tab>
@@ -514,7 +515,7 @@
                  expand="openPositionSkillsListTable"
                  icon="FILTER">
                 <dataGrid id="openPositionSkillsListTable"
-                          height="300px"
+                          height="100%"
                           width="100%"
                           dataContainer="openPositionSkillsListsDc">
                     <columns>
@@ -544,6 +545,7 @@
                  icon="ANDROID">
                 <dataGrid id="recrutiesTasksTable"
                           width="100%"
+                          height="100%"
                           dataContainer="taskRecrutior">
                     <columns>
                         <column id="startDate"
@@ -557,6 +559,10 @@
                     </columns>
                     <rowsCount/>
                     <buttonsPanel>
+                        <button id="groupSubscribe"
+                                invoke="groupSubscribe"
+                                caption="msg://msgGroupSubscribe"
+                                icon="BELL_O"></button>
                         <button action="recrutiesTasksTable.create"/>
                         <button action="recrutiesTasksTable.edit"/>
                         <button action="recrutiesTasksTable.remove"/>
@@ -569,7 +575,9 @@
                 </dataGrid>
             </tab>
         </tabSheet>
-        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+        <hbox id="editActions"
+              spacing="true"
+              align="BOTTOM_RIGHT">
             <button id="openClosePosition" invoke="openClosePosition" icon="CLOSE"/>
             <button invoke="subscribePosition" caption="msg://msgSubscribe" icon="BELL"/>
             <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>

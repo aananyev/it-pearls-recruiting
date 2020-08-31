@@ -126,6 +126,10 @@
                         caption="msg://mshSubscibe"
                         invoke="subscribePosition"
                         icon="BELL"/>
+                <button id="groupSubscribe"
+                        caption="msg://msgGroupSubscribe"
+                        invoke="groupSubscribe"
+                        icon="BELL_O"/>
                 <button id="buttonExcel"
                         action="openPositionsTable.excel"
                         icon="EXCEL_ACTION"

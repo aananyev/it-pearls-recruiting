@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
+import com.haulmont.charts.gui.components.charts.GanttChart;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
@@ -118,6 +119,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Image candidatePic;
     @Inject
     private FileUploadField fileImageFaceUpload;
+    @Inject
+    private CollectionLoader<IteractionList> iteractionCandidateGanttDl;
+    @Inject
+    private CollectionContainer<IteractionList> iteractionCandidateGanttDc;
+    @Inject
+    private GanttChart jobIteractionHistoryGantt;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -521,6 +528,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onInit(InitEvent event) {
         addIconColumn();
+        addCandidateGanttChart();
+    }
+
+    private void addCandidateGanttChart() {
+        iteractionCandidateGanttDl.setParameter("candidate", getEditedEntity());
+        iteractionCandidateGanttDl.load();
+
+        jobIteractionHistoryGantt.setStartDate(iteractionCandidateGanttDc.getItem().getDateIteraction());
     }
 
     private Boolean needDublicateDialog() {
