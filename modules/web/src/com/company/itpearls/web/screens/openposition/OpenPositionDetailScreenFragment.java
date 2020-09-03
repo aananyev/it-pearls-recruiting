@@ -19,17 +19,4 @@ import javax.inject.Inject;
 @UiController("itpearls_OpenPositionDetailScreenFragment")
 @UiDescriptor("open-position-detail-screen-fragment.xml")
 public class OpenPositionDetailScreenFragment extends ScreenFragment {
-    @Inject
-    private TextArea<String> commentTextArea;
-    @Inject
-    private TextField<String> middleNameTextField;
-
-    @Subscribe
-    public void onAfterInit(AfterInitEvent event) {
-        commentTextArea.setValue(Jsoup.parse(commentTextArea.getRawValue()).text());
-
-        if(middleNameTextField.getValue().equals(null)) {
-            middleNameTextField.setVisible(false);
-        }
-    }
 }

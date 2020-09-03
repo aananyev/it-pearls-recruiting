@@ -1,6 +1,12 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 
+.label-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .text-field-title-form {
         font-size: medium;
         border-radius: 4px;
