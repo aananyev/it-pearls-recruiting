@@ -5,64 +5,190 @@
                     class="com.company.itpearls.entity.OpenPosition"
                     provided="true"/>
     </data>
-    <layout expand="bodyInfoVBox">
-            <hbox id="bodyInfoVBox"
-                  spacing="true"
-                  expand="projectDescriptionVBox">
-                <vbox id="projectCompanyVBox">
-                    <label id="projectCompanyTitleLabel"
-                           stylename="h3"
-                           value="msg://msgProjectCompany"/>
-                    <field>
-                    <textField id="projectCompanyTitleTextField" align="TOP_LEFT"
-                               editable="false"
-                               caption="msg://msgVacansy"
-                               dataContainer="openPositionsDc"
-                               stylename="borderless"
-                               property="positionType"/>
-                    <textField id="conpanyTextField"
-                               editable="false"
-                               caption="msg://msgCompany"
-                               dataContainer="openPositionsDc"
-                               stylename="borderless"
-                               property="projectName.projectDepartment.companyName"/>
-                    <textField id="departamentTextField"
-                               editable="false"
-                               caption="msg://msgDepartament"
-                               dataContainer="openPositionsDc"
-                               stylename="borderless"
-                               property="projectName.projectDepartment"/>
-                    <textField id="projectTextField"
-                               editable="false"
-                               caption="msg://msgProject"
-                               dataContainer="openPositionsDc"
-                               stylename="borderless"
-                               property="projectName"/>
-                    </field>
-                </vbox>
-                <vbox id="projectDetailVbox">
-                    <label id="projectDetailTitleLabel" stylename="h3" value="msg://msgProjectDetailTitle"/>
-                </vbox>
-                <vbox id="projectDescriptionVBox"
-                      expand="shortDescriptionTextArea">
-                    <label id="projectDescriptionLabel" stylename="h3" value="msg://mspProjectDescription"/>
-                    <textArea id="shortDescriptionTextArea"
-                              stylename="borderless"
-                              editable="false"
-                              width="100%"
-                              height="100%"
-                              dataContainer="openPositionsDc"
-                              property="shortDescription"/>
-                </vbox>
-                <vbox id="companyLogoVBox" align="TOP_RIGHT">
-                    <image id="companyLogoImage"
-                           align="TOP_RIGHT"
-                           stylename="widget-border"
-                           width="150px"
-                           dataContainer="openPositionsDc"
-                           scaleMode="FILL"
-                           property="projectName.projectDepartment.companyName.fileCompanyLogo"/>
-                </vbox>
-            </hbox>
+    <layout width="100%" spacing="false">
+        <hbox spacing="false" height="100%" expand="projectCompanyFieldGroup">
+            <grid id="projectCompanyFieldGroup"
+                  width="100%"
+                  spacing="false"
+                  height="100%">
+                <columns>
+                    <column/>
+                    <column/>
+                    <column/>
+                    <column/>
+                </columns>
+                <rows>
+                    <row>
+                        <label value="msg://msgCompany"
+                               align="BOTTOM_LEFT"
+                               stylename="h3"/>
+                        <label value="msg://msgProjectOwner"
+                               align="BOTTOM_LEFT"
+                               stylename="h3"/>
+                        <label value="msg://msgProjectDetail"
+                               align="BOTTOM_LEFT"
+                               stylename="h3"/>
+                        <label value="msg://msgProjectDescription"
+                               align="BOTTOM_LEFT"
+                               stylename="h3"/>
+                    </row>
+                    <row>
+                        <hbox expand="conpanyTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgCompanyName"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="conpanyTextField"
+                                      align="BOTTOM_LEFT"
+                                      dataContainer="openPositionsDc"
+                                      stylename="borderless"
+                                      width="100%"
+                                      property="projectName.projectDepartment.companyName"/>
+                        </hbox>
+                        <hbox align="BOTTOM_LEFT" spacing="false">
+                            <label value="msg://msgProjectOwner"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="firstNameTextField"
+                                      align="BOTTOM_LEFT"
+                                      property="projectName.projectOwner.firstName"
+                                      dataContainer="openPositionsDc"
+                                      stylename="borderless"/>
+                            <textField id="middleNameTextField"
+                                       property="projectName.projectOwner.secondName"
+                                       align="BOTTOM_LEFT"
+                                       dataContainer="openPositionsDc"
+                                       stylename="borderless"/>
+                            <textField property="projectName.projectOwner.middleName"
+                                      align="BOTTOM_LEFT"
+                                      dataContainer="openPositionsDc"
+                                      stylename="borderless"/>
+                        </hbox>
+                        <hbox expand="salaryMinTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgSalaryMin"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="salaryMinTextField"
+                                      align="BOTTOM_LEFT"
+                                      property="salaryMin"
+                                      stylename="borderless"/>
+                        </hbox>
+                        <hbox expand="shortDescriptionTextArea"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgShortDescription"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="shortDescriptionTextArea"
+                                      align="BOTTOM_LEFT"
+                                      stylename="borderless"
+                                      width="100%"
+                                      dataContainer="openPositionsDc"
+                                      property="shortDescription"/>
+                        </hbox>
+                    </row>
+                    <row>
+                        <hbox expand="departamentTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgProjectDepartament"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="departamentTextField"
+                                      align="BOTTOM_LEFT"
+                                      dataContainer="openPositionsDc"
+                                      stylename="borderless"
+                                      width="100%"
+                                      property="projectName.projectDepartment"/>
+                        </hbox>
+                        <hbox expand="salaryMaxTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgSalaryMax"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="salaryMaxTextField"
+                                       align="BOTTOM_LEFT"
+                                       property="salaryMax"
+                                       stylename="borderless"/>
+                        </hbox>
+                    </row>
+                    <row>
+                        <hbox expand="projectTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgProject"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="projectTextField"
+                                      align="BOTTOM_LEFT"
+                                      dataContainer="openPositionsDc"
+                                      stylename="borderless"
+                                      width="100%"
+                                      property="projectName"/>
+                        </hbox>
+                        <label/>
+                        <hbox expand="startProjectDateTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgStartProjectDate"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="startProjectDateTextField"
+                                      align="BOTTOM_LEFT"
+                                      property="projectName.startProjectDate"
+                                      dataContainer="openPositionsDc"
+                                      stylename="borderless"
+                                      width="100%"/>
+                        </hbox>
+                    </row>
+                    <row>
+                        <hbox expand="cityPositionTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgCity"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="cityPositionTextField"
+                                      align="BOTTOM_LEFT"
+                                      property="cityPosition"
+                                      dataContainer="openPositionsDc"
+                                      stylename="borderless"
+                                      width="100%"/>
+                        </hbox>
+                    </row>
+                    <row>
+                        <label/>
+                        <label/>
+                        <hbox expand="numberPositionTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgNumberPosition"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="numberPositionTextField"
+                                      align="BOTTOM_LEFT"
+                                      property="numberPosition"
+                                      dataContainer="openPositionsDc"
+                                      stylename="borderless"/>
+                        </hbox>
+                    </row>
+                    <row>
+                        <label/>
+                        <label/>
+                        <hbox expand="remoteWorkTextField"
+                              align="BOTTOM_LEFT">
+                            <label value="msg://msgRemoteWork"
+                                   align="BOTTOM_LEFT"/>
+                            <textField id="remoteWorkTextField"
+                                      align="BOTTOM_LEFT"
+                                      property="remoteWork"
+                                      stylename="borderless"/>
+                        </hbox>
+                    </row>
+                    <row>
+                        <textArea id="commentTextArea"
+                                  property="comment"
+                                  align="BOTTOM_LEFT"
+                                  wordWrap="true"
+                                  colspan="3"
+                                  dataContainer="openPositionsDc"
+                                  stylename="borderless"/>
+                    </row>
+                </rows>
+            </grid>
+        </hbox>
+        <image id="companyLogoImage"
+               rowspan="5"
+               stylename="widget-border"
+               width="150px"
+               height="200px"
+               align="TOP_RIGHT"
+               scaleMode="FILL"
+               property="projectName.projectDepartment.companyName.fileCompanyLogo"/>
     </layout>
 </fragment>

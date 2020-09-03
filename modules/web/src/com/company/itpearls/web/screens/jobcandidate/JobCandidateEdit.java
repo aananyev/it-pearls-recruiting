@@ -1,19 +1,14 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
-import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.haulmont.charts.gui.components.charts.GanttChart;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TextField;
-import com.haulmont.cuba.gui.components.data.ValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
@@ -25,7 +20,6 @@ import com.haulmont.cuba.core.global.Metadata;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,6 +31,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
+    private static final String MANAGER_GROUP = "Менеджеры";
+    private static final String RECRUTIER_GROUP = "Рекрутеры";
     @Inject
     private DataManager dataManager;
     @Inject
@@ -253,17 +249,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("tabIteraction")
     public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
-        dialogs.createOptionDialog()
-                .withCaption("Warning")
-                .withMessage("Подписатся на изменение вакансии?")
-                .withActions(
-                        new DialogAction(DialogAction.Type.YES,
-                                Action.Status.PRIMARY).withHandler(e -> {
-                            this.commitChanges();
-                        }),
-                        new DialogAction(DialogAction.Type.NO)
-                )
-                .show();
+        if(!userSession.getUser().getGroup().getName().equals(MANAGER_GROUP) ||
+                !userSession.getUser().getGroup().getName().equals(RECRUTIER_GROUP)) {
+            dialogs.createOptionDialog()
+                    .withCaption("Warning")
+                    .withMessage("Подписатся на изменение вакансии?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(e -> {
+                                this.commitChanges();
+                            }),
+                            new DialogAction(DialogAction.Type.NO)
+                    )
+                    .show();
+        }
     }
 
     @Subscribe("firstNameField")

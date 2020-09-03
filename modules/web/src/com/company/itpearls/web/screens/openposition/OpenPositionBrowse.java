@@ -250,160 +250,44 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         GroupBoxLayout mainLayout = uiComponents.create(GroupBoxLayout.NAME);
         mainLayout.setWidth("100%");
+
+        HBoxLayout titleBox = uiComponents.create(HBoxLayout.NAME);
         HBoxLayout buttonsHBox = uiComponents.create(HBoxLayout.NAME);
+
         buttonsHBox.setSpacing(true);
         buttonsHBox.setAlignment(Component.Alignment.TOP_RIGHT);
 
+        Component fragmentTitle = createTitleFragment(entity);
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
         editButton.setAlignment(Component.Alignment.TOP_RIGHT);
 
+        buttonsHBox.setAlignment(Component.Alignment.BOTTOM_RIGHT);
         buttonsHBox.add(editButton);
         buttonsHBox.add(closeButton);
 
-        mainLayout.add(buttonsHBox);
-        mainLayout.add(openPositionDetailScreenFragment.getFragment());
+        titleBox.add(fragmentTitle);
+        titleBox.add(buttonsHBox);
+        titleBox.setWidthFull();
+
+        mainLayout.add(titleBox);
+
+        Fragment fragment = openPositionDetailScreenFragment.getFragment();
+        fragment.setWidth("100%");
+
+        mainLayout.add(fragment);
 
         return mainLayout;
     }
 
-    private VBoxLayout setProjectDescription(OpenPosition entity) {
-        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
-        retBox.setWidthAuto();
+    private Component createTitleFragment(OpenPosition entity) {
+        Label titleLabel = uiComponents.create(Label.NAME);
+        titleLabel.setStyleName("h2");
+        titleLabel.setValue(entity.getVacansyName());
+        titleLabel.setAlignment(Component.Alignment.BOTTOM_LEFT);
 
-        if (entity.getProjectName().getProjectDescription() != null) {
-            Label title = uiComponents.create(Label.NAME);
-            title.setStyleName("h3");
-            title.setValue("Краткое описание проекта");
-
-            retBox.add(title);
-
-            TextArea description = uiComponents.create(TextArea.NAME);
-            description.setValue(Jsoup.parse(entity.getProjectName().getProjectDescription()).text());
-            description.setWidth("50%");
-            description.setWordWrap(true);
-            description.setStyleName("borderless");
-
-            retBox.add(description);
-            retBox.expand(description);
-        }
-
-        return retBox;
-    }
-
-    private HBoxLayout setInfoOpenPositionBix(OpenPosition entity) {
-        HBoxLayout retBox = uiComponents.create(HBoxLayout.NAME);
-
-        VBoxLayout projectBox = getProjectBox(entity);
-        projectBox.setWidth("20%");
-
-        VBoxLayout projectDescription = setProjectDescription(entity);
-        projectDescription.setWidth("40%");
-
-        VBoxLayout vacansyDetail = setVacansyDetailBox(entity);
-        vacansyDetail.setWidth("20%");
-
-        VBoxLayout companyLogo = getCompanyLogo(entity);
-        companyLogo.setWidth("20%");
-        companyLogo.setAlignment(Component.Alignment.TOP_RIGHT);
-
-        retBox.add(projectBox);
-        retBox.add(vacansyDetail);
-        if (projectDescription != null) retBox.add(projectDescription);
-        retBox.expand(projectDescription);
-
-        if (companyLogo != null) retBox.add(companyLogo);
-
-        return retBox;
-    }
-
-    private VBoxLayout setVacansyDetailBox(OpenPosition entity) {
-        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
-        retBox.setSpacing(false);
-        retBox.setWidth("15%");
-
-        Label vacansyDetailHeader = uiComponents.create(Label.NAME);
-        vacansyDetailHeader.setValue("Детали вакансии");
-        vacansyDetailHeader.setStyleName("h3");
-        Label numberPosition = uiComponents.create(Label.NAME);
-        numberPosition.setValue("Количество вакансий: " + entity.getNumberPosition().toString());
-        Label salaryMin = uiComponents.create(Label.NAME);
-        salaryMin.setValue("Зарплата (min): " + entity.getSalaryMin().toString());
-        Label salaryMax = uiComponents.create(Label.NAME);
-        salaryMax.setValue("Зарплата (max): " + entity.getSalaryMax().toString());
-
-        retBox.add(vacansyDetailHeader);
-        retBox.add(salaryMin);
-        retBox.add(salaryMax);
-
-        return retBox;
-    }
-
-    private VBoxLayout getCompanyLogo(OpenPosition entity) {
-        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
-        retBox.setSpacing(true);
-        retBox.setWidth("20%");
-        retBox.setAlignment(Component.Alignment.TOP_RIGHT);
-
-        Image companyLogo = uiComponents.create(Image.NAME);
-        companyLogo.setHeight("150px");
-        companyLogo.setScaleMode(Image.ScaleMode.FILL);
-        companyLogo.setStyleName("widget-border");
-        companyLogo.setAlignment(Component.Alignment.TOP_RIGHT);
-
-        FileDescriptor fileDescriptor = entity.getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo();
-
-        if (fileDescriptor != null) {
-            FileDescriptorResource fileDescriptorResource = companyLogo.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(fileDescriptor);
-            companyLogo.setSource(fileDescriptorResource);
-            companyLogo.setVisible(true);
-            retBox.add(companyLogo);
-            return retBox;
-        } else {
-            companyLogo.setVisible(false);
-            return null;
-        }
-
-    }
-
-    private VBoxLayout getProjectBox(OpenPosition entity) {
-        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
-        retBox.setWidth("15%");
-
-        Label title = uiComponents.create(Label.NAME);
-        title.setStyleName("h3");
-        title.setValue("Проект и компания");
-        retBox.add(title);
-
-        Label companyName = uiComponents.create(Label.NAME);
-        companyName.setValue("Компания: " + entity.getProjectName().getProjectDepartment().getCompanyName().getComanyName());
-        retBox.add(companyName);
-
-        Label departaMentName = uiComponents.create(Label.NAME);
-        departaMentName.setValue("Департамент: " + entity.getProjectName().getProjectDepartment().getDepartamentRuName());
-        retBox.add(departaMentName);
-
-        Label projectName = uiComponents.create(Label.NAME);
-        projectName.setValue("Проект: " + entity.getProjectName().getProjectName());
-        retBox.add(projectName);
-
-        Label city = uiComponents.create(Label.NAME);
-        city.setValue("Город: " + entity.getCityPosition().getCityRuName());
-        retBox.add(city);
-
-        if (entity.getProjectName().getProjectOwner() != null) {
-            Label projectOwner = uiComponents.create(Label.NAME);
-            projectOwner.setValue("Владелец проекта: " + entity.getProjectName().getProjectOwner().getSecondName()
-                    + " "
-                    + entity.getProjectName().getProjectOwner().getFirstName()
-                    + (entity.getProjectName().getProjectOwner().getMiddleName() != null ?
-                    " " + entity.getProjectName().getProjectOwner().getMiddleName() : ""));
-            retBox.add(projectOwner);
-        }
-
-        return retBox;
+        return titleLabel;
     }
 
     private Component createEditButton(OpenPosition entity) {
