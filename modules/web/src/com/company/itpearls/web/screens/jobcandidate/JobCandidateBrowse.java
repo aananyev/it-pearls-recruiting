@@ -340,8 +340,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         hBoxLayout.add(contacts);
         hBoxLayout.add(iteraction);
-        hBoxLayout.add(candidatePhoto);
         hBoxLayout.add(statistics);
+        hBoxLayout.add(candidatePhoto);
 
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
