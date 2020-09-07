@@ -86,6 +86,7 @@ create table ITPEARLS_ITERACTION_LIST (
     --
     NUMBER_ITERACTION decimal(19, 2),
     DATE_ITERACTION timestamp,
+    END_DATE_ITERACTION timestamp,
     CANDIDATE_ID uuid not null,
     CURRENT_JOB_POSITION_ID uuid,
     VACANCY_ID uuid,

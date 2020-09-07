@@ -534,7 +534,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         iteractionCandidateGanttDl.setParameter("candidate", getEditedEntity());
         iteractionCandidateGanttDl.load();
 
-        jobIteractionHistoryGantt.setStartDate(iteractionCandidateGanttDc.getItem().getDateIteraction());
+//        jobIteractionHistoryGantt.setStartDate(iteractionCandidateGanttDc.getItem().getDateIteraction());
     }
 
     private Boolean needDublicateDialog() {

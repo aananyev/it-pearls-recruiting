@@ -20,8 +20,10 @@ import com.haulmont.cuba.security.global.UserSession;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 @UiController("itpearls_IteractionList.edit")
 @UiDescriptor("iteraction-list-edit.xml")
@@ -485,6 +487,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     break;
             }
         }
+    }
+
+    @Subscribe
+    public void onBeforeClose(BeforeCloseEvent event) {
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setGregorianChange(getEditedEntity().getDateIteraction());
+        gregorianCalendar.add(Calendar.HOUR, 1);
+
+        if(getEditedEntity().getEndDateIteraction() == null) {
+            if(getEditedEntity().getDateIteraction() != null) {
+                getEditedEntity().setEndDateIteraction(gregorianCalendar.getTime());
+            }
+        }
+
     }
 
     private boolean yourCandidate() {

@@ -24,6 +24,10 @@ public class IteractionList extends StandardEntity {
     @Column(name = "DATE_ITERACTION")
     protected Date dateIteraction;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "END_DATE_ITERACTION")
+    protected Date endDateIteraction;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -90,6 +94,14 @@ public class IteractionList extends StandardEntity {
 
     @Column(name = "ADD_INTEGER")
     protected Integer addInteger;
+
+    public void setEndDateIteraction(Date endDateIteraction) {
+        this.endDateIteraction = endDateIteraction;
+    }
+
+    public Date getEndDateIteraction() {
+        return endDateIteraction;
+    }
 
     public Integer getAddInteger() {
         return addInteger;

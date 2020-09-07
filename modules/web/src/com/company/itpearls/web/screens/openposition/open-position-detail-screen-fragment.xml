@@ -8,6 +8,7 @@
     <layout width="100%" spacing="false" expand="mainHBox">
         <hbox id="mainHBox"
               spacing="true"
+              width="100%"
               height="100%"
               expand="projectCompanyFieldGroup">
             <image id="companyLogoImage"
@@ -20,19 +21,16 @@
                    property="projectName.projectDepartment.companyName.fileCompanyLogo"/>
             <grid id="projectCompanyFieldGroup"
                   spacing="false"
+                  width="100%"
                   height="100%">
                 <columns>
-                    <column/>
-                    <column/>
-                    <column/>
+                    <column flex="1"/>
+                    <column flex="1"/>
                     <column flex="1"/>
                 </columns>
                 <rows>
                     <row>
                         <label value="msg://msgCompany"
-                               align="BOTTOM_LEFT"
-                               stylename="h3"/>
-                        <label value="msg://msgProjectOwner"
                                align="BOTTOM_LEFT"
                                stylename="h3"/>
                         <label value="msg://msgProjectDetail"
@@ -46,38 +44,25 @@
                         <hbox expand="conpanyTextField"
                               spacing="true">
                             <label value="msg://msgCompanyName"
+                                   align="BOTTOM_LEFT"
                                    stylename="bold"/>
                             <label id="conpanyTextField"
                                    dataContainer="openPositionsDc"
+                                   align="MIDDLE_LEFT"
                                    property="projectName.projectDepartment.companyName"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label value="msg://msgProjectOwner"
-                                   stylename="bold"
-                                   align="MIDDLE_LEFT"/>
-                            <label id="firstNameTextField"
-                                   align="MIDDLE_LEFT"
-                                   property="projectName.projectOwner.firstName"
-                                   dataContainer="openPositionsDc"/>
-                            <label id="middleNameTextField"
-                                   align="MIDDLE_LEFT"
-                                   property="projectName.projectOwner.secondName"
-                                   dataContainer="openPositionsDc"/>
-                            <label property="projectName.projectOwner.middleName"
-                                   align="MIDDLE_LEFT"
-                                   dataContainer="openPositionsDc"/>
                         </hbox>
                         <hbox spacing="true">
                             <label value="msg://msgSalaryMin"
                                    stylename="bold"
-                                   align="MIDDLE_LEFT"/>
+                                   align="BOTTOM_LEFT"/>
                             <label id="salaryMinTextField"
                                    property="salaryMin"
+                                   align="BOTTOM_LEFT"
                                    dataContainer="openPositionsDc"/>
                         </hbox>
-                        <hbox
-                              spacing="true">
+                        <hbox spacing="true">
                             <label value="msg://msgShortDescription"
+                                   align="BOTTOM_LEFT"
                                    stylename="bold"/>
 
                         </hbox>
@@ -85,24 +70,26 @@
                     <row>
                         <hbox spacing="true">
                             <label stylename="bold"
+                                   align="BOTTOM_LEFT"
                                    value="msg://msgProjectDepartament"/>
                             <label id="departamentTextField"
-                                      dataContainer="openPositionsDc"
-                                      property="projectName.projectDepartment"/>
-                        </hbox>
-                        <hbox>
-
+                                   align="BOTTOM_LEFT"
+                                   dataContainer="openPositionsDc"
+                                   property="projectName.projectDepartment"/>
                         </hbox>
                         <hbox spacing="true">
                             <label value="msg://msgSalaryMax"
+                                   align="BOTTOM_LEFT"
                                    stylename="bold"/>
                             <label id="salaryMaxTextField"
+                                   align="BOTTOM_LEFT"
                                    property="salaryMax"
                                    dataContainer="openPositionsDc"/>
                         </hbox>
-                        <hbox rowspan="4">
+                        <hbox rowspan="5">
                             <textArea id="shortDescriptionTextArea"
                                       stylename="borderless"
+                                      align="BOTTOM_LEFT"
                                       editable="false"
                                       dataContainer="openPositionsDc"
                                       property="shortDescription"/>
@@ -110,18 +97,21 @@
                     </row>
                     <row>
                         <hbox spacing="true">
-                            <label value="msg://msgProject" stylename="bold"/>
+                            <label value="msg://msgProject"
+                                   align="BOTTOM_LEFT"
+                                   stylename="bold"/>
                             <label id="projectTextField"
-                                   stylename="label-ellipsis"
+                                   align="BOTTOM_LEFT"
                                    dataContainer="openPositionsDc"
                                    property="projectName"/>
                         </hbox>
-                        <label/>
                         <hbox spacing="true">
                             <label value="msg://msgStartProjectDate"
+                                   align="BOTTOM_LEFT"
                                    stylename="bold"/>
                             <label id="startProjectDateTextField"
                                    property="projectName.startProjectDate"
+                                   align="MIDDLE_LEFT"
                                    dataContainer="openPositionsDc">
                                 <formatter format="dd.MM.yyyy"
                                            class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
@@ -138,21 +128,41 @@
                         </hbox>
                     </row>
                     <row>
-                        <label/>
-                        <label/>
                         <hbox spacing="true">
-                            <label value="msg://msgNumberPosition" stylename="bold"/>
+                            <label value="msg://msgProjectOwner"
+                                   stylename="bold"
+                                   align="BOTTOM_LEFT"/>
+                            <label id="firstNameTextField"
+                                   align="MIDDLE_LEFT"
+                                   property="projectName.projectOwner.firstName"
+                                   dataContainer="openPositionsDc"/>
+                            <label id="middleNameTextField"
+                                   align="BOTTOM_LEFT"
+                                   property="projectName.projectOwner.secondName"
+                                   dataContainer="openPositionsDc"/>
+                            <label property="projectName.projectOwner.middleName"
+                                   align="BOTTOM_LEFT"
+                                   dataContainer="openPositionsDc"/>
+                        </hbox>
+                        <hbox spacing="true">
+                            <label value="msg://msgNumberPosition"
+                                   align="BOTTOM_LEFT"
+                                   stylename="bold"/>
                             <label id="numberPositionTextField"
-                                      property="numberPosition"
-                                      dataContainer="openPositionsDc"/>
+                                   align="BOTTOM_LEFT"
+                                   property="numberPosition"
+                                   dataContainer="openPositionsDc"/>
                         </hbox>
                     </row>
                     <row>
                         <label/>
-                        <label/>
                         <hbox>
-                            <label value="msg://msgRemoteWork" stylename="bold"/>
+                            <label value="msg://msgRemoteWork"
+                                   align="BOTTOM_LEFT"
+                                   stylename="bold"/>
                             <label id="remoteWorkTextField"
+                                   align="BOTTOM_LEFT"
+                                   dataContainer="openPositionsDc"
                                    property="remoteWork"/>
                         </hbox>
                     </row>

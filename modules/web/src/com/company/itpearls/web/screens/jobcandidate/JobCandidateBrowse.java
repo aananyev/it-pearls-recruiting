@@ -426,7 +426,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private String getLastVacansy(List<IteractionList> iteractionList) {
         for (IteractionList a : iteractionList) {
-            return a.getVacancy().getVacansyName();
+            return a.getVacancy() != null ? a.getVacancy().getVacansyName() : "";
         }
 
         return "";
