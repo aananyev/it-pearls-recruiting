@@ -327,7 +327,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         iteraction.add(titleIteraction);
         if(!getLastProject(iteractionList).equals("")) iteraction.add(lastProject);
         iteraction.add(vacansyName);
-        iteraction.add(getLastIteraction(iteractionList));
+        if(getLastIteraction(iteractionList) != null) iteraction.add(getLastIteraction(iteractionList));
         if (!lastRecrutier.getValue().equals("")) iteraction.add(lastRecrutier);
         if (!lastResearcher.getValue().equals("")) iteraction.add(lastResearcher);
 
@@ -400,12 +400,16 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 "e.candidate = :candidate";
         String iteractionName = "Зарплатные ожидания";
 
-        IteractionList iteractionList = dataManager.load(IteractionList.class)
-                .query(QUERY_LAST_SALARY)
-                .view("iteractionList-view")
-                .parameter("iteractionName", iteractionName)
-                .parameter("candidate", jobCandidatesTable.getSingleSelected())
-                .one();
+        IteractionList iteractionList = null;
+
+        try {
+            iteractionList = dataManager.load(IteractionList.class)
+                    .query(QUERY_LAST_SALARY)
+                    .view("iteractionList-view")
+                    .parameter("iteractionName", iteractionName)
+                    .parameter("candidate", jobCandidatesTable.getSingleSelected())
+                    .one();
+        } catch (Exception e) {}
 
 
         VBoxLayout vBoxLayout = uiComponents.create(VBoxLayout.NAME);
