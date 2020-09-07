@@ -18,6 +18,7 @@
                    height="200px"
                    align="TOP_RIGHT"
                    scaleMode="FILL"
+                   dataContainer="openPositionsDc"
                    property="projectName.projectDepartment.companyName.fileCompanyLogo"/>
             <grid id="projectCompanyFieldGroup"
                   spacing="false"
