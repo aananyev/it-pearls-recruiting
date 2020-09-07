@@ -395,7 +395,30 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         titleStatistics.setValue("Статистика по кандидату");
         titleStatistics.setStyleName("h3");
 
+        String QUERY_LAST_SALARY = "select e from itpearls_IteractionList e where e.iteractionType = " +
+                "(select f from itpearls_Iteraction f where f.iterationName like :iteractionName) and " +
+                "e.candidate = :candidate";
+        String iteractionName = "Зарплатные ожидания";
+
+        IteractionList iteractionList = dataManager.load(IteractionList.class)
+                .query(QUERY_LAST_SALARY)
+                .view("iteractionList-view")
+                .parameter("iteractionName", iteractionName)
+                .parameter("candidate", jobCandidatesTable.getSingleSelected())
+                .one();
+
+
+        VBoxLayout vBoxLayout = uiComponents.create(VBoxLayout.NAME);
+        vBoxLayout.setWidth("100%");
+
+        if(iteractionList != null) {
+            Label lastSalary = uiComponents.create(Label.NAME);
+            lastSalary.setValue("Зарплатные ожидания: " + iteractionList.getAddString());
+            vBoxLayout.add(lastSalary);
+        }
+
         statistics.add(titleStatistics);
+        statistics.add(vBoxLayout);
     }
 
     private String getLastProject(List<IteractionList> iteractionList) {
