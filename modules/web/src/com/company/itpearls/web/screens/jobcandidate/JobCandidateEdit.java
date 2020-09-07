@@ -119,8 +119,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<IteractionList> iteractionCandidateGanttDl;
     @Inject
     private CollectionContainer<IteractionList> iteractionCandidateGanttDc;
-    @Inject
-    private GanttChart jobIteractionHistoryGantt;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -533,8 +531,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void addCandidateGanttChart() {
         iteractionCandidateGanttDl.setParameter("candidate", getEditedEntity());
         iteractionCandidateGanttDl.load();
-
-//        jobIteractionHistoryGantt.setStartDate(iteractionCandidateGanttDc.getItem().getDateIteraction());
     }
 
     private Boolean needDublicateDialog() {
