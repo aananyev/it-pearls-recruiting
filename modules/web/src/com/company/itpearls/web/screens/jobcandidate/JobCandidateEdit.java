@@ -115,10 +115,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Image candidatePic;
     @Inject
     private FileUploadField fileImageFaceUpload;
-    @Inject
-    private CollectionLoader<IteractionList> iteractionCandidateGanttDl;
-    @Inject
-    private CollectionContainer<IteractionList> iteractionCandidateGanttDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -525,12 +521,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onInit(InitEvent event) {
         addIconColumn();
-        addCandidateGanttChart();
-    }
-
-    private void addCandidateGanttChart() {
-        iteractionCandidateGanttDl.setParameter("candidate", getEditedEntity());
-        iteractionCandidateGanttDl.load();
     }
 
     private Boolean needDublicateDialog() {
