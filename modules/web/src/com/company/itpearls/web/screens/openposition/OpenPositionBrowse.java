@@ -1,21 +1,17 @@
 package com.company.itpearls.web.screens.openposition;
 
-import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
-import com.haulmont.cuba.gui.Fragments;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
-import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
@@ -24,13 +20,10 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
-import javax.swing.*;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.company.itpearls.web.screens.openposition.OpenPositionEdit.ADMINISTRATOR;
 
 @UiController("itpearls_OpenPosition.browse")
 @UiDescriptor("open-position-browse.xml")
@@ -69,6 +62,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Button groupSubscribe;
     @Inject
     private Screens screens;
+    @Inject
+    private CollectionContainer<OpenPosition> openPositionsDc;
 
 
     @Subscribe
@@ -82,8 +77,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void initGroupSubscribeButton() {
-        if(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
-        userSession.getUser().getGroup().getName().equals(HUNTING_GROUP)) {
+        if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
+                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP)) {
             groupSubscribe.setVisible(true);
         } else {
             groupSubscribe.setVisible(false);
@@ -166,7 +161,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private void addIconColumn() {
         //  обавление светофорчика
-        DataGrid.Column iconColumn = openPositionsTable.addGeneratedColumn("icon",
+        DataGrid.Column<OpenPosition> iconColumn = openPositionsTable.addGeneratedColumn("icon",
                 new DataGrid.ColumnGenerator<OpenPosition, String>() {
                     @Override
                     public String getValue(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -184,7 +179,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private void addIconRemoteWork() {
         // добавление удаленнной работы
-        DataGrid.Column iconRemoteWork = openPositionsTable.addGeneratedColumn("remoteWork",
+        DataGrid.Column<OpenPosition> iconRemoteWork = openPositionsTable.addGeneratedColumn("remoteWork",
                 new DataGrid.ColumnGenerator<OpenPosition, String>() {
                     @Override
                     public String getValue(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -282,7 +277,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private Component createTitleFragment(OpenPosition entity) {
-        Label titleLabel = uiComponents.create(Label.NAME);
+        Label<String> titleLabel = uiComponents.create(Label.NAME);
         titleLabel.setStyleName("h2");
         titleLabel.setValue(entity.getVacansyName());
         titleLabel.setAlignment(Component.Alignment.BOTTOM_LEFT);

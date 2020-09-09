@@ -4,10 +4,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -61,6 +58,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private UiComponents uiComponents;
 
     private List<IteractionList> iteractionList = new ArrayList<>();
+    @Inject
+    private Fragments fragments;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -209,6 +208,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         mainLayout.setWidth("100%");
         mainLayout.setMargin(true);
 
+        JobCanidateDetailScreenFragment jobCanidateDetailScreenFragment = fragments.create(this,
+                JobCanidateDetailScreenFragment.class);
+
+/*
         Image candidatePhoto = uiComponents.create(Image.NAME);
         candidatePhoto.setAlignment(Component.Alignment.TOP_RIGHT);
         candidatePhoto.setHeight("150px");
@@ -225,7 +228,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         } else {
             candidatePhoto.setVisible(false);
         }
-
+*/
         HBoxLayout headerBox = uiComponents.create(HBoxLayout.NAME);
         headerBox.setWidth("100%");
         headerBox.setHeight("100%");
@@ -238,7 +241,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         infoLabel.setHtmlEnabled(true);
         infoLabel.setStyleName("h3");
         infoLabel.setValue("Информация о кандидате:");
-
+/*
         Label personPosition = uiComponents.create(Label.NAME);
         personPosition.setHtmlEnabled(true);
         personPosition.setStyleName("h4");
@@ -285,6 +288,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             Label skype = uiComponents.create(Label.NAME);
             skype.setValue("Skype: " + entity.getSkypeName());
             contacts.add(skype);
+        }
+
+        if (entity.getTelegramName() != null) {
+            Label telegramm = uiComponents.create(Label.NAME);
+            telegramm.setValue("Telegramm: " + entity.getTelegramName());
+            contacts.add(telegramm);
         }
 
         if (entity.getWhatsupName() != null) {
@@ -342,7 +351,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         hBoxLayout.add(iteraction);
         hBoxLayout.add(statistics);
         hBoxLayout.add(candidatePhoto);
-
+*/
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
         headerBox.add(infoLabel);
@@ -353,8 +362,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         mainLayout.add(headerBox);
         mainLayout.add(header2Box);
-        mainLayout.add(hBoxLayout);
-        mainLayout.expand(hBoxLayout);
+//        mainLayout.add(hBoxLayout);
+//        mainLayout.expand(hBoxLayout);
+
+
+        Fragment fragment = jobCanidateDetailScreenFragment.getFragment();
+        fragment.setWidth("100%");
+        fragment.setAlignment(Component.Alignment.BOTTOM_LEFT);
+
+        mainLayout.add(fragment);
 
         return mainLayout;
     }
