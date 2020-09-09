@@ -1,7 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
-import com.haulmont.charts.gui.components.charts.GanttChart;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -31,8 +30,9 @@ import java.util.concurrent.atomic.AtomicReference;
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
-    private static final String MANAGER_GROUP = "Менеджеры";
-    private static final String RECRUTIER_GROUP = "Рекрутеры";
+    private static final String MANAGER_GROUP = "Менеджмент";
+    private static final String RECRUTIER_GROUP = "Хантинг";
+    private static final String RESEARCHER_GROUP = "Ресерчинг";
     @Inject
     private DataManager dataManager;
     @Inject
@@ -73,8 +73,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> wiberNameField;
     @Inject
     private Label<String> labelQualityPercent;
-    @Named("jobCityCandidateField.lookup")
-    private LookupAction jobCityCandidateFieldLookup;
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
@@ -88,17 +86,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
     @Inject
-    private InstanceLoader<JobCandidate> jobCandidateDl;
-    @Inject
     private CollectionLoader<IteractionList> jobCandidateIteractionListDataGridDl;
-    @Inject
-    private InstanceContainer<JobCandidate> jobCandidateDc;
     @Inject
     private DataGrid<IteractionList> jobCandidateIteractionListTable;
     @Inject
     private CollectionContainer<IteractionList> jobCandidateIteractionListDataGridDc;
-    @Named("tabSheetSocialNetworks.jobCandidateCard")
-    private VBoxLayout jobCandidateCard;
     @Inject
     private Label<String> personPositionTitle;
     @Inject
@@ -193,7 +185,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void setImageListener() {
         candidatePic.addClickListener(clickEvent -> {
-            if(clickEvent.isDoubleClick()) {
+            if (clickEvent.isDoubleClick()) {
 
             }
         });
@@ -243,20 +235,51 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("tabIteraction")
     public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
-        if(!userSession.getUser().getGroup().getName().equals(MANAGER_GROUP) ||
-                !userSession.getUser().getGroup().getName().equals(RECRUTIER_GROUP)) {
-            dialogs.createOptionDialog()
-                    .withCaption("Warning")
-                    .withMessage("Подписатся на изменение вакансии?")
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES,
-                                    Action.Status.PRIMARY).withHandler(e -> {
-                                this.commitChanges();
-                            }),
-                            new DialogAction(DialogAction.Type.NO)
-                    )
-                    .show();
-        }
+/*        if (!checkSubscibe(event)) {
+            if (!userSession.getUser().getGroup().getName().equals(MANAGER_GROUP) ||
+                    !userSession.getUser().getGroup().getName().equals(RECRUTIER_GROUP) ||
+                    !userSession.getUser().getGroup().getName().equals(RESEARCHER_GROUP)) {
+                dialogs.createOptionDialog()
+                        .withCaption("Warning")
+                        .withMessage("Подписатся на изменение вакансии?")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES,
+                                        Action.Status.PRIMARY).withHandler(e -> {
+                                    screenBuilders.editor(RecrutiesTasks.class, this)
+                                            .newEntity()
+                                            .withOpenMode(OpenMode.DIALOG)
+                                            .withInitializer(d -> {
+                                                d.setOpenPosition(jobCandidateIteractionListTable
+                                                        .getSingleSelected()
+                                                        .getVacancy());
+                                            })
+                                            .withParentDataContext(dataContext)
+                                            .build()
+                                            .show();
+                                }),
+                                new DialogAction(DialogAction.Type.NO)
+                        )
+                        .show();
+            }
+        } */
+    }
+
+    private Boolean checkSubscibe(LayoutClickNotifier.LayoutClickEvent event) {
+        Integer countSubscrine = dataManager
+                .loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
+                        "where e.reacrutier = :recrutier and " +
+                        "e.openPosition = :openPosition and " +
+                        ":nowDate between e.startDate and e.endDate", Integer.class)
+//                .parameter( "recrutier", recrutiesTasksFieldUser.getValue() )
+                .parameter("recrutier", userSession.getUser())
+                .parameter("openPosition", getEditedEntity().getOpenPosition())
+//                .parameter( "openPosition", openPositionField.getValue() )
+                .parameter("nowDate", new Date())
+                .one();
+
+        // если нет соответствия, значит нет еще подписки, значит можно подписаться,
+        // если уже есть, то не надо подписываться
+        return countSubscrine > 0 ? true : false;
     }
 
     @Subscribe("firstNameField")

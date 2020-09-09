@@ -52,7 +52,7 @@
                     <column id="reacrutier.name"/>
                 </group>
                 <column id="openPosition.vacansyName"/>
-                <column id="openPosition.projectName.projectName"/>
+                <column id="openPosition.projectName"/>
                 <column id="startDate"/>
                 <column id="endDate"/>
             </columns>

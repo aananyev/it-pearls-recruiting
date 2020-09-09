@@ -366,11 +366,16 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 //        mainLayout.expand(hBoxLayout);
 
 
+        jobCanidateDetailScreenFragment.setVisibleLogo();
+        jobCanidateDetailScreenFragment.setLastSalaryLabel("Зарплатные ожидания");
+        jobCanidateDetailScreenFragment.setStatistics();
+
         Fragment fragment = jobCanidateDetailScreenFragment.getFragment();
         fragment.setWidth("100%");
         fragment.setAlignment(Component.Alignment.BOTTOM_LEFT);
 
         mainLayout.add(fragment);
+        mainLayout.expand(fragment);
 
         return mainLayout;
     }

@@ -8,8 +8,8 @@
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
-where e.openClose = false
-order by e.vacansyName]]>
+                        where e.openClose = false
+                        order by e.vacansyName]]>
                 </query>
             </loader>
         </collection>
@@ -22,39 +22,62 @@ order by e.vacansyName]]>
             <loader id="usersDl">
                 <query>
                     <![CDATA[select e from sec$User e
-order by e.lastName, e.firstName]]>
+                        order by e.lastName, e.firstName]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="recrutiesTasksDc" width="100%">
+    <layout spacing="true"
+            width="100%">
+        <form id="form"
+              dataContainer="recrutiesTasksDc"
+              width="100%">
             <column width="250px">
-                <dateField id="startDateField" property="startDate"/>
-                <dateField id="endDateField" property="endDate"/>
-                <lookupPickerField id="recrutiesTasksFieldUser" dataContainer="recrutiesTasksDc"
-                                   optionsContainer="usersDc" width="50%" property="reacrutier">
+                <dateField id="startDateField"
+                           property="startDate"/>
+                <dateField id="endDateField"
+                           property="endDate"/>
+                <lookupPickerField id="recrutiesTasksFieldUser"
+                                   dataContainer="recrutiesTasksDc"
+                                   optionsContainer="usersDc"
+                                   width="50%"
+                                   property="reacrutier">
                     <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="open" type="picker_open"/>
+                        <action id="lookup"
+                                type="picker_lookup"/>
+                        <action id="open"
+                                type="picker_open"/>
                     </actions>
                 </lookupPickerField>
-                <lookupPickerField id="openPositionField" width="50%" dataContainer="recrutiesTasksDc" optionsContainer="openPositionsDc"
+                <lookupPickerField id="openPositionField"
+                                   width="50%"
+                                   dataContainer="recrutiesTasksDc"
+                                   optionsContainer="openPositionsDc"
                                    property="openPosition">
                     <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="open" type="picker_open"/>
+                        <action id="lookup"
+                                type="picker_lookup"/>
+                        <action id="open"
+                                type="picker_open"/>
                     </actions>
                 </lookupPickerField>
-                <checkBox id="recrutiesTasksSubscribeCheckBox" dataContainer="recrutiesTasksDc" property="subscribe"
+                <checkBox id="recrutiesTasksSubscribeCheckBox"
+                          dataContainer="recrutiesTasksDc"
+                          property="subscribe"
                           caption="msg://msgSubscribe"/>
             </column>
         </form>
-        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
-            <button id="windowExtendAndCloseButton" caption="msg://msgExtend"/>
-            <button id="okButton" icon="OK" caption="msg://msgOK"/>
+        <hbox id="editActions"
+              spacing="true"
+              align="BOTTOM_RIGHT"
+              height="100%">
+            <button id="windowExtendAndCloseButton"
+                    caption="msg://msgExtend"/>
+            <button id="okButton"
+                    icon="OK"
+                    caption="msg://msgOK"/>
             <button action="windowClose"/>
         </hbox>
     </layout>

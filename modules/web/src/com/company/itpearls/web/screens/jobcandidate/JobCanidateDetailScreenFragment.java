@@ -1,9 +1,11 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.HBoxLayout;
+import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -14,6 +16,7 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 @UiController("itpearls_JobCanidateDetailScreenFragment")
@@ -28,9 +31,82 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     @Inject
     private Label<String> salaryExpectationLabel;
 
-    @Subscribe
-    public void onAfterInit(AfterInitEvent event) {
-        salaryExpectationLabel.setValue(getStatistics("Зарплатные ожидания").getAddString());
+    private static final String MANAGER_GROUP = "Менеджмент";
+    private static final String RECRUTIER_GROUP = "Хантинг";
+    private static final String RESEARCHER_GROUP = "Ресерчинг";
+    @Inject
+    private Label<String> lastResearcherLabel;
+    @Inject
+    private Label<String> lastIteractionLabel;
+    @Inject
+    private Image candidateFaceImage;
+    @Inject
+    private Label<String> iteractionCountLabel;
+
+    public void setLastSalaryLabel(String iteractionName) {
+        IteractionList iteractionList = getStatistics(iteractionName);
+        if(iteractionList != null) {
+            if(iteractionList.getAddString() != null) {
+                salaryExpectationLabel.setValue(getStatistics(iteractionName).getAddString());
+            }
+        }
+    }
+
+    public void setVisibleLogo() {
+
+        if(candidateFaceImage.getValueSource().getValue() == null) {
+            candidateFaceImage.setVisible(false);
+        } else {
+            candidateFaceImage.setVisible(true);
+        }
+    }
+
+    public void setStatistics() {
+        List<IteractionList> iteractionList = getAllCandidateIteractions();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        // найти последнего рекрутера
+        for(IteractionList iteraction : iteractionList) {
+            if(iteraction.getRecrutier().getGroup().getName().equals(RECRUTIER_GROUP)) {
+                lastRecruterLabel.setValue(iteraction.getRecrutier().getName() + "("
+                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")");
+                break;
+            }
+        }
+
+        //Найти последнего реcthxthf
+        for(IteractionList iteraction : iteractionList) {
+            if(iteraction.getRecrutier().getGroup().getName().equals(RESEARCHER_GROUP)) {
+                lastResearcherLabel.setValue(iteraction.getRecrutier().getName() + "("
+                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")");
+                break;
+            }
+        }
+        // последнее взаимодействие
+        if(iteractionList.size() != 0) {
+            lastIteractionLabel.setValue(iteractionList.get(0).getIteractionType().getIterationName() + "("
+                    + simpleDateFormat.format((iteractionList.get(0).getDateIteraction())) + ")");
+        }
+
+        iteractionCountLabel.setValue(String.valueOf(iteractionList.size()));
+    }
+
+    private List<IteractionList> getAllCandidateIteractions() {
+        String QUERY_ALL_ITERACIONS = "select e from itpearls_IteractionList e " +
+                "where e.candidate = :candidate " +
+                "order by e.dateIteraction desc";
+
+        List<IteractionList> iteractionLists = new ArrayList<>();
+
+        try {
+            iteractionLists = dataManager.load(IteractionList.class)
+                    .query(QUERY_ALL_ITERACIONS)
+                    .view("iteractionList-view")
+                    .parameter("candidate", jobCandidatesDc.getItem())
+                    .list();
+        } catch (Exception e) {}
+
+        return iteractionLists;
     }
 
     private IteractionList getStatistics(String iteractionName) {

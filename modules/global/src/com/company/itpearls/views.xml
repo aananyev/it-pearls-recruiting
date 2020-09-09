@@ -264,7 +264,9 @@
             <property name="calendarItemStyle"/>
             <property name="calendarItemDescription"/>
         </property>
-        <property name="recrutier" fetch="JOIN" view="_local"/>
+        <property name="recrutier" fetch="JOIN" view="_local">
+            <property name="group" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">
