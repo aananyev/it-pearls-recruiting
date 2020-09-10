@@ -23,7 +23,7 @@
                    dataContainer="jobCandidatesDc"
                    property="fileImageFace"/>
             <hbox id="infoHBox" spacing="false">
-                <vbox id="jobCandidateVBox" width="33%">
+                <vbox id="jobCandidateVBox" width="25%">
                     <label id="jobCandidateLabel"
                            align="BOTTOM_LEFT"
                            stylename="h3"
@@ -61,7 +61,7 @@
                                property="cityOfResidence"/>
                     </hbox>
                 </vbox>
-                <vbox id="jobCandidateContactsVBox" width="33%">
+                <vbox id="jobCandidateContactsVBox" width="25%">
                     <label id="jobCandidateContactsLabel"
                            align="BOTTOM_LEFT"
                            stylename="h3"
@@ -115,7 +115,27 @@
                                property="whatsupName"/>
                     </hbox>
                 </vbox>
-                <vbox id="jobCandidateStatisticsVBox" width="33%">
+                <vbox id="jobCandidateIteractionInfoVBox" width="25%">
+                    <label id="jobCandidateIteractionLabel"
+                           align="BOTTOM_LEFT"
+                           stylename="h3"
+                           value="msg://msgCandidateIteraction"/>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgIteraction"/>
+                        <label id="lastIteractionLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgSalaryExpectation"/>
+                        <label id="salaryExpectationLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                </vbox>
+                <vbox id="jobCandidateStatisticsVBox" width="25%">
                     <label id="jobCandidateStatisticsLabel"
                            align="BOTTOM_LEFT"
                            stylename="h3"
@@ -137,22 +157,8 @@
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
-                               value="msg://msgIteraction"/>
-                        <label id="lastIteractionLabel"
-                               align="BOTTOM_LEFT"/>
-                    </hbox>
-                    <hbox spacing="true">
-                        <label align="BOTTOM_LEFT"
-                               stylename="bold"
                                value="msg://msgIteractionCount"/>
                         <label id="iteractionCountLabel"
-                               align="BOTTOM_LEFT"/>
-                    </hbox>
-                    <hbox spacing="true">
-                        <label align="BOTTOM_LEFT"
-                               stylename="bold"
-                               value="msg://msgSalaryExpectation"/>
-                        <label id="salaryExpectationLabel"
                                align="BOTTOM_LEFT"/>
                     </hbox>
                 </vbox>
