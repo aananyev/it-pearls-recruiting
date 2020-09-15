@@ -153,33 +153,70 @@ order by e.cityRuName]]>
                               spacing="true"
                               stylename="light"
                               height="100%">
-                        <hbox spacing="true">
-                            <label id="jobTitleTitle" value="msg://msgFIO" stylename="h3" htmlEnabled="true"/>
-                            <label id="jobTitle" dataContainer="jobCandidateDc" property="fullName" stylename="h3"/>
-                            <label value="," stylename="h3" htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc" property="cityOfResidence" stylename="h3"
+                        <hbox spacing="false">
+                            <label id="jobTitleTitle"
+                                   value="msg://msgFIO"
+                                   stylename="h3"
+                                   htmlEnabled="true"/>
+                            <label id="jobTitle"
+                                   dataContainer="jobCandidateDc"
+                                   property="fullName"
+                                   stylename="h3"/>
+                            <label value=", " stylename="h3" htmlEnabled="true"/>
+                            <label id="currentCompanyLabel"
+                                   dataContainer="jobCandidateDc"
+                                   property="currentCompany"
+                                   stylename="h3"/>
+                            <label value=", "
+                                   stylename="h3"
+                                   htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc"
+                                   property="cityOfResidence"
+                                   stylename="h3"
                                    htmlEnabled="true"/>
                         </hbox>
                         <hbox spacing="true">
-                            <label id="personPositionTitle" value="msg://msgPosition" stylename="h3"
+                            <label id="personPositionTitle"
+                                   value="msg://msgPosition"
+                                   stylename="h4"
                                    htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc" property="personPosition" stylename="h3"/>
+                            <label dataContainer="jobCandidateDc"
+                                   property="personPosition"
+                                   stylename="h4"/>
                         </hbox>
                         <hbox spacing="true">
-                            <label id="emailTitle" value="msg://msgEmail" stylename="h3" htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc" property="email" stylename="h3"/>
+                            <label id="emailTitle"
+                                   value="msg://msgEmail"
+                                   stylename="h4"
+                                   htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc"
+                                   property="email"
+                                   stylename="h4"/>
                         </hbox>
                         <hbox spacing="true">
-                            <label id="phoneTitle" value="msg://msgPhone" stylename="h3" htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc" property="phone" stylename="h3"/>
+                            <label id="phoneTitle"
+                                   value="msg://msgPhone" stylename="h4"
+                                   htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc"
+                                   property="phone"
+                                   stylename="h4"/>
                         </hbox>
                         <hbox spacing="true">
-                            <label id="telegramTitle" value="msg://msgTelegram" stylename="h3" htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc" property="telegramName" stylename="h3"/>
+                            <label id="telegramTitle"
+                                   value="msg://msgTelegram"
+                                   stylename="h4"
+                                   htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc"
+                                   property="telegramName"
+                                   stylename="h4"/>
                         </hbox>
                         <hbox spacing="true">
-                            <label id="skypeTitle" value="msg://msgSkype" stylename="h3" htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc" property="skypeName" stylename="h3"/>
+                            <label id="skypeTitle"
+                                   value="msg://msgSkype"
+                                   stylename="h4" htmlEnabled="true"/>
+                            <label dataContainer="jobCandidateDc"
+                                   property="skypeName"
+                                   stylename="h4"/>
                         </hbox>
                     </groupBox>
                     <vbox id="dropZone"
@@ -213,6 +250,7 @@ order by e.cityRuName]]>
                  caption="msg://candidate"
                  margin="true,true,true,true"
                  expand="tabCabdidateGrid"
+                 icon="BOMB"
                  spacing="true">
                 <grid id="tabCabdidateGrid"
                       height="100%"
@@ -269,6 +307,7 @@ order by e.cityRuName]]>
                  caption="msg://msgTabContactInfo"
                  margin="true,true,true,true"
                  expand="socialNetworkTable"
+                 icon="font-icon:USER"
                  spacing="true">
                 <grid id="contactInfoGrid" spacing="true" width="100%">
                     <columns count="2"/>
@@ -308,6 +347,7 @@ order by e.cityRuName]]>
                  caption="msg://candidateIteration"
                  margin="true,true,true,true"
                  expand="jobCandidateIteractionListTable"
+                 icon="LIST"
                  spacing="true">
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionListDataGridDc"
@@ -367,6 +407,7 @@ order by e.cityRuName]]>
                  caption="msg://msgSkills"
                  margin="true,true,true,true"
                  expand="jobCandidateSkillListTable"
+                 icon="font-icon:MEDKIT"
                  spacing="true">
                 <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc"
                                    property="specialisation"
@@ -397,6 +438,7 @@ order by e.cityRuName]]>
             <tab id="tabResume"
                  caption="msg://msgResume"
                  margin="true,true,true,true"
+                 icon="font-icon:FILE_TEXT"
                  expand="jobCandidateCandidateCvTable"
                  spacing="true">
                 <dataGrid id="jobCandidateCandidateCvTable"

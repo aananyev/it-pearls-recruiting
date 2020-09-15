@@ -9,6 +9,7 @@ import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Project;
 
@@ -42,6 +43,8 @@ public class ProjectEdit extends StandardEditor<Project> {
     List<OpenPosition> openPositions = new ArrayList<>();
     @Inject
     private CollectionLoader<OpenPosition> projectOpenPositionsDl;
+    @Inject
+    private DataContext dataContext;
 
     @Subscribe("checkBoxProjectIsClosed")
     public void onCheckBoxProjectIsClosedValueChange1(HasValue.ValueChangeEvent<Boolean> event) {

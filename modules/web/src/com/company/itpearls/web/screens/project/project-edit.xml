@@ -91,6 +91,7 @@ order by e.secondName, e.firstName]]></query>
                         </actions>
                     </lookupPickerField>
                     <lookupPickerField id="projectOwnerField"
+                                       required="true"
                                        optionsContainer="projectOwnersDc"
                                        dataContainer="projectDc"
                                        property="projectOwner"
