@@ -7,7 +7,8 @@
                     view="iteractionList-view">
             <loader id="candidatesPausedDl">
                 <query><![CDATA[select e from itpearls_IteractionList e
-                        order by e.numberIteraction desc]]>
+                        order by e.numberIteraction desc
+                        inner join e.i]]>
                 <condition>
                     <and>
                         <c:jpql>

@@ -19,6 +19,7 @@ import com.haulmont.cuba.core.global.Metadata;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -627,6 +628,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .withInitializer(candidate -> {
                             candidate.setCandidate(getEditedEntity());
                             candidate.setVacancy(finalLastIteraction.getVacancy());
+                            candidate.setNumberIteraction(numBerIteractionForNewEntity());
                         })
                         .newEntity()
                         .build()
@@ -651,11 +653,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withInitializer(candidate -> {
                         candidate.setCandidate(jobCandidateIteractionListTable.getSingleSelected().getCandidate());
                         candidate.setVacancy(jobCandidateIteractionListTable.getSingleSelected().getVacancy());
+                        candidate.setNumberIteraction(numBerIteractionForNewEntity());
                     })
                     .newEntity()
                     .build()
                     .show();
         }
+    }
+
+    private BigDecimal numBerIteractionForNewEntity() {
+        return dataManager.loadValue("select count(e.numberIteraction) " +
+                "from itpearls_IteractionList e " +
+                "where e.candidate = :candidate and " +
+                "e.vacancy = :vacancy", BigDecimal.class)
+                .parameter("candidate", getEditedEntity())
+                .parameter("vacancy", jobCandidateIteractionListTable.getSingleSelected().getVacancy())
+                .one().add(BigDecimal.ONE);
     }
 
 
