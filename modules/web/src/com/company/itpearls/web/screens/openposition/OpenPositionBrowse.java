@@ -64,6 +64,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Screens screens;
     @Inject
     private CollectionContainer<OpenPosition> openPositionsDc;
+    @Inject
+    private CheckBox checkBoxOnlyNotPaused;
 
 
     @Subscribe
@@ -391,10 +393,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         setInternalProjectFilter();
         setSubcribersFilter();
+        setOpenPositionNotPaused();
 
         openPositionsTable.getColumn("openClose").setCollapsed(true);
         openPositionsTable.getColumn("openClose").setCollapsible(true);
         openPositionsTable.getColumn("openClose").setVisible(true);
+    }
+
+    private void setOpenPositionNotPaused() {
+        checkBoxOnlyNotPaused.setValue(true);
     }
 
     private void setInternalProjectFilter() {
@@ -424,6 +431,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     public void onCheckBoxOnlyMySubscribeValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         setSubcribersFilter();
     }
+
+    @Subscribe("checkBoxOnlyNotPaused")
+    public void onCheckBoxOnlyNotPausedValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+       if(checkBoxOnlyNotPaused.getValue()) {
+           openPositionsDl.setParameter("paused", 0);
+       } else {
+           openPositionsDl.removeParameter("paused");
+       }
+
+       openPositionsDl.load();
+    }
+
+
 
     @Subscribe("checkBoxOnlyOpenedPosition")
     public void onCheckBoxOnlyOpenedPositionValueChange(HasValue.ValueChangeEvent<Boolean> event) {

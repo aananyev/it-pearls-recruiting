@@ -18,6 +18,9 @@
                                 <c:where>e.openClose=:openClosePos</c:where>
                             </c:jpql>
                             <c:jpql>
+                                <c:where>e.priority > :paused</c:where>
+                            </c:jpql>
+                            <c:jpql>
                                 <c:where>
                                     e in
                                     (select f.openPosition
@@ -141,6 +144,9 @@
             <checkBox id="checkBoxOnlyOpenedPosition"
                       description="msg://msgOnlyOpenedVacansy"
                       caption="msg://msgOnlyOpenedVacansy"/>
+            <checkBox id="checkBoxOnlyNotPaused"
+                      description="msg://msgOnlyNotPaused"
+                      caption="msg://msgOnlyNotPaused"/>
             <checkBox id="checkBoxOnlyMySubscribe"
                       description="msg://msgOnlyMySubscribe"
                       caption="msg://msgOnlyMySubscribe"/>

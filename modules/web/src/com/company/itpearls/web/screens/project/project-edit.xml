@@ -10,7 +10,9 @@
                   view="project-view">
             <loader/>
             <collection id="projectJobCandidatesDc" property="jobCandidate"/>
+            <collection id="projectOpenPositionsDc" property="openPosition"/>
         </instance>
+<!--
         <collection id="projectOpenPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
             <loader id="projectOpenPositionsDl">
                 <query>
@@ -27,6 +29,7 @@
                 </query>
             </loader>
         </collection>
+-->
         <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="projectDepartmentsLc">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
@@ -126,8 +129,6 @@ order by e.secondName, e.firstName]]></query>
                                     width="35px"/>
                             <column id="vacansyName"
                                     property="vacansyName"/>
-                            <column id="projectName"
-                                    property="projectName"/>
                             <column id="numberPosition"
                                     property="numberPosition"/>
                             <column id="positionType"

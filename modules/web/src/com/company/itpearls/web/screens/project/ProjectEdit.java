@@ -41,8 +41,8 @@ public class ProjectEdit extends StandardEditor<Project> {
     private DataManager dataManager;
 
     List<OpenPosition> openPositions = new ArrayList<>();
-    @Inject
-    private CollectionLoader<OpenPosition> projectOpenPositionsDl;
+//    @Inject
+//    private CollectionLoader<OpenPosition> projectOpenPositionsDl;
     @Inject
     private DataContext dataContext;
 
@@ -108,12 +108,12 @@ public class ProjectEdit extends StandardEditor<Project> {
 
     private void filterOpenPositionOnProject() {
         if(!PersistenceHelper.isNew(getEditedEntity())) {
-            projectOpenPositionsDl.setParameter("project", getEditedEntity());
+//            projectOpenPositionsDl.setParameter("project", getEditedEntity());
         } else {
-            projectOpenPositionsDl.removeParameter("project");
+//            projectOpenPositionsDl.removeParameter("project");
         }
 
-        projectOpenPositionsDl.load();
+//        projectOpenPositionsDl.load();
     }
 
     private void setStartDateOfProject() {

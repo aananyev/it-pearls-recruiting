@@ -1,5 +1,5 @@
 buildscript {
-    ext.cubaVersion = '7.2.7'
+    ext.cubaVersion = '7.2.8'
     repositories {
         mavenLocal()
         maven {
@@ -118,7 +118,7 @@ configure(coreModule) {
     }
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
-        host = '62.109.0.26'
+        host = 'localhost'
         dbName = 'itpearls'
         dbms = 'postgres'
         dbUser = 'cuba'
@@ -126,7 +126,7 @@ configure(coreModule) {
     }
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
-        host = '62.109.0.26'
+        host = 'localhost'
         dbName = 'itpearls'
         dbms = 'postgres'
         dbUser = 'cuba'
@@ -263,3 +263,12 @@ task restart(dependsOn: ['stop', ":${modulePrefix}-core:deploy", ":${modulePrefi
 }
 restart.finalizedBy start
 
+task buildWar(type: CubaWarBuilding) {
+    includeJdbcDriver = true
+    appProperties = ['cuba.automaticDatabaseUpdate': true,
+                     'cuba.dataSourceProvider'     : 'jndi']
+    logbackConfigurationFile = 'etc/war-logback.xml'
+    includeContextXml = true
+    singleWar = false
+    coreContextXmlPath = 'modules/core/web/META-INF/war-context.xml'
+}
