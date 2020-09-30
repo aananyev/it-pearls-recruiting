@@ -18,10 +18,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@UiController("itpearls_FunnelHuntingWidget")
-@UiDescriptor("funnel-hunting-widget.xml")
-@DashboardWidget(name = "Funnel Hunting Widget")
-public class FunnelHuntingWidget extends ScreenFragment {
+@UiController("itpearls_FunnelHuntingAllEmployeeWidget")
+@UiDescriptor("funnel-hunting-all-employee-widget.xml")
+@DashboardWidget(name = "Funnel Hunting All Employee Widget")
+public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
     @Inject
     private UiComponents uiComponents;
 
@@ -46,8 +46,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
     private String labelHeight = "15px";
     private String sizeColumn = "115px";
-    private String RESEARCHER = "Ресерчинг";
-    private String RESEARCHER_INTERN = "Стажер";
 
     @Inject
     private HBoxLayout boxWidgetTitle;
@@ -71,7 +69,7 @@ public class FunnelHuntingWidget extends ScreenFragment {
     }
 
     private void setWidgetTitle() {
-        String title = "Статистика по ресерчерам за: ";
+        String title = "Статистика за: ";
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
         widgetTitle.setValue(title + df.format(startDate) + " - " + df.format(endDate));
@@ -86,7 +84,15 @@ public class FunnelHuntingWidget extends ScreenFragment {
                         "e.name not like \'Administrator\' " +
                         "order by e.name"))
                 .setView("user-view");
+
         reaearchers = dataManager.loadList(loadContext);
+
+        Collections.sort(reaearchers, new Comparator<User>() {
+            @Override
+            public int compare(User user, User t1) {
+                return user.getName().compareTo(t1.getName());
+            }
+        });
     }
 
     private void setDeafaultTimeInterval() {
@@ -145,7 +151,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
 
                 if (user.getGroup() != null) {
-                   if (user.getGroup().getName().equals(RESEARCHER) || user.getGroup().getName().equals(RESEARCHER_INTERN)) {
 
                         Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
 
@@ -155,7 +160,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
                         labelCount.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
 
                         vBox.add(labelCount);
-                    }
                 }
             }
         }
@@ -167,7 +171,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
         for (User a : reaearchers) {
 
             if (a.getGroup() != null) {
-                if (a.getGroup().getName().equals(RESEARCHER) || a.getGroup().getName().equals(RESEARCHER_INTERN)) {
                     styleCount = styleCount == 2 ? 1 : 2;
 
                     CssLayout boxLayout = uiComponents.create(CssLayout.class);
@@ -183,7 +186,6 @@ public class FunnelHuntingWidget extends ScreenFragment {
 
                     boxLayout.add(label);
                     researcherNameBox.add(boxLayout);
-                }
             }
         }
     }
@@ -192,11 +194,9 @@ public class FunnelHuntingWidget extends ScreenFragment {
         listIteractionForCheck.add(ITRKT_NEW_CONTACT);
         listIteractionForCheck.add(ITRKT_POPOSE_JOB);
         listIteractionForCheck.add(ITRKT_ASSIGN_ITPEARKS_INTERVIEW);
-//        listIteractionForCheck.add(ITRKT_PREPARE_ITPEARKS_INTERVIEW);
-//        listIteractionForCheck.add(ITRKT_ASSIGN_TECH_INTERVIEW);
-//        listIteractionForCheck.add(ITRKT_PREPARE_TECH_INTERVIEW);
-//        listIteractionForCheck.add(ITRKT_PREPARE_DIRECTOR_INTERVIEW);
-
-        Collections.sort(listIteractionForCheck);
+        listIteractionForCheck.add(ITRKT_PREPARE_ITPEARKS_INTERVIEW);
+        listIteractionForCheck.add(ITRKT_ASSIGN_TECH_INTERVIEW);
+        listIteractionForCheck.add(ITRKT_PREPARE_TECH_INTERVIEW);
+        listIteractionForCheck.add(ITRKT_PREPARE_DIRECTOR_INTERVIEW);
     }
 }
