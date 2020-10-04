@@ -1,6 +1,7 @@
 package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.CaseConversion;
 import com.haulmont.cuba.core.entity.annotation.ConversionType;
@@ -61,6 +62,11 @@ public class Person extends StandardEntity {
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CITY_OF_RESIDENCE_ID")
+    protected City cityOfResidence;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
 
@@ -71,6 +77,10 @@ public class Person extends StandardEntity {
 
     @Column(name = "SEND_RESUME_TO_EMAIL")
     protected Boolean sendResumeToEmail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_IMAGE_FACE")
+    protected FileDescriptor fileImageFace;
 
     public Boolean getSendResumeToEmail() {
         return sendResumeToEmail;
@@ -190,5 +200,21 @@ public class Person extends StandardEntity {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+    }
+
+    public FileDescriptor getFileImageFace() {
+        return fileImageFace;
+    }
+
+    public void setFileImageFace(FileDescriptor fileImageFace) {
+        this.fileImageFace = fileImageFace;
+    }
+
+    public void setCityOfResidence(City cityOfResidence) {
+        this.cityOfResidence = cityOfResidence;
+    }
+
+    public City getCityOfResidence() {
+        return cityOfResidence;
     }
 }

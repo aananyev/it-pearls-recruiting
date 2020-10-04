@@ -24,7 +24,7 @@
             <properties include=".*"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="personsTable"
+        <dataGrid id="personsTable"
                     width="100%"
                     dataContainer="personsDc">
             <actions>
@@ -33,18 +33,12 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="secondName"/>
-                <column id="firstName"/>
-                <column id="middleName"/>
-                <column id="birdhDate"/>
-                <column id="email"/>
-                <column id="phone"/>
-                <column id="skypeName"/>
-                <column id="telegramName"/>
-                <column id="wiberName"/>
-                <column id="watsupName"/>
-                <column id="positionCountry"/>
-                <column id="personPosition"/>
+                <column id="secondName" property="secondName" caption="msg://msgSecondName"/>
+                <column id="firstName" property="firstName" caption="msg://msgFirstName"/>
+                <column id="middleName" property="middleName" caption="msg://msgMiddleName"/>
+                <column id="personPosition" property="personPosition" caption="msg://msgPersonPosition"/>
+                <column id="positionCountry" property="positionCountry" caption="msg://msgPositionCountry"/>
+                <column id="cityOfResidence" property="cityOfResidence" caption="msg://msgCityOfResidence"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -53,7 +47,7 @@
                 <button id="editBtn" action="personsTable.edit"/>
                 <button id="removeBtn" action="personsTable.remove"/>
             </buttonsPanel>
-        </groupTable>
+        </dataGrid>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

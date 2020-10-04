@@ -9,16 +9,19 @@
                   view="person-view">
             <loader/>
         </instance>
+        <collection id="positionCityDc" class="com.company.itpearls.entity.City" view="_minimal">
+            <loader id="positionCityLc">
+                <query><![CDATA[select e from itpearls_City e order by e.cityRuName]]></query>
+            </loader>
+        </collection>
         <collection id="positionCountriesDc" class="com.company.itpearls.entity.Country" view="_minimal">
             <loader id="positionCountriesLc">
-                <query><![CDATA[select e from itpearls_Country e
-order by e.countryRuName]]></query>
+                <query><![CDATA[select e from itpearls_Country e order by e.countryRuName]]></query>
             </loader>
         </collection>
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
             <loader id="personPositionsLc">
-                <query><![CDATA[select e from itpearls_Position e
-order by e.positionRuName]]></query>
+                <query><![CDATA[select e from itpearls_Position e order by e.positionRuName]]></query>
             </loader>
         </collection>
         <collection id="companyDepartamentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_local">
@@ -31,15 +34,20 @@ order by e.positionRuName]]></query>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="scrollBox" spacing="true">
-        <scrollBox id="scrollBox" spacing="true">
-            <form id="form" dataContainer="personDc">
+    <layout expand="mainHBox" spacing="true">
+        <hbox id="mainHBox"
+              spacing="true"
+              width="100%"
+              expand="form">
+            <form id="form"
+                  width="100%"
+                  dataContainer="personDc">
                 <column width="250px">
                     <textField id="firstNameField" property="firstName" caption="mainMsg://msgFirstName"/>
                     <textField id="middleNameField" property="middleName" caption="mainMsg://msgMiddleName"/>
                     <textField id="secondNameField" property="secondName" caption="mainMsg://msgSecondName"/>
-<!--                    <lookupPickerField id="personFieldCompanyDepartment" dataContainer="companyDepartamentsDc" property="companyDepartment"
-                                       caption="mainMsg://msgCompanyDepartment" optionsContainer="personPositionsDc"/> -->
+                    <!--                    <lookupPickerField id="personFieldCompanyDepartment" dataContainer="companyDepartamentsDc" property="companyDepartment"
+                                                           caption="mainMsg://msgCompanyDepartment" optionsContainer="personPositionsDc"/> -->
                     <dateField id="birdhDateField" property="birdhDate" caption="mainMsg://msgBirthday"/>
                     <textField id="emailField" property="email" caption="mainMsg://msgEmail"/>
                     <textField id="phoneField" property="phone" caption="mainMsg://msgPhone"/>
@@ -49,6 +57,12 @@ order by e.positionRuName]]></query>
                     <textField id="telegramNameField" property="telegramName" caption="mainMsg://msgTelegram"/>
                     <textField id="wiberNameField" property="wiberName" caption="mainMsg://msgViber"/>
                     <textField id="watsupNameField" property="watsupName" caption="mainMsg://msgWhatsApp"/>
+                    <lookupPickerField id="positionCityField" property="cityOfResidence" caption="msg://msgCityOfResidence"
+                                 optionsContainer="positionCityDc">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                    </lookupPickerField>
                     <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
                                        property="positionCountry" caption="mainMsg://msgCountry">
                         <actions>
@@ -63,7 +77,31 @@ order by e.positionRuName]]></query>
                     </lookupPickerField>
                 </column>
             </form>
-        </scrollBox>
+            <vbox id="dropZone"
+                  spacing="true"
+                  width="200px"
+                  height="266px"
+                  align="TOP_RIGHT"
+                  expand="peoplePic"
+                  stylename="dropzone-container">
+                <image id="peoplePic"
+                       dataContainer="personDc"
+                       property="fileImageFace"
+                       width="100%"
+                       align="TOP_RIGHT"
+                       height="100%"
+                       stylename="widget-border"
+                       scaleMode="FILL"/>
+                <upload id="fileImageFaceUpload"
+                        fileStoragePutMode="IMMEDIATE"
+                        dataContainer="personDc"
+                        align="BOTTOM_CENTER"
+                        showFileName="false"
+                        dropZone="dropZone"
+                        showClearButton="true"
+                        property="fileImageFace"/>
+            </vbox>
+        </hbox>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
