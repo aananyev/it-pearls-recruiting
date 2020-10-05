@@ -25,8 +25,8 @@ public class ProjectBrowse extends StandardLookup<Project> {
         setProjectClosedFilter();
     }
 
-    @Install(to = "projectsTable", subject = "itemDescriptionProvider")
-    private String projectsTableItemDescriptionProvider(Project project, String string) {
+    @Install(to = "projectsTable", subject = "rowDescriptionProvider")
+    private String projectsTableRowDescriptionProvider(Project project) {
         return project.getProjectDescription() != null ? project.getProjectDescription() : "";
     }
 

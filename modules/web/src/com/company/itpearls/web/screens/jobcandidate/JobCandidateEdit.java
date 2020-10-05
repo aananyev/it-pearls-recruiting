@@ -586,7 +586,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void addIteractionJobCandidate() {
         screenBuilders.editor(IteractionList.class, this)
                 .newEntity()
-                .withOpenMode(OpenMode.DIALOG)
+//                .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new JobCandidateScreenOptions(false))
                 .withParentDataContext(dataContext)
                 .withContainer(jobCandidateIteractionListDataGridDc)
@@ -622,7 +622,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 IteractionList finalLastIteraction = lastIteraction;
 
                 screenBuilders.editor(IteractionList.class, this)
-                        .withOpenMode(OpenMode.DIALOG)
+//                        .withOpenMode(OpenMode.DIALOG)
                         .withParentDataContext(dataContext)
                         .withContainer(jobCandidateIteractionListDataGridDc)
                         .withInitializer(candidate -> {
@@ -647,7 +647,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         } else {
             screenBuilders.editor(IteractionList.class, this)
-                    .withOpenMode(OpenMode.DIALOG)
+//                    .withOpenMode(OpenMode.DIALOG)
                     .withParentDataContext(dataContext)
                     .withContainer(jobCandidateIteractionListDataGridDc)
                     .withInitializer(candidate -> {
@@ -662,13 +662,26 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private BigDecimal numBerIteractionForNewEntity() {
-        return dataManager.loadValue("select count(e.numberIteraction) " +
-                "from itpearls_IteractionList e " +
-                "where e.candidate = :candidate and " +
-                "e.vacancy = :vacancy", BigDecimal.class)
-                .parameter("candidate", getEditedEntity())
-                .parameter("vacancy", jobCandidateIteractionListTable.getSingleSelected().getVacancy())
-                .one().add(BigDecimal.ONE);
+        OpenPosition openPosition = null;
+
+        if(jobCandidateIteractionListTable.getSingleSelected() != null)
+            openPosition = jobCandidateIteractionListTable.getSingleSelected().getVacancy();
+
+        if(openPosition != null) {
+            return dataManager.loadValue("select count(e.numberIteraction) " +
+                    "from itpearls_IteractionList e " +
+                    "where e.candidate = :candidate and " +
+                    "e.vacancy = :vacancy", BigDecimal.class)
+                    .parameter("candidate", getEditedEntity())
+                    .parameter("vacancy", openPosition)
+                    .one().add(BigDecimal.ONE);
+        } else {
+            return dataManager.loadValue("select count(e.numberIteraction) " +
+                    "from itpearls_IteractionList e " +
+                    "where e.candidate = :candidate", BigDecimal.class)
+                    .parameter("candidate", getEditedEntity())
+                    .one().add(BigDecimal.ONE);
+        }
     }
 
 

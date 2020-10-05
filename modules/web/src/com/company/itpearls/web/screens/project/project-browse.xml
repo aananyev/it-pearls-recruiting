@@ -11,7 +11,7 @@
             <loader id="projectsDl">
                 <query>
                     <![CDATA[select e from itpearls_Project e
-order by e.projectIsClosed desc, e.projectName]]>
+                            order by e.projectIsClosed desc, e.projectName]]>
                     <condition>
                         <c:jpql>
                             <c:where>
@@ -33,7 +33,7 @@ order by e.projectIsClosed desc, e.projectName]]>
             <properties include=".*"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="projectsTable"
+        <dataGrid id="projectsTable"
                     width="100%"
                     dataContainer="projectsDc">
             <actions>
@@ -42,12 +42,12 @@ order by e.projectIsClosed desc, e.projectName]]>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="projectIsClosed" caption="msg://msgProjectIsClosed" align="CENTER"/>
-                <column id="projectName" caption="msg://msgProjectName"/>
-                <column id="startProjectDate" caption="msg://msgProjectStartDate"/>
-                <column id="endProjectDate" caption="msg://msgProjectEndDate"/>
-                <column id="projectDepartment" caption="msg://msgProjectDepartament"/>
-                <column id="projectOwner" caption="msg://msgProjectOwner"/>
+                <column id="projectIsClosed" caption="msg://msgProjectIsClosed" property="projectIsClosed"/>
+                <column id="projectName" caption="msg://msgProjectName" property="projectName"/>
+                <column id="startProjectDate" caption="msg://msgProjectStartDate" property="startProjectDate"/>
+                <column id="endProjectDate" caption="msg://msgProjectEndDate" property="endProjectDate"/>
+                <column id="projectDepartment" caption="msg://msgProjectDepartament" property="projectDepartment"/>
+                <column id="projectOwner" caption="msg://msgProjectOwner" property="projectOwner"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -56,7 +56,7 @@ order by e.projectIsClosed desc, e.projectName]]>
                 <button id="editBtn" action="projectsTable.edit"/>
                 <button id="removeBtn" action="projectsTable.remove"/>
             </buttonsPanel>
-        </groupTable>
+        </dataGrid>
         <groupBox>
             <checkBox id="onlyOpenProjectCheckBox" caption="msg://msgOnlyOpenedProject"/>
         </groupBox>

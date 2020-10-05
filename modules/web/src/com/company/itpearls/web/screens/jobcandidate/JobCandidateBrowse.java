@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.*;
@@ -354,7 +355,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 */
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
+        Component newIteraction = createNewIteractionButton(entity);
+
         headerBox.add(infoLabel);
+        headerBox.add(newIteraction);
         headerBox.add(editButton);
         headerBox.add(closeButton);
         headerBox.expand(infoLabel);
@@ -378,6 +382,27 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         mainLayout.expand(fragment);
 
         return mainLayout;
+    }
+
+    private Component createNewIteractionButton(JobCandidate entity) {
+        Button newIteractionButton = uiComponents.create(Button.class);
+        newIteractionButton.setCaption("Новое взаимодействие");
+
+        newIteractionButton.setAction(new BaseAction("newIteraction")
+                .withHandler(actionPerformedEvent ->
+                        screenBuilders.editor(IteractionList.class, this)
+//                                .withOpenMode(OpenMode.DIALOG)
+//                                .withLaunchMode(OpenMode.DIALOG)
+                                .newEntity()
+                                .withScreenClass(IteractionListEdit.class)
+                                .withInitializer(iteractionList1 -> {
+                                    iteractionList1.setCandidate(jobCandidatesTable.getSingleSelected());
+                                })
+                                .build()
+                                .show())
+        );
+
+        return newIteractionButton;
     }
 
     private HBoxLayout getLastIteraction(List<IteractionList> iteractionList) {
@@ -430,13 +455,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .parameter("iteractionName", iteractionName)
                     .parameter("candidate", jobCandidatesTable.getSingleSelected())
                     .one();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
 
         VBoxLayout vBoxLayout = uiComponents.create(VBoxLayout.NAME);
         vBoxLayout.setWidth("100%");
 
-        if(iteractionList != null) {
+        if (iteractionList != null) {
             Label lastSalary = uiComponents.create(Label.NAME);
             lastSalary.setValue("Зарплатные ожидания: " + iteractionList.getAddString());
             vBoxLayout.add(lastSalary);

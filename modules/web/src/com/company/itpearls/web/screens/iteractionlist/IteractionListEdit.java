@@ -133,79 +133,81 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             _addFlag = false;
         }
 
-        if (_addFlag) {
-            if (_addType != 0) {
-                switch (_addType) {
-                    case 1:
-                        addDate.setVisible(true);
-                        addDate.setRequired(true);
-                        addDate.setCaption(iteractionTypeField.getValue().getAddCaption());
-                        addDate.setRequired(true);
+        if(_addFlag != null) {
+            if (_addFlag) {
+                if (_addType != 0) {
+                    switch (_addType) {
+                        case 1:
+                            addDate.setVisible(true);
+                            addDate.setRequired(true);
+                            addDate.setCaption(iteractionTypeField.getValue().getAddCaption());
+                            addDate.setRequired(true);
 
-                        addString.setVisible(false);
-                        addInteger.setVisible(false);
-                        buttonCallAction.setVisible(false);
-                        break;
-                    case 2:
-                        addDate.setVisible(false);
-                        addString.setVisible(true);
-                        addString.setRequired(true);
-                        addString.setCaption(iteractionTypeField.getValue().getAddCaption());
-                        addString.setRequired(true);
+                            addString.setVisible(false);
+                            addInteger.setVisible(false);
+                            buttonCallAction.setVisible(false);
+                            break;
+                        case 2:
+                            addDate.setVisible(false);
+                            addString.setVisible(true);
+                            addString.setRequired(true);
+                            addString.setCaption(iteractionTypeField.getValue().getAddCaption());
+                            addString.setRequired(true);
 
-                        addInteger.setVisible(false);
-                        buttonCallAction.setVisible(false);
-                        break;
-                    case 3:
-                        addDate.setVisible(false);
-                        addString.setVisible(false);
-                        addInteger.setVisible(true);
+                            addInteger.setVisible(false);
+                            buttonCallAction.setVisible(false);
+                            break;
+                        case 3:
+                            addDate.setVisible(false);
+                            addString.setVisible(false);
+                            addInteger.setVisible(true);
 
-                        try {
-                            addInteger.setCaption(iteractionTypeField.getValue().getAddCaption());
-                        } catch (NullPointerException e) {
-                            addInteger.setCaption(iteractionTypeField.getValue().getIterationName());
-                        }
-                        addInteger.setRequired(true);
+                            try {
+                                addInteger.setCaption(iteractionTypeField.getValue().getAddCaption());
+                            } catch (NullPointerException e) {
+                                addInteger.setCaption(iteractionTypeField.getValue().getIterationName());
+                            }
+                            addInteger.setRequired(true);
 
-                        addInteger.setRequired(true);
-                        buttonCallAction.setVisible(false);
-                        break;
-                    default:
-                        addDate.setVisible(false);
-                        addString.setVisible(false);
-                        addInteger.setVisible(false);
-                        addDate.setVisible(false);
+                            addInteger.setRequired(true);
+                            buttonCallAction.setVisible(false);
+                            break;
+                        default:
+                            addDate.setVisible(false);
+                            addString.setVisible(false);
+                            addInteger.setVisible(false);
+                            addDate.setVisible(false);
 
-                        addDate.setRequired(false);
-                        addInteger.setRequired(false);
-                        addString.setRequired(false);
+                            addDate.setRequired(false);
+                            addInteger.setRequired(false);
+                            addString.setRequired(false);
 
-                        addDate.setCaption("");
-                        addInteger.setCaption("");
-                        addString.setCaption("");
-                        break;
+                            addDate.setCaption("");
+                            addInteger.setCaption("");
+                            addString.setCaption("");
+                            break;
+                    }
                 }
-            }
-        } else {
-            Boolean callForm;
-
-            try {
-                callForm = iteractionTypeField.getValue().getCallForm();
-            } catch (NullPointerException e) {
-                callForm = false;
-            }
-
-            if (callForm) {
-                addDate.setVisible(false);
-                addString.setVisible(false);
-                addInteger.setVisible(false);
-                buttonCallAction.setVisible(true);
             } else {
-                addDate.setVisible(false);
-                addString.setVisible(false);
-                addInteger.setVisible(false);
-                buttonCallAction.setVisible(false);
+                Boolean callForm;
+
+                try {
+                    callForm = iteractionTypeField.getValue().getCallForm();
+                } catch (NullPointerException e) {
+                    callForm = false;
+                }
+
+                if (callForm) {
+                    addDate.setVisible(false);
+                    addString.setVisible(false);
+                    addInteger.setVisible(false);
+                    buttonCallAction.setVisible(true);
+                } else {
+                    addDate.setVisible(false);
+                    addString.setVisible(false);
+                    addInteger.setVisible(false);
+                    buttonCallAction.setVisible(false);
+                }
             }
         }
     }
