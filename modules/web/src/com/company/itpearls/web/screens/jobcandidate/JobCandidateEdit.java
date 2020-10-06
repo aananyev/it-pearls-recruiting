@@ -16,6 +16,7 @@ import com.haulmont.cuba.security.global.UserSession;
 
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -598,6 +599,26 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         jobCandidateIteractionListDataGridDl.load();
     }
+
+    @Install(to = "jobCandidateCandidateCvTable.letter", subject = "descriptionProvider")
+    private String jobCandidateCandidateCvTableLetterDescriptionProvider(CandidateCV candidateCV) {
+        String returnData = candidateCV.getLetter()!= null ? Jsoup.parse(candidateCV.getLetter()).text() : "";
+        return returnData;
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "descriptionProvider")
+    private String jobCandidateCandidateCvTableIconOriginalCVFileDescriptionProvider(CandidateCV candidateCV) {
+        return candidateCV.getLinkOriginalCv();
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "descriptionProvider")
+    private String jobCandidateCandidateCvTableIconITPearlsCVFileDescriptionProvider(CandidateCV candidateCV) {
+        return candidateCV.getLinkItPearlsCV();
+    }
+
+
+
+
 
     public void copyIteractionJobCandidate() {
         if (jobCandidateIteractionListTable.getSingleSelected() == null) {
