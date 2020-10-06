@@ -124,7 +124,7 @@ order by e.vacansyName]]>
                                                    width="100%" align="MIDDLE_LEFT"/>
                                         <linkButton id="linkOriginalCV" align="BOTTOM_LEFT"
                                                     description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"
-                                                    invoke="setUrlOriginalCV" responsive="true"/>
+                                                    responsive="true"/>
                                     </row>
                                     <row>
                                         <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"

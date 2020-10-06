@@ -1,7 +1,5 @@
 package com.company.itpearls.web.screens.candidatecv;
 
-import com.company.itpearls.BeanNotificationEvent;
-import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -21,7 +19,6 @@ import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.web.AppUI;
-import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -235,12 +232,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
+    @Subscribe("linkOriginalCV")
+    public void onLinkOriginalCVClick1(Button.ClickEvent event) {
+        setUrlOriginalCV();
+    }
+
     public void setUrlOriginalCV() {
         String value = textFieldIOriginalCV.getValue();
 
         if (value == null)
             return;
-        if (!value.startsWith("http://"))
+        if (!value.startsWith("http://") && !value.startsWith("https://"))
             value = "http://" + value;
 
         webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
