@@ -2,27 +2,25 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListBrowse;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import javax.security.auth.callback.LanguageCallback;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 @UiController("itpearls_JobCandidate.browse")
@@ -447,9 +445,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
         Component newIteraction = createNewIteractionButton(entity);
+        Component listIteraction = createListIteractionButton(entity);
 
         headerBox.add(infoLabel);
         headerBox.add(newIteraction);
+        headerBox.add(listIteraction);
         headerBox.add(editButton);
         headerBox.add(closeButton);
         headerBox.expand(infoLabel);
@@ -475,15 +475,31 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return mainLayout;
     }
 
+    private Component createListIteractionButton(JobCandidate entity) {
+        Button listIteractionButton = uiComponents.create(Button.class);
+        listIteractionButton.setCaption("Список взаимодействий");
+
+        listIteractionButton.setAction(new BaseAction("listIteraction")
+                .withHandler(actionPerformedEvent ->
+                        screenBuilders.lookup(IteractionList.class, this)
+                                .withScreenClass(IteractionListBrowse.class)
+                                .withLaunchMode(OpenMode.DIALOG)
+                                .build()
+                                .show())
+        );
+
+        return listIteractionButton;
+
+    }
+
     private Component createNewIteractionButton(JobCandidate entity) {
         Button newIteractionButton = uiComponents.create(Button.class);
         newIteractionButton.setCaption("Новое взаимодействие");
 
+
         newIteractionButton.setAction(new BaseAction("newIteraction")
                 .withHandler(actionPerformedEvent ->
                         screenBuilders.editor(IteractionList.class, this)
-//                                .withOpenMode(OpenMode.DIALOG)
-//                                .withLaunchMode(OpenMode.DIALOG)
                                 .newEntity()
                                 .withScreenClass(IteractionListEdit.class)
                                 .withInitializer(iteractionList1 -> {
