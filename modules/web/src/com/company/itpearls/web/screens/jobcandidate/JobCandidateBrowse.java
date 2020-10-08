@@ -20,7 +20,9 @@ import javax.security.auth.callback.LanguageCallback;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 @UiController("itpearls_JobCandidate.browse")
@@ -155,6 +157,95 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return CubaIcon.valueOf(retStr);
+    }
+
+    @Install(to = "jobCandidatesTable.freeCandidate", subject = "styleProvider")
+    private String jobCandidatesTableFreeCandidateStyleProvider(JobCandidate jobCandidate) {
+        String retStr = null;
+
+        IteractionList iteractionList = getLastIteraction(jobCandidate);
+
+        if (iteractionList != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(iteractionList.getDateIteraction());
+            calendar.add(Calendar.MONTH, 1);
+
+            Calendar calendar1 = Calendar.getInstance();
+
+            if (calendar.after(calendar1)) {
+                if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                    retStr = "pic-center-large-red";
+                } else {
+                    retStr = "pic-center-large-yellow";
+                }
+            } else {
+                retStr = "pic-center-large-green";
+            }
+
+            return retStr;
+        } else {
+            return "pic-center-large-green";
+        }
+    }
+
+    @Install(to = "jobCandidatesTable.freeCandidate", subject = "descriptionProvider")
+    private String jobCandidatesTableFreeCandidateDescriptionProvider(JobCandidate jobCandidate) {
+        IteractionList iteractionList = getLastIteraction(jobCandidate);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        return iteractionList != null ?
+                simpleDateFormat.format(iteractionList.getDateIteraction())
+                        + "\n"
+                        + iteractionList.getIteractionType().getIterationName()
+                        + "\n"
+                        + iteractionList.getRecrutier().getName() : "";
+    }
+
+    private IteractionList getLastIteraction(JobCandidate jobCandidate) {
+        String query = "select e from itpearls_IteractionList e " +
+                "where e.numberIteraction = " +
+                "(select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate) " +
+                "and e.candidate = :candidate";
+
+        IteractionList iteractionList = null;
+
+        try {
+            iteractionList = dataManager.load(IteractionList.class)
+                    .query(query)
+                    .parameter("candidate", jobCandidate)
+                    .view("iteractionList-view")
+                    .one();
+        } catch (Exception e) {
+        }
+
+        return iteractionList;
+    }
+
+    @Install(to = "jobCandidatesTable.freeCandidate", subject = "columnGenerator")
+    private Icons.Icon jobCandidatesTableFreeCandidateColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        // FREE_CODE_CAMP check square minus square
+        String retSrt = null;
+
+        IteractionList iteractionList = getLastIteraction(event.getItem());
+
+        if (iteractionList != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(iteractionList.getDateIteraction());
+            calendar.add(Calendar.MONTH, 1);
+
+            Calendar calendar1 = Calendar.getInstance();
+
+            if (calendar.after(calendar1)) {
+                retSrt = "MINUS_SQUARE";
+            } else {
+                retSrt = "CHECK_SQUARE";
+            }
+
+            return CubaIcon.valueOf(retSrt);
+        } else {
+            return CubaIcon.valueOf("CHECK_SQUARE");
+        }
     }
 
     @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")

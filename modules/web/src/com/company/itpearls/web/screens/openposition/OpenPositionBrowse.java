@@ -96,7 +96,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.remoteWork", subject = "descriptionProvider")
     private String openPositionsTableRemoteWorkDescriptionProvider(OpenPosition openPosition) {
-        return String.valueOf(remoteWork.get(openPosition.getRemoteWork()));
+        String retStr = String.valueOf(remoteWork.get(openPosition.getRemoteWork()));
+
+        return retStr;
     }
 
     private void initRemoteWorkMap() {
