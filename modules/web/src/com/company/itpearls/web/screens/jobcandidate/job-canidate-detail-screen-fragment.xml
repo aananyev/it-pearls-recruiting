@@ -123,6 +123,34 @@
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               value="msg://msgCompany"/>
+                        <label id="companyLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgVacancyName"/>
+                        <label id="vacancyNameLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgDepartament"/>
+                        <label id="departamentLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgProjectName"/>
+                        <label id="projectNameLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
                                value="msg://msgIteraction"/>
                         <label id="lastIteractionLabel"
                                align="BOTTOM_LEFT"/>

@@ -42,11 +42,19 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private Image candidateFaceImage;
     @Inject
     private Label<String> iteractionCountLabel;
+    @Inject
+    private Label<String> companyLabel;
+    @Inject
+    private Label<String> departamentLabel;
+    @Inject
+    private Label<String> vacancyNameLabel;
+    @Inject
+    private Label<String> projectNameLabel;
 
     public void setLastSalaryLabel(String iteractionName) {
         IteractionList iteractionList = getStatistics(iteractionName);
-        if(iteractionList != null) {
-            if(iteractionList.getAddString() != null) {
+        if (iteractionList != null) {
+            if (iteractionList.getAddString() != null) {
                 salaryExpectationLabel.setValue(getStatistics(iteractionName).getAddString());
             }
         }
@@ -83,9 +91,36 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             }
         }
         // последнее взаимодействие
-        if(iteractionList.size() != 0) {
+        if (iteractionList.size() != 0) {
             lastIteractionLabel.setValue(iteractionList.get(0).getIteractionType().getIterationName() + "("
                     + simpleDateFormat.format((iteractionList.get(0).getDateIteraction())) + ")");
+        }
+
+        if (iteractionList.size() != 0) {
+            companyLabel.setValue(iteractionList.get(0)
+                    .getProject()
+                    .getProjectDepartment()
+                    .getCompanyName()
+                    .getComanyName());
+        }
+
+        if (iteractionList.size() != 0) {
+            departamentLabel.setValue(iteractionList.get(0)
+                    .getProject()
+                    .getProjectDepartment()
+                    .getDepartamentRuName());
+        }
+
+        if (iteractionList.size() != 0) {
+            vacancyNameLabel.setValue(iteractionList.get(0)
+                    .getVacancy()
+                    .getVacansyName());
+        }
+
+        if (iteractionList.size() != 0) {
+            projectNameLabel.setValue(iteractionList.get(0)
+                    .getProject()
+                    .getProjectName());
         }
 
         iteractionCountLabel.setValue(String.valueOf(iteractionList.size()));

@@ -185,6 +185,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Install(to = "jobCandidatesTable.freeCandidate", subject = "descriptionProvider")
     private String jobCandidatesTableFreeCandidateDescriptionProvider(JobCandidate jobCandidate) {
         IteractionList iteractionList = getLastIteraction(jobCandidate);
+        String recrutierName = "";
+
+        if (iteractionList != null) {
+            if (iteractionList.getRecrutier() != null) {
+                if (iteractionList.getRecrutier().getName() != null) {
+                    recrutierName = iteractionList.getRecrutier().getName();
+                }
+            }
+        }
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -193,7 +202,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                         + "\n"
                         + iteractionList.getIteractionType().getIterationName()
                         + "\n"
-                        + iteractionList.getRecrutier().getName() : "";
+                        + recrutierName : "";
     }
 
     private IteractionList getLastIteraction(JobCandidate jobCandidate) {
