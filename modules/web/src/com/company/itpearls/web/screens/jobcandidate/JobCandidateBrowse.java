@@ -2,8 +2,8 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
-import com.company.itpearls.web.screens.iteractionlist.IteractionListBrowse;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -40,11 +40,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private CheckBox checkBoxOnWork;
     @Inject
-    private Dialogs dialogs;
-    @Inject
     private ScreenBuilders screenBuilders;
-    @Inject
-    private Notifications notifications;
     @Inject
     private GetRoleService getRoleService;
     @Inject
@@ -480,13 +476,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         listIteractionButton.setCaption("Список взаимодействий");
 
         listIteractionButton.setAction(new BaseAction("listIteraction")
-                .withHandler(actionPerformedEvent ->
-                        screenBuilders.lookup(IteractionList.class, this)
-                                .withScreenClass(IteractionListBrowse.class)
-                                .withLaunchMode(OpenMode.DIALOG)
-                                .build()
-                                .show())
-        );
+                .withHandler(actionPerformedEvent -> {
+                            screenBuilders.lookup(IteractionList.class, this)
+                                    .withScreenClass(IteractionListSimpleBrowse.class)
+                                    .withLaunchMode(OpenMode.DIALOG)
+                                    .build()
+                                    .show();
+
+                        }
+                ));
 
         return listIteractionButton;
 
