@@ -31,33 +31,45 @@
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgCandidate"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                property="fullName"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgPersonPosition"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                property="personPosition"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgCorrentCompany"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                property="currentCompany"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgCity"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                property="cityOfResidence"/>
                     </hbox>
                 </vbox>
@@ -69,49 +81,67 @@
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgEmail"/>
                         <label align="BOTTOM_LEFT"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                dataContainer="jobCandidatesDc"
                                property="email"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgPhone"/>
                         <label align="BOTTOM_LEFT"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                dataContainer="jobCandidatesDc"
                                property="phone"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgSkype"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                property="skypeName"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgTelegram"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                property="telegramName"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgViberAccount"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                property="wiberName"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
+                               width="100px"
                                value="msg://msgWhatsAppAccount"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                property="whatsupName"/>
                     </hbox>
                 </vbox>
@@ -122,45 +152,63 @@
                            value="msg://msgCandidateIteraction"/>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
+                               width="100px"
                                stylename="bold"
                                value="msg://msgCompany"/>
                         <label id="companyLabel"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
                                align="BOTTOM_LEFT"/>
+                        align="MIDDLE_LEFT"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
+                               width="100px"
                                stylename="bold"
                                value="msg://msgVacancyName"/>
                         <label id="vacancyNameLabel"
-                               align="BOTTOM_LEFT"/>
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
+                               width="100px"
                                stylename="bold"
                                value="msg://msgDepartament"/>
                         <label id="departamentLabel"
-                               align="BOTTOM_LEFT"/>
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
+                               width="100px"
                                stylename="bold"
                                value="msg://msgProjectName"/>
                         <label id="projectNameLabel"
-                               align="BOTTOM_LEFT"/>
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
+                               width="100px"
                                stylename="bold"
                                value="msg://msgIteraction"/>
                         <label id="lastIteractionLabel"
-                               align="BOTTOM_LEFT"/>
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
+                               width="100px"
                                stylename="bold"
                                value="msg://msgSalaryExpectation"/>
                         <label id="salaryExpectationLabel"
-                               align="BOTTOM_LEFT"/>
+                               width="190px" stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
                     </hbox>
                 </vbox>
                 <vbox id="jobCandidateStatisticsVBox" width="25%">

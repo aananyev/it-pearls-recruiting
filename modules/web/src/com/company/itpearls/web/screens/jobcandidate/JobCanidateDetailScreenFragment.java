@@ -55,7 +55,9 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         IteractionList iteractionList = getStatistics(iteractionName);
         if (iteractionList != null) {
             if (iteractionList.getAddString() != null) {
-                salaryExpectationLabel.setValue(getStatistics(iteractionName).getAddString());
+                String salary = getStatistics(iteractionName).getAddString();
+                salaryExpectationLabel.setValue(salary);
+                salaryExpectationLabel.setDescription(getStatistics(iteractionName).getAddString());
             }
         }
     }
@@ -76,8 +78,11 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         // найти последнего рекрутера
         for(IteractionList iteraction : iteractionList) {
             if(iteraction.getRecrutier().getGroup().getName().equals(RECRUTIER_GROUP)) {
-                lastRecruterLabel.setValue(iteraction.getRecrutier().getName() + "("
-                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")");
+                String lastRecrutier = iteraction.getRecrutier().getName() + " ("
+                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+
+                lastRecruterLabel.setValue(lastRecrutier);
+                lastRecruterLabel.setDescription(lastRecrutier);
                 break;
             }
         }
@@ -85,42 +90,86 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         //Найти последнего реcthxthf
         for(IteractionList iteraction : iteractionList) {
             if(iteraction.getRecrutier().getGroup().getName().equals(RESEARCHER_GROUP)) {
-                lastResearcherLabel.setValue(iteraction.getRecrutier().getName() + "("
-                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")");
+                String lastResearcher = iteraction.getRecrutier().getName() + " ("
+                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+                lastResearcherLabel.setValue(lastResearcher);
+                lastRecruterLabel.setDescription(lastResearcher);
                 break;
             }
         }
         // последнее взаимодействие
         if (iteractionList.size() != 0) {
-            lastIteractionLabel.setValue(iteractionList.get(0).getIteractionType().getIterationName() + "("
-                    + simpleDateFormat.format((iteractionList.get(0).getDateIteraction())) + ")");
+            String lastIteraction = iteractionList.get(0).getIteractionType().getIterationName() + " ("
+                    + simpleDateFormat.format((iteractionList.get(0).getDateIteraction())) + ")";
+
+            lastIteractionLabel.setValue(lastIteraction);
+            lastIteractionLabel.setDescription(lastIteraction);
         }
 
         if (iteractionList.size() != 0) {
-            companyLabel.setValue(iteractionList.get(0)
-                    .getProject()
-                    .getProjectDepartment()
-                    .getCompanyName()
-                    .getComanyName());
+            String project = "";
+
+            try {
+                project = iteractionList.get(0)
+                        .getProject()
+                        .getProjectDepartment()
+                        .getCompanyName()
+                        .getComanyName();
+            } catch (Exception e) {
+                project = "";
+            }
+
+            if (project != null) {
+                companyLabel.setValue(project);
+                companyLabel.setDescription(project);
+            }
         }
 
         if (iteractionList.size() != 0) {
-            departamentLabel.setValue(iteractionList.get(0)
-                    .getProject()
-                    .getProjectDepartment()
-                    .getDepartamentRuName());
+            String departament = "";
+
+            try {
+                departament = iteractionList.get(0)
+                        .getProject()
+                        .getProjectDepartment()
+                        .getDepartamentRuName();
+            } catch (Exception e) {
+                departament = "";
+            }
+
+            if (departament != null) {
+                departamentLabel.setValue(departament);
+                departamentLabel.setDescription(departament);
+            }
         }
 
         if (iteractionList.size() != 0) {
-            vacancyNameLabel.setValue(iteractionList.get(0)
-                    .getVacancy()
-                    .getVacansyName());
+            String vacansyName = "";
+
+            try {
+                vacansyName = iteractionList.get(0)
+                        .getVacancy()
+                        .getVacansyName();
+            } catch (Exception e) {
+                vacansyName = "";
+            }
+            vacancyNameLabel.setValue(vacansyName);
+            vacancyNameLabel.setDescription(vacansyName);
         }
 
         if (iteractionList.size() != 0) {
-            projectNameLabel.setValue(iteractionList.get(0)
-                    .getProject()
-                    .getProjectName());
+            String projectName = "";
+
+            try {
+                projectName = iteractionList.get(0)
+                        .getProject()
+                        .getProjectName();
+            } catch (Exception e) {
+                projectName = "";
+            }
+
+            projectNameLabel.setValue(projectName);
+            projectNameLabel.setDescription(projectName);
         }
 
         iteractionCountLabel.setValue(String.valueOf(iteractionList.size()));

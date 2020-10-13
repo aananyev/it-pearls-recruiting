@@ -1,6 +1,21 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 
+.job-candidate-fragment-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+}
+
+.job-candidate-fragment-label-bold {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: bold;
+        text-transform: uppercase;
+}
+
 .label-ellipsis {
     white-space: nowrap;
     overflow: hidden;
@@ -10,8 +25,9 @@
 .label-cute-text {
     white-space: nowrap; /* Отменяем перенос текста */
     overflow: hidden; /* Обрезаем содержимое */
-    padding: 5px; /* Поля */
+    padding: 1px; /* Поля */
     position: relative; /* Относительное позиционирование */
+    max-width: 250px;
 }
 
 .label-cute-text::after {

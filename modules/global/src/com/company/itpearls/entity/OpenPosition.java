@@ -26,7 +26,7 @@ public class OpenPosition extends StandardEntity {
     protected Boolean openClose = false;
 
     @NotNull
-    @Column(name = "VACANSY_NAME", nullable = false, length = 120)
+    @Column(name = "VACANSY_NAME", nullable = false, length = 150)
     protected String vacansyName;
 
     @NotNull
