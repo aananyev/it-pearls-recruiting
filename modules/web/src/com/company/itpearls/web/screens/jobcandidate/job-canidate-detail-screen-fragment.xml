@@ -152,7 +152,7 @@
                            value="msg://msgCandidateIteraction"/>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
-                               width="100px"
+                               width="105px"
                                stylename="bold"
                                value="msg://msgCompany"/>
                         <label id="companyLabel"
@@ -163,7 +163,7 @@
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
-                               width="100px"
+                               width="105px"
                                stylename="bold"
                                value="msg://msgVacancyName"/>
                         <label id="vacancyNameLabel"
@@ -173,7 +173,7 @@
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
-                               width="100px"
+                               width="105px"
                                stylename="bold"
                                value="msg://msgDepartament"/>
                         <label id="departamentLabel"
@@ -183,7 +183,7 @@
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
-                               width="100px"
+                               width="105px"
                                stylename="bold"
                                value="msg://msgProjectName"/>
                         <label id="projectNameLabel"
@@ -193,7 +193,7 @@
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
-                               width="100px"
+                               width="105px"
                                stylename="bold"
                                value="msg://msgIteraction"/>
                         <label id="lastIteractionLabel"
@@ -203,7 +203,7 @@
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
-                               width="100px"
+                               width="105px"
                                stylename="bold"
                                value="msg://msgSalaryExpectation"/>
                         <label id="salaryExpectationLabel"

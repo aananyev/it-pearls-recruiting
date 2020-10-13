@@ -64,7 +64,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
     public void setVisibleLogo() {
 
-        if(candidateFaceImage.getValueSource().getValue() == null) {
+        if (candidateFaceImage.getValueSource().getValue() == null) {
             candidateFaceImage.setVisible(false);
         } else {
             candidateFaceImage.setVisible(true);
@@ -76,26 +76,32 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         // найти последнего рекрутера
-        for(IteractionList iteraction : iteractionList) {
-            if(iteraction.getRecrutier().getGroup().getName().equals(RECRUTIER_GROUP)) {
-                String lastRecrutier = iteraction.getRecrutier().getName() + " ("
-                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+        for (IteractionList iteraction : iteractionList) {
+            if (iteraction.getRecrutier() != null)
+                if (iteraction.getRecrutier().getGroup() != null)
+                    if (iteraction.getRecrutier().getGroup().getName() != null)
+                        if (iteraction.getRecrutier().getGroup().getName().equals(RECRUTIER_GROUP)) {
+                            String lastRecrutier = iteraction.getRecrutier().getName() + " ("
+                                    + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
 
-                lastRecruterLabel.setValue(lastRecrutier);
-                lastRecruterLabel.setDescription(lastRecrutier);
-                break;
-            }
+                            lastRecruterLabel.setValue(lastRecrutier);
+                            lastRecruterLabel.setDescription(lastRecrutier);
+                            break;
+                        }
         }
 
         //Найти последнего реcthxthf
-        for(IteractionList iteraction : iteractionList) {
-            if(iteraction.getRecrutier().getGroup().getName().equals(RESEARCHER_GROUP)) {
-                String lastResearcher = iteraction.getRecrutier().getName() + " ("
-                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
-                lastResearcherLabel.setValue(lastResearcher);
-                lastRecruterLabel.setDescription(lastResearcher);
-                break;
-            }
+        for (IteractionList iteraction : iteractionList) {
+            if (iteraction.getRecrutier() != null)
+                if (iteraction.getRecrutier().getGroup() != null)
+                    if (iteraction.getRecrutier().getGroup().getName() != null)
+                        if (iteraction.getRecrutier().getGroup().getName().equals(RESEARCHER_GROUP)) {
+                            String lastResearcher = iteraction.getRecrutier().getName() + " ("
+                                    + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+                            lastResearcherLabel.setValue(lastResearcher);
+                            lastRecruterLabel.setDescription(lastResearcher);
+                            break;
+                        }
         }
         // последнее взаимодействие
         if (iteractionList.size() != 0) {
@@ -104,6 +110,11 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
             lastIteractionLabel.setValue(lastIteraction);
             lastIteractionLabel.setDescription(lastIteraction);
+
+            if (candidateFaceImage == null) {
+                String width = String.valueOf(lastIteractionLabel.getWidth() + 20);
+                lastIteractionLabel.setWidth(width);
+            }
         }
 
         if (iteractionList.size() != 0) {
@@ -188,7 +199,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                     .view("iteractionList-view")
                     .parameter("candidate", jobCandidatesDc.getItem())
                     .list();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         return iteractionLists;
     }
@@ -208,7 +220,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                     .parameter("iteractionName", iteractionName)
                     .parameter("candidate", jobCandidatesDc.getItem())
                     .one();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         return iteractionList;
     }
