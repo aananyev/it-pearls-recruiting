@@ -1054,7 +1054,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if(vacansyNameField.getValue() != null) {
             if(generatePositionName().equals(retValue)) {
-                retValue = retValue + " (" + projectNameField.getValue().getProjectName() + ")";
+                if (projectNameField.getValue().getProjectName() != null) {
+                    retValue = retValue + " (" + projectNameField.getValue().getProjectName() + ")";
+                }
             }
         }
 

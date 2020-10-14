@@ -30,7 +30,11 @@
             <property name="projectOfDepartment" view="_minimal"/>
         </property>
         <property name="projectOwner" view="_local">
-            <property name="personPosition" view="_minimal"/>
+            <property name="personPosition" view="_local">
+                <property name="positionRuName"/>
+                <property name="positionEnName"/>
+            </property>
+            <property name="fileImageFace" view="_local"/>
         </property>
         <property name="openPosition" view="_local">
             <property name="projectName" view="_minimal">
@@ -63,7 +67,9 @@
             </property>
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local">
-                    <property name="cityOfCompany" view="_local"/>
+                    <property name="cityOfCompany" view="_local">
+                        <property name="cityRuName"/>
+                    </property>
                     <property name="fileCompanyLogo" view="_minimal"/>
                 </property>
             </property>
