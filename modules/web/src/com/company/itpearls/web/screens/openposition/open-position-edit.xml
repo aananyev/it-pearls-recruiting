@@ -35,6 +35,16 @@
             <collection id="openPositionCandidatesesDc"
                         property="candidates"/>
         </instance>
+        <collection id="openPositionParentDc" class="com.company.itpearls.entity.OpenPosition"
+                    view="_local">
+            <loader id="openPositionParentDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                    where e.openClose is null or e.openClose=false
+                    order by e.vacansyName]]>
+                </query>
+            </loader>
+        </collection>
         <collection id="positionTypesDc"
                     class="com.company.itpearls.entity.Position"
                     view="_local">
@@ -328,6 +338,22 @@
                                width="100%"
                                required="true"/>
                 </hbox>
+            </tab>
+            <tab id="tabCommandTab" caption="msg://msgCommandTab"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 icon="GROUP">
+                <radioButtonGroup id="commandOrPosition"
+                                  orientation="horizontal"
+                                  required="true"
+                                  property="commandCandidate"
+                                  description="msg://msgCommandOrPosition"
+                                  caption="msg://msgCommandOrPosition"/>
+                <lookupPickerField id="parentOpenPositionField"
+                                   dataContainer="openPositionDc"
+                                   property="parentOpenPosition"
+                                   optionsContainer="openPositionParentDc"/>
+
             </tab>
             <tab id="tabPayments"
                  caption="msg://msgPayments"

@@ -11,6 +11,8 @@
             <loader/>
             <collection id="projectJobCandidatesDc" property="jobCandidate"/>
             <collection id="projectOpenPositionsDc" property="openPosition"/>
+            <collection id="projectDepartmentsDc" property="projectDepartment"/>
+            <collection id="projectOwnersDc" property="projectOwner"/>
         </instance>
 <!--
         <collection id="projectOpenPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
@@ -29,7 +31,6 @@
                 </query>
             </loader>
         </collection>
--->
         <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="projectDepartmentsLc">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
@@ -42,7 +43,7 @@
                 <query><![CDATA[select e from itpearls_Person e
 order by e.secondName, e.firstName]]></query>
             </loader>
-        </collection>
+        </collection> -->
     </data>
     <dialogMode height="600"
                 width="800"/>

@@ -75,7 +75,7 @@
 
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT" width="100%">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

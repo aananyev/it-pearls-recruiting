@@ -1,0 +1,1 @@
+alter table ITPEARLS_OPEN_POSITION add column PARENT_OPEN_POSITION_ID uuid ;

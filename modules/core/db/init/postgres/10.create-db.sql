@@ -397,6 +397,7 @@ create table ITPEARLS_OPEN_POSITION (
     OPEN_CLOSE boolean,
     VACANSY_NAME varchar(150) not null,
     REMOTE_WORK integer not null,
+    COMMAND_CANDIDATE integer,
     SALARY_MIN decimal(19, 2),
     SALARY_MAX decimal(19, 2),
     CITY_POSITION_ID uuid,
@@ -421,6 +422,7 @@ create table ITPEARLS_OPEN_POSITION (
     PERCENT_COMISSION_OF_COMPANY varchar(5),
     PERCENT_SALARY_OF_RESEARCHER varchar(5),
     PERCENT_SALARY_OF_RECRUTIER varchar(5),
+    PARENT_OPEN_POSITION_ID uuid,
     --
     primary key (ID)
 )^

@@ -234,8 +234,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableProjectNameDescriptionProvider(OpenPosition openPosition) {
         String textReturn = openPosition.getProjectName().getProjectDescription();
         String a = textReturn != null ? Jsoup.parse(textReturn).text() : "";
+        String projectOwner = openPosition.getProjectName().getProjectOwner().getSecondName() + " " +
+                openPosition.getProjectName().getProjectOwner().getFirstName();
 
-        return a;
+        return "Владелец проекта: " + projectOwner + " \n" + a;
     }
 
     @Inject

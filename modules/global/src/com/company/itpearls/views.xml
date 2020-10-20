@@ -84,6 +84,7 @@
         <property name="percentComissionOfCompany"/>
         <property name="percentSalaryOfResearcher"/>
         <property name="percentSalaryOfRecrutier"/>
+        <property name="parentOpenPosition"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" fetch="JOIN" view="_local"/>
@@ -213,7 +214,9 @@
             <property name="cityOfResidence" view="_minimal"/>
             <property name="positionCountry" view="_minimal"/>
             <property name="jobHistory" view="_minimal"/>
-            <property name="candidateCv" view="_local"/>
+            <property name="candidateCv" view="_local">
+                <property name="fileCV" view="_local"/>
+            </property>
         </property>
         <property name="resumePosition" view="_minimal"/>
         <property name="toVacancy" view="_minimal"/>

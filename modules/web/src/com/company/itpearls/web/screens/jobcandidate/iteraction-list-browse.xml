@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout>
+        <dataGrid id="iteractionListsTable"
+                  width="100%">
+            <actions>
+            </actions>
+            <columns>
+                <column property="dateIteraction" id="dateIteraction">
+                    <formatter format="dd.MM.yyyy"
+                               class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                </column>
+                <column property="candidate" id="candidate"/>
+                <column property="iteractionType" id="iteractionType"/>
+                <column property="vacancy" id="vacancy"/>
+                <column property="project" id="project"/>
+                <column property="recrutier" id="recrutier"/>
+                <column property="recrutierName" id="recrutierName"/>
+            </columns>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+            </buttonsPanel>
+        </dataGrid>
+    </layout>
+</fragment>

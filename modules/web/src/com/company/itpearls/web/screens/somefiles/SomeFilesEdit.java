@@ -8,6 +8,7 @@ import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.PickerField;
 import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.SomeFiles;
 
@@ -26,6 +27,8 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
     private LookupPickerField<FileType> fileTypeField;
     @Inject
     private LookupPickerField<CandidateCV> candidateCVField;
+    @Inject
+    private DataContext dataContext;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -60,5 +63,9 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
                 }
             }
         }
+    }
+
+    public void setParentDataContext(DataContext parentDataContext) {
+        dataContext.setParent(parentDataContext);
     }
 }

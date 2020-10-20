@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.iteractionlist;
+package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.model.CollectionLoader;

@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.candidatecv;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.somefiles.SomeFilesEdit;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.AppBeans;
@@ -9,8 +10,10 @@ import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
@@ -60,6 +63,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Dialogs dialogs;
     @Inject
     private RichTextArea letterRichTextArea;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private DataContext dataContext;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -67,7 +74,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         webBrowserTools = ui.getWebBrowserTools();
 
         fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
-            if(fileOriginalCVField.getFileId() != null ) {
+            if (fileOriginalCVField.getFileId() != null) {
                 File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
 
                 commitChanges();
@@ -285,5 +292,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
         someFilesesDl.setParameter("candidate", candidateField.getValue());
         someFilesesDl.load();
+    }
+
+    public void createSomeFileButtonAction() {
+        screenBuilders.editor(SomeFiles.class, this)
+                .newEntity()
+                .withScreenClass(SomeFilesEdit.class)
+                .withParentDataContext(dataContext)
+                .withInitializer(someFiles -> {
+                    someFiles.setCandidateCV(this.getEditedEntity());
+                })
+                .build()
+                .show();
     }
 }

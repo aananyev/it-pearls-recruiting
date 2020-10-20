@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://iteractionListSimpleBrowse.caption"
+        focusComponent="iteractionListsTable"
+        messagesPack="com.company.itpearls.web.screens.iteractionlist">
+    <data readOnly="true">
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="iteractionListsTable"
+            spacing="true">
+        <fragment id="iteractionListsTable" screen="itpearls_IteractionListBrowse"/>
+    </layout>
+</window>

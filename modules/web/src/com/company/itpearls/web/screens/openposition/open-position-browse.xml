@@ -48,15 +48,16 @@
                         exclude="id|birdhDate|email|id|whatsupName"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <dataGrid id="openPositionsTable"
-               width="100%"
-               editorEnabled="false"
-               headerVisible="true"
-               contextMenuEnabled="false"
-               textSelectionEnabled="false"
-               selectionMode="SINGLE"
-               reorderingAllowed="true"
-               dataContainer="openPositionsDc">
+        <treeDataGrid id="openPositionsTable"
+                      width="100%"
+                      editorEnabled="false"
+                      headerVisible="true"
+                      contextMenuEnabled="false"
+                      textSelectionEnabled="false"
+                      hierarchyProperty="parentOpenPosition"
+                      selectionMode="SINGLE"
+                      reorderingAllowed="true"
+                      dataContainer="openPositionsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
@@ -66,7 +67,7 @@
             <columns>
                 <column id="icon"
                         resizable="true"
-                        width="40px"
+                        width="60px"
                         minimumWidth="35px"
                         caption=""/>
                 <column id="vacansyName"
@@ -139,7 +140,7 @@
                         enable="false"
                         visible="false"/>
             </buttonsPanel>
-        </dataGrid>
+        </treeDataGrid>
         <hbox spacing="true">
             <checkBox id="checkBoxOnlyOpenedPosition"
                       description="msg://msgOnlyOpenedVacansy"

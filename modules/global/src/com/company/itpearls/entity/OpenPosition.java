@@ -33,6 +33,10 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "REMOTE_WORK", nullable = false)
     protected Integer remoteWork;
 
+    @NotNull
+    @Column(name = "COMMAND_CANDIDATE")
+    protected Integer commandCandidate;
+
     @Column(name = "SALARY_MIN")
     protected BigDecimal salaryMin;
 
@@ -126,6 +130,10 @@ public class OpenPosition extends StandardEntity {
 
     @Column(name = "PERCENT_SALARY_OF_RECRUTIER", length = 5)
     protected String percentSalaryOfRecrutier;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARENT_OPEN_POSITION_ID")
+    protected OpenPosition parentOpenPosition;
 
     public Boolean getInternalProject() {
         return internalProject;
@@ -357,5 +365,21 @@ public class OpenPosition extends StandardEntity {
 
     public void setNeedLetter(Boolean needLetter) {
         this.needLetter = needLetter;
+    }
+
+    public OpenPosition getParentOpenPosition() {
+        return parentOpenPosition;
+    }
+
+    public void setParentOpenPosition(OpenPosition parentOpenPosition) {
+        this.parentOpenPosition = parentOpenPosition;
+    }
+
+    public void setCommandCandidate(Integer commandCandidate) {
+        this.commandCandidate = commandCandidate;
+    }
+
+    public Integer getCommandCandidate() {
+        return commandCandidate;
     }
 }

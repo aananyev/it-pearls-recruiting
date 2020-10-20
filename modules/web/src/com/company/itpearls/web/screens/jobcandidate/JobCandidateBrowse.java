@@ -3,15 +3,13 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
-import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
@@ -49,7 +47,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private DataGrid<JobCandidate> jobCandidatesTable;
     @Inject
     private DataManager dataManager;
-
     private String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
     @Inject
     private UiComponents uiComponents;
@@ -57,6 +54,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private List<IteractionList> iteractionList = new ArrayList<>();
     @Inject
     private Fragments fragments;
+    @Inject
+    private DataComponents dataComponents;
+
+    private CollectionContainer<IteractionList> iteractionListDc;
+    private CollectionLoader<IteractionList> iteractionListDl;
+
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -483,20 +486,37 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Component createListIteractionButton(JobCandidate entity) {
         Button listIteractionButton = uiComponents.create(Button.class);
         listIteractionButton.setCaption("Список взаимодействий");
+        createDataComponents();
 
         listIteractionButton.setAction(new BaseAction("listIteraction")
                 .withHandler(actionPerformedEvent -> {
-                            screenBuilders.lookup(IteractionList.class, this)
-                                    .withScreenClass(IteractionListSimpleBrowse.class)
-                                    .withLaunchMode(OpenMode.DIALOG)
-                                    .build()
-                                    .show();
+                    iteractionListDl.setParameter("candidate", entity);
+                    iteractionListDl.load();
 
-                        }
-                ));
+                    Screen iteractionListSimpleBrowse = screenBuilders.lookup(IteractionList.class, this)
+                            .withScreenClass(IteractionListSimpleBrowse.class)
+                            .withContainer(iteractionListDc)
+                            .withLaunchMode(OpenMode.DIALOG)
+                            .build();
+                }));
 
         return listIteractionButton;
 
+    }
+
+    private void createDataComponents() {
+        DataContext dataContext = dataComponents.createDataContext();
+        getScreenData().setDataContext(dataContext);
+
+        iteractionListDc = dataComponents.createCollectionContainer(IteractionList.class);
+
+        iteractionListDl = dataComponents.createCollectionLoader();
+        iteractionListDl.setContainer(iteractionListDc);
+        iteractionListDl.setDataContext(dataContext);
+        iteractionListDl.setView("iteractionList-view");
+        iteractionListDl.setQuery("select e from itpearls_IteractionList e " +
+                "where e.candidate = :candidate " +
+                "order by e.numberIteraction desc");
     }
 
     private Component createNewIteractionButton(JobCandidate entity) {
