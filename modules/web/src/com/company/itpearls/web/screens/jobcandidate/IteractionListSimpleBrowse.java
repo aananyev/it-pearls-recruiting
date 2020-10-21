@@ -12,11 +12,12 @@ import javax.inject.Inject;
 @LookupComponent("iteractionListsTable")
 @LoadDataBeforeShow
 public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
+
     @Inject
-    private CollectionLoader<IteractionList> iteractionListsDl;
+    private CollectionLoader<IteractionList> iteractionListDl;
 
     public void setSelectedCandidate(JobCandidate jobCandidate) {
-        iteractionListsDl.setParameter("candidate", jobCandidate);
-        iteractionListsDl.load();
+        iteractionListDl.setParameter("candidate", jobCandidate);
+        iteractionListDl.load();
     }
 }

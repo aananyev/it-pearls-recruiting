@@ -36,7 +36,7 @@
             </property>
             <property name="fileImageFace" view="_local"/>
         </property>
-        <property name="openPosition" view="_local">
+        <property name="openPosition" view="openPosition-view">
             <property name="projectName" view="_minimal">
                 <property name="projectDepartment" view="_minimal"/>
             </property>

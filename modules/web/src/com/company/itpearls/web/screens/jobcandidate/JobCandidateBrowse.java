@@ -59,6 +59,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private CollectionContainer<IteractionList> iteractionListDc;
     private CollectionLoader<IteractionList> iteractionListDl;
+    @Inject
+    private Screens screens;
 
 
     @Subscribe
@@ -493,11 +495,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     iteractionListDl.setParameter("candidate", entity);
                     iteractionListDl.load();
 
-                    Screen iteractionListSimpleBrowse = screenBuilders.lookup(IteractionList.class, this)
-                            .withScreenClass(IteractionListSimpleBrowse.class)
-                            .withContainer(iteractionListDc)
-                            .withLaunchMode(OpenMode.DIALOG)
-                            .build();
+                    IteractionListSimpleBrowse iteractionListSimpleBrowse = screens.create(IteractionListSimpleBrowse.class);
+                    iteractionListSimpleBrowse.setSelectedCandidate(entity);
+                    screens.show(iteractionListSimpleBrowse);
+
                 }));
 
         return listIteractionButton;
@@ -522,6 +523,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Component createNewIteractionButton(JobCandidate entity) {
         Button newIteractionButton = uiComponents.create(Button.class);
         newIteractionButton.setCaption("Новое взаимодействие");
+        newIteractionButton.setIcon("CREATE_ACTION");
 
 
         newIteractionButton.setAction(new BaseAction("newIteraction")
@@ -672,6 +674,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Component createEditButton(JobCandidate entity) {
         Button editButton = uiComponents.create(Button.class);
         editButton.setCaption("Редактирование");
+        editButton.setIcon("EDIT_ACTION");
+
         BaseAction editAction = new BaseAction("edit")
                 .withHandler(actionPerformedEvent -> {
                     screenBuilders.editor(JobCandidate.class, this)

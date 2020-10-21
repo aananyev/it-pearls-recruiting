@@ -67,7 +67,7 @@
             <columns>
                 <column id="icon"
                         resizable="true"
-                        width="60px"
+                        width="70px"
                         minimumWidth="35px"
                         caption=""/>
                 <column id="vacansyName"

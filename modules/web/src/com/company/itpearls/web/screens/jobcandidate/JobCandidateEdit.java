@@ -760,10 +760,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
-                .setFileDescriptor(fileImageFaceUpload.getFileDescriptor());
+        try {
+            FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(fileImageFaceUpload.getFileDescriptor());
 
-        candidatePic.setSource(fileDescriptorResource);
+            candidatePic.setSource(fileDescriptorResource);
+        } catch (IllegalArgumentException e) {
+        }
     }
 
     @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "columnGenerator")
