@@ -5,10 +5,10 @@
         focusComponent="iteractionListsTable"
         messagesPack="com.company.itpearls.web.screens.iteractionlist">
     <data readOnly="true">
-        <collection id="iteractionListDc"
-                    class="com.company.itpearls.entity.IteractionList"
-                    provided="true">
-            <loader id="iteractionListDl">
+        <collection id="iteractionListsDc"
+                    class="com.company.itpearls.entity.IteractionList">
+            <view extends="iteractionList-view"/>
+            <loader id="iteractionListsDl">
                 <query>
                     <![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
                     <condition>
@@ -21,22 +21,32 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="800"/>
+                width="800"
+                forceDialog="true"/>
     <layout expand="iteractionListsTable"
             spacing="true">
-        <dataGrid id="iteractionListsTable" dataContainer="iteractionListDc">
+        <dataGrid id="iteractionListsTable"
+                  width="100%"
+                  dataContainer="iteractionListsDc">
+            <actions>
+            </actions>
             <columns>
+                <column property="numberIteraction" id="numberIteraction"/>
                 <column property="dateIteraction" id="dateIteraction">
-                    <formatter format="dd.MM.yyyy"
-                               class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                    <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                 </column>
-                <column property="candidate" id="candidate"/>
                 <column property="iteractionType" id="iteractionType"/>
                 <column property="vacancy" id="vacancy"/>
-                <column property="project" id="project"/>
                 <column property="recrutier" id="recrutier"/>
-                <column property="recrutierName" id="recrutierName"/>
             </columns>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button action="lookupCancelAction"/>
+            </buttonsPanel>
         </dataGrid>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
     </layout>
 </window>

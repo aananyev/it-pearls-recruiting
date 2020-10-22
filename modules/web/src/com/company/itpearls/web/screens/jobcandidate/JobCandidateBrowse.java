@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;

@@ -164,6 +164,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Button groupSubscribe;
     @Inject
     private RadioButtonGroup commandOrPosition;
+    @Inject
+    private LookupPickerField<OpenPosition> parentOpenPositionField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -976,11 +978,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         Map<String, Integer> map = new LinkedHashMap<>();
 
         map.put("Команда", 1);
-        map.put("Кандидат", 0);
+        map.put("Вакансия", 0);
 
         commandOrPosition.setOptionsMap(map);
-
     }
+
 
     private void setGroupSubscribeButton() {
         groupSubscribe.setVisible(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||

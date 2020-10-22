@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.jobcandidate;
+package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -12,12 +12,11 @@ import javax.inject.Inject;
 @LookupComponent("iteractionListsTable")
 @LoadDataBeforeShow
 public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
-
     @Inject
-    private CollectionLoader<IteractionList> iteractionListDl;
+    private CollectionLoader<IteractionList> iteractionListsDl;
 
-    public void setSelectedCandidate(JobCandidate jobCandidate) {
-        iteractionListDl.setParameter("candidate", jobCandidate);
-        iteractionListDl.load();
+    public void setSelectedCandidate(JobCandidate entity) {
+        iteractionListsDl.setParameter("candidate", entity);
+        iteractionListsDl.load();
     }
 }
