@@ -3,7 +3,7 @@
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://browseCaption"
         focusComponent="openPositionsTable"
-        messagesPack="com.company.itpearls.web.screens.openposition" icon="USER_PLUS">
+        messagesPack="com.company.itpearls.web.screens.openposition" icon="COMPASS">
     <data readOnly="true">
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition"
@@ -11,7 +11,7 @@
             <loader id="openPositionsDl" cacheable="false">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
-                    order by e.vacansyName]]>
+                                      order by e.vacansyName]]>
                     <condition>
                         <and>
                             <c:jpql>

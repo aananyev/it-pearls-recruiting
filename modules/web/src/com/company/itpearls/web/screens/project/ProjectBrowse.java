@@ -6,6 +6,7 @@ import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Project;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 
@@ -27,7 +28,7 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     @Install(to = "projectsTable", subject = "rowDescriptionProvider")
     private String projectsTableRowDescriptionProvider(Project project) {
-        return project.getProjectDescription() != null ? project.getProjectDescription() : "";
+        return Jsoup.parse(project.getProjectDescription() != null ? project.getProjectDescription() : "").text();
     }
 
     private void setProjectClosedFilter() {

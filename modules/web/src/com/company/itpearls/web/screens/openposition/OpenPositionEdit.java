@@ -336,6 +336,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setTopLabel();
     }
 
+    @Subscribe("commandOrPosition")
+    public void onCommandOrPositionValueChange(HasValue.ValueChangeEvent event) {
+        switch ((int) commandOrPosition.getValue()) {
+            case 0: // вакансия
+                parentOpenPositionField.setVisible(true);
+                break;
+            case 1: // команда
+                parentOpenPositionField.setVisible(false);
+                break;
+        }
+
+    }
+
     @Subscribe("openClosePositionCheckBox")
     public void onOpenClosePositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (getEditedEntity().getOpenClose()) {
@@ -356,6 +369,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             projectNameField.setEditable(true);
             vacansyNameField.setEditable(true);
             companyDepartamentField.setEditable(true);
+
         }
     }
 
@@ -1067,8 +1081,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private String generatePositionNameInProject() {
         String retValue = vacansyNameField.getValue();
 
-        if(vacansyNameField.getValue() != null) {
-            if(generatePositionName().equals(retValue)) {
+        if (vacansyNameField.getValue() != null) {
+            if (generatePositionName().equals(retValue)) {
                 if (projectNameField.getValue().getProjectName() != null) {
                     retValue = retValue + " (" + projectNameField.getValue().getProjectName() + ")";
                 }
@@ -1081,7 +1095,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private String generatePositionNameCity() {
         String retValue = vacansyNameField.getValue();
 
-        if(PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             if (cityOpenPositionField.getValue() != null) {
                 if (generatePositionNameInProject().equals(retValue)) {
                     retValue = retValue.substring(0, retValue.length() - 1) + ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
@@ -1101,8 +1115,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         String retPosName = "";
 
 
-        if(positionTypeField.getValue() != null) {
-            if(positionTypeField.getValue().getPositionEnName() == null) {
+        if (positionTypeField.getValue() != null) {
+            if (positionTypeField.getValue().getPositionEnName() == null) {
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withHideDelayMs(3000)
                         .withDescription("Не заполнено наименование типа позиции")

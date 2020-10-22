@@ -8,8 +8,7 @@
         <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
             <loader id="openPositionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e
-order by e.vacansyName]]>
+                    <![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]>
                 </query>
             </loader>
         </collection>
@@ -145,7 +144,7 @@ order by e.vacansyName]]>
                                 align="TOP_LEFT" caption="msg://msgCV" dataContainer="candidateCVDc"
                                 showClearButton="true"/>
                     </tab>
-                    <tab id="tabFiles" caption="mainMsg://msgFiles" margin="true,false,fsalse,false" spacing="true">
+                    <tab id="tabFiles" caption="mainMsg://msgFiles" margin="true,true,true,true" spacing="true">
                         <table id="someFilesTable" height="300px" width="100%" dataContainer="someFilesesDc">
                             <columns>
                                 <column id="fileDescription"/>
@@ -177,7 +176,6 @@ order by e.vacansyName]]>
             </column>
         </form>
         <hbox id="editActions"
-              width="100%"
               spacing="true"
               align="TOP_RIGHT">
             <button action="windowCommitAndClose"/>

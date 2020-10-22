@@ -234,8 +234,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableProjectNameDescriptionProvider(OpenPosition openPosition) {
         String textReturn = openPosition.getProjectName().getProjectDescription();
         String a = textReturn != null ? Jsoup.parse(textReturn).text() : "";
-        String projectOwner = openPosition.getProjectName().getProjectOwner().getSecondName() + " " +
-                openPosition.getProjectName().getProjectOwner().getFirstName();
+        String projectOwner = "";
+
+        try {
+            projectOwner = openPosition.getProjectName().getProjectOwner().getSecondName() + " " +
+                    openPosition.getProjectName().getProjectOwner().getFirstName();
+        } catch (NullPointerException e) {
+            return a;
+        }
 
         return "Владелец проекта: " + projectOwner + " \n" + a;
     }
@@ -320,44 +326,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return closeButton;
     }
 
-/*    private HBoxLayout setHeaderBox(OpenPosition openPosition) {
-        HBoxLayout ret = uiComponents.create(HBoxLayout.NAME);
-        ret.setSpacing(true);
-
-        ret.setWidth("100%");
-        ret.setHeight("100%");
-
-        Label infoLabel = uiComponents.create(Label.NAME);
-        infoLabel.setHtmlEnabled(true);
-        infoLabel.setStyleName("h3");
-        infoLabel.setValue("Информация о вакансии:");
-
-        HBoxLayout buttonBox = uiComponents.create(HBoxLayout.NAME);
-        buttonBox.setSpacing(true);
-//        Component closeButton = createCloseButton(openPosition);
-//        Component editButton = createEditButton(openPosition);
-
-//        buttonBox.add(editButton);
-//        buttonBox.add(closeButton);
-
-//        closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
-//        editButton.setAlignment(Component.Alignment.TOP_RIGHT);
-
-        if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
-                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP) ||
-                userSession.getUser().getName().equals(ADMINISTRATOR)) {
-            editButton.setVisible(true);
-        } else {
-            editButton.setVisible(false);
-        }
-
-        // ret.add(editButton);
-        // ret.add(closeButton);
-        ret.add(buttonBox);
-        buttonBox.setAlignment(Component.Alignment.TOP_RIGHT);
-
-        return ret;
-    } */
 
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")
     private String openPositionsTableRowStyleProvider(OpenPosition openPosition) {
@@ -378,15 +346,21 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }
             } else {
                 if (s == 0)
-                    return "open-position-empty-recrutier";
+                    if ((openPosition.getCommandCandidate() != null ? openPosition.getCommandCandidate() : 2) != 1)
+                        return "open-position-empty-recrutier";
+                    else
+                        return "open-position-job-command";
                 else
                     return "open-position-job-recruitier";
             }
         } else {
-            if (s == 0)
-                return "open-position-empty-recrutier";
-            else
-                return "open-position-job-recruitier";
+            if (openPosition.getCommandCandidate() != 1) {
+                if (s == 0)
+                    return "open-position-empty-recrutier";
+                else
+                    return "open-position-job-recruitier";
+            } else
+                return "open-position-job-command";
         }
     }
 

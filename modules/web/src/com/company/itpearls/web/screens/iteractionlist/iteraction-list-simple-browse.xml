@@ -31,17 +31,27 @@
             <actions>
             </actions>
             <columns>
-                <column property="numberIteraction" id="numberIteraction"/>
-                <column property="dateIteraction" id="dateIteraction">
-                    <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                <column id="icon" width="48px"
+                        resizable="false"
+                        caption=""/>
+                <column property="numberIteraction"
+                        id="numberIteraction"/>
+                <column property="dateIteraction"
+                        id="dateIteraction">
+                    <formatter format="dd.MM.yyyy"
+                               class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                 </column>
-                <column property="iteractionType" id="iteractionType"/>
-                <column property="vacancy" id="vacancy"/>
-                <column property="recrutier" id="recrutier"/>
+                <column property="iteractionType"
+                        id="iteractionType"/>
+                <column property="vacancy"
+                        id="vacancy"/>
+                <column property="recrutier"
+                        id="recrutier"/>
             </columns>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button action="lookupCancelAction"/>
+                <button action="lookupCancelAction"
+                        align="BOTTOM_RIGHT"/>
             </buttonsPanel>
         </dataGrid>
         <hbox id="lookupActions" spacing="true" visible="false">

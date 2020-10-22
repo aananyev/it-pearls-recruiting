@@ -57,8 +57,8 @@
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_minimal" systemProperties="true">
         <property name="openClose"/>
-        <property name="cityPosition" view="_local"/>
-        <property name="positionType" view="_local"/>
+        <property name="cityPosition" view="city-view"/>
+        <property name="positionType" view="position-view"/>
         <property name="projectName" view="_local">
             <property name="projectOwner" view="_local">
                 <property name="firstName"/>
@@ -85,6 +85,7 @@
         <property name="percentSalaryOfResearcher"/>
         <property name="percentSalaryOfRecrutier"/>
         <property name="parentOpenPosition"/>
+        <property name="commandCandidate"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" fetch="JOIN" view="_local"/>
