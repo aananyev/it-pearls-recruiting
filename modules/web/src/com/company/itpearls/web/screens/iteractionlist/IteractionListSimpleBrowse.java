@@ -54,4 +54,12 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     private String iteractionListsTableIteractionTypeDescriptionProvider(IteractionList iteractionList) {
         return Jsoup.parse(iteractionList.getComment() != null ? iteractionList.getComment() : "").text();
     }
+
+    @Install(to = "iteractionListsTable.vacancy", subject = "descriptionProvider")
+    private String iteractionListsTableVacancyDescriptionProvider(IteractionList iteractionList) {
+        return iteractionList.getVacancy().getVacansyName() + "\n" +
+                iteractionList.getVacancy().getProjectName().getProjectName() + "\n" +
+                iteractionList.getVacancy().getProjectName().getProjectDepartment().getDepartamentRuName() + "\n" +
+                iteractionList.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName();
+    }
 }

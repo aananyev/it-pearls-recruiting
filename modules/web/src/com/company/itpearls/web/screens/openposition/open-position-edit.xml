@@ -581,7 +581,7 @@
                         <button id="groupSubscribe"
                                 invoke="groupSubscribe"
                                 caption="msg://msgGroupSubscribe"
-                                icon="BELL_O"></button>
+                                icon="BELL_O"/>
                         <button action="recrutiesTasksTable.create"/>
                         <button action="recrutiesTasksTable.edit"/>
                         <button action="recrutiesTasksTable.remove"/>
@@ -597,7 +597,6 @@
         <hbox id="editActions"
               spacing="true"
               align="BOTTOM_RIGHT">
-            <button id="openClosePosition" invoke="openClosePosition" icon="CLOSE"/>
             <button invoke="subscribePosition" caption="msg://msgSubscribe" icon="BELL"/>
             <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
             <button action="windowClose"/>

@@ -147,8 +147,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CheckBox internalProjectCheckBox;
     @Inject
-    private Button openClosePosition;
-    @Inject
     private DataContext dataContext;
     @Inject
     private DataGrid<Person> personTable;
@@ -187,17 +185,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setDisableTwoField();
         setWorkExperienceRadioButton();
         setCommandExperienceRadioButton();
-        setOpenCloseButton();
-    }
-
-    private void setOpenCloseButton() {
-        if (openClosePositionCheckBox.getValue()) {
-            openClosePosition.setCaption("Открыть вакансию");
-            openClosePosition.setIcon("OPEN");
-        } else {
-            openClosePosition.setCaption("Закрыть вакансию");
-            openClosePosition.setIcon("CLOSE");
-        }
     }
 
     private void setInternalProject() {
@@ -351,6 +338,35 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("openClosePositionCheckBox")
     public void onOpenClosePositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        String queryStr = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
+
+        List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
+                .query(queryStr)
+                .parameter("parentOpenPosition", getEditedEntity())
+                .list();
+
+        String magPos = "";
+
+        if (openPositions.size() != 0) {
+            for (OpenPosition a : openPositions) {
+                magPos = magPos + "<li><i>" + a.getVacansyName() + "</i></li>";
+            }
+
+            dialogs.createOptionDialog()
+                    .withType(Dialogs.MessageType.WARNING)
+                    .withContentMode(ContentMode.HTML)
+                    .withCaption("ВНИМАНИЕ")
+                    .withMessage((!getEditedEntity().getOpenClose() ? "Открыть" : "Закрыть") +
+                            " вакансии группы?<br><ul>" + magPos + "</ul>")
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        for (OpenPosition a : openPositions) {
+                            a.setOpenClose(getEditedEntity().getOpenClose());
+                        }
+                    }), new DialogAction(DialogAction.Type.NO))
+                    .show();
+
+        }
+
         if (getEditedEntity().getOpenClose()) {
             cityOpenPositionField.setEditable(false);
             companyDepartamentField.setEditable(false);
@@ -997,7 +1013,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         commandOrPosition.setOptionsMap(map);
     }
 
-
     private void setGroupSubscribeButton() {
         groupSubscribe.setVisible(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
                 userSession.getUser().getGroup().getName().equals(HUNTING_GROUP));
@@ -1154,7 +1169,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .withMessage(message + " позицию \"" + vacansyNameField.getValue() + "\"?")
                 .withCaption("ВНИМАНИЕ!")
                 .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                    openCloseButtonSetCaption();
 
                     if (this.openClosePositionCheckBox.getValue())
                         this.closeWithCommit();
@@ -1162,20 +1176,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                 }), new DialogAction(DialogAction.Type.NO))
                 .show();
-    }
-
-    private void openCloseButtonSetCaption() {
-        if (openClosePositionCheckBox.getValue()) {
-            openClosePosition.setCaption("Открыть вакансию");
-            openClosePosition.setIcon("OPEN");
-            openClosePositionCheckBox.setValue(false);
-        } else {
-            openClosePosition.setCaption("Закрыть вакансию");
-            openClosePosition.setIcon("CLOSE");
-            openClosePositionCheckBox.setValue(true);
-
-            openClosePosition();
-        }
 
     }
 
