@@ -57,9 +57,19 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable.vacancy", subject = "descriptionProvider")
     private String iteractionListsTableVacancyDescriptionProvider(IteractionList iteractionList) {
-        return iteractionList.getVacancy().getVacansyName() + "\n" +
-                iteractionList.getVacancy().getProjectName().getProjectName() + "\n" +
-                iteractionList.getVacancy().getProjectName().getProjectDepartment().getDepartamentRuName() + "\n" +
-                iteractionList.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName();
+        String retStr = "";
+
+        if (iteractionList.getVacancy() != null) {
+            try {
+                retStr = iteractionList.getVacancy().getVacansyName() + "\n" +
+                        iteractionList.getVacancy().getProjectName().getProjectName() + "\n" +
+                        iteractionList.getVacancy().getProjectName().getProjectDepartment().getDepartamentRuName() + "\n" +
+                        iteractionList.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName();
+            } catch (NullPointerException e) {
+
+            }
+        }
+
+        return retStr;
     }
 }
