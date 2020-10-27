@@ -139,6 +139,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     static String RECRUITER = "Recruiter";
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
+    static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
+
 
     @Inject
     private RadioButtonGroup workExperienceRadioButton;
@@ -302,8 +304,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void setCityNameOfCompany() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (companyNameField.getValue() != null && cityOpenPositionField.getValue() == null) {
-                if (companyDepartamentField.getValue().getCompanyName().getCityOfCompany() != null)
-                    cityOpenPositionField.setValue(companyDepartamentField.getValue().getCompanyName().getCityOfCompany());
+                if (companyDepartamentField.getValue().getCompanyName() != null) {
+                    if (companyDepartamentField.getValue().getCompanyName().getCityOfCompany() != null)
+                        cityOpenPositionField.setValue(companyDepartamentField.getValue().getCompanyName().getCityOfCompany());
+                }
             }
         }
     }
@@ -338,10 +342,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("openClosePositionCheckBox")
     public void onOpenClosePositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        String queryStr = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
 
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
-                .query(queryStr)
+                .query(QUERY_SELECT_COMMAND)
                 .parameter("parentOpenPosition", getEditedEntity())
                 .list();
 
@@ -461,6 +464,39 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (internalProjectCheckBox.getValue() == null)
             internalProjectCheckBox.setValue(false);
+
+        setCommandCountValue();
+    }
+
+    private void setCommandCountValue() {
+        List<OpenPosition> openPositions = new ArrayList<>();
+
+        if (getEditedEntity().getParentOpenPosition() == null) {
+            openPositions = dataManager.load(OpenPosition.class)
+                    .query(QUERY_SELECT_COMMAND)
+                    .parameter("parentOpenPosition", getEditedEntity())
+                    .list();
+        } else {
+            openPositions = dataManager.load(OpenPosition.class)
+                    .query(QUERY_SELECT_COMMAND)
+                    .parameter("parentOpenPosition", getEditedEntity().getParentOpenPosition())
+                    .list();
+
+        }
+
+        Integer countCommand = 0;
+
+        for (OpenPosition a : openPositions) {
+            countCommand = countCommand + a.getNumberPosition();
+        }
+
+        if (getEditedEntity().getParentOpenPosition() == null) {
+            // это наименование группы
+            numberPositionField.setValue(countCommand);
+        } else {
+            // это член команды
+            getEditedEntity().getParentOpenPosition().setNumberPosition(countCommand);
+        }
     }
 
     private String getAllSubscibers() {

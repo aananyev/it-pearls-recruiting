@@ -70,6 +70,18 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
             }
         }
 
+        if (iteractionList.getAddDate() != null) {
+            retStr = iteractionList.getAddDate() + "\n" + retStr;
+        }
+
+        if (iteractionList.getAddString() != null) {
+            retStr = iteractionList.getAddString() + "\n" + retStr;
+        }
+
+        if (iteractionList.getAddInteger() != null) {
+            retStr = iteractionList.getAddInteger() + "\n" + retStr;
+        }
+
         return retStr;
     }
 }

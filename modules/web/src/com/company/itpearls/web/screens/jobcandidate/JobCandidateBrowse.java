@@ -342,117 +342,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         infoLabel.setHtmlEnabled(true);
         infoLabel.setStyleName("h3");
         infoLabel.setValue("Информация о кандидате:");
-/*
-        Label personPosition = uiComponents.create(Label.NAME);
-        personPosition.setHtmlEnabled(true);
-        personPosition.setStyleName("h4");
-        personPosition.setValue(entity.getPersonPosition().getPositionRuName()
-                + (entity.getPersonPosition().getPositionEnName() != null ? "/" + entity.getPersonPosition().getPositionEnName() : "")
-                + ", " + entity.getCityOfResidence().getCityRuName());
 
-        VBoxLayout contacts = uiComponents.create(VBoxLayout.NAME);
-        contacts.setHeightAuto();
-        contacts.setHeight("100%");
-
-        VBoxLayout iteraction = uiComponents.create(VBoxLayout.NAME);
-        iteraction.setHeightAuto();
-        iteraction.setWidth("100%");
-
-        VBoxLayout statistics = uiComponents.create(VBoxLayout.NAME);
-        statistics.setHeightAuto();
-        statistics.setWidth("100%");
-
-        Label titleContacts = uiComponents.create(Label.NAME);
-        titleContacts.setValue("Контактная информация");
-        titleContacts.setStyleName("h3");
-
-        Label titleIteraction = uiComponents.create(Label.NAME);
-        titleIteraction.setValue("Последнее взаимодействия");
-        titleIteraction.setStyleName("h3");
-
-        contacts.add(titleContacts);
-        contacts.add(personPosition);
-
-        if (entity.getEmail() != null) {
-            Label email = uiComponents.create(Label.NAME);
-            email.setValue("Email: " + entity.getEmail());
-            contacts.add(email);
-        }
-
-        if (entity.getPhone() != null) {
-            Label phone = uiComponents.create(Label.NAME);
-            phone.setValue("Phone: " + entity.getPhone());
-            contacts.add(phone);
-        }
-
-        if (entity.getTelegramName() != null) {
-            Label skype = uiComponents.create(Label.NAME);
-            skype.setValue("Skype: " + entity.getSkypeName());
-            contacts.add(skype);
-        }
-
-        if (entity.getTelegramName() != null) {
-            Label telegramm = uiComponents.create(Label.NAME);
-            telegramm.setValue("Telegramm: " + entity.getTelegramName());
-            contacts.add(telegramm);
-        }
-
-        if (entity.getWhatsupName() != null) {
-            Label watsup = uiComponents.create(Label.NAME);
-            watsup.setValue("WhatsApp: " + entity.getSkypeName());
-            contacts.add(watsup);
-        }
-
-        if (entity.getWiberName() != null) {
-            Label viber = uiComponents.create(Label.NAME);
-            viber.setValue("Viber: " + entity.getWiberName());
-        }
-
-        iteractionList = getIteractionLists(jobCandidatesTable.getSingleSelected());
-
-        Label lastProject = uiComponents.create(Label.NAME);
-        lastProject.setValue(getLastProject(iteractionList));
-        lastProject.setStyleName("h4");
-
-        Label vacansyName = uiComponents.create(Label.NAME);
-        vacansyName.setValue(getLastVacansy(iteractionList));
-        vacansyName.setStyleName("h4");
-
-        String getLastContacter = getLastContacter(iteractionList, RECRUTIER_GROUP);
-
-        Label lastRecrutier = uiComponents.create(Label.NAME);
-        lastRecrutier.setValue(!getLastContacter.equals("") ?
-                (RECRUTIER_GROUP
-                        + ": " + getLastContacter
-                        + " (" + getLastIteraction(iteractionList, RECRUTIER_GROUP) + ")") :
-                "");
-
-        getLastContacter = getLastContacter(iteractionList, RESEARCHER_GROUP);
-        Label lastResearcher = uiComponents.create(Label.NAME);
-        lastResearcher.setValue(!getLastContacter.equals("") ?
-                (RESEARCHER_GROUP
-                        + ": " + getLastContacter
-                        + " (" + getLastIteraction(iteractionList, RESEARCHER_GROUP) + ")") : "");
-
-        iteraction.add(titleIteraction);
-        if(!getLastProject(iteractionList).equals("")) iteraction.add(lastProject);
-        iteraction.add(vacansyName);
-        if(getLastIteraction(iteractionList) != null) iteraction.add(getLastIteraction(iteractionList));
-        if (!lastRecrutier.getValue().equals("")) iteraction.add(lastRecrutier);
-        if (!lastResearcher.getValue().equals("")) iteraction.add(lastResearcher);
-
-        setIteraction(iteraction);
-        setStatistics(statistics);
-
-        HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.NAME);
-        hBoxLayout.setHeight("100%");
-        hBoxLayout.setWidth("100%");
-
-        hBoxLayout.add(contacts);
-        hBoxLayout.add(iteraction);
-        hBoxLayout.add(statistics);
-        hBoxLayout.add(candidatePhoto);
-*/
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
         Component newIteraction = createNewIteractionButton(entity);
@@ -460,17 +350,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         headerBox.add(infoLabel);
         headerBox.add(newIteraction);
-        headerBox.add(listIteraction);
         headerBox.add(editButton);
+        headerBox.add(listIteraction);
         headerBox.add(closeButton);
         headerBox.expand(infoLabel);
         headerBox.setSpacing(true);
 
         mainLayout.add(headerBox);
         mainLayout.add(header2Box);
-//        mainLayout.add(hBoxLayout);
-//        mainLayout.expand(hBoxLayout);
-
 
         jobCanidateDetailScreenFragment.setVisibleLogo();
         jobCanidateDetailScreenFragment.setLastSalaryLabel("Зарплатные ожидания");
@@ -488,7 +375,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Component createListIteractionButton(JobCandidate entity) {
         Button listIteractionButton = uiComponents.create(Button.class);
-        listIteractionButton.setCaption("Список взаимодействий");
+        listIteractionButton.setDescription("Список взаимодействий");
+        listIteractionButton.setIconFromSet(CubaIcon.FILE_TEXT_O);
         createDataComponents();
 
         listIteractionButton.setAction(new BaseAction("listIteraction")
@@ -523,8 +411,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Component createNewIteractionButton(JobCandidate entity) {
         Button newIteractionButton = uiComponents.create(Button.class);
-        newIteractionButton.setCaption("Новое взаимодействие");
-        newIteractionButton.setIcon("CREATE_ACTION");
+        newIteractionButton.setDescription("Новое взаимодействие");
+        newIteractionButton.setIconFromSet(CubaIcon.CREATE_ACTION);
 
 
         newIteractionButton.setAction(new BaseAction("newIteraction")
@@ -674,8 +562,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Component createEditButton(JobCandidate entity) {
         Button editButton = uiComponents.create(Button.class);
-        editButton.setCaption("Редактирование");
-        editButton.setIcon("EDIT_ACTION");
+        editButton.setDescription("Редактирование");
+        editButton.setIconFromSet(CubaIcon.EDIT_ACTION);
 
         BaseAction editAction = new BaseAction("edit")
                 .withHandler(actionPerformedEvent -> {
@@ -702,6 +590,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Component createCloseButton(JobCandidate entity) {
         Button closeButton = uiComponents.create(Button.class);
+        closeButton.setDescription("Закрыть");
         closeButton.setIcon("icons/close.png");
         BaseAction closeAction = new BaseAction("closeAction")
                 .withHandler(actionPerformedEvent ->

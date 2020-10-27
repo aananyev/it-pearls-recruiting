@@ -39,7 +39,7 @@ order by e.secondName, e.firstName]]>
             <properties include=".*"
                         exclude="id"
                         excludeRecursively="true"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace"/>
         </filter>
         <dataGrid id="jobCandidatesTable"
                     width="100%"

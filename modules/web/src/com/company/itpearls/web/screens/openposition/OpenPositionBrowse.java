@@ -98,6 +98,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableRemoteWorkDescriptionProvider(OpenPosition openPosition) {
         String retStr = String.valueOf(remoteWork.get(openPosition.getRemoteWork()));
 
+        switch (openPosition.getRemoteWork()) {
+            case 0:
+                retStr = "Нет";
+                break;
+            case 1:
+                retStr = "Удаленная работа";
+                break;
+            case 2:
+                retStr = "Частично 50/50";
+                break;
+        }
+
         return retStr;
     }
 
@@ -127,6 +139,37 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return CubaIcon.valueOf(returnIcon);
+    }
+
+    @Install(to = "openPositionsTable.description", subject = "columnGenerator")
+    private Icons.Icon openPositionsTableDescriptionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String returnIcon = "";
+
+        if (!event.getItem().getComment().startsWith("нет")) {
+            returnIcon = "FILE_TEXT";
+        } else {
+            returnIcon = "FILE";
+        }
+
+        return CubaIcon.valueOf(returnIcon);
+    }
+
+    @Install(to = "openPositionsTable.description", subject = "descriptionProvider")
+    private String openPositionsTableDescriptionDescriptionProvider(OpenPosition openPosition) {
+        return Jsoup.parse(openPosition.getComment()).text();
+    }
+
+    @Install(to = "openPositionsTable.description", subject = "styleProvider")
+    private String openPositionsTableDescriptionStyleProvider(OpenPosition openPosition) {
+        String style = "";
+
+        if (!openPosition.getComment().startsWith("нет")) {
+            style = "open-position-pic-center-large-green";
+        } else {
+            style = "open-position-pic-center-large-red";
+        }
+
+        return style;
     }
 
     @Install(to = "openPositionsTable.icon", subject = "styleProvider")
