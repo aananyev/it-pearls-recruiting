@@ -37,7 +37,7 @@
                 applyTo="iteractionListsTable"
                 dataLoader="iteractionListsDl">
             <properties include=".*"
-                        exclude="addDate|addInteger|addString|addType|communicationMethod|ID|iteractionChain|numberIteraction|recrutierName"
+                        exclude="addDate|addInteger|addString|addType|communicationMethod|ID|iteractionChain|numberIteraction|recrutierName|endDateIteraction|id"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <dataGrid id="iteractionListsTable"
