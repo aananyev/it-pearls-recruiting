@@ -211,32 +211,35 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         someFilesesDl.load();
         // добавить шаблон сопроводительного письма
-        setTemplateLetter();
+//        setTemplateLetter();
 
     }
 
     private void setTemplateLetter() {
         String templateLetter = "";
 
-        if (candidateCVFieldOpenPosition.getValue() != null) {
-            if (getEditedEntity().getLetter() == null) {
-                if (candidateCVFieldOpenPosition.getValue().getTemplateLetter() != null) {
-                    templateLetter = candidateCVFieldOpenPosition.getValue().getTemplateLetter();
-                    letterRichTextArea.setValue(candidateCVFieldOpenPosition.getValue().getTemplateLetter());
-                }
-            }
-        }
-
-        if (candidateCVFieldOpenPosition.getValue() != null) {
-            if (candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter() != null) {
-                if (getEditedEntity().getLetter() == null) {
+        if (getEditedEntity().getLetter() == null) {
+            if (candidateCVFieldOpenPosition.getValue() != null) {
+                if (candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter() != null) {
                     templateLetter = candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter()
                             + templateLetter;
                 }
             }
-        }
 
-        letterRichTextArea.setValue(templateLetter);
+            if (candidateCVFieldOpenPosition.getValue() != null) {
+                if (candidateCVFieldOpenPosition.getValue().getProjectName().getTemplateLetter() != null) {
+                    templateLetter = templateLetter + candidateCVFieldOpenPosition.getValue().getProjectName().getTemplateLetter();
+                }
+            }
+
+            if (candidateCVFieldOpenPosition.getValue() != null) {
+                if (candidateCVFieldOpenPosition.getValue().getTemplateLetter() != null) {
+                    templateLetter = templateLetter + candidateCVFieldOpenPosition.getValue().getTemplateLetter();
+                }
+            }
+
+            letterRichTextArea.setValue(templateLetter);
+        }
     }
 
     @Subscribe("candidateCVFieldOpenPosition")
