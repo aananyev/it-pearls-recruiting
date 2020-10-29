@@ -245,6 +245,7 @@ create table ITPEARLS_PROJECT (
     PROJECT_DEPARTMENT_ID uuid,
     PROJECT_OWNER_ID uuid,
     PROJECT_DESCRIPTION text,
+    TEMPLATE_LETTER text,
     --
     primary key (ID)
 )^

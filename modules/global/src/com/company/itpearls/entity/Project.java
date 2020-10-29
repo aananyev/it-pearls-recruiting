@@ -58,6 +58,10 @@ public class Project extends StandardEntity {
     @Column(name = "PROJECT_DESCRIPTION")
     protected String projectDescription;
 
+    @Lob
+    @Column(name = "TEMPLATE_LETTER")
+    protected String templateLetter;
+
     public String getProjectDescription() {
         return projectDescription;
     }
@@ -128,5 +132,13 @@ public class Project extends StandardEntity {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public void setTemplateLetter(String templateLetter) {
+        this.templateLetter = templateLetter;
+    }
+
+    public String getTemplateLetter() {
+        return templateLetter;
     }
 }

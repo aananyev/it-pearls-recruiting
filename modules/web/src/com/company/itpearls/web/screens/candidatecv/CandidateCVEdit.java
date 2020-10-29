@@ -216,13 +216,27 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     private void setTemplateLetter() {
-        if (candidateCVFieldOpenPosition.getValue() != null ) {
+        String templateLetter = "";
+
+        if (candidateCVFieldOpenPosition.getValue() != null) {
             if (getEditedEntity().getLetter() == null) {
                 if (candidateCVFieldOpenPosition.getValue().getTemplateLetter() != null) {
+                    templateLetter = candidateCVFieldOpenPosition.getValue().getTemplateLetter();
                     letterRichTextArea.setValue(candidateCVFieldOpenPosition.getValue().getTemplateLetter());
                 }
             }
         }
+
+        if (candidateCVFieldOpenPosition.getValue() != null) {
+            if (candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter() != null) {
+                if (getEditedEntity().getLetter() == null) {
+                    templateLetter = candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter()
+                            + templateLetter;
+                }
+            }
+        }
+
+        letterRichTextArea.setValue(templateLetter);
     }
 
     @Subscribe("candidateCVFieldOpenPosition")

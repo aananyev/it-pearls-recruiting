@@ -52,15 +52,10 @@
                   caption="msg://msgTabProject"
                   stylename="framed">
             <tab caption="msg://msgProjectName"
-                 margin="true,false,false,false"
+                 margin="true,true,true,true"
                  spacing="true"
-                 expand="projectNameBox"
+                 expand="projectDescriptionRichTextArea"
                  id="tabProject">
-                <groupBox id="projectNameBox"
-                          spacing="true"
-                          width="100%"
-                          height="100%"
-                          expand="projectDescriptionRichTextArea">
                     <checkBox id="checkBoxProjectIsClosed"
                               dataContainer="projectDc" property="projectIsClosed"
                               caption="msg://msgProjectIsClosed"/>
@@ -110,16 +105,12 @@
                                   width="100%"
                                   height="AUTO"
                                   caption="msg://msgProjectDescription"/>
-                </groupBox>
             </tab>
             <tab id="tabVacansy"
-                 margin="true,false,false,false"
+                 margin="true,true,true,true"
                  spacing="true"
-                 expand="groupBoxVacancy"
+                 expand="projectOpenPositionTable"
                  caption="msg://msgTabVacancy">
-                <groupBox id="groupBoxVacancy"
-                          expand="projectOpenPositionTable"
-                          spacing="true">
                     <dataGrid id="projectOpenPositionTable"
                               height="250px" width="100%"
                               dataContainer="projectOpenPositionsDc">
@@ -141,7 +132,23 @@
                             </column>
                         </columns>
                     </dataGrid>
-                </groupBox>
+            </tab>
+            <tab id="tabTemplateLetter"
+                 caption="msg://msgTemplateLetter"
+                 margin="true,true,true,true"
+                 expand="templateLetterBox"
+                 spacing="true">
+                <vbox id="templateLetterBox"
+                      width="100%"
+                      height="100%"
+                      expand="templateLetterRichTextArea">
+                    <richTextArea id="templateLetterRichTextArea"
+                                  dataContainer="projectDc"
+                                  property="templateLetter"
+                                  width="100%"
+                                  height="AUTO"
+                                  required="false"/>
+                </vbox>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
