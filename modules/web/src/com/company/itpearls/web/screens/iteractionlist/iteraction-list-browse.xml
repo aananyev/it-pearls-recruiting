@@ -80,6 +80,10 @@
                         visible="false"
                         caption="mainMsg://msgExcelExport"
                         icon="FILE_EXCEL_O"/>
+                <button id="jobCandidateCardButton"
+                        caption="msg://msgJobCandidateButton"
+                        invoke="onJobCandidateButtonClick"
+                        icon="FILE_ARCHIVE_O"/>
             </buttonsPanel>
         </dataGrid>
         <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>

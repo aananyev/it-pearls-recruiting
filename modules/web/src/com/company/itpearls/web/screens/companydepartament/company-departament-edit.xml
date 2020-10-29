@@ -19,78 +19,102 @@
         </collection>
         <collection id="departamentHrDirectorsDc" class="com.company.itpearls.entity.Person" view="_minimal">
             <loader id="departamentHrDirectorsLc">
-                <query><![CDATA[select e from itpearls_Person e
-order by e.secondName, e.firstName]]></query>
+                <query><![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
         <collection id="departamentDirectorsDc" class="com.company.itpearls.entity.Person" view="_minimal">
             <loader id="departamentDirectorsLc">
-                <query><![CDATA[select e from itpearls_Person e
-order by e.secondName, e.firstName]]></query>
+                <query><![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
+    <layout expand="tabSheetDepartment" spacing="true">
         <tabSheet id="tabSheetDepartment"
                   stylename="framed">
             <tab id="tabEditProject"
                  caption="msg://TabProject"
                  margin="true,true,true,true"
+                 expand="departamentDescriptionField"
                  spacing="true">
-                <groupBox spacing="true" height="80%">
-                    <textField id="departamentRuNameField" width="50%"
-                               caption="msg://msgDepartamentName" dataContainer="companyDepartamentDc"
-                               property="departamentRuName"/>
-                    <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" required="true"
-                                       width="50%" caption="msg://msgCompanyName" dataContainer="companyDepartamentDc"
-                                       property="companyName">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="departamentHrDirectorField" optionsContainer="departamentHrDirectorsDc"
-                                       width="50%"
-                                       caption="msg://msgHrDirectorOfDepartament" dataContainer="companyDepartamentDc"
-                                       property="departamentHrDirector">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="departamentDirectorField" optionsContainer="departamentDirectorsDc"
-                                       width="50%" caption="msg://msdDirectorName"
-                                       dataContainer="companyDepartamentDc" property="departamentDirector">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <textField id="departamentNumberOfProgrammersField"
-                               width="50%" caption="msg://msgNumberOfPosition" dataContainer="companyDepartamentDc"
-                               property="departamentNumberOfProgrammers"/>
-                    <textArea id="departamentDescriptionField" property="departamentDescription" rows="5" width="100%"/>
-                </groupBox>
+                <textField id="departamentRuNameField" width="50%"
+                           caption="msg://msgDepartamentName" dataContainer="companyDepartamentDc"
+                           property="departamentRuName"/>
+                <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" required="true"
+                                   width="50%" caption="msg://msgCompanyName" dataContainer="companyDepartamentDc"
+                                   property="companyName">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="departamentHrDirectorField" optionsContainer="departamentHrDirectorsDc"
+                                   width="50%"
+                                   caption="msg://msgHrDirectorOfDepartament" dataContainer="companyDepartamentDc"
+                                   property="departamentHrDirector">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="departamentDirectorField" optionsContainer="departamentDirectorsDc"
+                                   width="50%" caption="msg://msdDirectorName"
+                                   dataContainer="companyDepartamentDc" property="departamentDirector">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <textField id="departamentNumberOfProgrammersField"
+                           width="50%" caption="msg://msgNumberOfPosition" dataContainer="companyDepartamentDc"
+                           property="departamentNumberOfProgrammers"/>
+                <textArea id="departamentDescriptionField"
+                          property="departamentDescription"
+                          caption="msg://msgShortDescription"
+                          rows="5"
+                          height="100%"
+                          width="100%"/>
             </tab>
-            <tab id="tabOpenPosition" caption="msg://TabOpenPosition" margin="true,false,false,false" spacing="true">
-                <groupBox spacing="true" height="80%">
-                    <table id="companyDepartamentTable" dataContainer="companyDepartamentProjectOfDepartmentsDc" height="200px" width="100%">
-                        <columns>
-                            <column id="projectName"/>
-                            <column id="startProjectDate"/>
-                            <column id="endProjectDate"/>
-                        </columns>
-                        <buttonsPanel>
-                            <button id="addButton" action="companyDepartamentTable.add"/>
-                            <button id="editButton" action="companyDepartamentTable.edit"/>
-                            <button id="removeButton" action="companyDepartamentTable.remove"/>
-                        </buttonsPanel>
-                        <actions>
-                            <action id="add" type="add"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
-                    </table>
-                </groupBox>
+            <tab id="tabOpenPosition"
+                 caption="msg://TabOpenPosition"
+                 margin="true,true,true,true"
+                 expand="companyDepartamentTable"
+                 spacing="true">
+                <table id="companyDepartamentTable"
+                       dataContainer="companyDepartamentProjectOfDepartmentsDc"
+                       height="100%"
+                       width="100%">
+                    <columns>
+                        <column id="projectName"/>
+                        <column id="startProjectDate"/>
+                        <column id="endProjectDate"/>
+                    </columns>
+                    <buttonsPanel>
+                        <button id="addButton" action="companyDepartamentTable.add"/>
+                        <button id="editButton" action="companyDepartamentTable.edit"/>
+                        <button id="removeButton" action="companyDepartamentTable.remove"/>
+                    </buttonsPanel>
+                    <actions>
+                        <action id="add" type="add"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
+                </table>
+            </tab>
+            <tab id="tabTemplateLetter"
+                 caption="msg://msgTemplateLetter"
+                 margin="true,true,true,true"
+                 expand="templateLetterBox"
+                 spacing="true">
+                <vbox id="templateLetterBox"
+                      width="100%"
+                      height="100%"
+                      expand="templateLetterRichTextArea">
+                    <richTextArea id="templateLetterRichTextArea"
+                                  dataContainer="companyDepartamentDc"
+                                  property="templateLetter"
+                                  width="100%"
+                                  height="AUTO"
+                                  required="false"/>
+                </vbox>
             </tab>
         </tabSheet>
         <form id="form" dataContainer="companyDepartamentDc">

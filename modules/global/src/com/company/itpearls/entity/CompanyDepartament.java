@@ -51,6 +51,10 @@ public class CompanyDepartament extends StandardEntity {
     @OneToMany(mappedBy = "projectDepartment")
     protected List<Project> projectOfDepartment;
 
+    @Lob
+    @Column(name = "TEMPLATE_LETTER")
+    protected String templateLetter;
+
     public List<Project> getProjectOfDepartment() {
         return projectOfDepartment;
     }
@@ -105,5 +109,13 @@ public class CompanyDepartament extends StandardEntity {
 
     public void setDepartamentRuName(String departamentRuName) {
         this.departamentRuName = departamentRuName;
+    }
+
+    public void setTemplateLetter(String templateLetter) {
+        this.templateLetter = templateLetter;
+    }
+
+    public String getTemplateLetter() {
+        return templateLetter;
     }
 }

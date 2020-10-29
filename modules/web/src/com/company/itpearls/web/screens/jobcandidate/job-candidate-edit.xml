@@ -12,8 +12,7 @@
             <loader id="jobCandidateDl"/>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
-            <collection id="jobCandidateSocialNetworksDc" property="socialNetwork">
-            </collection>
+            <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
             <collection id="jobCandidateSkillsesDc" property="skills"/>
         </instance>
         <collection id="jobCandidateIteractionListDataGridDc"

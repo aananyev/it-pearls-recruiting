@@ -1,11 +1,14 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
+import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
@@ -47,6 +50,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private DataManager dataManager;
     @Inject
     private DataGrid<IteractionList> iteractionListsTable;
+    private DataContext dataContext;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -152,5 +156,14 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Subscribe
     public void onInit(InitEvent event) {
         addIconColumn();
+    }
+
+    public void onJobCandidateButtonClick() {
+        screenBuilders.editor(JobCandidate.class, this)
+                .editEntity(iteractionListsTable.getSingleSelected().getCandidate())
+                .withScreenClass(JobCandidateEdit.class)
+                .withParentDataContext(dataContext)
+                .build()
+                .show();
     }
 }
