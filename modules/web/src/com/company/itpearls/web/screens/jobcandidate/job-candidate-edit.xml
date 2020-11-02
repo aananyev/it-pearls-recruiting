@@ -452,6 +452,7 @@ order by e.cityRuName]]>
                                 property="resumePosition" caption="msg://msgToPosition"/>
                         <column id="toVacancy"
                                 property="toVacancy"
+                                maximumWidth="500px"
                                 caption="msg://msgToVacansy"/>
                         <column id="iconOriginalCVFile"
                                 width="100px"

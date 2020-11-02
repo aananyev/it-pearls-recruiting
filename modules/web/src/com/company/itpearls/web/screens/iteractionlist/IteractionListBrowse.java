@@ -6,6 +6,7 @@ import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
@@ -51,6 +52,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Inject
     private DataGrid<IteractionList> iteractionListsTable;
     private DataContext dataContext;
+    @Inject
+    private Screens screens;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -159,11 +162,9 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     }
 
     public void onJobCandidateButtonClick() {
-        screenBuilders.editor(JobCandidate.class, this)
-                .editEntity(iteractionListsTable.getSingleSelected().getCandidate())
-                .withScreenClass(JobCandidateEdit.class)
-                .withParentDataContext(dataContext)
-                .build()
-                .show();
+        JobCandidateEdit jobCandidateEdit = screens.create(JobCandidateEdit.class);
+
+        jobCandidateEdit.setEntityToEdit(iteractionListsTable.getSingleSelected().getCandidate());
+        screens.show(jobCandidateEdit);
     }
 }

@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.global.DataManager;
@@ -60,8 +61,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private CollectionContainer<IteractionList> iteractionListDc;
     private CollectionLoader<IteractionList> iteractionListDl;
+    private CollectionContainer<CandidateCV> candidateCVDc;
+    private CollectionLoader<CandidateCV> candidateCVDl;
     @Inject
     private Screens screens;
+    @Inject
+    private DataContext dataContext;
+    @Inject
+    private Notifications notifications;
 
 
     @Subscribe
@@ -312,24 +319,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         JobCanidateDetailScreenFragment jobCanidateDetailScreenFragment = fragments.create(this,
                 JobCanidateDetailScreenFragment.class);
 
-/*
-        Image candidatePhoto = uiComponents.create(Image.NAME);
-        candidatePhoto.setAlignment(Component.Alignment.TOP_RIGHT);
-        candidatePhoto.setHeight("150px");
-        candidatePhoto.setScaleMode(Image.ScaleMode.FILL);
-        candidatePhoto.setStyleName("widget-border");
-
-        FileDescriptor fileDescriptor = entity.getFileImageFace();
-
-        if (fileDescriptor != null) {
-            FileDescriptorResource fileDescriptorResource = candidatePhoto.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(fileDescriptor);
-            candidatePhoto.setSource(fileDescriptorResource);
-            candidatePhoto.setVisible(true);
-        } else {
-            candidatePhoto.setVisible(false);
-        }
-*/
         HBoxLayout headerBox = uiComponents.create(HBoxLayout.NAME);
         headerBox.setWidth("100%");
         headerBox.setHeight("100%");
@@ -343,15 +332,44 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         infoLabel.setStyleName("h3");
         infoLabel.setValue("Информация о кандидате:");
 
+        Label iteractionLabelHeader = uiComponents.create(Label.NAME);
+        iteractionLabelHeader.setHtmlEnabled(true);
+        iteractionLabelHeader.setStyleName("h3");
+        iteractionLabelHeader.setValue("Взаимодействия:");
+
+        Label resumeLabelHeader = uiComponents.create(Label.NAME);
+        resumeLabelHeader.setHtmlEnabled(true);
+        resumeLabelHeader.setStyleName("h3");
+        resumeLabelHeader.setValue("Взаимодействия:");
+
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
         Component newIteraction = createNewIteractionButton(entity);
         Component listIteraction = createListIteractionButton(entity);
 
+        Label cvLabelHeader = uiComponents.create(Label.NAME);
+        cvLabelHeader.setHtmlEnabled(true);
+        cvLabelHeader.setStyleName("h3");
+        cvLabelHeader.setValue("Резюме:");
+
+        Component newResumeButton = addNewResume(entity);
+        Component editLastResumeButton = editLastResume(entity);
+        Component getLetterButton = getLastLetterToClipboard(entity);
+        Component getCVButton = getLastCVtoClipboard(entity);
+
         headerBox.add(infoLabel);
+
+        headerBox.add(iteractionLabelHeader);
         headerBox.add(newIteraction);
         headerBox.add(editButton);
         headerBox.add(listIteraction);
+
+        headerBox.add(cvLabelHeader);
+        headerBox.add(newResumeButton);
+        headerBox.add(editLastResumeButton);
+        headerBox.add(getLetterButton);
+        headerBox.add(getCVButton);
+
         headerBox.add(closeButton);
         headerBox.expand(infoLabel);
         headerBox.setSpacing(true);
@@ -373,6 +391,82 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return mainLayout;
     }
 
+    private Component getLastCVtoClipboard(JobCandidate entity) {
+        Button getLastLetterButton = uiComponents.create(Button.class);
+        getLastLetterButton.setDescription("Получить последнее сопроводительное письмо");
+        getLastLetterButton.setIconFromSet(CubaIcon.TABLET);
+
+        return getLastLetterButton;
+    }
+
+    private Component getLastLetterToClipboard(JobCandidate entity) {
+        Button getLastResumeButton = uiComponents.create(Button.class);
+        getLastResumeButton.setDescription("Получить последнее резюме");
+        getLastResumeButton.setIconFromSet(CubaIcon.GET_POCKET);
+
+        return getLastResumeButton;
+    }
+
+    private Component editLastResume(JobCandidate entity) {
+        Button editLastResumeButton = uiComponents.create(Button.class);
+        editLastResumeButton.setDescription("Редактировать последнее резюме");
+        editLastResumeButton.setIconFromSet(CubaIcon.EDIT_ACTION);
+        createDataComponentsResume();
+
+        editLastResumeButton.setAction(new BaseAction("candidateCV")
+                .withHandler(actionPerformedEvent -> {
+                    candidateCVDl.setParameter("candidate", entity);
+                    candidateCVDl.load();
+
+                    List<CandidateCV> candidateCV = candidateCVDc.getItems();
+
+                    if (candidateCV.size() != 0) {
+                        CandidateCV lastCV = null;
+                        for (CandidateCV a : candidateCV) {
+                            lastCV = a;
+                        }
+
+                        screenBuilders.editor(CandidateCV.class, this)
+                                .withScreenClass(CandidateCVEdit.class)
+                                .editEntity(lastCV)
+                                .withContainer(candidateCVDc)
+                                .build()
+                                .show();
+
+                    } else {
+                        notifications.create().withCaption("У кандидата нет ни одного резюме").show();
+                    }
+                }));
+
+        return editLastResumeButton;
+    }
+
+    private Component addNewResume(JobCandidate entity) {
+        Button addResumeButton = uiComponents.create(Button.class);
+        addResumeButton.setDescription("Добавить новое резюме кандидата");
+        addResumeButton.setIconFromSet(CubaIcon.ADD_ACTION);
+
+        createDataComponentsResume();
+
+        addResumeButton.setAction(new BaseAction("candidateCV")
+                .withHandler(actionPerformedEvent -> {
+                    candidateCVDl.setParameter("candidate", entity);
+                    candidateCVDl.load();
+
+                    screenBuilders.editor(CandidateCV.class, this)
+                            .withScreenClass(CandidateCVEdit.class)
+                            .withInitializer(candidateCV -> {
+                                candidateCV.setCandidate(entity);
+                            })
+                            .newEntity()
+                            .withContainer(candidateCVDc)
+                            .build()
+                            .show();
+                }));
+
+        return addResumeButton;
+    }
+
     private Component createListIteractionButton(JobCandidate entity) {
         Button listIteractionButton = uiComponents.create(Button.class);
         listIteractionButton.setDescription("Список взаимодействий");
@@ -392,6 +486,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return listIteractionButton;
 
+    }
+
+    private void createDataComponentsResume() {
+        DataContext dataContext = dataComponents.createDataContext();
+        getScreenData().setDataContext(dataContext);
+
+        candidateCVDc = dataComponents.createCollectionContainer(CandidateCV.class);
+
+        candidateCVDl = dataComponents.createCollectionLoader();
+        candidateCVDl.setContainer(candidateCVDc);
+        iteractionListDl.setDataContext(dataContext);
+        candidateCVDl.setView("candidateCV-view");
+        candidateCVDl.setQuery("select e from itpearls_CandidateCV e " +
+                "where e.candidate = :candidate order by e.datePost");
     }
 
     private void createDataComponents() {
