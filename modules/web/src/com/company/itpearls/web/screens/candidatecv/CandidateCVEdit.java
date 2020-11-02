@@ -221,8 +221,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         if (getEditedEntity().getLetter() == null) {
             if (candidateCVFieldOpenPosition.getValue() != null) {
                 if (candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter() != null) {
-                    templateLetter = candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter()
-                            + templateLetter;
+                    templateLetter = templateLetter + candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter();
                 }
             }
 
