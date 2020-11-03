@@ -100,17 +100,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         switch (openPosition.getRemoteWork()) {
             case 0:
-                retStr = "Нет";
+                retStr = "Работа в офисе";
                 break;
             case 1:
                 retStr = "Удаленная работа";
                 break;
             case 2:
-                retStr = "Частично 50/50";
+                retStr = "Частично удаленная (офис + удаленная)";
                 break;
         }
 
-        return retStr;
+        return retStr + "\nЖелаемая локация: " + openPosition.getCityPosition().getCityRuName();
     }
 
     private void initRemoteWorkMap() {

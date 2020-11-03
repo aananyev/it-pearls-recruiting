@@ -490,12 +490,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             countCommand = countCommand + a.getNumberPosition();
         }
 
-        if (getEditedEntity().getParentOpenPosition() == null) {
+        if ((int) commandOrPosition.getValue() != 0) {
             // это наименование группы
             numberPositionField.setValue(countCommand);
         } else {
-            // это член команды
-            getEditedEntity().getParentOpenPosition().setNumberPosition(countCommand);
+            if (getEditedEntity().getParentOpenPosition() != null) {
+                // это член команды
+                getEditedEntity().getParentOpenPosition().setNumberPosition(countCommand);
+            }
         }
     }
 
