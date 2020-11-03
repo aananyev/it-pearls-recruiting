@@ -228,13 +228,20 @@
                                stylename="bold"
                                value="msg://msgResearcher"/>
                         <label id="lastResearcherLabel"
-                                align="BOTTOM_LEFT"/>
+                               align="BOTTOM_LEFT"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                value="msg://msgIteractionCount"/>
                         <label id="iteractionCountLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgResumeCount"/>
+                        <label id="resumeCountLabel"
                                align="BOTTOM_LEFT"/>
                     </hbox>
                 </vbox>

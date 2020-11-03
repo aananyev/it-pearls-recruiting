@@ -237,33 +237,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("tabIteraction")
     public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
-/*        if (!checkSubscibe(event)) {
-            if (!userSession.getUser().getGroup().getName().equals(MANAGER_GROUP) ||
-                    !userSession.getUser().getGroup().getName().equals(RECRUTIER_GROUP) ||
-                    !userSession.getUser().getGroup().getName().equals(RESEARCHER_GROUP)) {
-                dialogs.createOptionDialog()
-                        .withCaption("Warning")
-                        .withMessage("Подписатся на изменение вакансии?")
-                        .withActions(
-                                new DialogAction(DialogAction.Type.YES,
-                                        Action.Status.PRIMARY).withHandler(e -> {
-                                    screenBuilders.editor(RecrutiesTasks.class, this)
-                                            .newEntity()
-                                            .withOpenMode(OpenMode.DIALOG)
-                                            .withInitializer(d -> {
-                                                d.setOpenPosition(jobCandidateIteractionListTable
-                                                        .getSingleSelected()
-                                                        .getVacancy());
-                                            })
-                                            .withParentDataContext(dataContext)
-                                            .build()
-                                            .show();
-                                }),
-                                new DialogAction(DialogAction.Type.NO)
-                        )
-                        .show();
-            }
-        } */
     }
 
     private Boolean checkSubscibe(LayoutClickNotifier.LayoutClickEvent event) {

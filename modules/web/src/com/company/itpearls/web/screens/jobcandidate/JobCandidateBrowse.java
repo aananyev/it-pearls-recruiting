@@ -69,6 +69,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private DataContext dataContext;
     @Inject
     private Notifications notifications;
+    @Inject
+    private Dialogs dialogs;
 
 
     @Subscribe
@@ -396,6 +398,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         getLastLetterButton.setDescription("Получить последнее сопроводительное письмо");
         getLastLetterButton.setIconFromSet(CubaIcon.TABLET);
 
+        getLastLetterButton.setAction(new BaseAction("candidateCV")
+                .withHandler(actionPerformedEvent -> {
+                    notifications.create().withCaption("Пока не реализовано");
+                }));
+
         return getLastLetterButton;
     }
 
@@ -403,6 +410,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Button getLastResumeButton = uiComponents.create(Button.class);
         getLastResumeButton.setDescription("Получить последнее резюме");
         getLastResumeButton.setIconFromSet(CubaIcon.GET_POCKET);
+
+        getLastResumeButton.setAction(new BaseAction("candidateCV")
+                .withHandler(actionPerformedEvent -> {
+                    notifications.create().withCaption("Пока не реализовано");
+                }));
 
         return getLastResumeButton;
     }
@@ -434,11 +446,35 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 .show();
 
                     } else {
-                        notifications.create().withCaption("У кандидата нет ни одного резюме").show();
+                        dialogs.createOptionDialog()
+                                .withCaption("Внимание")
+                                .withMessage("У кандидата нет ни одного резюме.\nСоздать резюме?")
+                                .withActions(
+                                        new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                                            addNewResumeAction(entity);
+                                        }),
+                                        new DialogAction(DialogAction.Type.NO)
+                                )
+                                .show();
                     }
                 }));
 
         return editLastResumeButton;
+    }
+
+    protected void addNewResumeAction(JobCandidate entity) {
+        candidateCVDl.setParameter("candidate", entity);
+        candidateCVDl.load();
+
+        screenBuilders.editor(CandidateCV.class, this)
+                .withScreenClass(CandidateCVEdit.class)
+                .withInitializer(candidateCV -> {
+                    candidateCV.setCandidate(entity);
+                })
+                .newEntity()
+                .withContainer(candidateCVDc)
+                .build()
+                .show();
     }
 
     private Component addNewResume(JobCandidate entity) {
@@ -450,18 +486,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         addResumeButton.setAction(new BaseAction("candidateCV")
                 .withHandler(actionPerformedEvent -> {
-                    candidateCVDl.setParameter("candidate", entity);
-                    candidateCVDl.load();
-
-                    screenBuilders.editor(CandidateCV.class, this)
-                            .withScreenClass(CandidateCVEdit.class)
-                            .withInitializer(candidateCV -> {
-                                candidateCV.setCandidate(entity);
-                            })
-                            .newEntity()
-                            .withContainer(candidateCVDc)
-                            .build()
-                            .show();
+                    addNewResumeAction(entity);
                 }));
 
         return addResumeButton;

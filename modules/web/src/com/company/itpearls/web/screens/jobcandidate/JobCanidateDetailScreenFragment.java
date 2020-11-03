@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
@@ -50,6 +51,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private Label<String> vacancyNameLabel;
     @Inject
     private Label<String> projectNameLabel;
+    @Inject
+    private Label<String> resumeCountLabel;
 
     public void setLastSalaryLabel(String iteractionName) {
         IteractionList iteractionList = getStatistics(iteractionName);
@@ -184,6 +187,27 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         }
 
         iteractionCountLabel.setValue(String.valueOf(iteractionList.size()));
+        resumeCountLabel.setValue(getResumeCount());
+    }
+
+    private String getResumeCount() {
+        String QUERY_ALL_CV = "select e from itpearls_CandidateCV e " +
+                "where e.candidate = :candidate ";
+        String retStr = "";
+
+        try {
+            List<CandidateCV> candidateCV = dataManager.load(CandidateCV.class)
+                    .query(QUERY_ALL_CV)
+                    .view("candidateCV-view")
+                    .parameter("candidate", jobCandidatesDc.getItem())
+                    .list();
+
+            retStr = String.valueOf(candidateCV.size());
+        } catch (Exception e) {
+            retStr = "0";
+        }
+
+        return retStr;
     }
 
     private List<IteractionList> getAllCandidateIteractions() {
