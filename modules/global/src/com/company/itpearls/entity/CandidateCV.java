@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -11,6 +12,7 @@ import com.haulmont.cuba.security.entity.User;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
 @NamePattern("%s|candidate")
 @Table(name = "ITPEARLS_CANDIDATE_CV")
@@ -70,6 +72,19 @@ public class CandidateCV extends StandardEntity {
     @NotNull
     @Column(name = "DATE_POST", nullable = false)
     protected Date datePost;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "candidateCV")
+    protected List<SomeFiles> someFiles;
+
+    public List<SomeFiles> getSomeFiles() {
+        return someFiles;
+    }
+
+    public void setSomeFiles(List<SomeFiles> someFiles) {
+        this.someFiles = someFiles;
+    }
 
     public OpenPosition getToVacancy() {
         return toVacancy;

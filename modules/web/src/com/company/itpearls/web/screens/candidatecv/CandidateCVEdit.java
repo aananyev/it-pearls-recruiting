@@ -1,6 +1,9 @@
 package com.company.itpearls.web.screens.candidatecv;
 
-import com.company.itpearls.entity.*;
+import com.company.itpearls.entity.CandidateCV;
+import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.SomeFiles;
 import com.company.itpearls.web.screens.somefiles.SomeFilesEdit;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -11,16 +14,12 @@ import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.WebBrowserTools;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.cuba.gui.WebBrowserTools;
-import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.UiController;
-import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.web.AppUI;
 
 import javax.inject.Inject;
@@ -35,8 +34,6 @@ import java.util.Date;
 public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private UserSession userSession;
-    @Inject
-    private CollectionLoader<SomeFiles> someFilesesDl;
     @Inject
     private LinkButton linkOriginalCV;
     @Inject
@@ -204,12 +201,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             linkITPearlsCV.setVisible(false);
         }
         // отфильтровать файлы кандидата только
-        if (!PersistenceHelper.isNew(getEditedEntity()))
+/*        if (!PersistenceHelper.isNew(getEditedEntity()))
             someFilesesDl.setParameter("candidate", candidateField.getValue());
         else
             someFilesesDl.removeParameter("candidate");
 
-        someFilesesDl.load();
+        someFilesesDl.load(); */
         // добавить шаблон сопроводительного письма
 //        setTemplateLetter();
 
@@ -306,8 +303,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("candidateField")
     public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
-        someFilesesDl.setParameter("candidate", candidateField.getValue());
-        someFilesesDl.load();
+//        someFilesesDl.setParameter("candidate", candidateField.getValue());
+//        someFilesesDl.load();
     }
 
     public void createSomeFileButtonAction() {

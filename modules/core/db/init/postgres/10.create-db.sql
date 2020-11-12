@@ -537,7 +537,7 @@ create table ITPEARLS_SOME_FILES (
     DELETED_BY varchar(50),
     --
     FILE_DESCRIPTION varchar(80) not null,
-    FILE_DESCRIPTOR_ID uuid not null,
+    FILE_DESCRIPTOR_ID uuid,
     FILE_LINK varchar(255),
     FILE_COMMENT text,
     FILE_OWNER_ID uuid not null,

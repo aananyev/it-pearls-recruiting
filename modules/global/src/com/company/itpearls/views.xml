@@ -15,7 +15,9 @@
     <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
         <property name="companyName" fetch="JOIN" view="_local">
             <property name="departmentOfCompany" view="_local">
-                <property name="companyName" view="_local"/>
+                <property name="companyName" view="_local">
+                    <property name="cityOfCompany" view="_local"/>
+                </property>
             </property>
         </property>
         <property name="departamentHrDirector" view="_minimal"/>
@@ -65,6 +67,7 @@
                 <property name="firstName"/>
                 <property name="secondName"/>
                 <property name="middleName"/>
+                <property name="cityOfResidence"/>
             </property>
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local">
@@ -202,7 +205,9 @@
     <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" fetch="JOIN" view="_local"/>
         <property name="departmentOfCompany" view="_local">
-            <property name="companyName" view="_local"/>
+            <property name="companyName" view="_local">
+                <property name="cityOfCompany" view="_local"/>
+            </property>
         </property>
         <property name="cityOfCompany" view="_local"/>
         <property name="regionOfCompany" view="_minimal"/>
@@ -240,6 +245,7 @@
         </property>
         <property name="createTs"/>
         <property name="createdBy"/>
+        <property name="someFiles" view="_local"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">

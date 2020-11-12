@@ -109,6 +109,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Image candidatePic;
     @Inject
     private FileUploadField fileImageFaceUpload;
+    @Inject
+    private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();

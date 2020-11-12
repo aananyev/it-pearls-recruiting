@@ -334,6 +334,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         infoLabel.setStyleName("h3");
         infoLabel.setValue("Информация о кандидате:");
 
+        Label candidateTitle = uiComponents.create(Label.NAME);
+        candidateTitle.setHtmlEnabled(true);
+        candidateTitle.setStyleName("h3");
+        candidateTitle.setValue("Кандидат:");
+
         Label iteractionLabelHeader = uiComponents.create(Label.NAME);
         iteractionLabelHeader.setHtmlEnabled(true);
         iteractionLabelHeader.setStyleName("h3");
@@ -361,9 +366,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         headerBox.add(infoLabel);
 
+        headerBox.add(candidateTitle);
+        headerBox.add(editButton);
+
         headerBox.add(iteractionLabelHeader);
         headerBox.add(newIteraction);
-        headerBox.add(editButton);
         headerBox.add(listIteraction);
 
         headerBox.add(cvLabelHeader);

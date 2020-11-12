@@ -41,13 +41,22 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="someFilesDc" width="100%">
+    <layout expand="fileCommentField"
+            spacing="true">
+        <textField id="fileDescriptionField"
+                   property="fileDescription"
+                   dataContainer="someFilesDc"
+                   required="false"
+                   width="100%"/>
+        <form id="form"
+              dataContainer="someFilesDc"
+              width="100%">
             <column width="100%">
                 <lookupPickerField id="fileTypeField"
                                    optionsContainer="fileTypesDc"
                                    property="fileType"
-                                   required="true" width="50%">
+                                   required="true"
+                                   width="50%">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
@@ -60,24 +69,36 @@
                         <action id="lookup" type="picker_lookup"/>
                     </actions>
                 </lookupPickerField>
-                <textField id="fileDescriptionField" property="fileDescription" required="true" width="100%"/>
-                <textField id="fileLinkField" property="fileLink" width="100%"
-                           caption="msg://msgFileLink"/>
-                <upload id="fileDescriptorField" fileStoragePutMode="IMMEDIATE" property="fileDescriptor"
+                <upload id="fileDescriptorField"
+                        fileStoragePutMode="MANUAL"
+                        dataContainer="someFilesDc"
+                        property="fileDescriptor"
+                        width="100%"
                         showFileName="true"/>
-                <textArea id="fileCommentField" property="fileComment" rows="5" width="100%"/>
-                <lookupPickerField id="fileOwnerField" optionsContainer="fileOwnersDc" property="fileOwner"
-                                   required="true" width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-
+                <textField id="fileLinkField"
+                           property="fileLink"
+                           width="100%"
+                           caption="msg://msgFileLink"/>
             </column>
         </form>
+        <textArea id="fileCommentField"
+                  property="fileComment"
+                  dataContainer="someFilesDc"
+                  rows="5"
+                  width="100%"/>
+        <lookupPickerField id="fileOwnerField"
+                           dataContainer="someFilesDc"
+                           optionsContainer="fileOwnersDc"
+                           property="fileOwner"
+                           required="true" width="50%">
+            <actions>
+                <action id="lookup"
+                        type="picker_lookup"/>
+            </actions>
+        </lookupPickerField>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT" width="100%">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+            <button action="windowCommitAndClose" align="BOTTOM_RIGHT"/>
+            <button action="windowClose" align="BOTTOM_RIGHT"/>
         </hbox>
     </layout>
 </window>

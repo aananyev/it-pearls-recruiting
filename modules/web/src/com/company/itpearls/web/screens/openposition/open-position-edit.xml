@@ -329,6 +329,7 @@
                 <textField id="numberPositionField"
                            dataContainer="openPositionDc"
                            property="numberPosition"
+                           required="true"
                            caption="msg://msgNumberOpenPosition"
                            width="50%"/>
                 <hbox id="hboxSalary"

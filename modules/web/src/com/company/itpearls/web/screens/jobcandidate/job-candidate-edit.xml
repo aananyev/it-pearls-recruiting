@@ -14,6 +14,7 @@
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
             <collection id="jobCandidateSkillsesDc" property="skills"/>
+            <collection id="jobCandidateIteractionDc" property="iteractionList"/>
         </instance>
         <collection id="jobCandidateIteractionListDataGridDc"
                     class="com.company.itpearls.entity.IteractionList"

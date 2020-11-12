@@ -23,7 +23,7 @@ public class SomeFiles extends StandardEntity {
     protected String fileDescription;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_DESCRIPTOR_ID")
     protected FileDescriptor fileDescriptor;
 

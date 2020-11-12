@@ -1,10 +1,8 @@
 package com.company.itpearls.web.screens.openposition;
 
-import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
-import com.company.itpearls.service.GetUserRoleService;
 import com.company.itpearls.web.screens.position.PositionEdit;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.app.EmailService;
@@ -20,13 +18,12 @@ import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import org.springframework.context.event.EventListener;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.*;
-import javax.inject.Inject;
 
 
 @UiController("itpearls_OpenPosition.edit")
@@ -487,7 +484,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         Integer countCommand = 0;
 
         for (OpenPosition a : openPositions) {
-            countCommand = countCommand + a.getNumberPosition();
+            if (a.getNumberPosition() != null)
+                countCommand = countCommand + a.getNumberPosition();
         }
 
         if ((int) commandOrPosition.getValue() != 0) {

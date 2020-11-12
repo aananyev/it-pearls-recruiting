@@ -141,15 +141,42 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return CubaIcon.valueOf(returnIcon);
     }
 
+    @Install(to = "openPositionsTable.testExserice", subject = "columnGenerator")
+    private Object openPositionsTableTestExsericeColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String returnIcon = "";
+
+        if (event.getItem().getNeedExercise() != null) {
+            if (event.getItem().getNeedExercise())
+                returnIcon = "PLUS_CIRCLE";
+            else
+                returnIcon = "MINUS_CIRCLE";
+        } else
+            returnIcon = "MINUS_CIRCLE";
+
+        return CubaIcon.valueOf(returnIcon);
+
+    }
+
+    @Install(to = "openPositionsTable.testExserice", subject = "descriptionProvider")
+    private String openPositionsTableTestExsericeDescriptionProvider(OpenPosition openPosition) {
+        if (openPosition.getExercise() != null)
+            return Jsoup.parse(openPosition.getExercise()).text();
+        else
+            return "";
+    }
+
     @Install(to = "openPositionsTable.description", subject = "columnGenerator")
     private Icons.Icon openPositionsTableDescriptionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = "";
 
-        if (!event.getItem().getComment().startsWith("нет")) {
-            returnIcon = "FILE_TEXT";
-        } else {
+        if (event.getItem().getComment() != null) {
+            if (!event.getItem().getComment().startsWith("нет")) {
+                returnIcon = "FILE_TEXT";
+            } else {
+                returnIcon = "FILE";
+            }
+        } else
             returnIcon = "FILE";
-        }
 
         return CubaIcon.valueOf(returnIcon);
     }
@@ -171,6 +198,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         return style;
     }
+
+    @Install(to = "openPositionsTable.testExserice", subject = "styleProvider")
+    private String openPositionsTableTestExsericeStyleProvider(OpenPosition openPosition) {
+        if (openPosition.getNeedExercise() != null) {
+            if (openPosition.getNeedExercise()) {
+                return "open-position-pic-center-large-green";
+            } else {
+                return "open-position-pic-center-large-red";
+            }
+        } else
+            return "open-position-pic-center-large-red";
+    }
+
 
     @Install(to = "openPositionsTable.icon", subject = "styleProvider")
     private String openPositionsTableIconStyleProvider(OpenPosition openPosition) {

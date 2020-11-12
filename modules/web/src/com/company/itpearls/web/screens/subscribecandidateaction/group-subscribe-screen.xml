@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://groupSubscribeScreen.caption"
+        messagesPack="com.company.itpearls.web.screens.subscribecandidateaction">
+    <data>
+        <instance id="subscribeDc" class="com.company.itpearls.entity.SubscribeCandidateAction"
+                  view="subscribeCandidateAction-view"/>
+        <collection id="subscribersDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
+            <loader id="subscribersLc">
+                <query>
+                    <![CDATA[select e from sec$User e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="openPositionDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
+            <loader id="openPositionDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e where e.openClose is not false]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="typePositionDc" class="com.company.itpearls.entity.Position" view="position-view">
+            <loader id="typePositionDl">
+                <query>
+                    <![CDATA[select e from itpearls_Position e order by e.positionEnName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="companyDc" class="com.company.itpearls.entity.Company" view="company-view">
+            <loader id="compantDl">
+                <query>
+                    <![CDATA[select e from itpearls_Company order by e.companyRuName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="departamentDc" class="com.company.itpearls.entity.CompanyDepartament"
+                    view="companyDepartament-view">
+            <loader id="departamentDl">
+                <query>
+                    <![CDATA[select e from itpearls_CompanyDepartament e order by e.departamentRuName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="projectDc" class="com.company.itpearls.entity.Project" view="project-view">
+            <loader id="projectDl">
+                <query>
+                    <![CDATA[select e from itpearls_Project e order by e.projectName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout spacing="true" width="AUTO" height="AUTO">
+        <searchPickerField id="subscriberField"
+                           property="subscriber"
+                           width="100%" optionsDatasource="subscribersDc"
+                           caption="mainMsg://msgSubscriber"
+                           required="true"/>
+        <hbox spacing="true">
+            <dateField id="startDateField"
+                       property="startDate"
+                       width="50%"
+                       caption="mainMsg://msgStartDate"
+                       required="true"/>
+            <dateField id="endDateField"
+                       property="endDate"
+                       width="50%"
+                       caption="mainMsg://msgEndDate"
+                       required="true"/>
+        </hbox>
+        <hbox spacing="true">
+            <radioButtonGroup id="typeSubscribeRadioButton"
+                              align="TOP_LEFT"
+                              caption="msg://msgSubscribeType"/>
+            <lookupPickerField id="typePositionField"
+                               align="TOP_LEFT"
+                               caption="msg://msgPosition"
+                               captionProperty="positionEnName"
+                               optionsContainer="typePositionDc"/>
+            <lookupPickerField id="companyField"
+                               align="TOP_LEFT"
+                               caption="msg://msgCompany"
+                               optionsContainer="companyDc"/>
+            <lookupPickerField id="departamentField"
+                               align="TOP_LEFT"
+                               caption="msg://msgDepartament"
+                               optionsContainer="departamentDc"/>
+            <lookupPickerField id="projectField"
+                               align="TOP_LEFT"
+                               caption="msg://msgProject"
+                               optionsContainer="projectDc"/>
+        </hbox>
+    </layout>
+</window>

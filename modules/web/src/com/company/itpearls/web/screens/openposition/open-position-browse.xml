@@ -88,8 +88,8 @@
                 <column id="description"
                         sortable="false"
                         resizable="true"
-                        maximumWidth="85px"
-                        minimumWidth="85px"
+                        maximumWidth="65px"
+                        minimumWidth="45px"
                         caption="msg://msgCVDescription">
                     <iconRenderer/>
                 </column>
@@ -97,9 +97,17 @@
                         property="remoteWork"
                         sortable="false"
                         resizable="true"
-                        maximumWidth="85px"
-                        minimumWidth="85px"
+                        maximumWidth="65px"
+                        minimumWidth="45px"
                         caption="msg://msgRemoteWork">
+                    <iconRenderer/>
+                </column>
+                <column id="testExserice"
+                        sortable="false"
+                        caption="msg://msgNeedExercise"
+                        resizable="true"
+                        maximumWidth="65px"
+                        minimumWidth="45px">
                     <iconRenderer/>
                 </column>
                 <column id="openClose"
@@ -107,8 +115,8 @@
                         collapsed="true"
                         property="openClose"
                         width="85px"
-                        maximumWidth="85px"
-                        minimumWidth="85px"
+                        maximumWidth="65px"
+                        minimumWidth="45px"
                         caption="mainMsg://msgOpecnClosePosition"/>
                 <column id="numberPosition"
                         property="numberPosition"
@@ -116,14 +124,6 @@
                         maximumWidth="85px"
                         minimumWidth="85px"
                         caption="msg://msgNumberOpenPosition"/>
-                <column id="createTs"
-                        property="createTs"
-                        width="100px"
-                        collapsed="false"
-                        caption="msg://msgCreatedTs">
-                        <formatter format="dd.MM.yyyy"
-                                   class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
-                </column>
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"

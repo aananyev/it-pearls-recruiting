@@ -30,20 +30,38 @@
         <form id="form" dataContainer="subscribeCandidateActionDc" width="100%">
             <column width="100%">
                 <groupBox caption="msg://msgSubscribe">
-                    <radioButtonGroup id="radioButtonGroupDates" caption="msg://msgChoise" required="true"/>
+                    <radioButtonGroup id="radioButtonGroupDates"
+                                      caption="msg://msgChoise"
+                                      required="true"/>
                     <hbox spacing="true" width="100%">
-                        <dateField id="startDateField" property="startDate" width="50%" caption="mainMsg://msgStartDate"
-                                   dataContainer="subscribeCandidateActionDc" required="true"/>
-                        <dateField id="endDateField" property="endDate" width="50%" caption="mainMsg://msgEndDate"
-                                   dataContainer="subscribeCandidateActionDc" required="true"/>
+                        <dateField id="startDateField"
+                                   property="startDate"
+                                   width="50%"
+                                   caption="mainMsg://msgStartDate"
+                                   dataContainer="subscribeCandidateActionDc"
+                                   required="true"/>
+                        <dateField id="endDateField"
+                                   property="endDate"
+                                   width="50%"
+                                   caption="mainMsg://msgEndDate"
+                                   dataContainer="subscribeCandidateActionDc"
+                                   required="true"/>
                     </hbox>
                     <hbox spacing="true" width="100%">
-                        <lookupPickerField id="candidateField" optionsContainer="candidatesDc" property="candidate"
-                                           width="100%" caption="mainMsg://msgCandidate"
-                                           dataContainer="subscribeCandidateActionDc" required="true"/>
-                        <lookupPickerField id="subscriberField" optionsContainer="subscribersDc" property="subscriber"
-                                           width="100%" caption="mainMsg://msgSubscriber"
-                                           dataContainer="subscribeCandidateActionDc" required="true"/>
+                        <lookupPickerField id="candidateField"
+                                           optionsContainer="candidatesDc"
+                                           property="candidate"
+                                           width="100%"
+                                           caption="mainMsg://msgCandidate"
+                                           dataContainer="subscribeCandidateActionDc"
+                                           required="true"/>
+                        <lookupPickerField id="subscriberField"
+                                           optionsContainer="subscribersDc"
+                                           property="subscriber"
+                                           width="100%"
+                                           caption="mainMsg://msgSubscriber"
+                                           dataContainer="subscribeCandidateActionDc"
+                                           required="true"/>
                     </hbox>
                 </groupBox>
             </column>

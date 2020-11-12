@@ -35,6 +35,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private static final String MANAGER_GROUP = "Менеджмент";
     private static final String RECRUTIER_GROUP = "Хантинг";
     private static final String RESEARCHER_GROUP = "Ресерчинг";
+
     @Inject
     private Label<String> lastResearcherLabel;
     @Inject
