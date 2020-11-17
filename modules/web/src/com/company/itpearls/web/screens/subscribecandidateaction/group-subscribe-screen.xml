@@ -50,11 +50,12 @@
         </collection>
     </data>
     <layout spacing="true" width="AUTO" height="AUTO">
-        <searchPickerField id="subscriberField"
-                           property="subscriber"
-                           width="100%" optionsDatasource="subscribersDc"
-                           caption="mainMsg://msgSubscriber"
-                           required="true"/>
+<!--       <searchPickerField id="subscriberField"
+                          property="subscriber"
+                          width="100%"
+                          optionsDatasource="subscribersDc"
+                          caption="mainMsg://msgSubscriber"
+                          required="true"/> -->
         <hbox spacing="true">
             <dateField id="startDateField"
                        property="startDate"

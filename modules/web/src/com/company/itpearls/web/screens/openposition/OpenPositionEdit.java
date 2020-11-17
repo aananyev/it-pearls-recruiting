@@ -445,6 +445,29 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            OpenPosition dublicateOpenPosition = checkDublicateOpenPosition();
+
+            if (dublicateOpenPosition != null) {
+                dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                        .withCaption("ВНИМАНИЕ!")
+                        .withMessage("Вакансия " + vacansyNameField.getValue() + "\n" + "уже есть в базе.\n" +
+                                "\nОткрыта ранее: " + dublicateOpenPosition.getCreatedBy() +
+                                "\nСтатус: " + (dublicateOpenPosition.getOpenClose() ? "Закрыта" : "Открыта" +
+                                "\nПродолжить сохранение?"))
+                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                            event.resume();
+                            // вернуться и не закомитить
+                        }), new DialogAction(DialogAction.Type.NO))
+                        .show();
+            }
+
+            event.preventCommit();
+        }
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges1(BeforeCommitChangesEvent event) {
         // если не изменился статус открыто/закрыто
         if (!sendOpenCloseMessage()) {
             // отослать сооьщение об изменении позиции
@@ -463,6 +486,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             internalProjectCheckBox.setValue(false);
 
         setCommandCountValue();
+    }
+
+    private OpenPosition checkDublicateOpenPosition() {
+        List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
+                .query("select e from itpearls_OpenPosition e")
+                .view("openPosition-view")
+                .list();
+
+        for (OpenPosition op : openPositions) {
+            if (op.getPositionType().equals(positionTypeField.getValue())) {
+                if (op.getCityPosition().equals(cityOpenPositionField.getValue())) {
+                    if (op.getProjectName().equals(projectNameField.getValue())) {
+                        return op;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     private void setCommandCountValue() {

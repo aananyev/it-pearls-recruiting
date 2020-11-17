@@ -60,7 +60,7 @@
         </collection>
         <collection id="projectNamesDc"
                     class="com.company.itpearls.entity.Project"
-                    view="_local">
+                    view="project-view">
             <loader id="projectNamesLc">
                 <query>
                     <![CDATA[select e from itpearls_Project e
@@ -79,7 +79,7 @@
         </collection>
         <collection id="companyNamesDc"
                     class="com.company.itpearls.entity.Company"
-                    view="_minimal">
+                    view="company-view">
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
                         order by e.comanyName]]></query>

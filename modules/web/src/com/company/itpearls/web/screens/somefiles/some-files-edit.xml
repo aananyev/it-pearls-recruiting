@@ -85,6 +85,7 @@
                   property="fileComment"
                   dataContainer="someFilesDc"
                   rows="5"
+                  height="50%"
                   width="100%"/>
         <lookupPickerField id="fileOwnerField"
                            dataContainer="someFilesDc"

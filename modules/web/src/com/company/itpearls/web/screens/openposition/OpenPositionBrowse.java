@@ -236,10 +236,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return style;
     }
 
-    @Install(to = "openPositionsTable.openClose", subject = "styleProvider")
+/*    @Install(to = "openPositionsTable.openClose", subject = "styleProvider")
     private String openPositionsTableOpenCloseStyleProvider(OpenPosition openPosition) {
         return "open-position-pic-center";
-    }
+    }*/
 
     @Install(to = "openPositionsTable.numberPosition", subject = "styleProvider")
     private String openPositionsTableNumberPositionStyleProvider(OpenPosition openPosition) {
@@ -310,7 +310,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         returnData = returnData != null ? Jsoup.parse(returnData).text() : "";
 
-        return returnData;
+        return openPosition.getVacansyName() + "\n" + returnData;
     }
 
     @Install(to = "openPositionsTable.projectName", subject = "descriptionProvider")
@@ -412,6 +412,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")
     private String openPositionsTableRowStyleProvider(OpenPosition openPosition) {
+        String returnStr = "";
+
         Integer s = dataManager.loadValue("select count(e.reacrutier) " +
                 "from itpearls_RecrutiesTasks e " +
                 "where e.openPosition = :openPos and " +
@@ -423,28 +425,37 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (openPosition.getInternalProject() != null) {
             if (openPosition.getInternalProject()) {
                 if (s == 0) {
-                    return "open-position-internal-project";
+                    returnStr = "open-position-internal-project";
                 } else {
-                    return "open-position-internal-project-job-recrutier";
+                    returnStr = "open-position-internal-project-job-recrutier";
                 }
             } else {
                 if (s == 0)
                     if ((openPosition.getCommandCandidate() != null ? openPosition.getCommandCandidate() : 2) != 1)
-                        return "open-position-empty-recrutier";
+                        returnStr = "open-position-empty-recrutier";
                     else
-                        return "open-position-job-command";
+                        returnStr = "open-position-job-command";
                 else
-                    return "open-position-job-recruitier";
+                    returnStr = "open-position-job-recruitier";
             }
         } else {
             if (openPosition.getCommandCandidate() != 1) {
                 if (s == 0)
-                    return "open-position-empty-recrutier";
+                    returnStr = "open-position-empty-recrutier";
                 else
-                    return "open-position-job-recruitier";
+                    returnStr = "open-position-job-recruitier";
             } else
-                return "open-position-job-command";
+                returnStr = "open-position-job-command";
         }
+
+        if (openPosition.getOpenClose() != null) {
+            if (openPosition.getOpenClose()) {
+                returnStr = "open-position-close-position";
+            }
+
+        }
+
+        return returnStr;
     }
 
     @Subscribe
@@ -456,9 +467,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setSubcribersFilter();
         setOpenPositionNotPaused();
 
-        openPositionsTable.getColumn("openClose").setCollapsed(true);
-        openPositionsTable.getColumn("openClose").setCollapsible(true);
-        openPositionsTable.getColumn("openClose").setVisible(true);
+//        openPositionsTable.getColumn("openClose").setCollapsed(true);
+//        openPositionsTable.getColumn("openClose").setCollapsible(true);
+//        openPositionsTable.getColumn("openClose").setVisible(true);
     }
 
     private void setOpenPositionNotPaused() {
@@ -510,12 +521,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     public void onCheckBoxOnlyOpenedPositionValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (checkBoxOnlyOpenedPosition.getValue()) {
             openPositionsDl.setParameter("openClosePos", false);
-            openPositionsTable.getColumn("openClose").setCollapsed(true);
-            openPositionsTable.getColumn("openClose").setVisible(false);
+//            openPositionsTable.getColumn("openClose").setCollapsed(true);
+//            openPositionsTable.getColumn("openClose").setVisible(false);
         } else {
             openPositionsDl.removeParameter("openClosePos");
-            openPositionsTable.getColumn("openClose").setCollapsed(false);
-            openPositionsTable.getColumn("openClose").setVisible(true);
+//            openPositionsTable.getColumn("openClose").setCollapsed(false);
+//            openPositionsTable.getColumn("openClose").setVisible(true);
         }
 
         openPositionsDl.load();

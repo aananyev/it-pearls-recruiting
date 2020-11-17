@@ -232,7 +232,7 @@
             <property name="lastName"/>
         </property>
         <property name="lintToCloudFile"/>
-        <property name="fileCV" view="_minimal">
+        <property name="fileCV" view="_local">
             <property name="name"/>
             <property name="size"/>
             <property name="createTs"/>
@@ -245,7 +245,12 @@
         </property>
         <property name="createTs"/>
         <property name="createdBy"/>
-        <property name="someFiles" view="_local"/>
+        <property name="someFiles" view="_local">
+            <property name="fileType" view="_minimal"/>
+            <property name="candidateCV" view="_minimal"/>
+            <property name="fileDescriptor" view="_minimal"/>
+            <property name="fileOwner" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">
