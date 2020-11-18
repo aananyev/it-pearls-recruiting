@@ -278,6 +278,7 @@
         </property>
         <property name="vacancy" fetch="BATCH" view="_local">
             <property name="projectName" fetch="JOIN" view="_local">
+                <property name="projectOwner" view="_local"/>
                 <property name="projectDepartment" view="_local">
                     <property name="companyName" view="_local"/>
                 </property>

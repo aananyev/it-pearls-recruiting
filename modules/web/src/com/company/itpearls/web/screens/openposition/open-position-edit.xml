@@ -455,7 +455,8 @@
                 <scrollBox id="jobDescriptionVBox"
                            box.expandRatio="1"
                            spacing="true">
-                    <groupBox collapsable="true"
+                    <groupBox id="workExperienceGroupBox"
+                              collapsable="true"
                               collapsed="true"
                               caption="msg://msgWorkExperience"
                               spacing="true"

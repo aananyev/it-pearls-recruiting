@@ -1,21 +1,18 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
-import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.core.global.CommitContext;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
-
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Metadata;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -239,6 +236,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("tabIteraction")
     public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "descriptionProvider")
+    private String jobCandidateIteractionListTableVacancyDescriptionProvider(IteractionList iteractionList) {
+        return Jsoup.parse(iteractionList.getVacancy().getVacansyName()).text();
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.projectName", subject = "descriptionProvider")
+    private String jobCandidateIteractionListTableProjectNameDescriptionProvider(IteractionList iteractionList) {
+        return Jsoup.parse("Ответственный за проект: " +
+                iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() +
+                " " +
+                iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName()).text();
     }
 
     private Boolean checkSubscibe(LayoutClickNotifier.LayoutClickEvent event) {

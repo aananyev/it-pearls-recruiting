@@ -163,11 +163,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private RadioButtonGroup commandOrPosition;
     @Inject
     private LookupPickerField<OpenPosition> parentOpenPositionField;
+    @Inject
+    private GroupBoxLayout workExperienceGroupBox;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             recrutiesTasksesDl.setParameter("openPosition", getEditedEntity().getVacansyName());
+            // раскрыть стаж работы
         } else {
             recrutiesTasksesDl.removeParameter("openPosition");
         }
@@ -458,11 +461,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                         .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                             event.resume();
                             // вернуться и не закомитить
-                        }), new DialogAction(DialogAction.Type.NO))
+                        }), new DialogAction(DialogAction.Type.NO).withHandler(f -> {
+                            // закончить
+                            event.preventCommit();
+                        }))
                         .show();
             }
 
-            event.preventCommit();
         }
     }
 
