@@ -187,11 +187,12 @@ order by e.cityRuName]]>
                         <hbox spacing="true">
                             <label id="emailTitle"
                                    value="msg://msgEmail"
+                                   align="MIDDLE_LEFT"
                                    stylename="h4"
                                    htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc"
-                                   property="email"
-                                   stylename="h4"/>
+                            <linkButton id="emailLinkButton"
+                                        align="MIDDLE_LEFT"
+                                        description="msg://msgEmail"/>
                         </hbox>
                         <hbox spacing="true">
                             <label id="phoneTitle"
@@ -205,18 +206,21 @@ order by e.cityRuName]]>
                             <label id="telegramTitle"
                                    value="msg://msgTelegram"
                                    stylename="h4"
+                                   align="MIDDLE_LEFT"
                                    htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc"
-                                   property="telegramName"
-                                   stylename="h4"/>
+                            <linkButton id="telegrammLinkButton"
+                                        align="MIDDLE_LEFT"
+                                        description="msg://msgTelegram"/>
                         </hbox>
                         <hbox spacing="true">
                             <label id="skypeTitle"
                                    value="msg://msgSkype"
-                                   stylename="h4" htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc"
-                                   property="skypeName"
-                                   stylename="h4"/>
+                                   align="MIDDLE_LEFT"
+                                   stylename="h4"
+                                   htmlEnabled="true"/>
+                            <linkButton id="skypeLinkButton"
+                                        align="MIDDLE_LEFT"
+                                        description="msg://msgSkype"/>
                         </hbox>
                     </groupBox>
                     <vbox id="dropZone"

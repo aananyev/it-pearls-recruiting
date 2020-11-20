@@ -7,6 +7,7 @@ import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.WebBrowserTools;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
@@ -108,6 +109,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private FileUploadField fileImageFaceUpload;
     @Inject
     private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
+    @Inject
+    private LinkButton emailLinkButton;
+    @Inject
+    private LinkButton skypeLinkButton;
+    @Inject
+    private LinkButton telegrammLinkButton;
+    @Inject
+    private WebBrowserTools webBrowserTools;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -423,6 +432,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if (middleNameField.getValue() != null)
             middleNameField.setValue(replaceE_E(middleNameField.getValue()));
+
+        trimTelegramName();
+    }
+
+    private void trimTelegramName() {
+        telegramNameField.setValue(telegramNameField.getValue().trim().charAt(0) == '@' ?
+                telegramNameField.getValue().trim().substring(1) :
+                telegramNameField.getValue().trim());
     }
 
     String replaceE_E(String str) {
@@ -813,6 +830,56 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onBeforeShow2(BeforeShowEvent event) {
         setCandidateInTables();
+        trimTelegramName();
+    }
+
+    @Subscribe
+    public void onBeforeShow3(BeforeShowEvent event) {
+        setLinkButtonEmail();
+        setLinkButtonTelegrem();
+        setLinkButtonSkype();
+    }
+
+    private void setLinkButtonSkype() {
+        if (getEditedEntity().getSkypeName() != null) {
+            skypeLinkButton.setCaption(getEditedEntity().getSkypeName());
+        }
+    }
+
+    private void setLinkButtonTelegrem() {
+        if (getEditedEntity().getTelegramName() != null) {
+            telegrammLinkButton.setCaption(getEditedEntity().getTelegramName());
+        }
+    }
+
+    @Subscribe("emailLinkButton")
+    public void onEmailLinkButtonClick(Button.ClickEvent event) {
+        webBrowserTools.showWebPage("mailto:" + event.getButton().getCaption(), null);
+    }
+
+    @Subscribe("telegrammLinkButton")
+    public void onTelegrammLinkButtonClick(Button.ClickEvent event) {
+        String retStr = event.getButton().getCaption();
+
+        if (retStr.charAt(0) != '@') {
+            webBrowserTools.showWebPage("http://t.me/" + retStr, null);
+        } else {
+            retStr = retStr.substring(1);
+            webBrowserTools.showWebPage("http://t.me/" + retStr.substring(1, retStr.length() - 1), null);
+        }
+
+    }
+
+    @Subscribe("skypeLinkButton")
+    public void onSkypeLinkButtonClick(Button.ClickEvent event) {
+        webBrowserTools.showWebPage("skype:" + event.getButton().getCaption() + "?chat", null);
+
+    }
+
+    private void setLinkButtonEmail() {
+        if (getEditedEntity().getEmail() != null) {
+            emailLinkButton.setCaption(getEditedEntity().getEmail());
+        }
     }
 
     private void setCandidateInTables() {
