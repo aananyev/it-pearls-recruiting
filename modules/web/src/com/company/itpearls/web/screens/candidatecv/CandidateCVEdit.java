@@ -163,12 +163,15 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("linkOriginalCV")
     public void onLinkOriginalCVClick(Button.ClickEvent event) {
-        openURL(textFieldIOriginalCV.getValue());
+//        openURL(textFieldIOriginalCV.getValue());
+
+        webBrowserTools.showWebPage(textFieldIOriginalCV.getValue(), null);
     }
 
     @Subscribe("linkITPearlsCV")
     public void onLinkITPearlsCVClick(Button.ClickEvent event) {
-        openURL(textFieldITPearlsCV.getValue());
+//        openURL(textFieldITPearlsCV.getValue());
+        webBrowserTools.showWebPage(textFieldITPearlsCV.getValue(), null);
     }
 
     @Subscribe("textFieldIOriginalCV")

@@ -66,14 +66,18 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private LinkButton emailLinkButton;
 
     public void setLinkButtonTelegrem() {
-        String retStr = jobCandidatesDc.getItem().getTelegramName().trim();
+        String retStr = "";
 
-        if (retStr != null) {
-            if (retStr.charAt(0) == '@') {
-                retStr = retStr.substring(1);
+        if (jobCandidatesDc.getItem().getTelegramName() != null) {
+            retStr = jobCandidatesDc.getItem().getTelegramName().trim();
+
+            if (retStr != null) {
+                if (retStr.charAt(0) == '@') {
+                    retStr = retStr.substring(1);
+                }
+
+                telegrammLinkButton.setCaption(retStr);
             }
-
-            telegrammLinkButton.setCaption(retStr);
         }
     }
 
