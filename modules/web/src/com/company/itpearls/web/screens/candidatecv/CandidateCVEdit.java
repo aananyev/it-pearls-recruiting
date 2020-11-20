@@ -265,7 +265,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         if (!value.startsWith("http://") && !value.startsWith("https://"))
             value = "http://" + value;
 
-        webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
+        webBrowserTools.showWebPage(value, null);
     }
 
     @Subscribe("tabFiles")

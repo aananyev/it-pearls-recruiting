@@ -1,14 +1,14 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.components.HBoxLayout;
+import com.haulmont.cuba.gui.WebBrowserTools;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.VBoxLayout;
+import com.haulmont.cuba.gui.components.LinkButton;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -39,6 +39,10 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     @Inject
     private Label<String> lastResearcherLabel;
     @Inject
+    private LinkButton telegrammLinkButton;
+
+
+    @Inject
     private Label<String> lastIteractionLabel;
     @Inject
     private Image candidateFaceImage;
@@ -54,6 +58,56 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private Label<String> projectNameLabel;
     @Inject
     private Label<String> resumeCountLabel;
+    @Inject
+    private WebBrowserTools webBrowserTools;
+    @Inject
+    private LinkButton skypeLinkButton;
+    @Inject
+    private LinkButton emailLinkButton;
+
+    public void setLinkButtonTelegrem() {
+        String retStr = jobCandidatesDc.getItem().getTelegramName().trim();
+
+        if (retStr != null) {
+            if (retStr.charAt(0) == '@') {
+                retStr = retStr.substring(1);
+            }
+
+            telegrammLinkButton.setCaption(retStr);
+        }
+    }
+
+
+    public void setLinkButtonEmail() {
+        if (jobCandidatesDc.getItem().getEmail() != null) {
+            emailLinkButton.setCaption(jobCandidatesDc.getItem().getEmail());
+        }
+    }
+
+    public void setLinkButtonSkype() {
+        if (jobCandidatesDc.getItem().getSkypeName() != null) {
+            skypeLinkButton.setCaption(jobCandidatesDc.getItem().getSkypeName());
+        }
+    }
+
+    @Subscribe("emailLinkButton")
+    public void onEmailLinkButtonClick(Button.ClickEvent event) {
+        webBrowserTools.showWebPage("mailto:" + event.getButton().getCaption(), null);
+    }
+
+    @Subscribe("telegrammLinkButton")
+    public void onTelegrammLinkButtonClick(Button.ClickEvent event) {
+        String retStr = event.getButton().getCaption();
+
+        webBrowserTools.showWebPage("http://t.me/" + retStr, null);
+    }
+
+
+    @Subscribe("skypeLinkButton")
+    public void onSkypeLinkButtonClick(Button.ClickEvent event) {
+        webBrowserTools.showWebPage("skype:" + event.getButton().getCaption() + "?chat", null);
+
+    }
 
     public void setLastSalaryLabel(String iteractionName) {
         IteractionList iteractionList = getStatistics(iteractionName);

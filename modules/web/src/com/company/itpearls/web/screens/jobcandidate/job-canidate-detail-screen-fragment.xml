@@ -83,11 +83,9 @@
                                stylename="bold"
                                width="100px"
                                value="msg://msgEmail"/>
-                        <label align="BOTTOM_LEFT"
-                               width="190px"
-                               stylename="job-candidate-fragment-label"
-                               dataContainer="jobCandidatesDc"
-                               property="email"/>
+                        <linkButton id="emailLinkButton"
+                                    align="BOTTOM_LEFT"
+                                    description="msg://msgEmail"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
@@ -105,22 +103,18 @@
                                stylename="bold"
                                width="100px"
                                value="msg://msgSkype"/>
-                        <label align="BOTTOM_LEFT"
-                               dataContainer="jobCandidatesDc"
-                               width="190px"
-                               stylename="job-candidate-fragment-label"
-                               property="skypeName"/>
+                        <linkButton id="skypeLinkButton"
+                                    align="BOTTOM_LEFT"
+                                    description="msg://msgSkype"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
                                value="msg://msgTelegram"/>
-                        <label align="BOTTOM_LEFT"
-                               dataContainer="jobCandidatesDc"
-                               width="190px"
-                               stylename="job-candidate-fragment-label"
-                               property="telegramName"/>
+                        <linkButton id="telegrammLinkButton"
+                                    align="BOTTOM_LEFT"
+                                    description="msg://msgTelegram"/>
                     </hbox>
                     <hbox spacing="true">
                         <label align="BOTTOM_LEFT"

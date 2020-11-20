@@ -389,6 +389,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCanidateDetailScreenFragment.setVisibleLogo();
         jobCanidateDetailScreenFragment.setLastSalaryLabel("Зарплатные ожидания");
         jobCanidateDetailScreenFragment.setStatistics();
+        jobCanidateDetailScreenFragment.setLinkButtonTelegrem();
+        jobCanidateDetailScreenFragment.setLinkButtonEmail();
+        jobCanidateDetailScreenFragment.setLinkButtonSkype();
 
         Fragment fragment = jobCanidateDetailScreenFragment.getFragment();
         fragment.setWidth("100%");

@@ -437,9 +437,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void trimTelegramName() {
-        telegramNameField.setValue(telegramNameField.getValue().trim().charAt(0) == '@' ?
-                telegramNameField.getValue().trim().substring(1) :
-                telegramNameField.getValue().trim());
+        if (telegramNameField.getValue() != null) {
+            telegramNameField.setValue(telegramNameField.getValue().trim().charAt(0) == '@' ?
+                    telegramNameField.getValue().trim().substring(1) :
+                    telegramNameField.getValue().trim());
+        }
     }
 
     String replaceE_E(String str) {
