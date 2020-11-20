@@ -66,6 +66,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private CollectionContainer<OpenPosition> openPositionsDc;
     @Inject
     private CheckBox checkBoxOnlyNotPaused;
+    @Inject
+    private LookupField notLowerRatingLookupField;
 
 
     @Subscribe
@@ -466,10 +468,34 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setInternalProjectFilter();
         setSubcribersFilter();
         setOpenPositionNotPaused();
+        setStatusNotLower();
 
 //        openPositionsTable.getColumn("openClose").setCollapsed(true);
 //        openPositionsTable.getColumn("openClose").setCollapsible(true);
 //        openPositionsTable.getColumn("openClose").setVisible(true);
+    }
+
+    private void setStatusNotLower() {
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+
+        priorityMap.put("Paused", 0);
+        priorityMap.put("Low", 1);
+        priorityMap.put("Normal", 2);
+        priorityMap.put("High", 3);
+        priorityMap.put("Critical", 4);
+
+        notLowerRatingLookupField.setOptionsMap(priorityMap);
+    }
+
+    @Subscribe("notLowerRatingLookupField")
+    public void onNotLowerRatingLookupFieldValueChange(HasValue.ValueChangeEvent event) {
+        if (notLowerRatingLookupField.getValue() != null) {
+            openPositionsDl.setParameter("rating", notLowerRatingLookupField.getValue());
+        } else {
+            openPositionsDl.removeParameter("rating");
+        }
+
+        openPositionsDl.load();
     }
 
     private void setOpenPositionNotPaused() {

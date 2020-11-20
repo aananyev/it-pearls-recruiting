@@ -31,6 +31,9 @@
                             <c:jpql>
                                 <c:where>e.internalProject = :internalProject</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>e.priority >= :rating</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -141,16 +144,28 @@
                         visible="false"/>
             </buttonsPanel>
         </treeDataGrid>
-        <hbox spacing="true">
+        <hbox spacing="true"
+              align="MIDDLE_LEFT"
+              expand="notLowerRatingForm">
             <checkBox id="checkBoxOnlyOpenedPosition"
+                      align="MIDDLE_LEFT"
                       description="msg://msgOnlyOpenedVacansy"
                       caption="msg://msgOnlyOpenedVacansy"/>
             <checkBox id="checkBoxOnlyNotPaused"
+                      align="MIDDLE_LEFT"
                       description="msg://msgOnlyNotPaused"
                       caption="msg://msgOnlyNotPaused"/>
             <checkBox id="checkBoxOnlyMySubscribe"
+                      align="MIDDLE_LEFT"
                       description="msg://msgOnlyMySubscribe"
                       caption="msg://msgOnlyMySubscribe"/>
+            <hbox id="notLowerRatingForm"
+                  align="MIDDLE_RIGHT"
+                  width="100%">
+                <lookupField id="notLowerRatingLookupField"
+                             align="MIDDLE_RIGHT"
+                             description="msg://msgStatusNotLower"/>
+            </hbox>
         </hbox>
         <hbox id="lookupActions"
               spacing="true"

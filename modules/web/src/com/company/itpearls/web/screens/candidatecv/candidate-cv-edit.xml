@@ -39,23 +39,6 @@
                 </query>
             </loader>
         </collection>
-        <!--        <collection id="someFilesesDc" class="com.company.itpearls.entity.SomeFiles" view="someFiles-view">
-                    <loader id="someFilesesDl">
-                        <query>
-                            <![CDATA[select e from itpearls_SomeFiles e ]]>
-                            <condition>
-                                <and>
-                                    <c:jpql>
-                                        <c:where>e.candidateCV.candidate = :candidate</c:where>
-                                    </c:jpql>
-                                    <c:jpql>
-                                        <c:where>e.candidateCV is not null</c:where>
-                                    </c:jpql>
-                                </and>
-                            </condition>
-                        </query>
-                    </loader>
-                </collection> -->
     </data>
     <dialogMode height="600"
                 modal="true"
@@ -156,7 +139,7 @@
                                 <column id="fileOwner.name" caption="mainMsg://msgOwner"/>
                             </columns>
                             <buttonsPanel>
-                                <button id="createSomeFile" icon="CREATE_ACTION" invoke="createSomeFileButtonAction"/>
+<!--                                <button id="createSomeFile" icon="CREATE_ACTION" invoke="createSomeFileButtonAction"/> -->
                                 <button action="someFilesTable.create"/>
                                 <button action="someFilesTable.edit"/>
                                 <button action="someFilesTable.remove"/>

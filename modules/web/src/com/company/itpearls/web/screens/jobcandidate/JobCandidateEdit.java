@@ -240,15 +240,36 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableVacancyDescriptionProvider(IteractionList iteractionList) {
-        return Jsoup.parse(iteractionList.getVacancy().getVacansyName()).text();
+        String retStr = "";
+
+        if (iteractionList.getVacancy() != null) {
+            if (iteractionList.getVacancy().getVacansyName() != null) {
+                retStr = iteractionList.getVacancy().getVacansyName();
+            }
+        }
+
+        return Jsoup.parse(retStr).text();
     }
 
     @Install(to = "jobCandidateIteractionListTable.projectName", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableProjectNameDescriptionProvider(IteractionList iteractionList) {
-        return Jsoup.parse("Ответственный за проект: " +
-                iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() +
-                " " +
-                iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName()).text();
+        String retStr = "Ответственный за проект: ";
+
+        if (iteractionList.getVacancy() != null) {
+            if (iteractionList.getVacancy().getProjectName() != null) {
+                if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
+                    if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
+                        retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
+
+                        if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
+                            retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
+                        }
+                    }
+                }
+            }
+        }
+
+        return Jsoup.parse(retStr).text();
     }
 
     private Boolean checkSubscibe(LayoutClickNotifier.LayoutClickEvent event) {
