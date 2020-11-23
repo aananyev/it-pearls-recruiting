@@ -20,11 +20,20 @@ public class ExtMainScreen extends MainScreen {
 
     @EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withDescription( event.getMessage() )
-                .withCaption("INFO")
-                .withContentMode(ContentMode.HTML)
-                .show();
+        if (event.getMessage().startsWith("Открыта") ||
+                event.getMessage().startsWith("Закрыта")) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withDescription(event.getMessage())
+                    .withCaption("INFO")
+                    .withContentMode(ContentMode.HTML)
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withDescription(event.getMessage())
+                    .withCaption("INFO")
+                    .withContentMode(ContentMode.HTML)
+                    .show();
+        }
     }
 
     // screens do not receive non-UI events!

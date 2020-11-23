@@ -137,7 +137,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
     static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
-
+    private OpenPosition beforeEdit = null;
 
     @Inject
     private RadioButtonGroup workExperienceRadioButton;
@@ -174,8 +174,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         } else {
             recrutiesTasksesDl.removeParameter("openPosition");
         }
+
         recrutiesTasksesDl.load();
 
+        beforeEdit = getEditedEntity();
         booOpenClosePosition = getEditedEntity().getOpenClose();
 
         // проверка на ноль
@@ -472,18 +474,28 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
-    public void onBeforeCommitChanges1(BeforeCommitChangesEvent event) {
-        // если не изменился статус открыто/закрыто
-        if (!sendOpenCloseMessage()) {
-            // отослать сооьщение об изменении позиции
-            if (entityIsChanged) {
-                if (!getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
-                        getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
-                    sendMessage();
-                }
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        if (beforeEdit.getOpenClose() != getEditedEntity().getOpenClose()) {
+            if (!getEditedEntity().getOpenClose()) {
+                sendOpenPositionMessage();
+            } else {
+                sendClosePositionMessage();
             }
         }
+    }
 
+    private void sendClosePositionMessage() {
+        events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
+                getEditedEntity().getVacansyName()));
+    }
+
+    private void sendOpenPositionMessage() {
+        events.publish(new UiNotificationEvent(this, "Открыта новая вакансия: " +
+                getEditedEntity().getVacansyName()));
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges1(BeforeCommitChangesEvent event) {
         if (openClosePositionCheckBox.getValue() == null)
             openClosePositionCheckBox.setValue(false);
 
@@ -1082,6 +1094,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+
         setRadioButtons();
         setGroupSubscribeButton();
         setGroupCommandRadioButtin();

@@ -67,7 +67,7 @@
                 <property name="firstName"/>
                 <property name="secondName"/>
                 <property name="middleName"/>
-                <property name="cityOfResidence"/>
+<!--                <property name="cityOfResidence"/> -->
             </property>
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local">
@@ -79,7 +79,7 @@
             </property>
         </property>
         <property name="skillsList" fetch="JOIN" view="_local"/>
-        <property name="candidates" fetch="BATCH" view="_local"/>
+        <!--        <property name="candidates" fetch="BATCH" view="_local"/> -->
         <property name="paymentsType"/>
         <property name="typeCompanyComission"/>
         <property name="typeSalaryOfResearcher"/>
