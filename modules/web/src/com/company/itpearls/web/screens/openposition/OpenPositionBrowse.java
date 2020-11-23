@@ -20,10 +20,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @UiController("itpearls_OpenPosition.browse")
 @UiDescriptor("open-position-browse.xml")
@@ -68,6 +65,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private CheckBox checkBoxOnlyNotPaused;
     @Inject
     private LookupField notLowerRatingLookupField;
+    @Inject
+    private Label<String> urgentlyListLabel;
+    @Inject
+    private GroupBoxLayout urgentlyPositons;
 
 
     @Subscribe
@@ -469,10 +470,45 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setSubcribersFilter();
         setOpenPositionNotPaused();
         setStatusNotLower();
+        setUrgentlyPositios();
 
 //        openPositionsTable.getColumn("openClose").setCollapsed(true);
 //        openPositionsTable.getColumn("openClose").setCollapsible(true);
 //        openPositionsTable.getColumn("openClose").setVisible(true);
+    }
+
+    private void setUrgentlyPositios() {
+        String QUERY_URGENTLY_POSITIONS = "select e from itpearls_OpenPosition e " +
+                "where e.openClose = false and " +
+                "e.priority = 4 ";
+
+        List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
+                .query(QUERY_URGENTLY_POSITIONS)
+                .view("openPosition-view")
+                .list();
+        String urgentPos = "";
+
+        List<String> opList = new ArrayList<>();
+
+        for (OpenPosition op : openPositions) {
+            if (!opList.contains(op.getPositionType().getPositionRuName())) {
+                opList.add(op.getPositionType().getPositionRuName());
+            }
+        }
+
+        if (opList.size() != 0) {
+            for (String s : opList) {
+                if (!urgentPos.equals("")) {
+                    urgentPos = urgentPos + "; " + s;
+                } else {
+                    urgentPos = s;
+                }
+            }
+        } else {
+            urgentlyPositons.setVisible(false);
+        }
+
+        urgentlyListLabel.setValue(urgentPos);
     }
 
     private void setStatusNotLower() {
