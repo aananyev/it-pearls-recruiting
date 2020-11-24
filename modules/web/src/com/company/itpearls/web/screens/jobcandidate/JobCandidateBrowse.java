@@ -8,10 +8,12 @@ import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -335,22 +337,22 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         header2Box.setWidth("100%");
         header2Box.setHeight("100%");
 
-        Label infoLabel = uiComponents.create(Label.NAME);
+        Label<String> infoLabel = uiComponents.create(Label.NAME);
         infoLabel.setHtmlEnabled(true);
         infoLabel.setStyleName("h3");
         infoLabel.setValue("Информация о кандидате:");
 
-        Label candidateTitle = uiComponents.create(Label.NAME);
+        Label<String> candidateTitle = uiComponents.create(Label.NAME);
         candidateTitle.setHtmlEnabled(true);
         candidateTitle.setStyleName("h3");
         candidateTitle.setValue("Кандидат:");
 
-        Label iteractionLabelHeader = uiComponents.create(Label.NAME);
+        Label<String> iteractionLabelHeader = uiComponents.create(Label.NAME);
         iteractionLabelHeader.setHtmlEnabled(true);
         iteractionLabelHeader.setStyleName("h3");
         iteractionLabelHeader.setValue("Взаимодействия:");
 
-        Label resumeLabelHeader = uiComponents.create(Label.NAME);
+        Label<String> resumeLabelHeader = uiComponents.create(Label.NAME);
         resumeLabelHeader.setHtmlEnabled(true);
         resumeLabelHeader.setStyleName("h3");
         resumeLabelHeader.setValue("Взаимодействия:");
@@ -360,7 +362,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Component newIteraction = createNewIteractionButton(entity);
         Component listIteraction = createListIteractionButton(entity);
 
-        Label cvLabelHeader = uiComponents.create(Label.NAME);
+        Label<String> cvLabelHeader = uiComponents.create(Label.NAME);
         cvLabelHeader.setHtmlEnabled(true);
         cvLabelHeader.setStyleName("h3");
         cvLabelHeader.setValue("Резюме:");
@@ -581,9 +583,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private HBoxLayout getLastIteraction(List<IteractionList> iteractionList) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.NAME);
-        Label dateIteraction = uiComponents.create(Label.NAME);
-        Label retLab = uiComponents.create(Label.NAME);
-        Label add = uiComponents.create((Label.NAME));
+        Label<String> dateIteraction = uiComponents.create(Label.NAME);
+        Label<String> retLab = uiComponents.create(Label.NAME);
+        Label<String> add = uiComponents.create((Label.NAME));
         String addInfo = "";
 
         if (iteractionList.size() != 0) {
@@ -611,7 +613,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private void setStatistics(VBoxLayout statistics) {
-        Label titleStatistics = uiComponents.create(Label.NAME);
+        Label<String> titleStatistics = uiComponents.create(Label.NAME);
         titleStatistics.setValue("Статистика по кандидату");
         titleStatistics.setStyleName("h3");
 
@@ -637,7 +639,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         vBoxLayout.setWidth("100%");
 
         if (iteractionList != null) {
-            Label lastSalary = uiComponents.create(Label.NAME);
+            Label<String> lastSalary = uiComponents.create(Label.NAME);
             lastSalary.setValue("Зарплатные ожидания: " + iteractionList.getAddString());
             vBoxLayout.add(lastSalary);
         }
@@ -726,8 +728,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return editButton;
     }
 
-    private Label setContacts(String labelName) {
-        Label label = uiComponents.create(Label.NAME);
+    private Label<String> setContacts(String labelName) {
+        Label<String> label = uiComponents.create(Label.NAME);
 
         if (labelName != null) {
             label.setValue(labelName);
@@ -838,17 +840,16 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     jobCandidatesTable.setDetailsVisible(jobCandidatesTable.getSingleSelected(), true);
                 }));
 
-//        candidateImageColumnRenderer();
+        candidateImageColumnRenderer();
     }
 
     private void candidateImageColumnRenderer() {
-        DataGrid.ImageRenderer<JobCandidate> imageRenderer =
-                jobCandidatesTable.createRenderer(DataGrid.ImageRenderer.class);
-
-        try {
-            jobCandidatesTable.getColumn("fileImageFace").setRenderer(imageRenderer);
-        } catch (Exception e) {
-
-        }
+        jobCandidatesTable.addGeneratedColumn("fileImageFace", entity -> {
+            Image image = uiComponents.create(Image.NAME);
+            image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
+                    "fileImageFace"));
+            image.setHeight("100px");
+            return image;
+        });
     }
 }

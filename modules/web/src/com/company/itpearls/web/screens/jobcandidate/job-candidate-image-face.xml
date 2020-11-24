@@ -7,6 +7,8 @@
                   class="com.company.itpearls.entity.JobCandidate"
                   view="_minimal"/>
     </data>
+    <dialogMode height="600"
+                width="800"/>
     <layout expand="candidateImage">
         <image id="candidateImage" dataContainer="jobCandidateDc" property="fileImageFace"/>
     </layout>

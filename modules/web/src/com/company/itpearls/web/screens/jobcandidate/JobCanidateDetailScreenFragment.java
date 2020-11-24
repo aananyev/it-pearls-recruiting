@@ -4,16 +4,15 @@ import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.WebBrowserTools;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.LinkButton;
 import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.screen.ScreenFragment;
-import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.UiController;
-import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
@@ -64,6 +63,10 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private LinkButton skypeLinkButton;
     @Inject
     private LinkButton emailLinkButton;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private Screens screens;
 
     public void setLinkButtonTelegrem() {
         String retStr = "";
@@ -80,7 +83,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             }
         }
     }
-
 
     public void setLinkButtonEmail() {
         if (jobCandidatesDc.getItem().getEmail() != null) {

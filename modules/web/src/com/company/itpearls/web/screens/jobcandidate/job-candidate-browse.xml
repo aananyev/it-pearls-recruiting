@@ -54,10 +54,11 @@ order by e.secondName, e.firstName]]>
                 <column id="status" width="50px">
                     <iconRenderer/>
                 </column>
-<!--                <column id="fileImageFace" property="fileImageFace" width="80px">
-                </column> -->
                 <column id="freeCandidate" caption="msg://msgFreeCandidate" width="60px">
                     <iconRenderer/>
+                </column>
+                <column id="fileImageFace" property="fileImageFace" width="80px">
+                    <componentRenderer/>
                 </column>
                 <column id="fullName" caption="mainMsg://msgFullName" property="fullName"/>
                 <column id="personPosition" caption="msg://msgPersonPosition" property="personPosition"/>
