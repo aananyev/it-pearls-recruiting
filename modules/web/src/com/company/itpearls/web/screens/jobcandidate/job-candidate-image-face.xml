@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://jobCandidateImageFace.caption"
+        messagesPack="com.company.itpearls.web.screens.jobcandidate">
+    <data>
+        <instance id="jobCandidateDc"
+                  class="com.company.itpearls.entity.JobCandidate"
+                  view="_minimal"/>
+    </data>
+    <layout expand="candidateImage">
+        <image id="candidateImage" dataContainer="jobCandidateDc" property="fileImageFace"/>
+    </layout>
+</window>

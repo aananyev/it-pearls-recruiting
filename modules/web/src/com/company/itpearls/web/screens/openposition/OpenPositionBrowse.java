@@ -66,9 +66,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private LookupField notLowerRatingLookupField;
     @Inject
-    private Label<String> urgentlyListLabel;
-    @Inject
     private GroupBoxLayout urgentlyPositons;
+    @Inject
+    private Filter filter;
+    @Inject
+    private HBoxLayout urgentlyHBox;
 
 
     @Subscribe
@@ -480,35 +482,70 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private void setUrgentlyPositios() {
         String QUERY_URGENTLY_POSITIONS = "select e from itpearls_OpenPosition e " +
                 "where e.openClose = false and " +
-                "e.priority = 4 ";
+                "e.priority >= 3";
 
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_URGENTLY_POSITIONS)
                 .view("openPosition-view")
                 .list();
-        String urgentPos = "";
 
-        List<String> opList = new ArrayList<>();
+//        Map<Integer,String> opList = new ArrayList<Integer, String>();
+        HashMap<String, Integer> opList = new HashMap<>();
+
+        // перемешать коллекцию случайным образом
+        Collections.shuffle(openPositions);
 
         for (OpenPosition op : openPositions) {
-            if (!opList.contains(op.getPositionType().getPositionRuName())) {
-                opList.add(op.getPositionType().getPositionRuName());
+            String positionName = op.getPositionType().getPositionRuName();
+
+            if (!opList.containsKey(positionName)) {
+                opList.put(positionName, op.getPriority());
+            } else {
+                if (opList.get(positionName) < op.getPriority()) {
+                    opList.remove(positionName);
+                    opList.put(positionName, op.getPriority());
+                }
             }
         }
 
-        if (opList.size() != 0) {
-            for (String s : opList) {
-                if (!urgentPos.equals("")) {
-                    urgentPos = urgentPos + "; " + s;
-                } else {
-                    urgentPos = s;
-                }
-            }
-        } else {
+        if (opList.size() == 0) {
             urgentlyPositons.setVisible(false);
         }
 
-        urgentlyListLabel.setValue(urgentPos);
+        for (HashMap.Entry op : opList.entrySet()) {
+            LinkButton label = uiComponents.create(LinkButton.NAME);
+            label.setCaption(op.getKey().toString());
+
+            String opDescriptiom = "<b><u>Проекты:</u></b><br>";
+
+            for (OpenPosition op1 : openPositions) {
+                if (op.getKey().equals(op1.getPositionType().getPositionRuName()) &&
+                        (!op1.getOpenClose() || op1.getOpenClose() == null)) {
+                    opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
+                }
+            }
+
+            label.setDescriptionAsHtml(true);
+            label.setDescription(opDescriptiom);
+            label.addClickListener(clickEvent -> {
+                filter.setParamValue("positionType.positionRuName", op.getKey().toString());
+                filter.apply(true);
+            });
+
+            if ((int) op.getValue() == 4) {
+                label.setStyleName("transition-red");
+            } else {
+                if ((int) op.getValue() == 3) {
+                    label.setStyleName("transition-orange");
+                }
+            }
+
+            Label label1 = uiComponents.create(Label.NAME);
+            label1.setValue(" ");
+
+            urgentlyHBox.add(label);
+            urgentlyHBox.add(label1);
+        }
     }
 
     private void setStatusNotLower() {
@@ -568,15 +605,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe("checkBoxOnlyNotPaused")
     public void onCheckBoxOnlyNotPausedValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-       if(checkBoxOnlyNotPaused.getValue()) {
-           openPositionsDl.setParameter("paused", 0);
-       } else {
-           openPositionsDl.removeParameter("paused");
-       }
+        if (checkBoxOnlyNotPaused.getValue()) {
+            openPositionsDl.setParameter("paused", 0);
+        } else {
+            openPositionsDl.removeParameter("paused");
+        }
 
-       openPositionsDl.load();
+        openPositionsDl.load();
     }
-
 
 
     @Subscribe("checkBoxOnlyOpenedPosition")

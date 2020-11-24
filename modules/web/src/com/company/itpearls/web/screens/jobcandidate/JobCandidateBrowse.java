@@ -1,6 +1,9 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.entity.*;
+import com.company.itpearls.entity.CandidateCV;
+import com.company.itpearls.entity.IteractionList;
+import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.entity.SubscribeCandidateAction;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
@@ -11,9 +14,12 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
-import com.haulmont.cuba.gui.model.*;
-import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataComponents;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
@@ -831,5 +837,18 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withHandler(actionPerformedEvent -> {
                     jobCandidatesTable.setDetailsVisible(jobCandidatesTable.getSingleSelected(), true);
                 }));
+
+//        candidateImageColumnRenderer();
+    }
+
+    private void candidateImageColumnRenderer() {
+        DataGrid.ImageRenderer<JobCandidate> imageRenderer =
+                jobCandidatesTable.createRenderer(DataGrid.ImageRenderer.class);
+
+        try {
+            jobCandidatesTable.getColumn("fileImageFace").setRenderer(imageRenderer);
+        } catch (Exception e) {
+
+        }
     }
 }
