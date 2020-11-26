@@ -1,10 +1,76 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 
+.v-loading-indicator {
+  $spinner-size: 64px;
+
+  @include valo-spinner($size: $spinner-size, $thickness: 4px);
+
+  background: transparent;
+  z-index: 100;
+
+  $offset: ceil($spinner-size/2);
+  top: calc(50% - $offset);
+  left: calc(50% - $offset);
+
+  &[style*="none"] {
+    @include transition(none);
+    width: $spinner-size !important;
+  }
+}
+
+.image-candidate-face-little-image {
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 1px;
+}
+
+.transition-blue {
+    animation-name: blink;
+    animation-timing-function: linear;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+
+    background: blue; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.transition-green {
+    animation-name: blink;
+    animation-timing-function: linear;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+
+    background: green; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.transition-grey {
+    animation-name: blink;
+    animation-timing-function: linear;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+
+    background: grey; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
 .transition-red {
     animation-name: blink;
     animation-timing-function: linear;
-    animation-duration: 1s;
+    animation-duration: 5s;
     animation-iteration-count: infinite;
 
     background: red; /* Цвет фона */
@@ -17,7 +83,7 @@
 .transition-orange {
     animation-name: blink;
     animation-timing-function: linear;
-    animation-duration: 1s;
+    animation-duration: 7s;
     animation-iteration-count: infinite;
 
     background: orange; /* Цвет фона */

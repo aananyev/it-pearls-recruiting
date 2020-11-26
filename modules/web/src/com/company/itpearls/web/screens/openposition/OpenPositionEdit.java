@@ -1109,6 +1109,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         commandOrPosition.setOptionsMap(map);
     }
 
+    @Subscribe("projectNameField")
+    public void onProjectNameFieldValueChange1(HasValue.ValueChangeEvent<Project> event) {
+        if (event.getValue().getProjectIsClosed()) {
+            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                    .withContentMode(ContentMode.HTML)
+                    .withMessage("Вы пытаетесь открыть позицию по закрытому проекту.<br>" +
+                            "Открыть проект заново?")
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        event.getValue().setEndProjectDate(null);
+                        event.getValue().setProjectIsClosed(false);
+                    }), new DialogAction(DialogAction.Type.NO).withHandler((f -> {
+                        projectNameField.setValue(null);
+                    })));
+        }
+
+    }
+
     private void setGroupSubscribeButton() {
         groupSubscribe.setVisible(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
                 userSession.getUser().getGroup().getName().equals(HUNTING_GROUP));

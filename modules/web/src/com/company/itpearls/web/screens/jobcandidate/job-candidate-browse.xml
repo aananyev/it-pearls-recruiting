@@ -54,20 +54,16 @@ order by e.secondName, e.firstName]]>
                 <column id="status" width="50px">
                     <iconRenderer/>
                 </column>
-                <column id="freeCandidate" caption="msg://msgFreeCandidate" width="60px">
+                <column id="freeCandidate" caption="msg://msgFreeCandidate" width="60px" maximumWidth="60px">
                     <iconRenderer/>
                 </column>
-                <column id="fileImageFace" property="fileImageFace" width="80px">
+                <column id="fileImageFace" property="fileImageFace" width="60px">
                     <componentRenderer/>
                 </column>
                 <column id="fullName" caption="mainMsg://msgFullName" property="fullName"/>
                 <column id="personPosition" caption="msg://msgPersonPosition" property="personPosition"/>
                 <column id="currentCompany" caption="msg://msgCompany" property="currentCompany"/>
                 <column id="cityOfResidence" caption="msg://msgCityOfResidence" property="cityOfResidence"/>
-                <column id="photo" caption="msg://msgPhotoCandidate" collapsed="true"
-                        width="60px">
-                    <iconRenderer/>
-                </column>
                 <column id="resume" caption="msg://msgResume" width="60px">
                     <iconRenderer/>
                 </column>

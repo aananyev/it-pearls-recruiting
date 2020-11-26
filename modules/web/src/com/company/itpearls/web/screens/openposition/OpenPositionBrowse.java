@@ -472,20 +472,34 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setSubcribersFilter();
         setOpenPositionNotPaused();
         setStatusNotLower();
-        setUrgentlyPositios();
+        setUrgentlyPositios(3);
 
 //        openPositionsTable.getColumn("openClose").setCollapsed(true);
 //        openPositionsTable.getColumn("openClose").setCollapsible(true);
 //        openPositionsTable.getColumn("openClose").setVisible(true);
     }
 
-    private void setUrgentlyPositios() {
+    @Subscribe("notLowerRatingLookupField")
+    public void onNotLowerRatingLookupFieldValueChange1(HasValue.ValueChangeEvent event) {
+        removeUrgentlyLists();
+        setUrgentlyPositios((int) notLowerRatingLookupField.getValue());
+    }
+
+
+    private void removeUrgentlyLists() {
+        for (Component component : urgentlyHBox.getComponents()) {
+            urgentlyHBox.remove(component);
+        }
+    }
+
+    private void setUrgentlyPositios(int priority) {
         String QUERY_URGENTLY_POSITIONS = "select e from itpearls_OpenPosition e " +
                 "where e.openClose = false and " +
-                "e.priority >= 3";
+                "e.priority >= :priority";
 
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_URGENTLY_POSITIONS)
+                .parameter("priority", priority)
                 .view("openPosition-view")
                 .list();
 
@@ -513,8 +527,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         for (HashMap.Entry op : opList.entrySet()) {
+            Integer countOp = 0;
+
             LinkButton label = uiComponents.create(LinkButton.NAME);
-            label.setCaption(op.getKey().toString());
 
             String opDescriptiom = "<b><u>Проекты:</u></b><br>";
 
@@ -522,9 +537,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 if (op.getKey().equals(op1.getPositionType().getPositionRuName()) &&
                         (!op1.getOpenClose() || op1.getOpenClose() == null)) {
                     opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
+
+                    countOp++;
                 }
             }
 
+            label.setCaption(op.getKey().toString() + " (" + countOp.toString() + ")");
             label.setDescriptionAsHtml(true);
             label.setDescription(opDescriptiom);
             label.addClickListener(clickEvent -> {
@@ -532,13 +550,32 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 filter.apply(true);
             });
 
+            switch ((int) op.getValue()) {
+                case 1:
+                    label.setStyleName("transition-green");
+                    break;
+                case 2:
+                    label.setStyleName("transition-blue");
+                    break;
+                case 3:
+                    label.setStyleName("transition-orange");
+                    break;
+                case 4:
+                    label.setStyleName("transition-red");
+                    break;
+                default:
+                    label.setStyleName("transition-grey");
+                    break;
+            }
+
+            /*
             if ((int) op.getValue() == 4) {
                 label.setStyleName("transition-red");
             } else {
                 if ((int) op.getValue() == 3) {
                     label.setStyleName("transition-orange");
                 }
-            }
+            } */
 
             Label label1 = uiComponents.create(Label.NAME);
             label1.setValue(" ");

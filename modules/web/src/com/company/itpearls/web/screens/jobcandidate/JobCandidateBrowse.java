@@ -163,6 +163,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return retStr;
     }
 
+    /*
     @Install(to = "jobCandidatesTable.photo", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTablePhotoColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         String retStr = "";
@@ -174,7 +175,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return CubaIcon.valueOf(retStr);
-    }
+    } */
 
     @Install(to = "jobCandidatesTable.freeCandidate", subject = "styleProvider")
     private String jobCandidatesTableFreeCandidateStyleProvider(JobCandidate jobCandidate) {
@@ -306,7 +307,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return retStr;
     }
 
-
+/*
     @Install(to = "jobCandidatesTable.photo", subject = "styleProvider")
     private String jobCandidatesTablePhotoStyleProvider(JobCandidate jobCandidate) {
         String retStr = "";
@@ -318,7 +319,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return retStr;
-    }
+    } */
 
     @Install(to = "jobCandidatesTable", subject = "detailsGenerator")
     private Component jobCandidatesTableDetailsGenerator(JobCandidate entity) {
@@ -848,7 +849,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             Image image = uiComponents.create(Image.NAME);
             image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
                     "fileImageFace"));
-            image.setHeight("100px");
+            image.setWidth("50px");
+            image.setStyleName("image-candidate-face-little-image");
+            image.setScaleMode(Image.ScaleMode.CONTAIN);
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
             return image;
         });
     }
