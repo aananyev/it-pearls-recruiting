@@ -78,7 +78,8 @@
                 <action id="remove" type="remove"/>
                 <action id="excel" type="excel"/>
             </actions>
-            <columns>
+            <columns
+                    exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
                 <column id="icon"
                         resizable="true"
                         width="70px"

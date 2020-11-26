@@ -29,8 +29,7 @@
     <layout stylename="widget-border"
             spacing="false"
             height="100%"
-            width="100%"
-            expand="listCandidateInPause">
+            width="100%">
         <vbox id="listCandidateInPause"
               spacing="false"
               height="100%"
@@ -46,21 +45,21 @@
                        htmlEnabled="false"
                        height="100%"/>
             </cssLayout>
-            <dataGrid id="iteractionInPausedDataGrid"
-
+            <table id="iteractionInPausedDataGrid"
                    dataContainer="candidatesPausedDc"
+                   width="100%"
                    height="100%">
                 <columns>
-                    <column id="numberIteraction" property="numberIteraction"/>
-                    <column id="candidate" property="candidate"/>
-                    <column id="iteractionType" property="iteractionType"/>
-                    <column id="addDate" property="addDate">
+                    <column id="numberIteraction"/>
+                    <column id="candidate"/>
+                    <column id="iteractionType"/>
+                    <column id="addDate">
                         <formatter format="dd.MM.yyyy"
                                    class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                     </column>
                 </columns>
                 <rowsCount/>
-            </dataGrid>
+            </table>
         </vbox>
     </layout>
 </fragment>
