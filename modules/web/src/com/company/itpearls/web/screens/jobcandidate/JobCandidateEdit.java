@@ -119,8 +119,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private SuggestionField<String> secondNameField;
     @Inject
     private SuggestionField<String> middleNameField;
-    @Inject
-    private InstanceContainer<JobCandidate> jobCandidateDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -575,9 +573,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onInit(InitEvent event) {
         addIconColumn();
-        addFirstNameSuggestField();
-        addSecondNameSuggestField();
-        addMiddleNameSuggestField();
     }
 
     private void addMiddleNameSuggestField() {
@@ -592,6 +587,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 middleName.stream()
                         .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
                         .collect(Collectors.toList()));
+
+    }
+
+    @Install(to = "secondNameField", subject = "enterActionHandler")
+    private void secondNameFieldEnterActionHandler(String searchString) {
+        secondNameField.setValue(searchString);
+    }
+
+    @Install(to = "firstNameField", subject = "enterActionHandler")
+    private void firstNameFieldEnterActionHandler(String searchString) {
+        firstNameField.setValue(searchString);
+    }
+
+    @Install(to = "middleNameField", subject = "enterActionHandler")
+    private void middleNameFieldEnterActionHandler(String searchString) {
+        middleNameField.setValue(searchString);
     }
 
     private void addSecondNameSuggestField() {
@@ -879,13 +890,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onBeforeShow2(BeforeShowEvent event) {
         setCandidateInTables();
         trimTelegramName();
-    }
 
-    @Subscribe
-    public void onBeforeShow3(BeforeShowEvent event) {
         setLinkButtonEmail();
         setLinkButtonTelegrem();
         setLinkButtonSkype();
+
+        addFirstNameSuggestField();
+        addSecondNameSuggestField();
+        addMiddleNameSuggestField();
     }
 
     private void setLinkButtonSkype() {

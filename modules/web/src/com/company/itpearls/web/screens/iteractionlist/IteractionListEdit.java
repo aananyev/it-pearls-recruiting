@@ -643,11 +643,53 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (iteractionTypeField.getValue() != null) {
             if (iteractionTypeField.getValue().getSetDateTime() != null) {
                 if (iteractionTypeField.getValue().getSetDateTime()) {
-                    if( addDate.getValue() == null) {
+                    if (addDate.getValue() == null) {
                         Date date = new Date();
                         addDate.setValue(date);
                     }
                 }
+            }
+        }
+    }
+
+    @Subscribe("vacancyFiels")
+    public void onVacancyFielsValueChange2(HasValue.ValueChangeEvent<OpenPosition> event) {
+        ifDiscrepancyOfVacansy(event);
+    }
+
+    private void ifDiscrepancyOfVacansy(HasValue.ValueChangeEvent<OpenPosition> event) {
+        if (!event.getValue().getPositionType().getPositionRuName().equals(
+                candidateField.getValue().getPersonPosition().getPositionRuName())) {
+            dialogs.createOptionDialog()
+                    .withCaption("ВНИМАНИЕ! В вакансии заявлена позиция "
+                            + event.getValue().getPositionType().getPositionRuName()
+                            + ", а кандидат в настоящее время занимает позицию "
+                            + candidateField.getValue().getPersonPosition().getPositionRuName()
+                            + "\nВы хотите выбрать другую вакансию?")
+                    .withType(Dialogs.MessageType.WARNING)
+                    .withActions(new DialogAction(DialogAction.Type.YES,
+                                    Action.Status.PRIMARY).withHandler(e -> {
+                                vacancyFiels.setValue(null);
+                            }),
+                            new DialogAction(DialogAction.Type.NO));
+        }
+
+        if (vacancyFiels.getValue() != null) {
+            if (!event.getValue().getCityPosition().getCityRuName().equals(
+                    candidateField.getValue().getCityOfResidence().getCityRuName()) &&
+                    event.getValue().getRemoteWork() == 0) {
+                dialogs.createOptionDialog()
+                        .withType(Dialogs.MessageType.WARNING)
+                        .withCaption("Внимание! В вакансии заявлен город "
+                                + event.getValue().getCityPosition().getCityRuName()
+                                + ", а какндидат в настоящее время проживает в "
+                                + candidateField.getValue().getCityOfResidence().getCityRuName()
+                                + "\nВы хотите выбрать другую вакансию?")
+                        .withActions(new DialogAction(DialogAction.Type.YES,
+                                        Action.Status.PRIMARY).withHandler(e -> {
+                                    vacancyFiels.setValue(null);
+                                }),
+                                new DialogAction(DialogAction.Type.NO));
             }
         }
     }
