@@ -14,6 +14,7 @@ import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @UiController("itpearls_JobCandidate.edit")
 @UiDescriptor("job-candidate-edit.xml")
@@ -50,13 +52,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private TextField<String> emailField;
     @Inject
-    private TextField<String> firstNameField;
-    @Inject
     private LookupPickerField<Specialisation> jobCandidateSpecialisationField;
-    @Inject
-    private TextField<String> middleNameField;
-    @Inject
-    private TextField<String> secondNameField;
     @Inject
     private LookupPickerField<City> jobCityCandidateField;
     @Inject
@@ -117,6 +113,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LinkButton telegrammLinkButton;
     @Inject
     private WebBrowserTools webBrowserTools;
+    @Inject
+    private SuggestionField<String> firstNameField;
+    @Inject
+    private SuggestionField<String> secondNameField;
+    @Inject
+    private SuggestionField<String> middleNameField;
+    @Inject
+    private InstanceContainer<JobCandidate> jobCandidateDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -571,6 +575,51 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onInit(InitEvent event) {
         addIconColumn();
+        addFirstNameSuggestField();
+        addSecondNameSuggestField();
+        addMiddleNameSuggestField();
+    }
+
+    private void addMiddleNameSuggestField() {
+        String queryString = "select distinct e.middleName " +
+                "from itpearls_JobCandidate e " +
+                "order by e.middleName";
+
+        List<String> middleName = dataManager.loadValue(queryString, String.class)
+                .list();
+
+        middleNameField.setSearchExecutor((searchString, searchParams) ->
+                middleName.stream()
+                        .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
+                        .collect(Collectors.toList()));
+    }
+
+    private void addSecondNameSuggestField() {
+        String queryString = "select distinct e.secondName " +
+                "from itpearls_JobCandidate e " +
+                "order by e.secondName";
+
+        List<String> secondName = dataManager.loadValue(queryString, String.class)
+                .list();
+
+        secondNameField.setSearchExecutor((searchString, searchParams) ->
+                secondName.stream()
+                        .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
+                        .collect(Collectors.toList()));
+    }
+
+    private void addFirstNameSuggestField() {
+        String queryString = "select distinct e.firstName " +
+                "from itpearls_JobCandidate e " +
+                "order by e.firstName";
+
+        List<String> firstName = dataManager.loadValue(queryString, String.class)
+                .list();
+
+        firstNameField.setSearchExecutor((searchString, searchParams) ->
+                firstName.stream()
+                        .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
+                        .collect(Collectors.toList()));
     }
 
     private Boolean needDublicateDialog() {
@@ -627,7 +676,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateCandidateCvTable.letter", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableLetterDescriptionProvider(CandidateCV candidateCV) {
-        String returnData = candidateCV.getLetter()!= null ? Jsoup.parse(candidateCV.getLetter()).text() : "";
+        String returnData = candidateCV.getLetter() != null ? Jsoup.parse(candidateCV.getLetter()).text() : "";
         return returnData;
     }
 
@@ -640,9 +689,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private String jobCandidateCandidateCvTableIconITPearlsCVFileDescriptionProvider(CandidateCV candidateCV) {
         return candidateCV.getLinkItPearlsCV();
     }
-
-
-
 
 
     public void copyIteractionJobCandidate() {
@@ -710,10 +756,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private BigDecimal numBerIteractionForNewEntity() {
         OpenPosition openPosition = null;
 
-        if(jobCandidateIteractionListTable.getSingleSelected() != null)
+        if (jobCandidateIteractionListTable.getSingleSelected() != null)
             openPosition = jobCandidateIteractionListTable.getSingleSelected().getVacancy();
 
-        if(openPosition != null) {
+        if (openPosition != null) {
             return dataManager.loadValue("select count(e.numberIteraction) " +
                     "from itpearls_IteractionList e " +
                     "where e.candidate = :candidate and " +

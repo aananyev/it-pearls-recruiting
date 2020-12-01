@@ -560,7 +560,7 @@
                     </buttonsPanel>
                 </dataGrid>
             </tab>
-            <tab caption="mainMsg://msgResrutierTask"
+<!--            <tab caption="mainMsg://msgResrutierTask"
                  margin="true,true,true,true"
                  spacing="true"
                  id="tabRecrutior"
@@ -596,7 +596,7 @@
                         <action id="remove" type="remove"/>
                     </actions>
                 </dataGrid>
-            </tab>
+            </tab> -->
         </tabSheet>
         <hbox id="editActions"
               spacing="true"

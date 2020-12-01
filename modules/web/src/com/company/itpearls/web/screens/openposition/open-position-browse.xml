@@ -34,6 +34,9 @@
                             <c:jpql>
                                 <c:where>e.priority >= :rating</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>e.remoteWork = :remoteWork</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -158,6 +161,7 @@
         </treeDataGrid>
         <hbox spacing="true"
               align="MIDDLE_LEFT"
+              width="100%"
               expand="notLowerRatingForm">
             <checkBox id="checkBoxOnlyOpenedPosition"
                       align="MIDDLE_LEFT"
@@ -173,10 +177,16 @@
                       caption="msg://msgOnlyMySubscribe"/>
             <hbox id="notLowerRatingForm"
                   align="MIDDLE_RIGHT"
+                  spacing="true"
                   width="100%">
                 <lookupField id="notLowerRatingLookupField"
                              align="MIDDLE_RIGHT"
+                             caption="msg://msgPriorityPosition"
                              description="msg://msgStatusNotLower"/>
+                <lookupField id="remoteWorkLookupField"
+                             caption="msg://msgRemoteWork"
+                             align="MIDDLE_RIGHT"
+                             description="msg://msgRemoteWork"/>
             </hbox>
         </hbox>
         <hbox id="lookupActions"

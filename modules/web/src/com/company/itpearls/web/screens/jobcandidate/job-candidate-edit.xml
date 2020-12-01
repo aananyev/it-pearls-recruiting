@@ -263,9 +263,32 @@ order by e.cityRuName]]>
                     <columns count="2"/>
                     <rows>
                         <row>
-                            <textField id="firstNameField" dataContainer="jobCandidateDc" property="firstName"
-                                       width="100%"
-                                       caption="msg://msgFirstName" rowspan="1" colspan="1" required="true"/>
+                            <suggestionField id="firstNameField"
+                                             dataContainer="jobCandidateDc"
+                                             property="firstName"
+                                             width="100%"
+                                             caption="msg://msgFirstName"
+                                             rowspan="1"
+                                             colspan="1"
+                                             minSearchStringLength="1"
+                                             required="true"
+                                             inputPrompt="msg://msgFirstName">
+                                <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                       escapeValueForLike="false"
+                                       view="_local"
+                                       searchStringFormat="%$searchString%">
+                                    select e.firstName from itpearls_JobCandidate e where lower(e.firstName) like
+                                    lower(:searchString) escape '\'
+                                </query>
+                            </suggestionField>
+                            <!--                            <textField id="firstNameField"
+                                                                   dataContainer="jobCandidateDc"
+                                                                   property="firstName"
+                                                                   caption="msg://msgFirstName"
+                                                                   width="100%"
+                                                                   rowspan="1"
+                                                                   colspan="1"
+                                                                   required="true"/> -->
                             <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
                                                dataContainer="jobCandidateDc" property="currentCompany" width="100%"
                                                caption="msg://msgCorrentCompany" required="true">
@@ -275,9 +298,26 @@ order by e.cityRuName]]>
                             </lookupPickerField>
                         </row>
                         <row>
-                            <textField id="middleNameField" dataContainer="jobCandidateDc" property="middleName"
-                                       width="100%"
-                                       caption="msg://msgMiddleName"/>
+                            <suggestionField id="middleNameField"
+                                             dataContainer="jobCandidateDc"
+                                             property="middleName"
+                                             width="100%"
+                                             minSearchStringLength="1"
+                                             caption="msg://msgMiddleName"
+                                             inputPrompt="msg://msgMiddleName">
+                                <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                       searchStringFormat="%$searchString%"
+                                       view="_minimal"
+                                       escapeValueForLike="true">
+                                    select e from itpearls_JobCandidate e where lower(e.middleName) like
+                                    lower(:searchString) escape '\'
+                                </query>
+                            </suggestionField>
+                            <!--                            <textField id="middleNameField"
+                                                                   dataContainer="jobCandidateDc"
+                                                                   property="middleName"
+                                                                   width="100%"
+                                                                   caption="msg://msgMiddleName"/> -->
                             <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
                                                dataContainer="jobCandidateDc" property="personPosition" width="100%"
                                                caption="msg://msgPersonPosition" required="true">
@@ -287,9 +327,25 @@ order by e.cityRuName]]>
                             </lookupPickerField>
                         </row>
                         <row>
-                            <textField id="secondNameField" dataContainer="jobCandidateDc" property="secondName"
-                                       width="100%"
-                                       caption="msg://msgSecondName" required="true"/>
+                            <suggestionField id="secondNameField"
+                                             dataContainer="jobCandidateDc"
+                                             property="secondName"
+                                             width="100%"
+                                             minSearchStringLength="1"
+                                             caption="msg://msgSecondName"
+                                             inputPrompt="msg://msgSecondName">
+                                <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                       escapeValueForLike="true"
+                                       searchStringFormat="%$searchString%">
+                                    select e from itpearls_JobCandidate e where lower(e.secondName) like
+                                    lower(:searchString) escape '\'
+                                </query>
+                            </suggestionField>
+                            <!--                            <textField id="secondNameField"
+                                                                   dataContainer="jobCandidateDc"
+                                                                   property="secondName"
+                                                                   width="100%"
+                                                                   caption="msg://msgSecondName"/> -->
                             <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc"
                                                width="100%"
                                                caption="msg://msgCityOfResidence" optionsContainer="citiesDc"

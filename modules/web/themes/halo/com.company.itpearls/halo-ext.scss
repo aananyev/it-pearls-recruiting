@@ -1,6 +1,10 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 
+.c-login-layout-it-pearls .c-login-layout {
+    background: #ffab00;
+}
+
 .v-loading-indicator {
   $spinner-size: 64px;
 

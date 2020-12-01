@@ -4,7 +4,6 @@ import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.position.PositionEdit;
-import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
@@ -150,15 +149,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private DataGrid<Person> personTable;
     @Inject
-    private DataGrid<RecrutiesTasks> recrutiesTasksTable;
-    @Inject
     private RichTextArea templateLetterRichTextArea;
     @Inject
     private CollectionLoader<Position> positionTypesLc;
     @Inject
     private Screens screens;
-    @Inject
-    private Button groupSubscribe;
     @Inject
     private RadioButtonGroup commandOrPosition;
     @Inject
@@ -602,7 +597,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private String getRecrutiersMaillist() {
-        return "alan@itpearls.ru;tmd@itpearls.ru";
+        return "alan@itpearls.ru";
     }
 
     private void setRadioButtons() {
@@ -1127,8 +1122,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setGroupSubscribeButton() {
-        groupSubscribe.setVisible(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
-                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP));
+//        groupSubscribe.setVisible(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
+//                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP));
     }
 
     @Install(to = "priorityField", subject = "optionIconProvider")
@@ -1292,7 +1287,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     }
 
-    public void groupSubscribe() {
-        screens.create(RecrutiesTasksGroupSubscribeBrowse.class).show();
-    }
+//    public void groupSubscribe() {
+//        screens.create(RecrutiesTasksGroupSubscribeBrowse.class).show();
+//    }
 }

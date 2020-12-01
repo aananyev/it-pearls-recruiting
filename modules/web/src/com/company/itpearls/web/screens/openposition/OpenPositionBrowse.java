@@ -71,6 +71,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Filter filter;
     @Inject
     private HBoxLayout urgentlyHBox;
+    @Inject
+    private LookupField remoteWorkLookupField;
 
 
     @Subscribe
@@ -472,17 +474,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setSubcribersFilter();
         setOpenPositionNotPaused();
         setStatusNotLower();
+        setStatusRemoteWork();
         setUrgentlyPositios(3);
+    }
 
-//        openPositionsTable.getColumn("openClose").setCollapsed(true);
-//        openPositionsTable.getColumn("openClose").setCollapsible(true);
-//        openPositionsTable.getColumn("openClose").setVisible(true);
+    @Subscribe("remoteWorkLookupField")
+    public void onRemoteWorkLookupFieldValueChange(HasValue.ValueChangeEvent event) {
+        openPositionsDl.setParameter("remoteWork", remoteWorkLookupField.getValue());
+        openPositionsDl.load();
     }
 
     @Subscribe("notLowerRatingLookupField")
     public void onNotLowerRatingLookupFieldValueChange1(HasValue.ValueChangeEvent event) {
         removeUrgentlyLists();
-        setUrgentlyPositios((int) notLowerRatingLookupField.getValue());
+        setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
     }
 
 
@@ -595,6 +600,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         priorityMap.put("Critical", 4);
 
         notLowerRatingLookupField.setOptionsMap(priorityMap);
+    }
+
+    private void setStatusRemoteWork() {
+        remoteWorkLookupField.setOptionsMap(remoteWork);
     }
 
     @Subscribe("notLowerRatingLookupField")
