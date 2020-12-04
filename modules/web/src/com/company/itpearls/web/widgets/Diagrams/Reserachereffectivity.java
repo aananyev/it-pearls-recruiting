@@ -1,7 +1,6 @@
 package com.company.itpearls.web.widgets.Diagrams;
 
 import com.company.itpearls.entity.IteractionList;
-import com.company.itpearls.service.GetRoleService;
 import com.google.common.collect.ImmutableMap;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
@@ -19,7 +18,6 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.entity.Role;
 import com.haulmont.cuba.security.entity.User;
-import com.haulmont.cuba.security.entity.UserRole;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
@@ -58,6 +56,7 @@ public class Reserachereffectivity extends ScreenFragment {
     private static String GRAPH_Y = "count";
     private String RESEARCHER = "Ресерчинг";
     private String RESEARCHER_INTERN = "Стажер";
+    private String RECRUTER = "Хантинг";
 
     @Inject
     private SerialChart countIteractionChart;
@@ -103,7 +102,9 @@ public class Reserachereffectivity extends ScreenFragment {
 
         for (User a : users) {
             if(a.getGroup() != null) {
-                if (a.getGroup().getName().equals(RESEARCHER) || a.getGroup().getName().equals(RESEARCHER_INTERN)) {
+                if (a.getGroup().getName().equals(RESEARCHER)
+                        || a.getGroup().getName().equals(RESEARCHER_INTERN)
+                        || a.getGroup().getName().equals(RECRUTER)) {
                     if (a.getActive() & a.getFirstName() != null & a.getLastName() != null) {
                         int count;
                         if (iteractionName == null) {
