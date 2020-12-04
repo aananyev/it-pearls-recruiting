@@ -133,7 +133,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             _addFlag = false;
         }
 
-        if(_addFlag != null) {
+        if (_addFlag != null) {
             if (_addFlag) {
                 if (_addType != 0) {
                     switch (_addType) {
@@ -497,8 +497,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         gregorianCalendar.setGregorianChange(getEditedEntity().getDateIteraction());
         gregorianCalendar.add(Calendar.HOUR, 1);
 
-        if(getEditedEntity().getEndDateIteraction() == null) {
-            if(getEditedEntity().getDateIteraction() != null) {
+        if (getEditedEntity().getEndDateIteraction() == null) {
+            if (getEditedEntity().getDateIteraction() != null) {
                 getEditedEntity().setEndDateIteraction(gregorianCalendar.getTime());
             }
         }
@@ -658,39 +658,79 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void ifDiscrepancyOfVacansy(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if (!event.getValue().getPositionType().getPositionRuName().equals(
-                candidateField.getValue().getPersonPosition().getPositionRuName())) {
+        String candidatePosition = null;
+        String vacansyPosition = null;
+        String dialogStartMessage = "ВНИМАНИЕ! В вакансии заявлена позиция:\n";
+        String dialogEndMessage = "\nВы хотите выбрать другую вакансию?";
+        String dialogMessage = "";
+
+        try {
+            candidatePosition = candidateField
+                    .getValue()
+                    .getPersonPosition()
+                    .getPositionRuName();
+        } catch (Exception e) {
+
+        }
+
+        try {
+            vacansyPosition = vacancyFiels
+                    .getValue()
+                    .getPositionType()
+                    .getPositionRuName();
+        } catch (Exception e) {
+
+        }
+
+        if (vacansyPosition != null || candidatePosition != null) {
+            if (!candidatePosition.equals(vacansyPosition) && vacancyFiels.getValue() != null) {
+                dialogMessage = "\n"
+                        + "\n- позиция "
+                        + vacansyPosition
+                        + ", а кандидат в настоящее время занимает позицию "
+                        + candidatePosition;
+            }
+        }
+
+        String vacansyCity = null;
+        String candidateCity = null;
+        int remoteWork = 0;
+
+        try {
+            vacansyCity = vacancyFiels.getValue().getCityPosition().getCityRuName();
+        } catch (Exception e) {
+        }
+
+        try {
+            candidateCity = candidateField.getValue().getCityOfResidence().getCityRuName();
+        } catch (Exception e) {
+        }
+
+        try {
+            remoteWork = vacancyFiels.getValue().getRemoteWork();
+        } catch (Exception e) {
+        }
+
+        if (vacansyCity != null && candidateCity != null) {
+            if (!vacansyCity.equals(candidateCity) && remoteWork == 0) {
+                dialogMessage = dialogMessage
+                        + "\n- локация "
+                        + vacansyCity
+                        + ", а кандидат находится в настоящее время кандидат находится в городе "
+                        + candidateCity;
+            }
+        }
+
+        if (!dialogMessage.equals("")) {
             dialogs.createOptionDialog()
-                    .withCaption("ВНИМАНИЕ! В вакансии заявлена позиция "
-                            + event.getValue().getPositionType().getPositionRuName()
-                            + ", а кандидат в настоящее время занимает позицию "
-                            + candidateField.getValue().getPersonPosition().getPositionRuName()
-                            + "\nВы хотите выбрать другую вакансию?")
                     .withType(Dialogs.MessageType.WARNING)
+                    .withMessage(dialogStartMessage + dialogMessage + dialogEndMessage)
                     .withActions(new DialogAction(DialogAction.Type.YES,
                                     Action.Status.PRIMARY).withHandler(e -> {
                                 vacancyFiels.setValue(null);
                             }),
-                            new DialogAction(DialogAction.Type.NO));
-        }
-
-        if (vacancyFiels.getValue() != null) {
-            if (!event.getValue().getCityPosition().getCityRuName().equals(
-                    candidateField.getValue().getCityOfResidence().getCityRuName()) &&
-                    event.getValue().getRemoteWork() == 0) {
-                dialogs.createOptionDialog()
-                        .withType(Dialogs.MessageType.WARNING)
-                        .withCaption("Внимание! В вакансии заявлен город "
-                                + event.getValue().getCityPosition().getCityRuName()
-                                + ", а какндидат в настоящее время проживает в "
-                                + candidateField.getValue().getCityOfResidence().getCityRuName()
-                                + "\nВы хотите выбрать другую вакансию?")
-                        .withActions(new DialogAction(DialogAction.Type.YES,
-                                        Action.Status.PRIMARY).withHandler(e -> {
-                                    vacancyFiels.setValue(null);
-                                }),
-                                new DialogAction(DialogAction.Type.NO));
-            }
+                            new DialogAction(DialogAction.Type.NO))
+                    .show();
         }
     }
 
@@ -708,14 +748,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         askFlag = false;
         askFlag2 = false;
-        
+
         getScreenOptionsNoSubscribers(event);
     }
+
     // получить параметны экрана
     private void getScreenOptionsNoSubscribers(InitEvent event) {
         ScreenOptions options = event.getOptions();
 
-        if(options instanceof IteracionListScreenOptions) {
+        if (options instanceof IteracionListScreenOptions) {
             noSubscribe = ((IteracionListScreenOptions) options).getNoSubscribers();
         }
     }
@@ -754,8 +795,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange1(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if(vacancyFiels.getValue() != null)
-            if(vacancyFiels.getValue().getProjectName() != null) {
+        if (vacancyFiels.getValue() != null)
+            if (vacancyFiels.getValue().getProjectName() != null) {
                 getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
 
                 notifications.create(Notifications.NotificationType.TRAY)
