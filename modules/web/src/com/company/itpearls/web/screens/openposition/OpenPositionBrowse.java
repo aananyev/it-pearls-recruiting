@@ -476,6 +476,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setStatusNotLower();
         setStatusRemoteWork();
         setUrgentlyPositios(3);
+
+        clearUrgentFilter();
     }
 
     @Subscribe("remoteWorkLookupField")
@@ -551,8 +553,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             label.setDescriptionAsHtml(true);
             label.setDescription(opDescriptiom);
             label.addClickListener(clickEvent -> {
-                filter.setParamValue("positionType.positionRuName", op.getKey().toString());
-                filter.apply(true);
+                OpenPosition opRet = null;
+
+                for (OpenPosition ops : openPositions) {
+                    if (ops.getPositionType().getPositionRuName().equals(op.getKey())) {
+                        opRet = ops;
+                        break;
+                    }
+
+                }
+
+                openPositionsDl.setParameter("rating", opRet.getPriority());
+                openPositionsDl.setParameter("positionType", opRet.getPositionType());
+                openPositionsDl.load();
             });
 
             switch ((int) op.getValue()) {
@@ -750,6 +763,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     public void groupSubscribe() {
         screens.create(RecrutiesTasksGroupSubscribeBrowse.class).show();
+    }
+
+    public void clearUrgentFilter() {
+        if (notLowerRatingLookupField.getValue() != null) {
+            openPositionsDl.setParameter("rating", (int) notLowerRatingLookupField.getValue());
+        } else {
+            openPositionsDl.removeParameter("rating");
+        }
+
+        openPositionsDl.removeParameter("positionType");
+        openPositionsDl.load();
     }
 }
 

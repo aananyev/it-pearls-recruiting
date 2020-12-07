@@ -103,6 +103,11 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.DENY)
     protected List<RecrutiesTasks> candidates;
 
+    @JoinTable(name = "ITPEARLS_OPEN_POSITION_CITY_LINK", joinColumns = @JoinColumn(name = "CITIES_LIST_ID"), inverseJoinColumns = @JoinColumn(name = "CITY_ID"))
+    @ManyToMany
+    @OnDelete(DeletePolicy.CASCADE)
+    protected List<City> citiesList;
+
     @Column(name = "PAYMENTS_TYPE")
     protected Integer paymentsType;
 
@@ -133,6 +138,7 @@ public class OpenPosition extends StandardEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PARENT_OPEN_POSITION_ID")
+
     protected OpenPosition parentOpenPosition;
 
     public Boolean getInternalProject() {
@@ -225,6 +231,14 @@ public class OpenPosition extends StandardEntity {
 
     public void setCandidates(List<RecrutiesTasks> candidates) {
         this.candidates = candidates;
+    }
+
+    public void setCitiesList(List<City> citiesList) {
+        this.citiesList = citiesList;
+    }
+
+    public List<City> getCitiesList() {
+        return citiesList;
     }
 
     public List<RecrutiesTasks> getCandidates() {

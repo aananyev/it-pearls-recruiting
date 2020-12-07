@@ -279,6 +279,9 @@
             <property name="personPosition" view="_local">
                 <property name="positionRuName"/>
             </property>
+            <property name="email"/>
+            <property name="telegramName"/>
+            <property name="skypeName"/>
         </property>
         <property name="vacancy" fetch="BATCH" view="_local">
             <property name="positionType" view="_minimal">

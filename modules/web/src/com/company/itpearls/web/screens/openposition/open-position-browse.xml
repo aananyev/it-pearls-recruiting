@@ -37,6 +37,9 @@
                             <c:jpql>
                                 <c:where>e.remoteWork = :remoteWork</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>e.positionType = :positionType</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -49,13 +52,18 @@
             spacing="true">
         <groupBox id="urgentlyPositons"
                   collapsable="true"
+                  spacing="true"
                   caption="msg://msgUrgentlyPositios"
                   description="msg://msgUrgentlyPositios">
+            <button id="clearUrgentPos"
+                    caption="msg://msgClear"
+                    description="msg://msgClearDescription"
+                    invoke="clearUrgentFilter"/>
             <scrollBox id="urgentlyBox"
                        orientation="horizontal"
                        contentMaxHeight="100%"
                        contentMaxWidth="100%">
-                <hbox id="urgentlyHBox"/>
+                <hbox id="urgentlyHBox" spacing="true"/>
             </scrollBox>
         </groupBox>
         <filter id="filter"
