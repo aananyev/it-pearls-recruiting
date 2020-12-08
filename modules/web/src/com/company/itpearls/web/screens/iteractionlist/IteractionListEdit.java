@@ -437,7 +437,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (commentField.getValue() == null)
             commentField.setValue("");
 
-//        getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getProjectName().getProjectDepartment() );
         setSubscribe();
     }
 
@@ -689,11 +688,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         if (vacansyPosition != null || candidatePosition != null) {
             if (!candidatePosition.equals(vacansyPosition) && vacancyFiels.getValue() != null) {
-                dialogMessage = "\n"
-                        + "\n- позиция "
-                        + vacansyPosition
-                        + ", а кандидат в настоящее время занимает позицию "
-                        + candidatePosition;
+                dialogMessage =
+                        "\n- позиция <b><i>"
+                                + vacansyPosition
+                                + "</i></b>, а кандидат в настоящее время занимает позицию <b><i>"
+                                + candidatePosition + "</i></b>";
             }
         }
 
@@ -719,10 +718,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (vacansyCity != null && candidateCity != null) {
             if (!vacansyCity.equals(candidateCity) && remoteWork == 0) {
                 dialogMessage = dialogMessage
-                        + "\n- локация "
+                        + "\n- локация <b><i>"
                         + vacansyCity
-                        + ", а кандидат находится в настоящее время кандидат находится в городе "
-                        + candidateCity;
+                        + "</i></b>, а кандидат находится в настоящее время кандидат находится в городе <b><i>"
+                        + candidateCity + "</i></b>";
             }
         }
 
