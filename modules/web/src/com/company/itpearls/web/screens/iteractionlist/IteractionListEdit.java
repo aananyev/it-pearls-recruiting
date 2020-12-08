@@ -438,6 +438,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             commentField.setValue("");
 
 //        getEditedEntity().setCompanyDepartment( vacancyFiels.getValue().getProjectName().getProjectDepartment() );
+        setSubscribe();
+    }
+
+    private void setSubscribe() {
+        // подписать меня на все варианты позиций
     }
 
     private void sendMessages() {

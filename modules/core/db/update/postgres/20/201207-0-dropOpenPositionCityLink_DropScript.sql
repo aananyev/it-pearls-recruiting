@@ -1,1 +1,0 @@
-drop table if exists ITPEARLS_OPEN_POSITION_CITY_LINK__U70664 cascade ;

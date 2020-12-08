@@ -53,6 +53,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private static final String HUNTING_GROUP = "Хантинг";
     private String ROLE_ADMINISTRATOR = "Administrators";
     private Map<String, Integer> remoteWork = new LinkedHashMap<>();
+    private Map<String, Integer> priorityMap = new LinkedHashMap<>();
+
     @Inject
     private UserSessionSource userSessionSource;
     @Inject
@@ -78,11 +80,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     protected void onInit(InitEvent event) {
         addIconColumn();
-        // addIconRemoteWork();
         initRemoteWorkMap();
 
         initTableGenerator();
         initGroupSubscribeButton();
+
+        setMapOfPriority();
     }
 
     private void initGroupSubscribeButton() {
@@ -357,10 +360,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Component fragmentTitle = createTitleFragment(entity);
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
+        Component priorityField = createPriorityField(entity);
+
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
         editButton.setAlignment(Component.Alignment.TOP_RIGHT);
+        priorityField.setAlignment(Component.Alignment.TOP_RIGHT);
 
         buttonsHBox.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+
+        buttonsHBox.add(priorityField);
         buttonsHBox.add(editButton);
         buttonsHBox.add(closeButton);
 
@@ -378,9 +386,53 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return mainLayout;
     }
 
+    private Component createPriorityField(OpenPosition entity) {
+        LookupField retField = uiComponents.create(LookupField.NAME);
+
+        retField.setOptionsMap(priorityMap);
+        retField.setValue(entity.getPriority());
+        retField.setAlignment(Component.Alignment.TOP_RIGHT);
+        retField.addValueChangeListener(f -> {
+            openPositionsTable.getSingleSelected().setPriority((int) retField.getValue());
+            dataManager.commit(entity);
+        });
+
+        retField.setLookupSelectHandler(e -> {
+            openPositionsTable.getSingleSelected().setPriority((int) retField.getValue());
+            dataManager.commit(entity);
+        });
+
+        retField.setOptionIconProvider(g -> {
+            String icon = null;
+
+            switch (g.hashCode()) {
+                case 0: //"Paused"
+                    icon = "icons/remove.png";
+                    break;
+                case 1: //"Low"
+                    icon = "icons/traffic-lights_blue.png";
+                    break;
+                case 2: //"Normal"
+                    icon = "icons/traffic-lights_green.png";
+                    break;
+                case 3: //"High"
+                    icon = "icons/traffic-lights_yellow.png";
+                    break;
+                case 4: //"Critical"
+                    icon = "icons/traffic-lights_red.png";
+                    break;
+            }
+
+            return icon;
+        });
+
+        return retField;
+    }
+
     private Component createTitleFragment(OpenPosition entity) {
         Label<String> titleLabel = uiComponents.create(Label.NAME);
         titleLabel.setStyleName("h2");
+        titleLabel.setDescription(entity.getVacansyName());
         titleLabel.setValue(entity.getVacansyName());
         titleLabel.setAlignment(Component.Alignment.BOTTOM_LEFT);
 
@@ -546,11 +598,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
 
                     if (notLowerRatingLookupField.getValue() != null) {
-                        if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue()) {
-                            countOp++;
+                        if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue() &&
+                                !op1.getOpenClose()) {
+                            countOp = countOp + op1.getNumberPosition();
                         }
-                    } else
-                        countOp++;
+                    } else if (!op1.getOpenClose()) {
+                        countOp = countOp + op1.getNumberPosition();
+                    }
                 }
             }
 
@@ -599,15 +653,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
-    private void setStatusNotLower() {
-        Map<String, Integer> priorityMap = new LinkedHashMap<>();
-
+    private void setMapOfPriority() {
         priorityMap.put("Paused", 0);
         priorityMap.put("Low", 1);
         priorityMap.put("Normal", 2);
         priorityMap.put("High", 3);
         priorityMap.put("Critical", 4);
+    }
 
+    private void setStatusNotLower() {
         notLowerRatingLookupField.setOptionsMap(priorityMap);
     }
 

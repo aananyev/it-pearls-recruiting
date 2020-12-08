@@ -332,6 +332,7 @@
                 <button id="addCity"
                         caption="msg://msgAddCity"
                         width="10%"
+                        enable="false"
                         align="MIDDLE_RIGHT"
                         description="msg://msgAddCityDescription"
                         invoke="addListCity"/>
