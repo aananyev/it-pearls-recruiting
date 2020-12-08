@@ -545,7 +545,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         (!op1.getOpenClose() || op1.getOpenClose() == null)) {
                     opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
 
-                    countOp++;
+                    if (notLowerRatingLookupField.getValue() != null) {
+                        if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue()) {
+                            countOp++;
+                        }
+                    } else
+                        countOp++;
                 }
             }
 
@@ -570,10 +575,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             switch ((int) op.getValue()) {
                 case 1:
-                    label.setStyleName("transition-green");
+                    label.setStyleName("transition-blue");
                     break;
                 case 2:
-                    label.setStyleName("transition-blue");
+                    label.setStyleName("transition-green");
                     break;
                 case 3:
                     label.setStyleName("transition-orange");
@@ -585,15 +590,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     label.setStyleName("transition-grey");
                     break;
             }
-
-            /*
-            if ((int) op.getValue() == 4) {
-                label.setStyleName("transition-red");
-            } else {
-                if ((int) op.getValue() == 3) {
-                    label.setStyleName("transition-orange");
-                }
-            } */
 
             Label label1 = uiComponents.create(Label.NAME);
             label1.setValue(" ");

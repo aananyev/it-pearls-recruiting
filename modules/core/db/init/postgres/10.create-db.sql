@@ -313,6 +313,7 @@ create table ITPEARLS_CITY (
     CITY_RU_NAME varchar(50) not null,
     CITY_PHONE_CODE varchar(5),
     CITY_REGION_ID uuid,
+    OPEN_POSITION_ID uuid,
     --
     primary key (ID)
 )^
@@ -610,10 +611,3 @@ create table ITPEARLS_ITEARCTION_REQUIREMENTS (
     primary key (ID)
 )^
 -- end ITPEARLS_ITEARCTION_REQUIREMENTS
--- begin ITPEARLS_OPEN_POSITION_CITY_LINK
-create table ITPEARLS_OPEN_POSITION_CITY_LINK (
-    CITIES_LIST_ID uuid,
-    CITY_ID uuid,
-    primary key (CITIES_LIST_ID, CITY_ID)
-)^
--- end ITPEARLS_OPEN_POSITION_CITY_LINK

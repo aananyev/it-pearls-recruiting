@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://selectCitiesLocation.caption"
+        messagesPack="com.company.itpearls.web.screens.openposition">
+    <data>
+        <instance id="citiesDc" class="com.company.itpearls.entity.OpenPosition" view="_local">
+            <loader id="citiesDl">
+                <query><![CDATA[]select f from itpearls_OpenPosition f]]></query>
+            </loader>
+            <collection id="cityDc" property="citiesList"/>
+        </instance>
+        <collection id="cityOptionDc" class="com.company.itpearls.entity.City" view="_local">
+            <loader id="cityOptionDl">
+                <query>
+                    <![CDATA[select e from itpearls_City e order by e.cityRuName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <twinColumn id="citiesLocationTwinColumn"
+                    dataContainer="c"
+                    property="citiesList"
+                    width="100%"
+                    optionsContainer="cityOptionDc"/>
+    </layout>
+</window>

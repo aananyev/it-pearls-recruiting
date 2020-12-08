@@ -63,7 +63,7 @@
                        orientation="horizontal"
                        contentMaxHeight="100%"
                        contentMaxWidth="100%">
-                <hbox id="urgentlyHBox" spacing="true"/>
+                <hbox id="urgentlyHBox"/>
             </scrollBox>
         </groupBox>
         <filter id="filter"

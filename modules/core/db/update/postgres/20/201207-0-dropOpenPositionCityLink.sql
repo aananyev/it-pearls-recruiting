@@ -1,0 +1,1 @@
+alter table itpearls_open_position_city_link rename to ITPEARLS_OPEN_POSITION_CITY_LINK__U70664 ;

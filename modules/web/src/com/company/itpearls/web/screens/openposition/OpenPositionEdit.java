@@ -1287,6 +1287,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     }
 
+    public void addListCity() {
+        screenBuilders.screen(this)
+                .withScreenClass(SelectCitiesLocation.class)
+                .withLaunchMode(OpenMode.DIALOG)
+                .build()
+                .show();
+    }
+
 //    public void groupSubscribe() {
 //        screens.create(RecrutiesTasksGroupSubscribeBrowse.class).show();
 //    }
