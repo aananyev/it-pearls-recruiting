@@ -405,7 +405,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 String msg = "С этим кандидатом " + oldIteraction.getRecrutier().getName() + " контактировал " +
                         oldIteraction.getDateIteraction().toString() + " МЕНЕЕ МЕСЯЦА НАЗАД!";
 
-                dialogs.createOptionDialog()
+/*                dialogs.createOptionDialog()
                         .withCaption("Warning")
                         .withMessage(msg + "\nПродолжить?")
                         .withActions(
@@ -415,6 +415,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                 }),
                                 new DialogAction(DialogAction.Type.NO)
                         )
+                        .show(); */
+
+                notifications.create()
+                        .withType(Notifications.NotificationType.HUMANIZED)
+                        .withCaption("ВНИМАНИЕ!!!")
+                        .withDescription(msg)
+                        .withPosition(Notifications.Position.MIDDLE_CENTER)
                         .show();
             }
         }
