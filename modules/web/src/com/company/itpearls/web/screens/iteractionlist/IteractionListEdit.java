@@ -809,13 +809,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (vacancyFiels.getValue() != null)
             if (vacancyFiels.getValue().getProjectName() != null) {
                 getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
-
+/*
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withContentMode(ContentMode.TEXT)
                         .withCaption("Проект")
                         .withDescription(vacancyFiels.getValue().getProjectName().getProjectName())
                         .withHideDelayMs(5000)
-                        .show();
+                        .show(); */
             }
 
     }
