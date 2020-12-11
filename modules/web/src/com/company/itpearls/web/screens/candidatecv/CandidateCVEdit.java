@@ -189,20 +189,24 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe("textFieldITPearlsCV")
     public void onTextFieldITPearlsCVValueChange(HasValue.ValueChangeEvent<String> event) {
         if (textFieldITPearlsCV.getValue() != null) {
-            linkITPearlsCV.setVisible((true));
+//            linkITPearlsCV.setVisible((true));
             itpearlsCVLink.setUrl(textFieldITPearlsCV.getValue());
+            itpearlsCVLink.setVisible(true);
         } else {
-            linkITPearlsCV.setVisible(false);
+//            linkITPearlsCV.setVisible(false);
+            itpearlsCVLink.setVisible(false);
         }
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (textFieldIOriginalCV.getValue() != null) {
-            linkOriginalCV.setVisible(true);
+//            linkOriginalCV.setVisible(true);
             originalCVLink.setUrl(textFieldIOriginalCV.getValue());
+            originalCVLink.setVisible(true);
         } else {
-            linkOriginalCV.setVisible(false);
+//            linkOriginalCV.setVisible(false);
+            originalCVLink.setVisible(false);
         }
 
         if (textFieldITPearlsCV.getValue() != null) {
