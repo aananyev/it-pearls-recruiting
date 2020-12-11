@@ -353,7 +353,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         Integer qualityPercent = setQualityPercent() * 100 / 14;
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            labelQualityPercent.setValue("| Процент заполнения карточки: " + qualityPercent.toString()
+            labelQualityPercent.setValue("Процент заполнения карточки: " + qualityPercent.toString()
                     + "%");
         }
     }
@@ -414,9 +414,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
-                labelCV.setValue("| Резюме: НЕТ");
+                labelCV.setValue("Резюме: НЕТ");
             } else {
-                labelCV.setValue("| Резюме: ДА");
+                labelCV.setValue("Резюме: ДА");
             }
         }
 

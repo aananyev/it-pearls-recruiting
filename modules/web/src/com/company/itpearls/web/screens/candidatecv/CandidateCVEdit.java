@@ -64,6 +64,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ScreenBuilders screenBuilders;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private Link itpearlsCVLink;
+    @Inject
+    private Link originalCVLink;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -184,16 +188,19 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("textFieldITPearlsCV")
     public void onTextFieldITPearlsCVValueChange(HasValue.ValueChangeEvent<String> event) {
-        if (textFieldITPearlsCV.getValue() != null)
+        if (textFieldITPearlsCV.getValue() != null) {
             linkITPearlsCV.setVisible((true));
-        else
+            itpearlsCVLink.setUrl(textFieldITPearlsCV.getValue());
+        } else {
             linkITPearlsCV.setVisible(false);
+        }
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (textFieldIOriginalCV.getValue() != null) {
             linkOriginalCV.setVisible(true);
+            originalCVLink.setUrl(textFieldIOriginalCV.getValue());
         } else {
             linkOriginalCV.setVisible(false);
         }

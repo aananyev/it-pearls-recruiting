@@ -99,23 +99,33 @@
                                     fileStoragePutMode="IMMEDIATE" showClearButton="true"/>
                             </hbox>
                             <grid spacing="true" width="100%">
-                                <columns count="2"/>
+                                <columns count="3"/>
                                 <rows>
                                     <row>
                                         <textField id="textFieldIOriginalCV" dataContainer="candidateCVDc"
                                                    property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV"
                                                    width="100%" align="MIDDLE_LEFT"/>
-                                        <linkButton id="linkOriginalCV" align="BOTTOM_LEFT"
+<!--                                        <linkButton id="linkOriginalCV" align="BOTTOM_LEFT"
                                                     description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"
-                                                    responsive="true"/>
+                                                    responsive="true"/> -->
+                                        <link id="originalCVLink"
+                                              icon="font-icon:FILE_WORD_O"
+                                              align="BOTTOM_LEFT"
+                                              caption="msg://msgGoTo"
+                                              description="msg://msgGoTo"/>
                                     </row>
                                     <row>
                                         <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
                                                    caption="mainMsg://msgLinkToItPearlsCV" width="100%"
                                                    align="MIDDLE_LEFT"/>
-                                        <linkButton id="linkITPearlsCV" align="BOTTOM_LEFT"
+<!--                                        <linkButton id="linkITPearlsCV" align="BOTTOM_LEFT"
                                                     description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"
-                                                    invoke="setUrlITPearlsCV"/>
+                                                    invoke="setUrlITPearlsCV"/> -->
+                                        <link id="itpearlsCVLink"
+                                              icon="font-icon:FILE_WORD_O"
+                                              align="BOTTOM_LEFT"
+                                              caption="msg://msgGoTo"
+                                              description="msg://msgGoTo"/>
                                     </row>
                                 </rows>
                             </grid>
