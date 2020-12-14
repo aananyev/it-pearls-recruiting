@@ -227,6 +227,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         return ((emailField.getValue() == null) &&
                 (skypeNameField.getValue() == null) &&
+                (telegramNameField.getValue() == null) &&
                 (phoneField.getValue() == null)) && !isEmptySN;
     }
 
@@ -385,10 +386,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             skypeNameField.setRequired(true);
             phoneField.setRequired(true);
             emailField.setRequired(true);
+            telegramNameField.setRequired(true);
         } else {
             skypeNameField.setRequired(false);
             phoneField.setRequired(false);
             emailField.setRequired(false);
+            telegramNameField.setRequired(false);
         }
     }
 
