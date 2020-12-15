@@ -734,6 +734,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         if (!dialogMessage.equals("")) {
             dialogs.createOptionDialog()
+                    .withContentMode(ContentMode.HTML)
                     .withType(Dialogs.MessageType.WARNING)
                     .withMessage(dialogStartMessage + dialogMessage + dialogEndMessage)
                     .withActions(new DialogAction(DialogAction.Type.YES,
