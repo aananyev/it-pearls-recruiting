@@ -99,16 +99,15 @@
                                     fileStoragePutMode="IMMEDIATE" showClearButton="true"/>
                             </hbox>
                             <grid spacing="true" width="100%">
-                                <columns count="3"/>
+                                <columns>
+                                    <column/>
+                                    <column flex="0"/>
+                                </columns>
                                 <rows>
                                     <row>
                                         <textField id="textFieldIOriginalCV" dataContainer="candidateCVDc"
                                                    property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV"
                                                    width="100%" align="MIDDLE_LEFT"/>
-                                        <linkButton id="linkOriginalCV" align="BOTTOM_LEFT"
-                                                    description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"
-                                                    visible="false"
-                                                    responsive="true"/>
                                         <link id="originalCVLink"
                                               icon="font-icon:FILE_WORD_O"
                                               align="BOTTOM_LEFT"
@@ -120,10 +119,6 @@
                                         <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
                                                    caption="mainMsg://msgLinkToItPearlsCV" width="100%"
                                                    align="MIDDLE_LEFT"/>
-                                        <linkButton id="linkITPearlsCV" align="BOTTOM_LEFT"
-                                                    visible="false"
-                                                    description="mainMsg://msgGoTo" caption="mainMsg://msgGoTo"
-                                                    invoke="setUrlITPearlsCV"/>
                                         <link id="itpearlsCVLink"
                                               icon="font-icon:FILE_WORD_O"
                                               align="BOTTOM_LEFT"

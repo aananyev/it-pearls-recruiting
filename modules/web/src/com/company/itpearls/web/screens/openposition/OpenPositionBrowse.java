@@ -76,7 +76,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private LookupField remoteWorkLookupField;
 
-
     @Subscribe
     protected void onInit(InitEvent event) {
         addIconColumn();
@@ -103,6 +102,55 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         openPositionsTable.setDetailsVisible(openPositionsTable.getSingleSelected(), true)));
 
     }
+
+    @Install(to = "notLowerRatingLookupField", subject = "optionIconProvider")
+    private String notLowerRatingLookupFieldOptionIconProvider(Object object) {
+        String icon = null;
+
+        switch ((int) object) {
+            case 0: //"Paused"
+                icon = "icons/remove.png";
+                break;
+            case 1: //"Low"
+                icon = "icons/traffic-lights_blue.png";
+                break;
+            case 2: //"Normal"
+                icon = "icons/traffic-lights_green.png";
+                break;
+            case 3: //"High"
+                icon = "icons/traffic-lights_yellow.png";
+                break;
+            case 4: //"Critical"
+                icon = "icons/traffic-lights_red.png";
+                break;
+        }
+
+        return icon;
+    }
+
+    @Install(to = "remoteWorkLookupField", subject = "optionIconProvider")
+    private String remoteWorkLookupFieldOptionIconProvider(Object object) {
+        String returnIcon = "";
+
+        switch ((int)object) {
+            case 1:
+                returnIcon = "font-icon:PLUS_CIRCLE";
+                break;
+            case 0:
+                returnIcon = "font-icon:MINUS_CIRCLE";
+                break;
+            case 2:
+                returnIcon = "font-icon:QUESTION_CIRCLE";
+                break;
+            default:
+                returnIcon = "fint-icon:QUESTION_CIRCLE";
+                break;
+        }
+
+        return returnIcon;
+    }
+
+
 
     @Install(to = "openPositionsTable.remoteWork", subject = "descriptionProvider")
     private String openPositionsTableRemoteWorkDescriptionProvider(OpenPosition openPosition) {

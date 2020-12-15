@@ -1126,6 +1126,28 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 //                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP));
     }
 
+    @Install(to = "remoteWorkField", subject = "optionIconProvider")
+    private String remoteWorkFieldOptionIconProvider(Integer integer) {
+        String returnIcon = "";
+
+        switch (integer) {
+            case 1:
+                returnIcon = "font-icon:PLUS_CIRCLE";
+                break;
+            case 0:
+                returnIcon = "font-icon:MINUS_CIRCLE";
+                break;
+            case 2:
+                returnIcon = "font-icon:QUESTION_CIRCLE";
+                break;
+            default:
+                returnIcon = "fint-icon:QUESTION_CIRCLE";
+                break;
+        }
+
+        return returnIcon;
+    }
+
     @Install(to = "priorityField", subject = "optionIconProvider")
     private String priorityFieldOptionIconProvider(Integer integer) {
 

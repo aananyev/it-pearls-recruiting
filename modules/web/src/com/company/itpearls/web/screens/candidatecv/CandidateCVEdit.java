@@ -35,10 +35,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private UserSession userSession;
     @Inject
-    private LinkButton linkOriginalCV;
-    @Inject
-    private LinkButton linkITPearlsCV;
-    @Inject
     private TextField<String> textFieldIOriginalCV;
 
     private WebBrowserTools webBrowserTools;
@@ -165,35 +161,21 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    @Subscribe("linkOriginalCV")
-    public void onLinkOriginalCVClick(Button.ClickEvent event) {
-//        openURL(textFieldIOriginalCV.getValue());
-
-        webBrowserTools.showWebPage(textFieldIOriginalCV.getValue(), null);
-    }
-
-    @Subscribe("linkITPearlsCV")
-    public void onLinkITPearlsCVClick(Button.ClickEvent event) {
-//        openURL(textFieldITPearlsCV.getValue());
-        webBrowserTools.showWebPage(textFieldITPearlsCV.getValue(), null);
-    }
-
     @Subscribe("textFieldIOriginalCV")
     public void onTextFieldIOriginalCVValueChange(HasValue.ValueChangeEvent<String> event) {
-        if (textFieldIOriginalCV.getValue() != null)
-            linkOriginalCV.setVisible(true);
-        else
-            linkOriginalCV.setVisible(false);
+        if (textFieldIOriginalCV.getValue() != null) {
+            originalCVLink.setUrl(textFieldIOriginalCV.getValue());
+            originalCVLink.setVisible(true);
+        } else
+            originalCVLink.setVisible(false);
     }
 
     @Subscribe("textFieldITPearlsCV")
     public void onTextFieldITPearlsCVValueChange(HasValue.ValueChangeEvent<String> event) {
         if (textFieldITPearlsCV.getValue() != null) {
-//            linkITPearlsCV.setVisible((true));
             itpearlsCVLink.setUrl(textFieldITPearlsCV.getValue());
             itpearlsCVLink.setVisible(true);
         } else {
-//            linkITPearlsCV.setVisible(false);
             itpearlsCVLink.setVisible(false);
         }
     }
@@ -201,18 +183,16 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (textFieldIOriginalCV.getValue() != null) {
-//            linkOriginalCV.setVisible(true);
             originalCVLink.setUrl(textFieldIOriginalCV.getValue());
             originalCVLink.setVisible(true);
         } else {
-//            linkOriginalCV.setVisible(false);
             originalCVLink.setVisible(false);
         }
 
         if (textFieldITPearlsCV.getValue() != null) {
-            linkITPearlsCV.setVisible(true);
+            itpearlsCVLink.setVisible(true);
         } else {
-            linkITPearlsCV.setVisible(false);
+            itpearlsCVLink.setVisible(false);
         }
     }
 
@@ -292,11 +272,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    @Subscribe("linkOriginalCV")
-    public void onLinkOriginalCVClick1(Button.ClickEvent event) {
-        setUrlOriginalCV();
-    }
-
     public void setUrlOriginalCV() {
         String value = textFieldIOriginalCV.getValue();
 
@@ -304,8 +279,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         if (!value.startsWith("http://") && !value.startsWith("https://"))
             value = "http://" + value;
-
-//        webBrowserTools.showWebPage(value, null);
         onLinkButtonClick(value);
     }
 

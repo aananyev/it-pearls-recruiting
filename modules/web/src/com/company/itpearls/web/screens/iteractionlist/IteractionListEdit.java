@@ -212,9 +212,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    @Subscribe("vacancyFiels")
-    public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-
+    private void vacancyFieldValueChange() {
         if (vacancyFiels.getValue() != null)
             if (vacancyFiels.getValue().getProjectName() != null)
                 if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null)
@@ -763,6 +761,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         getScreenOptionsNoSubscribers(event);
     }
+
+    @Subscribe("vacancyFiels")
+    public void onVacancyFielsFieldValueChange(PickerField.FieldValueChangeEvent<OpenPosition> event) {
+       vacancyFieldValueChange();
+    }
+
+
 
     // получить параметны экрана
     private void getScreenOptionsNoSubscribers(InitEvent event) {
