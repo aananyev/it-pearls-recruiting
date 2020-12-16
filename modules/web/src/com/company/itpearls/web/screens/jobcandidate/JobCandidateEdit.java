@@ -228,6 +228,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return ((emailField.getValue() == null) &&
                 (skypeNameField.getValue() == null) &&
                 (telegramNameField.getValue() == null) &&
+                (wiberNameField.getValue() == null) &&
+                (whatsupNameField.getValue() == null) &&
                 (phoneField.getValue() == null)) && !isEmptySN;
     }
 
@@ -379,6 +381,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
     }
 
+    @Subscribe("telegramNameField")
+    public void onTelegramNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("whatsupNameField")
+    public void onWhatsupNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("wiberNameField")
+    public void onWiberNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+       enableDisableContacts();
+    }
 
     protected void enableDisableContacts() {
         // ХОТЯ БЫ ОДИН КОНТАКТ
@@ -387,11 +403,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             phoneField.setRequired(true);
             emailField.setRequired(true);
             telegramNameField.setRequired(true);
+            whatsupNameField.setRequired(true);
+            wiberNameField.setRequired(true);
         } else {
             skypeNameField.setRequired(false);
             phoneField.setRequired(false);
             emailField.setRequired(false);
             telegramNameField.setRequired(false);
+            whatsupNameField.setRequired(false);
+            wiberNameField.setRequired(false);
         }
     }
 
