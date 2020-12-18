@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.openposition;
 
+import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
@@ -168,7 +169,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 break;
         }
 
-        return retStr + "\nЖелаемая локация: " + openPosition.getCityPosition().getCityRuName();
+        return openPosition.getCityPosition() == null ? retStr : retStr + "\nЖелаемая локация: " + openPosition.getCityPosition().getCityRuName();
     }
 
     private void initRemoteWorkMap() {
@@ -872,6 +873,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         openPositionsDl.removeParameter("positionType");
         openPositionsDl.load();
+    }
+
+    @Install(to = "openPositionsTable.cityPosition", subject = "descriptionProvider")
+    private String openPositionsTableCityPositionDescriptionProvider(OpenPosition openPosition) {
+        String outStr = "";
+
+        if(openPosition.getCities() != null) {
+            for (City s : openPosition.getCities()) {
+                if (!outStr.equals("")) {
+                    outStr = outStr + ",";
+                }
+
+                outStr = outStr + s.getCityRuName();
+            }
+        }
+
+        return outStr;
     }
 }
 

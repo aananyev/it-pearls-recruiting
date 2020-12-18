@@ -90,6 +90,7 @@
         <property name="percentSalaryOfRecrutier"/>
         <property name="parentOpenPosition"/>
         <property name="commandCandidate"/>
+        <property name="cities" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" fetch="JOIN" view="_local"/>

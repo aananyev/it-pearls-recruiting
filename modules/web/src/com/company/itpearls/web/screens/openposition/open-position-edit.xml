@@ -31,6 +31,8 @@
                           view="_minimal"/>
                 <property name="parentOpenPosition"
                           view="_local"/>
+                <property name="cities"
+                          view="_local"/>
             </view>
             <loader/>
             <collection id="openPositionSkillsListsDc"
@@ -329,13 +331,18 @@
                     </lookupPickerField>
 
                 </hbox>
-                <button id="addCity"
-                        caption="msg://msgAddCity"
-                        width="10%"
-                        enable="false"
-                        align="MIDDLE_RIGHT"
-                        description="msg://msgAddCityDescription"
-                        invoke="addListCity"/>
+                <hbox align="MIDDLE_RIGHT" spacing="true">
+                    <label id="citiesLabel"
+                           stylename="h4"
+                           align="BOTTOM_CENTER"/>
+                    <button id="addCity"
+                            caption="msg://msgAddCity"
+                            width="100%"
+                            enable="true"
+                            align="MIDDLE_RIGHT"
+                            description="msg://msgAddCityDescription"
+                            invoke="addListCity"/>
+                </hbox>
                 <textField id="numberPositionField"
                            dataContainer="openPositionDc"
                            property="numberPosition"

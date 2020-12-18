@@ -55,16 +55,19 @@
                   spacing="true"
                   caption="msg://msgUrgentlyPositios"
                   description="msg://msgUrgentlyPositios">
-            <button id="clearUrgentPos"
-                    caption="msg://msgClear"
-                    description="msg://msgClearDescription"
-                    invoke="clearUrgentFilter"/>
-            <scrollBox id="urgentlyBox"
-                       orientation="horizontal"
-                       contentMaxHeight="100%"
-                       contentMaxWidth="100%">
-                <hbox id="urgentlyHBox"/>
-            </scrollBox>
+            <hbox spacing="true">
+                <button id="clearUrgentPos"
+                        caption="msg://msgClear"
+                        align="MIDDLE_LEFT"
+                        description="msg://msgClearDescription"
+                        invoke="clearUrgentFilter"/>
+                <scrollBox id="urgentlyBox"
+                           orientation="horizontal"
+                           contentMaxHeight="100%"
+                           contentMaxWidth="100%">
+                    <hbox id="urgentlyHBox"/>
+                </scrollBox>
+            </hbox>
         </groupBox>
         <filter id="filter"
                 applyTo="openPositionsTable"
@@ -111,6 +114,10 @@
                         property="projectName"
                         maximumWidth="300px"
                         caption="msg://msgProjectName"/>
+                <column id="cityPosition"
+                        property="cityPosition"
+                        minimumWidth="60px"
+                        width="120px"/>
                 <column id="numberPosition"
                         property="numberPosition"
                         width="65px"

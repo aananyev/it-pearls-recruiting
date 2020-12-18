@@ -160,6 +160,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private LookupPickerField<OpenPosition> parentOpenPositionField;
     @Inject
     private GroupBoxLayout workExperienceGroupBox;
+    @Inject
+    private Label<String> citiesLabel;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -184,6 +186,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setDisableTwoField();
         setWorkExperienceRadioButton();
         setCommandExperienceRadioButton();
+        changeCityListsLabel();
     }
 
     private void setInternalProject() {
@@ -1306,18 +1309,37 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                 }), new DialogAction(DialogAction.Type.NO))
                 .show();
-
     }
 
     public void addListCity() {
-        screenBuilders.screen(this)
-                .withScreenClass(SelectCitiesLocation.class)
-                .withLaunchMode(OpenMode.DIALOG)
-                .build()
-                .show();
+        SelectCitiesLocation selectCitiesLocation = screens.create(SelectCitiesLocation.class);
+
+        selectCitiesLocation.addAfterShowListener( e -> {
+           selectCitiesLocation.setCitiesList(this.getEditedEntity().getCities());
+        });
+        selectCitiesLocation.addAfterCloseListener( e -> {
+            this.getEditedEntity().setCities(selectCitiesLocation.getCitiesList());
+            changeCityListsLabel();
+        });
+        selectCitiesLocation.show();
+
     }
 
-//    public void groupSubscribe() {
-//        screens.create(RecrutiesTasksGroupSubscribeBrowse.class).show();
-//    }
+    private void changeCityListsLabel() {
+        String outStr = "";
+
+        if(getEditedEntity().getCities() != null) {
+            for (City s : getEditedEntity().getCities()) {
+                if (!outStr.equals("")) {
+                    outStr = outStr + ",";
+                }
+
+                outStr = outStr + s.getCityRuName();
+            }
+
+        }
+        if(!outStr.equals("")) {
+            citiesLabel.setValue(outStr);
+        }
+    }
 }

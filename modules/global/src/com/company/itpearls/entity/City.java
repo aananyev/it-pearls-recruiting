@@ -26,6 +26,10 @@ public class City extends StandardEntity {
     @JoinColumn(name = "CITY_REGION_ID")
     protected Region cityRegion;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "OPEN_POSITION_ID")
+    protected OpenPosition openPosition;
+
     public Region getCityRegion() {
         return cityRegion;
     }
@@ -48,5 +52,13 @@ public class City extends StandardEntity {
 
     public void setCityRuName(String cityRuName) {
         this.cityRuName = cityRuName;
+    }
+
+    public void setOpenPosition(OpenPosition openPosition) {
+        this.openPosition = openPosition;
+    }
+
+    public OpenPosition getOpenPosition() {
+        return openPosition;
     }
 }

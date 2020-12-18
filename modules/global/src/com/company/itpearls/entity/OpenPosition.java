@@ -98,6 +98,11 @@ public class OpenPosition extends StandardEntity {
     @OneToMany(mappedBy = "openPosition")
     protected List<SkillTree> skillsList;
 
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "openPosition")
+    protected List<City> cities;
+
     @JoinTable(name = "ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK", joinColumns = @JoinColumn(name = "OPEN_POSITION_ID"), inverseJoinColumns = @JoinColumn(name = "RECRUTIES_TASKS_ID"))
     @ManyToMany
     @OnDelete(DeletePolicy.DENY)
@@ -381,5 +386,13 @@ public class OpenPosition extends StandardEntity {
 
     public Integer getCommandCandidate() {
         return commandCandidate;
+    }
+
+    public List<City> getCities() {
+        return cities;
+    }
+
+    public void setCities(List<City> cities) {
+        this.cities = cities;
     }
 }
