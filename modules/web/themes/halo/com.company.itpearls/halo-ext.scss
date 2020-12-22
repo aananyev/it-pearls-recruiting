@@ -1,6 +1,13 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 
+.vacancy-filed-close-gray {
+    color: gray;
+}
+
+.vacancy-filed-close-black {
+    color: black;
+}
 .c-login-layout-it-pearls .c-login-layout {
     background: #ffab00;
 }

@@ -10,6 +10,7 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.model.InstanceLoader;
@@ -661,7 +662,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    private void ifDiscrepancyOfVacansy(PickerField.FieldValueChangeEvent<OpenPosition> event) {
+    private void ifDiscrepancyOfVacansy(HasValue.ValueChangeEvent<OpenPosition> event) {
         String candidatePosition = null;
         String vacansyPosition = null;
         String dialogStartMessage = "ВНИМАНИЕ! В вакансии заявлена позиция:\n";
@@ -758,14 +759,33 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     @Subscribe("vacancyFiels")
-    public void onVacancyFielsFieldValueChange(PickerField.FieldValueChangeEvent<OpenPosition> event) {
+    public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
         vacancyFieldValueChange();
         ifDiscrepancyOfVacansy(event);
 
-        if (vacancyFiels.getValue() != null)
+        if (vacancyFiels.getValue() != null) {
             if (vacancyFiels.getValue().getProjectName() != null) {
                 getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
             }
+        }
+    }
+
+    @Install(to = "vacancyFiels", subject = "optionIconProvider")
+    private String vacancyFielsOptionIconProvider(OpenPosition openPosition) {
+        if (!openPosition.getOpenClose()) {
+            return CubaIcon.PLUS_CIRCLE.source();
+        } else {
+            return CubaIcon.MINUS_CIRCLE.source();
+        }
+    }
+
+    @Install(to = "vacancyFiels", subject = "optionStyleProvider")
+    private String vacancyFielsOptionStyleProvider(OpenPosition openPosition) {
+        if(openPosition.getOpenClose()) {
+            return "vacancy-filed-close-gray";
+        } else {
+            return "vacancy-filed-close-black";
+        }
     }
 
     // получить параметны экрана

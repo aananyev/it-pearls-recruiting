@@ -43,8 +43,7 @@
                     cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
-                                where e.openClose = false or e.openClose is not null
-                                order by e.vacansyName]]>
+                                order by e.openClose, e.vacansyName]]>
                     <condition>
                         <c:jpql>
                             <c:where>
