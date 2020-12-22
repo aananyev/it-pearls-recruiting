@@ -661,12 +661,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    @Subscribe("vacancyFiels")
-    public void onVacancyFielsValueChange2(HasValue.ValueChangeEvent<OpenPosition> event) {
-        ifDiscrepancyOfVacansy(event);
-    }
-
-    private void ifDiscrepancyOfVacansy(HasValue.ValueChangeEvent<OpenPosition> event) {
+    private void ifDiscrepancyOfVacansy(PickerField.FieldValueChangeEvent<OpenPosition> event) {
         String candidatePosition = null;
         String vacansyPosition = null;
         String dialogStartMessage = "ВНИМАНИЕ! В вакансии заявлена позиция:\n";
@@ -764,10 +759,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsFieldValueChange(PickerField.FieldValueChangeEvent<OpenPosition> event) {
-       vacancyFieldValueChange();
+        vacancyFieldValueChange();
+        ifDiscrepancyOfVacansy(event);
+
+        if (vacancyFiels.getValue() != null)
+            if (vacancyFiels.getValue().getProjectName() != null) {
+                getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
+            }
     }
-
-
 
     // получить параметны экрана
     private void getScreenOptionsNoSubscribers(InitEvent event) {
@@ -810,21 +809,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
     }
 
-    @Subscribe("vacancyFiels")
-    public void onVacancyFielsValueChange1(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if (vacancyFiels.getValue() != null)
-            if (vacancyFiels.getValue().getProjectName() != null) {
-                getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
-/*
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withContentMode(ContentMode.TEXT)
-                        .withCaption("Проект")
-                        .withDescription(vacancyFiels.getValue().getProjectName().getProjectName())
-                        .withHideDelayMs(5000)
-                        .show(); */
-            }
-
-    }
 
     public void addNewIteraction() {
         String classIL = "itpearls_" + getEditedEntity().getClass().getSimpleName() + ".edit";
