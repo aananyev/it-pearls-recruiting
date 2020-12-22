@@ -117,6 +117,7 @@
                 <column id="cityPosition"
                         property="cityPosition"
                         minimumWidth="60px"
+                        caption="msg://msgCity"
                         width="120px"/>
                 <column id="numberPosition"
                         property="numberPosition"

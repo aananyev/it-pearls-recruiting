@@ -19,12 +19,21 @@
                             title="Количество"/>
             </chart:valueAxes>
             <chart:graphs>
-                <chart:graph id="reseracherIteractionCountGraph"
+                <chart:graph id="researcherLastWeekIteractionCountGraph"
                              type="COLUMN"
                              fillAlphas="1"
+                             balloonColor="ALICEBLUE"
+                             color="BEIGE"
+                             colorField="BEIGE"
+                             valueField="countLastWeek"/>
+                <chart:graph id="reseracherIteractionCountGraph"
+                             type="COLUMN"
+                             fillAlphas="0.9"
                              balloonColor="AQUA"
                              color="GREEN"
+                             colorField="GREEN"
                              valueField="count"/>
+
             </chart:graphs>
             <chart:chartCursor cursorAlpha="1"
                                categoryBalloonDateFormat="DD.mm"

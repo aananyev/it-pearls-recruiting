@@ -42,7 +42,9 @@
             <loader id="openPositionsDl"
                     cacheable="true">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                                where e.openClose = false or e.openClose is not null
+                                order by e.vacansyName]]>
                     <condition>
                         <c:jpql>
                             <c:where>

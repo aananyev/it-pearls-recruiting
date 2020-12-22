@@ -7,6 +7,7 @@ import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.charts.gui.amcharts.model.Color;
 import com.haulmont.charts.gui.amcharts.model.Title;
 import com.haulmont.charts.gui.components.charts.SerialChart;
+import com.haulmont.charts.gui.data.DataItem;
 import com.haulmont.charts.gui.data.DataProvider;
 import com.haulmont.charts.gui.data.ListDataProvider;
 import com.haulmont.charts.gui.data.MapDataItem;
@@ -21,10 +22,7 @@ import com.haulmont.cuba.security.entity.User;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
 @UiController("itpearls_Reserachereffectivity")
 @UiDescriptor("ReseracherEffectivity.xml")
@@ -54,6 +52,7 @@ public class Reserachereffectivity extends ScreenFragment {
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static String GRAPH_X = "recrutier";
     private static String GRAPH_Y = "count";
+    private static String GRAPH_Y_WEEK = "countLastWeek";
     private String RESEARCHER = "Ресерчинг";
     private String RESEARCHER_INTERN = "Стажер";
     private String RECRUTER = "Хантинг";
@@ -105,8 +104,24 @@ public class Reserachereffectivity extends ScreenFragment {
                 if (a.getGroup().getName().equals(RESEARCHER)
                         || a.getGroup().getName().equals(RESEARCHER_INTERN)
                         || a.getGroup().getName().equals(RECRUTER)) {
+                    int     count;
+                    int     countWeek;
+
+                    GregorianCalendar firsDayOfWeek = new GregorianCalendar();
+                    firsDayOfWeek.setTime(new Date());
+
+                    GregorianCalendar today = new GregorianCalendar();
+                    today.setTime(new Date());
+                    today.add(Calendar.DAY_OF_YEAR, 1);
+
+                    if(firsDayOfWeek.get(Calendar.DAY_OF_MONTH) >= 7) {
+                        firsDayOfWeek.setFirstDayOfWeek(Calendar.MONDAY);
+                        firsDayOfWeek.add(Calendar.DAY_OF_YEAR, -1);
+                    } else {
+                        firsDayOfWeek.set(Calendar.DAY_OF_MONTH, 1);
+                    }
+
                     if (a.getActive() & a.getFirstName() != null & a.getLastName() != null) {
-                        int count;
                         if (iteractionName == null) {
                             count = dataManager.load(IteractionList.class)
                                     .query(queryCount)
@@ -116,6 +131,15 @@ public class Reserachereffectivity extends ScreenFragment {
                                     .parameter("endDate", endDate)
                                     .list()
                                     .size();
+
+                                countWeek = dataManager.load(IteractionList.class)
+                                        .query(queryCount)
+                                        .view("iteractionList-view")
+                                        .parameter("user", a)
+                                        .parameter("startDate", firsDayOfWeek.getTime())
+                                        .parameter("endDate", today.getTime())
+                                        .list()
+                                        .size();
                         } else {
                             count = dataManager.load(IteractionList.class)
                                     .query(queryCount)
@@ -126,16 +150,24 @@ public class Reserachereffectivity extends ScreenFragment {
                                     .parameter("endDate", endDate)
                                     .list()
                                     .size();
+
+                            countWeek = dataManager.load(IteractionList.class)
+                                    .query(queryCount)
+                                    .view("iteractionList-view")
+                                    .parameter("user", a)
+                                    .parameter("iteractionName", iteractionName)
+                                    .parameter("startDate", firsDayOfWeek.getTime())
+                                    .parameter("endDate", today.getTime())
+                                    .list()
+                                    .size();
                         }
 
                         if (userRole != null) {
                             if (checkUserRoles(a, userRole)) {
-                                dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
-                                        a.getFirstName() + "\n" + a.getLastName())));
+                                dataProvider.addItem(researcherCount(a.getFirstName() + "\n" + a.getLastName(), count - countWeek, countWeek));
                             }
                         } else {
-                            dataProvider.addItem(new MapDataItem(ImmutableMap.of(GRAPH_Y, count, GRAPH_X,
-                                    a.getFirstName() + "\n" + a.getLastName())));
+                            dataProvider.addItem(researcherCount(a.getFirstName() + "\n" + a.getLastName(), count - countWeek, countWeek));
                         }
                     }
                 }
@@ -143,6 +175,16 @@ public class Reserachereffectivity extends ScreenFragment {
         }
 
         return dataProvider;
+    }
+
+    private DataItem researcherCount(String s, int i, int countWeek) {
+        MapDataItem item = new MapDataItem();
+
+        item.add(GRAPH_X, s);
+        item.add(GRAPH_Y_WEEK, i);
+        item.add(GRAPH_Y, countWeek);
+
+        return item;
     }
 
     private void setDeafaultTimeInterval() {
