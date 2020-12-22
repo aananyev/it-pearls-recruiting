@@ -49,6 +49,11 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
 
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "jobCandidate")
+    protected List<Position> positionList;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_OF_RESIDENCE_ID")
@@ -163,6 +168,14 @@ public class JobCandidate extends StandardEntity {
 
     public OpenPosition getOpenPosition() {
         return openPosition;
+    }
+
+    public List<Position> getPositionList() {
+        return positionList;
+    }
+
+    public void setPositionList(List<Position> positionList) {
+        this.positionList = positionList;
     }
 
     public void setOpenPosition(OpenPosition openPosition) {

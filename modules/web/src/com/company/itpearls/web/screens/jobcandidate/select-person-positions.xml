@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://selectPersonPositions.caption"
+        messagesPack="com.company.itpearls.web.screens.jobcandidate">
+    <data>
+        <instance id="positionsDc" class="com.company.itpearls.entity.JobCandidate">
+            <view extends="_local">
+                <property name="positionList" view="_local"/>
+            </view>
+            <loader id="positionsDl">
+                <query><![CDATA[select f from itpearls_JobCandidate f]]></query>
+            </loader>
+            <collection id="positionDc" property="positionList"/>
+        </instance>
+        <collection id="positionsOptionDc" class="com.company.itpearls.entity.Position">
+            <view extends="position-view">
+                <property name="jobCandidate" view="_local"/>
+                <property name="positionRuName"/>
+            </view>
+            <loader id="positionsOptionDl">
+                <query>
+                    <![CDATA[select g from itpearls_Position g]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="400"
+                width="600"
+                forceDialog="true"
+                closeOnClickOutside="false"
+                resizable="false"/>
+    <layout expand="positionTwinColumn" spacing="true">
+        <twinColumn id="positionTwinColumn"
+                    dataContainer="positionsDc"
+                    property="positionList"
+                    height="100%"
+                    addAllBtnEnabled="true"
+                    width="100%"/>
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
+            <button id="closeBtn" caption="msg://msgClose" align="BOTTOM_RIGHT"/>
+        </hbox>
+    </layout>
+</window>

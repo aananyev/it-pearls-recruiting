@@ -331,13 +331,14 @@
                     </lookupPickerField>
 
                 </hbox>
-                <hbox align="MIDDLE_RIGHT" spacing="true">
+                <hbox align="MIDDLE_RIGHT" spacing="true" width="50%" expand="citiesLabel">
                     <label id="citiesLabel"
                            stylename="h4"
-                           align="BOTTOM_CENTER"/>
+                           width="AUTO"
+                           align="MIDDLE_RIGHT"/>
                     <button id="addCity"
                             caption="msg://msgAddCity"
-                            width="100%"
+                            width="AUTO"
                             enable="true"
                             align="MIDDLE_RIGHT"
                             description="msg://msgAddCityDescription"

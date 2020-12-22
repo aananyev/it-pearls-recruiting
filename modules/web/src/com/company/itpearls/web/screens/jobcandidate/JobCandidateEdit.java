@@ -1,12 +1,14 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.openposition.SelectCitiesLocation;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.WebBrowserTools;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -119,6 +121,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private SuggestionField<String> secondNameField;
     @Inject
     private SuggestionField<String> middleNameField;
+    @Inject
+    private Screens screens;
+    @Inject
+    private Label<String> positionsLabel;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -191,16 +197,29 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
 
         setLabelTitle();
-//        setImageListener();
-
+        setPositionsLabel();
     }
 
-    private void setImageListener() {
-        candidatePic.addClickListener(clickEvent -> {
-            if (clickEvent.isDoubleClick()) {
+    private void setPositionsLabel() {
+        String outStr = "";
+        String description = "";
 
+        if(getEditedEntity().getPositionList() != null) {
+            for (Position s : getEditedEntity().getPositionList()) {
+                if (!outStr.equals("")) {
+                    outStr = outStr + ",";
+                    description = description + "\n";
+                }
+
+                outStr = outStr + s.getPositionRuName();
+                description = description + s.getPositionRuName();
             }
-        });
+
+        }
+        if(!outStr.equals("")) {
+            positionsLabel.setValue(outStr);
+            positionsLabel.setDescription(description);
+        }
     }
 
     private void setLabelTitle() {
@@ -968,5 +987,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void setCandidateInTables() {
         jobCandidateIteractionListDataGridDl.setParameter("candidate", getEditedEntity());
         jobCandidateIteractionListDataGridDl.load();
+    }
+
+    public void addPositionList() {
+        SelectPersonPositions selectPersonPositions = screens.create(SelectPersonPositions.class);
+
+        selectPersonPositions.addAfterShowListener( e -> {
+            selectPersonPositions.setPositionsList(getEditedEntity().getPositionList());
+        });
+        selectPersonPositions.addAfterCloseListener( e -> {
+            this.getEditedEntity().setPositionList(selectPersonPositions.getPositionsList());
+            setPositionsLabel();
+        });
+        selectPersonPositions.show();
     }
 }

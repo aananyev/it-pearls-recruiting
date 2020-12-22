@@ -1327,19 +1327,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void changeCityListsLabel() {
         String outStr = "";
+        String description = "";
 
         if(getEditedEntity().getCities() != null) {
             for (City s : getEditedEntity().getCities()) {
                 if (!outStr.equals("")) {
                     outStr = outStr + ",";
+                    description = description + "\n";
                 }
 
                 outStr = outStr + s.getCityRuName();
+                description = description + s.getCityRuName();
             }
 
         }
         if(!outStr.equals("")) {
             citiesLabel.setValue(outStr);
+            citiesLabel.setDescription(description);
         }
     }
 }

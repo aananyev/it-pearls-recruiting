@@ -157,6 +157,7 @@
             </property>
         </property>
         <property name="fileImageFace" fetch="AUTO" view="_local"/>
+        <property name="positionList" fetch="AUTO" view="_local"/>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="jobCandidate" view="_local">

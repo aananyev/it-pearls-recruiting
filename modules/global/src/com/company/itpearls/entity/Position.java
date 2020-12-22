@@ -7,10 +7,7 @@ import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
 import org.springframework.beans.factory.annotation.Lookup;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -27,6 +24,10 @@ public class Position extends StandardEntity {
     @Column(name = "POSITION_EN_NAME", unique = true, length = 80)
     protected String positionEnName;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_CANDIDATE_ID")
+    protected JobCandidate jobCandidate;
+
     public String getPositionRuName() {
         return positionRuName;
     }
@@ -41,5 +42,13 @@ public class Position extends StandardEntity {
 
     public String getPositionEnName() {
         return positionEnName;
+    }
+
+    public JobCandidate getJobCandidate() {
+        return jobCandidate;
+    }
+
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
     }
 }

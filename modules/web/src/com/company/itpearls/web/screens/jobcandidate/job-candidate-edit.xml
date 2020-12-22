@@ -101,6 +101,7 @@ order by e.cityRuName]]>
                         <label stylename="h2" value="|"/>
                         <label stylename="h2"
                                align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="personPosition"/>
+
                         <label stylename="h2" value="|"/>
                         <label id="cityOfCandidate" stylename="h2"
                                align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="cityOfResidence"/>
@@ -270,25 +271,25 @@ order by e.cityRuName]]>
                     <columns count="2"/>
                     <rows>
                         <row>
-                           <suggestionField id="firstNameField"
-                                            dataContainer="jobCandidateDc"
-                                            property="firstName"
-                                            width="100%"
-                                            caption="msg://msgFirstName"
-                                            rowspan="1"
-                                            colspan="1"
-                                            minSearchStringLength="1"
-                                            required="true"
-                                            editable="true"
-                                            inputPrompt="msg://msgPressEnter">
-                               <query entityClass="com.company.itpearls.entity.JobCandidate"
-                                      escapeValueForLike="false"
-                                      view="_local"
-                                      searchStringFormat="%$searchString%">
-                                   select e.firstName from itpearls_JobCandidate e where lower(e.firstName) like
-                                   lower(:searchString) escape '\'
-                               </query>
-                           </suggestionField>
+                            <suggestionField id="firstNameField"
+                                             dataContainer="jobCandidateDc"
+                                             property="firstName"
+                                             width="100%"
+                                             caption="msg://msgFirstName"
+                                             rowspan="1"
+                                             colspan="1"
+                                             minSearchStringLength="1"
+                                             required="true"
+                                             editable="true"
+                                             inputPrompt="msg://msgPressEnter">
+                                <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                       escapeValueForLike="false"
+                                       view="_local"
+                                       searchStringFormat="%$searchString%">
+                                    select e.firstName from itpearls_JobCandidate e where lower(e.firstName) like
+                                    lower(:searchString) escape '\'
+                                </query>
+                            </suggestionField>
                             <!--                                                        <textField id="firstNameField"
                                                                                                dataContainer="jobCandidateDc"
                                                                                                property="firstName"
@@ -334,6 +335,23 @@ order by e.cityRuName]]>
                                     <action id="lookup" type="picker_lookup"/>
                                 </actions>
                             </lookupPickerField>
+
+                        </row>
+                        <row>
+                            <hbox></hbox>
+                            <hbox align="MIDDLE_RIGHT" spacing="true" width="100%" expand="positionsLabel">
+                                <label id="positionsLabel"
+                                       stylename="h4"
+                                       width="AUTO"
+                                       align="MIDDLE_RIGHT"/>
+                                <button id="addCity"
+                                        caption="msg://msgSetPositions"
+                                        width="AUTO"
+                                        enable="true"
+                                        align="MIDDLE_RIGHT"
+                                        description="msg://msgSetPositions"
+                                        invoke="addPositionList"/>
+                            </hbox>
                         </row>
                         <row>
                             <suggestionField id="secondNameField"
