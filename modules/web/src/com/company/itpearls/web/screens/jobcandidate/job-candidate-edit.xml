@@ -7,9 +7,27 @@
         messagesPack="com.company.itpearls.web.screens.jobcandidate" icon="USER">
     <data>
         <instance id="jobCandidateDc"
-                  class="com.company.itpearls.entity.JobCandidate"
-                  view="jobCandidate-view">
+                  class="com.company.itpearls.entity.JobCandidate">
             <loader id="jobCandidateDl"/>
+            <view extends="_local">
+                <property name="positionList" view="_local"/>
+                <property name="openPosition" view="_local"/>
+                <property name="personPosition" view="_local"/>
+                <property name="cityOfResidence" view="_local"/>
+                <property name="candidateCv" view="_local">
+                    <property name="resumePosition" view="_local"/>
+                    <property name="toVacancy" view="_local">
+                        <property name="projectName" view="_local"/>
+                    </property>
+                </property>
+                <property name="fileImageFace" view="_local"/>
+                <property name="iteractionList" view="_local"/>
+                <property name="skills" view="_local"/>
+                <property name="socialNetwork" view="_local"/>
+                <property name="jobHistory" view="_local"/>
+                <property name="currentCompany" view="_local"/>
+                <property name="specialisation" view="_local"/>
+            </view>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
@@ -89,7 +107,6 @@ order by e.cityRuName]]>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <!--    <tabSheet/>  -->
     <layout expand="editActions" spacing="true">
         <groupBox spacing="true">
             <grid spacing="true">
@@ -323,34 +340,41 @@ order by e.cityRuName]]>
                                     lower(:searchString) escape '\'
                                 </query>
                             </suggestionField>
-                            <!--                                                        <textField id="middleNameField"
-                                                                                               dataContainer="jobCandidateDc"
-                                                                                               property="middleName"
-                                                                                               width="100%"
-                                                                                               caption="msg://msgMiddleName"/> -->
-                            <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
-                                               dataContainer="jobCandidateDc" property="personPosition" width="100%"
-                                               caption="msg://msgPersonPosition" required="true">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-
-                        </row>
-                        <row>
-                            <hbox></hbox>
-                            <hbox align="MIDDLE_RIGHT" spacing="true" width="100%" expand="positionsLabel">
-                                <label id="positionsLabel"
-                                       stylename="h4"
-                                       width="AUTO"
-                                       align="MIDDLE_RIGHT"/>
-                                <button id="addCity"
+                            <hbox expand="personPositionField"
+                                  spacing="true"
+                                  align="MIDDLE_LEFT"
+                                  width="100%">
+                                <lookupPickerField id="personPositionField"
+                                                   optionsContainer="personPositionsDc"
+                                                   dataContainer="jobCandidateDc"
+                                                   property="personPosition"
+                                                   width="100%"
+                                                   align="BOTTOM_RIGHT"
+                                                   caption="msg://msgPersonPosition"
+                                                   required="true">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <button id="addPositions"
                                         caption="msg://msgSetPositions"
                                         width="AUTO"
                                         enable="true"
-                                        align="MIDDLE_RIGHT"
+                                        align="BOTTOM_RIGHT"
                                         description="msg://msgSetPositions"
                                         invoke="addPositionList"/>
+                            </hbox>
+                        </row>
+                        <row>
+                            <hbox></hbox>
+                            <hbox align="MIDDLE_RIGHT"
+                                  spacing="true"
+                                  width="100%"
+                                  expand="positionsLabel">
+                                <label id="positionsLabel"
+                                       stylename="h4"
+                                       width="AUTO"
+                                       align="TOP_RIGHT"/>
                             </hbox>
                         </row>
                         <row>

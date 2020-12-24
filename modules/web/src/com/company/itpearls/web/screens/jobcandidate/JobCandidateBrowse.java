@@ -1,9 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.IteractionList;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.SubscribeCandidateAction;
+import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
@@ -36,6 +33,7 @@ import java.util.List;
 @LookupComponent("jobCandidatesTable")
 @LoadDataBeforeShow
 public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
+
     private static final String RECRUTIER_GROUP = "Хантинг";
     private static final String RESEARCHER_GROUP = "Ресерчинг";
 
@@ -855,5 +853,23 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
             return image;
         });
+    }
+
+    @Install(to = "jobCandidatesTable.personPosition", subject = "descriptionProvider")
+    private String jobCandidatesTablePersonPositionDescriptionProvider(JobCandidate jobCandidate) {
+        String retStr = "";
+
+        if(jobCandidate.getPositionList() != null) {
+            for (Position s : jobCandidate.getPositionList()) {
+                if (!retStr.equals("")) {
+                    retStr = retStr + ",";
+                }
+
+                retStr = retStr + s.getPositionRuName();
+            }
+
+        }
+
+        return retStr;
     }
 }

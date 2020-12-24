@@ -18,11 +18,11 @@ import java.util.List;
 public class SelectPersonPositions extends Screen {
     @Inject
     private DataManager dataManager;
-    @Inject
-    private TwinColumn<Position> positionTwinColumn;
 
     private List<Position> positions = new ArrayList<>();
     private List<Position> positionList = new ArrayList<>();
+    @Inject
+    private TwinColumn<Position> positionTwinColumn;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

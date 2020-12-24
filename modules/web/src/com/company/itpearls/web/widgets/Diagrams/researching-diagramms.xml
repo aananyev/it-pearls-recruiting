@@ -21,6 +21,16 @@
                             title="Количество"/>
             </chart:valueAxes>
             <chart:graphs>
+                <chart:graph id="externalInterview"
+                             type="COLUMN"
+                             color="GREEN"
+                             fillAlphas="1"
+                             valueField="externalInterview"/>
+                <chart:graph id="countInternalInterview"
+                             type="COLUMN"
+                             fillAlphas="1"
+                             color="YELLOW"
+                             valueField="internalInterview"/>
                 <chart:graph id="interviewGraph"
                              type="COLUMN"
                              fillAlphas="1"

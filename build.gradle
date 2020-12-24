@@ -3,14 +3,12 @@ buildscript {
     repositories {
         mavenLocal()
         maven {
-            url 'https://nexus.cuba-platform.cn/repository/cuba/'
+            url 'https://dl.bintray.com/cuba-platform/main'
 
         }
 
 
-        maven {
-            url 'https://maven.aliyun.com/repository/public'
-        }
+        jcenter()
     }
     dependencies {
         classpath "com.haulmont.gradle:cuba-plugin:$cubaVersion"

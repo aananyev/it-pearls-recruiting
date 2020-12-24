@@ -200,27 +200,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setPositionsLabel();
     }
 
-    private void setPositionsLabel() {
-        String outStr = "";
-        String description = "";
 
-        if(getEditedEntity().getPositionList() != null) {
-            for (Position s : getEditedEntity().getPositionList()) {
-                if (!outStr.equals("")) {
-                    outStr = outStr + ",";
-                    description = description + "\n";
-                }
-
-                outStr = outStr + s.getPositionRuName();
-                description = description + s.getPositionRuName();
-            }
-
-        }
-        if(!outStr.equals("")) {
-            positionsLabel.setValue(outStr);
-            positionsLabel.setDescription(description);
-        }
-    }
 
     private void setLabelTitle() {
         String BEFORE = "";
@@ -992,13 +972,44 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void addPositionList() {
         SelectPersonPositions selectPersonPositions = screens.create(SelectPersonPositions.class);
 
-        selectPersonPositions.addAfterShowListener( e -> {
-            selectPersonPositions.setPositionsList(getEditedEntity().getPositionList());
+        List<Position> setPos = new ArrayList<>();
+
+        if(getEditedEntity().getPositionList() != null) {
+            for (Position p : getEditedEntity().getPositionList()) {
+                setPos.add(p);
+            }
+        }
+
+        selectPersonPositions.addAfterShowListener(e -> {
+            selectPersonPositions.setPositionsList(setPos);
         });
+
         selectPersonPositions.addAfterCloseListener( e -> {
             this.getEditedEntity().setPositionList(selectPersonPositions.getPositionsList());
             setPositionsLabel();
         });
         selectPersonPositions.show();
+    }
+
+    private void setPositionsLabel() {
+        String outStr = "";
+        String description = "";
+
+        if(getEditedEntity().getPositionList() != null) {
+            for (Position s : getEditedEntity().getPositionList()) {
+                if (!outStr.equals("")) {
+                    outStr = outStr + ",";
+                    description = description + "\n";
+                }
+
+                outStr = outStr + s.getPositionRuName();
+                description = description + s.getPositionRuName();
+            }
+
+        }
+        if(!outStr.equals("")) {
+            positionsLabel.setValue(outStr);
+            positionsLabel.setDescription(description);
+        }
     }
 }

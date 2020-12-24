@@ -213,7 +213,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    private void vacancyFieldValueChange() {
+    private void vacancyFieldValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
+        ifDiscrepancyOfVacansy(event);
+
+        if (vacancyFiels.getValue() != null) {
+            if (vacancyFiels.getValue().getProjectName() != null) {
+                getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
+            }
+        }
+
         if (vacancyFiels.getValue() != null)
             if (vacancyFiels.getValue().getProjectName() != null)
                 if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null)
@@ -403,18 +411,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             if (PersistenceHelper.isNew(getEditedEntity())) {
                 String msg = "С этим кандидатом " + oldIteraction.getRecrutier().getName() + " контактировал " +
                         oldIteraction.getDateIteraction().toString() + " МЕНЕЕ МЕСЯЦА НАЗАД!";
-
-/*                dialogs.createOptionDialog()
-                        .withCaption("Warning")
-                        .withMessage(msg + "\nПродолжить?")
-                        .withActions(
-                                new DialogAction(DialogAction.Type.YES,
-                                        Action.Status.PRIMARY).withHandler(y -> {
-                                    this.copyPrevionsItems();
-                                }),
-                                new DialogAction(DialogAction.Type.NO)
-                        )
-                        .show(); */
 
                 notifications.create()
                         .withType(Notifications.NotificationType.HUMANIZED)
@@ -690,7 +686,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (vacansyPosition != null || candidatePosition != null) {
             if (!candidatePosition.equals(vacansyPosition) && vacancyFiels.getValue() != null) {
                 dialogMessage =
-                        "\n- позиция <b><i>"
+                        "<br>- позиция <b><i>"
                                 + vacansyPosition
                                 + "</i></b>, а кандидат в настоящее время занимает позицию <b><i>"
                                 + candidatePosition + "</i></b>";
@@ -717,10 +713,24 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         if (vacansyCity != null && candidateCity != null) {
-            if (!vacansyCity.equals(candidateCity) && remoteWork == 0) {
+            String cities = "";
+
+            if (vacancyFiels.getValue().getCities() != null) {
+                for(City c : event.getValue().getCities()) {
+                    if(candidateCity.equals(c.getCityRuName())) {
+                        cities = "";
+                        break;
+                    } else {
+                        cities = cities + ", " + c.getCityRuName();
+                    }
+                }
+            }
+
+            if (!vacansyCity.equals(candidateCity) && remoteWork == 0 && !cities.equals("")) {
                 dialogMessage = dialogMessage
-                        + "\n- локация <b><i>"
+                        + "<br>- локация <b><i>"
                         + vacansyCity
+                        + (!cities.equals("") ? "" : ", " + cities)
                         + "</i></b>, а кандидат находится в настоящее время кандидат находится в городе <b><i>"
                         + candidateCity + "</i></b>";
             }
@@ -760,14 +770,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        vacancyFieldValueChange();
-        ifDiscrepancyOfVacansy(event);
-
-        if (vacancyFiels.getValue() != null) {
-            if (vacancyFiels.getValue().getProjectName() != null) {
-                getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
-            }
-        }
+        vacancyFieldValueChange(event);
     }
 
     @Install(to = "vacancyFiels", subject = "optionIconProvider")
