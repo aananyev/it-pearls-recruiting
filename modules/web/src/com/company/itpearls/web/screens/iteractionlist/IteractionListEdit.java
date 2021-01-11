@@ -682,7 +682,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         }
 
-        if (vacansyPosition != null || candidatePosition != null) {
+        if (vacansyPosition != null && candidatePosition != null) {
             if ((!candidatePosition.equals(vacansyPosition) && vacancyFiels.getValue() != null) ||
             candidatePosition != null) {
                 dialogMessage =

@@ -41,8 +41,10 @@
                         property="candidates"/>
         </instance>
         <collection id="openPositionParentDc"
-                    class="com.company.itpearls.entity.OpenPosition"
-                    view="openPosition-view">
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local">
+                <property name="parentOpenPosition" view="_local"/>
+            </view>
             <loader id="openPositionParentDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
@@ -63,8 +65,8 @@
             </loader>
         </collection>
         <collection id="projectNamesDc"
-                    class="com.company.itpearls.entity.Project"
-                    view="project-view">
+                    class="com.company.itpearls.entity.Project">
+            <view extends="_local"/>
             <loader id="projectNamesLc">
                 <query>
                     <![CDATA[select e from itpearls_Project e
@@ -82,16 +84,16 @@
             </loader>
         </collection>
         <collection id="companyNamesDc"
-                    class="com.company.itpearls.entity.Company"
-                    view="company-view">
+                    class="com.company.itpearls.entity.Company">
+            <view extends="_local"/>
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
                         order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="companyDepartamentsDc"
-                    class="com.company.itpearls.entity.CompanyDepartament"
-                    view="companyDepartament-view">
+                    class="com.company.itpearls.entity.CompanyDepartament">
+            <view extends="_local"/>
             <loader id="companyDepartamentsLc">
                 <query>
                     <![CDATA[select e from itpearls_CompanyDepartament e
@@ -134,29 +136,6 @@
                 <query><![CDATA[select e
                 from itpearls_City e
                 order by e.cityRuName]]></query>
-            </loader>
-        </collection>
-        <collection id="taskRecrutior"
-                    class="com.company.itpearls.entity.RecrutiesTasks">
-            <view extends="_local">
-                <property name="reacrutier"
-                          fetch="BATCH"
-                          view="_local"/>
-                <property name="openPosition"
-                          fetch="BATCH"
-                          view="_local"/>
-            </view>
-            <loader id="recrutiesTasksesDl">
-                <query>
-                    <![CDATA[select e from itpearls_RecrutiesTasks e
-                    where CURRENT_DATE between e.startDate and e.endDate
-                    order by e.endDate desc]]>
-                    <condition>
-                        <c:jpql>
-                            <c:where>e.openPosition.vacansyName = :openPosition</c:where>
-                        </c:jpql>
-                    </condition>
-                </query>
             </loader>
         </collection>
         <collection id="personsDc"

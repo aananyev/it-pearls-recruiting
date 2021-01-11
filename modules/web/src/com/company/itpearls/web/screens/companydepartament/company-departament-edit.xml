@@ -5,8 +5,13 @@
         messagesPack="com.company.itpearls.web.screens.companydepartament" icon="GROUP">
     <data>
         <instance id="companyDepartamentDc"
-                  class="com.company.itpearls.entity.CompanyDepartament"
-                  view="companyDepartament-view">
+                  class="com.company.itpearls.entity.CompanyDepartament">
+            <view extends="_local">
+                <property name="projectOfDepartment" view="_local"/>
+                <property name="companyName" view="_local"/>
+                <property name="departamentDirector" view="_local"/>
+                <property name="departamentHrDirector" view="_local"/>
+            </view>
             <loader/>
             <collection id="companyDepartamentProjectOfDepartmentsDc" property="projectOfDepartment"/>
         </instance>

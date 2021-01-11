@@ -49,10 +49,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private TextField<String> vacansyNameField;
     @Inject
-    private CollectionLoader<RecrutiesTasks> recrutiesTasksesDl;
-    @Inject
-    private EmailService emailService;
-    @Inject
     private Notifications notifications;
     @Inject
     private LookupField<Integer> priorityField;
@@ -166,13 +162,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            recrutiesTasksesDl.setParameter("openPosition", getEditedEntity().getVacansyName());
+//            recrutiesTasksesDl.setParameter("openPosition", getEditedEntity().getVacansyName());
             // раскрыть стаж работы
         } else {
-            recrutiesTasksesDl.removeParameter("openPosition");
+//            recrutiesTasksesDl.removeParameter("openPosition");
         }
 
-        recrutiesTasksesDl.load();
+//        recrutiesTasksesDl.load();
 
         beforeEdit = getEditedEntity();
         booOpenClosePosition = getEditedEntity().getOpenClose();

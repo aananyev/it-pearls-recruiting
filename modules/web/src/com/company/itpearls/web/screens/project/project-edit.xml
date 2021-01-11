@@ -6,8 +6,12 @@
         messagesPack="com.company.itpearls.web.screens.project" icon="ARCHIVE">
     <data>
         <instance id="projectDc"
-                  class="com.company.itpearls.entity.Project"
-                  view="project-view">
+                  class="com.company.itpearls.entity.Project">
+            <view>
+                <property name="openPosition" view="_local"/>
+                <property name="projectDepartment" view="_local"/>
+                <property name="projectOwner" view="_local"/>
+            </view>
             <loader/>
             <collection id="projectJobCandidatesDc" property="jobCandidate"/>
             <collection id="projectOpenPositionsDc" property="openPosition"/>
