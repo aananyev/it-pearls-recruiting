@@ -122,16 +122,7 @@ public class ResearchingDiagramms extends ScreenFragment {
             int externalInterviewCount = getCountIteraction(iteractionsExternalInterview,
                     sDate.getTime(), gregorianCalendar.getTime(),
                     GRAPH_Y_EXTERNAL_INTERVIEW);
-/*
-            ValueLoadContext loadContext = ValueLoadContext.create()
-                    .setQuery(ValueLoadContext.createQuery(queryGraph)
-                            .setParameter("iteractionType", iteraction)
-                            .setParameter("startDate", sDate.getTime())
-                            .setParameter("endDate", gregorianCalendar.getTime()))
-                    .addProperty(GRAPH_Y);
 
-            List<KeyValueEntity> iteractionCount = dataManager.loadValues(loadContext);
-*/
             String date = dateFormat.format(sDate.getTime());
             dataProvider.addItem(iteractionCount(date,
                     iteractionCount - internalInterviewCount - externalInterviewCount,

@@ -661,8 +661,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private void ifDiscrepancyOfVacansy(HasValue.ValueChangeEvent<OpenPosition> event) {
         String candidatePosition = null;
         String vacansyPosition = null;
-        String dialogStartMessage = "ВНИМАНИЕ! В вакансии заявлена позиция:\n";
-        String dialogEndMessage = "\nВы хотите выбрать другую вакансию?";
+        String dialogStartMessage = "ВНИМАНИЕ! В вакансии заявлена позиция:<br>";
+        String dialogEndMessage = "<br><br>Вы хотите выбрать другую вакансию?";
         String dialogMessage = "";
 
         try {
@@ -675,8 +675,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         try {
-            vacansyPosition = vacancyFiels
-                    .getValue()
+            vacansyPosition = event.getValue()
                     .getPositionType()
                     .getPositionRuName();
         } catch (Exception e) {
@@ -684,7 +683,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         if (vacansyPosition != null || candidatePosition != null) {
-            if (!candidatePosition.equals(vacansyPosition) && vacancyFiels.getValue() != null) {
+            if ((!candidatePosition.equals(vacansyPosition) && vacancyFiels.getValue() != null) ||
+            candidatePosition != null) {
                 dialogMessage =
                         "<br>- позиция <b><i>"
                                 + vacansyPosition
@@ -698,7 +698,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         int remoteWork = 0;
 
         try {
-            vacansyCity = vacancyFiels.getValue().getCityPosition().getCityRuName();
+            vacansyCity = event.getValue().getCityPosition().getCityRuName();
         } catch (Exception e) {
         }
 
@@ -708,7 +708,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         try {
-            remoteWork = vacancyFiels.getValue().getRemoteWork();
+            remoteWork = event.getValue().getRemoteWork();
         } catch (Exception e) {
         }
 

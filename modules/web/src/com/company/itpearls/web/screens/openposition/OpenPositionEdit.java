@@ -459,13 +459,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                 "\nСтатус: " + (dublicateOpenPosition.getOpenClose() ? "Закрыта" : "Открыта" +
                                 "\nПродолжить сохранение?"))
                         .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                            event.resume();
+                            event.resume(commitChanges());
                             // вернуться и не закомитить
                         }), new DialogAction(DialogAction.Type.NO).withHandler(f -> {
                             // закончить
-                            event.preventCommit();
                         }))
                         .show();
+                event.preventCommit();
             }
 
         }
@@ -511,9 +511,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         for (OpenPosition op : openPositions) {
             if (op.getPositionType().equals(positionTypeField.getValue())) {
-                if (op.getCityPosition().equals(cityOpenPositionField.getValue())) {
-                    if (op.getProjectName().equals(projectNameField.getValue())) {
-                        return op;
+                if(op.getCityPosition() != null) {
+                    if (op.getCityPosition().equals(cityOpenPositionField.getValue())) {
+                        if (op.getProjectName().equals(projectNameField.getValue())) {
+                            return op;
+                        }
                     }
                 }
             }

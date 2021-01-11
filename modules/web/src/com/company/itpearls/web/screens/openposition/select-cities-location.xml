@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://selectCitiesLocation.caption"
         messagesPack="com.company.itpearls.web.screens.openposition">
     <data>
@@ -8,7 +9,15 @@
                 <property name="cities" view="_local"/>
             </view>
             <loader id="citiesDl">
-                <query><![CDATA[select f from itpearls_OpenPosition f]]></query>
+                <query><![CDATA[select f from itpearls_OpenPosition f]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                f.cityRegion.regionCountry.countryRuName = :countries
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
             </loader>
             <collection id="cityDc" property="cities"/>
         </instance>
@@ -16,10 +25,22 @@
         <view extends="city-view">
             <property name="openPosition" view="_local"/>
             <property name="cityRuName"/>
+            <property name="cityRegion" view="region-view">
+                <property name="regionCountry" view="_local">
+                    <property name="countryRuName"/>
+                </property>
+            </property>
         </view>
             <loader id="cityOptionDl">
                 <query>
                     <![CDATA[select g from itpearls_City g]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                g.cityRegion.regionCountry.countryRuName = :country
+                            </c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -30,8 +51,10 @@
                 closeOnClickOutside="false"
                 resizable="false"/>
     <layout expand="citiesLocationTwinColumn" spacing="true">
+        <radioButtonGroup id="countries" orientation="horizontal"/>
         <twinColumn id="citiesLocationTwinColumn"
                     dataContainer="citiesDc"
+                    reorderable="true"
                     property="cities"
                     height="100%"
                     addAllBtnEnabled="true"

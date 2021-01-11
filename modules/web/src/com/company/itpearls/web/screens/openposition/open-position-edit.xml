@@ -219,30 +219,32 @@
                               dataContainer="openPositionDc"
                               property="openClose"
                               caption="mainMsg://msgPositionClose"
-                              align="MIDDLE_LEFT"/>
+                              align="BOTTOM_LEFT"/>
                     <checkBox id="internalProjectCheckBox"
                               dataContainer="openPositionDc"
                               property="internalProject"
                               caption="msg://msgInternalProject"
-                              align="MIDDLE_LEFT"/>
+                              align="BOTTOM_LEFT"/>
                     <radioButtonGroup id="commandOrPosition"
                                       orientation="horizontal"
                                       required="true"
                                       dataContainer="openPositionDc"
                                       property="commandCandidate"
                                       description="msg://msgCommandOrPosition"
+                                      align="BOTTOM_LEFT"
                                       caption="msg://msgCommandOrPosition"/>
                     <lookupPickerField id="parentOpenPositionField"
                                        dataContainer="openPositionDc"
                                        property="parentOpenPosition"
-                                       align="MIDDLE_LEFT"
+                                       align="BOTTOM_LEFT"
+                                       caption="msg://msgCommand"
                                        optionsContainer="openPositionParentDc"/>
                     <lookupField id="priorityField"
                                  dataContainer="openPositionDc"
                                  property="priority"
                                  caption="msg://msgPriorityPosition"
                                  required="true"
-                                 align="MIDDLE_LEFT"
+                                 align="BOTTOM_LEFT"
                                  width="100%">
                     </lookupField>
 
@@ -317,32 +319,39 @@
                                     type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <lookupPickerField id="cityOpenPositionField"
-                                       dataContainer="openPositionDc"
-                                       optionsContainer="citiesDc"
-                                       property="cityPosition"
-                                       width="100%"
-                                       caption="mainMsg://msgCity"
-                                       required="true">
-                        <actions>
-                            <action id="lookup"
-                                    type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-
+                    <hbox spacing="true"
+                          expand="cityOpenPositionField"
+                          width="100%">
+                        <lookupPickerField id="cityOpenPositionField"
+                                           dataContainer="openPositionDc"
+                                           optionsContainer="citiesDc"
+                                           property="cityPosition"
+                                           width="100%"
+                                           caption="mainMsg://msgCity"
+                                           align="BOTTOM_LEFT"
+                                           required="true">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <button id="addCity"
+                                caption="msg://msgAddCity"
+                                width="AUTO"
+                                enable="true"
+                                align="BOTTOM_RIGHT"
+                                description="msg://msgAddCityDescription"
+                                invoke="addListCity"/>
+                    </hbox>
                 </hbox>
-                <hbox align="MIDDLE_RIGHT" spacing="true" width="50%" expand="citiesLabel">
+                <hbox align="TOP_RIGHT"
+                      spacing="true"
+                      width="50%"
+                      expand="citiesLabel">
                     <label id="citiesLabel"
                            stylename="h4"
                            width="AUTO"
                            align="MIDDLE_RIGHT"/>
-                    <button id="addCity"
-                            caption="msg://msgAddCity"
-                            width="AUTO"
-                            enable="true"
-                            align="MIDDLE_RIGHT"
-                            description="msg://msgAddCityDescription"
-                            invoke="addListCity"/>
                 </hbox>
                 <textField id="numberPositionField"
                            dataContainer="openPositionDc"

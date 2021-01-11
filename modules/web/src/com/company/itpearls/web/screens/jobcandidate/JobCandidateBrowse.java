@@ -368,8 +368,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         Component newResumeButton = addNewResume(entity);
         Component editLastResumeButton = editLastResume(entity);
-        Component getLetterButton = getLastLetterToClipboard(entity);
-        Component getCVButton = getLastCVtoClipboard(entity);
+//        Component getLetterButton = getLastLetterToClipboard(entity);
+//        Component getCVButton = getLastCVtoClipboard(entity);
 
         headerBox.add(infoLabel);
 
@@ -383,8 +383,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         headerBox.add(cvLabelHeader);
         headerBox.add(newResumeButton);
         headerBox.add(editLastResumeButton);
-        headerBox.add(getLetterButton);
-        headerBox.add(getCVButton);
+//        headerBox.add(getLetterButton);
+//        headerBox.add(getCVButton);
 
         headerBox.add(closeButton);
         headerBox.expand(infoLabel);

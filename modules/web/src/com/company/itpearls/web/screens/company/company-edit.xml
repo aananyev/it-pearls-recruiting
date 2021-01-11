@@ -5,8 +5,23 @@
         messagesPack="com.company.itpearls.web.screens.company" icon="BUILDING">
     <data>
         <instance id="companyDc"
-                  class="com.company.itpearls.entity.Company"
-                  view="company-view">
+                  class="com.company.itpearls.entity.Company">
+            <view extends="_local">
+                <property name="comanyName"/>
+                <property name="cityOfCompany" view="_local">
+                    <property name="cityRegion" view="_local">
+                        <property name="regionCountry" view="_local"/>
+                    </property>
+                </property>
+                <property name="companyOwnership" view="_minimal"/>
+                <property name="companyDirector" view="_local"/>
+                <property name="countryOfCompany" view="_local"/>
+                <property name="departmentOfCompany" view="_local">
+                    <property name="projectOfDepartment" view="_local"/>
+                </property>
+                <property name="regionOfCompany" view="_local"/>
+                <property name="fileCompanyLogo" view="_local"/>
+            </view>
             <loader/>
             <collection id="departmentOfCompanyDc" property="departmentOfCompany"/>
         </instance>

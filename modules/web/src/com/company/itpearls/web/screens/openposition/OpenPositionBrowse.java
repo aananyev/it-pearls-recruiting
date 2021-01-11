@@ -133,7 +133,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String remoteWorkLookupFieldOptionIconProvider(Object object) {
         String returnIcon = "";
 
-        switch ((int)object) {
+        switch ((int) object) {
             case 1:
                 returnIcon = "font-icon:PLUS_CIRCLE";
                 break;
@@ -150,7 +150,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         return returnIcon;
     }
-
 
 
     @Install(to = "openPositionsTable.remoteWork", subject = "descriptionProvider")
@@ -410,14 +409,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
         Component priorityField = createPriorityField(entity);
+        Component openCloseButton = createOpenCloseButton(entity);
 
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
+        openCloseButton.setAlignment(Component.Alignment.TOP_RIGHT);
         editButton.setAlignment(Component.Alignment.TOP_RIGHT);
         priorityField.setAlignment(Component.Alignment.TOP_RIGHT);
 
         buttonsHBox.setAlignment(Component.Alignment.BOTTOM_RIGHT);
 
         buttonsHBox.add(priorityField);
+        buttonsHBox.add(openCloseButton);
         buttonsHBox.add(editButton);
         buttonsHBox.add(closeButton);
 
@@ -433,6 +435,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         mainLayout.add(fragment);
 
         return mainLayout;
+    }
+
+    private Component createOpenCloseButton(OpenPosition entity) {
+        Button retButton = uiComponents.create(Button.NAME);
+
+        retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
+        retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
+
+        retButton.addClickListener(e -> {
+            entity.setOpenClose(!entity.getOpenClose());
+
+            retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
+            retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
+        });
+
+        return retButton;
     }
 
     private Component createPriorityField(OpenPosition entity) {
@@ -879,7 +897,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableCityPositionDescriptionProvider(OpenPosition openPosition) {
         String outStr = "";
 
-        if(openPosition.getCities() != null) {
+        if (openPosition.getCities() != null) {
             for (City s : openPosition.getCities()) {
                 if (!outStr.equals("")) {
                     outStr = outStr + ",";
