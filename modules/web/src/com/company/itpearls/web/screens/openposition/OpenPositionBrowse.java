@@ -456,7 +456,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.cityPositionList", subject = "columnGenerator")
     private Object openPositionsTableCityPositionListColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        return null;
+        String mainCity = "";
+
+        if(event.getItem().getCityPosition() != null) {
+            if(event.getItem().getCityPosition().getCityRuName() != null) {
+                mainCity = event.getItem().getCityPosition().getCityRuName();
+            } else
+                mainCity = "";
+        } else {
+            mainCity = "";
+        }
+
+        return mainCity + ((event.getItem().getCities().size() != 0) ? "[+]" : "");
+
     }
 
     private Component createPriorityField(OpenPosition entity) {
@@ -899,8 +911,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
-    @Install(to = "openPositionsTable.cityPosition", subject = "descriptionProvider")
-    private String openPositionsTableCityPositionDescriptionProvider(OpenPosition openPosition) {
+    @Install(to = "openPositionsTable.cityPositionList", subject = "descriptionProvider")
+    private String openPositionsTableCityPositionListDescriptionProvider(OpenPosition openPosition) {
         String outStr = "";
 
         if (openPosition.getCities() != null) {

@@ -114,13 +114,9 @@
                         property="projectName"
                         maximumWidth="300px"
                         caption="msg://msgProjectName"/>
-                <column id="cityPosition"
-                        property="cityPosition"
-                        minimumWidth="60px"
-                        caption="msg://msgCity"
-                        width="120px"/>
                 <column id="cityPositionList"
                         caption="msg://msgCity"
+                        minimumWidth="60px"
                         width="120px">
                     <textRenderer/>
                 </column>
