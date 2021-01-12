@@ -119,6 +119,11 @@
                         minimumWidth="60px"
                         caption="msg://msgCity"
                         width="120px"/>
+                <column id="cityPositionList"
+                        caption="msg://msgCity"
+                        width="120px">
+                    <textRenderer/>
+                </column>
                 <column id="numberPosition"
                         property="numberPosition"
                         width="65px"

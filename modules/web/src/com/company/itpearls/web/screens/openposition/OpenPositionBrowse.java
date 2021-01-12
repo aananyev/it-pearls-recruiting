@@ -445,12 +445,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retButton.addClickListener(e -> {
             entity.setOpenClose(!entity.getOpenClose());
+            dataManager.commit(entity);
 
             retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
             retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
         });
 
         return retButton;
+    }
+
+    @Install(to = "openPositionsTable.cityPositionList", subject = "columnGenerator")
+    private Object openPositionsTableCityPositionListColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        return null;
     }
 
     private Component createPriorityField(OpenPosition entity) {

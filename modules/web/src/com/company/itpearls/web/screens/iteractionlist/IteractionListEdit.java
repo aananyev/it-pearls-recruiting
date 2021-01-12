@@ -634,24 +634,26 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     // изменение надписи на кнопке в зависимости от щначения поля ItercationType
     @Subscribe("iteractionTypeField")
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
-        changeField();
-        // надпись на кнопке
-        if (iteractionTypeField.getValue().getCallButtonText() != null)
-            buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
-        // если установлен тип взаиподейтвия и нужно действие
-        if (iteractionTypeField.getValue() != null)
-            if (iteractionTypeField.getValue().getCallForm() != null)
-                if (iteractionTypeField.getValue().getCallForm())
-                    buttonCallAction.setVisible(true);
-                else
-                    buttonCallAction.setVisible(false);
+        if(!event.getValue().equals(event.getPrevValue())) {
+            changeField();
+            // надпись на кнопке
+            if (iteractionTypeField.getValue().getCallButtonText() != null)
+                buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
+            // если установлен тип взаиподейтвия и нужно действие
+            if (iteractionTypeField.getValue() != null)
+                if (iteractionTypeField.getValue().getCallForm() != null)
+                    if (iteractionTypeField.getValue().getCallForm())
+                        buttonCallAction.setVisible(true);
+                    else
+                        buttonCallAction.setVisible(false);
 
-        if (iteractionTypeField.getValue() != null) {
-            if (iteractionTypeField.getValue().getSetDateTime() != null) {
-                if (iteractionTypeField.getValue().getSetDateTime()) {
-                    if (addDate.getValue() == null) {
-                        Date date = new Date();
-                        addDate.setValue(date);
+            if (iteractionTypeField.getValue() != null) {
+                if (iteractionTypeField.getValue().getSetDateTime() != null) {
+                    if (iteractionTypeField.getValue().getSetDateTime()) {
+                        if (addDate.getValue() == null) {
+                            Date date = new Date();
+                            addDate.setValue(date);
+                        }
                     }
                 }
             }
@@ -683,13 +685,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         if (vacansyPosition != null && candidatePosition != null) {
-            if ((!candidatePosition.equals(vacansyPosition) && vacancyFiels.getValue() != null) ||
-            candidatePosition != null) {
-                dialogMessage =
-                        "<br>- позиция <b><i>"
-                                + vacansyPosition
-                                + "</i></b>, а кандидат в настоящее время занимает позицию <b><i>"
-                                + candidatePosition + "</i></b>";
+            if(vacancyFiels.getValue() != null) {
+                if ((!candidatePosition.equals(vacansyPosition)) &&
+                        candidatePosition != null) {
+                    dialogMessage =
+                            "<br>- позиция <b><i>"
+                                    + vacansyPosition
+                                    + "</i></b>, а кандидат в настоящее время занимает позицию <b><i>"
+                                    + candidatePosition + "</i></b>";
+                }
             }
         }
 
@@ -770,7 +774,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        vacancyFieldValueChange(event);
+        if(!event.getValue().equals(event.getPrevValue())) {
+            vacancyFieldValueChange(event);
+        }
     }
 
     @Install(to = "vacancyFiels", subject = "optionIconProvider")

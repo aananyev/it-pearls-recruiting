@@ -11,6 +11,7 @@
                 <property name="openPosition" view="_local"/>
                 <property name="projectDepartment" view="_local"/>
                 <property name="projectOwner" view="_local"/>
+                <property name="jobCandidate" view="_local"/>
             </view>
             <loader/>
             <collection id="projectJobCandidatesDc" property="jobCandidate"/>
