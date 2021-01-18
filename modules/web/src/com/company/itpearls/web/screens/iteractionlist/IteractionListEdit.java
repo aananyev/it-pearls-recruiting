@@ -774,8 +774,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if(!event.getValue().equals(event.getPrevValue())) {
-            vacancyFieldValueChange(event);
+        if(event.getPrevValue() != null && event.getValue() != null) {
+            if (!event.getValue().equals(event.getPrevValue())) {
+                vacancyFieldValueChange(event);
+            }
         }
     }
 

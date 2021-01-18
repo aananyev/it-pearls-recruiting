@@ -461,13 +461,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if(event.getItem().getCityPosition() != null) {
             if(event.getItem().getCityPosition().getCityRuName() != null) {
                 mainCity = event.getItem().getCityPosition().getCityRuName();
-            } else
-                mainCity = "";
-        } else {
-            mainCity = "";
+            }
         }
 
-        return mainCity + ((event.getItem().getCities().size() != 0) ? "[+]" : "");
+        return mainCity + ((event.getItem().getCities().size() != 0) ? " [+]" : "");
 
     }
 

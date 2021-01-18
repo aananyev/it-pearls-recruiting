@@ -447,6 +447,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             getEditedEntity().setStatus(0);
         }
         enableDisableContacts();
+
+        // проверить в названии должности (не использовать)
+        checkNotUsePosition();
+    }
+
+    private void checkNotUsePosition() {
+        if(personPositionField.getValue() != null) {
+            if (personPositionField.getValue().getPositionRuName().contains("не использовать")) {
+                personPositionField.setValue(null);
+            }
+        }
     }
 
     @Subscribe

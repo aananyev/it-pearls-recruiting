@@ -18,6 +18,8 @@
                 <property name="countryOfCompany" view="_local"/>
                 <property name="departmentOfCompany" view="_local">
                     <property name="projectOfDepartment" view="_local"/>
+                    <property name="departamentDirector" view="_local"/>
+                    <property name="departamentHrDirector" view="_local"/>
                 </property>
                 <property name="regionOfCompany" view="_local"/>
                 <property name="fileCompanyLogo" view="_local"/>
