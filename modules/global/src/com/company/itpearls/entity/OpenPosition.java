@@ -34,7 +34,7 @@ public class OpenPosition extends StandardEntity {
     protected Integer remoteWork;
 
     @NotNull
-    @Column(name = "COMMAND_CANDIDATE")
+    @Column(name = "COMMAND_CANDIDATE", nullable = false)
     protected Integer commandCandidate;
 
     @Column(name = "SALARY_MIN")

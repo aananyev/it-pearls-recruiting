@@ -18,8 +18,12 @@
         </groupBox>
         <form id="form" dataContainer="positionDc">
             <column width="250px">
-                <textField id="positionRuNameField" property="positionRuName" caption="msg://msgPositionRuName"/>
-                <textField id="positionEnNameField" property="positionEnName" caption="msg://msgPositionEnName"/>
+                <textField id="positionRuNameField"
+                           property="positionRuName"
+                           caption="msg://msgPositionEnName" />
+                <textField id="positionEnNameField"
+                           property="positionEnName"
+                           caption="msg://msgPositionRuName"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

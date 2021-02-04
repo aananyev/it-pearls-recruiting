@@ -96,7 +96,9 @@
         <collection id="companyDepartamentsDc"
                     class="com.company.itpearls.entity.CompanyDepartament">
             <view extends="_local">
-                <property name="companyName" view="_local"/>
+                <property name="companyName" view="_local">
+                    <property name="cityOfCompany" view="_local"/>
+                </property>
             </view>
             <loader id="companyDepartamentsLc">
                 <query>

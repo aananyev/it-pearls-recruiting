@@ -444,26 +444,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            OpenPosition dublicateOpenPosition = checkDublicateOpenPosition();
+        OpenPosition dublicateOpenPosition = checkDublicateOpenPosition(event);
 
-            if (dublicateOpenPosition != null) {
-                dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
-                        .withCaption("ВНИМАНИЕ!")
-                        .withMessage("Вакансия " + vacansyNameField.getValue() + "\n" + "уже есть в базе.\n" +
-                                "\nОткрыта ранее: " + dublicateOpenPosition.getCreatedBy() +
-                                "\nСтатус: " + (dublicateOpenPosition.getOpenClose() ? "Закрыта" : "Открыта" +
-                                "\nПродолжить сохранение?"))
-                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                            event.resume(commitChanges());
-                            // вернуться и не закомитить
-                        }), new DialogAction(DialogAction.Type.NO).withHandler(f -> {
-                            // закончить
-                        }))
-                        .show();
-                event.preventCommit();
-            }
+        if (dublicateOpenPosition != null && PersistenceHelper.isNew(getEditedEntity())) {
+            dialogs.createOptionDialog()
+                    .withCaption("ВНИМАНИЕ!")
+                    .withMessage("Вакансия " + vacansyNameField.getValue() + "\n" + "уже есть в базе.\n" +
+                            "\nОткрыта ранее: " + dublicateOpenPosition.getCreatedBy() +
+                            "\nСтатус: " + (dublicateOpenPosition.getOpenClose() ? "Закрыта" : "Открыта" +
+                            "\nПродолжить сохранение?"))
+                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
+                        event.resume();
+                        // вернуться и не закомитить
+                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
+                        // закончить
+                    }))
+                    .show();
 
+            event.preventCommit();
         }
     }
 
@@ -499,25 +497,31 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommandCountValue();
     }
 
-    private OpenPosition checkDublicateOpenPosition() {
+    private OpenPosition checkDublicateOpenPosition(BeforeCommitChangesEvent event) {
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
-                .query("select e from itpearls_OpenPosition e")
+                .query("select e from itpearls_OpenPosition e " +
+                        "where e.positionType = :positionType " +
+                        "and e.vacansyName like :vacansyName " +
+                        "and e.projectName = :projectName " +
+                        "and e.parentOpenPosition = :parentOpenPosition " +
+                        "and e.vacansyName = :vacansyName " +
+                        "and e.remoteWork = :remoteWork " +
+                        "and e.cityPosition = :cityPosition")
+                .parameter("vacansyName", vacansyNameField.getValue())
+                .parameter("positionType", positionTypeField.getValue())
+                .parameter("projectName", projectNameField.getValue())
+                .parameter("cityPosition", cityOpenPositionField.getValue())
+                .parameter("parentOpenPosition", parentOpenPositionField.getValue())
+                .parameter("remoteWork", remoteWorkField.getValue())
+                .parameter("vacansyName", vacansyNameField.getValue())
                 .view("openPosition-view")
                 .list();
 
-        for (OpenPosition op : openPositions) {
-            if (op.getPositionType().equals(positionTypeField.getValue())) {
-                if(op.getCityPosition() != null) {
-                    if (op.getCityPosition().equals(cityOpenPositionField.getValue())) {
-                        if (op.getProjectName().equals(projectNameField.getValue())) {
-                            return op;
-                        }
-                    }
-                }
-            }
+        if (openPositions.size() == 0) {
+            return null;
+        } else {
+            return openPositions.get(0);
         }
-
-        return null;
     }
 
     private void setCommandCountValue() {
@@ -723,7 +727,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     protected BigDecimal minCompanyComission = new BigDecimal(BigInteger.ZERO);
     protected BigDecimal maxCompanyComission = new BigDecimal(BigInteger.ZERO);
 
-    protected String calculateComission(String percent, Integer type, boolean ndflFlag, BigDecimal minSalary, BigDecimal maxSalary) {
+    protected String calculateComission(String percent, Integer type, boolean ndflFlag, BigDecimal
+            minSalary, BigDecimal maxSalary) {
 
         String retValue = new String("");
         BigDecimal p = new BigDecimal(percent);
@@ -1312,10 +1317,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void addListCity() {
         SelectCitiesLocation selectCitiesLocation = screens.create(SelectCitiesLocation.class);
 
-        selectCitiesLocation.addAfterShowListener( e -> {
-           selectCitiesLocation.setCitiesList(this.getEditedEntity().getCities());
+        selectCitiesLocation.addAfterShowListener(e -> {
+            selectCitiesLocation.setCitiesList(this.getEditedEntity().getCities());
         });
-        selectCitiesLocation.addAfterCloseListener( e -> {
+        selectCitiesLocation.addAfterCloseListener(e -> {
             this.getEditedEntity().setCities(selectCitiesLocation.getCitiesList());
             changeCityListsLabel();
         });
@@ -1327,7 +1332,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         String outStr = "";
         String description = "";
 
-        if(getEditedEntity().getCities() != null) {
+        if (getEditedEntity().getCities() != null) {
             for (City s : getEditedEntity().getCities()) {
                 if (!outStr.equals("")) {
                     outStr = outStr + ",";
@@ -1339,7 +1344,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
 
         }
-        if(!outStr.equals("")) {
+        if (!outStr.equals("")) {
             citiesLabel.setValue(outStr);
             citiesLabel.setDescription(description);
         }

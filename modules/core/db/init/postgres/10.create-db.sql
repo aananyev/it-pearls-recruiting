@@ -401,7 +401,7 @@ create table ITPEARLS_OPEN_POSITION (
     OPEN_CLOSE boolean,
     VACANSY_NAME varchar(150) not null,
     REMOTE_WORK integer not null,
-    COMMAND_CANDIDATE integer,
+    COMMAND_CANDIDATE integer not null,
     SALARY_MIN decimal(19, 2),
     SALARY_MAX decimal(19, 2),
     CITY_POSITION_ID uuid,
