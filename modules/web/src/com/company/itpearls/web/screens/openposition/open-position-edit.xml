@@ -248,14 +248,15 @@
                                      required="true"
                                      align="MIDDLE_LEFT"
                                      caption="msg://msgRemoteWork"
-                                     width="50%">
+                                     width="100%">
                         </lookupField>
                         <textField id="remoteWorkCommentField"
                                    dataContainer="openPositionDc"
                                    property="remoteComment"
                                    required="false"
+                                   caption="msg://msgRemoteWorkCommant"
                                    align="MIDDLE_LEFT"
-                                   width="50%"/>
+                                   width="100%"/>
                     </hbox>
                 </hbox>
                 <hbox id="hboxProject"

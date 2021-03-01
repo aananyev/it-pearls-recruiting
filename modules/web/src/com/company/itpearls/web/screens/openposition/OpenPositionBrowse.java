@@ -168,7 +168,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 break;
         }
 
-        return openPosition.getCityPosition() == null ? retStr : retStr + "\nЖелаемая локация: " + openPosition.getCityPosition().getCityRuName();
+        return openPosition.getCityPosition() == null ? retStr : retStr +
+                "\nЖелаемая локация: " + openPosition.getCityPosition().getCityRuName() +
+                (openPosition.getRemoteComment() != null ?
+                        "\nКомментарий: " + openPosition.getRemoteComment() : "");
     }
 
     private void initRemoteWorkMap() {
@@ -281,13 +284,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         switch (openPosition.getRemoteWork()) {
             case 1:
-                style = "open-position-pic-center-large-green";
+                style = (openPosition.getRemoteComment() == null ?
+                        "open-position-pic-center-large-green" :
+                        "open-position-pic-center-large-lime");
                 break;
             case 2:
-                style = "open-position-pic-center-large-red";
+                style = (openPosition.getRemoteComment() == null ?
+                        "open-position-pic-center-large-red" :
+                        "open-position-pic-center-large-maroon");
                 break;
             case 0:
-                style = "open-position-pic-center-large-yellow";
+                style = (openPosition.getRemoteComment() == null ?
+                        "open-position-pic-center-large-yellow" :
+                        "open-position-pic-center-large-orange");
                 break;
         }
 
@@ -458,8 +467,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Object openPositionsTableCityPositionListColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String mainCity = "";
 
-        if(event.getItem().getCityPosition() != null) {
-            if(event.getItem().getCityPosition().getCityRuName() != null) {
+        if (event.getItem().getCityPosition() != null) {
+            if (event.getItem().getCityPosition().getCityRuName() != null) {
                 mainCity = event.getItem().getCityPosition().getCityRuName();
             }
         }
@@ -927,7 +936,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe("openPositionsTable")
     public void onOpenPositionsTableEditorClose(DataGrid.EditorCloseEvent event) {
-       openPositionsDl.load();
+        openPositionsDl.load();
     }
 }
 
