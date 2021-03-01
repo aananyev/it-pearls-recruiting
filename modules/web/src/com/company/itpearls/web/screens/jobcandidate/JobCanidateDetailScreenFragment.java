@@ -34,6 +34,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private static final String MANAGER_GROUP = "Менеджмент";
     private static final String RECRUTIER_GROUP = "Хантинг";
     private static final String RESEARCHER_GROUP = "Ресерчинг";
+    protected JobCandidate jobCandidate = null;
 
     @Inject
     private Label<String> lastResearcherLabel;
@@ -68,11 +69,19 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     @Inject
     private Screens screens;
 
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
+    }
+
     public void setLinkButtonTelegrem() {
         String retStr = "";
 
         if (jobCandidatesDc.getItem().getTelegramName() != null) {
-            retStr = jobCandidatesDc.getItem().getTelegramName().trim();
+            if (jobCandidate == null) {
+                retStr = jobCandidatesDc.getItem().getTelegramName().trim();
+            } else {
+                retStr = jobCandidate.getTelegramName().trim();
+            }
 
             if (retStr != null) {
                 if (retStr.charAt(0) == '@') {
@@ -85,15 +94,24 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     }
 
     public void setLinkButtonEmail() {
-        if (jobCandidatesDc.getItem().getEmail() != null) {
-            emailLinkButton.setCaption(jobCandidatesDc.getItem().getEmail());
+        if (jobCandidate == null) {
+            if (jobCandidatesDc.getItem().getEmail() != null) {
+
+                emailLinkButton.setCaption(jobCandidatesDc.getItem().getEmail());
+            }
+        } else {
+            emailLinkButton.setCaption(jobCandidate.getEmail());
         }
     }
 
+
     public void setLinkButtonSkype() {
-        if (jobCandidatesDc.getItem().getSkypeName() != null) {
-            skypeLinkButton.setCaption(jobCandidatesDc.getItem().getSkypeName());
-        }
+        if(jobCandidate == null) {
+            if (jobCandidatesDc.getItem().getSkypeName() != null) {
+                skypeLinkButton.setCaption(jobCandidatesDc.getItem().getSkypeName());
+            }
+        } else
+            skypeLinkButton.setCaption(jobCandidate.getSkypeName());
     }
 
     @Subscribe("emailLinkButton")

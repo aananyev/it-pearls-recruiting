@@ -469,6 +469,58 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             middleNameField.setValue(replaceE_E(middleNameField.getValue()));
 
         trimTelegramName();
+        addIteractionOfNewCandidate();
+
+        JobCandidate jobCandidate = checkDublicateCandidate();
+
+        if(jobCandidate != null && PersistenceHelper.isNew(getEditedEntity())) {
+            dialogs.createOptionDialog()
+                    .withCaption("ВНИМАНИЕ!")
+                    .withMessage("В базе уже присутствует кандидат "
+                            + firstNameField.getValue() + " " + secondNameField.getValue()
+                            + "\n с заимаемой позицией "
+                            + personPositionField.getValue().getPositionRuName()
+                            + " из города "
+                            + jobCityCandidateField.getValue().getCityRuName() + "."
+                            + "\nПродолжить сохранение?")
+                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
+                        event.resume();
+                        // вернуться и не закомитить
+                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
+                        // закончить
+                    }))
+                    .show();
+
+            event.preventCommit();
+        }
+    }
+
+    private void addIteractionOfNewCandidate() {
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            // добавить сюда Iteraction "Новый кандиат"
+        }
+    }
+
+    private JobCandidate checkDublicateCandidate() {
+        String queryStr = "select e from itpearls_JobCandidate e " +
+                            "where e.firstName = :firstName and " +
+                                    "e.secondName = :secondName and " +
+                                    "e.cityOfResidence = :cityOfResidence and " +
+                                    "e.personPosition = :personPosition";
+        List <JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
+                .query(queryStr)
+                .parameter("firstName", firstNameField.getValue())
+                .parameter("secondName", secondNameField.getValue())
+                .parameter("cityOfResidence", jobCityCandidateField.getValue())
+                .parameter("personPosition", personPositionField.getValue())
+                .view("jobCandidate-view")
+                .list();
+
+        if(jobCandidates.size() == 0) {
+            return null;
+        } else {
+            return jobCandidates.get(0);
+        }
     }
 
     private void trimTelegramName() {

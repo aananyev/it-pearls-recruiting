@@ -4,7 +4,6 @@ import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.position.PositionEdit;
-import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
@@ -14,11 +13,13 @@ import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
+import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -76,8 +77,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private GetRoleService getRoleService;
     @Inject
     private UserSession userSession;
-    @Inject
-    private CollectionLoader<Person> personsDl;
     @Inject
     private RadioButtonGroup radioButtonGroupPaymentsType;
     @Inject
@@ -143,10 +142,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private DataContext dataContext;
     @Inject
-    private DataGrid<Person> personTable;
-    @Inject
-    private RichTextArea templateLetterRichTextArea;
-    @Inject
     private CollectionLoader<Position> positionTypesLc;
     @Inject
     private Screens screens;
@@ -155,23 +150,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private LookupPickerField<OpenPosition> parentOpenPositionField;
     @Inject
-    private GroupBoxLayout workExperienceGroupBox;
-    @Inject
     private Label<String> citiesLabel;
+    @Named("tabSheetOpenPosition.tabPayments")
+    private VBoxLayout tabPayments;
+    @Inject
+    private CollectionLoader<OpenPosition> openPositionParentDl;
+    @Inject
+    private InstanceLoader<OpenPosition> openPositionDl;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
-//            recrutiesTasksesDl.setParameter("openPosition", getEditedEntity().getVacansyName());
-            // раскрыть стаж работы
-        } else {
-//            recrutiesTasksesDl.removeParameter("openPosition");
-        }
-
-//        recrutiesTasksesDl.load();
 
         beforeEdit = getEditedEntity();
         booOpenClosePosition = getEditedEntity().getOpenClose();
+        parentOpenPositionField.setEditable(commandOrPosition.getValue() != null);
 
         // проверка на ноль
         booOpenClosePosition = booOpenClosePosition == null ? false : booOpenClosePosition;
@@ -286,13 +278,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setPersonTableEmpty() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            personTable.setVisible(false);
+//            personTable.setVisible(false);
         } else {
             if (companyDepartamentField.getValue() != null) {
-                personsDl.setParameter("companyDepartment", companyDepartamentField.getValue());
-                personsDl.load();
+//                personsDl.setParameter("companyDepartment", companyDepartamentField.getValue());
+//                personsDl.load();
 
-                personTable.setVisible(true);
+//                personTable.setVisible(true);
             }
         }
     }
@@ -327,13 +319,30 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onCommandOrPositionValueChange(HasValue.ValueChangeEvent event) {
         switch ((int) commandOrPosition.getValue()) {
             case 0: // вакансия
-                parentOpenPositionField.setVisible(true);
+                parentOpenPositionField.setEditable(true);
+                openPositionFieldSalaryMin.setEditable(true);
+                openPositionFieldSalaryMax.setEditable(true);
+                tabPayments.setEnabled(false);
+                tabPayments.setVisible(false);
+                numberPositionField.setCaption("Количество персонала");
                 break;
             case 1: // команда
-                parentOpenPositionField.setVisible(false);
+                parentOpenPositionField.setEditable(false);
+                openPositionFieldSalaryMax.setEditable(false);
+                openPositionFieldSalaryMin.setEditable(false);
+                tabPayments.setEnabled(true);
+                tabPayments.setVisible(true);
+                numberPositionField.setCaption("Количество команд");
                 break;
         }
+    }
 
+    @Subscribe("parentOpenPositionField")
+    public void onParentOpenPositionFieldValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
+        if(projectNameField.getValue() == null
+                && parentOpenPositionField.getValue() != null) {
+            projectNameField.setValue(parentOpenPositionField.getValue().getProjectName());
+        }
     }
 
     @Subscribe("openClosePositionCheckBox")
@@ -493,8 +502,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (internalProjectCheckBox.getValue() == null)
             internalProjectCheckBox.setValue(false);
-
-        setCommandCountValue();
     }
 
     private OpenPosition checkDublicateOpenPosition(BeforeCommitChangesEvent event) {
@@ -521,40 +528,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             return null;
         } else {
             return openPositions.get(0);
-        }
-    }
-
-    private void setCommandCountValue() {
-        List<OpenPosition> openPositions = new ArrayList<>();
-
-        if (getEditedEntity().getParentOpenPosition() == null) {
-            openPositions = dataManager.load(OpenPosition.class)
-                    .query(QUERY_SELECT_COMMAND)
-                    .parameter("parentOpenPosition", getEditedEntity())
-                    .list();
-        } else {
-            openPositions = dataManager.load(OpenPosition.class)
-                    .query(QUERY_SELECT_COMMAND)
-                    .parameter("parentOpenPosition", getEditedEntity().getParentOpenPosition())
-                    .list();
-
-        }
-
-        Integer countCommand = 0;
-
-        for (OpenPosition a : openPositions) {
-            if (a.getNumberPosition() != null)
-                countCommand = countCommand + a.getNumberPosition();
-        }
-
-        if ((int) commandOrPosition.getValue() != 0) {
-            // это наименование группы
-            numberPositionField.setValue(countCommand);
-        } else {
-            if (getEditedEntity().getParentOpenPosition() != null) {
-                // это член команды
-                getEditedEntity().getParentOpenPosition().setNumberPosition(countCommand);
-            }
         }
     }
 
@@ -1034,6 +1007,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         setTopLabel();
+
+        openClosePositionCheckBox.setValue(openClosePositionCheckBox.getValue() == null ? false: true);
     }
 
     private void setTopLabel() {
@@ -1219,6 +1194,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onPositionTypeFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
         if (vacansyNameField.getValue() == null || vacansyNameField.getValue() == "") {
             vacansyNameField.setValue(generatePositionName());
+            if(projectNameField.getValue() != null) {
+                vacansyNameField.setValue(generatePositionNameInProject());
+                if(cityOpenPositionField.getValue() != null) {
+                    vacansyNameField.setValue(generatePositionNameCity());
+                }
+            }
         }
     }
 
@@ -1248,8 +1229,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (cityOpenPositionField.getValue() != null) {
-                if (generatePositionNameInProject().equals(retValue)) {
-                    retValue = retValue.substring(0, retValue.length() - 1) + ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+                if(retValue != null) {
+                    if (generatePositionNameInProject().equals(retValue)) {
+                        retValue = retValue.substring(0, retValue.length() - 1) + ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+                    }
+                } else {
+                    retValue = null;
                 }
             }
         }
@@ -1284,10 +1269,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 positionTypesLc.load();
             }
 
-            retPosName =
-                    (positionTypeField.getValue().getPositionRuName() != null ? positionTypeField.getValue().getPositionRuName() : "")
-                            + " \\ "
-                            + (positionTypeField.getValue().getPositionEnName() != null ? positionTypeField.getValue().getPositionEnName() : "");
+                retPosName =
+                        (positionTypeField.getValue().getPositionRuName() != null ? positionTypeField.getValue().getPositionRuName() : "")
+                                + " \\ "
+                                + (positionTypeField.getValue().getPositionEnName() != null ? positionTypeField.getValue().getPositionEnName() : "");
         }
 
         return retPosName;

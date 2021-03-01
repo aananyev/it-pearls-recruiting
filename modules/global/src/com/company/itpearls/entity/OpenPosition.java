@@ -33,6 +33,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "REMOTE_WORK", nullable = false)
     protected Integer remoteWork;
 
+    @Column(name = "REMOTE_COMMENT", length = 40)
+    protected String remoteComment;
+
     @NotNull
     @Column(name = "COMMAND_CANDIDATE", nullable = false)
     protected Integer commandCandidate;
@@ -162,6 +165,14 @@ public class OpenPosition extends StandardEntity {
 
     public void setRemoteWork(Integer remoteWork) {
         this.remoteWork = remoteWork;
+    }
+
+    public String getRemoteComment() {
+        return remoteComment;
+    }
+
+    public void setRemoteComment(String remoteComment) {
+        this.remoteComment = remoteComment;
     }
 
     public Boolean getUseTaxNDFL() {

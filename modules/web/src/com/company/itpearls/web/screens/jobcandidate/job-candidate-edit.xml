@@ -609,7 +609,7 @@ order by e.cityRuName]]>
         </form>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick" icon="BELL"/>
-            <button id="okAndCheck" caption="OK" invoke="onBtnOkAndCheck" icon="OK"/>
+            <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>
     </layout>

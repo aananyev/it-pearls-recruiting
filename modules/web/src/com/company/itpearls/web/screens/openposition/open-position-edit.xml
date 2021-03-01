@@ -30,11 +30,12 @@
                 <property name="candidates"
                           view="_minimal"/>
                 <property name="parentOpenPosition"
-                          view="_local"/>
+                          view="_local">
+                </property>
                 <property name="cities"
                           view="_local"/>
             </view>
-            <loader/>
+            <loader id="openPositionDl"/>
             <collection id="openPositionSkillsListsDc"
                         property="skillsList"/>
             <collection id="openPositionCandidatesesDc"
@@ -44,6 +45,7 @@
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local">
                 <property name="parentOpenPosition" view="_local"/>
+                <property name="projectName" view="_local"/>
             </view>
             <loader id="openPositionParentDl">
                 <query>
@@ -144,39 +146,10 @@
                 order by e.cityRuName]]></query>
             </loader>
         </collection>
-        <collection id="personsDc"
-                    class="com.company.itpearls.entity.Person">
-            <view extends="_local">
-                <property name="positionCountry"
-                          fetch="JOIN"
-                          view="_local">
-                    <property name="countryOfRegion"
-                              fetch="JOIN"
-                              view="_local">
-                        <property name="regionOfCity"
-                                  view="_local"/>
-                    </property>
-                </property>
-                <property name="personPosition"
-                          fetch="JOIN"
-                          view="_local"/>
-            </view>
-            <loader id="personsDl">
-                <query>
-                    <![CDATA[select e from itpearls_Person e, itpearls_Project f
-                        order by e.secondName, e.firstName]]>
-                    <condition>
-                        <c:jpql>
-                            <c:where>e.companyDepartment = :companyDepartment</c:where>
-                        </c:jpql>
-                    </condition>
-                </query>
-            </loader>
-        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions"
+    <layout expand="forExpand"
             spacing="true">
         <groupBox spacing="true">
             <vbox>
@@ -199,39 +172,50 @@
                  icon="USERS">
                 <hbox id="hboxProject1"
                       spacing="true"
+                      align="MIDDLE_LEFT"
+                      expand="spaceBox"
                       width="100%">
-                    <checkBox id="openClosePositionCheckBox"
-                              dataContainer="openPositionDc"
-                              property="openClose"
-                              caption="mainMsg://msgPositionClose"
-                              align="BOTTOM_LEFT"/>
-                    <checkBox id="internalProjectCheckBox"
-                              dataContainer="openPositionDc"
-                              property="internalProject"
-                              caption="msg://msgInternalProject"
-                              align="BOTTOM_LEFT"/>
-                    <radioButtonGroup id="commandOrPosition"
-                                      orientation="horizontal"
-                                      required="true"
-                                      dataContainer="openPositionDc"
-                                      property="commandCandidate"
-                                      description="msg://msgCommandOrPosition"
-                                      align="BOTTOM_LEFT"
-                                      caption="msg://msgCommandOrPosition"/>
-                    <lookupPickerField id="parentOpenPositionField"
-                                       dataContainer="openPositionDc"
-                                       property="parentOpenPosition"
-                                       align="BOTTOM_LEFT"
-                                       caption="msg://msgCommand"
-                                       optionsContainer="openPositionParentDc"/>
-                    <lookupField id="priorityField"
-                                 dataContainer="openPositionDc"
-                                 property="priority"
-                                 caption="msg://msgPriorityPosition"
-                                 required="true"
-                                 align="BOTTOM_LEFT"
-                                 width="100%">
-                    </lookupField>
+                    <hbox spacing="true" align="MIDDLE_LEFT">
+                        <checkBox id="openClosePositionCheckBox"
+                                  dataContainer="openPositionDc"
+                                  property="openClose"
+                                  caption="mainMsg://msgPositionClose"
+                                  width="50%"
+                                  align="BOTTOM_LEFT"/>
+                        <checkBox id="internalProjectCheckBox"
+                                  dataContainer="openPositionDc"
+                                  width="50%"
+                                  property="internalProject"
+                                  caption="msg://msgInternalProject"
+                                  align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox id="spaceBox"/>
+                    <hbox id="commandFieldHBox"
+                          spacing="true"
+                          align="MIDDLE_RIGHT">
+                        <radioButtonGroup id="commandOrPosition"
+                                          orientation="horizontal"
+                                          required="true"
+                                          dataContainer="openPositionDc"
+                                          property="commandCandidate"
+                                          description="msg://msgCommandOrPosition"
+                                          align="BOTTOM_LEFT"
+                                          caption="msg://msgCommandOrPosition"/>
+                        <lookupPickerField id="parentOpenPositionField"
+                                           dataContainer="openPositionDc"
+                                           property="parentOpenPosition"
+                                           align="BOTTOM_LEFT"
+                                           caption="msg://msgCommand"
+                                           optionsContainer="openPositionParentDc"/>
+                        <lookupField id="priorityField"
+                                     dataContainer="openPositionDc"
+                                     property="priority"
+                                     caption="msg://msgPriorityPosition"
+                                     required="true"
+                                     align="BOTTOM_LEFT"
+                                     width="100%">
+                        </lookupField>
+                    </hbox>
 
                 </hbox>
                 <textField id="vacansyNameField"
@@ -256,14 +240,23 @@
                                     type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <lookupField id="remoteWorkField"
-                                 dataContainer="openPositionDc"
-                                 property="remoteWork"
-                                 required="true"
-                                 align="MIDDLE_LEFT"
-                                 caption="msg://msgRemoteWork"
-                                 width="50%">
-                    </lookupField>
+                    <hbox spacing="true"
+                          width="100%">
+                        <lookupField id="remoteWorkField"
+                                     dataContainer="openPositionDc"
+                                     property="remoteWork"
+                                     required="true"
+                                     align="MIDDLE_LEFT"
+                                     caption="msg://msgRemoteWork"
+                                     width="50%">
+                        </lookupField>
+                        <textField id="remoteWorkCommentField"
+                                   dataContainer="openPositionDc"
+                                   property="remoteComment"
+                                   required="false"
+                                   align="MIDDLE_LEFT"
+                                   width="50%"/>
+                    </hbox>
                 </hbox>
                 <hbox id="hboxProject"
                       spacing="true"
@@ -364,7 +357,6 @@
             <tab id="tabPayments"
                  caption="msg://msgPayments"
                  margin="tue,true,true,true"
-                 expand="personTable"
                  spacing="true"
                  icon="BULK_EDIT_ACTION">
                 <groupBox id="groupBoxPaymentsResearcher"
@@ -437,26 +429,26 @@
                         </vbox>
                     </hbox>
                 </groupBox>
-                <dataGrid id="personTable"
-                          width="100%"
-                          dataContainer="personsDc">
-                    <columns>
-                        <column id="sendResumeToEmail"
-                                property="sendResumeToEmail"
-                                caption="msg://msgSendResume"
-                                width="80px"
-                                editable="true"/>
-                        <column id="secondName"
-                                property="secondName"/>
-                        <column id="firstName"
-                                property="firstName"/>
-                        <column id="personPosition.positionRuName"
-                                property="personPosition"/>
-                        <column id="positionCountry.countryRuName"
-                                property="positionCountry"/>
-                    </columns>
-                    <rowsCount/>
-                </dataGrid>
+                <!--                <dataGrid id="personTable"
+                                          width="100%"
+                                          dataContainer="personsDc">
+                                    <columns>
+                                        <column id="sendResumeToEmail"
+                                                property="sendResumeToEmail"
+                                                caption="msg://msgSendResume"
+                                                width="80px"
+                                                editable="true"/>
+                                        <column id="secondName"
+                                                property="secondName"/>
+                                        <column id="firstName"
+                                                property="firstName"/>
+                                        <column id="personPosition.positionRuName"
+                                                property="personPosition"/>
+                                        <column id="positionCountry.countryRuName"
+                                                property="positionCountry"/>
+                                    </columns>
+                                    <rowsCount/>
+                                </dataGrid> -->
             </tab>
             <tab caption="mainMsg://msgJobDescription"
                  margin="true,true,true,true"
@@ -507,17 +499,23 @@
                  caption="msg://msgExercise"
                  margin="true,true,true,true"
                  spacing="true"
-                 expand="exerciseRichTextArea"
+                 expand="exerciseVbox"
                  icon="ADJUST">
-                <checkBox id="needExerciseCheckBox"
-                          dataContainer="openPositionDc"
-                          property="needExercise"
-                          caption="msg://msgNeedExercice"/>
-                <richTextArea id="exerciseRichTextArea"
+                <vbox id="exerciseVbox"
+                      height="100%"
+                      width="100%"
+                      spacing="true"
+                      expand="exerciseRichTextArea">
+                    <checkBox id="needExerciseCheckBox"
                               dataContainer="openPositionDc"
-                              property="exercise"
-                              height="AUTO"
-                              width="100%"/>
+                              property="needExercise"
+                              caption="msg://msgNeedExercice"/>
+                    <richTextArea id="exerciseRichTextArea"
+                                  dataContainer="openPositionDc"
+                                  property="exercise"
+                                  height="100%"
+                                  width="100%"/>
+                </vbox>
             </tab>
             <tab id="tabTemplateLetter"
                  caption="msg://msgTemplateLetter"
@@ -528,6 +526,7 @@
                 <vbox id="templateLetterBox"
                       width="100%"
                       height="100%"
+                      spacing="true"
                       expand="templateLetterRichTextArea">
                     <checkBox id="needLetterCheckBox"
                               dataContainer="openPositionDc"
@@ -537,7 +536,7 @@
                                   dataContainer="openPositionDc"
                                   property="templateLetter"
                                   width="100%"
-                                  height="AUTO"
+                                  height="100%"
                                   required="false"/>
                 </vbox>
             </tab>
@@ -608,12 +607,14 @@
                             </dataGrid>
                         </tab> -->
         </tabSheet>
-        <hbox id="editActions"
-              spacing="true"
-              align="BOTTOM_RIGHT">
-            <button invoke="subscribePosition" caption="msg://msgSubscribe" icon="BELL"/>
-            <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
-            <button action="windowClose"/>
-        </hbox>
+        <vbox id="forExpand" spacing="false" align="BOTTOM_RIGHT">
+            <hbox id="editActions"
+                  spacing="true"
+                  align="BOTTOM_RIGHT">
+                <button invoke="subscribePosition" caption="msg://msgSubscribe" icon="BELL"/>
+                <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
+                <button action="windowClose"/>
+            </hbox>
+        </vbox>
     </layout>
 </window>

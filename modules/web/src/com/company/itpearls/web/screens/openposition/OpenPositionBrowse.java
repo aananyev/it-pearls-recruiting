@@ -924,5 +924,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         return outStr;
     }
+
+    @Subscribe("openPositionsTable")
+    public void onOpenPositionsTableEditorClose(DataGrid.EditorCloseEvent event) {
+       openPositionsDl.load();
+    }
 }
 
