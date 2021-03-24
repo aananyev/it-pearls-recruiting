@@ -481,13 +481,24 @@
                                           property="commandExperience"
                                           caption="msg://msgCommandExperience"/>
                     </groupBox>
-                    <richTextArea id="openPositionRichTextArea"
-                                  dataContainer="openPositionDc"
-                                  property="comment"
-                                  width="100%"
-                                  box.expandRatio="1"
-                                  height="400px"
-                                  required="true"/>
+                    <hbox spacing="true" width="100%">
+                        <richTextArea id="openPositionRichTextArea"
+                                      dataContainer="openPositionDc"
+                                      property="comment"
+                                      caption="msg://msgRuComment"
+                                      width="100%"
+                                      box.expandRatio="1"
+                                      height="350px"
+                                      required="true"/>
+                        <richTextArea id="openPositionEnRichTextArea"
+                                      dataContainer="openPositionDc"
+                                      property="commentEn"
+                                      caption="msg://msgEnComment"
+                                      width="100%"
+                                      box.expandRatio="1"
+                                      height="350px"
+                                      required="false"/>
+                    </hbox>
                     <textField id="shortDescriptionTextArea"
                                dataContainer="openPositionDc"
                                caption="msg://msgShortCaption"

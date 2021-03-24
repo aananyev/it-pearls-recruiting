@@ -76,6 +76,10 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "COMMENT_")
     protected String comment;
 
+    @Lob
+    @Column(name = "COMMENT_EN")
+    protected String commentEn;
+
     @Column(name = "SHORT_DESCRIPTION", length = 160)
     protected String shortDescription;
 
@@ -405,5 +409,13 @@ public class OpenPosition extends StandardEntity {
 
     public void setCities(List<City> cities) {
         this.cities = cities;
+    }
+
+    public String getCommentEn() {
+        return commentEn;
+    }
+
+    public void setCommentEn(String commentEn) {
+        this.commentEn = commentEn;
     }
 }
