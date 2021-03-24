@@ -64,6 +64,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Link itpearlsCVLink;
     @Inject
     private Link originalCVLink;
+    @Inject
+    private RichTextArea questionLetterRichTextArea;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -255,6 +257,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
 
             letterRichTextArea.setValue(templateLetter);
+
+            if(!templateLetter.equals("")) {
+                questionLetterRichTextArea.setVisible(true);
+                questionLetterRichTextArea.setValue(templateLetter);
+            } else {
+                questionLetterRichTextArea.setVisible(false);
+            }
         }
     }
 

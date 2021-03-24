@@ -162,8 +162,17 @@
                         </table>
                     </tab>
                     <tab id="tabLetter" caption="msg://msgLetter" margin="true,false,false,false" spacing="true">
-                        <richTextArea id="letterRichTextArea" dataContainer="candidateCVDc" property="letter"
-                                      width="100%" height="300pt"/>
+                        <richTextArea id="questionLetterRichTextArea"
+                                      width="100%"
+                                      editable="false"
+                                      visible="false"
+                                      caption="msg://msgPatternLetter"
+                                      height="100pt"/>
+                        <richTextArea id="letterRichTextArea"
+                                      dataContainer="candidateCVDc"
+                                      property="letter"
+                                      width="100%"
+                                      height="300pt"/>
                     </tab>
                 </tabSheet>
             </column>
