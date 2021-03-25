@@ -434,8 +434,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                         emails = getAllSubscibers();
                         // позиция открылась
-                        events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
-                                getEditedEntity().getVacansyName()));
+//                        events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
+//                                getEditedEntity().getVacansyName()));
 
                         r = true;
                     } else {
