@@ -240,19 +240,25 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         if (getEditedEntity().getLetter() == null) {
             if (candidateCVFieldOpenPosition.getValue() != null) {
                 if (candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter() != null) {
-                    templateLetter = templateLetter + candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter();
+                    templateLetter = templateLetter
+                            + candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter()
+                            + "\n<br>";
                 }
             }
 
             if (candidateCVFieldOpenPosition.getValue() != null) {
                 if (candidateCVFieldOpenPosition.getValue().getProjectName().getTemplateLetter() != null) {
-                    templateLetter = templateLetter + candidateCVFieldOpenPosition.getValue().getProjectName().getTemplateLetter();
+                    templateLetter = templateLetter
+                            + candidateCVFieldOpenPosition.getValue().getProjectName().getTemplateLetter()
+                            + "\n<br>";
                 }
             }
 
             if (candidateCVFieldOpenPosition.getValue() != null) {
                 if (candidateCVFieldOpenPosition.getValue().getTemplateLetter() != null) {
-                    templateLetter = templateLetter + candidateCVFieldOpenPosition.getValue().getTemplateLetter();
+                    templateLetter = templateLetter
+                            + candidateCVFieldOpenPosition.getValue().getTemplateLetter()
+                            + "\n<br>";
                 }
             }
 

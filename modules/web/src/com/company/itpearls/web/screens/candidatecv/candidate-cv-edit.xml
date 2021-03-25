@@ -62,41 +62,43 @@
                     <tab id="tabCandidate" caption="msg://msgCandidate" spacing="true">
                         <groupBox id="groupBox" spacing="true">
                             <vbox>
-                            <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
-                                               dataContainer="candidateCVDc" property="candidate"
-                                               caption="msg://msgCandidate" height="50%" width="70%">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                    <action id="open" type="picker_open"/>
-                                </actions>
-                            </lookupPickerField>
-                            <lookupPickerField id="resumePositionField"
-                                               optionsContainer="resumePositionsDc"
-                                               dataContainer="candidateCVDc"
-                                               property="resumePosition"
-                                               caption="msg://msgPosition"
-                                               height="50%"
-                                               required="true"
-                                               width="70%">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                            <lookupPickerField id="candidateCVFieldOpenPosition" dataContainer="candidateCVDc" optionsContainer="openPositionsDc"
-                                               property="toVacancy" caption="mainMsg://msgVacancy" width="70%">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
+                                <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
+                                                   dataContainer="candidateCVDc" property="candidate"
+                                                   caption="msg://msgCandidate" height="50%" width="70%">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <lookupPickerField id="resumePositionField"
+                                                   optionsContainer="resumePositionsDc"
+                                                   dataContainer="candidateCVDc"
+                                                   property="resumePosition"
+                                                   caption="msg://msgPosition"
+                                                   height="50%"
+                                                   required="true"
+                                                   width="70%">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <lookupPickerField id="candidateCVFieldOpenPosition" dataContainer="candidateCVDc"
+                                                   optionsContainer="openPositionsDc"
+                                                   property="toVacancy" caption="mainMsg://msgVacancy" width="70%">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
                             </vbox>
                             <lookupField id="СandidateCVField" dataContainer="candidateCVDc" optionsContainer="usersDc"
                                          caption="mainMsg://msgOwner" property="owner" width="70%"/>
                             <hbox width="70%">
-                            <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost" caption="msg://msgDatePost"
-                                       height="50%" width="50%"/>
-                            <upload id="fileOriginalCVField" property="originalFileCV" showFileName="true"
-                                    align="TOP_RIGHT" caption="msg://msgOriginalCV" dataContainer="candidateCVDc"
-                                    fileStoragePutMode="IMMEDIATE" showClearButton="true"/>
+                                <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost"
+                                           caption="msg://msgDatePost"
+                                           height="50%" width="50%"/>
+                                <upload id="fileOriginalCVField" property="originalFileCV" showFileName="true"
+                                        align="TOP_RIGHT" caption="msg://msgOriginalCV" dataContainer="candidateCVDc"
+                                        fileStoragePutMode="IMMEDIATE" showClearButton="true"/>
                             </hbox>
                             <grid spacing="true" width="100%">
                                 <columns>
@@ -116,7 +118,8 @@
                                               description="msg://msgGoTo"/>
                                     </row>
                                     <row>
-                                        <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc" property="linkItPearlsCV"
+                                        <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc"
+                                                   property="linkItPearlsCV"
                                                    caption="mainMsg://msgLinkToItPearlsCV" width="100%"
                                                    align="MIDDLE_LEFT"/>
                                         <link id="itpearlsCVLink"
@@ -148,7 +151,7 @@
                                 <column id="fileOwner.name" caption="mainMsg://msgOwner"/>
                             </columns>
                             <buttonsPanel>
-<!--                                <button id="createSomeFile" icon="CREATE_ACTION" invoke="createSomeFileButtonAction"/> -->
+                                <!--                                <button id="createSomeFile" icon="CREATE_ACTION" invoke="createSomeFileButtonAction"/> -->
                                 <button action="someFilesTable.create"/>
                                 <button action="someFilesTable.edit"/>
                                 <button action="someFilesTable.remove"/>
@@ -162,17 +165,22 @@
                         </table>
                     </tab>
                     <tab id="tabLetter" caption="msg://msgLetter" margin="true,false,false,false" spacing="true">
-                        <richTextArea id="questionLetterRichTextArea"
-                                      width="100%"
-                                      editable="false"
-                                      visible="false"
-                                      caption="msg://msgPatternLetter"
-                                      height="100pt"/>
-                        <richTextArea id="letterRichTextArea"
-                                      dataContainer="candidateCVDc"
-                                      property="letter"
-                                      width="100%"
-                                      height="300pt"/>
+                        <vbox spacing="true"
+                              margin="true,true,true,true">
+                            <richTextArea id="questionLetterRichTextArea"
+                                          width="100%"
+                                          editable="false"
+                                          visible="false"
+                                          caption="msg://msgPatternLetter"
+                                          stylename="text-field-title-form"
+                                          height="100pt"/>
+                            <richTextArea id="letterRichTextArea"
+                                          dataContainer="candidateCVDc"
+                                          property="letter"
+                                          caption="msg://msgLetter"
+                                          width="100%"
+                                          height="300pt"/>
+                        </vbox>
                     </tab>
                 </tabSheet>
             </column>
