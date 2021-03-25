@@ -284,6 +284,7 @@
             <property name="email"/>
             <property name="telegramName"/>
             <property name="skypeName"/>
+            <property name="positionList"/>
         </property>
         <property name="vacancy" fetch="BATCH" view="_local">
             <property name="positionType" view="_minimal">
