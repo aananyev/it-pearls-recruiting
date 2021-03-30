@@ -463,6 +463,48 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
+    @Install(to = "openPositionsTable.salaryMinMax", subject = "columnGenerator")
+    private String openPositionsTableSalaryMinMaxColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String retStr = "";
+
+        try {
+            retStr = getSalaryString(event.getItem());
+        } catch (NullPointerException e) {
+            retStr = "";
+        }
+
+        return retStr;
+    }
+
+    private String getSalaryString(OpenPosition openPosition) {
+        int minLength = openPosition.getSalaryMin().toString().length();
+        int maxLength = openPosition.getSalaryMax().toString().length();
+
+        String retStr = "";
+
+        try {
+            retStr = openPosition.getSalaryMin().toString().substring(0, minLength - 3) + " / "
+                    + openPosition.getSalaryMax().toString().substring(0, maxLength - 3);
+        } catch (NullPointerException e) {
+            retStr = "";
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "openPositionsTable.salaryMinMax", subject = "descriptionProvider")
+    private String openPositionsTableSalaryMinMaxDescriptionProvider(OpenPosition openPosition) {
+        String retStr = "";
+
+        try {
+            retStr = getSalaryString(openPosition);
+        } catch (NullPointerException e) {
+            retStr = "";
+        }
+
+        return retStr;
+    }
+
     @Install(to = "openPositionsTable.cityPositionList", subject = "columnGenerator")
     private Object openPositionsTableCityPositionListColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String mainCity = "";

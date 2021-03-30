@@ -102,7 +102,7 @@
                 <column id="vacansyName"
                         property="vacansyName"
                         resizable="true"
-                        maximumWidth="500px"
+                        maximumWidth="400px"
                         caption="msg://msgVacancy"/>
                 <column id="positionType"
                         resizable="true"
@@ -112,8 +112,14 @@
                 <column id="projectName"
                         resizable="true"
                         property="projectName"
-                        maximumWidth="300px"
+                        maximumWidth="250px"
                         caption="msg://msgProjectName"/>
+                <column id="salaryMinMax"
+                        resizable="true"
+                        width="120px"
+                        caption="msg://msgSalaryMinMax">
+                    <textRenderer/>
+                </column>
                 <column id="cityPositionList"
                         caption="msg://msgCity"
                         minimumWidth="60px"

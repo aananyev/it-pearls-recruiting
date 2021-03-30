@@ -353,6 +353,9 @@
                                caption="msg://msgSalaryMax"
                                width="100%"
                                required="true"/>
+                    <checkBox id="salaryStrongLimitCheckBox"
+                              dataContainer="openPositionDc"
+                              caption="msg://msgSalaryStrongLimit"/>
                 </hbox>
             </tab>
             <tab id="tabPayments"

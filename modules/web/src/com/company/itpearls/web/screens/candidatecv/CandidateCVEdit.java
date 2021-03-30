@@ -7,10 +7,7 @@ import com.company.itpearls.entity.SomeFiles;
 import com.company.itpearls.web.screens.somefiles.SomeFilesEdit;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.FileStorageException;
-import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -21,10 +18,19 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.AppUI;
+import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.io.RandomAccessFile;
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 @UiController("itpearls_CandidateCV.edit")
@@ -66,6 +72,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Link originalCVLink;
     @Inject
     private RichTextArea questionLetterRichTextArea;
+    @Inject
+    private FileLoader fileLoader;
+    @Inject
+    private RichTextArea candidateCVRichTextArea;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -323,6 +333,41 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             value = "http://" + value;
 
         webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
+    }
+
+    @Subscribe("fileOriginalCVField")
+    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) throws IOException {
+        parsePdfCV(event);
+        getPhotofromPDF(event);
+    }
+
+    private void getPhotofromPDF(FileUploadField.FileUploadSucceedEvent event) throws IOException {
+        File file = new File(event.getFileName());
+        PDDocument pdDocument = PDDocument.load(file);
+
+        PDFRenderer renderer = new PDFRenderer(pdDocument);
+
+        BufferedImage image = renderer.renderImage(0);
+        String TMP_IMAGE = "tmp_image.jpg";
+        ImageIO.write(image, "JPEG", new File(TMP_IMAGE));
+
+        pdDocument.close();
+    }
+
+    private void parsePdfCV(FileUploadField.FileUploadSucceedEvent event) throws IOException {
+        String parsedText;
+
+        PDFParser parser = new PDFParser(new RandomAccessFile(new File(event.getFileName()), "r"));
+        parser.parse();
+
+        COSDocument cosDoc = parser.getDocument();
+        PDFTextStripper pdfStripper = new PDFTextStripper();
+        PDDocument pdDoc = new PDDocument(cosDoc);
+        parsedText = pdfStripper.getText(pdDoc);
+
+        if(candidateCVRichTextArea.getValue() != null) {
+            candidateCVRichTextArea.setValue(parsedText);
+        }
     }
 
     public void setParameter(CandidateCV entity) {

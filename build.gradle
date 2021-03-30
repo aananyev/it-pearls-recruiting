@@ -1,7 +1,6 @@
 buildscript {
     ext.cubaVersion = '7.2.13'
     repositories {
-        mavenLocal()
         maven {
             url 'https://nexus.cuba-platform.cn/repository/cuba/'
 
@@ -81,6 +80,7 @@ configure(globalModule) {
             runtime('javax.xml.bind:jaxb-api:2.3.1')
             runtime('org.glassfish.jaxb:jaxb-runtime:2.3.1')
         }
+        compile 'org.apache.pdfbox:pdfbox:2.0.23'
     }
 
     entitiesEnhancing {
