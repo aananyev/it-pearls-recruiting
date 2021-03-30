@@ -405,6 +405,7 @@ create table ITPEARLS_OPEN_POSITION (
     COMMAND_CANDIDATE integer not null,
     SALARY_MIN decimal(19, 2),
     SALARY_MAX decimal(19, 2),
+    SALARY_FIX_LIMIT boolean,
     CITY_POSITION_ID uuid,
     POSITION_TYPE_ID uuid,
     PROJECT_NAME_ID uuid not null,

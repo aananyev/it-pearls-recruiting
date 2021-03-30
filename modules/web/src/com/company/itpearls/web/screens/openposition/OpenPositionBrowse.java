@@ -483,7 +483,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String retStr = "";
 
         try {
-            retStr = openPosition.getSalaryMin().toString().substring(0, minLength - 3) + " / "
+            retStr = openPosition.getSalaryMin().toString().substring(0, minLength - 3) + "/"
                     + openPosition.getSalaryMax().toString().substring(0, maxLength - 3);
         } catch (NullPointerException e) {
             retStr = "";
@@ -496,10 +496,27 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableSalaryMinMaxDescriptionProvider(OpenPosition openPosition) {
         String retStr = "";
 
+        if(openPosition.getSalaryFixLimit()) {
+            retStr = "Фиксированное запрлатное предложение\n";
+        }
+
         try {
-            retStr = getSalaryString(openPosition);
+            retStr = retStr + getSalaryString(openPosition);
         } catch (NullPointerException e) {
             retStr = "";
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "openPositionsTable.salaryMinMax", subject = "styleProvider")
+    private String openPositionsTableSalaryMinMaxStyleProvider(OpenPosition openPosition) {
+        String retStr = "";
+
+        if(openPosition.getSalaryFixLimit() != null) {
+            if(openPosition.getSalaryFixLimit()) {
+                retStr = "salary-fix-limit";
+            }
         }
 
         return retStr;

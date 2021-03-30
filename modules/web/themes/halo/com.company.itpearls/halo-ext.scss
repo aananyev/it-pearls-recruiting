@@ -1,6 +1,10 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 
+.salary-fix-limit {
+    color: red;
+}
+
 .vacancy-filed-close-gray {
     color: gray;
 }

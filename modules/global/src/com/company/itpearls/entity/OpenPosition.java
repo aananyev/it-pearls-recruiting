@@ -46,6 +46,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "SALARY_MAX")
     protected BigDecimal salaryMax;
 
+    @Column(name = "SALARY_FIX_LIMIT")
+    protected Boolean salaryFixLimit;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_POSITION_ID")
@@ -417,5 +420,13 @@ public class OpenPosition extends StandardEntity {
 
     public void setCommentEn(String commentEn) {
         this.commentEn = commentEn;
+    }
+
+    public void setSalaryFixLimit(Boolean salaryFixLimit) {
+        this.salaryFixLimit = salaryFixLimit;
+    }
+
+    public Boolean getSalaryFixLimit() {
+        return salaryFixLimit;
     }
 }
