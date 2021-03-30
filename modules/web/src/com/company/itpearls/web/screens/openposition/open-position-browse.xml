@@ -114,16 +114,16 @@
                         property="projectName"
                         maximumWidth="250px"
                         caption="msg://msgProjectName"/>
-                <column id="salaryMinMax"
-                        resizable="true"
-                        width="120px"
-                        caption="msg://msgSalaryMinMax">
-                    <textRenderer/>
-                </column>
                 <column id="cityPositionList"
                         caption="msg://msgCity"
                         minimumWidth="60px"
                         width="120px">
+                    <textRenderer/>
+                </column>
+                <column id="salaryMinMax"
+                        resizable="true"
+                        width="120px"
+                        caption="msg://msgSalaryMinMax">
                     <textRenderer/>
                 </column>
                 <column id="numberPosition"

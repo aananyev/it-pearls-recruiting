@@ -496,8 +496,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableSalaryMinMaxDescriptionProvider(OpenPosition openPosition) {
         String retStr = "";
 
-        if(openPosition.getSalaryFixLimit()) {
-            retStr = "Фиксированное запрлатное предложение\n";
+        if(openPosition.getSalaryFixLimit() != null) {
+            if (openPosition.getSalaryFixLimit()) {
+                retStr = "Фиксированное запрлатное предложение\n";
+            }
         }
 
         try {
@@ -979,6 +981,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.cityPositionList", subject = "descriptionProvider")
     private String openPositionsTableCityPositionListDescriptionProvider(OpenPosition openPosition) {
         String outStr = "";
+
+        if(openPosition.getCityPosition() != null) {
+            outStr = openPosition.getCityPosition().getCityRuName();
+        }
 
         if (openPosition.getCities() != null) {
             for (City s : openPosition.getCities()) {
