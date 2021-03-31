@@ -21,6 +21,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.*;
 
 @UiController("itpearls_OpenPosition.browse")
@@ -28,6 +29,7 @@ import java.util.*;
 @LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
+    private static final String NULL_SALARY = "0 т.р./0 т.р.";
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
     @Inject
@@ -393,7 +395,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             return a;
         }
 
-        return "Владелец проекта: " + projectOwner + " \n" + a;
+        return openPosition.getProjectName().getProjectName() + "\n"
+                + "Владелец проекта: " + projectOwner + " \n" + a;
     }
 
     @Inject
@@ -480,13 +483,54 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         int minLength = openPosition.getSalaryMin().toString().length();
         int maxLength = openPosition.getSalaryMax().toString().length();
 
+        BigDecimal salaryMin = openPosition.getSalaryMin().divide(BigDecimal.valueOf(1000));
+        BigDecimal salaryMax = openPosition.getSalaryMax().divide(BigDecimal.valueOf(1000));
+
         String retStr = "";
 
         try {
-            retStr = openPosition.getSalaryMin().toString().substring(0, minLength - 3) + "/"
-                    + openPosition.getSalaryMax().toString().substring(0, maxLength - 3);
+            int salMin = salaryMin.divide(BigDecimal.valueOf(1000)).intValue();
+            if (salMin != 0) {
+                retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
+                        + " т.р./"
+                        + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
+                        + " т.р.";
+            } else {
+                retStr = "До "
+                        + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
+                        + " т.р.";
+            }
         } catch (NullPointerException e) {
             retStr = "";
+        }
+
+        if (salaryMin.intValue() == 0) {
+            retStr = "неопределено";
+        }
+
+        return retStr;
+    }
+
+    private String getSalaryStringCaption(OpenPosition openPosition) {
+        int minLength = openPosition.getSalaryMin().toString().length();
+        int maxLength = openPosition.getSalaryMax().toString().length();
+
+        BigDecimal salaryMin = openPosition.getSalaryMin().divide(BigDecimal.valueOf(1000));
+        BigDecimal salaryMax = openPosition.getSalaryMax().divide(BigDecimal.valueOf(1000));
+
+        String retStr = "";
+
+        try {
+            retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
+                    + " т.р./"
+                    + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
+                    + " т.р.";
+        } catch (NullPointerException e) {
+            retStr = "";
+        }
+
+        if (salaryMin.intValue() == 0) {
+            retStr = "неопределено";
         }
 
         return retStr;
@@ -496,14 +540,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableSalaryMinMaxDescriptionProvider(OpenPosition openPosition) {
         String retStr = "";
 
-        if(openPosition.getSalaryFixLimit() != null) {
+        if (openPosition.getSalaryFixLimit() != null) {
             if (openPosition.getSalaryFixLimit()) {
                 retStr = "Фиксированное запрлатное предложение\n";
             }
         }
 
         try {
-            retStr = retStr + getSalaryString(openPosition);
+            retStr = retStr + getSalaryStringCaption(openPosition);
         } catch (NullPointerException e) {
             retStr = "";
         }
@@ -515,8 +559,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableSalaryMinMaxStyleProvider(OpenPosition openPosition) {
         String retStr = "";
 
-        if(openPosition.getSalaryFixLimit() != null) {
-            if(openPosition.getSalaryFixLimit()) {
+        if (openPosition.getSalaryFixLimit() != null) {
+            if (openPosition.getSalaryFixLimit()) {
                 retStr = "salary-fix-limit";
             }
         }
@@ -978,11 +1022,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
+    @Install(to = "openPositionsTable.positionType", subject = "descriptionProvider")
+    private String openPositionsTablePositionTypeDescriptionProvider(OpenPosition openPosition) {
+        return openPosition.getPositionType() != null ? openPosition.getPositionType().getPositionRuName()
+                + (openPosition.getPositionType().getPositionEnName() != null ? "/"
+                + openPosition.getPositionType().getPositionEnName() : "")
+                : "";
+    }
+
     @Install(to = "openPositionsTable.cityPositionList", subject = "descriptionProvider")
     private String openPositionsTableCityPositionListDescriptionProvider(OpenPosition openPosition) {
         String outStr = "";
 
-        if(openPosition.getCityPosition() != null) {
+        if (openPosition.getCityPosition() != null) {
             outStr = openPosition.getCityPosition().getCityRuName();
         }
 

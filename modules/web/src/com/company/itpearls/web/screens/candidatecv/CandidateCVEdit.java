@@ -342,6 +342,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     private void getPhotofromPDF(FileUploadField.FileUploadSucceedEvent event) throws IOException {
+        /*
         File file = new File(event.getFileName());
         PDDocument pdDocument = PDDocument.load(file);
 
@@ -352,6 +353,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         ImageIO.write(image, "JPEG", new File(TMP_IMAGE));
 
         pdDocument.close();
+         */
     }
 
     private void parsePdfCV(FileUploadField.FileUploadSucceedEvent event) throws IOException {

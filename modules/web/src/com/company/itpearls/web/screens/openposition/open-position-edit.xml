@@ -435,26 +435,6 @@
                         </vbox>
                     </hbox>
                 </groupBox>
-                <!--                <dataGrid id="personTable"
-                                          width="100%"
-                                          dataContainer="personsDc">
-                                    <columns>
-                                        <column id="sendResumeToEmail"
-                                                property="sendResumeToEmail"
-                                                caption="msg://msgSendResume"
-                                                width="80px"
-                                                editable="true"/>
-                                        <column id="secondName"
-                                                property="secondName"/>
-                                        <column id="firstName"
-                                                property="firstName"/>
-                                        <column id="personPosition.positionRuName"
-                                                property="personPosition"/>
-                                        <column id="positionCountry.countryRuName"
-                                                property="positionCountry"/>
-                                    </columns>
-                                    <rowsCount/>
-                                </dataGrid> -->
             </tab>
             <tab caption="mainMsg://msgJobDescription"
                  margin="true,true,true,true"
@@ -487,22 +467,29 @@
                                           caption="msg://msgCommandExperience"/>
                     </groupBox>
                     <hbox spacing="true" width="100%">
-                        <richTextArea id="openPositionRichTextArea"
-                                      dataContainer="openPositionDc"
-                                      property="comment"
-                                      caption="msg://msgRuComment"
-                                      width="100%"
-                                      box.expandRatio="1"
-                                      height="350px"
-                                      required="true"/>
-                        <richTextArea id="openPositionEnRichTextArea"
-                                      dataContainer="openPositionDc"
-                                      property="commentEn"
-                                      caption="msg://msgEnComment"
-                                      width="100%"
-                                      box.expandRatio="1"
-                                      height="350px"
-                                      required="false"/>
+                        <accordion id="openPositionAccordion"
+                                   height="100%">
+                            <tab id="openPositionRuTabAccordion"
+                                 caption="msg://msgRuComment">
+                                <richTextArea id="openPositionRichTextArea"
+                                              dataContainer="openPositionDc"
+                                              property="comment"
+                                              width="100%"
+                                              box.expandRatio="1"
+                                              height="350px"
+                                              required="true"/>
+                            </tab>
+                            <tab id="openPositionEnTabAccordion"
+                                 caption="msg://msgEnComment">
+                                <richTextArea id="openPositionEnRichTextArea"
+                                              dataContainer="openPositionDc"
+                                              property="commentEn"
+                                              width="100%"
+                                              box.expandRatio="1"
+                                              height="350px"
+                                              required="false"/>
+                            </tab>
+                        </accordion>
                     </hbox>
                     <textField id="shortDescriptionTextArea"
                                dataContainer="openPositionDc"
