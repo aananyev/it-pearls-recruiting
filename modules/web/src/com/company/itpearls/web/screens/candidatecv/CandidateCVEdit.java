@@ -1,9 +1,7 @@
 package com.company.itpearls.web.screens.candidatecv;
 
-import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.SomeFiles;
+import com.company.itpearls.core.PdfParserService;
+import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.somefiles.SomeFilesEdit;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -13,6 +11,7 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.WebBrowserTools;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
@@ -30,8 +29,8 @@ import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 
 @UiController("itpearls_CandidateCV.edit")
 @UiDescriptor("candidate-cv-edit.xml")
@@ -73,9 +72,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private RichTextArea questionLetterRichTextArea;
     @Inject
-    private FileLoader fileLoader;
-    @Inject
     private RichTextArea candidateCVRichTextArea;
+    @Inject
+    private PdfParserService pdfParserService;
+    @Inject
+    private CollectionContainer<JobCandidate> candidatesDc;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -88,17 +89,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
                 commitChanges();
 
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption("Commit changes of " + candidateField.getValue().getFullName())
-                        .withDescription("INFO")
-                        .show();
-
-                if (file != null) {
-                    notifications.create()
-                            .withCaption("File is uploaded to temporary storage at " + file.getAbsolutePath())
-                            .show();
-                }
-
                 FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
 
                 try {
@@ -110,6 +100,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 dataManager.commit(fd);
 
                 notifications.create()
+                        .withType(Notifications.NotificationType.TRAY)
                         .withCaption("Uploaded file: " + fileOriginalCVField.getFileName())
                         .show();
             }
@@ -119,15 +110,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 notifications.create()
                         .withCaption("File upload error")
                         .show());
-
-        /*
-        // а вдруг этот класс вызван из ItercationListEdit кнопкой?
-         ExchangeBean exchange = getEditedEntity().getValue( "exchange" );
-
-        if( exchange != null) {
-            candidateField.setValue( exchange.getCandidate() );
-            candidateCVFieldOpenPosition.setValue( exchange.getOpenPosition() );
-        } */
     }
 
     void openURL(String url) {
@@ -336,14 +318,91 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     @Subscribe("fileOriginalCVField")
-    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) throws IOException {
-        parsePdfCV(event);
-        getPhotofromPDF(event);
+    public void onFileOriginalCVFieldFileUploadSucceed1(FileUploadField.FileUploadSucceedEvent event) {
+        File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+        String textResume = "";
+
+        try {
+            textResume = parsePdfCV(loadFile);
+            candidateCVRichTextArea.setValue(textResume.replace("\n", "<br>"));
+        } catch (IOException e) {
+            notifications.create()
+                    .withType(Notifications.NotificationType.WARNING)
+                    .withDescription("ВНИМАНИЕ!")
+                    .withCaption("Ошибка расшифровки резюме.\nЗагрузите PDF для расшифровки.")
+                    .show();
+        }
+
+        parserSkills(textResume);
     }
 
-    private void getPhotofromPDF(FileUploadField.FileUploadSucceedEvent event) throws IOException {
-        /*
-        File file = new File(event.getFileName());
+
+/*
+    @Subscribe("fileOriginalCVField")
+    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) throws IOException {
+        File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+
+        if(loadFile != null) {
+            notifications.create()
+                    .withType(Notifications.NotificationType.TRAY)
+                    .withCaption("Резюме загружено в хранилище")
+                    .show();
+        }
+        
+        String textResume = "";
+
+        try {
+            textResume = parsePdfCV(loadFile);
+        } catch (Exception e) {
+            notifications.create()
+                    .withDescription("ВНИМАНИЕ!")
+                    .withCaption("Ошибка расшифровки резюме.\nЗагрузите PDF для расшифровки.")
+                    .show();
+        }
+        
+        parserSkills(textResume);
+//        getPhotofromPDF(fileOriginalCVField.getFileName());
+
+        FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
+
+        try {
+            fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
+        } catch (FileStorageException e) {
+            throw new RuntimeException("Ошибка записи файла в хранилище.", e);
+        }
+
+        dataManager.commit(fd);
+
+        notifications.create()
+                .withType(Notifications.NotificationType.TRAY)
+                .withCaption("Резюме загружено в хранилище")
+                .show();
+
+    }
+*/
+
+
+    private void parserSkills(String textResume) {
+        List<SkillTree> candidateSkills = pdfParserService.parseSkillTree(textResume);
+
+        CommitContext commitContext = new CommitContext();
+        JobCandidate jobCandidate = getEditedEntity().getCandidate();
+        jobCandidate.setSkills(candidateSkills);
+
+        commitContext.addInstanceToCommit(jobCandidate);
+
+        dataManager.commit(commitContext);
+    }
+
+    @Subscribe("fileOriginalCVField")
+    public void onFileOriginalCVFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
+        notifications.create()
+                .withCaption("Ошибка загрузки файла в хранилище.")
+                .show();
+    }
+
+    private void getPhotofromPDF(String fileName) throws IOException {
+        File file = new File(fileName);
         PDDocument pdDocument = PDDocument.load(file);
 
         PDFRenderer renderer = new PDFRenderer(pdDocument);
@@ -353,23 +412,31 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         ImageIO.write(image, "JPEG", new File(TMP_IMAGE));
 
         pdDocument.close();
-         */
     }
 
-    private void parsePdfCV(FileUploadField.FileUploadSucceedEvent event) throws IOException {
-        String parsedText;
+    private String parsePdfCV(File fileName) throws IOException {
+        String parsedText = "";
 
-        PDFParser parser = new PDFParser(new RandomAccessFile(new File(event.getFileName()), "r"));
-        parser.parse();
+        if(fileOriginalCVField.getFileName().contains("pdf")) {
 
-        COSDocument cosDoc = parser.getDocument();
-        PDFTextStripper pdfStripper = new PDFTextStripper();
-        PDDocument pdDoc = new PDDocument(cosDoc);
-        parsedText = pdfStripper.getText(pdDoc);
+            PDFParser parser = new PDFParser(new RandomAccessFile(fileName, "r"));
+            parser.parse();
 
-        if(candidateCVRichTextArea.getValue() != null) {
-            candidateCVRichTextArea.setValue(parsedText);
+            COSDocument cosDoc = parser.getDocument();
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            PDDocument pdDoc = new PDDocument(cosDoc);
+            parsedText = pdfStripper.getText(pdDoc);
+
+            candidateCVRichTextArea.setValue(parsedText.replace("\n", "<br>"));
+        } else {
+            notifications.create()
+                    .withDescription("ОШИБКА")
+                    .withCaption("Файл не является PDF")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
         }
+
+        return parsedText;
     }
 
     public void setParameter(CandidateCV entity) {
@@ -393,5 +460,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 })
                 .build()
                 .show();
+    }
+
+    public void rescanResume() {
+        String inputText = candidateCVRichTextArea.getValue();
+        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
+
+        getEditedEntity().setSkillTree(skillTrees);
     }
 }

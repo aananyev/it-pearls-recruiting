@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.position.PositionEdit;
@@ -157,6 +158,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CollectionLoader<OpenPosition> openPositionParentDl;
     @Inject
     private InstanceLoader<OpenPosition> openPositionDl;
+    @Inject
+    private PdfParserService pdfParserService;
+    @Inject
+    private RichTextArea openPositionEnRichTextArea;
+    @Inject
+    private RichTextArea openPositionRichTextArea;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1333,5 +1340,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             citiesLabel.setValue(outStr);
             citiesLabel.setDescription(description);
         }
+    }
+
+    public void rescanJobDescription() {
+        String inputText = openPositionRichTextArea.getValue();
+        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
+
+        getEditedEntity().setSkillsList(skillTrees);
+
     }
 }

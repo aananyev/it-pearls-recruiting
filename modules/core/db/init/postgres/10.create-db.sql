@@ -334,6 +334,8 @@ create table ITPEARLS_SKILL_TREE (
     SKILL_TREE_ID uuid,
     JOB_CANDIDATE_ID uuid,
     OPEN_POSITION_ID uuid,
+    CANDIDATE_CV_ID uuid,
+    COMMENT text,
     --
     primary key (ID)
 )^

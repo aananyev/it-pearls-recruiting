@@ -78,6 +78,12 @@ public class CandidateCV extends StandardEntity {
     @OneToMany(mappedBy = "candidateCV")
     protected List<SomeFiles> someFiles;
 
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "candidateCV")
+    protected List<SkillTree> skillTree;
+
     public List<SomeFiles> getSomeFiles() {
         return someFiles;
     }
@@ -180,5 +186,13 @@ public class CandidateCV extends StandardEntity {
 
     public void setCandidate(JobCandidate candidate) {
         this.candidate = candidate;
+    }
+
+    public void setSkillTree(List<SkillTree> skillTree) {
+        this.skillTree = skillTree;
+    }
+
+    public List<SkillTree> getSkillTree() {
+        return skillTree;
     }
 }

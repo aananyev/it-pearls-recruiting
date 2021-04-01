@@ -504,7 +504,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             retStr = "";
         }
 
-        if (salaryMin.intValue() == 0) {
+        if (salaryMax.intValue() == 0) {
             retStr = "неопределено";
         }
 

@@ -42,6 +42,15 @@ public class SkillTree extends StandardEntity {
     @OneToMany(mappedBy = "skillTree")
     protected List<JobCandidate> candidates;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CANDIDATE_CV_ID")
+    protected CandidateCV candidateCV;
+
+    @Lob
+    @Column(name = "COMMENT")
+    protected String comment;
+
     public List<JobCandidate> getCandidates() {
         return candidates;
     }
@@ -80,5 +89,21 @@ public class SkillTree extends StandardEntity {
 
     public void setSkillName(String skillName) {
         this.skillName = skillName;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public CandidateCV getCandidateCV() {
+        return candidateCV;
+    }
+
+    public void setCandidateCV(CandidateCV candidateCV) {
+        this.candidateCV = candidateCV;
     }
 }

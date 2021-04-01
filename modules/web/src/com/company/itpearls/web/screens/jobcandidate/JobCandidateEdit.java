@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.openposition.SelectCitiesLocation;
 import com.haulmont.cuba.core.global.CommitContext;
@@ -125,6 +126,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Screens screens;
     @Inject
     private Label<String> positionsLabel;
+    @Inject
+    private PdfParserService pdfParserService;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -1074,5 +1077,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             positionsLabel.setValue(outStr);
             positionsLabel.setDescription(description);
         }
+    }
+
+    @Install(to = "jobCandidateSkillListTable.skillName", subject = "descriptionProvider")
+    private String jobCandidateSkillListTableSkillNameDescriptionProvider(SkillTree skillTree) {
+        return skillTree.getComment();
     }
 }

@@ -14,6 +14,7 @@
                 <entry key="itpearls_GetUserRoleService" value="com.company.itpearls.service.GetUserRoleService"/>
                 <entry key="itpearls_GetRoleService" value="com.company.itpearls.service.GetRoleService"/>
                 <entry key="itpearls_SubscribeDateService" value="com.company.itpearls.service.SubscribeDateService"/>
+                <entry key="itpearls_PdfParserService" value="com.company.itpearls.core.PdfParserService"/>
             </map>
         </property>
     </bean>

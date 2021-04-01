@@ -23,37 +23,34 @@ order by e.skillName]]>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="skillTreeDc" width="100%">
+        <form id="form"
+              dataContainer="skillTreeDc"
+              width="100%">
             <column width="100%">
-                <tabSheet>
-                    <tab id="tabSkillTree" caption="msg://msgSkill" margin="true,false,false,false" spacing="true">
-                        <lookupPickerField id="skillTreeField" optionsContainer="skillTreesDc"
-                                           caption="mainMsg://msgSkillTree" dataContainer="skillTreeDc"
-                                           property="skillTree" width="50%">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <textField id="skillNameField" caption="mainMsg://msgSkill"
-                                   dataContainer="skillTreeDc" property="skillName" width="50%"/>
-                    </tab>
-                    <tab id="tabCandidates" caption="msg://msgCandidate" margin="true,false,false,false" spacing="true">
-                        <table id="skillTreeCandidatesTable" dataContainer="skillTreeCandidatesesDc" height="200px" width="100%"
-                        >
-                            <columns>
-                                <column id="firstName"/>
-                                <column id="middleName"/>
-                                <column id="secondName"/>
-                                <column id="birdhDate"/>
-                                <column id="email"/>
-                                <column id="phone"/>
-                                <column id="skypeName"/>
-                                <column id="telegramName"/>
-                            </columns>
-                            <actions>
-                                <action id="edit" type="edit"/>
-                            </actions>
-                        </table>
+                <tabSheet stylename="framed">
+                    <tab id="tabSkillTree"
+                         caption="msg://msgSkill"
+                         margin="true,trua,true,true"
+                         spacing="true">
+                        <vbox spacing="true" height="100%" width="100%">
+                            <lookupPickerField id="skillTreeField"
+                                               optionsContainer="skillTreesDc"
+                                               caption="mainMsg://msgSkillTree"
+                                               property="skillTree"
+                                               width="50%">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                            <textField id="skillNameField" caption="mainMsg://msgSkill"
+                                       dataContainer="skillTreeDc" property="skillName" width="50%"/>
+
+                            <richTextArea id="skillCommentRichTextArea"
+                                          dataContainer="skillTreeDc"
+                                          property="comment"
+                                          width="100%"
+                                          height="100%"/>
+                        </vbox>
                     </tab>
                 </tabSheet>
             </column>

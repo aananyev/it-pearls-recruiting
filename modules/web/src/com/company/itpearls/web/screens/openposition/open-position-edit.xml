@@ -25,8 +25,6 @@
                     </property>
                 </property>
                 <property name="commandCandidate"/>
-                <property name="skillsList"
-                          view="_minimal"/>
                 <property name="candidates"
                           view="_minimal"/>
                 <property name="parentOpenPosition"
@@ -34,6 +32,10 @@
                 </property>
                 <property name="cities"
                           view="_local"/>
+                <property name="skillsList"
+                          view="_local">
+                    <property name="skillTree" view="_local"/>
+                </property>
             </view>
             <loader id="openPositionDl"/>
             <collection id="openPositionSkillsListsDc"
@@ -550,12 +552,17 @@
                  spacing="true"
                  expand="openPositionSkillsListTable"
                  icon="FILTER">
-                <dataGrid id="openPositionSkillsListTable"
+                <button id="rescanSkills"
+                        caption="msg://msgRescanJobDescription"
+                        align="BOTTOM_LEFT"
+                        invoke="rescanJobDescription"/>
+                <treeTable id="openPositionSkillsListTable"
                           height="100%"
                           width="100%"
+                          hierarchyProperty="skillTree"
                           dataContainer="openPositionSkillsListsDc">
                     <columns>
-                        <column id="skillName" property="skillName"/>
+                        <column id="skillName"/>
                     </columns>
                     <rowsCount/>
                     <actions>
@@ -571,7 +578,7 @@
                         <button action="openPositionSkillsListTable.edit"/>
                         <button action="openPositionSkillsListTable.remove"/>
                     </buttonsPanel>
-                </dataGrid>
+                </treeTable>
             </tab>
             <!--            <tab caption="mainMsg://msgResrutierTask"
                              margin="true,true,true,true"
