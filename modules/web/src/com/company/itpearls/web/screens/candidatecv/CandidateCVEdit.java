@@ -382,7 +382,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 */
 
 
-    private void parserSkills(String textResume) {
+    private void parserSkills(String textResume) {/*
         List<SkillTree> candidateSkills = pdfParserService.parseSkillTree(textResume);
 
         CommitContext commitContext = new CommitContext();
@@ -392,7 +392,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         commitContext.addInstanceToCommit(jobCandidate);
 
         dataManager.commit(commitContext);
-    }
+    */}
 
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadError(UploadField.FileUploadErrorEvent event) {

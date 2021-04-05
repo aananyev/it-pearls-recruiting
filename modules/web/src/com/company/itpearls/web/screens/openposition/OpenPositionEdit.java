@@ -1345,8 +1345,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void rescanJobDescription() {
         String inputText = openPositionRichTextArea.getValue();
         List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
-
         getEditedEntity().setSkillsList(skillTrees);
-
     }
 }

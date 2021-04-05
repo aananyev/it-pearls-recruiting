@@ -5,21 +5,16 @@
         focusComponent="recrutiesTasksesTable"
         messagesPack="com.company.itpearls.web.screens.openposition">
     <data readOnly="true">
-        <collection id="recrutiesTasksesDc"
-                    class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local">
-                <property name="positionType"/>
-            </view>
+        <instance id="recrutiesTasksesDc"
+                  class="com.company.itpearls.entity.RecrutiesTasks"
+                  view="_local">
             <loader id="recrutiesTasksesDl">
                 <query>
-                    <![CDATA[select e.positionType from itpearls_OpenPosition e
-                    where e.openClose = false
-                    group by e.positionType]]>
+                    <![CDATA[select e from itpearls_RecruitiesTasks e]]>
                 </query>
             </loader>
-        </collection>
-        <collection id="openPositions"
-                    class="com.company.itpearls.entity.Position"/>
+        </instance>
+
     </data>
     <dialogMode height="600"
                 modal="true"
@@ -33,18 +28,10 @@
                 dataLoader="recrutiesTasksesDl">
             <properties include=".*"/>
         </filter>
-        <dataGrid id="recrutiesTasksesTable"
-                  dataContainer="openPositions"
-                  width="100%">
-            <actions>
-            </actions>
+        <dataGrid id="recrutiesTasksesTable">
             <columns>
-                <column id="positionRuName" property="positionRuName"/>
-                <column id="positionEnName" property="positionEnName"/>
+                <column></column>
             </columns>
-            <buttonsPanel id="buttonsPanel"
-                          alwaysVisible="true">
-            </buttonsPanel>
         </dataGrid>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>

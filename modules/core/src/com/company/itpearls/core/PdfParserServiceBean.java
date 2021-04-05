@@ -32,10 +32,26 @@ public class PdfParserServiceBean implements PdfParserService {
         for(SkillTree specialisation : competitions) {
             if(inputText.contains(specialisation.getSkillName())) {
                 candidateSkills.add(specialisation);
+
+                if(isNotSkillParent(candidateSkills, specialisation.getSkillTree())) {
+                    candidateSkills.add(specialisation.getSkillTree());
+                }
             }
         }
-        return competitions;
+
+        return candidateSkills;
     }
+
+    private boolean isNotSkillParent(List<SkillTree> competitions, SkillTree skillTree) {
+        for(SkillTree comp : competitions) {
+            if(comp.equals(skillTree)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
     @Override
     public String pdf2txt(String fileName) throws IOException {

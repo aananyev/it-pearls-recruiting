@@ -32,19 +32,5 @@ public class RecrutiesTasksGroupSubscribeBrowse extends StandardLookup<Recruties
 
     @Subscribe
     public void onInit(InitEvent event) {
-        addDataSourceToGrid();
-    }
-
-    private void addDataSourceToGrid() {
-        positions = dataManager.loadValues("select e.positionType.positionRuName " +
-                        "from itpearls_OpenPosition e " +
-                        "where e.openClose = false " +
-                        "group by e.positionType")
-                .properties("positionType")
-                .list();
-
-        for (KeyValueEntity a : positions) {
-            String ret = a.getValue("positionType");
-        }
     }
 }

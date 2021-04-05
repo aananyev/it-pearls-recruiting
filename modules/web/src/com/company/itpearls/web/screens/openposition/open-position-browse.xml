@@ -140,6 +140,14 @@
                         caption="msg://msgCVDescription">
                     <iconRenderer/>
                 </column>
+                <column id="testExserice"
+                        sortable="false"
+                        caption="msg://msgNeedExercise"
+                        resizable="true"
+                        maximumWidth="65px"
+                        minimumWidth="45px">
+                    <iconRenderer/>
+                </column>
                 <column id="remoteWork"
                         property="remoteWork"
                         sortable="false"
@@ -149,14 +157,15 @@
                         caption="msg://msgRemoteWork">
                     <iconRenderer/>
                 </column>
-                <column id="testExserice"
+                <column id="queryQuestion"
                         sortable="false"
-                        caption="msg://msgNeedExercise"
+                        caption="msg://msgQuestionQuery"
                         resizable="true"
                         maximumWidth="65px"
                         minimumWidth="45px">
                     <iconRenderer/>
                 </column>
+
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"

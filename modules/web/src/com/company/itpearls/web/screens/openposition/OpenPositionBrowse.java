@@ -1055,5 +1055,86 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     public void onOpenPositionsTableEditorClose(DataGrid.EditorCloseEvent event) {
         openPositionsDl.load();
     }
+
+    @Install(to = "openPositionsTable.queryQuestion", subject = "columnGenerator")
+    private Object openPositionsTableQueryQuestionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String returnIcon = "";
+
+        switch (getQueryQuestion(event)) {
+            case 1:
+                returnIcon = "PLUS_CIRCLE";
+                break;
+            case 0:
+                returnIcon = "MINUS_CIRCLE";
+                break;
+            case 2:
+                returnIcon = "QUESTION_CIRCLE";
+                break;
+            default:
+                returnIcon = "QUESTION_CIRCLE";
+                break;
+        }
+
+        return CubaIcon.valueOf(returnIcon);
+    }
+
+    private int getQueryQuestion(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+
+        int retInt;
+
+        if(getTemplateLetter(event.getItem()) != "") {
+            retInt = 1;
+        } else {
+            retInt = 0;
+        }
+
+        return retInt;
+    }
+
+    private String getTemplateLetter(OpenPosition openPosition) {
+        String retStr = "";
+
+        if(openPosition.getTemplateLetter() != null &&
+            openPosition.getTemplateLetter() != "") {
+            retStr = "Требования к вакансии: " + Jsoup.parse(openPosition.getTemplateLetter()).text() + "\n\n";
+        }
+
+        if(openPosition.getProjectName().getTemplateLetter() != null &&
+            openPosition.getProjectName().getTemplateLetter() != "") {
+            retStr = retStr +
+                    "Требования проекта: " +
+                    Jsoup.parse(openPosition.getProjectName().getTemplateLetter()).text() + "\n\n";
+        }
+
+        if(openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != null &&
+            openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != "") {
+            retStr = retStr +
+                    "Требования департамента: " +
+                    Jsoup.parse(openPosition.getProjectName().getProjectDepartment().getTemplateLetter()).text();
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "openPositionsTable.queryQuestion", subject = "descriptionProvider")
+    private String openPositionsTableQueryQuestionDescriptionProvider(OpenPosition openPosition) {
+        return getTemplateLetter(openPosition);
+    }
+
+    @Install(to = "openPositionsTable.queryQuestion", subject = "styleProvider")
+    private String openPositionsTableQueryQuestionStyleProvider(OpenPosition openPosition) {
+        String style = "";
+
+        if (!getTemplateLetter(openPosition).equals("")) {
+            style = "open-position-pic-center-large-green";
+        } else {
+            style = "open-position-pic-center-large-red";
+        }
+
+        return style;
+    }
+
+
+
 }
 
