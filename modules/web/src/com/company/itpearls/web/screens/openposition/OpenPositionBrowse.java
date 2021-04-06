@@ -1,10 +1,12 @@
 package com.company.itpearls.web.screens.openposition;
 
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -78,6 +80,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private HBoxLayout urgentlyHBox;
     @Inject
     private LookupField remoteWorkLookupField;
+    @Inject
+    private Events events;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -461,6 +465,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
             retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
+
+            if(!entity.getOpenClose()) {
+                events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
+                        entity.getVacansyName()));
+            } else {
+                events.publish(new UiNotificationEvent(this, "Открыта вакансия: " +
+                        entity.getVacansyName()));
+            }
         });
 
         return retButton;

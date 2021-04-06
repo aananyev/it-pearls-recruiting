@@ -82,6 +82,7 @@ configure(globalModule) {
             runtime('org.glassfish.jaxb:jaxb-runtime:2.3.1')
         }
         compile 'org.apache.pdfbox:pdfbox:2.0.23'
+        compile 'org.webjars.npm:domelementtype:2.2.0'
     }
 
     entitiesEnhancing {

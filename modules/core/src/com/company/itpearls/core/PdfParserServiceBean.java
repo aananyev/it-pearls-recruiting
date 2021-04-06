@@ -29,11 +29,12 @@ public class PdfParserServiceBean implements PdfParserService {
                 .view("skillTree-view")
                 .list();
 
-        for(SkillTree specialisation : competitions) {
-            if(inputText.contains(specialisation.getSkillName())) {
+        for (SkillTree specialisation : competitions) {
+            if (inputText.toLowerCase().contains(specialisation.getSkillName().toLowerCase())) {
                 candidateSkills.add(specialisation);
 
-                if(isNotSkillParent(candidateSkills, specialisation.getSkillTree())) {
+                if (specialisation.getSkillTree() != null &&
+                        checkHiLevel(candidateSkills, specialisation.getSkillTree())) {
                     candidateSkills.add(specialisation.getSkillTree());
                 }
             }
@@ -42,22 +43,21 @@ public class PdfParserServiceBean implements PdfParserService {
         return candidateSkills;
     }
 
-    private boolean isNotSkillParent(List<SkillTree> competitions, SkillTree skillTree) {
-        for(SkillTree comp : competitions) {
-            if(comp.equals(skillTree)) {
-                return true;
+    private boolean checkHiLevel(List<SkillTree> candidateSkills, SkillTree skillTree) {
+        for (SkillTree a : candidateSkills) {
+            if(a.equals(skillTree)) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
-
 
     @Override
     public String pdf2txt(String fileName) throws IOException {
         String parsedText = "";
 
-        if(fileName.contains("pdf")) {
+        if (fileName.contains("pdf")) {
 
             PDFParser parser = new PDFParser(new RandomAccessFile(new File(fileName), "r"));
             parser.parse();

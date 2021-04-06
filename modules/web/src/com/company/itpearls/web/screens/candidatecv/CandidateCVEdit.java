@@ -188,6 +188,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         } else {
             itpearlsCVLink.setVisible(false);
         }
+
+        if(candidateCVRichTextArea.getValue() != null)
+            rescanResume();
     }
 
     public void onLinkButtonClick(String mylaunch) {
@@ -333,7 +336,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     .show();
         }
 
-        parserSkills(textResume);
+        rescanResume();
     }
 
 
@@ -379,10 +382,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 .show();
 
     }
-*/
 
 
-    private void parserSkills(String textResume) {/*
+
+    private void parserSkills(String textResume) {
         List<SkillTree> candidateSkills = pdfParserService.parseSkillTree(textResume);
 
         CommitContext commitContext = new CommitContext();
@@ -392,8 +395,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         commitContext.addInstanceToCommit(jobCandidate);
 
         dataManager.commit(commitContext);
-    */}
-
+    }
+*/
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
         notifications.create()
