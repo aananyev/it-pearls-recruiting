@@ -594,6 +594,10 @@ order by e.cityRuName]]>
                     </actions>
                     <buttonsPanel>
                         <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
+                        <button id="copyCVButton"
+                                caption="msg://msgCopy"
+                                icon="COPY"
+                                invoke="copyCVJobCandidate"/>
                         <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
                         <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
                     </buttonsPanel>

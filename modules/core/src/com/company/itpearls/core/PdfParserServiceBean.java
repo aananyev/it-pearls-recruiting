@@ -6,10 +6,13 @@ import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,5 +72,26 @@ public class PdfParserServiceBean implements PdfParserService {
         }
 
         return parsedText;
+    }
+
+    @Override
+    public File getImageFromPDF(File file) throws IOException {
+        //Loading an existing PDF document
+        PDDocument document = PDDocument.load(file);
+
+        //Instantiating the PDFRenderer class
+        PDFRenderer renderer = new PDFRenderer(document);
+
+        //Rendering an image from the PDF document
+        BufferedImage image = renderer.renderImage(0);
+
+        //Writing the image to a file
+        File tempJpg = File.createTempFile("img", "jpg");
+
+        ImageIO.write (image, "JPEG", tempJpg);
+
+        //Closing the document
+        document.close();
+        return tempJpg;
     }
 }

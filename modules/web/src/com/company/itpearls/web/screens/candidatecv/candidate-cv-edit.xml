@@ -57,87 +57,123 @@
                 </rows>
             </grid>
         </groupBox>
-        <form id="form" dataContainer="candidateCVDc" width="100%">
+        <form id="form"
+              dataContainer="candidateCVDc"
+              width="100%">
             <column width="100%">
                 <tabSheet id="tabSheet" stylename="framed">
-                    <tab id="tabCandidate" caption="msg://msgCandidate" spacing="true">
-                        <groupBox id="groupBox" spacing="true">
-                            <vbox>
-                                <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
-                                                   dataContainer="candidateCVDc" property="candidate"
-                                                   caption="msg://msgCandidate" height="50%" width="70%">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                        <action id="open" type="picker_open"/>
-                                    </actions>
-                                </lookupPickerField>
-                                <lookupPickerField id="resumePositionField"
-                                                   optionsContainer="resumePositionsDc"
-                                                   dataContainer="candidateCVDc"
-                                                   property="resumePosition"
-                                                   caption="msg://msgPosition"
-                                                   height="50%"
-                                                   required="true"
-                                                   width="70%">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                    </actions>
-                                </lookupPickerField>
-                                <lookupPickerField id="candidateCVFieldOpenPosition" dataContainer="candidateCVDc"
-                                                   optionsContainer="openPositionsDc"
-                                                   property="toVacancy" caption="mainMsg://msgVacancy" width="70%">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                    </actions>
-                                </lookupPickerField>
-                            </vbox>
-                            <lookupField id="СandidateCVField" dataContainer="candidateCVDc" optionsContainer="usersDc"
-                                         caption="mainMsg://msgOwner" property="owner" width="70%"/>
-                            <hbox width="70%">
-                                <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost"
-                                           caption="msg://msgDatePost"
-                                           height="50%" width="50%"/>
-                                <upload id="fileOriginalCVField"
-                                        property="originalFileCV"
-                                        showFileName="true"
-                                        align="TOP_RIGHT"
-                                        caption="msg://msgOriginalCV"
-                                        dataContainer="candidateCVDc"
+                    <tab id="tabCandidate"
+                         caption="msg://msgCandidate"
+                         spacing="true">
+                        <hbox spacing="true"
+                              width="100%"
+                              height="100%"
+                              expand="groupBox">
+                            <groupBox id="groupBox"
+                                      spacing="true"
+                                      stylename="light">
+                                <vbox>
+                                    <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
+                                                       dataContainer="candidateCVDc" property="candidate"
+                                                       caption="msg://msgCandidate" height="50%" width="70%">
+                                        <actions>
+                                            <action id="lookup" type="picker_lookup"/>
+                                            <action id="open" type="picker_open"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                    <lookupPickerField id="resumePositionField"
+                                                       optionsContainer="resumePositionsDc"
+                                                       dataContainer="candidateCVDc"
+                                                       property="resumePosition"
+                                                       caption="msg://msgPosition"
+                                                       height="50%"
+                                                       required="true"
+                                                       width="70%">
+                                        <actions>
+                                            <action id="lookup" type="picker_lookup"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                    <lookupPickerField id="candidateCVFieldOpenPosition" dataContainer="candidateCVDc"
+                                                       optionsContainer="openPositionsDc"
+                                                       property="toVacancy" caption="mainMsg://msgVacancy" width="70%">
+                                        <actions>
+                                            <action id="lookup" type="picker_lookup"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                </vbox>
+                                <lookupField id="СandidateCVField" dataContainer="candidateCVDc"
+                                             optionsContainer="usersDc"
+                                             caption="mainMsg://msgOwner" property="owner" width="70%"/>
+                                <hbox width="70%">
+                                    <dateField id="datePostField" dataContainer="candidateCVDc" property="datePost"
+                                               caption="msg://msgDatePost"
+                                               height="50%" width="50%"/>
+                                    <upload id="fileOriginalCVField"
+                                            property="originalFileCV"
+                                            showFileName="true"
+                                            align="TOP_RIGHT"
+                                            caption="msg://msgOriginalCV"
+                                            dataContainer="candidateCVDc"
+                                            fileStoragePutMode="IMMEDIATE"
+                                            showClearButton="true"/>
+                                </hbox>
+                                <grid spacing="true" width="100%">
+                                    <columns>
+                                        <column/>
+                                        <column flex="0"/>
+                                    </columns>
+                                    <rows>
+                                        <row>
+                                            <textField id="textFieldIOriginalCV" dataContainer="candidateCVDc"
+                                                       property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV"
+                                                       width="100%" align="MIDDLE_LEFT"/>
+                                            <link id="originalCVLink"
+                                                  icon="font-icon:FILE_WORD_O"
+                                                  align="BOTTOM_LEFT"
+                                                  target="_blank"
+                                                  caption="msg://msgGoTo"
+                                                  description="msg://msgGoTo"/>
+                                        </row>
+                                        <row>
+                                            <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc"
+                                                       property="linkItPearlsCV"
+                                                       caption="mainMsg://msgLinkToItPearlsCV" width="100%"
+                                                       align="MIDDLE_LEFT"/>
+                                            <link id="itpearlsCVLink"
+                                                  icon="font-icon:FILE_WORD_O"
+                                                  align="BOTTOM_LEFT"
+                                                  target="_blank"
+                                                  caption="msg://msgGoTo"
+                                                  description="msg://msgGoTo"/>
+                                        </row>
+                                    </rows>
+                                </grid>
+                            </groupBox>
+                            <vbox id="dropZone"
+                                  spacing="true"
+                                  width="200px"
+                                  height="266px"
+                                  align="TOP_RIGHT"
+                                  expand="candidatePic"
+                                  stylename="dropzone-container">
+                                <image id="candidatePic"
+                                       dataContainer="candidateCVDc"
+                                       property="fileImageFace"
+                                       width="100%"
+                                       align="TOP_RIGHT"
+                                       height="100%"
+                                       stylename="widget-border"
+                                       scaleMode="FILL"/>
+                                <upload id="fileImageFaceUpload"
                                         fileStoragePutMode="IMMEDIATE"
-                                        showClearButton="true"/>
-                            </hbox>
-                            <grid spacing="true" width="100%">
-                                <columns>
-                                    <column/>
-                                    <column flex="0"/>
-                                </columns>
-                                <rows>
-                                    <row>
-                                        <textField id="textFieldIOriginalCV" dataContainer="candidateCVDc"
-                                                   property="linkOriginalCv" caption="mainMsg://msgLinkOriginalCV"
-                                                   width="100%" align="MIDDLE_LEFT"/>
-                                        <link id="originalCVLink"
-                                              icon="font-icon:FILE_WORD_O"
-                                              align="BOTTOM_LEFT"
-                                              target="_blank"
-                                              caption="msg://msgGoTo"
-                                              description="msg://msgGoTo"/>
-                                    </row>
-                                    <row>
-                                        <textField id="textFieldITPearlsCV" dataContainer="candidateCVDc"
-                                                   property="linkItPearlsCV"
-                                                   caption="mainMsg://msgLinkToItPearlsCV" width="100%"
-                                                   align="MIDDLE_LEFT"/>
-                                        <link id="itpearlsCVLink"
-                                              icon="font-icon:FILE_WORD_O"
-                                              align="BOTTOM_LEFT"
-                                              target="_blank"
-                                              caption="msg://msgGoTo"
-                                              description="msg://msgGoTo"/>
-                                    </row>
-                                </rows>
-                            </grid>
-                        </groupBox>
+                                        dataContainer="candidateCVDc"
+                                        align="BOTTOM_CENTER"
+                                        showFileName="false"
+                                        dropZone="dropZone"
+                                        showClearButton="true"
+                                        property="fileImageFace"/>
+                            </vbox>
+                        </hbox>
                     </tab>
                     <tab id="tabCV"
                          caption="msg://msgCV"

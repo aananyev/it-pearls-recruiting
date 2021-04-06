@@ -84,6 +84,12 @@ public class CandidateCV extends StandardEntity {
     @OneToMany(mappedBy = "candidateCV")
     protected List<SkillTree> skillTree;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_IMAGE_FACE")
+    protected FileDescriptor fileImageFace;
+
+
     public List<SomeFiles> getSomeFiles() {
         return someFiles;
     }
@@ -194,5 +200,13 @@ public class CandidateCV extends StandardEntity {
 
     public List<SkillTree> getSkillTree() {
         return skillTree;
+    }
+
+    public FileDescriptor getFileImageFace() {
+        return fileImageFace;
+    }
+
+    public void setFileImageFace(FileDescriptor fileImageFace) {
+        this.fileImageFace = fileImageFace;
     }
 }

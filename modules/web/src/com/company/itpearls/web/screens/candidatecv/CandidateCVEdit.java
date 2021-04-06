@@ -77,6 +77,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private PdfParserService pdfParserService;
     @Inject
     private CollectionContainer<JobCandidate> candidatesDc;
+    @Inject
+    private Image candidatePic;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -324,9 +326,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onFileOriginalCVFieldFileUploadSucceed1(FileUploadField.FileUploadSucceedEvent event) {
         File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
         String textResume = "";
+        File imageFace = null;
 
         try {
             textResume = parsePdfCV(loadFile);
+            imageFace = pdfParserService.getImageFromPDF(loadFile);
+
             candidateCVRichTextArea.setValue(textResume.replace("\n", "<br>"));
         } catch (IOException e) {
             notifications.create()
@@ -339,64 +344,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         rescanResume();
     }
 
-
-/*
-    @Subscribe("fileOriginalCVField")
-    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) throws IOException {
-        File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
-
-        if(loadFile != null) {
-            notifications.create()
-                    .withType(Notifications.NotificationType.TRAY)
-                    .withCaption("Резюме загружено в хранилище")
-                    .show();
-        }
-        
-        String textResume = "";
-
-        try {
-            textResume = parsePdfCV(loadFile);
-        } catch (Exception e) {
-            notifications.create()
-                    .withDescription("ВНИМАНИЕ!")
-                    .withCaption("Ошибка расшифровки резюме.\nЗагрузите PDF для расшифровки.")
-                    .show();
-        }
-        
-        parserSkills(textResume);
-//        getPhotofromPDF(fileOriginalCVField.getFileName());
-
-        FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
-
-        try {
-            fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
-        } catch (FileStorageException e) {
-            throw new RuntimeException("Ошибка записи файла в хранилище.", e);
-        }
-
-        dataManager.commit(fd);
-
-        notifications.create()
-                .withType(Notifications.NotificationType.TRAY)
-                .withCaption("Резюме загружено в хранилище")
-                .show();
-
-    }
-
-
-
-    private void parserSkills(String textResume) {
-        List<SkillTree> candidateSkills = pdfParserService.parseSkillTree(textResume);
-
-        CommitContext commitContext = new CommitContext();
-        JobCandidate jobCandidate = getEditedEntity().getCandidate();
-        jobCandidate.setSkills(candidateSkills);
-
-        commitContext.addInstanceToCommit(jobCandidate);
-
-        dataManager.commit(commitContext);
-    }
-*/
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
         notifications.create()

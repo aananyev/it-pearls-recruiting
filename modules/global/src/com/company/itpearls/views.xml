@@ -254,6 +254,7 @@
             <property name="fileOwner" view="_minimal"/>
         </property>
         <property name="skillTree" view="_local"/>
+        <property name="fileImageFace" view="_local"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">

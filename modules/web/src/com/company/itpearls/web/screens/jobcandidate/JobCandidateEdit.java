@@ -128,6 +128,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> positionsLabel;
     @Inject
     private PdfParserService pdfParserService;
+    @Inject
+    private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
+    @Inject
+    private CollectionPropertyContainer<CandidateCV> jobCandidateCandidateCvsDc;
+    @Inject
+    private Button copyCVButton;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -661,6 +667,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onInit(InitEvent event) {
         addIconColumn();
+        setCopyCVButton();
+    }
+
+    private void setCopyCVButton() {
+        copyCVButton.setEnabled(false);
+        jobCandidateCandidateCvTable.addItemClickListener(e -> {
+                if(jobCandidateCandidateCvTable.getSingleSelected() == null) {
+                    copyCVButton.setEnabled(true);
+                } else {
+                    copyCVButton.setEnabled(false);
+                }
+        });
     }
 
     private void addMiddleNameSuggestField() {
@@ -1082,5 +1100,70 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Install(to = "jobCandidateSkillListTable.skillName", subject = "descriptionProvider")
     private String jobCandidateSkillListTableSkillNameDescriptionProvider(SkillTree skillTree) {
         return skillTree.getComment();
+    }
+
+    public void copyCVJobCandidate() {
+        if (jobCandidateCandidateCvTable.getSingleSelected() == null) {
+            String QUERY_GET_CANDIDATE_CV = "select e " +
+                    "from itpearls_CandidateCV e " +
+                    "where e.candidate = :candidate";
+
+            CandidateCV candidateCV = null;
+
+            try {
+                candidateCV = dataManager.load(CandidateCV.class)
+                        .query(QUERY_GET_CANDIDATE_CV)
+                        .parameter("candidate",
+                                jobCandidateCandidateCvTable.getSingleSelected().getCandidate())
+                        .view("candidateCV-view")
+                        .one();
+            } catch (IllegalStateException e) {
+                candidateCV = null;
+            }
+
+            if (candidateCV != null) {
+                screenBuilders.editor(CandidateCV.class, this)
+                        .withParentDataContext(dataContext)
+                        .withContainer(jobCandidateCandidateCvsDc)
+                        .withInitializer(candidate -> {
+                            candidate.setCandidate(getEditedEntity());
+                        })
+                        .newEntity()
+                        .build()
+                        .show();
+            } else {
+                dialogs.createOptionDialog()
+                        .withCaption("Нет резюме кандидата")
+                        .withMessage("Создать резюме?")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+//                                    addIteractionJobCandidate();
+                                }),
+                                new DialogAction(DialogAction.Type.NO)
+                        )
+                        .show();
+            }
+        } else {
+            screenBuilders.editor(CandidateCV.class, this)
+                    .withParentDataContext(dataContext)
+                    .withContainer(jobCandidateCandidateCvsDc)
+                    .withInitializer(candidate -> {
+                        candidate.setCandidate(jobCandidateCandidateCvTable.getSingleSelected().getCandidate());
+                        candidate.setTextCV(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
+//                        candidate.setFileCV(jobCandidateCandidateCvTable.getSingleSelected().getFileCV());
+//                        candidate.setFileImageFace(jobCandidateCandidateCvTable.getSingleSelected().getFileImageFace());
+                        candidate.setLetter(jobCandidateCandidateCvTable.getSingleSelected().getLetter());
+                        candidate.setResumePosition(jobCandidateCandidateCvTable.getSingleSelected().getResumePosition());
+                        candidate.setToVacancy(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy());
+
+//                        candidate.setOriginalFileCV(jobCandidateCandidateCvTable.getSingleSelected().getOriginalFileCV());
+                        candidate.setLinkOriginalCv(jobCandidateCandidateCvTable.getSingleSelected().getLinkOriginalCv());
+                        candidate.setLinkItPearlsCV(jobCandidateCandidateCvTable.getSingleSelected().getLinkItPearlsCV());
+                        candidate.setLintToCloudFile(jobCandidateCandidateCvTable.getSingleSelected().getLintToCloudFile());
+                    })
+                    .newEntity()
+                    .build()
+                    .show();
+        }
     }
 }
