@@ -23,6 +23,7 @@ import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.jsoup.Jsoup;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
@@ -330,7 +331,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         try {
             textResume = parsePdfCV(loadFile);
-            imageFace = pdfParserService.getImageFromPDF(loadFile);
+//            imageFace = pdfParserService.getImageFromPDF(loadFile);
+//            candidatePic.setSource(ClasspathResource.class)
+//                    .setPath(imageFace.getAbsolutePath());
 
             candidateCVRichTextArea.setValue(textResume.replace("\n", "<br>"));
         } catch (IOException e) {
@@ -413,7 +416,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void rescanResume() {
-        String inputText = candidateCVRichTextArea.getValue();
+        String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
         List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
 
         getEditedEntity().setSkillTree(skillTrees);

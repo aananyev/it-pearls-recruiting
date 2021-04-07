@@ -236,7 +236,7 @@
                         </vbox>
                     </tab>
                     <tab id="tabSkillTree"
-                         caption="msg://msgSkillTree"
+                         caption="msg://msgCVSkillTree"
                          margin="true,true,true,true"
                          spacing="true">
                         <button id="rescanResume"

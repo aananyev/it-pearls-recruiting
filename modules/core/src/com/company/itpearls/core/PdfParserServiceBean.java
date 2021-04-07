@@ -48,7 +48,7 @@ public class PdfParserServiceBean implements PdfParserService {
 
     private boolean checkHiLevel(List<SkillTree> candidateSkills, SkillTree skillTree) {
         for (SkillTree a : candidateSkills) {
-            if(a.equals(skillTree)) {
+            if(a.getSkillName().toLowerCase().equals(skillTree.getSkillName().toLowerCase())) {
                 return false;
             }
         }
@@ -86,12 +86,34 @@ public class PdfParserServiceBean implements PdfParserService {
         BufferedImage image = renderer.renderImage(0);
 
         //Writing the image to a file
-        File tempJpg = File.createTempFile("img", "jpg");
+        File tempJpg = File.createTempFile("img", ".jpg");
 
         ImageIO.write (image, "JPEG", tempJpg);
 
         //Closing the document
         document.close();
         return tempJpg;
+    }
+
+    @Override
+    public String getImageFromNamePDF(File file) throws IOException {
+        //Loading an existing PDF document
+        PDDocument document = PDDocument.load(file);
+
+        //Instantiating the PDFRenderer class
+        PDFRenderer renderer = new PDFRenderer(document);
+
+        //Rendering an image from the PDF document
+        BufferedImage image = renderer.renderImage(0);
+
+        //Writing the image to a file
+        File tempJpg = File.createTempFile("img", ".jpg");
+
+        ImageIO.write (image, "JPEG", tempJpg);
+
+        //Closing the document
+        document.close();
+
+        return tempJpg.getName();
     }
 }

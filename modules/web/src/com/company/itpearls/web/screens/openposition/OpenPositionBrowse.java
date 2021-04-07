@@ -601,8 +601,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retField.setValue(entity.getPriority());
         retField.setAlignment(Component.Alignment.TOP_RIGHT);
         retField.addValueChangeListener(f -> {
+            int value = (int) retField.getValue();
+            Optional<String> result = priorityMap.entrySet()
+                    .stream()
+                    .filter(entry -> value == entry.getValue())
+                    .map(Map.Entry::getKey)
+                    .findFirst();
+
             openPositionsTable.getSingleSelected().setPriority((int) retField.getValue());
             dataManager.commit(entity);
+
+            events.publish(new UiNotificationEvent(this,
+                    "Изменен приоритет вакансии <b>"
+                    + openPositionsTable.getSingleSelected().getVacansyName()
+                    + "</b> на <b>" + result.get() + "</b>"));
         });
 
         retField.setLookupSelectHandler(e -> {
@@ -862,6 +874,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setMapOfPriority() {
+
         priorityMap.put("Paused", 0);
         priorityMap.put("Low", 1);
         priorityMap.put("Normal", 2);

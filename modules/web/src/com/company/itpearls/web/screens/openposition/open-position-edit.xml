@@ -33,7 +33,7 @@
                 <property name="cities"
                           view="_local"/>
                 <property name="skillsList"
-                          view="_local">
+                          view="skillTree-view">
                     <property name="skillTree" view="_local"/>
                 </property>
             </view>

@@ -14,4 +14,6 @@ public interface PdfParserService {
     String pdf2txt(String fileName) throws IOException;
 
     File getImageFromPDF(File file) throws IOException;
+
+    String getImageFromNamePDF(File file) throws IOException;
 }

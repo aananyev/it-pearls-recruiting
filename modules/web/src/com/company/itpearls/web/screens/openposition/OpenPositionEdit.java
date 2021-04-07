@@ -18,6 +18,7 @@ import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -182,6 +183,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setWorkExperienceRadioButton();
         setCommandExperienceRadioButton();
         changeCityListsLabel();
+
+        if(openPositionRichTextArea.getValue() != null)
+            rescanJobDescription();
     }
 
     private void setInternalProject() {
@@ -1343,7 +1347,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     public void rescanJobDescription() {
-        String inputText = openPositionRichTextArea.getValue();
+        String inputText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
         List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
         getEditedEntity().setSkillsList(skillTrees);
     }
