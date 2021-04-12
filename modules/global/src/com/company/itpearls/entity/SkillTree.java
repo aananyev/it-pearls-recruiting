@@ -51,6 +51,9 @@ public class SkillTree extends StandardEntity {
     @Column(name = "COMMENT")
     protected String comment;
 
+    @Column(name = "WIKI_PAGE", length = 250)
+    protected String wikiPage;
+
     public List<JobCandidate> getCandidates() {
         return candidates;
     }
@@ -105,5 +108,13 @@ public class SkillTree extends StandardEntity {
 
     public void setCandidateCV(CandidateCV candidateCV) {
         this.candidateCV = candidateCV;
+    }
+
+    public void setWikiPage(String wikiPage) {
+        this.wikiPage = wikiPage;
+    }
+
+    public String getWikiPage() {
+        return wikiPage;
     }
 }

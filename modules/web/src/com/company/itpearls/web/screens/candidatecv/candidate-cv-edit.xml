@@ -239,10 +239,16 @@
                          caption="msg://msgCVSkillTree"
                          margin="true,true,true,true"
                          spacing="true">
-                        <button id="rescanResume"
-                                caption="msg://msgRescanResume"
-                                align="BOTTOM_LEFT"
-                                invoke="rescanResume"/>
+                        <buttonsPanel>
+                            <button id="rescanResume"
+                                    caption="msg://msgRescanResume"
+                                    align="BOTTOM_LEFT"
+                                    invoke="rescanResume"/>
+                            <button id="checkSkillFromJD"
+                                    caption="msg://msgCheckSkills"
+                                    align="BOTTOM_LEFT"
+                                    invoke="checkSkillFromJD"/>
+                        </buttonsPanel>
                         <treeTable id="skillTreesTable"
                                    width="100%"
                                    dataContainer="skillTreesDc"

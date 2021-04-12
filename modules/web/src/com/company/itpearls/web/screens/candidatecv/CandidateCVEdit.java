@@ -2,14 +2,12 @@ package com.company.itpearls.web.screens.candidatecv;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.company.itpearls.web.screens.somefiles.SomeFilesEdit;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.WebBrowserTools;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.DataContext;
@@ -80,6 +78,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private CollectionContainer<JobCandidate> candidatesDc;
     @Inject
     private Image candidatePic;
+    @Inject
+    private Screens screens;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -415,10 +415,37 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 .show();
     }
 
-    public void rescanResume() {
+/*    public void rescanResume() {
         String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
         List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
 
         getEditedEntity().setSkillTree(skillTrees);
+    }*/
+
+
+    public List<SkillTree> rescanResume() {
+        String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
+        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
+
+        getEditedEntity().setSkillTree(skillTrees);
+
+        return skillTrees;
+    }
+
+    public void checkSkillFromJD() {
+        List<SkillTree> skillTrees = rescanResume();
+
+
+        SkillTreeBrowseCheck s = screenBuilders.screen(this)
+                .withScreenClass(SkillTreeBrowseCheck.class)
+                .build();
+        s.setCandidateCVSkills(skillTrees);
+        s.setOpenPositionSkills(skillTrees);
+
+        s.show();
+
+//        CheckSkillsFromJobDescription checkSkillsFromJobDescription =
+//                screens.create(CheckSkillsFromJobDescription.class);
+//        checkSkillsFromJobDescription.show();
     }
 }

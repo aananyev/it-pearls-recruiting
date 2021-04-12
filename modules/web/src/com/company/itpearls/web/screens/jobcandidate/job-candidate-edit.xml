@@ -75,8 +75,8 @@ order by e.countryRuName]]></query>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City">
             <view extends="_local">
-                <property name="cityRegion" fetch="JOIN" view="_local">
-                    <property name="regionCountry" fetch="JOIN" view="_local"/>
+                <property name="cityRegion" view="_local">
+                    <property name="regionCountry" view="_local"/>
                 </property>
             </view>
             <loader id="citiesDl">
@@ -88,8 +88,8 @@ order by e.cityRuName]]>
         </collection>
         <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs">
             <view extends="_local">
-                <property name="jobCandidate" fetch="BATCH" view="_minimal"/>
-                <property name="socialNetworkURL" fetch="JOIN" view="_minimal">
+                <property name="jobCandidate" view="_minimal"/>
+                <property name="socialNetworkURL" view="_minimal">
                     <property name="socialNetworkURL"/>
                 </property>
             </view>

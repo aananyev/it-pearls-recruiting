@@ -557,10 +557,10 @@
                         align="BOTTOM_LEFT"
                         invoke="rescanJobDescription"/>
                 <treeTable id="openPositionSkillsListTable"
-                          height="100%"
-                          width="100%"
-                          hierarchyProperty="skillTree"
-                          dataContainer="openPositionSkillsListsDc">
+                           height="100%"
+                           width="100%"
+                           dataContainer="openPositionSkillsListsDc"
+                           hierarchyProperty="skillTree">
                     <columns>
                         <column id="skillName"/>
                     </columns>

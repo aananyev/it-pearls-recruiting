@@ -78,7 +78,7 @@
                 </property>
             </property>
         </property>
-        <property name="skillsList" fetch="JOIN" view="_local"/>
+        <property name="skillsList" view="_local"/>
         <!--        <property name="candidates" fetch="BATCH" view="_local"/> -->
         <property name="paymentsType"/>
         <property name="typeCompanyComission"/>

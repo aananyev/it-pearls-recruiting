@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://skillTreeBrowseCheck.caption"
+        focusComponent="skillTreesTable"
+        messagesPack="com.company.itpearls.web.screens.skilltree">
+    <data readOnly="true">
+        <collection id="skillTreesDc"
+                    class="com.company.itpearls.entity.SkillTree">
+            <view extends="skillTree-view"/>
+            <loader id="skillTreesDl">
+                <query>
+                    <![CDATA[select e from itpearls_SkillTree e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="skillTreesTable"
+            spacing="true">
+        <treeDataGrid id="skillTreesTable"
+                      width="100%"
+                      dataContainer="skillTreesDc"
+                      hierarchyProperty="skillTree">
+            <actions>
+            </actions>
+            <columns>
+                <column property="skillName" id="skillName"/>
+                <column id="cvSkills">
+                    <iconRenderer/>
+                </column>
+                <column id="openPosition">
+                    <iconRenderer/>
+                </column>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+            </buttonsPanel>
+        </treeDataGrid>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

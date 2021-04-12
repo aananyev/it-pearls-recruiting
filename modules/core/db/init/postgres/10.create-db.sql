@@ -337,6 +337,7 @@ create table ITPEARLS_SKILL_TREE (
     OPEN_POSITION_ID uuid,
     CANDIDATE_CV_ID uuid,
     COMMENT text,
+    WIKI_PAGE varchar(250),
     --
     primary key (ID)
 )^

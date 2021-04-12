@@ -44,7 +44,8 @@ order by e.skillName]]>
                             </lookupPickerField>
                             <textField id="skillNameField" caption="mainMsg://msgSkill"
                                        dataContainer="skillTreeDc" property="skillName" width="50%"/>
-
+                            <textField id="wikiPateField" caption="msg://msgWikiPage"
+                                       dataContainer="skillTreeDc" property="wikiPage" width="50%"/>
                             <richTextArea id="skillCommentRichTextArea"
                                           dataContainer="skillTreeDc"
                                           property="comment"

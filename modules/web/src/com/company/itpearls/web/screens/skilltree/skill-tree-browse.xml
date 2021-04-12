@@ -9,7 +9,7 @@
                     view="skillTree-view">
             <loader id="skillTreesDl">
                 <query>
-                    <![CDATA[select e from itpearls_SkillTree e]]>
+                    <![CDATA[select e from itpearls_SkillTree e order by e.skillName]]>
                 </query>
             </loader>
         </collection>

@@ -12,9 +12,7 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataContext;
-import com.haulmont.cuba.gui.model.InstanceLoader;
+import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
@@ -165,6 +163,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private RichTextArea openPositionEnRichTextArea;
     @Inject
     private RichTextArea openPositionRichTextArea;
+    @Inject
+    private CollectionPropertyContainer<SkillTree> openPositionSkillsListsDc;
+    @Inject
+    private TreeTable<SkillTree> openPositionSkillsListTable;
+    @Inject
+    private InstanceContainer<OpenPosition> openPositionDc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -184,7 +188,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommandExperienceRadioButton();
         changeCityListsLabel();
 
-        if(openPositionRichTextArea.getValue() != null)
+        if (openPositionRichTextArea.getValue() != null &&
+                !openPositionRichTextArea.getValue().trim().equals(""))
             rescanJobDescription();
     }
 
@@ -350,7 +355,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("parentOpenPositionField")
     public void onParentOpenPositionFieldValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if(projectNameField.getValue() == null
+        if (projectNameField.getValue() == null
                 && parentOpenPositionField.getValue() != null) {
             projectNameField.setValue(parentOpenPositionField.getValue().getProjectName());
         }
@@ -1019,7 +1024,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         setTopLabel();
 
-        openClosePositionCheckBox.setValue(openClosePositionCheckBox.getValue() == null ? false: true);
+        openClosePositionCheckBox.setValue(openClosePositionCheckBox.getValue() == null ? false : true);
     }
 
     private void setTopLabel() {
@@ -1205,9 +1210,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onPositionTypeFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
         if (vacansyNameField.getValue() == null || vacansyNameField.getValue() == "") {
             vacansyNameField.setValue(generatePositionName());
-            if(projectNameField.getValue() != null) {
+            if (projectNameField.getValue() != null) {
                 vacansyNameField.setValue(generatePositionNameInProject());
-                if(cityOpenPositionField.getValue() != null) {
+                if (cityOpenPositionField.getValue() != null) {
                     vacansyNameField.setValue(generatePositionNameCity());
                 }
             }
@@ -1240,7 +1245,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (cityOpenPositionField.getValue() != null) {
-                if(retValue != null) {
+                if (retValue != null) {
                     if (generatePositionNameInProject().equals(retValue)) {
                         retValue = retValue.substring(0, retValue.length() - 1) + ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
                     }
@@ -1280,10 +1285,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 positionTypesLc.load();
             }
 
-                retPosName =
-                        (positionTypeField.getValue().getPositionRuName() != null ? positionTypeField.getValue().getPositionRuName() : "")
-                                + " \\ "
-                                + (positionTypeField.getValue().getPositionEnName() != null ? positionTypeField.getValue().getPositionEnName() : "");
+            retPosName =
+                    (positionTypeField.getValue().getPositionRuName() != null ? positionTypeField.getValue().getPositionRuName() : "")
+                            + " \\ "
+                            + (positionTypeField.getValue().getPositionEnName() != null ? positionTypeField.getValue().getPositionEnName() : "");
         }
 
         return retPosName;
