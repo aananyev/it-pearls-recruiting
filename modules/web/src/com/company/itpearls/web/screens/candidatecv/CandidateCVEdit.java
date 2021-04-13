@@ -192,6 +192,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             itpearlsCVLink.setVisible(false);
         }
 
+    }
+
+    @Subscribe
+    public void onAfterShow1(AfterShowEvent event) {
         if(candidateCVRichTextArea.getValue() != null)
             rescanResume();
     }

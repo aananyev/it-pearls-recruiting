@@ -40,10 +40,10 @@
             </actions>
             <columns>
                 <column property="skillName" id="skillName"/>
-                <column id="cvSkills" caption="msg://msgCV" width="100px" resizable="false">
+                <column id="openPosition" caption="msg://msgJD" width="100px" resizable="false">
                     <iconRenderer/>
                 </column>
-                <column id="openPosition" caption="msg://msgJD" width="100px" resizable="false">
+                <column id="cvSkills" caption="msg://msgCV" width="100px" resizable="false">
                     <iconRenderer/>
                 </column>
             </columns>

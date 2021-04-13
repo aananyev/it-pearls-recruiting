@@ -8,4 +8,8 @@ import com.company.itpearls.entity.SkillTree;
 @LookupComponent("skillTreesTable")
 @LoadDataBeforeShow
 public class SkillTreeBrowse extends StandardLookup<SkillTree> {
+    @Install(to = "skillTreesTable", subject = "itemDescriptionProvider")
+    private String skillTreesTableItemDescriptionProvider(SkillTree skillTree, String string) {
+        return skillTree.getComment() != null ? skillTree.getComment() : "";
+    }
 }

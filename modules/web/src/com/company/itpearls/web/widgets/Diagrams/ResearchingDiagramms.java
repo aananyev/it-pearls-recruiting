@@ -25,6 +25,8 @@ import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+
+// Общий счетчик собеседований
 @UiController("itpearls_ResearchingDiagramms")
 @UiDescriptor("researching-diagramms.xml")
 @DashboardWidget(name = "Count interview diagramm") // ++

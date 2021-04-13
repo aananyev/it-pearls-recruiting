@@ -33,7 +33,6 @@
                              color="GREEN"
                              colorField="GREEN"
                              valueField="count"/>
-
             </chart:graphs>
             <chart:chartCursor cursorAlpha="1"
                                categoryBalloonDateFormat="DD.mm"

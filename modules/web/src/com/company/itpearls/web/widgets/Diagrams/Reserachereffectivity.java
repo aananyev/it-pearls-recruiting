@@ -97,6 +97,8 @@ public class Reserachereffectivity extends ScreenFragment {
                     "order by e.recrutier.name";
         }
 
+        String usersList = "select f from sec$user f where ";
+
         List<User> users = dataManager.load(User.class).view("user-view").list();
 
         for (User a : users) {

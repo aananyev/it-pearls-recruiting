@@ -188,9 +188,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommandExperienceRadioButton();
         changeCityListsLabel();
 
-        if (openPositionRichTextArea.getValue() != null &&
-                !openPositionRichTextArea.getValue().trim().equals(""))
-            rescanJobDescription();
+
     }
 
     private void setInternalProject() {
@@ -418,6 +416,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setOpenClose(false);
         }
+
+        if (openPositionRichTextArea.getValue() != null &&
+                !openPositionRichTextArea.getValue().trim().equals(""))
+            rescanJobDescription();
     }
 
     private void sendMessage() {
@@ -1355,5 +1357,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         String inputText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
         List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
         getEditedEntity().setSkillsList(skillTrees);
+    }
+
+    @Subscribe("openPositionRichTextArea")
+    public void onOpenPositionRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (openPositionRichTextArea.getValue() != null &&
+                !openPositionRichTextArea.getValue().trim().equals(""))
+            rescanJobDescription();
     }
 }

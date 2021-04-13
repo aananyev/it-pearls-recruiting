@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.skilltree;
 
+import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.TreeDataGrid;
@@ -8,6 +9,7 @@ import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.SkillTree;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
     private CollectionContainer<SkillTree> skillTreesDc;
     @Inject
     private CollectionLoader<SkillTree> skillTreesDl;
+    @Inject
+    private CheckBox removeBlankSkills;
 
     public void setCandidateCVSkills(List<SkillTree> candidateCVSkills) {
         this.candidateCVSkills = candidateCVSkills;
@@ -66,34 +70,41 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
 
     @Install(to = "skillTreesTable.cvSkills", subject = "styleProvider")
     private String skillTreesTableCvSkillsStyleProvider(SkillTree skillTree) {
-        String style = "";
+        if(candidateCVSkills.size() != 0) {
+            for(SkillTree s : candidateCVSkills) {
+                if(s.equals(skillTree)) {
+                    return "pic-center-large-green";
+                }
+            }
 
-        if (checkSkills(candidateCVSkills, skillTree)) {
-            style = "pic-center-large-green";
-        } else {
-            style = "pic-center-large-red";
         }
 
-        return style;
+        return "pic-center-large-red";
     }
 
     @Install(to = "skillTreesTable.openPosition", subject = "styleProvider")
     private String skillTreesTableOpenPositionStyleProvider(SkillTree skillTree) {
-        String style = "";
+        if(openPositionSkills.size() != 0) {
+            for(SkillTree s : openPositionSkills) {
+                if(s.equals(skillTree)) {
+                    return "pic-center-large-green";
+                }
+            }
 
-        if (checkSkills(openPositionSkills, skillTree)) {
-            style = "pic-center-large-green";
-        } else {
-            style = "pic-center-large-red";
         }
 
-        return style;
+        return "pic-center-large-red";
+    }
+
+    @Install(to = "skillTreesTable", subject = "rowDescriptionProvider")
+    private String skillTreesTableRowDescriptionProvider(SkillTree skillTree) {
+        return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).text() : "";
     }
 
     Boolean checkSkills(List<SkillTree> skillTrees, SkillTree s) {
         if (skillTrees.size() != 0) {
             for (SkillTree a : skillTrees) {
-                if (s.equals(a)) {
+                if (s.getSkillName().equals(a.getSkillName())) {
                     return true;
                 }
 
@@ -132,10 +143,10 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
 
             skillTreesDl.load();
         }
-
     }
 
-
-
-
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        removeBlankSkills.setValue(true);
+    }
 }

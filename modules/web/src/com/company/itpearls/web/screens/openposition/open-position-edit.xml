@@ -34,7 +34,7 @@
                           view="_local"/>
                 <property name="skillsList"
                           view="skillTree-view">
-                    <property name="skillTree" view="_local"/>
+                    <property name="skillTree" view="skillTree-view"/>
                 </property>
             </view>
             <loader id="openPositionDl"/>
