@@ -447,6 +447,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     .build();
             s.setCandidateCVSkills(skillTrees);
             s.setOpenPositionSkills(skillTreesFromJD);
+            s.setTitle(candidateCVFieldOpenPosition.getValue().getVacansyName());
 
             s.show();
         } else {

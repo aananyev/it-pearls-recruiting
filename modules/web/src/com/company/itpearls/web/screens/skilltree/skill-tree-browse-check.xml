@@ -32,6 +32,8 @@
                 resizable="false"/>
     <layout expand="skillTreesTable"
             spacing="true">
+        <label id="header" stylename="h3"/>
+        <label id="percent" stylename="h4"/>
         <treeDataGrid id="skillTreesTable"
                       width="100%"
                       dataContainer="skillTreesDc"

@@ -1,17 +1,16 @@
 package com.company.itpearls.web.screens.skilltree;
 
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.DataGrid;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.TreeDataGrid;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.SkillTree;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +21,8 @@ import java.util.List;
 public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
     List<SkillTree> candidateCVSkills = new ArrayList<>();
     List<SkillTree> openPositionSkills = new ArrayList<>();
+    String title = "";
+
     @Inject
     private TreeDataGrid<SkillTree> skillTreesTable;
     @Inject
@@ -30,6 +31,24 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
     private CollectionLoader<SkillTree> skillTreesDl;
     @Inject
     private CheckBox removeBlankSkills;
+    @Inject
+    private Label<String> header;
+    @Inject
+    private Label<String> percent;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if (title != null) {
+            header.setValue(title);
+        }
+
+        if (candidateCVSkills.size() != 0 && openPositionSkills.size() != 0) {
+            int percentInt = (openPositionSkills.size() > 0 ?
+                    (candidateCVSkills.size() *100 / openPositionSkills.size()) : 0);
+            percent.setValue("Процент релевантности: " + percentInt + "%");
+        }
+    }
+
 
     public void setCandidateCVSkills(List<SkillTree> candidateCVSkills) {
         this.candidateCVSkills = candidateCVSkills;
@@ -37,6 +56,10 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
 
     public void setOpenPositionSkills(List<SkillTree> openPositionSkills) {
         this.openPositionSkills = openPositionSkills;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Install(to = "skillTreesTable.cvSkills", subject = "columnGenerator")
@@ -70,9 +93,9 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
 
     @Install(to = "skillTreesTable.cvSkills", subject = "styleProvider")
     private String skillTreesTableCvSkillsStyleProvider(SkillTree skillTree) {
-        if(candidateCVSkills.size() != 0) {
-            for(SkillTree s : candidateCVSkills) {
-                if(s.equals(skillTree)) {
+        if (candidateCVSkills.size() != 0) {
+            for (SkillTree s : candidateCVSkills) {
+                if (s.equals(skillTree)) {
                     return "pic-center-large-green";
                 }
             }
@@ -84,9 +107,9 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
 
     @Install(to = "skillTreesTable.openPosition", subject = "styleProvider")
     private String skillTreesTableOpenPositionStyleProvider(SkillTree skillTree) {
-        if(openPositionSkills.size() != 0) {
-            for(SkillTree s : openPositionSkills) {
-                if(s.equals(skillTree)) {
+        if (openPositionSkills.size() != 0) {
+            for (SkillTree s : openPositionSkills) {
+                if (s.equals(skillTree)) {
                     return "pic-center-large-green";
                 }
             }
@@ -118,7 +141,7 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
     @Subscribe("removeBlankSkills")
     public void onRemoveBlankSkillsValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (event.getValue() != null) {
-            if(event.getValue()) {
+            if (event.getValue()) {
                 skillTreesDl.setParameter("skillsFromJD", openPositionSkills);
                 skillTreesDl.setParameter("skillsFromCV", candidateCVSkills);
             } else {
@@ -132,9 +155,9 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
 
     @Subscribe("skillsFromCVonly")
     public void onSkillsFromCVonlyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if(event.getValue() != null) {
+        if (event.getValue() != null) {
             if (event.getValue()) {
-                if(openPositionSkills.size() != 0) {
+                if (openPositionSkills.size() != 0) {
                     skillTreesDl.setParameter("skillsFromJD", openPositionSkills);
                 }
             } else {
