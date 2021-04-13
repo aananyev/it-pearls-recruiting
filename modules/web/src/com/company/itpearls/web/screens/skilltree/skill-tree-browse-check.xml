@@ -10,13 +10,26 @@
             <view extends="skillTree-view"/>
             <loader id="skillTreesDl">
                 <query>
-                    <![CDATA[select e from itpearls_SkillTree e]]>
+                    <![CDATA[select e from itpearls_SkillTree e order by e.skillName]]>
+                    <condition>
+                        <or>
+                            <c:jpql>
+                                <c:where>e in :skillsFromCV</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in :skillsFromJD</c:where>
+                            </c:jpql>
+                        </or>
+                    </condition>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
+    <dialogMode height="400"
+                width="600"
+                forceDialog="true"
+                closeOnClickOutside="false"
+                resizable="false"/>
     <layout expand="skillTreesTable"
             spacing="true">
         <treeDataGrid id="skillTreesTable"
@@ -27,10 +40,10 @@
             </actions>
             <columns>
                 <column property="skillName" id="skillName"/>
-                <column id="cvSkills">
+                <column id="cvSkills" caption="msg://msgCV" width="100px" resizable="false">
                     <iconRenderer/>
                 </column>
-                <column id="openPosition">
+                <column id="openPosition" caption="msg://msgJD" width="100px" resizable="false">
                     <iconRenderer/>
                 </column>
             </columns>
@@ -39,6 +52,12 @@
                           alwaysVisible="true">
             </buttonsPanel>
         </treeDataGrid>
+        <hbox spacing="true">
+        <checkBox id="skillsFromCVonly"
+                  caption="msg://msgSkillsFromJDOnly"/>
+        <checkBox id="removeBlankSkills"
+                  caption="msg://mshRemoveBlank"/>
+        </hbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

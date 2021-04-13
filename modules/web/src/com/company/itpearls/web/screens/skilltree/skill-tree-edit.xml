@@ -32,7 +32,11 @@ order by e.skillName]]>
                          caption="msg://msgSkill"
                          margin="true,trua,true,true"
                          spacing="true">
-                        <vbox spacing="true" height="100%" width="100%">
+                        <vbox spacing="true"
+                              height="100%"
+                              margin="true,true,true,true"
+                              width="100%"
+                              expand="skillCommentRichTextArea">
                             <lookupPickerField id="skillTreeField"
                                                optionsContainer="skillTreesDc"
                                                caption="mainMsg://msgSkillTree"
@@ -43,9 +47,22 @@ order by e.skillName]]>
                                 </actions>
                             </lookupPickerField>
                             <textField id="skillNameField" caption="mainMsg://msgSkill"
-                                       dataContainer="skillTreeDc" property="skillName" width="50%"/>
-                            <textField id="wikiPateField" caption="msg://msgWikiPage"
-                                       dataContainer="skillTreeDc" property="wikiPage" width="50%"/>
+                                       dataContainer="skillTreeDc"
+                                       property="skillName"
+                                       width="50%"/>
+                            <hbox spacing="true"
+                                  width="100%"
+                                  expand="wikiPateField">
+                                <textField id="wikiPateField"
+                                           caption="msg://msgWikiPage"
+                                           align="BOTTOM_LEFT"
+                                           dataContainer="skillTreeDc"
+                                           property="wikiPage" width="50%"/>
+                                <button id="parseWikiText"
+                                        align="BOTTOM_LEFT"
+                                        caption="msg://msgParseWikiText"
+                                        invoke="parseWikiToDescription"/>
+                            </hbox>
                             <richTextArea id="skillCommentRichTextArea"
                                           dataContainer="skillTreeDc"
                                           property="comment"

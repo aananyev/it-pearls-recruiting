@@ -434,18 +434,23 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void checkSkillFromJD() {
         List<SkillTree> skillTrees = rescanResume();
+        String inputText = Jsoup.parse(candidateCVFieldOpenPosition.getValue().getComment()).text();
+        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
 
+        if(candidateCVFieldOpenPosition.getValue() != null) {
+            SkillTreeBrowseCheck s = screenBuilders.screen(this)
+                    .withScreenClass(SkillTreeBrowseCheck.class)
+                    .build();
+            s.setCandidateCVSkills(skillTrees);
+            s.setOpenPositionSkills(skillTreesFromJD);
 
-        SkillTreeBrowseCheck s = screenBuilders.screen(this)
-                .withScreenClass(SkillTreeBrowseCheck.class)
-                .build();
-        s.setCandidateCVSkills(skillTrees);
-        s.setOpenPositionSkills(skillTrees);
-
-        s.show();
-
-//        CheckSkillsFromJobDescription checkSkillsFromJobDescription =
-//                screens.create(CheckSkillsFromJobDescription.class);
-//        checkSkillsFromJobDescription.show();
+            s.show();
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Для проверки навыков кандидата по резюме " +
+                            "\nнеобходимозаполнить поле \"Вакансия\".")
+                    .show();
+        }
     }
 }
