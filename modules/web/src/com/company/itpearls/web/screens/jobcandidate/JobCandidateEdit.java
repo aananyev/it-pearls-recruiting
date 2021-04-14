@@ -3,10 +3,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.openposition.SelectCitiesLocation;
-import com.haulmont.cuba.core.global.CommitContext;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
@@ -1150,16 +1147,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withInitializer(candidate -> {
                         candidate.setCandidate(jobCandidateCandidateCvTable.getSingleSelected().getCandidate());
                         candidate.setTextCV(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
-//                        candidate.setFileCV(jobCandidateCandidateCvTable.getSingleSelected().getFileCV());
-//                        candidate.setFileImageFace(jobCandidateCandidateCvTable.getSingleSelected().getFileImageFace());
                         candidate.setLetter(jobCandidateCandidateCvTable.getSingleSelected().getLetter());
                         candidate.setResumePosition(jobCandidateCandidateCvTable.getSingleSelected().getResumePosition());
-                        candidate.setToVacancy(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy());
-
-//                        candidate.setOriginalFileCV(jobCandidateCandidateCvTable.getSingleSelected().getOriginalFileCV());
                         candidate.setLinkOriginalCv(jobCandidateCandidateCvTable.getSingleSelected().getLinkOriginalCv());
                         candidate.setLinkItPearlsCV(jobCandidateCandidateCvTable.getSingleSelected().getLinkItPearlsCV());
                         candidate.setLintToCloudFile(jobCandidateCandidateCvTable.getSingleSelected().getLintToCloudFile());
+                        candidate.setOwner(userSession.getUser());
                     })
                     .newEntity()
                     .build()

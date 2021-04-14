@@ -42,17 +42,17 @@ public class Person extends StandardEntity {
     protected String mobPhone;
 
     @CaseConversion(type = ConversionType.LOWER)
-    @Column(name = "SKYPE_NAME", unique = true, length = 15)
+    @Column(name = "SKYPE_NAME", unique = true, length = 40)
     protected String skypeName;
 
-    @Column(name = "TELEGRAM_NAME", unique = true, length = 15)
+    @Column(name = "TELEGRAM_NAME", unique = true, length = 40)
     protected String telegramName;
 
-    @Column(name = "WIBER_NAME", unique = true, length = 15)
+    @Column(name = "WIBER_NAME", unique = true, length = 40)
     protected String wiberName;
 
     @CaseConversion(type = ConversionType.LOWER)
-    @Column(name = "WATSUP_NAME", unique = true, length = 15)
+    @Column(name = "WATSUP_NAME", unique = true, length = 40)
     protected String watsupName;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
