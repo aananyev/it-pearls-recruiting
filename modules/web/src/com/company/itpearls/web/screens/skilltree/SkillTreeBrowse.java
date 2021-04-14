@@ -1,19 +1,40 @@
 package com.company.itpearls.web.screens.skilltree;
 
+import com.company.itpearls.entity.JobCandidate;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.DataGrid;
+import com.haulmont.cuba.gui.components.Image;
+import com.haulmont.cuba.gui.components.TreeDataGrid;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.SkillTree;
+import org.jsoup.Jsoup;
+
+import javax.inject.Inject;
 
 @UiController("itpearls_SkillTree.browse")
 @UiDescriptor("skill-tree-browse.xml")
 @LookupComponent("skillTreesTable")
 @LoadDataBeforeShow
 public class SkillTreeBrowse extends StandardLookup<SkillTree> {
-    @Install(to = "skillTreesTable", subject = "itemDescriptionProvider")
+    @Inject
+    private TreeDataGrid<SkillTree> skillTreesTable;
+    @Inject
+    private UiComponents uiComponents;
+/*    @Install(to = "skillTreesTable", subject = "itemDescriptionProvider")
     private String skillTreesTableItemDescriptionProvider(SkillTree skillTree, String string) {
         return skillTree.getComment() != null ? skillTree.getComment() : "";
+    }*/
+
+    @Install(to = "skillTreesTable.skillName", subject = "descriptionProvider")
+    private String skillTreesTableSkillNameDescriptionProvider(SkillTree skillTree) {
+        return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).text() : "";
     }
+
+
 
     @Install(to = "skillTreesTable.isComment", subject = "columnGenerator")
     private Object skillTreesTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
@@ -32,4 +53,24 @@ public class SkillTreeBrowse extends StandardLookup<SkillTree> {
             return "pic-center-large-red";
         }
     }
+
+    private void skillImageColumnRenderer() {
+        skillTreesTable.addGeneratedColumn("fileImageLogo", entity -> {
+            Image image = uiComponents.create(Image.NAME);
+            image.setValueSource(new ContainerValueSource<SkillTree, FileDescriptor>(entity.getContainer(),
+                    "fileImageLogo"));
+            image.setWidth("50px");
+            image.setStyleName("image-candidate-face-little-image");
+            image.setScaleMode(Image.ScaleMode.CONTAIN);
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            return image;
+        });
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        skillImageColumnRenderer();
+    }
+
+
 }

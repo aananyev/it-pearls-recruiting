@@ -287,10 +287,10 @@ create table ITPEARLS_PERSON (
     EMAIL varchar(40),
     PHONE varchar(20),
     MOB_PHONE varchar(20),
-    SKYPE_NAME varchar(15),
-    TELEGRAM_NAME varchar(15),
-    WIBER_NAME varchar(15),
-    WATSUP_NAME varchar(15),
+    SKYPE_NAME varchar(40),
+    TELEGRAM_NAME varchar(40),
+    WIBER_NAME varchar(40),
+    WATSUP_NAME varchar(40),
     POSITION_COUNTRY_ID uuid,
     CITY_OF_RESIDENCE_ID uuid,
     PERSON_POSITION_ID uuid,
@@ -336,8 +336,10 @@ create table ITPEARLS_SKILL_TREE (
     JOB_CANDIDATE_ID uuid,
     OPEN_POSITION_ID uuid,
     CANDIDATE_CV_ID uuid,
+    SPECIALISATION_ID uuid,
     COMMENT text,
     WIKI_PAGE varchar(250),
+    FILE_IMAGE_LOGO uuid,
     --
     primary key (ID)
 )^

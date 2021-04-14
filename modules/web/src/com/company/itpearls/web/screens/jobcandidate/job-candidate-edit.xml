@@ -478,11 +478,11 @@ order by e.cityRuName]]>
                                 caption="msg://msgCreate"
                                 icon="ADD_ACTION"
                                 invoke="addIteractionJobCandidate"/>
+                        <button action="jobCandidateIteractionListTable.edit"/>
                         <button id="copyIteractionButton"
                                 caption="msg://msgCopy"
                                 icon="COPY"
                                 invoke="copyIteractionJobCandidate"/>
-                        <button action="jobCandidateIteractionListTable.edit"/>
                         <button action="jobCandidateIteractionListTable.remove"/>
                     </buttonsPanel>
                     <columns>

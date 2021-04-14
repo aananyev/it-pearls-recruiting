@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.skilltree" icon="CODE_FORK">
     <data>
         <instance id="skillTreeDc"
@@ -19,61 +18,108 @@ order by e.skillName]]>
                 </query>
             </loader>
         </collection>
+        <collection id="specialisationDc" class="com.company.itpearls.entity.Specialisation" view="specialisation-view">
+            <loader id="specialisationDl">
+                <query>
+                    <![CDATA[select e from itpearls_Specialisation e order by e.specRuName]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form"
-              dataContainer="skillTreeDc"
-              width="100%">
-            <column width="100%">
-                <tabSheet stylename="framed">
-                    <tab id="tabSkillTree"
-                         caption="msg://msgSkill"
-                         margin="true,trua,true,true"
-                         spacing="true">
-                        <vbox spacing="true"
-                              height="100%"
-                              margin="true,true,true,true"
-                              width="100%"
-                              expand="skillCommentRichTextArea">
-                            <lookupPickerField id="skillTreeField"
-                                               optionsContainer="skillTreesDc"
-                                               caption="mainMsg://msgSkillTree"
-                                               property="skillTree"
-                                               width="50%">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                            <textField id="skillNameField" caption="mainMsg://msgSkill"
+    <layout expand="allBox" spacing="true">
+        <vbox id="allBox" width="100%" height="AUTO" expand="areaBox" spacing="true">
+            <hbox id="fieldBox"
+                  width="100%"
+                  height="AUTO"
+                  expand="skillTreeTab"
+                  spacing="true">
+                <groupBox id="skillTreeTab"
+                          spacing="true"
+                          width="100%"
+                          height="266px"
+                          align="TOP_LEFT">
+                    <lookupPickerField id="skillTreeField"
+                                       optionsContainer="skillTreesDc"
                                        dataContainer="skillTreeDc"
-                                       property="skillName"
-                                       width="50%"/>
-                            <hbox spacing="true"
-                                  width="100%"
-                                  expand="wikiPateField">
-                                <textField id="wikiPateField"
-                                           caption="msg://msgWikiPage"
-                                           align="BOTTOM_LEFT"
-                                           trim="true"
-                                           dataContainer="skillTreeDc"
-                                           property="wikiPage" width="50%"/>
-                                <button id="parseWikiText"
-                                        align="BOTTOM_LEFT"
-                                        caption="msg://msgParseWikiText"
-                                        invoke="parseWikiToDescription"/>
-                            </hbox>
-                            <richTextArea id="skillCommentRichTextArea"
-                                          dataContainer="skillTreeDc"
-                                          property="comment"
-                                          width="100%"
-                                          height="100%"/>
-                        </vbox>
-                    </tab>
-                </tabSheet>
-            </column>
-        </form>
+                                       align="TOP_LEFT"
+                                       caption="mainMsg://msgSkillTree"
+                                       property="skillTree"
+                                       width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="specialisationField"
+                                       optionsContainer="specialisationDc"
+                                       dataContainer="skillTreesDc"
+                                       caption="msg://msgSpecialisation"
+                                       align="TOP_LEFT"
+                                       property="specialisation"
+                                       width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <textField id="skillNameField" caption="mainMsg://msgSkill"
+                               dataContainer="skillTreeDc"
+                               property="skillName"
+                               align="TOP_LEFT"
+                               width="50%"/>
+                    <hbox spacing="true"
+                          width="100%"
+                          expand="wikiPateField">
+                        <textField id="wikiPateField"
+                                   caption="msg://msgWikiPage"
+                                   align="BOTTOM_LEFT"
+                                   trim="true"
+                                   dataContainer="skillTreeDc"
+                                   property="wikiPage" width="50%"/>
+                        <button id="parseWikiText"
+                                align="BOTTOM_LEFT"
+                                caption="msg://msgParseWikiText"
+                                invoke="parseWikiToDescription"/>
+                    </hbox>
+                </groupBox>
+                <vbox id="dropZone"
+                      spacing="true"
+                      width="200px"
+                      height="266px"
+                      align="TOP_RIGHT"
+                      expand="candidatePic"
+                      stylename="dropzone-container">
+                    <image id="candidatePic"
+                           dataContainer="skillTreesDc"
+                           property="fileImageLogo"
+                           width="100%"
+                           align="TOP_RIGHT"
+                           height="100%"
+                           stylename="widget-border"
+                           scaleMode="FILL"/>
+                    <upload id="fileImageFaceUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="skillTreesDc"
+                            align="BOTTOM_CENTER"
+                            showFileName="false"
+                            dropZone="dropZone"
+                            showClearButton="true"
+                            property="fileImageLogo"/>
+                </vbox>
+            </hbox>
+            <groupBox id="areaBox"
+                  width="100%"
+                  height="100%"
+                  align="TOP_LEFT">
+                <richTextArea id="skillCommentRichTextArea"
+                              dataContainer="skillTreeDc"
+                              align="TOP_LEFT"
+                              property="comment"
+                              width="100%"
+                              caption="msg://msgSkillComment"
+                              height="100%"/>
+            </groupBox>
+        </vbox>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

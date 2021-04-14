@@ -170,8 +170,9 @@
         </property>
     </view>
     <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
-        <property name="skillTree" view="_local"/>
-        <property name="jobCandidate" view="_local"/>
+        <property name="skillTree" view="_local">
+            <property name="skillTree" view="_local"/>
+        </property>
         <property name="openPosition" view="_local"/>
         <property name="candidates" view="_local">
             <property name="currentCompany" view="_local"/>
@@ -183,8 +184,12 @@
             <property name="jobHistory" view="_local"/>
             <property name="socialNetwork" view="_local"/>
             <property name="candidateCv" view="_local"/>
-            <property name="skillTree" view="_local"/>
+            <property name="skillTree" view="_local">
+                <property name="skillTree" view="_local"/>
+            </property>
         </property>
+        <property name="specialisation" view="_local"/>
+        <property name="fileImageLogo" view="_local"/>
     </view>
     <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local">
         <property name="candidate" view="_local">

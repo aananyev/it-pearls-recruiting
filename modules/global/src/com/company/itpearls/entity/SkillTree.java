@@ -2,6 +2,7 @@ package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -47,12 +48,21 @@ public class SkillTree extends StandardEntity {
     @JoinColumn(name = "CANDIDATE_CV_ID")
     protected CandidateCV candidateCV;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne
+    @JoinColumn(name = "SPECIALISATION_ID")
+    protected Specialisation specialisation;
+
     @Lob
     @Column(name = "COMMENT")
     protected String comment;
 
     @Column(name = "WIKI_PAGE", length = 250)
     protected String wikiPage;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_IMAGE_LOGO")
+    protected FileDescriptor fileImageLogo;
 
     public List<JobCandidate> getCandidates() {
         return candidates;
@@ -116,5 +126,21 @@ public class SkillTree extends StandardEntity {
 
     public String getWikiPage() {
         return wikiPage;
+    }
+
+    public void setSpecialisation(Specialisation specialisation) {
+        this.specialisation = specialisation;
+    }
+
+    public Specialisation getSpecialisation() {
+        return specialisation;
+    }
+
+    public void setFileImageLogo(FileDescriptor fileImageLogo) {
+        this.fileImageLogo = fileImageLogo;
+    }
+
+    public FileDescriptor getFileImageLogo() {
+        return fileImageLogo;
     }
 }
