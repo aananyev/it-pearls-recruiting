@@ -6,12 +6,12 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.position.PositionEdit;
 import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
@@ -166,9 +166,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CollectionPropertyContainer<SkillTree> openPositionSkillsListsDc;
     @Inject
-    private TreeTable<SkillTree> openPositionSkillsListTable;
-    @Inject
     private InstanceContainer<OpenPosition> openPositionDc;
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private TreeDataGrid<SkillTree> openPositionSkillsListTable;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1092,6 +1094,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setRadioButtons();
         setGroupSubscribeButton();
         setGroupCommandRadioButtin();
+        skillImageColumnRenderer();
     }
 
     private void setGroupCommandRadioButtin() {
@@ -1364,5 +1367,41 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (openPositionRichTextArea.getValue() != null &&
                 !openPositionRichTextArea.getValue().trim().equals(""))
             rescanJobDescription();
+    }
+
+    private void skillImageColumnRenderer() {
+        openPositionSkillsListTable.addGeneratedColumn("fileImageLogo", entity -> {
+            Image image = uiComponents.create(Image.NAME);
+            image.setValueSource(new ContainerValueSource<SkillTree, FileDescriptor>(entity.getContainer(),
+                    "fileImageLogo"));
+            image.setWidth("50px");
+            image.setStyleName("image-candidate-face-little-image");
+            image.setScaleMode(Image.ScaleMode.CONTAIN);
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            return image;
+        });
+    }
+
+    @Install(to = "openPositionSkillsListTable.isComment", subject = "columnGenerator")
+    private Object openPositionSkillsListTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
+        if(event.getItem().getComment() != null && !event.getItem().equals("")) {
+            return CubaIcon.PLUS_CIRCLE;
+        } else {
+            return CubaIcon.MINUS_CIRCLE;
+        }
+    }
+
+    @Install(to = "openPositionSkillsListTable.isComment", subject = "styleProvider")
+    private String openPositionSkillsListTableIsCommentStyleProvider(SkillTree skillTree) {
+        if (skillTree.getComment() != null && !skillTree.equals("")) {
+            return "pic-center-large-green";
+        } else {
+            return "pic-center-large-red";
+        }
+    }
+
+    @Install(to = "openPositionSkillsListTable", subject = "rowDescriptionProvider")
+    private String openPositionSkillsListTableRowDescriptionProvider(SkillTree skillTree) {
+        return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).text() : "";
     }
 }

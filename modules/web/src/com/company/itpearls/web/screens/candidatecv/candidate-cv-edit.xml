@@ -238,44 +238,52 @@
                     <tab id="tabSkillTree"
                          caption="msg://msgCVSkillTree"
                          margin="true,true,true,true"
+                         expand="skillBox"
                          spacing="true">
-                        <buttonsPanel>
-                            <button id="rescanResume"
-                                    caption="msg://msgRescanResume"
-                                    align="BOTTOM_LEFT"
-                                    invoke="rescanResume"/>
-                            <button id="checkSkillFromJD"
-                                    caption="msg://msgCheckSkills"
-                                    align="BOTTOM_LEFT"
-                                    invoke="checkSkillFromJD"/>
-                        </buttonsPanel>
-                        <treeTable id="skillTreesTable"
-                                   width="100%"
-                                   dataContainer="skillTreesDc"
-                                   hierarchyProperty="skillTree">
-                            <actions>
-                                <action id="create" type="create"/>
-                                <action id="edit" type="edit"/>
-                                <action id="remove" type="remove"/>
-                            </actions>
-                            <columns>
-                                <column id="skillName" caption="mainMsg://msgSkill"/>
-                            </columns>
-                            <rowsCount/>
-                            <buttonsPanel id="buttonsPanel"
-                                          alwaysVisible="true">
-                                <button id="createBtn" action="skillTreesTable.create"/>
-                                <button id="editBtn" action="skillTreesTable.edit"/>
-                                <button id="removeBtn" action="skillTreesTable.remove"/>
+                        <vbox id="skillBox"
+                              width="100%"
+                              expand="skillTreesTable"
+                              spacing="true">
+                            <buttonsPanel>
+                                <button id="rescanResume"
+                                        caption="msg://msgRescanResume"
+                                        align="BOTTOM_LEFT"
+                                        invoke="rescanResume"/>
+                                <button id="checkSkillFromJD"
+                                        caption="msg://msgCheckSkills"
+                                        align="BOTTOM_LEFT"
+                                        invoke="checkSkillFromJD"/>
                             </buttonsPanel>
-                        </treeTable>
+                            <treeDataGrid id="skillTreesTable"
+                                          width="100%"
+                                          dataContainer="skillTreesDc"
+                                          hierarchyProperty="skillTree">
+                                <columns>
+                                    <column id="fileImageLogo"
+                                            property="fileImageLogo"
+                                            maximumWidth="120px"
+                                            caption="msg://msgSkillLogo">
+                                        <componentRenderer/>
+                                    </column>
+                                    <column id="skillName" caption="mainMsg://msgSkill" property="skillName"/>
+                                    <column id="specialisation" property="specialisation"
+                                            caption="msg://msgSpecialisation"/>
+                                    <column id="wikiPage" property="wikiPage" maximumWidth="250px"
+                                            caption="msg://msgWikiPage"/>
+                                    <column id="isComment" caption="msg://msgIsComment" maximumWidth="120px">
+                                        <iconRenderer/>
+                                    </column>
+                                </columns>
+                                <rowsCount/>
+                            </treeDataGrid>
+                        </vbox>
                     </tab>
                 </tabSheet>
             </column>
         </form>
         <hbox id="editActions"
               spacing="true"
-              align="TOP_RIGHT">
+              align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

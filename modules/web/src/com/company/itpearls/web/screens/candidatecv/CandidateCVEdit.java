@@ -9,6 +9,8 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
@@ -80,6 +82,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Image candidatePic;
     @Inject
     private Screens screens;
+    @Inject
+    private TreeDataGrid<SkillTree> skillTreesTable;
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -113,6 +119,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 notifications.create()
                         .withCaption("File upload error")
                         .show());
+
+        skillImageColumnRenderer();
     }
 
     void openURL(String url) {
@@ -428,12 +436,16 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
 
     public List<SkillTree> rescanResume() {
-        String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
-        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
+        if(candidateCVRichTextArea.getValue() != null) {
+            String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
+            List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
 
-        getEditedEntity().setSkillTree(skillTrees);
+            getEditedEntity().setSkillTree(skillTrees);
 
-        return skillTrees;
+            return skillTrees;
+        } else {
+            return null;
+        }
     }
 
     public void checkSkillFromJD() {
@@ -458,4 +470,37 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     .show();
         }
     }
+
+    @Install(to = "skillTreesTable.isComment", subject = "columnGenerator")
+    private Object skillTreesTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
+        if(event.getItem().getComment() != null && !event.getItem().equals("")) {
+            return CubaIcon.PLUS_CIRCLE;
+        } else {
+            return CubaIcon.MINUS_CIRCLE;
+        }
+    }
+
+    @Install(to = "skillTreesTable.isComment", subject = "styleProvider")
+    private String skillTreesTableIsCommentStyleProvider(SkillTree skillTree) {
+        if (skillTree.getComment() != null && !skillTree.equals("")) {
+            return "pic-center-large-green";
+        } else {
+            return "pic-center-large-red";
+        }
+    }
+
+
+    private void skillImageColumnRenderer() {
+        skillTreesTable.addGeneratedColumn("fileImageLogo", entity -> {
+            Image image = uiComponents.create(Image.NAME);
+            image.setValueSource(new ContainerValueSource<SkillTree, FileDescriptor>(entity.getContainer(),
+                    "fileImageLogo"));
+            image.setWidth("50px");
+            image.setStyleName("image-candidate-face-little-image");
+            image.setScaleMode(Image.ScaleMode.CONTAIN);
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            return image;
+        });
+    }
+
 }

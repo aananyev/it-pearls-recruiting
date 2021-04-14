@@ -40,8 +40,6 @@
             <loader id="openPositionDl"/>
             <collection id="openPositionSkillsListsDc"
                         property="skillsList"/>
-            <collection id="openPositionCandidatesesDc"
-                        property="candidates"/>
         </instance>
         <collection id="openPositionParentDc"
                     class="com.company.itpearls.entity.OpenPosition">
@@ -550,73 +548,51 @@
                  caption="msg://msgSkilsPosition"
                  margin="true,true,true,true"
                  spacing="true"
-                 expand="openPositionSkillsListTable"
+                 expand="skillsBox"
                  icon="FILTER">
-                <button id="rescanSkills"
-                        caption="msg://msgRescanJobDescription"
-                        align="BOTTOM_LEFT"
-                        invoke="rescanJobDescription"/>
-                <treeTable id="openPositionSkillsListTable"
-                           height="100%"
-                           width="100%"
-                           dataContainer="openPositionSkillsListsDc"
-                           hierarchyProperty="skillTree">
-                    <columns>
-                        <column id="skillName"/>
-                    </columns>
-                    <rowsCount/>
-                    <actions>
-                        <action id="add"
-                                type="add"/>
-                        <action id="edit"
-                                type="edit"/>
-                        <action id="remove"
-                                type="remove"/>
-                    </actions>
-                    <buttonsPanel>
-                        <button action="openPositionSkillsListTable.add"/>
-                        <button action="openPositionSkillsListTable.edit"/>
-                        <button action="openPositionSkillsListTable.remove"/>
-                    </buttonsPanel>
-                </treeTable>
+                <vbox id="skillsBox"
+                      width="100%"
+                      spacing="true"
+                      expand="openPositionSkillsListTable">
+                    <button id="rescanSkills"
+                            caption="msg://msgRescanJobDescription"
+                            align="BOTTOM_LEFT"
+                            invoke="rescanJobDescription"/>
+                    <treeDataGrid id="openPositionSkillsListTable"
+                                  width="100%"
+                                  dataContainer="openPositionSkillsListsDc"
+                                  hierarchyProperty="skillTree">
+                        <columns>
+                            <column id="fileImageLogo"
+                                    property="fileImageLogo"
+                                    maximumWidth="120px"
+                                    caption="msg://msgSkillLogo">
+                                <componentRenderer/>
+                            </column>
+                            <column id="skillName" property="skillName" caption="msg://msgSkill"/>
+                            <column id="specialisation" property="specialisation" caption="msg://msgSpecialisation"/>
+                            <column id="wikiPage" property="wikiPage" maximumWidth="250px" caption="msg://msgWikiPage"/>
+                            <column id="isComment" caption="msg://msgIsComment" maximumWidth="120px">
+                                <iconRenderer/>
+                            </column>
+                        </columns>
+                        <rowsCount/>
+                        <!--                    <actions>
+                                                <action id="add"
+                                                        type="add"/>
+                                                <action id="edit"
+                                                        type="edit"/>
+                                                <action id="remove"
+                                                        type="remove"/>
+                                            </actions>
+                                            <buttonsPanel>
+                                                <button action="openPositionSkillsListTable.add"/>
+                                                <button action="openPositionSkillsListTable.edit"/>
+                                                <button action="openPositionSkillsListTable.remove"/>
+                                            </buttonsPanel> -->
+                    </treeDataGrid>
+                </vbox>
             </tab>
-            <!--            <tab caption="mainMsg://msgResrutierTask"
-                             margin="true,true,true,true"
-                             spacing="true"
-                             id="tabRecrutior"
-                             expand="recrutiesTasksTable"
-                             icon="ANDROID">
-                            <dataGrid id="recrutiesTasksTable"
-                                      width="100%"
-                                      height="100%"
-                                      dataContainer="taskRecrutior">
-                                <columns>
-                                    <column id="startDate"
-                                            property="startDate"/>
-                                    <column id="endDate"
-                                            property="endDate"/>
-                                    <column id="reacrutier.name"
-                                            property="recrutierName"/>
-                                    <column id="openPosition.vacansyName"
-                                            property="openPosition"/>
-                                </columns>
-                                <rowsCount/>
-                                <buttonsPanel>
-                                    <button id="groupSubscribe"
-                                            invoke="groupSubscribe"
-                                            caption="msg://msgGroupSubscribe"
-                                            icon="BELL_O"/>
-                                    <button action="recrutiesTasksTable.create"/>
-                                    <button action="recrutiesTasksTable.edit"/>
-                                    <button action="recrutiesTasksTable.remove"/>
-                                </buttonsPanel>
-                                <actions>
-                                    <action id="create" type="create"/>
-                                    <action type="edit" id="edit"/>
-                                    <action id="remove" type="remove"/>
-                                </actions>
-                            </dataGrid>
-                        </tab> -->
         </tabSheet>
         <vbox id="forExpand" spacing="false" align="BOTTOM_RIGHT">
             <hbox id="editActions"
