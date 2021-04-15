@@ -951,6 +951,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             candidatePic.setSource(fileDescriptorResource);
         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
     }
 
