@@ -48,6 +48,9 @@
                 <column id="endProjectDate" caption="msg://msgProjectEndDate" property="endProjectDate"/>
                 <column id="projectDepartment" caption="msg://msgProjectDepartament" property="projectDepartment"/>
                 <column id="projectOwner" caption="msg://msgProjectOwner" property="projectOwner"/>
+                <column id="iconProjectDesc" caption="msg://msgIconCaption">
+                    <iconRenderer/>
+                </column>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

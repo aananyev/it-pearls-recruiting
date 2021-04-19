@@ -11,7 +11,9 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Table(name = "ITPEARLS_ITERACTION_LIST")
+@Table(name = "ITPEARLS_ITERACTION_LIST", indexes = {
+        @Index(name = "IDX_ITERACTION_NAME_NUMBER_ITERACTION", columnList = "NUMBER_ITERACTION")
+})
 @Entity(name = "itpearls_IteractionList")
 @NamePattern("%s|candidate")
 public class IteractionList extends StandardEntity {
@@ -94,6 +96,9 @@ public class IteractionList extends StandardEntity {
 
     @Column(name = "ADD_INTEGER")
     protected Integer addInteger;
+
+    @Column(name = "RATING")
+    protected Integer rating;
 
     public void setEndDateIteraction(Date endDateIteraction) {
         this.endDateIteraction = endDateIteraction;
@@ -237,5 +242,13 @@ public class IteractionList extends StandardEntity {
 
     public void setDateIteraction(Date dateIteraction) {
         this.dateIteraction = dateIteraction;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public Integer getRating() {
+        return rating;
     }
 }

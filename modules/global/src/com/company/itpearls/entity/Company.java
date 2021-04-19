@@ -14,7 +14,9 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NamePattern("%s %s|comanyName,companyShortName")
-@Table(name = "ITPEARLS_COMPANY")
+@Table(name = "ITPEARLS_COMPANY", indexes = {
+        @Index(name = "IDX_COMPANY_NAME", columnList = "COMANY_NAME")
+})
 @Entity(name = "itpearls_Company")
 public class Company extends StandardEntity {
     private static final long serialVersionUID = 7912366724901851184L;

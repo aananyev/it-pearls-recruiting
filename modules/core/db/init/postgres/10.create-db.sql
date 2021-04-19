@@ -102,6 +102,7 @@ create table ITPEARLS_ITERACTION_LIST (
     ADD_DATE timestamp,
     ADD_STRING varchar(255),
     ADD_INTEGER integer,
+    RATING integer,
     --
     primary key (ID)
 )^
@@ -240,6 +241,7 @@ create table ITPEARLS_PROJECT (
     DELETED_BY varchar(50),
     --
     PROJECT_NAME varchar(80),
+    PROJECT_TREE_ID uuid,
     PROJECT_IS_CLOSED boolean,
     START_PROJECT_DATE date,
     END_PROJECT_DATE date,

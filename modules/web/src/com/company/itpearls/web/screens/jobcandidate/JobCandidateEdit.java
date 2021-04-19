@@ -4,10 +4,7 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.openposition.SelectCitiesLocation;
 import com.haulmont.cuba.core.global.*;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
-import com.haulmont.cuba.gui.WebBrowserTools;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
@@ -81,12 +78,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataContext dataContext;
     @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
-    @Inject
-    private CollectionLoader<IteractionList> jobCandidateIteractionListDataGridDl;
+//    @Inject
+//    private CollectionLoader<IteractionList> jobCandidateIteractionListDataGridDl;
     @Inject
     private DataGrid<IteractionList> jobCandidateIteractionListTable;
-    @Inject
-    private CollectionContainer<IteractionList> jobCandidateIteractionListDataGridDc;
+//    @Inject
+//    private CollectionContainer<IteractionList> jobCandidateIteractionListDataGridDc;
     @Inject
     private Label<String> personPositionTitle;
     @Inject
@@ -131,6 +128,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionPropertyContainer<CandidateCV> jobCandidateCandidateCvsDc;
     @Inject
     private Button copyCVButton;
+    private long msec = 0;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private Label<String> createdUpdatedLabel;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -204,8 +206,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         setLabelTitle();
         setPositionsLabel();
+        setCreatedUpdatedLabel();
     }
 
+    private void setCreatedUpdatedLabel() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.mm.yyyy");
+
+        if(!PersistenceHelper.isNew(getEditedEntity())) {
+            String retStr = "Создано: " + getEditedEntity().getCreatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ")\n"
+                    + "Изменено: " + getEditedEntity().getUpdatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ")";
+
+            createdUpdatedLabel.setValue(retStr);
+        }
+    }
 
 
     private void setLabelTitle() {
@@ -354,6 +367,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         setPercentLabel();
+        msec = System.currentTimeMillis() - msec;
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption("Открытие JobCandadateEdit: " + msec)
+                .show();
     }
 
     private void setPercentLabel() {
@@ -665,6 +682,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onInit(InitEvent event) {
         addIconColumn();
         setCopyCVButton();
+
+        msec = System.currentTimeMillis();
     }
 
     private void setCopyCVButton() {
@@ -778,14 +797,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 //                .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new JobCandidateScreenOptions(false))
                 .withParentDataContext(dataContext)
-                .withContainer(jobCandidateIteractionListDataGridDc)
+                .withContainer(jobCandidateIteractionDc)
                 .withInitializer(candidate -> {
                     candidate.setCandidate(getEditedEntity());
                 })
                 .build()
                 .show();
 
-        jobCandidateIteractionListDataGridDl.load();
+//        jobCandidateIteractionListDataGridDl.load();
     }
 
     @Install(to = "jobCandidateCandidateCvTable.letter", subject = "descriptionProvider")
@@ -830,7 +849,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 screenBuilders.editor(IteractionList.class, this)
 //                        .withOpenMode(OpenMode.DIALOG)
                         .withParentDataContext(dataContext)
-                        .withContainer(jobCandidateIteractionListDataGridDc)
+                        .withContainer(jobCandidateIteractionDc)
                         .withInitializer(candidate -> {
                             candidate.setCandidate(getEditedEntity());
                             candidate.setVacancy(finalLastIteraction.getVacancy());
@@ -855,7 +874,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             screenBuilders.editor(IteractionList.class, this)
 //                    .withOpenMode(OpenMode.DIALOG)
                     .withParentDataContext(dataContext)
-                    .withContainer(jobCandidateIteractionListDataGridDc)
+                    .withContainer(jobCandidateIteractionDc)
                     .withInitializer(candidate -> {
                         candidate.setCandidate(jobCandidateIteractionListTable.getSingleSelected().getCandidate());
                         candidate.setVacancy(jobCandidateIteractionListTable.getSingleSelected().getVacancy());
@@ -1047,8 +1066,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setCandidateInTables() {
-        jobCandidateIteractionListDataGridDl.setParameter("candidate", getEditedEntity());
-        jobCandidateIteractionListDataGridDl.load();
+//        jobCandidateIteractionListDataGridDl.setParameter("candidate", getEditedEntity());
+//        jobCandidateIteractionListDataGridDl.load();
     }
 
     public void addPositionList() {

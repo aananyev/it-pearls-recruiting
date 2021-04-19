@@ -8,7 +8,9 @@ import com.haulmont.cuba.core.entity.annotation.LookupType;
 import javax.persistence.*;
 
 @NamePattern("%s|networkName")
-@Table(name = "ITPEARLS_SOCIAL_NETWORK_UR_LS")
+@Table(name = "ITPEARLS_SOCIAL_NETWORK_UR_LS", indexes = {
+        @Index(name = "IDX_NETWORK_NAME", columnList = "NETWORK_NAME")
+})
 @Entity(name = "itpearls_SocialNetworkURLs")
 public class SocialNetworkURLs extends StandardEntity {
     private static final long serialVersionUID = -4652381238943479311L;

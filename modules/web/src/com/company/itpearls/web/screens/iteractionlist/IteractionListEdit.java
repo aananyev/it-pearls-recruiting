@@ -21,10 +21,8 @@ import com.haulmont.cuba.security.global.UserSession;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
+import java.util.*;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 @UiController("itpearls_IteractionList.edit")
 @UiDescriptor("iteraction-list-edit.xml")
@@ -100,6 +98,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     static String ADMINISTRATOR = "Administrators";
     @Inject
     private Notifications notifications;
+    @Inject
+    private LookupField ratingField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -770,6 +770,37 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         askFlag2 = false;
 
         getScreenOptionsNoSubscribers(event);
+        setRatingField();
+    }
+
+    private void setRatingField() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("Полный негатив", 2);
+        map.put("Сомнительно", 4);
+        map.put("Нейтрально", 6);
+        map.put("Положительно",8);
+        map.put("Отлично!", 10);
+        ratingField.setOptionsMap(map);
+
+        ratingField.setOptionIconProvider(e -> {
+            int a = (int) ratingField.getValue();
+
+            switch (a) {
+                case 2:
+                    return "icons/remove.png";
+                case 4:
+                    return "icons/traffic-lights_blue.png";
+                case 6:
+                    return "icons/traffic-lights_green.png";
+                case 8:
+                    return "icons/traffic-lights_yellow.png";
+                case 10:
+                    return "icons/traffic-lights_red.png";
+                default:
+                    break;
+            }
+            return "icons/remove.png";
+        });
     }
 
     @Subscribe("vacancyFiels")

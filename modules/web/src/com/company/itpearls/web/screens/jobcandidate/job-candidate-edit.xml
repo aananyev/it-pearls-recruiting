@@ -3,8 +3,8 @@
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
-        messagesPack="com.company.itpearls.web.screens.jobcandidate" icon="USER">
+        messagesPack="com.company.itpearls.web.screens.jobcandidate"
+        icon="USER">
     <data>
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate">
@@ -17,11 +17,22 @@
                 <property name="candidateCv" view="_local">
                     <property name="resumePosition" view="_local"/>
                     <property name="toVacancy" view="_local">
-                        <property name="projectName" view="_local"/>
+                        <property name="projectName" view="_local">
+                            <property name="projectOwner" view="_local"/>
+                            <property name="projectDepartment" view="companyDepartament-view"/>
+                        </property>
                     </property>
                 </property>
                 <property name="fileImageFace" view="_local"/>
-                <property name="iteractionList" view="_local"/>
+                <property name="iteractionList" view="iteractionList-view">
+                    <property name="vacancy" view="_local">
+                        <property name="projectName" view="project-view">
+                            <property name="projectOwner" view="_local"/>
+                        </property>
+                    </property>
+                    <property name="iteractionType" view="_local"/>
+                    <property name="project" view="project-view"/>
+                </property>
                 <property name="skills" view="_local"/>
                 <property name="socialNetwork" view="_local"/>
                 <property name="jobHistory" view="_local"/>
@@ -34,21 +45,21 @@
             <collection id="jobCandidateSkillsesDc" property="skills"/>
             <collection id="jobCandidateIteractionDc" property="iteractionList"/>
         </instance>
-        <collection id="jobCandidateIteractionListDataGridDc"
-                    class="com.company.itpearls.entity.IteractionList"
-                    view="iteractionList-view">
-            <loader id="jobCandidateIteractionListDataGridDl">
-                <query>
-                    <![CDATA[select e from itpearls_IteractionList e
-                    order by e.numberIteraction desc]]>
-                    <condition>
-                        <c:jpql>
-                            <c:where>e.candidate = :candidate</c:where>
-                        </c:jpql>
-                    </condition>
-                </query>
-            </loader>
-        </collection>
+        <!--        <collection id="jobCandidateIteractionListDataGridDc"
+                            class="com.company.itpearls.entity.IteractionList"
+                            view="iteractionList-view">
+                    <loader id="jobCandidateIteractionListDataGridDl">
+                        <query>
+                            <![CDATA[select e from itpearls_IteractionList e
+                            order by e.numberIteraction desc]]>
+                            <condition>
+                                <c:jpql>
+                                    <c:where>e.candidate = :candidate</c:where>
+                                </c:jpql>
+                            </condition>
+                        </query>
+                    </loader>
+                </collection> -->
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_local">
             <loader id="personPositionsLc">
                 <query>
@@ -60,7 +71,7 @@
         </collection>
         <collection id="currentCompaniesDc" class="com.company.itpearls.entity.Company">
             <view extends="_local">
-                <property name="companyOwnership" fetch="JOIN" view="_minimal"/>
+                <property name="companyOwnership" view="_minimal"/>
             </view>
             <loader id="currentCompaniesLc">
                 <query><![CDATA[select e from itpearls_Company e
@@ -462,7 +473,7 @@ order by e.cityRuName]]>
                  icon="LIST"
                  spacing="true">
                 <dataGrid id="jobCandidateIteractionListTable"
-                          dataContainer="jobCandidateIteractionListDataGridDc"
+                          dataContainer="jobCandidateIteractionDc"
                           width="100%"
                           contextMenuEnabled="false"
                           textSelectionEnabled="false"
@@ -518,103 +529,126 @@ order by e.cityRuName]]>
             <tab id="tabSkills"
                  caption="msg://msgSkills"
                  margin="true,true,true,true"
-                 expand="jobCandidateSkillListTable"
+                 expand="tabSkillsVbox"
                  icon="font-icon:MEDKIT"
                  spacing="true">
-                <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc"
-                                   property="specialisation"
-                                   caption="msg://msgSpecialisation" width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="open" type="picker_open"/>
-                    </actions>
-                </lookupPickerField>
-                <dataGrid id="jobCandidateSkillListTable"
-                          width="100%"
-                          dataContainer="jobCandidateSkillsesDc">
-                    <columns>
-                        <column id="skillName" caption="mainMsg://msgSkills" property="skillName"/>
-                    </columns>
-                    <actions>
-                        <action id="add" type="add"/>
-                        <action id="edit" type="edit"/>
-                        <action id="remove" type="remove"/>
-                    </actions>
-                    <buttonsPanel>
-                        <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
-                        <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
-                        <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
-                    </buttonsPanel>
-                </dataGrid>
+                <vbox id="tabSkillsVbox"
+                      expand="jobCandidateSkillListTable"
+                      spacing="true">
+                    <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc"
+                                       property="specialisation"
+                                       caption="msg://msgSpecialisation" width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                        </actions>
+                    </lookupPickerField>
+                    <dataGrid id="jobCandidateSkillListTable"
+                              width="100%"
+                              dataContainer="jobCandidateSkillsesDc">
+                        <columns>
+                            <column id="skillName" caption="mainMsg://msgSkills" property="skillName"/>
+                        </columns>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                        <buttonsPanel>
+                            <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
+                            <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
+                            <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
+                        </buttonsPanel>
+                    </dataGrid>
+                </vbox>
             </tab>
             <tab id="tabResume"
                  caption="msg://msgResume"
                  margin="true,true,true,true"
                  icon="font-icon:FILE_TEXT"
-                 expand="jobCandidateCandidateCvTable"
+                 expand="tabResumeVbox"
                  spacing="true">
-                <dataGrid id="jobCandidateCandidateCvTable"
-                          width="100%"
-                          dataContainer="jobCandidateCandidateCvsDc">
-                    <columns>
-                        <column id="datePost"
-                                width="150px"
-                                property="datePost"
-                                caption="msg://msgDatePost"/>
-                        <column id="resumePosition"
-                                property="resumePosition" caption="msg://msgToPosition"/>
-                        <column id="toVacancy"
-                                property="toVacancy"
-                                maximumWidth="500px"
-                                caption="msg://msgToVacansy"/>
-                        <column id="iconOriginalCVFile"
-                                width="100px"
-                                caption="msg://msgOriginalCV">
-                            <iconRenderer/>
-                        </column>
-                        <column id="iconITPearlsCVFile"
-                                width="100px"
-                                caption="msg://msgITPearlsCV">
-                            <iconRenderer/>
-                        </column>
-                        <column id="letter"
-                                width="100px"
-                                caption="msg://msgCoverLetter">
-                            <iconRenderer/>
-                        </column>
-                        <column id="createdBy"
-                                property="createdBy"
-                                width="100px"
-                                caption="msg://msgCreatedBy"/>
-                    </columns>
-                    <actions>
-                        <action type="create" id="create"/>
-                        <action id="edit" type="edit"/>
-                        <action id="remove" type="remove"/>
-                    </actions>
-                    <buttonsPanel>
-                        <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
-                        <button id="copyCVButton"
-                                caption="msg://msgCopy"
-                                icon="COPY"
-                                invoke="copyCVJobCandidate"/>
-                        <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
-                        <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
-                    </buttonsPanel>
-                </dataGrid>
+                <vbox id="tabResumeVbox"
+                      spacing="true"
+                      height="100%"
+                      expand="jobCandidateCandidateCvTable">
+                    <dataGrid id="jobCandidateCandidateCvTable"
+                              width="100%"
+                              dataContainer="jobCandidateCandidateCvsDc">
+                        <columns>
+                            <column id="datePost"
+                                    width="150px"
+                                    property="datePost"
+                                    caption="msg://msgDatePost"/>
+                            <column id="resumePosition"
+                                    property="resumePosition" caption="msg://msgToPosition"/>
+                            <column id="toVacancy"
+                                    property="toVacancy"
+                                    maximumWidth="500px"
+                                    caption="msg://msgToVacansy"/>
+                            <column id="iconOriginalCVFile"
+                                    width="100px"
+                                    caption="msg://msgOriginalCV">
+                                <iconRenderer/>
+                            </column>
+                            <column id="iconITPearlsCVFile"
+                                    width="100px"
+                                    caption="msg://msgITPearlsCV">
+                                <iconRenderer/>
+                            </column>
+                            <column id="letter"
+                                    width="100px"
+                                    caption="msg://msgCoverLetter">
+                                <iconRenderer/>
+                            </column>
+                            <column id="createdBy"
+                                    property="createdBy"
+                                    width="100px"
+                                    caption="msg://msgCreatedBy"/>
+                        </columns>
+                        <actions>
+                            <action type="create" id="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                        <buttonsPanel>
+                            <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
+                            <button id="copyCVButton"
+                                    caption="msg://msgCopy"
+                                    icon="COPY"
+                                    invoke="copyCVJobCandidate"/>
+                            <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
+                            <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
+                        </buttonsPanel>
+                    </dataGrid>
+                </vbox>
             </tab>
         </tabSheet>
-        <form id="form" dataContainer="jobCandidateDc">
-            <column width="100%">
-                <textField id="jobCandidateFieldCreatedBy" dataContainer="jobCandidateDc" property="createdBy"
-                           width="50%"
-                           editable="false" enable="false" align="BOTTOM_RIGHT"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
-            <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick" icon="BELL"/>
-            <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+        <hbox id="editActions"
+              spacing="true"
+              height="100%"
+              width="100%"
+              align="BOTTOM_RIGHT"
+              expand="createdByLabel">
+            <hbox id="createdByLabel"
+                  spacing="true"
+                  expand="createdUpdatedLabel">
+                <label id="createdUpdatedLabel"
+                       align="BOTTOM_LEFT"
+                       stylename="h4"/>
+            </hbox>
+            <hbox id="buttonCancelOk" spacing="true">
+                <button id="buttonSubscribe"
+                        caption="msg://msgSubscribe"
+                        invoke="onButtonSubscribeClick"
+                        icon="BELL"
+                        align="BOTTOM_RIGHT"/>
+                <button id="windowCommitAndCloseButton"
+                        action="windowCommitAndClose"
+                        align="BOTTOM_RIGHT"/>
+                <button action="windowClose"
+                        align="BOTTOM_RIGHT"/>
+            </hbox>
         </hbox>
     </layout>
 </window>

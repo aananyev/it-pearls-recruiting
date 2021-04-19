@@ -2,7 +2,6 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.candidatecv" icon="FILE_WORD_O">
     <data>
         <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-view">
@@ -188,6 +187,7 @@
                  spacing="true">
                 <vbox id="cvVbox"
                       spacing="true"
+                      width="100%"
                       expand="candidateCVRichTextArea">
                     <button id="rescanSkills"
                             caption="msg://msgRescanResume"
@@ -197,7 +197,6 @@
                                   dataContainer="candidateCVDc"
                                   property="textCV"
                                   width="100%"
-                                  height="300pt"
                                   required="true"/>
                     <upload id="fileCVField" fileStoragePutMode="IMMEDIATE" property="fileCV"
                             showFileName="true"

@@ -23,6 +23,11 @@ public class Project extends StandardEntity {
     @Column(name = "PROJECT_NAME", length = 80)
     protected String projectName;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PROJECT_TREE_ID")
+    protected Project projectTree;
+
     @Column(name = "PROJECT_IS_CLOSED")
     protected Boolean projectIsClosed = false;
 
@@ -140,5 +145,13 @@ public class Project extends StandardEntity {
 
     public String getTemplateLetter() {
         return templateLetter;
+    }
+
+    public void setProjectTree(Project projectTree) {
+        this.projectTree = projectTree;
+    }
+
+    public Project getProjectTree() {
+        return projectTree;
     }
 }

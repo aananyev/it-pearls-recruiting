@@ -99,6 +99,13 @@
                   width="100%">
                 <columns count="2"/>
                 <rows>
+                    <row id="rating">
+                        <lookupField id="ratingField"
+                                           required="true"
+                                           caption="msg://msgRating"
+                                           description="msg://msgRatingDecription"
+                                           width="50%"/>
+                    </row>
                     <row id="row">
                         <lookupPickerField id="candidateField"
                                            optionsContainer="candidatesDc"

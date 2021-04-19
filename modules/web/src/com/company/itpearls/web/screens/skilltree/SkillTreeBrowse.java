@@ -3,17 +3,19 @@ package com.company.itpearls.web.screens.skilltree;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.UiComponents;
-import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.DataGrid;
-import com.haulmont.cuba.gui.components.Image;
-import com.haulmont.cuba.gui.components.TreeDataGrid;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.SkillTree;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import javax.inject.Inject;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @UiController("itpearls_SkillTree.browse")
 @UiDescriptor("skill-tree-browse.xml")
@@ -59,6 +61,7 @@ public class SkillTreeBrowse extends StandardLookup<SkillTree> {
             Image image = uiComponents.create(Image.NAME);
             image.setValueSource(new ContainerValueSource<SkillTree, FileDescriptor>(entity.getContainer(),
                     "fileImageLogo"));
+
             image.setWidth("50px");
             image.setStyleName("image-candidate-face-little-image");
             image.setScaleMode(Image.ScaleMode.CONTAIN);
@@ -71,6 +74,4 @@ public class SkillTreeBrowse extends StandardLookup<SkillTree> {
     public void onInit(InitEvent event) {
         skillImageColumnRenderer();
     }
-
-
 }

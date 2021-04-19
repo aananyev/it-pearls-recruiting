@@ -12,7 +12,11 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NamePattern("%s|positionRuName")
-@Table(name = "ITPEARLS_POSITION")
+@Table(name = "ITPEARLS_POSITION", indexes = {
+        @Index(name = "IDX_POSITION_RU_NAME", columnList = "POSITION_RU_NAME"),
+        @Index(name = "IDX_POSITION_EN_NAME", columnList = "POSITION_EN_NAME")
+})
+
 @Entity(name = "itpearls_Position")
 public class Position extends StandardEntity {
     private static final long serialVersionUID = 8755535357083277650L;

@@ -9,7 +9,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|cityRuName")
-@Table(name = "ITPEARLS_CITY")
+@Table(name = "ITPEARLS_CITY", indexes = {
+        @Index(name = "IDX_CITY_CITY_RU_NAME", columnList = "CITY_RU_NAME")
+})
 @Entity(name = "itpearls_City")
 public class City extends StandardEntity {
     private static final long serialVersionUID = -8881735664013253888L;
