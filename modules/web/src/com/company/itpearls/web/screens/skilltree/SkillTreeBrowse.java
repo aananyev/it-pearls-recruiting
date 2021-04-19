@@ -37,13 +37,12 @@ public class SkillTreeBrowse extends StandardLookup<SkillTree> {
     }
 
 
-
     @Install(to = "skillTreesTable.isComment", subject = "columnGenerator")
     private Object skillTreesTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
-        if(event.getItem().getComment() != null && !event.getItem().equals("")) {
-            return CubaIcon.PLUS_CIRCLE;
+        if (event.getItem().getComment() != null && !event.getItem().equals("")) {
+            return CubaIcon.FILE_TEXT;
         } else {
-            return CubaIcon.MINUS_CIRCLE;
+            return CubaIcon.FILE;
         }
     }
 
@@ -54,24 +53,5 @@ public class SkillTreeBrowse extends StandardLookup<SkillTree> {
         } else {
             return "pic-center-large-red";
         }
-    }
-
-    private void skillImageColumnRenderer() {
-        skillTreesTable.addGeneratedColumn("fileImageLogo", entity -> {
-            Image image = uiComponents.create(Image.NAME);
-            image.setValueSource(new ContainerValueSource<SkillTree, FileDescriptor>(entity.getContainer(),
-                    "fileImageLogo"));
-
-            image.setWidth("50px");
-            image.setStyleName("image-candidate-face-little-image");
-            image.setScaleMode(Image.ScaleMode.CONTAIN);
-            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            return image;
-        });
-    }
-
-    @Subscribe
-    public void onInit(InitEvent event) {
-        skillImageColumnRenderer();
     }
 }

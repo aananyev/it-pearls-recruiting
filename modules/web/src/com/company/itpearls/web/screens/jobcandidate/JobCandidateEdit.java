@@ -986,8 +986,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Icons.Icon jobCandidateCandidateCvTableiconITPearlsCVFileColumnGenerator
             (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         return event.getItem().getLinkItPearlsCV() != null ?
-                CubaIcon.valueOf("PLUS_CIRCLE") :
-                CubaIcon.valueOf("MINUS_CIRCLE");
+                CubaIcon.valueOf("FILE_TEXT") :
+                CubaIcon.valueOf("FILE");
     }
 
     @Install(to = "jobCandidateIteractionListTable.iteractionType", subject = "descriptionProvider")

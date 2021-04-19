@@ -560,6 +560,7 @@
                             invoke="rescanJobDescription"/>
                     <treeDataGrid id="openPositionSkillsListTable"
                                   width="100%"
+                                  hierarchyColumn="skillName"
                                   dataContainer="openPositionSkillsListsDc"
                                   hierarchyProperty="skillTree">
                         <columns>

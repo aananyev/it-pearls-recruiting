@@ -1,6 +1,11 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 
+.round-photo {
+    border-radius: 45px; /* Радиус скругления */
+    box-shadow: 0 0 0 2px green, 0 0 13px #333; /* Параметры теней */
+}
+
 .salary-fix-limit {
     color: red;
 }

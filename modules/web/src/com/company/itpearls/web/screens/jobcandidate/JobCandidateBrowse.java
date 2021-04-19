@@ -281,9 +281,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .parameter("candidate", event.getItem())
                 .list()
                 .size() == 0) {
-            retStr = "MINUS_CIRCLE";
+            retStr = "FILE";
         } else {
-            retStr = "PLUS_CIRCLE";
+            retStr = "FILE_TEXT";
         }
 
         return CubaIcon.valueOf(retStr);
@@ -849,7 +849,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
                     "fileImageFace"));
             image.setWidth("50px");
-            image.setStyleName("image-candidate-face-little-image");
+//            image.setStyleName("image-candidate-face-little-image");
+            if( entity.getItem().getFileImageFace() != null) {
+                image.setStyleName("round-photo");
+            } else {
+                image.setStyleName("pic-center");
+            }
             image.setScaleMode(Image.ScaleMode.CONTAIN);
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
             return image;

@@ -36,12 +36,12 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="fileImageLogo"
+<!--                <column id="fileImageLogo"
                         property="fileImageLogo"
                         maximumWidth="120px"
                         caption="msg://msgSkillLogo">
                     <componentRenderer/>
-                </column>
+                </column> -->
                 <column id="skillName" property="skillName" caption="mainMsg://msgSkill"/>
                 <column id="specialisation" property="specialisation" caption="msg://msgSpecialisation"/>
                 <column id="wikiPage" property="wikiPage" maximumWidth="250px" caption="msg://msgWikiPage"/>
