@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|cityRuName")
 @Table(name = "ITPEARLS_CITY", indexes = {
+        @Index(name = "IDX_CITY_ID", columnList = "ID"),
         @Index(name = "IDX_CITY_CITY_RU_NAME", columnList = "CITY_RU_NAME")
 })
 @Entity(name = "itpearls_City")

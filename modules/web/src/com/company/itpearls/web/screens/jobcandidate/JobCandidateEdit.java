@@ -213,8 +213,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.mm.yyyy");
 
         if(!PersistenceHelper.isNew(getEditedEntity())) {
-            String retStr = "Создано: " + getEditedEntity().getCreatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ")\n"
-                    + "Изменено: " + getEditedEntity().getUpdatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ")";
+            String retStr = "Создано: " + getEditedEntity().getCreatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") "
+                    + "Изменено: " + getEditedEntity().getUpdatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ";
 
             createdUpdatedLabel.setValue(retStr);
         }

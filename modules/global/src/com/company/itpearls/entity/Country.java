@@ -12,6 +12,7 @@ import java.util.List;
 
 @NamePattern("%s|countryRuName")
 @Table(name = "ITPEARLS_COUNTRY", indexes = {
+        @Index(name = "IDX_ITPEARLS_COUNTRY_ID", columnList = "ID"),
         @Index(name = "IDX_COUNTRY_COUNTRY_RU_NAME", columnList = "COUNTRY_RU_NAME")
 })
 @Entity(name = "itpearls_Country")

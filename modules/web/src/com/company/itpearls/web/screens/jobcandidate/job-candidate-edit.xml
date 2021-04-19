@@ -118,7 +118,7 @@ order by e.cityRuName]]>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
+    <layout expand="tabSheetSocialNetworks" spacing="true" width="100%" height="100%">
         <groupBox spacing="true">
             <grid spacing="true">
                 <columns count="10"/>
@@ -178,8 +178,7 @@ order by e.cityRuName]]>
                  caption="msg://msgJobCard"
                  margin="true,true,true,true"
                  spacing="true"
-                 icon="ID_CARD"
-                 expand="cardBox">
+                 icon="ID_CARD">
                 <hbox id="cardBox"
                       spacing="true"
                       width="100%"
@@ -188,6 +187,7 @@ order by e.cityRuName]]>
                               width="AUTO"
                               spacing="true"
                               stylename="light"
+                              align="TOP_LEFT"
                               height="100%">
                         <hbox spacing="false">
                             <label id="jobTitleTitle"
@@ -289,9 +289,12 @@ order by e.cityRuName]]>
             <tab id="tabCandidate"
                  caption="msg://candidate"
                  margin="true,true,true,true"
-                 expand="tabCabdidateGrid"
                  icon="BOMB"
                  spacing="true">
+                <hbox id="cardCandidateBox"
+                      spacing="true"
+                      width="100%"
+                      expand="tabCabdidateGrid">
                 <grid id="tabCabdidateGrid"
                       height="100%"
                       spacing="true"
@@ -425,6 +428,7 @@ order by e.cityRuName]]>
                         </row>
                     </rows>
                 </grid>
+                </hbox>
             </tab>
             <tab id="tabContactInfo"
                  caption="msg://msgTabContactInfo"
@@ -626,7 +630,6 @@ order by e.cityRuName]]>
         </tabSheet>
         <hbox id="editActions"
               spacing="true"
-              height="100%"
               width="100%"
               align="BOTTOM_RIGHT"
               expand="createdByLabel">
@@ -635,7 +638,7 @@ order by e.cityRuName]]>
                   expand="createdUpdatedLabel">
                 <label id="createdUpdatedLabel"
                        align="BOTTOM_LEFT"
-                       stylename="h4"/>
+                       stylename="small"/>
             </hbox>
             <hbox id="buttonCancelOk" spacing="true">
                 <button id="buttonSubscribe"

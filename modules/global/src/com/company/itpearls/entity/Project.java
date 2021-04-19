@@ -14,7 +14,8 @@ import java.util.List;
 
 @NamePattern("%s|projectName")
 @Table(name = "ITPEARLS_PROJECT", indexes = {
-        @Index(name = "IDX_ITPEARLS_PROJECT", columnList = "PROJECT_NAME")
+        @Index(name = "IDX_ITPEARLS_PROJECT_ID", columnList = "ID"),
+        @Index(name = "IDX_ITPEARLS_PROJECT_PROJECT_NAME", columnList = "PROJECT_NAME")
 })
 @Entity(name = "itpearls_Project")
 public class Project extends StandardEntity {

@@ -43,7 +43,7 @@
     <dialogMode height="800"
                 modal="true"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
+    <layout expand="tabSheet" spacing="true" height="100%" width="100%">
         <groupBox spacing="true">
             <grid spacing="true">
                 <columns count="4"/>
@@ -56,7 +56,8 @@
                 </rows>
             </grid>
         </groupBox>
-        <tabSheet id="tabSheet" stylename="framed">
+        <tabSheet id="tabSheet"
+                  stylename="framed">
             <tab id="tabCandidate"
                  caption="msg://msgCandidate"
                  expand="candidateVbox"
@@ -65,11 +66,12 @@
                       spacing="true"
                       width="100%"
                       height="100%"
+                      align="TOP_LEFT"
                       expand="groupBox">
                     <groupBox id="groupBox"
                               spacing="true"
                               stylename="light">
-                        <vbox>
+                        <vbox >
                             <lookupPickerField id="candidateField" optionsContainer="candidatesDc"
                                                dataContainer="candidateCVDc" property="candidate"
                                                caption="msg://msgCandidate" height="50%" width="70%">
@@ -188,6 +190,7 @@
                 <vbox id="cvVbox"
                       spacing="true"
                       width="100%"
+                      height="100%"
                       expand="candidateCVRichTextArea">
                     <button id="rescanSkills"
                             caption="msg://msgRescanResume"
@@ -306,7 +309,6 @@
         </tabSheet>
         <hbox id="editActions"
               spacing="true"
-              height="100%"
               align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"
                     align="BOTTOM_RIGHT"/>

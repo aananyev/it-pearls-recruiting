@@ -15,6 +15,7 @@ import java.util.List;
 
 @NamePattern("%s|vacansyName")
 @Table(name = "ITPEARLS_OPEN_POSITION", indexes = {
+        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_ID", columnList = "ID"),
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_VACANCY_NAME", columnList = "VACANSY_NAME")
 })
 @Entity(name = "itpearls_OpenPosition")
