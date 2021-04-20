@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.CandidateCV;
+import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
@@ -68,6 +69,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private ScreenBuilders screenBuilders;
     @Inject
     private Screens screens;
+    @Inject
+    private Label<String> marqueeLabel;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -156,6 +159,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     public void setStatistics() {
         List<IteractionList> iteractionList = getAllCandidateIteractions();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        setMmrqueeLabel(iteractionList);
 
         // найти последнего рекрутера
         for (IteractionList iteraction : iteractionList) {
@@ -267,6 +272,18 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
         iteractionCountLabel.setValue(String.valueOf(iteractionList.size()));
         resumeCountLabel.setValue(getResumeCount());
+    }
+
+    private void setMmrqueeLabel(List<IteractionList> iteractionList) {
+        String retStr = "";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.mm.YYYY");
+
+        for(IteractionList iterList : iteractionList) {
+            retStr = retStr + iterList.getIteractionType().getIterationName() + "(" +
+                    simpleDateFormat.format(iterList.getDateIteraction()) + ") ; ";
+        }
+
+        marqueeLabel.setValue(retStr);
     }
 
     private String getResumeCount() {

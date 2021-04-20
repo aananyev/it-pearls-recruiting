@@ -27,7 +27,7 @@
                 <property name="iteractionList" view="iteractionList-view">
                     <property name="vacancy" view="_local">
                         <property name="projectName" view="project-view">
-                            <property name="projectOwner" view="_local"/>
+                            <property name="projectOwner" view="person-view"/>
                         </property>
                     </property>
                     <property name="iteractionType" view="_local"/>
@@ -38,6 +38,7 @@
                 <property name="jobHistory" view="_local"/>
                 <property name="currentCompany" view="_local"/>
                 <property name="specialisation" view="_local"/>
+                <property name="telegramGroup"/>
             </view>
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
@@ -166,6 +167,12 @@ order by e.cityRuName]]>
                                description="msg://msgTelegram"
                                dataContainer="jobCandidateDc"
                                property="telegramName"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"/>
+                        <label id="telegramGroupLabel"
+                               description="msg://msgTelegramGroup"
+                               dataContainer="jobCandidateDc"
+                               property="telegramGroup"
                                stylename="h4"
                                align="MIDDLE_LEFT"/>
                     </row>

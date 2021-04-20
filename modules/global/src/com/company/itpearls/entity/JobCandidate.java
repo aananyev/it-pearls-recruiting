@@ -20,6 +20,10 @@ import java.util.List;
 @NamePattern("%s %s %s %s|secondName,firstName,middleName,personPosition")
 @Table(name = "ITPEARLS_JOB_CANDIDATE", indexes = {
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_ID", columnList = "ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CURRENT_COMPANY_ID", columnList = "CURRENT_COMPANY_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_PERSON_POSITION_ID", columnList = "PERSON_POSITION_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CITY_OF_RESIDENCE_ID", columnList = "CITY_OF_RESIDENCE_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_OPEN_POSITION_ID", columnList = "OPEN_POSITION_ID"),
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FULL_NAME", columnList = "FULL_NAME")
 })
 @Entity(name = "itpearls_JobCandidate")
@@ -76,6 +80,9 @@ public class JobCandidate extends StandardEntity {
 
     @Column(name = "TELEGRAM_NAME", length = 30)
     protected String telegramName;
+
+    @Column(name = "TELEGRAM_GROUP", length = 50)
+    protected String telegramGroup;
 
     @Column(name = "WIBER_NAME", length = 30)
     protected String wiberName;
@@ -341,5 +348,13 @@ public class JobCandidate extends StandardEntity {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+    }
+
+    public void setTelegramGroup(String telegramGroup) {
+        this.telegramGroup = telegramGroup;
+    }
+
+    public String getTelegramGroup() {
+        return telegramGroup;
     }
 }

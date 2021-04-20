@@ -38,6 +38,7 @@ import java.util.List;
 @EditedEntityContainer("candidateCVDc")
 @LoadDataBeforeShow
 public class CandidateCVEdit extends StandardEditor<CandidateCV> {
+
     @Inject
     private UserSession userSession;
     @Inject
@@ -76,12 +77,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private RichTextArea candidateCVRichTextArea;
     @Inject
     private PdfParserService pdfParserService;
-    @Inject
-    private CollectionContainer<JobCandidate> candidatesDc;
-    @Inject
-    private Image candidatePic;
-    @Inject
-    private Screens screens;
     @Inject
     private TreeDataGrid<SkillTree> skillTreesTable;
     @Inject
@@ -503,4 +498,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         });
     }
 
+    @Install(to = "candidateField", subject = "optionImageProvider")
+    private Resource candidateFieldOptionImageProvider(JobCandidate jobCandidate) {
+
+        if(jobCandidate.getFileImageFace() != null) {
+            Image image = uiComponents.create(Image.NAME);
+            image.setStyleName("round-photo");
+            FileDescriptorResource resource = image.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(jobCandidate.getFileImageFace());
+            return resource;
+        }
+
+        return null;
+    }
 }

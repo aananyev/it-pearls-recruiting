@@ -13,7 +13,7 @@
               expand="projectCompanyFieldGroup">
             <image id="companyLogoImage"
                    rowspan="5"
-                   stylename="widget-border"
+                   stylename="renderer-photo-150px"
                    width="150px"
                    height="200px"
                    align="TOP_RIGHT"

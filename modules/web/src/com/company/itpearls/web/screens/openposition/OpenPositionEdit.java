@@ -171,6 +171,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private UiComponents uiComponents;
     @Inject
     private TreeDataGrid<SkillTree> openPositionSkillsListTable;
+    @Inject
+    private TextField<String> shortDescriptionTextArea;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1384,7 +1386,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Install(to = "openPositionSkillsListTable.isComment", subject = "columnGenerator")
     private Object openPositionSkillsListTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
-        if(event.getItem().getComment() != null && !event.getItem().equals("")) {
+        if (event.getItem().getComment() != null && !event.getItem().equals("")) {
             return CubaIcon.PLUS_CIRCLE;
         } else {
             return CubaIcon.MINUS_CIRCLE;
@@ -1403,5 +1405,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Install(to = "openPositionSkillsListTable", subject = "rowDescriptionProvider")
     private String openPositionSkillsListTableRowDescriptionProvider(SkillTree skillTree) {
         return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).text() : "";
+    }
+
+    public void addShortDescription() {
+        if (openPositionRichTextArea.getValue() != null) {
+            List<SkillTree> skillTrees = pdfParserService.parseSkillTree(Jsoup.parse(openPositionRichTextArea.getValue()).text());
+            String retStr = "";
+
+            for (SkillTree skillTree : skillTrees) {
+                if (skillTree.getSkillTree() != null) {
+                        retStr = skillTree.getSkillName() + ";" + retStr;
+                }
+            }
+
+            shortDescriptionTextArea.setValue(retStr);
+        }
     }
 }

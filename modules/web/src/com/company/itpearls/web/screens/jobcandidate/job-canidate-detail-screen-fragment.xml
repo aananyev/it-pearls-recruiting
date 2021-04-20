@@ -16,7 +16,7 @@
               height="100%">
             <image id="candidateFaceImage"
                    rowspan="5"
-                   stylename="widget-border"
+                   stylename="renderer-photo-150px"
                    width="150px"
                    align="TOP_RIGHT"
                    scaleMode="FILL"
@@ -241,5 +241,8 @@
                 </vbox>
             </hbox>
         </hbox>
+        <label id="marqueeLabel"
+               width="100%"
+               stylename="marquee"/>
     </layout>
 </fragment>

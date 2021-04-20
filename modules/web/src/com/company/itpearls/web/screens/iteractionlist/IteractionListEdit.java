@@ -100,6 +100,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Notifications notifications;
     @Inject
     private LookupField ratingField;
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -775,33 +777,68 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private void setRatingField() {
         Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("Полный негатив", 2);
-        map.put("Сомнительно", 4);
-        map.put("Нейтрально", 6);
-        map.put("Положительно",8);
-        map.put("Отлично!", 10);
+        map.put("Полный негатив", 0);
+        map.put("Сомнительно", 1);
+        map.put("Нейтрально", 2);
+        map.put("Положительно",3);
+        map.put("Отлично!", 4);
         ratingField.setOptionsMap(map);
-
-        ratingField.setOptionIconProvider(e -> {
-            int a = (int) ratingField.getValue();
-
-            switch (a) {
-                case 2:
-                    return "icons/remove.png";
-                case 4:
-                    return "icons/traffic-lights_blue.png";
-                case 6:
-                    return "icons/traffic-lights_green.png";
-                case 8:
-                    return "icons/traffic-lights_yellow.png";
-                case 10:
-                    return "icons/traffic-lights_red.png";
-                default:
-                    break;
-            }
-            return "icons/remove.png";
-        });
     }
+
+    @Install(to = "candidateField", subject = "optionImageProvider")
+    private Resource candidateFieldOptionImageProvider(JobCandidate jobCandidate) {
+        if(jobCandidate.getFileImageFace() != null) {
+            Image image = uiComponents.create(Image.NAME);
+            image.setStyleName("round-photo");
+            FileDescriptorResource resource = image.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(jobCandidate.getFileImageFace());
+            return resource;
+        }
+
+        return null;
+    }
+
+    @Install(to = "ratingField", subject = "optionIconProvider")
+    private String ratingFieldOptionIconProvider(Object object) {
+        int a = ratingField.getValue() != null ? (int) ratingField.getValue() : 0;
+
+        switch (a) {
+            case 0:
+                return CubaIcon.ANGLE_DOUBLE_DOWN.source();
+            case 1:
+                return CubaIcon.ANGLE_DOWN.source();
+            case 2:
+                return CubaIcon.ANDROID.source();
+            case 3:
+                return CubaIcon.ANGLE_UP.source();
+            case 4:
+                return CubaIcon.ANGLE_DOUBLE_UP.source();
+            default:
+                return CubaIcon.ANDROID.source();
+        }
+    }
+
+    @Install(to = "ratingField", subject = "optionStyleProvider")
+    private String ratingFieldOptionStyleProvider(Object object) {
+        int a = ratingField.getValue() != null ? (int) ratingField.getValue() : 0;
+
+        switch (a) {
+            case 0:
+                return "pic-center-large-red";
+            case 1:
+                return "pic-center-large-yellow";
+            case 2:
+                return "pic-center-large-gray";
+            case 3:
+                return "pic-center-large-blue";
+            case 4:
+                return "pic-center-large-green";
+            default:
+                return "pic-center-large-grey";
+        }
+    }
+
+
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {

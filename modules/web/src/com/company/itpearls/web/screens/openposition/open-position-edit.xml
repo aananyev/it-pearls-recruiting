@@ -491,12 +491,21 @@
                             </tab>
                         </accordion>
                     </hbox>
-                    <textField id="shortDescriptionTextArea"
-                               dataContainer="openPositionDc"
-                               caption="msg://msgShortCaption"
-                               property="shortDescription"
-                               maxLength="160"
-                               width="100%"/>
+                    <hbox width="100%"
+                          spacing="true"
+                          expand="shortDescriptionTextArea">
+                        <textField id="shortDescriptionTextArea"
+                                   dataContainer="openPositionDc"
+                                   caption="msg://msgShortCaption"
+                                   property="shortDescription"
+                                   maxLength="250"
+                                   width="100%"/>
+                        <button id="scanJDButton"
+                                caption="msg://msgScanJD"
+                                align="BOTTOM_RIGHT"
+                                description="msg://msgScanJDAndPut"
+                                invoke="addShortDescription"/>
+                    </hbox>
                 </scrollBox>
             </tab>
             <tab id="tabExercise"
