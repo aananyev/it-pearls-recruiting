@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.openposition.SelectCitiesLocation;
+import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -78,11 +79,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataContext dataContext;
     @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
-//    @Inject
+    //    @Inject
 //    private CollectionLoader<IteractionList> jobCandidateIteractionListDataGridDl;
     @Inject
     private DataGrid<IteractionList> jobCandidateIteractionListTable;
-//    @Inject
+    //    @Inject
 //    private CollectionContainer<IteractionList> jobCandidateIteractionListDataGridDc;
     @Inject
     private Label<String> personPositionTitle;
@@ -133,6 +134,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Notifications notifications;
     @Inject
     private Label<String> createdUpdatedLabel;
+    @Inject
+    private Button checkSkillFromJD;
+    @Inject
+    private LinkButton telegrammGroupLinkButton;
+    @Inject
+    private TextField<String> mobilePhoneField;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -212,7 +219,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void setCreatedUpdatedLabel() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.mm.yyyy");
 
-        if(!PersistenceHelper.isNew(getEditedEntity())) {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
             String retStr = "Создано: " + getEditedEntity().getCreatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") "
                     + "Изменено: " + getEditedEntity().getUpdatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ";
 
@@ -248,6 +255,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 (telegramNameField.getValue() == null) &&
                 (wiberNameField.getValue() == null) &&
                 (whatsupNameField.getValue() == null) &&
+                (mobilePhoneField.getValue() == null) &&
                 (phoneField.getValue() == null)) && !isEmptySN;
     }
 
@@ -368,9 +376,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onAfterShow(AfterShowEvent event) {
         setPercentLabel();
         msec = System.currentTimeMillis() - msec;
-        notifications.create(Notifications.NotificationType.WARNING)
-                .withCaption("Открытие JobCandadateEdit: " + msec)
-                .show();
+
+        System.out.println(msec);
+//        notifications.create(Notifications.NotificationType.WARNING)
+//                .withCaption("Открытие JobCandadateEdit: " + msec)
+//                .show();
     }
 
     private void setPercentLabel() {
@@ -398,6 +408,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
     }
 
+    @Subscribe("mobilePhoneField")
+    public void onMobilePhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
     @Subscribe("socialNetworkTable")
     public void onSocialNetworkTableSelection(Table.SelectionEvent<SocialNetworkURLs> event) {
         enableDisableContacts();
@@ -415,7 +430,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("wiberNameField")
     public void onWiberNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-       enableDisableContacts();
+        enableDisableContacts();
     }
 
     protected void enableDisableContacts() {
@@ -423,6 +438,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (isRequiredAddresField()) {
             skypeNameField.setRequired(true);
             phoneField.setRequired(true);
+            mobilePhoneField.setRequired(true);
             emailField.setRequired(true);
             telegramNameField.setRequired(true);
             whatsupNameField.setRequired(true);
@@ -430,6 +446,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         } else {
             skypeNameField.setRequired(false);
             phoneField.setRequired(false);
+            mobilePhoneField.setRequired(false);
             emailField.setRequired(false);
             telegramNameField.setRequired(false);
             whatsupNameField.setRequired(false);
@@ -476,7 +493,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void checkNotUsePosition() {
-        if(personPositionField.getValue() != null) {
+        if (personPositionField.getValue() != null) {
             if (personPositionField.getValue().getPositionRuName().contains("не использовать")) {
                 personPositionField.setValue(null);
             }
@@ -496,7 +513,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         JobCandidate jobCandidate = checkDublicateCandidate();
 
-        if(jobCandidate != null && PersistenceHelper.isNew(getEditedEntity())) {
+        if (jobCandidate != null && PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()
                     .withCaption("ВНИМАНИЕ!")
                     .withMessage("В базе уже присутствует кандидат "
@@ -519,18 +536,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void addIteractionOfNewCandidate() {
-        if(PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             // добавить сюда Iteraction "Новый кандиат"
         }
     }
 
     private JobCandidate checkDublicateCandidate() {
         String queryStr = "select e from itpearls_JobCandidate e " +
-                            "where e.firstName = :firstName and " +
-                                    "e.secondName = :secondName and " +
-                                    "e.cityOfResidence = :cityOfResidence and " +
-                                    "e.personPosition = :personPosition";
-        List <JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
+                "where e.firstName = :firstName and " +
+                "e.secondName = :secondName and " +
+                "e.cityOfResidence = :cityOfResidence and " +
+                "e.personPosition = :personPosition";
+        List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
                 .query(queryStr)
                 .parameter("firstName", firstNameField.getValue())
                 .parameter("secondName", secondNameField.getValue())
@@ -539,7 +556,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .view("jobCandidate-view")
                 .list();
 
-        if(jobCandidates.size() == 0) {
+        if (jobCandidates.size() == 0) {
             return null;
         } else {
             return jobCandidates.get(0);
@@ -595,6 +612,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             qPercent = ++qPercent;
 
         if (phoneField.getValue() != null)             // 10
+            qPercent = ++qPercent;
+
+        if (mobilePhoneField.getValue() != null)             // 10
             qPercent = ++qPercent;
 
         if (skypeNameField.getValue() != null)         // 12
@@ -684,16 +704,27 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setCopyCVButton();
 
         msec = System.currentTimeMillis();
+
+
+        checkSkillFromJD.setEnabled(false);
+
+        jobCandidateCandidateCvTable.addSelectionListener(e -> {
+            if(e.getSelected() == null) {
+                checkSkillFromJD.setEnabled(false);
+            } else {
+                checkSkillFromJD.setEnabled(true);
+            }
+        });
     }
 
     private void setCopyCVButton() {
         copyCVButton.setEnabled(false);
         jobCandidateCandidateCvTable.addItemClickListener(e -> {
-                if(jobCandidateCandidateCvTable.getSingleSelected() == null) {
-                    copyCVButton.setEnabled(true);
-                } else {
-                    copyCVButton.setEnabled(false);
-                }
+            if (jobCandidateCandidateCvTable.getSingleSelected() == null) {
+                copyCVButton.setEnabled(true);
+            } else {
+                copyCVButton.setEnabled(false);
+            }
         });
     }
 
@@ -958,8 +989,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Icons.Icon jobCandidateCandidateCvTableLetterColumnGenerator
             (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         return event.getItem().getLetter() != null ?
-                CubaIcon.valueOf("PLUS_CIRCLE") :
-                CubaIcon.valueOf("MINUS_CIRCLE");
+                CubaIcon.valueOf("FILE_TEXT") :
+                CubaIcon.valueOf("FILE");
     }
 
     @Subscribe("fileImageFaceUpload")
@@ -978,8 +1009,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Icons.Icon jobCandidateCandidateCvTableIconOriginalCVFileColumnGenerator
             (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         return event.getItem().getLinkOriginalCv() != null ?
-                CubaIcon.valueOf("PLUS_CIRCLE") :
-                CubaIcon.valueOf("MINUS_CIRCLE");
+                CubaIcon.valueOf("FILE_TEXT") :
+                CubaIcon.valueOf("FILE");
     }
 
     @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "columnGenerator")
@@ -1016,6 +1047,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         setLinkButtonEmail();
         setLinkButtonTelegrem();
+        setLinkButtonTelegremGroup();
         setLinkButtonSkype();
 
         addFirstNameSuggestField();
@@ -1032,6 +1064,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void setLinkButtonTelegrem() {
         if (getEditedEntity().getTelegramName() != null) {
             telegrammLinkButton.setCaption(getEditedEntity().getTelegramName());
+        }
+    }
+
+    private void setLinkButtonTelegremGroup() {
+        if (getEditedEntity().getTelegramGroup() != null) {
+            telegrammGroupLinkButton.setCaption(getEditedEntity().getTelegramGroup());
         }
     }
 
@@ -1075,7 +1113,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         List<Position> setPos = new ArrayList<>();
 
-        if(getEditedEntity().getPositionList() != null) {
+        if (getEditedEntity().getPositionList() != null) {
             for (Position p : getEditedEntity().getPositionList()) {
                 setPos.add(p);
             }
@@ -1085,7 +1123,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             selectPersonPositions.setPositionsList(setPos);
         });
 
-        selectPersonPositions.addAfterCloseListener( e -> {
+        selectPersonPositions.addAfterCloseListener(e -> {
             this.getEditedEntity().setPositionList(selectPersonPositions.getPositionsList());
             setPositionsLabel();
         });
@@ -1096,7 +1134,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String outStr = "";
         String description = "";
 
-        if(getEditedEntity().getPositionList() != null) {
+        if (getEditedEntity().getPositionList() != null) {
             for (Position s : getEditedEntity().getPositionList()) {
                 if (!outStr.equals("")) {
                     outStr = outStr + ",";
@@ -1108,7 +1146,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
         }
-        if(!outStr.equals("")) {
+        if (!outStr.equals("")) {
             positionsLabel.setValue(outStr);
             positionsLabel.setDescription(description);
         }
@@ -1178,5 +1216,49 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .build()
                     .show();
         }
+    }
+
+    public void checkSkillFromJD() {
+        List<SkillTree> skillTrees = rescanResume();
+        String inputText = Jsoup.parse(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment()).text();
+        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
+
+        if (jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment() != null) {
+            SkillTreeBrowseCheck s = screenBuilders.screen(this)
+                    .withScreenClass(SkillTreeBrowseCheck.class)
+                    .build();
+            s.setCandidateCVSkills(skillTrees);
+            s.setOpenPositionSkills(skillTreesFromJD);
+            s.setTitle(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getVacansyName());
+
+            s.show();
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Для проверки навыков кандидата по резюме " +
+                            "\nнеобходимозаполнить поле \"Вакансия\".")
+                    .show();
+        }
+    }
+
+    public List<SkillTree> rescanResume() {
+        if (jobCandidateCandidateCvTable.getSingleSelected() != null) {
+            if (jobCandidateCandidateCvTable
+                    .getSingleSelected()
+                    .getTextCV() != null) {
+                String inputText = Jsoup.parse(jobCandidateCandidateCvTable
+                        .getSingleSelected()
+                        .getTextCV())
+                        .text();
+
+                List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
+
+                return skillTrees;
+            } else {
+                return null;
+            }
+        }
+
+        return null;
     }
 }

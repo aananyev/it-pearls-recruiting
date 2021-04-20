@@ -38,6 +38,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     BIRDH_DATE date,
     EMAIL varchar(50),
     PHONE varchar(18),
+    MOBILE_PHONE varchar(18),
     SKYPE_NAME varchar(30),
     TELEGRAM_NAME varchar(30),
     TELEGRAM_GROUP varchar(50),

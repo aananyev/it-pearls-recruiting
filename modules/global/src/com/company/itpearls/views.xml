@@ -290,6 +290,7 @@
             </property>
             <property name="email"/>
             <property name="telegramName"/>
+            <property name="telegramGroup"/>
             <property name="skypeName"/>
             <property name="positionList"/>
         </property>

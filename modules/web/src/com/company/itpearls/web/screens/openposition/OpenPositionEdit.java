@@ -173,6 +173,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TreeDataGrid<SkillTree> openPositionSkillsListTable;
     @Inject
     private TextField<String> shortDescriptionTextArea;
+    @Inject
+    private Button scanJDButton;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1098,6 +1100,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setGroupCommandRadioButtin();
         skillImageColumnRenderer();
     }
+
 
     private void setGroupCommandRadioButtin() {
         Map<String, Integer> map = new LinkedHashMap<>();

@@ -120,6 +120,15 @@
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
+                               value="msg://msgTelegramGroup"/>
+                        <linkButton id="telegrammGroupLinkButton"
+                                    align="BOTTOM_LEFT"
+                                    description="msg://msgTelegramGroup"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
                                value="msg://msgViberAccount"/>
                         <label align="BOTTOM_LEFT"
                                dataContainer="jobCandidatesDc"
@@ -241,8 +250,5 @@
                 </vbox>
             </hbox>
         </hbox>
-        <label id="marqueeLabel"
-               width="100%"
-               stylename="marquee"/>
     </layout>
 </fragment>

@@ -169,12 +169,6 @@ order by e.cityRuName]]>
                                property="telegramName"
                                stylename="h4"
                                align="MIDDLE_LEFT"/>
-                        <label id="telegramGroupLabel"
-                               description="msg://msgTelegramGroup"
-                               dataContainer="jobCandidateDc"
-                               property="telegramGroup"
-                               stylename="h4"
-                               align="MIDDLE_LEFT"/>
                     </row>
                 </rows>
             </grid>
@@ -254,6 +248,16 @@ order by e.cityRuName]]>
                             <linkButton id="telegrammLinkButton"
                                         align="MIDDLE_LEFT"
                                         description="msg://msgTelegram"/>
+                        </hbox>
+                        <hbox spacing="true">
+                            <label id="telegramGroupTitle"
+                                   value="msg://msgTelegramGroup"
+                                   stylename="h4"
+                                   align="MIDDLE_LEFT"
+                                   htmlEnabled="true"/>
+                            <linkButton id="telegrammGroupLinkButton"
+                                        align="MIDDLE_LEFT"
+                                        description="msg://msgTelegramGroup"/>
                         </hbox>
                         <hbox spacing="true">
                             <label id="skypeTitle"
@@ -414,11 +418,6 @@ order by e.cityRuName]]>
                                     lower(:searchString) escape '\'
                                 </query>
                             </suggestionField>
-                            <!--                                                       <textField id="secondNameField"
-                                                                                               dataContainer="jobCandidateDc"
-                                                                                               property="secondName"
-                                                                                               width="100%"
-                                                                                               caption="msg://msgSecondName"/> -->
                             <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc"
                                                width="100%"
                                                caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
@@ -455,6 +454,12 @@ order by e.cityRuName]]>
                         <row>
                             <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="100%"
                                        caption="msg://msgPhone" required="true"/>
+                            <textField id="telegramGroupField" dataContainer="jobCandidateDc" property="telegramGroup"
+                                       width="100%" caption="msg://msgTelegramGrouep"/>
+                        </row>
+                        <row>
+                            <textField id="mobilePhoneField" dataContainer="jobCandidateDc" property="mobilePhone" width="100%"
+                                       caption="msg://msgMobilePhone" required="true"/>
                             <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName"
                                        width="100%"
                                        caption="msg://msgViberAccount"/>
@@ -583,6 +588,10 @@ order by e.cityRuName]]>
                       spacing="true"
                       height="100%"
                       expand="jobCandidateCandidateCvTable">
+                    <button id="checkSkillFromJD"
+                            caption="msg://msgCheckSkills"
+                            align="BOTTOM_LEFT"
+                            invoke="checkSkillFromJD"/>
                     <dataGrid id="jobCandidateCandidateCvTable"
                               width="100%"
                               dataContainer="jobCandidateCandidateCvsDc">

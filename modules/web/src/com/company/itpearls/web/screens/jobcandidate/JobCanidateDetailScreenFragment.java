@@ -65,12 +65,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private LinkButton skypeLinkButton;
     @Inject
     private LinkButton emailLinkButton;
-    @Inject
-    private ScreenBuilders screenBuilders;
-    @Inject
-    private Screens screens;
-    @Inject
-    private Label<String> marqueeLabel;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -84,6 +78,26 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                 retStr = jobCandidatesDc.getItem().getTelegramName().trim();
             } else {
                 retStr = jobCandidate.getTelegramName().trim();
+            }
+
+            if (retStr != null) {
+                if (retStr.charAt(0) == '@') {
+                    retStr = retStr.substring(1);
+                }
+
+                telegrammLinkButton.setCaption(retStr);
+            }
+        }
+    }
+
+    public void setLinkButtonTelegremGroup() {
+        String retStr = "";
+
+        if (jobCandidatesDc.getItem().getTelegramGroup() != null) {
+            if (jobCandidate == null) {
+                retStr = jobCandidatesDc.getItem().getTelegramGroup().trim();
+            } else {
+                retStr = jobCandidate.getTelegramGroup().trim();
             }
 
             if (retStr != null) {
@@ -159,8 +173,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     public void setStatistics() {
         List<IteractionList> iteractionList = getAllCandidateIteractions();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-
-        setMmrqueeLabel(iteractionList);
 
         // найти последнего рекрутера
         for (IteractionList iteraction : iteractionList) {
@@ -272,18 +284,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
         iteractionCountLabel.setValue(String.valueOf(iteractionList.size()));
         resumeCountLabel.setValue(getResumeCount());
-    }
-
-    private void setMmrqueeLabel(List<IteractionList> iteractionList) {
-        String retStr = "";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.mm.YYYY");
-
-        for(IteractionList iterList : iteractionList) {
-            retStr = retStr + iterList.getIteractionType().getIterationName() + "(" +
-                    simpleDateFormat.format(iterList.getDateIteraction()) + ") ; ";
-        }
-
-        marqueeLabel.setValue(retStr);
     }
 
     private String getResumeCount() {

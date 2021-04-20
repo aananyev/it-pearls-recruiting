@@ -75,6 +75,9 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "PHONE", length = 18)
     protected String phone;
 
+    @Column(name = "MOBILE_PHONE", length = 18)
+    protected String mobilePhone;
+
     @Column(name = "SKYPE_NAME", length = 30)
     protected String skypeName;
 
@@ -356,5 +359,13 @@ public class JobCandidate extends StandardEntity {
 
     public String getTelegramGroup() {
         return telegramGroup;
+    }
+
+    public String getMobilePhone() {
+        return mobilePhone;
+    }
+
+    public void setMobilePhone(String mobilePhone) {
+        this.mobilePhone = mobilePhone;
     }
 }
