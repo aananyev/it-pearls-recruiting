@@ -15,6 +15,7 @@
                 <property name="personPosition" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
                 <property name="candidateCv" view="_local">
+                    <property name="candidate" view="_local"/>
                     <property name="resumePosition" view="_local"/>
                     <property name="toVacancy" view="_local">
                         <property name="projectName" view="_local">
@@ -31,7 +32,9 @@
                         </property>
                     </property>
                     <property name="iteractionType" view="_local"/>
-                    <property name="project" view="project-view"/>
+                    <property name="project" view="project-view">
+                        <property name="projectOwner" view="_local"/>
+                    </property>
                 </property>
                 <property name="skills" view="_local"/>
                 <property name="socialNetwork" view="_local"/>

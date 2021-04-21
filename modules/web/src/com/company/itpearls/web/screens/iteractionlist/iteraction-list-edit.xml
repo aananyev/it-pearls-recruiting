@@ -18,16 +18,16 @@
                     cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Iteraction e order by e.iterationName]]>
-                        <condition>
-                            <c:jpql>
-                                <c:where>
-                                    e.iteractionTree.number like :number
-                                </c:where>
-                            </c:jpql>
-                        </condition>
-                    </query>
-                </loader>
-            </collection>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e.iteractionTree.number like :number
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="candidatesDc"
                     class="com.company.itpearls.entity.JobCandidate"
                     view="_minimal">
@@ -101,10 +101,12 @@
                 <rows>
                     <row id="rating">
                         <lookupField id="ratingField"
-                                           required="true"
-                                           caption="msg://msgRating"
-                                           description="msg://msgRatingDecription"
-                                           width="50%"/>
+                                     required="true"
+                                     caption="msg://msgRating"
+                                     dataContainer="iteractionListDc"
+                                     property="rating"
+                                     description="msg://msgRatingDecription"
+                                     width="50%"/>
                     </row>
                     <row id="row">
                         <lookupPickerField id="candidateField"
@@ -162,7 +164,7 @@
                                            width="100%"/>
                                 <dateField id="addDate" dataContainer="iteractionListDc"
                                            property="addDate"
-                                           width="100%" />
+                                           width="100%"/>
                                 <textField id="addInteger"
                                            dataContainer="iteractionListDc"
                                            property="addInteger"
@@ -211,10 +213,10 @@
                     invoke="onButtonSubscribeClick"
                     caption="mainMsg://msgSubscribe"
                     icon="BELL"/>
-<!--            <button id="buttonAddNewIteraction"
-                    invoke="addNewIteraction"
-                    caption="msg://msgAddNewIteraction"
-                    icon="COPY"/> -->
+            <!--            <button id="buttonAddNewIteraction"
+                                invoke="addNewIteraction"
+                                caption="msg://msgAddNewIteraction"
+                                icon="COPY"/> -->
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

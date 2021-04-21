@@ -1,5 +1,5 @@
 package com.company.itpearls.web.screens.jobcandidate;
-
+// TODO сделать сортировку по номеру взаимодействия или дате в таблице IteractioNList.Borwse
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.openposition.SelectCitiesLocation;
@@ -293,9 +293,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateIteractionListTable.projectName", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableProjectNameDescriptionProvider(IteractionList iteractionList) {
-        String retStr = "Ответственный за проект: ";
+        String retStr = "";
 
-        if (iteractionList.getVacancy() != null) {
+        try {
+            retStr = "Ответственный за проект: ";
+
+            retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
+
+            if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
+                retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
+            }
+
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+
+/*        if (iteractionList.getVacancy() != null) {
             if (iteractionList.getVacancy().getProjectName() != null) {
                 if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
                     if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
@@ -307,7 +320,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     }
                 }
             }
-        }
+        } */
 
         return Jsoup.parse(retStr).text();
     }
@@ -385,7 +398,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void setPercentLabel() {
         // вычислить процент заполнения карточки кандидата
-        Integer qualityPercent = setQualityPercent() * 100 / 14;
+        Integer qualityPercent = setQualityPercent() * 100 / 16;
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             labelQualityPercent.setValue("Процент заполнения карточки: " + qualityPercent.toString()

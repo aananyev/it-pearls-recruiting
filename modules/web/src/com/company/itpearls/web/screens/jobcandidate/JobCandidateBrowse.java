@@ -847,11 +847,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private void candidateImageColumnRenderer() {
         jobCandidatesTable.addGeneratedColumn("fileImageFace", entity -> {
             Image image = uiComponents.create(Image.NAME);
-            image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
-                    "fileImageFace"));
-            image.setWidth("50px");
+
+            if (entity.getItem().getFileImageFace() != null) {
+                image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
+                        "fileImageFace"));
+                image.setWidth("50px");
 //            image.setStyleName("image-candidate-face-little-image");
-            if( entity.getItem().getFileImageFace() != null) {
                 image.setStyleName("round-photo");
             } else {
                 image.setStyleName("pic-center");
@@ -866,7 +867,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private String jobCandidatesTablePersonPositionDescriptionProvider(JobCandidate jobCandidate) {
         String retStr = "";
 
-        if(jobCandidate.getPositionList() != null) {
+        if (jobCandidate.getPositionList() != null) {
             for (Position s : jobCandidate.getPositionList()) {
                 if (!retStr.equals("")) {
                     retStr = retStr + ",";
