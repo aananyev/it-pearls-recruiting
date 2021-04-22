@@ -1,13 +1,58 @@
 /* Define your theme modifications inside next mixin */
 @mixin com_company_itpearls-halo-ext {
 
+.rating_red_1 {
+    color: red;
+    font_size: large;
+    font-weight: bold;
+    text-align: center;
+        border-radius: 15px; /* Радиус скругления */
+        box-shadow: 0 0 0 2px red, 0 0 13px #333; /* Параметры теней */
+}
+
+.rating_orange_2 {
+    color: orange;
+    font_size: large;
+    font-weight: bold;
+    text-align: center;
+        border-radius: 15px; /* Радиус скругления */
+        box-shadow: 0 0 0 2px orange, 0 0 13px #333; /* Параметры теней */
+}
+
+.rating_yellow_3 {
+    color: yellow;
+    font_size: large;
+    font-weight: bold;
+    text-align: center;
+        border-radius: 15px; /* Радиус скругления */
+        box-shadow: 0 0 0 2px yellow, 0 0 13px #333; /* Параметры теней */
+}
+
+.rating_green_4 {
+    color: green;
+    font_size: large;
+    font-weight: bold;
+    text-align: center;
+        border-radius: 15px; /* Радиус скругления */
+        box-shadow: 0 0 0 2px green, 0 0 13px #333; /* Параметры теней */
+}
+
+.rating_blue_5 {
+    color: blue;
+    font_size: large;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 15px; /* Радиус скругления */
+    box-shadow: 0 0 0 2px blue, 0 0 13px #333; /* Параметры теней */
+}
+
 .round-photo {
-    border-radius: 45px; /* Радиус скругления */
+    border-radius: 15px; /* Радиус скругления */
     box-shadow: 0 0 0 2px green, 0 0 13px #333; /* Параметры теней */
 }
 
 .round-photo-150px {
-    border-radius: 150px; /* Радиус скругления */
+    border-radius: 50px; /* Радиус скругления */
     box-shadow: 0 0 0 3px green, 0 0 13px #333; /* Параметры теней */
 }
 

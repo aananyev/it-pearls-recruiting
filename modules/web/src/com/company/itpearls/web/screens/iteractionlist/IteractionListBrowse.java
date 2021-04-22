@@ -8,6 +8,8 @@ import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
@@ -167,4 +169,39 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         jobCandidateEdit.setEntityToEdit(iteractionListsTable.getSingleSelected().getCandidate());
         screens.show(jobCandidateEdit);
     }
+
+    @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")
+    private String iteractionListsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        return event.getItem().getRating() != null ? String.valueOf((event.getItem().getRating() + 1)) : "";
+    }
+
+
+/*
+    @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")
+    private Integer iteractionListsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        return event.getItem().getRating() != null ? event.getItem().getRating() + 1 : null;
+    }
+*/
+
+    @Install(to = "iteractionListsTable.rating", subject = "styleProvider")
+    private String iteractionListsTableRatingStyleProvider(IteractionList iteractionList) {
+        if(iteractionList.getRating() != null) {
+            switch (iteractionList.getRating()) {
+                case 0:
+                    return "rating_red_1";
+                case 1:
+                    return "rating_orange_2";
+                case 2:
+                    return "rating_yellow_3";
+                case 3:
+                    return "rating_green_4";
+                case 4:
+                    return "rating_blue_5";
+            }
+        }
+
+        return null;
+    }
+
+
 }

@@ -125,11 +125,14 @@ order by e.cityRuName]]>
     <layout expand="tabSheetSocialNetworks" spacing="true" width="100%" height="100%">
         <groupBox spacing="true">
             <grid spacing="true">
-                <columns count="10"/>
+                <columns count="12"/>
                 <rows>
                     <row>
                         <label id="iteractionListLabelCandidate" stylename="h2"
                                align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="fullName"/>
+                        <label stylename="h2" value="|"/>
+                        <label id="candidateRatingLabel" stylename="h2"
+                               align="MIDDLE_LEFT"/>
                         <label stylename="h2" value="|"/>
                         <label stylename="h2"
                                align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="personPosition"/>
@@ -519,8 +522,12 @@ order by e.cityRuName]]>
                         <column id="icon" width="48px" caption=""/>
                         <column id="numberIteraction"
                                 property="numberIteraction"
+                                sort="DESCENDING"
                                 sortable="true"/>
-
+                        <column id="rating"
+                                caption="msg://msgRating">
+                            <htmlRenderer nullRepresentation="null"/>
+                        </column>
                         <column id="vacancy"
                                 property="vacancy"/>
                         <column id="iteractionType"

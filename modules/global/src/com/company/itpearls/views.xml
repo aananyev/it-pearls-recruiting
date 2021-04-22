@@ -67,7 +67,6 @@
                 <property name="firstName"/>
                 <property name="secondName"/>
                 <property name="middleName"/>
-<!--                <property name="cityOfResidence"/> -->
             </property>
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local">
@@ -79,7 +78,6 @@
             </property>
         </property>
         <property name="skillsList" view="_local"/>
-        <!--        <property name="candidates" fetch="BATCH" view="_local"/> -->
         <property name="paymentsType"/>
         <property name="typeCompanyComission"/>
         <property name="typeSalaryOfResearcher"/>
@@ -88,7 +86,9 @@
         <property name="percentComissionOfCompany"/>
         <property name="percentSalaryOfResearcher"/>
         <property name="percentSalaryOfRecrutier"/>
-        <property name="parentOpenPosition"/>
+        <property name="parentOpenPosition" view="_local">
+            <property name="projectName" view="_local"/>
+        </property>
         <property name="commandCandidate"/>
         <property name="cities" view="_local"/>
     </view>
@@ -419,7 +419,9 @@
             <property name="recrutierName"/>
         </property>
         <property name="specialisation" view="_minimal"/>
-        <property name="candidateCv" view="_minimal"/>
+        <property name="candidateCv" view="_minimal">
+            <property name="fileImageFace" view="_local"/>
+        </property>
         <property name="openPosition" view="_minimal">
             <property name="cityPosition" view="_minimal"/>
             <property name="positionType" view="_minimal"/>

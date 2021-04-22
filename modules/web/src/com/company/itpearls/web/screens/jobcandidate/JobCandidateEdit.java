@@ -1,8 +1,8 @@
 package com.company.itpearls.web.screens.jobcandidate;
 // TODO сделать сортировку по номеру взаимодействия или дате в таблице IteractioNList.Borwse
+
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
-import com.company.itpearls.web.screens.openposition.SelectCitiesLocation;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -79,12 +79,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataContext dataContext;
     @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
-    //    @Inject
-//    private CollectionLoader<IteractionList> jobCandidateIteractionListDataGridDl;
     @Inject
     private DataGrid<IteractionList> jobCandidateIteractionListTable;
-    //    @Inject
-//    private CollectionContainer<IteractionList> jobCandidateIteractionListDataGridDc;
     @Inject
     private Label<String> personPositionTitle;
     @Inject
@@ -140,6 +136,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LinkButton telegrammGroupLinkButton;
     @Inject
     private TextField<String> mobilePhoneField;
+    @Inject
+    private Label<String> candidateRatingLabel;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -214,6 +212,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLabelTitle();
         setPositionsLabel();
         setCreatedUpdatedLabel();
+        setRatingLabel(getEditedEntity());
     }
 
     private void setCreatedUpdatedLabel() {
@@ -470,7 +469,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!getEditedEntity().getFullName().equals("")) {
                 if (getEditedEntity().getFullName() == null)
@@ -711,8 +709,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    long startSec = System.currentTimeMillis();
+    ;
+
+    private void printSec() {
+        startSec = System.currentTimeMillis() - startSec;
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withDescription("Время выполнения: " + startSec)
+                .show();
+        startSec = System.currentTimeMillis();
+    }
+
     @Subscribe
     public void onInit(InitEvent event) {
+
         addIconColumn();
         setCopyCVButton();
 
@@ -722,7 +732,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         checkSkillFromJD.setEnabled(false);
 
         jobCandidateCandidateCvTable.addSelectionListener(e -> {
-            if(e.getSelected() == null) {
+            if (e.getSelected() == null) {
                 checkSkillFromJD.setEnabled(false);
             } else {
                 checkSkillFromJD.setEnabled(true);
@@ -1274,4 +1284,62 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         return null;
     }
+
+    @Subscribe("jobCandidateIteractionListTable")
+    public void onJobCandidateIteractionListTableEditorClose(DataGrid.EditorCloseEvent event) {
+        setRatingLabel(getEditedEntity());
+    }
+
+
+    private void setRatingLabel(JobCandidate editedEntity) {
+        String queryString = "select sum(e.rating) from itpearls_IteractionList e " +
+                "where e.candidate = :candidate and e.rating is not null";
+        String querySumString = "select count(e) from itpearls_IteractionList e " +
+                "where e.candidate = :candidate and e.rating is not null";
+
+        BigDecimal sumRating = dataManager
+                .loadValue(querySumString, BigDecimal.class)
+                .parameter("candidate", editedEntity)
+                .one();
+
+        BigDecimal countRating = dataManager
+                .loadValue(queryString, BigDecimal.class)
+                .parameter("candidate", editedEntity)
+                .one();
+
+        if(!countRating.equals(0.0)) {
+            candidateRatingLabel.setValue("Рейтинг: "
+                    + sumRating.add(BigDecimal.ONE).divide(countRating).setScale(1));
+        } else {
+            candidateRatingLabel.setValue("Рейтинг: 0.0");
+        }
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.rating", subject = "columnGenerator")
+    private String jobCandidateIteractionListTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        return event.getItem().getRating() != null ? String.valueOf((event.getItem().getRating() + 1)) : "";
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.rating", subject = "styleProvider")
+    private String jobCandidateIteractionListTableRatingStyleProvider(IteractionList iteractionList) {
+        if(iteractionList.getRating() != null) {
+            switch (iteractionList.getRating()) {
+                case 0:
+                    return "rating_red_1";
+                case 1:
+                    return "rating_orange_2";
+                case 2:
+                    return "rating_yellow_3";
+                case 3:
+                    return "rating_green_4";
+                case 4:
+                    return "rating_blue_5";
+            }
+        }
+
+        return null;
+    }
+
+
+
 }

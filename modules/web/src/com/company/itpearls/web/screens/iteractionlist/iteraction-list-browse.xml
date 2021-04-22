@@ -57,6 +57,10 @@
             <columns>
                 <column id="icon" width="48px" resizable="false" caption=""/>
                 <column id="numberIteraction" property="numberIteraction" caption="msg://msgNumber"/>
+                <column id="rating"
+                        caption="msg://msgRating">
+                    <htmlRenderer nullRepresentation="null"/>
+                </column>
                 <column id="candidate.fullName" property="candidate.fullName" caption="msg://msgCandidate" width="200px"/>
                 <column id="iteractionType" property="iteractionType" caption="msg://msgIteractionType" width="250px"/>
                 <column id="vacancy.projectName.projectName" property="vacancy.projectName.projectName" caption="msg://msgCompanyShortName" width="200px"/>
