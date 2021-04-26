@@ -228,7 +228,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private IteractionList getLastIteraction(JobCandidate jobCandidate) {
-        if(jobCandidate.getIteractionList() != null) {
+        if (jobCandidate.getIteractionList() != null) {
             IteractionList maxIteraction = null;
 
             for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
@@ -928,18 +928,40 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         float countRating = 0,
                 sumRating = 0;
 
-        for(IteractionList iteractionList : item.getIteractionList()) {
-            if(iteractionList.getRating() != null) {
-                countRating ++;
-                sumRating =+ iteractionList.getRating();
+        for (IteractionList iteractionList : item.getIteractionList()) {
+            if (iteractionList.getRating() != null) {
+                countRating++;
+                sumRating = sumRating + iteractionList.getRating();
             }
         }
 
-        if(countRating != 0) {
+        if (countRating != 0) {
             float avgRating = (float) sumRating / (float) countRating + 1;
             BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
-            return String.valueOf(avgRatiog.setScale(1));
+            String ratingStr = String.valueOf(avgRatiog.setScale(1));
 
+
+            String style = "";
+
+            switch (ratingStr.substring(0, 1)) {
+                case "1":
+                    style = "<div class=\"rating_red_1\">";
+                    break;
+                case "2":
+                    style = "<div class=\"rating_orange_2\">";
+                    break;
+                case "3":
+                    style = "<div class=\"rating_yellow_3\">";
+                    break;
+                case "4":
+                    style = "<div class=\"rating_green_4\">";
+                    break;
+                case "5":
+                    style = "<div class=\"rating_blue_5\">";
+                    break;
+            }
+
+            return style + ratingStr + "</div>";
         } else {
             return "";
         }
@@ -949,24 +971,24 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private String jobCandidatesTableRatingStyleProvider(JobCandidate jobCandidate) {
         String retStr = "rating";
         String avg = avgRating(jobCandidate);
-        if(!avg.equals("")) {
+        if (!avg.equals("")) {
             String s = avg.substring(0, 1);
 
             switch (s) {
                 case "1":
-                    retStr = retStr + "_red_" + avgRating(jobCandidate).substring(0, 1);
+                    retStr = retStr + "_red_" + s;
                     break;
                 case "2":
-                    retStr = retStr + "_orange" + avgRating(jobCandidate).substring(0, 1);
+                    retStr = retStr + "_orange" + s;
                     break;
                 case "3":
-                    retStr = retStr + "_yellow_" + avgRating(jobCandidate).substring(0, 1);
+                    retStr = retStr + "_yellow_" + s;
                     break;
                 case "4":
-                    retStr = retStr + "_green_" + avgRating(jobCandidate).substring(0, 1);
+                    retStr = retStr + "_green_" + s;
                     break;
                 case "5":
-                    retStr = retStr + "_blue_" + avgRating(jobCandidate).substring(0, 1);
+                    retStr = retStr + "_blue_" + s;
                     break;
                 default:
                     break;
