@@ -223,7 +223,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             String retStr = "Создано: " + getEditedEntity().getCreatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") "
-                    + "Изменено: " + getEditedEntity().getUpdatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ";
+                    + "/ Изменено: " + getEditedEntity().getUpdatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ";
 
             createdUpdatedLabel.setValue(retStr);
         }
@@ -1322,26 +1322,26 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         }
 
-        if(!countRating.equals(0.0)) {
+        if(countRating != 0) {
             float avgRating = (float) sumRating / (float) countRating;
             BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
             candidateRatingLabel.setValue(String.valueOf(avgRatiog.setScale(1)));
 
                 switch ((int) Integer.valueOf(avgRatiog.intValue())) {
                     case 0:
-                        candidateRatingLabel.setStyleName("rating_red_1");
+                        candidateRatingLabel.setStyleName("rating_candidate_red_1");
                         break;
                     case 1:
-                        candidateRatingLabel.setStyleName("rating_orange_2");
+                        candidateRatingLabel.setStyleName("rating_candidate_orange_2");
                         break;
                     case 2:
-                        candidateRatingLabel.setStyleName("rating_yellow_3");
+                        candidateRatingLabel.setStyleName("rating_candidate_yellow_3");
                         break;
                     case 3:
-                        candidateRatingLabel.setStyleName("rating_green_4");
+                        candidateRatingLabel.setStyleName("rating_candidate_green_4");
                         break;
                     case 4:
-                        candidateRatingLabel.setStyleName("rating_blue_5");
+                        candidateRatingLabel.setStyleName("rating_candidate_blue_5");
                         break;
                     default:
                         break;
@@ -1354,29 +1354,31 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateIteractionListTable.rating", subject = "columnGenerator")
     private String jobCandidateIteractionListTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return event.getItem().getRating() != null ? String.valueOf((event.getItem().getRating() + 1)) : "";
-    }
+        String style = "";
 
-    @Install(to = "jobCandidateIteractionListTable.rating", subject = "styleProvider")
-    private String jobCandidateIteractionListTableRatingStyleProvider(IteractionList iteractionList) {
-        if(iteractionList.getRating() != null) {
-            switch (iteractionList.getRating()) {
+        if(event.getItem().getRating() != null) {
+            switch (event.getItem().getRating()) {
                 case 0:
-                    return "rating_red_1";
+                    style = "<div class=\"rating_red_1\">";
+                    break;
                 case 1:
-                    return "rating_orange_2";
+                    style = "<div class=\"rating_orange_2\">";
+                    break;
                 case 2:
-                    return "rating_yellow_3";
+                    style = "<div class=\"rating_yellow_3\">";
+                    break;
                 case 3:
-                    return "rating_green_4";
+                    style = "<div class=\"rating_green_4\">";
+                    break;
                 case 4:
-                    return "rating_blue_5";
+                    style = "<div class=\"rating_blue_5\">";
+                    break;
             }
         }
 
-        return null;
+        return event.getItem().getRating() != null ?
+                style +
+                        String.valueOf((event.getItem().getRating() + 1)) +
+                        "</div>" : "";
     }
-
-
-
 }

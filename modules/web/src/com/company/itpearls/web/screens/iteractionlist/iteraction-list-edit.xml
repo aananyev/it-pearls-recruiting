@@ -107,6 +107,9 @@
                                      property="rating"
                                      description="msg://msgRatingDecription"
                                      width="50%"/>
+                        <label id="ratingLabel"
+                               width="100%"
+                               align="MIDDLE_RIGHT"/>
                     </row>
                     <row id="row">
                         <lookupPickerField id="candidateField"

@@ -1,4 +1,52 @@
 /* Define your theme modifications inside next mixin */
+
+.round-photo {
+    border-radius: 10px; /* Радиус скругления */
+    box-shadow: 0 0 0 2px green, 0 0 13px #333; /* Параметры теней */
+        width: 20px;
+        height: 20px;
+}
+
+.round-photo-150px {
+    border-radius: 50px; /* Радиус скругления */
+    box-shadow: 0 0 0 3px green, 0 0 13px #333; /* Параметры теней */
+}
+
+@mixin rating_stars($number) {
+    @for $i from 1 through 5 {
+        @if $i < $number {
+            content: '&#x2605';
+        } @else {
+            content: '&#x2606';
+        }
+    }
+}
+
+.rating_star_1 {
+    @include rating_stars(1);
+    color: red;
+}
+
+.rating_star_2 {
+    @include rating_stars(2);
+    color: red;
+}
+
+.rating_star_3 {
+    @include rating_stars(3);
+    color: red;
+}
+
+.rating_star_4 {
+    @include rating_stars(4);
+    color: red;
+}
+
+.rating_star_5 {
+    @include rating_stars(5);
+    color: blue;
+}
+
 @mixin rating_round($color_p) {
     font-family: 'Kanit', sans-serif;
     font-size: large;
@@ -9,6 +57,21 @@
     height: 20px;
     border: 1px solid;
     border-radius: 10px;
+    line-height: 17px;
+    color: $color_p;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
+}
+
+@mixin rating_candidate_round($color_p) {
+    font-family: 'Antonio', sans-serif;
+    font-size: large;
+    font-weight: bold;
+    text-align: center;
+/*    font-family: bold; */
+    width: 28px;
+    height: 28px;
+    border: 1px solid;
+    border-radius: 14px;
     line-height: 17px;
     color: $color_p;
     box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
@@ -44,6 +107,36 @@
     box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
 }
 
+.rating_candidate_red_1 {
+    @include rating_candidate_round(red);
+/*    color: red;
+    box-shadow: 0 0 0 2px red, 0 0 13px #333; Параметры теней */
+}
+
+.rating_candidate_orange_2 {
+    @include rating_candidate_round(orange);
+/*    color: orange;
+    box-shadow: 0 0 0 2px orange, 0 0 13px #333; Параметры теней */
+}
+
+.rating_candidate_yellow {
+    @include rating_candidate_round(yellow);
+/*    color: yellow;
+    box-shadow: 0 0 0 2px yellow, 0 0 13px #333; Параметры теней */
+}
+
+.rating_candidate_green_4 {
+    @include rating_candidate_round(green);
+/*    color: green;
+    box-shadow: 0 0 0 2px green, 0 0 13px #333; Параметры теней */
+}
+
+.rating_candidate_blue_5 {
+    @include rating_candidate_round(blue);
+/*    color: blue;
+    box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
+}
+
 @mixin com_company_itpearls-halo-ext {
 
 .rating_box {
@@ -51,16 +144,6 @@
         font-weight: bold;
         text-align: center;
         font-family: bold;
-}
-
-.round-photo {
-    border-radius: 12px; /* Радиус скругления */
-    box-shadow: 0 0 0 2px green, 0 0 13px #333; /* Параметры теней */
-}
-
-.round-photo-150px {
-    border-radius: 50px; /* Радиус скругления */
-    box-shadow: 0 0 0 3px green, 0 0 13px #333; /* Параметры теней */
 }
 
 .salary-fix-limit {

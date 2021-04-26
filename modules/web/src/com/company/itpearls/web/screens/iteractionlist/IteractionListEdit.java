@@ -102,6 +102,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private LookupField ratingField;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private Label<String> ratingLabel;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -783,6 +785,41 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         map.put("Положительно",3);
         map.put("Отлично!", 4);
         ratingField.setOptionsMap(map);
+
+        ratingField.addValueChangeListener(e -> {
+            ratingLabel.setValue(String.valueOf(ratingField.getValue() != null ?
+                    ((int) ratingField.getValue()) + 1 :
+                    0));
+            String rating_color = "";
+
+            if(ratingField.getValue() != null) {
+                switch ((int) ratingField.getValue()) {
+                    case 0:
+                        rating_color = "red";
+                        break;
+                    case 1:
+                        rating_color = "orange";
+                        break;
+                    case 2:
+                        rating_color = "yellow";
+                        break;
+                    case 3:
+                        rating_color = "green";
+                        break;
+                    case 4:
+                        rating_color = "blue";
+                        break;
+                    default:
+                        rating_color = "red";
+                        break;
+                }
+            }
+
+            String rating_style = "rating_star_"
+                    + String.valueOf(ratingField.getValue() != null ? ((int) ratingField.getValue()) + 1 : 1);
+
+            ratingField.setStyleName(rating_style);
+        });
     }
 
     @Install(to = "candidateField", subject = "optionImageProvider")
@@ -798,7 +835,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         return null;
     }
 
-    @Install(to = "ratingField", subject = "optionIconProvider")
+/*    @Install(to = "ratingField", subject = "optionIconProvider")
     private String ratingFieldOptionIconProvider(Object object) {
         int a = ratingField.getValue() != null ? (int) ratingField.getValue() : 0;
 
@@ -816,26 +853,28 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             default:
                 return CubaIcon.ANDROID.source();
         }
-    }
+    }*/
 
     @Install(to = "ratingField", subject = "optionStyleProvider")
     private String ratingFieldOptionStyleProvider(Object object) {
         int a = ratingField.getValue() != null ? (int) ratingField.getValue() : 0;
 
-        switch (a) {
+/*        switch (a) {
             case 0:
-                return "pic-center-large-red";
+//                return "pic-center-large-red";
             case 1:
-                return "pic-center-large-yellow";
+//                return "pic-center-large-yellow";
             case 2:
-                return "pic-center-large-gray";
+//                return "pic-center-large-gray";
             case 3:
-                return "pic-center-large-blue";
+//                return "pic-center-large-blue";
             case 4:
                 return "pic-center-large-green";
             default:
                 return "pic-center-large-grey";
-        }
+        }*/
+
+        return "rating_star_" + (a + 1);
     }
 
 

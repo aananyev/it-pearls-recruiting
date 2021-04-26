@@ -22,6 +22,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,11 +65,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Fragments fragments;
     @Inject
     private DataComponents dataComponents;
-
-    private CollectionContainer<IteractionList> iteractionListDc;
-    private CollectionLoader<IteractionList> iteractionListDl;
-    private CollectionContainer<CandidateCV> candidateCVDc;
-    private CollectionLoader<CandidateCV> candidateCVDl;
     @Inject
     private Screens screens;
     @Inject
@@ -78,6 +74,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private Dialogs dialogs;
 
+    private CollectionContainer<IteractionList> iteractionListDc;
+    private CollectionLoader<IteractionList> iteractionListDl;
+    private CollectionContainer<CandidateCV> candidateCVDc;
+    private CollectionLoader<CandidateCV> candidateCVDl;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -228,6 +228,24 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private IteractionList getLastIteraction(JobCandidate jobCandidate) {
+        if(jobCandidate.getIteractionList() != null) {
+            IteractionList maxIteraction = null;
+
+            for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
+                if (maxIteraction == null)
+                    maxIteraction = iteractionList;
+
+                if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
+                    maxIteraction = iteractionList;
+                }
+            }
+
+            return maxIteraction;
+        } else
+            return null;
+    }
+/*
+    private IteractionList getLastIteraction(JobCandidate jobCandidate) {
         String query = "select e from itpearls_IteractionList e " +
                 "where e.numberIteraction = " +
                 "(select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate) " +
@@ -242,10 +260,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .view("iteractionList-view")
                     .one();
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return iteractionList;
-    }
+    } */
 
     @Install(to = "jobCandidatesTable.freeCandidate", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableFreeCandidateColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -842,6 +861,25 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 }));
 
         candidateImageColumnRenderer();
+        DataGrid.ButtonRenderer<JobCandidate> jobCandidatesTableLastIteractionRenderer = jobCandidatesTable.createRenderer(DataGrid.ButtonRenderer.class);
+        jobCandidatesTableLastIteractionRenderer.setRendererClickListener(clickableTextRendererClickEvent -> {
+        });
+        jobCandidatesTable.getColumn("lastIteraction").setRenderer(jobCandidatesTableLastIteractionRenderer);
+    }
+
+    @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
+    private String jobCandidatesTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        IteractionList iteractionList = getLastIteraction(event.getItem());
+
+        String date = null;
+
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy").format(iteractionList.getDateIteraction());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        return date;
     }
 
     private void candidateImageColumnRenderer() {
@@ -880,4 +918,63 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return retStr;
     }
+
+    @Install(to = "jobCandidatesTable.rating", subject = "columnGenerator")
+    private String jobCandidatesTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        return avgRating(event.getItem());
+    }
+
+    private String avgRating(JobCandidate item) {
+        float countRating = 0,
+                sumRating = 0;
+
+        for(IteractionList iteractionList : item.getIteractionList()) {
+            if(iteractionList.getRating() != null) {
+                countRating ++;
+                sumRating =+ iteractionList.getRating();
+            }
+        }
+
+        if(countRating != 0) {
+            float avgRating = (float) sumRating / (float) countRating + 1;
+            BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
+            return String.valueOf(avgRatiog.setScale(1));
+
+        } else {
+            return "";
+        }
+    }
+
+    @Install(to = "jobCandidatesTable.rating", subject = "styleProvider")
+    private String jobCandidatesTableRatingStyleProvider(JobCandidate jobCandidate) {
+        String retStr = "rating";
+        String avg = avgRating(jobCandidate);
+        if(!avg.equals("")) {
+            String s = avg.substring(0, 1);
+
+            switch (s) {
+                case "1":
+                    retStr = retStr + "_red_" + avgRating(jobCandidate).substring(0, 1);
+                    break;
+                case "2":
+                    retStr = retStr + "_orange" + avgRating(jobCandidate).substring(0, 1);
+                    break;
+                case "3":
+                    retStr = retStr + "_yellow_" + avgRating(jobCandidate).substring(0, 1);
+                    break;
+                case "4":
+                    retStr = retStr + "_green_" + avgRating(jobCandidate).substring(0, 1);
+                    break;
+                case "5":
+                    retStr = retStr + "_blue_" + avgRating(jobCandidate).substring(0, 1);
+                    break;
+                default:
+                    break;
+            }
+
+            return retStr;
+        } else
+            return null;
+    }
+
 }
