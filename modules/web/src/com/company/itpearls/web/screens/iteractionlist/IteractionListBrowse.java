@@ -172,7 +172,33 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")
     private String iteractionListsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return event.getItem().getRating() != null ? String.valueOf((event.getItem().getRating() + 1)) : "";
+
+        String style = "";
+
+        if(event.getItem().getRating() != null) {
+            switch (event.getItem().getRating()) {
+                case 0:
+                    style = "<div class=\"rating_red_1\">";
+                    break;
+                case 1:
+                    style = "<div class=\"rating_orange_2\">";
+                    break;
+                case 2:
+                    style = "<div class=\"rating_yellow_3\">";
+                    break;
+                case 3:
+                    style = "<div class=\"rating_green_4\">";
+                    break;
+                case 4:
+                    style = "<div class=\"rating_blue_5\">";
+                    break;
+            }
+        }
+
+        return event.getItem().getRating() != null ?
+                style +
+                String.valueOf((event.getItem().getRating() + 1)) +
+                "</div>" : "";
     }
 
 
@@ -185,23 +211,6 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable.rating", subject = "styleProvider")
     private String iteractionListsTableRatingStyleProvider(IteractionList iteractionList) {
-        if(iteractionList.getRating() != null) {
-            switch (iteractionList.getRating()) {
-                case 0:
-                    return "rating_red_1";
-                case 1:
-                    return "rating_orange_2";
-                case 2:
-                    return "rating_yellow_3";
-                case 3:
-                    return "rating_green_4";
-                case 4:
-                    return "rating_blue_5";
-            }
-        }
-
-        return null;
+        return "rating_box";
     }
-
-
 }

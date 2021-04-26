@@ -18,6 +18,7 @@ import org.jsoup.Jsoup;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -138,6 +139,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> mobilePhoneField;
     @Inject
     private Label<String> candidateRatingLabel;
+
+    List<IteractionList> iteractionListFromCandidate = new ArrayList();
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -469,6 +472,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+
+        if(!PersistenceHelper.isNew(getEditedEntity())) {
+            iteractionListFromCandidate = getIteractionListFromCandidate(getEditedEntity());
+        }
+
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!getEditedEntity().getFullName().equals("")) {
                 if (getEditedEntity().getFullName() == null)
@@ -740,6 +748,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
     }
 
+    private List<IteractionList> getIteractionListFromCandidate(JobCandidate editedEntity) {
+        String QUERY_GET_ITERCATION_LIST = "select e from itpearls_IteractionList e where e.candidate = :candidate";
+
+        return dataManager.load(IteractionList.class)
+                .query(QUERY_GET_ITERCATION_LIST)
+                .parameter("candidate", editedEntity)
+                .view("iteractionList-view")
+                .list();
+    }
+
     private void setCopyCVButton() {
         copyCVButton.setEnabled(false);
         jobCandidateCandidateCvTable.addItemClickListener(e -> {
@@ -894,6 +912,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .view("iteractionList-view")
                         .one();
             } catch (IllegalStateException e) {
+                e.printStackTrace();
                 lastIteraction = null;
             }
 
@@ -1292,26 +1311,44 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
     private void setRatingLabel(JobCandidate editedEntity) {
-        String queryString = "select sum(e.rating) from itpearls_IteractionList e " +
-                "where e.candidate = :candidate and e.rating is not null";
-        String querySumString = "select count(e) from itpearls_IteractionList e " +
-                "where e.candidate = :candidate and e.rating is not null";
 
-        BigDecimal sumRating = dataManager
-                .loadValue(querySumString, BigDecimal.class)
-                .parameter("candidate", editedEntity)
-                .one();
+        Integer sumRating = 0,
+                countRating = 0;
 
-        BigDecimal countRating = dataManager
-                .loadValue(queryString, BigDecimal.class)
-                .parameter("candidate", editedEntity)
-                .one();
+        for(IteractionList iteractionList : iteractionListFromCandidate) {
+            if(iteractionList.getRating() != null) {
+                sumRating = sumRating + iteractionList.getRating() + 1;
+                countRating ++;
+            }
+        }
 
         if(!countRating.equals(0.0)) {
-            candidateRatingLabel.setValue("Рейтинг: "
-                    + sumRating.add(BigDecimal.ONE).divide(countRating).setScale(1));
+            float avgRating = (float) sumRating / (float) countRating;
+            BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
+            candidateRatingLabel.setValue(String.valueOf(avgRatiog.setScale(1)));
+
+                switch ((int) Integer.valueOf(avgRatiog.intValue())) {
+                    case 0:
+                        candidateRatingLabel.setStyleName("rating_red_1");
+                        break;
+                    case 1:
+                        candidateRatingLabel.setStyleName("rating_orange_2");
+                        break;
+                    case 2:
+                        candidateRatingLabel.setStyleName("rating_yellow_3");
+                        break;
+                    case 3:
+                        candidateRatingLabel.setStyleName("rating_green_4");
+                        break;
+                    case 4:
+                        candidateRatingLabel.setStyleName("rating_blue_5");
+                        break;
+                    default:
+                        break;
+            }
         } else {
-            candidateRatingLabel.setValue("Рейтинг: 0.0");
+            candidateRatingLabel.setValue("0.0");
+            candidateRatingLabel.setStyleName("rating_red_1");
         }
     }
 

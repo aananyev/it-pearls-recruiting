@@ -55,17 +55,34 @@
                 <action id="excel" type="excel"/>
             </actions>
             <columns>
-                <column id="icon" width="48px" resizable="false" caption=""/>
-                <column id="numberIteraction" property="numberIteraction" caption="msg://msgNumber"/>
+                <column id="icon" width="48px"
+                        resizable="false"
+                        caption=""/>
+                <column id="numberIteraction"
+                        property="numberIteraction"
+                        caption="msg://msgNumber"/>
                 <column id="rating"
                         caption="msg://msgRating">
                     <htmlRenderer nullRepresentation="null"/>
                 </column>
-                <column id="candidate.fullName" property="candidate.fullName" caption="msg://msgCandidate" width="200px"/>
-                <column id="iteractionType" property="iteractionType" caption="msg://msgIteractionType" width="250px"/>
-                <column id="vacancy.projectName.projectName" property="vacancy.projectName.projectName" caption="msg://msgCompanyShortName" width="200px"/>
-                <column id="vacancy" property="vacancy" caption="mainMsg://msgVacancy" width="250px"/>
-                <column id="recrutier" property="recrutier" caption="msg://msgRecrutier"/>
+                <column id="candidate.fullName"
+                        property="candidate.fullName"
+                        caption="msg://msgCandidate" width="200px"/>
+                <column id="iteractionType"
+                        property="iteractionType"
+                        caption="msg://msgIteractionType"
+                        width="250px"/>
+                <column id="vacancy.projectName.projectName"
+                        property="vacancy.projectName.projectName"
+                        caption="msg://msgCompanyShortName"
+                        width="200px"/>
+                <column id="vacancy"
+                        property="vacancy"
+                        caption="mainMsg://msgVacancy"
+                        width="250px"/>
+                <column id="recrutier"
+                        property="recrutier"
+                        caption="msg://msgRecrutier"/>
                 <column id="dateIteraction" property="dateIteraction" caption="msg://msgDate">
                     <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                 </column>

@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+// TO-DO сделат кнопку просмотр кандидата или статистика по кандидату
+
 import com.haulmont.cuba.gui.Fragments;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;

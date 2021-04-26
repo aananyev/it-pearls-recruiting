@@ -131,7 +131,11 @@ order by e.cityRuName]]>
                         <label id="iteractionListLabelCandidate" stylename="h2"
                                align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="fullName"/>
                         <label stylename="h2" value="|"/>
-                        <label id="candidateRatingLabel" stylename="h2"
+                        <label stylename="h2"
+                               value="msg://msgRating"
+                               align="MIDDLE_LEFT"/>
+                        <label id="candidateRatingLabel"
+                               stylename="h2"
                                align="MIDDLE_LEFT"/>
                         <label stylename="h2" value="|"/>
                         <label stylename="h2"
