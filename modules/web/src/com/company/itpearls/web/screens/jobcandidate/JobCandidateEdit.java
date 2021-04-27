@@ -1328,19 +1328,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             candidateRatingLabel.setValue(String.valueOf(avgRatiog.setScale(1)));
 
                 switch ((int) Integer.valueOf(avgRatiog.intValue())) {
-                    case 0:
+                    case 1:
                         candidateRatingLabel.setStyleName("rating_candidate_red_1");
                         break;
-                    case 1:
+                    case 2:
                         candidateRatingLabel.setStyleName("rating_candidate_orange_2");
                         break;
-                    case 2:
+                    case 3:
                         candidateRatingLabel.setStyleName("rating_candidate_yellow_3");
                         break;
-                    case 3:
+                    case 4:
                         candidateRatingLabel.setStyleName("rating_candidate_green_4");
                         break;
-                    case 4:
+                    case 5:
                         candidateRatingLabel.setStyleName("rating_candidate_blue_5");
                         break;
                     default:

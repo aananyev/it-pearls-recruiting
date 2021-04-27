@@ -1,5 +1,50 @@
 /* Define your theme modifications inside next mixin */
 
+@mixin date_iteraction_button($color) {
+    background: $color;
+        font_size: large;
+        color: $color;
+}
+
+.button_table_red {
+    @include date_iteraction_button(red);
+}
+
+.button_table_yellow {
+    @include date_iteraction_button(yellow);
+}
+
+.button_table_green {
+    @include date_iteraction_button(green);
+}
+
+@mixin ratingfield($primary-stylename: ratingfield) {
+  .#{$primary-stylename}-star {
+    font-family: FontAwesome;
+    font-size: $v-font-size--h2;
+    padding-right: round($v-unit-size/4);
+    cursor: pointer;
+
+    &:after {
+          content: '\f006'; // 'fa-star-o'
+    }
+  }
+
+  .#{$primary-stylename}-star-selected {
+    &:after {
+          content: '\f005'; // 'fa-star'
+    }
+  }
+
+  .#{$primary-stylename} .#{$primary-stylename}-star:last-child {
+    padding-right: 0;
+  }
+
+  .#{$primary-stylename}.v-disabled .#{$primary-stylename}-star {
+    cursor: default;
+  }
+}
+
 .round-photo {
     border-radius: 10px; /* Радиус скругления */
     box-shadow: 0 0 0 2px green, 0 0 13px #333; /* Параметры теней */
@@ -12,38 +57,56 @@
     box-shadow: 0 0 0 3px green, 0 0 13px #333; /* Параметры теней */
 }
 
-@mixin rating_stars($number) {
-    @for $i from 1 through 5 {
-        @if $i < $number {
-            content: '&#x2605';
-        } @else {
-            content: '&#x2606';
-        }
-    }
-}
+@mixin star{content: '&#x2605';}
+@mixin star_fill{content: '&#x2606';}
 
 .rating_star_1 {
-    @include rating_stars(1);
+    content: '&#x2605';
+    content: '&#x2606';
+    content: '&#x2606';
+    content: '&#x2606';
+    content: '&#x2606';
+    font_size: large;
     color: red;
 }
 
 .rating_star_2 {
-    @include rating_stars(2);
-    color: red;
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2606';
+    content: '&#x2606';
+    content: '&#x2606';
+    font_size: large;
+    color: orange;
 }
 
 .rating_star_3 {
-    @include rating_stars(3);
-    color: red;
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2606';
+    content: '&#x2606';
+    font_size: large;
+    color: yellow;
 }
 
 .rating_star_4 {
-    @include rating_stars(4);
-    color: red;
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2606';
+    font_size: large;
+    color: green;
 }
 
 .rating_star_5 {
-    @include rating_stars(5);
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    font_size: large;
     color: blue;
 }
 

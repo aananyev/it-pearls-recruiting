@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
@@ -104,6 +105,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private UiComponents uiComponents;
     @Inject
     private Label<String> ratingLabel;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -638,7 +641,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     // изменение надписи на кнопке в зависимости от щначения поля ItercationType
     @Subscribe("iteractionTypeField")
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
-        if(!event.getValue().equals(event.getPrevValue())) {
+        if (!event.getValue().equals(event.getPrevValue())) {
             changeField();
             // надпись на кнопке
             if (iteractionTypeField.getValue().getCallButtonText() != null)
@@ -689,7 +692,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         if (vacansyPosition != null && candidatePosition != null) {
-            if(vacancyFiels.getValue() != null) {
+            if (vacancyFiels.getValue() != null) {
                 if ((!candidatePosition.equals(vacansyPosition)) &&
                         candidatePosition != null) {
                     dialogMessage =
@@ -724,8 +727,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             String cities = "";
 
             if (vacancyFiels.getValue().getCities() != null) {
-                for(City c : event.getValue().getCities()) {
-                    if(candidateCity.equals(c.getCityRuName())) {
+                for (City c : event.getValue().getCities()) {
+                    if (candidateCity.equals(c.getCityRuName())) {
                         cities = "";
                         break;
                     } else {
@@ -779,11 +782,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private void setRatingField() {
         Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("Полный негатив", 0);
-        map.put("Сомнительно", 1);
-        map.put("Нейтрально", 2);
-        map.put("Положительно",3);
-        map.put("Отлично!", 4);
+        map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
+        map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
+        map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
+        map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
+        map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
         ratingField.setOptionsMap(map);
 
         ratingField.addValueChangeListener(e -> {
@@ -792,7 +795,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     0));
             String rating_color = "";
 
-            if(ratingField.getValue() != null) {
+            if (ratingField.getValue() != null) {
                 switch ((int) ratingField.getValue()) {
                     case 0:
                         rating_color = "red";
@@ -815,16 +818,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
 
-            String rating_style = "rating_star_"
+            String rating_style = "rating_" + rating_color
                     + String.valueOf(ratingField.getValue() != null ? ((int) ratingField.getValue()) + 1 : 1);
 
-            ratingField.setStyleName(rating_style);
+//            ratingField.setStyleName(rating_style);
+            ratingLabel.setStyleName(rating_style);
         });
     }
 
     @Install(to = "candidateField", subject = "optionImageProvider")
     private Resource candidateFieldOptionImageProvider(JobCandidate jobCandidate) {
-        if(jobCandidate.getFileImageFace() != null) {
+        if (jobCandidate.getFileImageFace() != null) {
             Image image = uiComponents.create(Image.NAME);
             image.setStyleName("round-photo");
             FileDescriptorResource resource = image.createResource(FileDescriptorResource.class)
@@ -878,10 +882,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
 
-
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if(event.getPrevValue() != null && event.getValue() != null) {
+        if (event.getPrevValue() != null && event.getValue() != null) {
             if (!event.getValue().equals(event.getPrevValue())) {
                 vacancyFieldValueChange(event);
             }
@@ -899,7 +902,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Install(to = "vacancyFiels", subject = "optionStyleProvider")
     private String vacancyFielsOptionStyleProvider(OpenPosition openPosition) {
-        if(openPosition.getOpenClose()) {
+        if (openPosition.getOpenClose()) {
             return "vacancy-filed-close-gray";
         } else {
             return "vacancy-filed-close-black";

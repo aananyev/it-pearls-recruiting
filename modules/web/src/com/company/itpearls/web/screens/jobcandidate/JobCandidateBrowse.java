@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
@@ -22,7 +23,6 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -68,8 +68,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private Screens screens;
     @Inject
-    private DataContext dataContext;
-    @Inject
     private Notifications notifications;
     @Inject
     private Dialogs dialogs;
@@ -78,6 +76,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CollectionLoader<IteractionList> iteractionListDl;
     private CollectionContainer<CandidateCV> candidateCVDc;
     private CollectionLoader<CandidateCV> candidateCVDl;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -161,6 +161,35 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return retStr;
     }
 
+    @Install(to = "jobCandidatesTable.lastIteraction", subject = "styleProvider")
+    private String jobCandidatesTableLastIteractionStyleProvider(JobCandidate jobCandidate) {
+        String retStr = null;
+
+        IteractionList iteractionList = getLastIteraction(jobCandidate);
+
+        if (iteractionList != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(iteractionList.getDateIteraction());
+            calendar.add(Calendar.MONTH, 1);
+
+            Calendar calendar1 = Calendar.getInstance();
+
+            if (calendar.after(calendar1)) {
+                if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                    retStr = "button_table_red";
+                } else {
+                    retStr = "button_table_yellow";
+                }
+            } else {
+                retStr = "button_table_green";
+            }
+
+            return retStr;
+        } else {
+            return "button_table_yellow";
+        }
+    }
+
     /*
     @Install(to = "jobCandidatesTable.photo", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTablePhotoColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -175,6 +204,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return CubaIcon.valueOf(retStr);
     } */
 
+
+/*
     @Install(to = "jobCandidatesTable.freeCandidate", subject = "styleProvider")
     private String jobCandidatesTableFreeCandidateStyleProvider(JobCandidate jobCandidate) {
         String retStr = null;
@@ -225,7 +256,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                         + iteractionList.getIteractionType().getIterationName()
                         + "\n"
                         + recrutierName : "";
-    }
+    } */
 
     private IteractionList getLastIteraction(JobCandidate jobCandidate) {
         if (jobCandidate.getIteractionList() != null) {
@@ -265,7 +296,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return iteractionList;
     } */
-
+/*
     @Install(to = "jobCandidatesTable.freeCandidate", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableFreeCandidateColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         // FREE_CODE_CAMP check square minus square
@@ -290,16 +321,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         } else {
             return CubaIcon.valueOf("CHECK_SQUARE");
         }
-    }
+    } */
 
     @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableResumeColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         String retStr = "";
 
-        if (dataManager.loadValues(QUERY_RESUME)
-                .parameter("candidate", event.getItem())
-                .list()
-                .size() == 0) {
+        if(event.getItem().getCandidateCv().size() == 0) {
             retStr = "FILE";
         } else {
             retStr = "FILE_TEXT";
@@ -887,8 +915,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             Image image = uiComponents.create(Image.NAME);
 
             if (entity.getItem().getFileImageFace() != null) {
-                image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
-                        "fileImageFace"));
+                try {
+                    image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
+                            "fileImageFace"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 image.setWidth("50px");
 //            image.setStyleName("image-candidate-face-little-image");
                 image.setStyleName("round-photo");
@@ -924,7 +957,26 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return avgRating(event.getItem());
     }
 
-    private String avgRating(JobCandidate item) {
+    private String avgRating(JobCandidate jobCandidate) {
+        float countRating = 0,
+                sumRating = 0;
+
+        for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
+            if (iteractionList.getRating() != null) {
+                countRating++;
+                sumRating = sumRating + iteractionList.getRating();
+            }
+        }
+
+        if (countRating != 0) {
+            int avgRating = (int) (sumRating / countRating + 1);
+
+            return starsAndOtherService.setStars(avgRating);
+        } else
+            return "";
+    }
+
+/*    private String avgRating(JobCandidate item) {
         float countRating = 0,
                 sumRating = 0;
 
@@ -961,11 +1013,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     break;
             }
 
-            return style + ratingStr + "</div>";
+//            return style + ratingStr + "</div>";
+            return starsAndOtherService.setStars(avgRatiog.intValue());
         } else {
             return "";
         }
-    }
+    } */
 
     @Install(to = "jobCandidatesTable.rating", subject = "styleProvider")
     private String jobCandidatesTableRatingStyleProvider(JobCandidate jobCandidate) {

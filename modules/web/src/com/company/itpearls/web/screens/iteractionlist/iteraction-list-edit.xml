@@ -90,6 +90,9 @@
                     <label id="companyLabel"
                            align="MIDDLE_LEFT"
                            htmlEnabled="true"/>
+                    <label id="ratingLabel"
+                           width="100%"
+                           align="MIDDLE_RIGHT"/>
                 </hbox>
             </hbox>
         </groupBox>
@@ -100,16 +103,16 @@
                 <columns count="2"/>
                 <rows>
                     <row id="rating">
+                        <label width="100%"
+                               align="MIDDLE_RIGHT"/>
                         <lookupField id="ratingField"
                                      required="true"
+                                     align="MIDDLE_RIGHT"
                                      caption="msg://msgRating"
                                      dataContainer="iteractionListDc"
                                      property="rating"
                                      description="msg://msgRatingDecription"
                                      width="50%"/>
-                        <label id="ratingLabel"
-                               width="100%"
-                               align="MIDDLE_RIGHT"/>
                     </row>
                     <row id="row">
                         <lookupPickerField id="candidateField"
