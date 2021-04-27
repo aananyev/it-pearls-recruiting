@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
@@ -56,13 +57,15 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private DataContext dataContext;
     @Inject
     private Screens screens;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), MANAGER));
 
         filterStagerField();
-        filterInternalProject();
+//        filterInternalProject();
     }
 
     private void filterStagerField() {
@@ -91,7 +94,6 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         if (iteractionList.getAddInteger() != null)
             add = iteractionList.getAddInteger().toString();
 
-
         return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
     }
 
@@ -103,7 +105,11 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             iteractionListsDl.setParameter("internalProject", false);
         }
 
-        iteractionListsDl.load();
+        try {
+            iteractionListsDl.load();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     @Subscribe("checkBoxShowOnlyMy")
@@ -173,41 +179,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")
     private String iteractionListsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
 
-        String style = "";
-
-        if(event.getItem().getRating() != null) {
-            switch (event.getItem().getRating()) {
-                case 0:
-                    style = "<div class=\"rating_red_1\">";
-                    break;
-                case 1:
-                    style = "<div class=\"rating_orange_2\">";
-                    break;
-                case 2:
-                    style = "<div class=\"rating_yellow_3\">";
-                    break;
-                case 3:
-                    style = "<div class=\"rating_green_4\">";
-                    break;
-                case 4:
-                    style = "<div class=\"rating_blue_5\">";
-                    break;
-            }
-        }
-
-        return event.getItem().getRating() != null ?
-                style +
-                String.valueOf((event.getItem().getRating() + 1)) +
-                "</div>" : "";
+        return starsAndOtherService.setStars(event.getItem().getRating() + 1);
     }
-
-
-/*
-    @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")
-    private Integer iteractionListsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return event.getItem().getRating() != null ? event.getItem().getRating() + 1 : null;
-    }
-*/
 
     @Install(to = "iteractionListsTable.rating", subject = "styleProvider")
     private String iteractionListsTableRatingStyleProvider(IteractionList iteractionList) {

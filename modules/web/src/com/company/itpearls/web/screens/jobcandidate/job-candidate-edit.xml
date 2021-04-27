@@ -523,12 +523,15 @@ order by e.cityRuName]]>
                         <button action="jobCandidateIteractionListTable.remove"/>
                     </buttonsPanel>
                     <columns>
-                        <column id="icon" width="48px" caption=""/>
+                        <column id="icon"
+                                width="48px"
+                                caption=""/>
                         <column id="numberIteraction"
                                 property="numberIteraction"
                                 sort="DESCENDING"
                                 sortable="true"/>
                         <column id="rating"
+                                minimumWidth="85px"
                                 caption="msg://msgRating">
                             <htmlRenderer nullRepresentation="null"/>
                         </column>

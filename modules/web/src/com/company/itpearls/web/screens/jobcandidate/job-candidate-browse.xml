@@ -51,36 +51,61 @@ order by e.secondName, e.firstName]]>
                 <action id="excel" type="excel"/>
             </actions>
             <columns>
-                <column id="status" width="50px">
+                <column id="status"
+                        width="50px">
                     <iconRenderer/>
                 </column>
 <!--                <column id="freeCandidate" caption="msg://msgFreeCandidate" width="60px" maximumWidth="60px">
                     <iconRenderer/>
                 </column> -->
-                <column id="fileImageFace" property="fileImageFace" width="60px">
+                <column id="fileImageFace"
+                        property="fileImageFace"
+                        width="60px">
                     <componentRenderer/>
                 </column>
-                <column id="fullName" caption="mainMsg://msgFullName" property="fullName"/>
-                <column id="rating" minimumWidth="85px" caption="msg://msgRating">
+                <column id="fullName"
+                        caption="mainMsg://msgFullName"
+                        property="fullName"/>
+                <column id="rating"
+                        minimumWidth="85px"
+                        maximumWidth="85px"
+                        caption="msg://msgRating">
                     <htmlRenderer nullRepresentation="null"/>
                 </column>
-                <column id="personPosition" caption="msg://msgPersonPosition" property="personPosition"/>
-                <column id="currentCompany" caption="msg://msgCompany" property="currentCompany"/>
-                <column id="cityOfResidence" caption="msg://msgCityOfResidence" property="cityOfResidence"/>
-                <column id="resume" caption="msg://msgResume" width="60px">
+                <column id="personPosition"
+                        caption="msg://msgPersonPosition"
+                        property="personPosition"/>
+                <column id="currentCompany"
+                        caption="msg://msgCompany"
+                        property="currentCompany"/>
+                <column id="cityOfResidence"
+                        caption="msg://msgCityOfResidence"
+                        minimumWidth="150px"
+                        property="cityOfResidence"/>
+                <column id="resume"
+                        caption="msg://msgResume"
+                        width="60px">
                     <iconRenderer/>
                 </column>
-                <column id="lastIteraction" caption="msg://msgDateLastIteraction" maximumWidth="100px">
-                    <textRenderer/>
+                <column id="lastIteraction"
+                        caption="msg://msgDateLastIteraction"
+                        maximumWidth="90px"
+                        minimumWidth="90px">
+                    <htmlRenderer/>
                 </column>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="jobCandidatesTable.create"/>
-                <button id="editBtn" action="jobCandidatesTable.edit"/>
-                <button id="removeBtn" action="jobCandidatesTable.remove"/>
-                <button id="buttonSubscribe" caption="msg://msgSubscribe" invoke="onButtonSubscribeClick"
+                <button id="createBtn"
+                        action="jobCandidatesTable.create"/>
+                <button id="editBtn"
+                        action="jobCandidatesTable.edit"/>
+                <button id="removeBtn"
+                        action="jobCandidatesTable.remove"/>
+                <button id="buttonSubscribe"
+                        caption="msg://msgSubscribe"
+                        invoke="onButtonSubscribeClick"
                         icon="BELL"/>
                 <button id="buttonExcel"
                         action="jobCandidatesTable.excel"
@@ -88,11 +113,16 @@ order by e.secondName, e.firstName]]>
                         enable="false"/>
             </buttonsPanel>
         </dataGrid>
-        <groupBox orientation="horizontal" spacing="true">
-            <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
-            <checkBox id="checkBoxOnWork" caption="msg://msgCandidateOnWork"/>
+        <groupBox orientation="horizontal"
+                  spacing="true">
+            <checkBox id="checkBoxShowOnlyMy"
+                      caption="mainMsg://msgVisibleOnlyMyCandidate"/>
+            <checkBox id="checkBoxOnWork"
+                      caption="msg://msgCandidateOnWork"/>
         </groupBox>
-        <hbox id="lookupActions" spacing="true" visible="false">
+        <hbox id="lookupActions"
+              spacing="true"
+              visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>

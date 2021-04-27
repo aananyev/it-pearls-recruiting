@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 // TODO сделать сортировку по номеру взаимодействия или дате в таблице IteractioNList.Borwse
 
 import com.company.itpearls.core.PdfParserService;
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.*;
@@ -141,6 +142,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> candidateRatingLabel;
 
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -1354,31 +1357,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateIteractionListTable.rating", subject = "columnGenerator")
     private String jobCandidateIteractionListTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        String style = "";
-
-        if(event.getItem().getRating() != null) {
-            switch (event.getItem().getRating()) {
-                case 0:
-                    style = "<div class=\"rating_red_1\">";
-                    break;
-                case 1:
-                    style = "<div class=\"rating_orange_2\">";
-                    break;
-                case 2:
-                    style = "<div class=\"rating_yellow_3\">";
-                    break;
-                case 3:
-                    style = "<div class=\"rating_green_4\">";
-                    break;
-                case 4:
-                    style = "<div class=\"rating_blue_5\">";
-                    break;
-            }
-        }
-
-        return event.getItem().getRating() != null ?
-                style +
-                        String.valueOf((event.getItem().getRating() + 1)) +
-                        "</div>" : "";
+        return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating()) : "";
     }
 }

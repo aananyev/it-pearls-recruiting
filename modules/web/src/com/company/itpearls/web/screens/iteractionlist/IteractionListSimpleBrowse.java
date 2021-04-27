@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -14,10 +15,18 @@ import javax.inject.Inject;
 @LookupComponent("iteractionListsTable")
 @LoadDataBeforeShow
 public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
+
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
     private DataGrid<IteractionList> iteractionListsTable;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
+
+    @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")
+    private String iteractionListsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
+    }
 
     public void setSelectedCandidate(JobCandidate entity) {
         iteractionListsDl.setParameter("candidate", entity);

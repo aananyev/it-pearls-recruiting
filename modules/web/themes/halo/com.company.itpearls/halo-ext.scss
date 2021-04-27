@@ -2,8 +2,15 @@
 
 @mixin date_iteraction_button($color) {
     background: $color;
-        font_size: large;
-        color: $color;
+    font_size: large;
+    font-family: 'Teko', sans-serif;
+    color: white;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.button_table_white {
+        @include date_iteraction_button(white);
 }
 
 .button_table_red {
@@ -20,21 +27,21 @@
 
 @mixin ratingfield($primary-stylename: ratingfield) {
   .#{$primary-stylename}-star {
-    font-family: FontAwesome;
-    font-size: $v-font-size--h2;
-    padding-right: round($v-unit-size/4);
-    cursor: pointer;
+  font-family: FontAwesome;
+  font-size: $v-font-size--h2;
+  padding-right: round($v-unit-size/4);
+  cursor: pointer;
 
-    &:after {
-          content: '\f006'; // 'fa-star-o'
-    }
+  &:after {
+      content: '\f006'; // 'fa-star-o'
   }
+}
 
-  .#{$primary-stylename}-star-selected {
-    &:after {
-          content: '\f005'; // 'fa-star'
-    }
+.#{$primary-stylename}-star-selected {
+  &:after {
+     content: '\f005'; // 'fa-star'
   }
+}
 
   .#{$primary-stylename} .#{$primary-stylename}-star:last-child {
     padding-right: 0;
@@ -48,8 +55,8 @@
 .round-photo {
     border-radius: 10px; /* Радиус скругления */
     box-shadow: 0 0 0 2px green, 0 0 13px #333; /* Параметры теней */
-        width: 20px;
-        height: 20px;
+    width: 20px;
+    height: 20px;
 }
 
 .round-photo-150px {

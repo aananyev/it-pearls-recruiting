@@ -36,6 +36,11 @@
                         caption=""/>
                 <column property="numberIteraction"
                         id="numberIteraction"/>
+                <column id="rating"
+                        maximumWidth="85px"
+                        minimumWidth="85px">
+                    <htmlRenderer nullRepresentation="null"/>
+                </column>
                 <column property="dateIteraction"
                         id="dateIteraction">
                     <formatter format="dd.MM.yyyy"

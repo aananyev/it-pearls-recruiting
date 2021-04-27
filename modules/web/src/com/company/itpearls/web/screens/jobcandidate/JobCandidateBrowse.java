@@ -24,10 +24,8 @@ import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 @UiController("itpearls_JobCandidate.browse")
 @UiDescriptor("job-candidate-browse.xml")
@@ -159,6 +157,44 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return retStr;
+    }
+
+
+    @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
+    private String jobCandidatesTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        IteractionList iteractionList = getLastIteraction(event.getItem());
+
+        String date = null;
+
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy").format(iteractionList.getDateIteraction());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        String retStr = "";
+
+        if (iteractionList != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(iteractionList.getDateIteraction());
+            calendar.add(Calendar.MONTH, 1);
+
+            Calendar calendar1 = Calendar.getInstance();
+
+            if (calendar.after(calendar1)) {
+                if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                    retStr = "button_table_red";
+                } else {
+                    retStr = "button_table_yellow";
+                }
+            } else {
+                retStr = "button_table_green";
+            }
+        } else {
+            retStr = "button_table_white";
+        }
+
+        return "<div class=\"" + retStr + "\">" + date + "</div>";
     }
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "styleProvider")
@@ -893,22 +929,38 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidatesTableLastIteractionRenderer.setRendererClickListener(clickableTextRendererClickEvent -> {
         });
         jobCandidatesTable.getColumn("lastIteraction").setRenderer(jobCandidatesTableLastIteractionRenderer);
+
+        jobCandidatesTable.getColumn("lastIteraction").setStyleProvider( e -> {
+            IteractionList iteractionList = getLastIteraction(e);
+            String retStr = "";
+
+            if (iteractionList != null) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(iteractionList.getDateIteraction());
+                calendar.add(Calendar.MONTH, 1);
+
+                Calendar calendar1 = Calendar.getInstance();
+
+                if (calendar.after(calendar1)) {
+                    if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                        retStr = "button_table_red";
+                    } else {
+                        retStr = "button_table_yellow";
+                    }
+                } else {
+                    retStr = "button_table_green";
+                }
+            } else {
+                retStr = "button_table_white";
+            }
+
+            return retStr;
+        });
+
+        jobCandidatesTable.getColumn("lastIteraction")
+                .setRenderer(jobCandidatesTable.createRenderer(DataGrid.HtmlRenderer.class));
     }
 
-    @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
-    private String jobCandidatesTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        IteractionList iteractionList = getLastIteraction(event.getItem());
-
-        String date = null;
-
-        try {
-            date = new SimpleDateFormat("dd-MM-yyyy").format(iteractionList.getDateIteraction());
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-
-        return date;
-    }
 
     private void candidateImageColumnRenderer() {
         jobCandidatesTable.addGeneratedColumn("fileImageFace", entity -> {
