@@ -226,6 +226,29 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
+    @Install(to = "jobCandidatesTable.lastIteraction", subject = "descriptionProvider")
+    private String jobCandidatesTableLastIteractionDescriptionProvider(JobCandidate jobCandidate) {
+        IteractionList iteractionList = getLastIteraction(jobCandidate);
+        String recrutierName = "";
+
+        if (iteractionList != null) {
+            if (iteractionList.getRecrutier() != null) {
+                if (iteractionList.getRecrutier().getName() != null) {
+                    recrutierName = iteractionList.getRecrutier().getName();
+                }
+            }
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        return iteractionList != null ?
+                simpleDateFormat.format(iteractionList.getDateIteraction())
+                        + "\n"
+                        + iteractionList.getIteractionType().getIterationName()
+                        + "\n"
+                        + recrutierName : "";
+    }
+
     /*
     @Install(to = "jobCandidatesTable.photo", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTablePhotoColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -363,7 +386,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Icons.Icon jobCandidatesTableResumeColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         String retStr = "";
 
-        if(event.getItem().getCandidateCv().size() == 0) {
+        if (event.getItem().getCandidateCv().size() == 0) {
             retStr = "FILE";
         } else {
             retStr = "FILE_TEXT";
@@ -925,12 +948,17 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 }));
 
         candidateImageColumnRenderer();
-        DataGrid.ButtonRenderer<JobCandidate> jobCandidatesTableLastIteractionRenderer = jobCandidatesTable.createRenderer(DataGrid.ButtonRenderer.class);
-        jobCandidatesTableLastIteractionRenderer.setRendererClickListener(clickableTextRendererClickEvent -> {
-        });
-        jobCandidatesTable.getColumn("lastIteraction").setRenderer(jobCandidatesTableLastIteractionRenderer);
 
-        jobCandidatesTable.getColumn("lastIteraction").setStyleProvider( e -> {
+        DataGrid.ClickableTextRenderer<JobCandidate> jobCandidatesTableLastIteractionRenderer =
+                jobCandidatesTable.createRenderer(DataGrid.ClickableTextRenderer.class);
+
+        jobCandidatesTableLastIteractionRenderer.setRendererClickListener(clickableTextRendererClickEvent -> {
+            IteractionListSimpleBrowse iteractionListSimpleBrowse = screens.create(IteractionListSimpleBrowse.class);
+            iteractionListSimpleBrowse.setSelectedCandidate(clickableTextRendererClickEvent.getItem());
+            screens.show(iteractionListSimpleBrowse);
+        });
+
+        jobCandidatesTable.getColumn("lastIteraction").setStyleProvider(e -> {
             IteractionList iteractionList = getLastIteraction(e);
             String retStr = "";
 
@@ -957,8 +985,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             return retStr;
         });
 
+
         jobCandidatesTable.getColumn("lastIteraction")
-                .setRenderer(jobCandidatesTable.createRenderer(DataGrid.HtmlRenderer.class));
+                .setRenderer(jobCandidatesTableLastIteractionRenderer);
+//        jobCandidatesTable.getColumn("lastIteraction")
+//                .setRenderer(jobCandidatesTable.createRenderer(DataGrid.HtmlRenderer.class));
     }
 
 

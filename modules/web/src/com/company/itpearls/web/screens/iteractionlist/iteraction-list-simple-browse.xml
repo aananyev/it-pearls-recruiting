@@ -37,6 +37,7 @@
                 <column property="numberIteraction"
                         id="numberIteraction"/>
                 <column id="rating"
+                        caption="msg://msgRating"
                         maximumWidth="85px"
                         minimumWidth="85px">
                     <htmlRenderer nullRepresentation="null"/>

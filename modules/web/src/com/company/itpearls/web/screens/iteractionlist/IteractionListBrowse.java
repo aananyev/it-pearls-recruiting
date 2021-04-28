@@ -179,7 +179,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")
     private String iteractionListsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
 
-        return starsAndOtherService.setStars(event.getItem().getRating() + 1);
+        return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
     }
 
     @Install(to = "iteractionListsTable.rating", subject = "styleProvider")

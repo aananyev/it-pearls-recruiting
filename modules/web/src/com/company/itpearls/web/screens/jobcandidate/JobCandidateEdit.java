@@ -1328,7 +1328,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if(countRating != 0) {
             float avgRating = (float) sumRating / (float) countRating;
             BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
-            candidateRatingLabel.setValue(String.valueOf(avgRatiog.setScale(1)));
+
+//            candidateRatingLabel.setValue(String.valueOf(avgRatiog.setScale(1)));
+            candidateRatingLabel.setValue(String.valueOf(avgRatiog.intValue()));
 
                 switch ((int) Integer.valueOf(avgRatiog.intValue())) {
                     case 1:
@@ -1357,6 +1359,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateIteractionListTable.rating", subject = "columnGenerator")
     private String jobCandidateIteractionListTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating()) : "";
+        return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
     }
 }
