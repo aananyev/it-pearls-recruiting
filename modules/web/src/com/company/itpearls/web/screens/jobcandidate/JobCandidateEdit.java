@@ -308,24 +308,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
                 retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
             }
-
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | NullPointerException e) {
             e.printStackTrace();
         }
-
-/*        if (iteractionList.getVacancy() != null) {
-            if (iteractionList.getVacancy().getProjectName() != null) {
-                if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
-                    if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
-                        retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
-
-                        if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
-                            retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
-                        }
-                    }
-                }
-            }
-        } */
 
         return Jsoup.parse(retStr).text();
     }
@@ -476,7 +461,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
 
-        if(!PersistenceHelper.isNew(getEditedEntity())) {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
             iteractionListFromCandidate = getIteractionListFromCandidate(getEditedEntity());
         }
 
@@ -1318,38 +1303,38 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         Integer sumRating = 0,
                 countRating = 0;
 
-        for(IteractionList iteractionList : iteractionListFromCandidate) {
-            if(iteractionList.getRating() != null) {
+        for (IteractionList iteractionList : iteractionListFromCandidate) {
+            if (iteractionList.getRating() != null) {
                 sumRating = sumRating + iteractionList.getRating() + 1;
-                countRating ++;
+                countRating++;
             }
         }
 
-        if(countRating != 0) {
+        if (countRating != 0) {
             float avgRating = (float) sumRating / (float) countRating;
             BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
 
 //            candidateRatingLabel.setValue(String.valueOf(avgRatiog.setScale(1)));
             candidateRatingLabel.setValue(String.valueOf(avgRatiog.intValue()));
 
-                switch ((int) Integer.valueOf(avgRatiog.intValue())) {
-                    case 1:
-                        candidateRatingLabel.setStyleName("rating_candidate_red_1");
-                        break;
-                    case 2:
-                        candidateRatingLabel.setStyleName("rating_candidate_orange_2");
-                        break;
-                    case 3:
-                        candidateRatingLabel.setStyleName("rating_candidate_yellow_3");
-                        break;
-                    case 4:
-                        candidateRatingLabel.setStyleName("rating_candidate_green_4");
-                        break;
-                    case 5:
-                        candidateRatingLabel.setStyleName("rating_candidate_blue_5");
-                        break;
-                    default:
-                        break;
+            switch ((int) Integer.valueOf(avgRatiog.intValue())) {
+                case 1:
+                    candidateRatingLabel.setStyleName("rating_candidate_red_1");
+                    break;
+                case 2:
+                    candidateRatingLabel.setStyleName("rating_candidate_orange_2");
+                    break;
+                case 3:
+                    candidateRatingLabel.setStyleName("rating_candidate_yellow_3");
+                    break;
+                case 4:
+                    candidateRatingLabel.setStyleName("rating_candidate_green_4");
+                    break;
+                case 5:
+                    candidateRatingLabel.setStyleName("rating_candidate_blue_5");
+                    break;
+                default:
+                    break;
             }
         } else {
             candidateRatingLabel.setValue("0.0");

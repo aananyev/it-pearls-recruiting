@@ -194,7 +194,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             retStr = "button_table_white";
         }
 
-        return "<div class=\"" + retStr + "\">" + date + "</div>";
+        return
+                "<div class=\"" +
+                        retStr
+                        + "\">" +
+                        date
+                        + "</div>"
+                ;
     }
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "styleProvider")
@@ -986,10 +992,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         });
 
 
-        jobCandidatesTable.getColumn("lastIteraction")
-                .setRenderer(jobCandidatesTableLastIteractionRenderer);
 //        jobCandidatesTable.getColumn("lastIteraction")
-//                .setRenderer(jobCandidatesTable.createRenderer(DataGrid.HtmlRenderer.class));
+//                .setRenderer(jobCandidatesTableLastIteractionRenderer);
+        jobCandidatesTable.getColumn("lastIteraction")
+                .setRenderer(jobCandidatesTable.createRenderer(DataGrid.HtmlRenderer.class));
     }
 
 
