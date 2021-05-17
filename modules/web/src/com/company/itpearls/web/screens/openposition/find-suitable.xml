@@ -20,35 +20,77 @@
                 </query>
             </loader>
         </collection>
+        <collection id="personPositionDc"
+                    class="com.company.itpearls.entity.Position"
+                    view="_minimal">
+            <loader id="personPositionDl">
+                <query>
+                    <![CDATA[select e from itpearls_Position e order by e.positionRuName]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"
                 forceDialog="true"/>
-    <layout>
-        <hbox align="TOP_CENTER">
-            <label id="candidateNameLabel" stylename="h2"/>
-            <label id="positionNameLabel" stylename="h2"/>
-        </hbox>
-        <dataGrid id="suitableCheckDataGrid"
+    <layout spacing="true" expand="suitableCheckVBox">
+        <vbox id="suitableCheckVBox"
+              width="100%"
+              align="TOP_CENTER"
+              spacing="true"
+              expand="suitableCheckDataGrid"
+              height="AUTO">
+            <hbox id="suitableCheckHBox"
                   width="100%"
-                  dataContainer="openPositionDc">
-            <columns>
-                <column id="number"
-                        width="80px"
-                        caption="mainMsg://msgNumber">
-                    <htmlRenderer nullRepresentation="null"/>
-                </column>
-                <column id="vacansyName"
-                        property="vacansyName"
-                        width="300px"/>
-                <column id="projectName"
-                        property="projectName"
-                        width="300px"/>
-                <column id="relevance"
-                        width="120px"
-                        caption="msg://msgPercentOfRelevance">
-                </column>
-            </columns>
-        </dataGrid>
+                  height="AUTO"
+                  spacing="true"
+                  align="TOP_CENTER">
+                <label id="candidateNameLabel"
+                       align="MIDDLE_LEFT"
+                       stylename="h3"/>
+                <label id="positionNameLabel"
+                       align="MIDDLE_LEFT"
+                       stylename="h3"/>
+            </hbox>
+            <hbox spacing="true"
+                  expand="jobPositionLookupPickerField"
+                  height="AUTO"
+                  width="100%">
+                <lookupPickerField id="jobPositionLookupPickerField"
+                                   align="MIDDLE_LEFT"
+                                   width="100%"
+                                   optionsContainer="personPositionDc">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="clear" type="picker_clear"/>
+                    </actions>
+                </lookupPickerField>
+                <button id="rescanButton"
+                        caption="msg://msgRescan"
+                        description="msg://msgRescanButton"
+                        invoke="rescanSuitable"/>
+            </hbox>
+            <dataGrid id="suitableCheckDataGrid"
+                      width="100%"
+                      dataContainer="openPositionDc">
+                <columns>
+                    <column id="number"
+                            width="80px"
+                            caption="mainMsg://msgNumber">
+                        <htmlRenderer nullRepresentation="null"/>
+                    </column>
+                    <column id="vacansyName"
+                            property="vacansyName"
+                            width="300px"/>
+                    <column id="projectName"
+                            property="projectName"
+                            width="300px"/>
+                    <column id="relevance"
+                            width="120px"
+                            caption="msg://msgPercentOfRelevance">
+                    </column>
+                </columns>
+            </dataGrid>
+        </vbox>
     </layout>
 </window>

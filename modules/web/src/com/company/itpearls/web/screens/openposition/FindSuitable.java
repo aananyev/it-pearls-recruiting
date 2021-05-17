@@ -1,12 +1,10 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.core.PdfParserService;
-import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.SkillTree;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.components.DataGrid;
+import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 
@@ -29,6 +27,18 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     private DataManager dataManager;
     @Inject
     private PdfParserService pdfParserService;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private HBoxLayout suitableCheckHBox;
+    @Inject
+    private Label<String> candidateNameLabel;
+    @Inject
+    private Label<String> positionNameLabel;
+    @Inject
+    private VBoxLayout suitableCheckVBox;
+    @Inject
+    private LookupPickerField<Position> jobPositionLookupPickerField;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -48,7 +58,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
         List<SkillTree> skillTrees = new ArrayList<>();
 
-        if(candidateCVs != null) {
+        if (candidateCVs != null) {
             for (CandidateCV candidateCV : candidateCVs) {
                 List<SkillTree> st = new ArrayList<>();
 
@@ -56,15 +66,15 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                     st = pdfParserService.parseSkillTree(candidateCV.getTextCV());
                 }
 
-                for(SkillTree cv : st) {
-                    for(SkillTree cv1 : skillTrees) {
-                        if(cv1.equals(cv)) {
+                for (SkillTree cv : st) {
+                    for (SkillTree cv1 : skillTrees) {
+                        if (cv1.equals(cv)) {
                             st.remove(cv);
                         }
                     }
                 }
 
-                if(st != null) {
+                if (st != null) {
                     skillTrees.addAll(st);
                 }
             }
@@ -72,16 +82,16 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
         List<SkillTree> skillTreesJD = new ArrayList<>();
 
-        if(event.getItem().getComment() != null) {
+        if (event.getItem().getComment() != null) {
             skillTreesJD = pdfParserService.parseSkillTree(event.getItem().getComment());
         }
 
         Integer counter = 0;
 
-        for(SkillTree skillTree : skillTreesJD) {
-            for(SkillTree st : skillTrees) {
-                if(skillTree.equals(st))
-                    counter ++;
+        for (SkillTree skillTree : skillTreesJD) {
+            for (SkillTree st : skillTrees) {
+                if (skillTree.equals(st))
+                    counter++;
             }
         }
 
@@ -92,8 +102,8 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if(jobCandidate != null) {
-            if(jobCandidate.getPersonPosition() != null) {
+        if (jobCandidate != null) {
+            if (jobCandidate.getPersonPosition() != null) {
                 openPositionDl.setParameter("positionType", this.jobCandidate.getPersonPosition());
             } else {
                 openPositionDl.removeParameter("positionType");
@@ -103,6 +113,13 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
         }
 
         openPositionDl.load();
+
+        candidateNameLabel.setValue(jobCandidate.getFullName());
+        positionNameLabel.setValue(jobCandidate.getPersonPosition().getPositionEnName()
+                + " / "
+                + jobCandidate.getPersonPosition().getPositionRuName());
+
+        jobPositionLookupPickerField.setValue(jobCandidate.getPersonPosition());
     }
 
     @Install(to = "suitableCheckDataGrid.number", subject = "columnGenerator")
@@ -118,4 +135,21 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
         return this.jobCandidate;
     }
 
+/*    public DataGrid getSuitableCheckDataGrid() {
+        return suitableCheckDataGrid;
+    } */
+
+    public HBoxLayout getSuitableCheckHBox() {
+        return suitableCheckHBox;
+    }
+
+    public VBoxLayout getSuitableCheckVBox() {
+        return suitableCheckVBox;
+    }
+
+    public void rescanSuitable() {
+        openPositionDl.setParameter("positionType", jobPositionLookupPickerField.getValue());
+        numberCounter = 0;
+        openPositionDl.load();
+    }
 }

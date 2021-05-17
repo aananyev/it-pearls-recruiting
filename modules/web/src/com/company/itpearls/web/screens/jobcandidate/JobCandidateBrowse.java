@@ -535,12 +535,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Component findSuitableButton(JobCandidate entity) {
         Button suitableButton = uiComponents.create(Button.class);
         suitableButton.setDescription("Подобрать вакансию по резюме");
-        suitableButton.setIconFromSet(CubaIcon.ADD_ACTION);
+        suitableButton.setIconFromSet(CubaIcon.TOGGLE_ON);
 
         suitableButton.setAction(new BaseAction("findSuitable")
         .withHandler(actionPerformedEvent -> {
             FindSuitable findSuitable = screens.create(FindSuitable.class);
             findSuitable.setJobCandidate(entity);
+
             findSuitable.show();
         }));
 
