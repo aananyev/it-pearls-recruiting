@@ -6,6 +6,7 @@ import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.openposition.FindSuitable;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.*;
@@ -76,6 +77,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CollectionLoader<CandidateCV> candidateCVDl;
     @Inject
     private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private LookupField ratingFieldNotLower;
+    @Inject
+    private CollectionContainer<JobCandidate> jobCandidatesDc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -459,6 +464,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         candidateTitle.setStyleName("h3");
         candidateTitle.setValue("Кандидат:");
 
+        Component suitableButton = findSuitableButton(entity);
+
         Label<String> iteractionLabelHeader = uiComponents.create(Label.NAME);
         iteractionLabelHeader.setHtmlEnabled(true);
         iteractionLabelHeader.setStyleName("h3");
@@ -488,6 +495,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         headerBox.add(candidateTitle);
         headerBox.add(editButton);
+        headerBox.add(suitableButton);
 
         headerBox.add(iteractionLabelHeader);
         headerBox.add(newIteraction);
@@ -522,6 +530,21 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         mainLayout.expand(fragment);
 
         return mainLayout;
+    }
+
+    private Component findSuitableButton(JobCandidate entity) {
+        Button suitableButton = uiComponents.create(Button.class);
+        suitableButton.setDescription("Подобрать вакансию по резюме");
+        suitableButton.setIconFromSet(CubaIcon.ADD_ACTION);
+
+        suitableButton.setAction(new BaseAction("findSuitable")
+        .withHandler(actionPerformedEvent -> {
+            FindSuitable findSuitable = screens.create(FindSuitable.class);
+            findSuitable.setJobCandidate(entity);
+            findSuitable.show();
+        }));
+
+        return suitableButton;
     }
 
     private Component getLastCVtoClipboard(JobCandidate entity) {
@@ -996,6 +1019,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 //                .setRenderer(jobCandidatesTableLastIteractionRenderer);
         jobCandidatesTable.getColumn("lastIteraction")
                 .setRenderer(jobCandidatesTable.createRenderer(DataGrid.HtmlRenderer.class));
+
+        setRatingField();
     }
 
 
@@ -1141,4 +1166,22 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             return null;
     }
 
+    private void setRatingField() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
+        map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
+        map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
+        map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
+        map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+        ratingFieldNotLower.setOptionsMap(map);
+
+        ratingFieldNotLower.addValueChangeListener(e -> {
+            if (ratingFieldNotLower.getValue() != null)
+                jobCandidatesDl.setParameter("rating", ratingFieldNotLower.getValue());
+            else
+                jobCandidatesDl.removeParameter("rating");
+
+            jobCandidatesDl.load();
+        });
+    }
 }

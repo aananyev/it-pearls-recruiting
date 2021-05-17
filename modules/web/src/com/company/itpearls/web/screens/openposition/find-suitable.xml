@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://findSuitable.caption"
+        messagesPack="com.company.itpearls.web.screens.jobcandidate">
+    <data readOnly="true">
+        <collection id="openPositionDc"
+                    class="com.company.itpearls.entity.OpenPosition"
+                    view="openPosition-view">
+            <loader id="openPositionDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e where e.openClose = false order by e.vacansyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.positionType = :positionType</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"
+                forceDialog="true"/>
+    <layout>
+        <hbox align="TOP_CENTER">
+            <label id="candidateNameLabel" stylename="h2"/>
+            <label id="positionNameLabel" stylename="h2"/>
+        </hbox>
+        <dataGrid id="suitableCheckDataGrid"
+                  width="100%"
+                  dataContainer="openPositionDc">
+            <columns>
+                <column id="number"
+                        width="80px"
+                        caption="mainMsg://msgNumber">
+                    <htmlRenderer nullRepresentation="null"/>
+                </column>
+                <column id="vacansyName"
+                        property="vacansyName"
+                        width="300px"/>
+                <column id="projectName"
+                        property="projectName"
+                        width="300px"/>
+                <column id="relevance"
+                        width="120px"
+                        caption="msg://msgPercentOfRelevance">
+                </column>
+            </columns>
+        </dataGrid>
+    </layout>
+</window>

@@ -1,12 +1,9 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.WebBrowserTools;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Image;

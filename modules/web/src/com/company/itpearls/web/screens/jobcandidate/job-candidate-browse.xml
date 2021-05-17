@@ -14,15 +14,15 @@
 order by e.secondName, e.firstName]]>
                     <condition>
                         <and>
-                        <c:jpql>
-                            <c:where>e.createdBy like :userName</c:where>
-                        </c:jpql>
-                        <c:jpql>
-                            <c:where>not e.status = :param1</c:where>
-                        </c:jpql>
-                        <c:jpql>
-                            <c:where>not e.status = :param3</c:where>
-                        </c:jpql>
+                            <c:jpql>
+                                <c:where>e.createdBy like :userName</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>not e.status = :param1</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>not e.status = :param3</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -42,8 +42,8 @@ order by e.secondName, e.firstName]]>
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace"/>
         </filter>
         <dataGrid id="jobCandidatesTable"
-                    width="100%"
-                    dataContainer="jobCandidatesDc">
+                  width="100%"
+                  dataContainer="jobCandidatesDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
@@ -55,9 +55,9 @@ order by e.secondName, e.firstName]]>
                         width="50px">
                     <iconRenderer/>
                 </column>
-<!--                <column id="freeCandidate" caption="msg://msgFreeCandidate" width="60px" maximumWidth="60px">
-                    <iconRenderer/>
-                </column> -->
+                <!--                <column id="freeCandidate" caption="msg://msgFreeCandidate" width="60px" maximumWidth="60px">
+                                    <iconRenderer/>
+                                </column> -->
                 <column id="fileImageFace"
                         property="fileImageFace"
                         width="60px">
@@ -113,13 +113,25 @@ order by e.secondName, e.firstName]]>
                         enable="false"/>
             </buttonsPanel>
         </dataGrid>
-        <groupBox orientation="horizontal"
-                  spacing="true">
+        <hbox align="MIDDLE_LEFT"
+              width="100%"
+              stylename="card"
+              margin="true,true,true,true"
+              height="AUTO"
+              spacing="false">
             <checkBox id="checkBoxShowOnlyMy"
+                      align="MIDDLE_LEFT"
                       caption="mainMsg://msgVisibleOnlyMyCandidate"/>
             <checkBox id="checkBoxOnWork"
+                      align="MIDDLE_LEFT"
                       caption="msg://msgCandidateOnWork"/>
-        </groupBox>
+            <hbox>
+                <lookupField id="ratingFieldNotLower"
+                             caption="msg://msgRatingNotLower"
+                             description="msg://msgRatingNotLoweerDecription"
+                             width="50%"/>
+            </hbox>
+        </hbox>
         <hbox id="lookupActions"
               spacing="true"
               visible="false">

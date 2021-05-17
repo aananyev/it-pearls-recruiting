@@ -83,6 +83,7 @@ configure(globalModule) {
         }
         compile 'org.apache.pdfbox:pdfbox:2.0.23'
         compile 'org.webjars.npm:domelementtype:2.2.0'
+        compile 'org.apache.opennlp:opennlp-tools:1.9.3'
     }
 
     entitiesEnhancing {
