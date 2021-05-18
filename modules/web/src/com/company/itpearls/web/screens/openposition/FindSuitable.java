@@ -4,12 +4,13 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,13 +40,22 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     private VBoxLayout suitableCheckVBox;
     @Inject
     private LookupPickerField<Position> jobPositionLookupPickerField;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private RichTextArea commentCVRichTextArea;
 
     @Subscribe
     public void onInit(InitEvent event) {
 
-        DataGrid.ButtonRenderer<OpenPosition> suitableCheckDataGridRelevanceRenderer = suitableCheckDataGrid.createRenderer(DataGrid.ButtonRenderer.class);
+        DataGrid.ButtonRenderer<OpenPosition> suitableCheckDataGridRelevanceRenderer = suitableCheckDataGrid
+                .createRenderer(DataGrid.ButtonRenderer.class);
+
         suitableCheckDataGridRelevanceRenderer.setRendererClickListener(clickableTextRendererClickEvent -> {
         });
+
         suitableCheckDataGrid.getColumn("relevance").setRenderer(suitableCheckDataGridRelevanceRenderer);
     }
 
@@ -66,10 +76,12 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                     st = pdfParserService.parseSkillTree(candidateCV.getTextCV());
                 }
 
-                for (SkillTree cv : st) {
-                    for (SkillTree cv1 : skillTrees) {
-                        if (cv1.equals(cv)) {
-                            st.remove(cv);
+                if(st != null) {
+                    for (SkillTree cv : st) {
+                        for (SkillTree cv1 : skillTrees) {
+                            if (cv1.equals(cv)) {
+                                st.remove(cv);
+                            }
                         }
                     }
                 }
@@ -151,5 +163,10 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
         openPositionDl.setParameter("positionType", jobPositionLookupPickerField.getValue());
         numberCounter = 0;
         openPositionDl.load();
+    }
+
+    @Subscribe("suitableCheckDataGrid")
+    public void onSuitableCheckDataGridSelection(DataGrid.SelectionEvent<OpenPosition> event) {
+        commentCVRichTextArea.setValue(suitableCheckDataGrid.getSingleSelected().getComment());
     }
 }

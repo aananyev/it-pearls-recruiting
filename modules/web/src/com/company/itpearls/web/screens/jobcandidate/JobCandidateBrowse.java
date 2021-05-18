@@ -495,7 +495,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         headerBox.add(candidateTitle);
         headerBox.add(editButton);
-        headerBox.add(suitableButton);
+
+        if (suitableButton != null)
+            headerBox.add(suitableButton);
 
         headerBox.add(iteractionLabelHeader);
         headerBox.add(newIteraction);
@@ -533,19 +535,25 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private Component findSuitableButton(JobCandidate entity) {
-        Button suitableButton = uiComponents.create(Button.class);
-        suitableButton.setDescription("Подобрать вакансию по резюме");
-        suitableButton.setIconFromSet(CubaIcon.TOGGLE_ON);
+        if (dataManager.load(CandidateCV.class)
+                .query("select e from itpearls_CandidateCV e where e.candidate = :candidate")
+                .parameter("candidate", entity)
+                .list().size() != 0) {
+            Button suitableButton = uiComponents.create(Button.class);
+            suitableButton.setDescription("Подобрать вакансию по резюме");
+            suitableButton.setIconFromSet(CubaIcon.TOGGLE_ON);
 
-        suitableButton.setAction(new BaseAction("findSuitable")
-        .withHandler(actionPerformedEvent -> {
-            FindSuitable findSuitable = screens.create(FindSuitable.class);
-            findSuitable.setJobCandidate(entity);
+            suitableButton.setAction(new BaseAction("findSuitable")
+                    .withHandler(actionPerformedEvent -> {
+                        FindSuitable findSuitable = screens.create(FindSuitable.class);
+                        findSuitable.setJobCandidate(entity);
 
-            findSuitable.show();
-        }));
+                        findSuitable.show();
+                    }));
 
-        return suitableButton;
+            return suitableButton;
+        } else
+            return null;
     }
 
     private Component getLastCVtoClipboard(JobCandidate entity) {

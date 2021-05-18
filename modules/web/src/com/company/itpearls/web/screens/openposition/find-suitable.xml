@@ -25,7 +25,7 @@
                     view="_minimal">
             <loader id="personPositionDl">
                 <query>
-                    <![CDATA[select e from itpearls_Position e order by e.positionRuName]]>
+                    <![CDATA[select e from itpearls_Position e]]>
                 </query>
             </loader>
         </collection>
@@ -38,7 +38,7 @@
               width="100%"
               align="TOP_CENTER"
               spacing="true"
-              expand="suitableCheckDataGrid"
+              expand="commentCVRichTextArea"
               height="AUTO">
             <hbox id="suitableCheckHBox"
                   width="100%"
@@ -72,6 +72,7 @@
             </hbox>
             <dataGrid id="suitableCheckDataGrid"
                       width="100%"
+                      height="AUTO"
                       dataContainer="openPositionDc">
                 <columns>
                     <column id="number"
@@ -91,6 +92,10 @@
                     </column>
                 </columns>
             </dataGrid>
+            <richTextArea id="commentCVRichTextArea"
+                          width="100%"
+                          editable="false"
+                          height="100%"/>
         </vbox>
     </layout>
 </window>
