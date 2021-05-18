@@ -34,11 +34,14 @@
                 width="800"
                 forceDialog="true"/>
     <layout spacing="true" expand="suitableCheckVBox">
+        <progressBar id="progressBar"
+                     width="100%"
+                     indeterminate="true"/>
         <vbox id="suitableCheckVBox"
               width="100%"
               align="TOP_CENTER"
               spacing="true"
-              expand="commentCVRichTextArea"
+              expand="gridAndAreaBox"
               height="AUTO">
             <hbox id="suitableCheckHBox"
                   width="100%"
@@ -70,32 +73,41 @@
                         description="msg://msgRescanButton"
                         invoke="rescanSuitable"/>
             </hbox>
-            <dataGrid id="suitableCheckDataGrid"
-                      width="100%"
-                      height="AUTO"
-                      dataContainer="openPositionDc">
-                <columns>
-                    <column id="number"
-                            width="80px"
-                            caption="mainMsg://msgNumber">
-                        <htmlRenderer nullRepresentation="null"/>
-                    </column>
-                    <column id="vacansyName"
-                            property="vacansyName"
-                            width="300px"/>
-                    <column id="projectName"
-                            property="projectName"
-                            width="300px"/>
-                    <column id="relevance"
-                            width="120px"
-                            caption="msg://msgPercentOfRelevance">
-                    </column>
-                </columns>
-            </dataGrid>
-            <richTextArea id="commentCVRichTextArea"
+            <vbox id="gridAndAreaBox"
+                  width="100%"
+                  spacing="true"
+                  expand="commentCVRichTextArea"
+                  height="100%">
+                <dataGrid id="suitableCheckDataGrid"
+                          columnResizeMode="ANIMATED"
+                          box.expandRatio="1"
                           width="100%"
-                          editable="false"
-                          height="100%"/>
+                          height="100%"
+                          dataContainer="openPositionDc">
+                    <columns>
+                        <column id="priority"
+                                width="60px"
+                                caption="msg://msgPriority">
+                            <iconRenderer/>
+                        </column>
+                        <column id="vacansyName"
+                                property="vacansyName"
+                                width="340px"/>
+                        <column id="projectName"
+                                property="projectName"
+                                width="300px"/>
+                        <column id="relevance"
+                                width="100px"
+                                caption="msg://msgPercentOfRelevance">
+                        </column>
+                    </columns>
+                </dataGrid>
+                <richTextArea id="commentCVRichTextArea"
+                              box.expandRatio="1"
+                              width="100%"
+                              editable="false"
+                              height="100%"/>
+            </vbox>
         </vbox>
     </layout>
 </window>

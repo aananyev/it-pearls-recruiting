@@ -2,17 +2,22 @@ package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @UiController("itpearls_FindSuitable")
 @UiDescriptor("find-suitable.xml")
@@ -21,15 +26,12 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     private CollectionLoader<OpenPosition> openPositionDl;
 
     private JobCandidate jobCandidate = null;
-    protected Integer numberCounter = 0;
     @Inject
     private DataGrid<OpenPosition> suitableCheckDataGrid;
     @Inject
     private DataManager dataManager;
     @Inject
     private PdfParserService pdfParserService;
-    @Inject
-    private Dialogs dialogs;
     @Inject
     private HBoxLayout suitableCheckHBox;
     @Inject
@@ -41,11 +43,13 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     @Inject
     private LookupPickerField<Position> jobPositionLookupPickerField;
     @Inject
-    private Notifications notifications;
+    private RichTextArea commentCVRichTextArea;
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
-    private RichTextArea commentCVRichTextArea;
+    private Notifications notifications;
+    @Inject
+    private ProgressBar progressBar;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -54,9 +58,54 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                 .createRenderer(DataGrid.ButtonRenderer.class);
 
         suitableCheckDataGridRelevanceRenderer.setRendererClickListener(clickableTextRendererClickEvent -> {
+            List<CandidateCV> candidateCVs = dataManager.load(CandidateCV.class)
+                    .query("select e from itpearls_CandidateCV e where e.candidate = :candidate")
+                    .parameter("candidate", jobCandidate)
+                    .view("candidateCV-view")
+                    .list();
+            if(candidateCVs.size() == 1) {
+                checkSkillFromJD(candidateCVs.get(0), clickableTextRendererClickEvent.getItem());
+            }
         });
 
         suitableCheckDataGrid.getColumn("relevance").setRenderer(suitableCheckDataGridRelevanceRenderer);
+    }
+
+    public void checkSkillFromJD(CandidateCV candidateCV, OpenPosition item) {
+        List<SkillTree> skillTrees = rescanResume(candidateCV);
+//        String inputText = Jsoup.parse(candidateCV.getToVacancy().getComment()).text();
+        String inputText = Jsoup.parse(item.getComment()).text();
+        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
+
+        if(candidateCV.getToVacancy() != null) {
+            SkillTreeBrowseCheck s = screenBuilders.screen(this)
+                    .withScreenClass(SkillTreeBrowseCheck.class)
+                    .build();
+            s.setCandidateCVSkills(skillTrees);
+            s.setOpenPositionSkills(skillTreesFromJD);
+            s.setTitle(item.getVacansyName());
+
+            s.show();
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Для проверки навыков кандидата по резюме " +
+                            "\nнеобходимозаполнить поле \"Вакансия\".")
+                    .show();
+        }
+    }
+
+    public List<SkillTree> rescanResume(CandidateCV candidateCV) {
+        if(candidateCV.getTextCV() != null) {
+            String inputText = Jsoup.parse(candidateCV.getTextCV()).text();
+            List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
+
+            candidateCV.setSkillTree(skillTrees);
+
+            return skillTrees;
+        } else {
+            return null;
+        }
     }
 
     @Install(to = "suitableCheckDataGrid.relevance", subject = "columnGenerator")
@@ -77,12 +126,16 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                 }
 
                 if(st != null) {
-                    for (SkillTree cv : st) {
-                        for (SkillTree cv1 : skillTrees) {
-                            if (cv1.equals(cv)) {
-                                st.remove(cv);
+                    try {
+                        for (SkillTree cv : st) {
+                            for (SkillTree cv1 : skillTrees) {
+                                if (cv1.equals(cv)) {
+                                    st.remove(cv);
+                                }
                             }
                         }
+                    } catch (ConcurrentModificationException e) {
+                        e.printStackTrace();
                     }
                 }
 
@@ -113,7 +166,9 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
+    public void onAfterShow(AfterShowEvent event) {
+//    @Subscribe
+//    public void onBeforeShow(BeforeShowEvent event) {
         if (jobCandidate != null) {
             if (jobCandidate.getPersonPosition() != null) {
                 openPositionDl.setParameter("positionType", this.jobCandidate.getPersonPosition());
@@ -132,11 +187,8 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                 + jobCandidate.getPersonPosition().getPositionRuName());
 
         jobPositionLookupPickerField.setValue(jobCandidate.getPersonPosition());
-    }
 
-    @Install(to = "suitableCheckDataGrid.number", subject = "columnGenerator")
-    private String suitableCheckDataGridNumberColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        return (++numberCounter).toString();
+        progressBar.setVisible(false);
     }
 
     public void setJobCandidate(JobCandidate jobCandidate) {
@@ -146,10 +198,6 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     public JobCandidate getJobCandidate() {
         return this.jobCandidate;
     }
-
-/*    public DataGrid getSuitableCheckDataGrid() {
-        return suitableCheckDataGrid;
-    } */
 
     public HBoxLayout getSuitableCheckHBox() {
         return suitableCheckHBox;
@@ -161,12 +209,65 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
     public void rescanSuitable() {
         openPositionDl.setParameter("positionType", jobPositionLookupPickerField.getValue());
-        numberCounter = 0;
         openPositionDl.load();
     }
 
     @Subscribe("suitableCheckDataGrid")
     public void onSuitableCheckDataGridSelection(DataGrid.SelectionEvent<OpenPosition> event) {
         commentCVRichTextArea.setValue(suitableCheckDataGrid.getSingleSelected().getComment());
+    }
+
+    @Install(to = "suitableCheckDataGrid.vacansyName", subject = "descriptionProvider")
+    private String suitableCheckDataGridVacansyNameDescriptionProvider(OpenPosition openPosition) {
+        return Jsoup.parse(openPosition.getVacansyName()).text();
+    }
+
+    @Install(to = "suitableCheckDataGrid.projectName", subject = "descriptionProvider")
+    private String suitableCheckDataGridProjectNameDescriptionProvider(OpenPosition openPosition) {
+        if(openPosition.getProjectName() != null) {
+            if (openPosition.getProjectName().getProjectDescription() != null) {
+                return Jsoup.parse(openPosition.getProjectName().getProjectDescription()).text();
+            }
+        }
+
+        return null;
+    }
+
+    @Install(to = "suitableCheckDataGrid.priority", subject = "columnGenerator")
+    private Icons.Icon suitableCheckDataGridPriorityColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+
+        switch ((int) event.getItem().getPriority()) {
+            case 0:
+                return CubaIcon.ANGLE_DOUBLE_DOWN;
+            case 1:
+                return CubaIcon.ANGLE_DOWN;
+            case 2:
+                return CubaIcon.CIRCLE;
+            case 3:
+                return CubaIcon.ANGLE_UP;
+            case 4:
+                return CubaIcon.ANGLE_DOUBLE_UP;
+        }
+
+        return null;
+    }
+
+    @Install(to = "suitableCheckDataGrid.priority", subject = "styleProvider")
+    private String suitableCheckDataGridPriorityStyleProvider(OpenPosition openPosition) {
+
+        switch ((int) openPosition.getPriority()) {
+            case 0:
+                return "pic-center-large-grey";
+            case 1:
+                return "pic-center-large-blue";
+            case 2:
+                return "pic-center-large-green";
+            case 3:
+                return "pic-center-large-yellow";
+            case 4:
+                return "pic-center-large-red";
+        }
+
+        return null;
     }
 }

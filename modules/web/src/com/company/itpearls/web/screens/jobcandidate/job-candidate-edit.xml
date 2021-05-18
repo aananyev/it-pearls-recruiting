@@ -342,14 +342,6 @@ order by e.cityRuName]]>
                                     lower(:searchString) escape '\'
                                 </query>
                             </suggestionField>
-                            <!--                                                        <textField id="firstNameField"
-                                                                                               dataContainer="jobCandidateDc"
-                                                                                               property="firstName"
-                                                                                               caption="msg://msgFirstName"
-                                                                                               width="100%"
-                                                                                               rowspan="1"
-                                                                                               colspan="1"
-                                                                                               required="true"/> -->
                             <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
                                                dataContainer="jobCandidateDc" property="currentCompany" width="100%"
                                                caption="msg://msgCorrentCompany" required="true">

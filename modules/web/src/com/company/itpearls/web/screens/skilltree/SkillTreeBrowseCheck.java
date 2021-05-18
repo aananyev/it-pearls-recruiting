@@ -24,10 +24,6 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
     String title = "";
 
     @Inject
-    private TreeDataGrid<SkillTree> skillTreesTable;
-    @Inject
-    private CollectionContainer<SkillTree> skillTreesDc;
-    @Inject
     private CollectionLoader<SkillTree> skillTreesDl;
     @Inject
     private CheckBox removeBlankSkills;
@@ -43,8 +39,21 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
         }
 
         if (candidateCVSkills.size() != 0 && openPositionSkills.size() != 0) {
-            int percentInt = (openPositionSkills.size() > 0 ?
-                    (candidateCVSkills.size() *100 / openPositionSkills.size()) : 0);
+
+            int countForPercent = 0;
+
+            for (SkillTree op : openPositionSkills) {
+                for(SkillTree opCand : candidateCVSkills) {
+                    if(op.equals(opCand)) {
+                        countForPercent ++;
+                    }
+                }
+            }
+
+            int percentInt = countForPercent * 100 / openPositionSkills.size();
+
+//            int percentInt = (openPositionSkills.size() > 0 ?
+//                    (candidateCVSkills.size() *100 / openPositionSkills.size()) : 0);
             percent.setValue("Процент релевантности: " + percentInt + "%");
         }
     }
