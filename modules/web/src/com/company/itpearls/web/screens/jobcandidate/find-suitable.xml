@@ -15,6 +15,9 @@
                             <c:jpql>
                                 <c:where>e.positionType = :positionType</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>e.cityPosition = :cityPosition</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -31,12 +34,9 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="800"
+                width="900"
                 forceDialog="true"/>
     <layout spacing="true" expand="suitableCheckVBox">
-        <progressBar id="progressBar"
-                     width="100%"
-                     indeterminate="true"/>
         <vbox id="suitableCheckVBox"
               width="100%"
               align="TOP_CENTER"
@@ -44,7 +44,7 @@
               expand="gridAndAreaBox"
               height="AUTO">
             <hbox id="suitableCheckHBox"
-                  width="100%"
+                  width="AUTO"
                   height="AUTO"
                   spacing="true"
                   align="TOP_CENTER">
@@ -52,6 +52,9 @@
                        align="MIDDLE_LEFT"
                        stylename="h3"/>
                 <label id="positionNameLabel"
+                       align="MIDDLE_LEFT"
+                       stylename="h3"/>
+                <label id="cityOfResidenceLabel"
                        align="MIDDLE_LEFT"
                        stylename="h3"/>
             </hbox>
@@ -92,12 +95,20 @@
                         </column>
                         <column id="vacansyName"
                                 property="vacansyName"
-                                width="340px"/>
+                                width="290px"/>
                         <column id="projectName"
                                 property="projectName"
-                                width="300px"/>
+                                width="250px"/>
+                        <column id="cityPosition"
+                                property="cityPosition"
+                                width="100px"/>
+                        <column id="remoteWork"
+                                width="100px">
+                            <iconRenderer/>
+                        </column>
                         <column id="relevance"
                                 width="100px"
+                                sortable="true"
                                 caption="msg://msgPercentOfRelevance">
                         </column>
                     </columns>
@@ -108,6 +119,10 @@
                               editable="false"
                               height="100%"/>
             </vbox>
+            <hbox spacing="true">
+                <checkBox id="useLocationCheckBox"
+                          caption="msg://msgUseLocation"/>
+            </hbox>
         </vbox>
     </layout>
 </window>

@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.openposition;
+package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
@@ -9,15 +9,14 @@ import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @UiController("itpearls_FindSuitable")
 @UiDescriptor("find-suitable.xml")
@@ -49,7 +48,11 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     @Inject
     private Notifications notifications;
     @Inject
-    private ProgressBar progressBar;
+    private CheckBox useLocationCheckBox;
+    @Inject
+    private Label<String> cityOfResidenceLabel;
+    @Inject
+    private CollectionContainer<OpenPosition> openPositionDc;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -63,7 +66,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                     .parameter("candidate", jobCandidate)
                     .view("candidateCV-view")
                     .list();
-            if(candidateCVs.size() == 1) {
+            if (candidateCVs.size() == 1) {
                 checkSkillFromJD(candidateCVs.get(0), clickableTextRendererClickEvent.getItem());
             }
         });
@@ -73,11 +76,10 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
     public void checkSkillFromJD(CandidateCV candidateCV, OpenPosition item) {
         List<SkillTree> skillTrees = rescanResume(candidateCV);
-//        String inputText = Jsoup.parse(candidateCV.getToVacancy().getComment()).text();
         String inputText = Jsoup.parse(item.getComment()).text();
         List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
 
-        if(candidateCV.getToVacancy() != null) {
+        if (candidateCV.getToVacancy() != null) {
             SkillTreeBrowseCheck s = screenBuilders.screen(this)
                     .withScreenClass(SkillTreeBrowseCheck.class)
                     .build();
@@ -96,7 +98,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     }
 
     public List<SkillTree> rescanResume(CandidateCV candidateCV) {
-        if(candidateCV.getTextCV() != null) {
+        if (candidateCV.getTextCV() != null) {
             String inputText = Jsoup.parse(candidateCV.getTextCV()).text();
             List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
 
@@ -125,23 +127,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                     st = pdfParserService.parseSkillTree(candidateCV.getTextCV());
                 }
 
-                if(st != null) {
-                    try {
-                        for (SkillTree cv : st) {
-                            for (SkillTree cv1 : skillTrees) {
-                                if (cv1.equals(cv)) {
-                                    st.remove(cv);
-                                }
-                            }
-                        }
-                    } catch (ConcurrentModificationException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (st != null) {
-                    skillTrees.addAll(st);
-                }
+                skillTrees.addAll(st);
             }
         }
 
@@ -167,8 +153,6 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-//    @Subscribe
-//    public void onBeforeShow(BeforeShowEvent event) {
         if (jobCandidate != null) {
             if (jobCandidate.getPersonPosition() != null) {
                 openPositionDl.setParameter("positionType", this.jobCandidate.getPersonPosition());
@@ -181,14 +165,31 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
         openPositionDl.load();
 
-        candidateNameLabel.setValue(jobCandidate.getFullName());
+        candidateNameLabel.setValue(jobCandidate.getFullName() + ", ");
         positionNameLabel.setValue(jobCandidate.getPersonPosition().getPositionEnName()
                 + " / "
-                + jobCandidate.getPersonPosition().getPositionRuName());
+                + jobCandidate.getPersonPosition().getPositionRuName()
+                + ", ");
+        cityOfResidenceLabel.setValue(jobCandidate.getCityOfResidence().getCityRuName());
 
         jobPositionLookupPickerField.setValue(jobCandidate.getPersonPosition());
 
-        progressBar.setVisible(false);
+        useLocationCheckBox.setValue(false);
+        setCityPosition();
+    }
+
+    @Subscribe("useLocationCheckBox")
+    public void onUseLocationCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        setCityPosition();
+    }
+
+    private void setCityPosition() {
+        if (useLocationCheckBox.getValue()) {
+            openPositionDl.setParameter("cityPosition", jobCandidate.getCityOfResidence());
+        } else {
+            openPositionDl.removeParameter("cityPosition");
+        }
+        openPositionDl.load();
     }
 
     public void setJobCandidate(JobCandidate jobCandidate) {
@@ -214,7 +215,11 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
     @Subscribe("suitableCheckDataGrid")
     public void onSuitableCheckDataGridSelection(DataGrid.SelectionEvent<OpenPosition> event) {
-        commentCVRichTextArea.setValue(suitableCheckDataGrid.getSingleSelected().getComment());
+        if (suitableCheckDataGrid.getSingleSelected() != null)
+            commentCVRichTextArea
+                    .setValue(suitableCheckDataGrid
+                            .getSingleSelected()
+                            .getComment());
     }
 
     @Install(to = "suitableCheckDataGrid.vacansyName", subject = "descriptionProvider")
@@ -224,7 +229,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
     @Install(to = "suitableCheckDataGrid.projectName", subject = "descriptionProvider")
     private String suitableCheckDataGridProjectNameDescriptionProvider(OpenPosition openPosition) {
-        if(openPosition.getProjectName() != null) {
+        if (openPosition.getProjectName() != null) {
             if (openPosition.getProjectName().getProjectDescription() != null) {
                 return Jsoup.parse(openPosition.getProjectName().getProjectDescription()).text();
             }
@@ -270,4 +275,77 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
         return null;
     }
+
+    @Install(to = "suitableCheckDataGrid.cityPosition", subject = "descriptionProvider")
+    private String suitableCheckDataGridCityPositionDescriptionProvider(OpenPosition openPosition) {
+        if (openPosition.getCityPosition() != null) {
+            if (openPosition.getCityPosition().getCityRuName() != null) {
+                return openPosition.getCityPosition().getCityRuName();
+            }
+        }
+
+        return null;
+    }
+
+    @Install(to = "suitableCheckDataGrid.remoteWork", subject = "columnGenerator")
+    private Icons.Icon suitableCheckDataGridRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String returnIcon = "";
+
+        switch ((int) event.getItem().getRemoteWork()) {
+            case 1:
+                return CubaIcon.PLUS_CIRCLE;
+            case 0:
+                return CubaIcon.MINUS_CIRCLE;
+            case 2:
+                return CubaIcon.QUESTION_CIRCLE;
+            default:
+                return CubaIcon.QUESTION_CIRCLE;
+        }
+    }
+
+    @Install(to = "suitableCheckDataGrid.remoteWork", subject = "descriptionProvider")
+    private String suitableCheckDataGridRemoteWorkDescriptionProvider(OpenPosition openPosition) {
+        String retStr = "";
+
+        switch (openPosition.getRemoteWork()) {
+            case 0:
+                retStr = "Работа в офисе";
+                break;
+            case 1:
+                retStr = "Удаленная работа";
+                break;
+            case 2:
+                retStr = "Частично удаленная (офис + удаленная)";
+                break;
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "suitableCheckDataGrid.remoteWork", subject = "styleProvider")
+    private String suitableCheckDataGridRemoteWorkStyleProvider(OpenPosition openPosition) {
+        String style = "";
+
+        switch (openPosition.getRemoteWork()) {
+            case 1:
+                style = (openPosition.getRemoteComment() == null ?
+                        "open-position-pic-center-large-green" :
+                        "open-position-pic-center-large-lime");
+                break;
+            case 2:
+                style = (openPosition.getRemoteComment() == null ?
+                        "open-position-pic-center-large-red" :
+                        "open-position-pic-center-large-maroon");
+                break;
+            case 0:
+                style = (openPosition.getRemoteComment() == null ?
+                        "open-position-pic-center-large-yellow" :
+                        "open-position-pic-center-large-orange");
+                break;
+        }
+
+        return style;
+    }
+    
+    
 }

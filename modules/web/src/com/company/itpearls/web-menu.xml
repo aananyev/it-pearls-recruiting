@@ -3,8 +3,6 @@
     <menu id="application-calendars" insertBefore="application-hunting">
         <item screen="itpearls_Interviewcalendar" icon="CALENDAR"/>
         <item screen="itpearls_WeekInterviewCalendar" icon="CALENDAR"/>
-        <item screen="itpearls_SelectPersonPositions" caption="mainMsg://menu_config.itpearls_SelectPersonPositions"/>
-        <item screen="itpearls_FindSuitable" caption="mainMsg://menu_config.itpearls_FindSuitable"/>
     </menu>
     <menu id="application-hunting" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
@@ -38,7 +36,6 @@
         <item screen="itpearls_FileType.browse" icon="FILE_TEXT_O"/>
         <item screen="itpearls_SomeFiles.browse" icon="COPY"/>
         <item screen="itpearls_SocialNetworkType.browse"/>
-        <item screen="itpearls_IteractionRequirement.browse"/>
     </menu>
     <item screen="itpearls_CheckCandidate.browse" insertAfter="application-hadbook" openType="DIALOG"/>
 </menu-config>
