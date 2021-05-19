@@ -1,9 +1,9 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
-import com.company.itpearls.entity.City;
-import com.company.itpearls.entity.RecrutiesTasks;
+import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
@@ -17,7 +17,6 @@ import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
@@ -82,6 +81,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private LookupField remoteWorkLookupField;
     @Inject
     private Events events;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -309,11 +310,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return style;
     }
 
-/*    @Install(to = "openPositionsTable.openClose", subject = "styleProvider")
-    private String openPositionsTableOpenCloseStyleProvider(OpenPosition openPosition) {
-        return "open-position-pic-center";
-    }*/
-
     @Install(to = "openPositionsTable.numberPosition", subject = "styleProvider")
     private String openPositionsTableNumberPositionStyleProvider(OpenPosition openPosition) {
         return "open-position-pic-center";
@@ -421,6 +417,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         buttonsHBox.setSpacing(true);
         buttonsHBox.setAlignment(Component.Alignment.TOP_RIGHT);
 
+        Component suitableButton = findSuitableButton(entity);
         Component fragmentTitle = createTitleFragment(entity);
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
@@ -437,6 +434,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         buttonsHBox.add(priorityField);
         buttonsHBox.add(openCloseButton);
         buttonsHBox.add(editButton);
+
+        if (suitableButton != null)
+            buttonsHBox.add(suitableButton);
+
         buttonsHBox.add(closeButton);
 
         titleBox.add(fragmentTitle);
@@ -451,6 +452,37 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         mainLayout.add(fragment);
 
         return mainLayout;
+    }
+
+
+    private Component findSuitableButton(OpenPosition entity) {
+
+        if (dataManager.load(CandidateCV.class)
+                .query("select e from itpearls_CandidateCV e where e.resumePosition = :resumePosition")
+                .parameter("resumePosition", entity.getPositionType())
+                .list().size() != 0) {
+
+            Button suitableButton = uiComponents.create(Button.class);
+            suitableButton.setDescription("Подобрать резюме по вакансии");
+            suitableButton.setIconFromSet(CubaIcon.EYE);
+
+            suitableButton.setAction(new BaseAction("Suggestjobcandidate")
+                    .withHandler(actionPerformedEvent -> {
+                        Suggestjobcandidate suggestjobcandidate = screens.create(Suggestjobcandidate.class);
+                        suggestjobcandidate.setOpenPosition(entity);
+
+                        suggestjobcandidate.show();
+                    }));
+
+            return suitableButton;
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ")
+                    .withDescription("Нет кандидатов в базе для выбранной вакансии")
+                    .show();
+
+            return null;
+        }
     }
 
     private Component createOpenCloseButton(OpenPosition entity) {

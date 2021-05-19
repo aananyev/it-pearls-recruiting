@@ -33,13 +33,17 @@ public class PdfParserServiceBean implements PdfParserService {
                 .list();
 
         for (SkillTree specialisation : competitions) {
-            if (inputText.toLowerCase().contains(specialisation.getSkillName().toLowerCase())) {
-                candidateSkills.add(specialisation);
+            try {
+                if (inputText.toLowerCase().contains(specialisation.getSkillName().toLowerCase())) {
+                    candidateSkills.add(specialisation);
 
-                if (specialisation.getSkillTree() != null &&
-                        checkHiLevel(candidateSkills, specialisation.getSkillTree())) {
-                    candidateSkills.add(specialisation.getSkillTree());
+                    if (specialisation.getSkillTree() != null &&
+                            checkHiLevel(candidateSkills, specialisation.getSkillTree())) {
+                        candidateSkills.add(specialisation.getSkillTree());
+                    }
                 }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
         }
 

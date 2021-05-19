@@ -146,7 +146,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
             }
         }
 
-        Integer percent = counter * 100 / skillTrees.size();
+        Integer percent = counter * 100 / skillTreesJD.size();
 
         return percent.toString() + "%";
     }
