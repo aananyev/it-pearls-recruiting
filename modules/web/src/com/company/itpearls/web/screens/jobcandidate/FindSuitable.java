@@ -16,7 +16,9 @@ import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @UiController("itpearls_FindSuitable")
 @UiDescriptor("find-suitable.xml")
@@ -137,6 +139,15 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
             skillTreesJD = pdfParserService.parseSkillTree(event.getItem().getComment());
         }
 
+
+        Set<SkillTree> stJD = new HashSet<>(skillTreesJD);
+        skillTreesJD.clear();
+        skillTreesJD.addAll(stJD);
+
+        Set<SkillTree> stCV = new HashSet<>(skillTrees);
+        skillTrees.clear();
+        skillTrees.addAll(stCV);
+
         Integer counter = 0;
 
         for (SkillTree skillTree : skillTreesJD) {
@@ -146,9 +157,9 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
             }
         }
 
-        Integer percent = counter * 100 / skillTreesJD.size();
+        String percent = (skillTreesJD.size() != 0 ? String.valueOf(counter * 100 / skillTreesJD.size()) : "...") + "%";
 
-        return percent.toString() + "%";
+        return percent;
     }
 
     @Subscribe

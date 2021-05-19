@@ -10,7 +10,9 @@ import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @UiController("itpearls_SuggestJobCandidate")
 @UiDescriptor("SuggestJobCandidate.xml")
@@ -31,6 +33,8 @@ public class Suggestjobcandidate extends Screen {
     private CheckBox useLocationCheckBox;
     @Inject
     private RichTextArea candidateCVRichTextArea;
+    @Inject
+    private Label<String> vacancyNameLabel;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -59,16 +63,17 @@ public class Suggestjobcandidate extends Screen {
 
         jobPositionLookupPickerField.setValue(this.openPosition.getPositionType());
         useLocationCheckBox.setValue(false);
+        vacancyNameLabel.setValue(openPosition.getVacansyName());
 
         setCityPosition();
     }
 
     private void setCityPosition() {
-            if (useLocationCheckBox.getValue()) {
-                candidateCVDl.setParameter("cityOfResidence", openPosition.getCityPosition());
-            } else {
-                candidateCVDl.removeParameter("cityOfResidence");
-            }
+        if (useLocationCheckBox.getValue()) {
+            candidateCVDl.setParameter("cityOfResidence", openPosition.getCityPosition());
+        } else {
+            candidateCVDl.removeParameter("cityOfResidence");
+        }
         candidateCVDl.load();
     }
 
@@ -84,6 +89,14 @@ public class Suggestjobcandidate extends Screen {
 
         Integer counter = 0;
 
+        Set<SkillTree> setSt = new HashSet<>(skillsFromJD);
+        skillsFromJD.clear();
+        skillsFromJD.addAll(setSt);
+
+        Set<SkillTree> setStCV = new HashSet<>(skillsFromCV);
+        skillsFromCV.clear();
+        skillsFromCV.addAll(setStCV);
+
         for (SkillTree skillTree : skillsFromJD) {
             for (SkillTree st : skillsFromCV) {
                 if (skillTree.equals(st))
@@ -91,9 +104,10 @@ public class Suggestjobcandidate extends Screen {
             }
         }
 
-        Integer percent = counter * 100 / skillsFromJD.size();
+        String percent = (skillsFromJD.size() != 0 ? String.valueOf(counter * 100 / skillsFromJD.size()) : "...") + "%";
 
-        return percent.toString() + "%";
+
+        return percent;
 
     }
 
@@ -121,16 +135,16 @@ public class Suggestjobcandidate extends Screen {
 
     @Subscribe("suitableCheckDataGrid")
     public void onSuitableCheckDataGridSelection(DataGrid.SelectionEvent<CandidateCV> event) {
-        if(suitableCheckDataGrid.getSingleSelected() != null) {
-            suitableCheckDataGrid
+        if (suitableCheckDataGrid.getSingleSelected() != null) {
+            candidateCVRichTextArea.setValue(suitableCheckDataGrid
                     .getSingleSelected()
-                    .getTextCV();
+                    .getTextCV());
         }
     }
 
     @Install(to = "suitableCheckDataGrid.toVacancy", subject = "descriptionProvider")
     private String suitableCheckDataGridToVacancyDescriptionProvider(CandidateCV candidateCV) {
-        if(candidateCV.getToVacancy() != null) {
+        if (candidateCV.getToVacancy() != null) {
             return candidateCV.getToVacancy().getVacansyName();
         } else {
             return null;

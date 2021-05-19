@@ -16,7 +16,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service(PdfParserService.NAME)
 public class PdfParserServiceBean implements PdfParserService {
@@ -46,6 +48,10 @@ public class PdfParserServiceBean implements PdfParserService {
                 e.printStackTrace();
             }
         }
+        // удаляем дубликаты
+/*        Set<SkillTree> st = new HashSet<>(candidateSkills);
+        candidateSkills.clear();
+        candidateSkills.addAll(st); */
 
         return candidateSkills;
     }

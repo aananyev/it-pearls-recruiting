@@ -29,8 +29,7 @@ import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @UiController("itpearls_CandidateCV.edit")
 @UiDescriptor("candidate-cv-edit.xml")
@@ -434,6 +433,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
             List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
 
+/*            Set<SkillTree> st = new HashSet<>(skillTrees);
+            skillTrees.clear();
+            skillTrees.addAll(st); */
+
             getEditedEntity().setSkillTree(skillTrees);
 
             return skillTrees;
@@ -446,6 +449,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         List<SkillTree> skillTrees = rescanResume();
         String inputText = Jsoup.parse(candidateCVFieldOpenPosition.getValue().getComment()).text();
         List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
+
+        Set<SkillTree> st = new HashSet<>(skillTreesFromJD);
+        skillTreesFromJD.clear();
+        skillTrees.addAll(st);
 
         if(candidateCVFieldOpenPosition.getValue() != null) {
             SkillTreeBrowseCheck s = screenBuilders.screen(this)
