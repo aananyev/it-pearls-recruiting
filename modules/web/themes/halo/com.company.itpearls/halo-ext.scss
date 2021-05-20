@@ -1,6 +1,5 @@
 /* Define your theme modifications inside next mixin */
 
-
 @mixin date_iteraction_button($color) {
     background: $color;
     font_size: large;
@@ -51,6 +50,20 @@
   .#{$primary-stylename}.v-disabled .#{$primary-stylename}-star {
     cursor: default;
   }
+}
+
+.quote-border {
+        border-radius: 5px;
+        box-shadow: 0 0 0 5px gray, 0 0 10px blue;
+        font-family: 'Yanone Kaffeesatz', sans-serif;
+        font-size: medium;
+        font-weight: bold;
+        text-align: center;
+        word-wrap: break-word;
+        padding:10px;
+        margin: 10px;
+        white-space: normal;
+        background-color: white;
 }
 
 .round-photo {

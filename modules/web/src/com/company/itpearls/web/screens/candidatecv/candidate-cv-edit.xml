@@ -46,17 +46,30 @@
                 modal="true"
                 width="800"/>
     <layout expand="tabSheet" spacing="true" height="100%" width="100%">
-        <groupBox spacing="true">
-            <grid spacing="true">
-                <columns count="4"/>
-                <rows>
-                    <row>
-                        <label id="iteractionListLabelCandidate" stylename="h2"
-                               align="MIDDLE_LEFT" dataContainer="candidateCVDc" property="candidate"/>
-                        <label id="labelLastRecrutier"/>
-                    </row>
-                </rows>
-            </grid>
+        <groupBox spacing="true" expand="candidateLabel">
+            <hbox id="candidateLabel"
+                  spacing="true"
+                  width="100%">
+                <vbox box.expandRatio="4"
+                      align="MIDDLE_LEFT">
+                    <label id="iteractionListLabelCandidate" stylename="h2"
+                           align="TOP_LEFT"
+                           dataContainer="candidateCVDc" property="candidate"/>
+                    <label id="labelLastRecrutier"/>
+                </vbox>
+                <hbox box.expandRatio="3"
+                      stylename="quote-border"
+                      width="100%"
+                      expand="quoteTextArea">
+                    <textArea id="quoteTextArea"
+                              align="MIDDLE_LEFT"
+                              width="100%"
+                              editable="false"
+                              rows="3"
+                              height="100%"
+                              stylename="quote-border"/>
+                </hbox>
+            </hbox>
         </groupBox>
         <tabSheet id="tabSheet"
                   stylename="framed">

@@ -79,6 +79,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private TreeDataGrid<SkillTree> skillTreesTable;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private TextArea<String> quoteTextArea;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -193,6 +197,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             itpearlsCVLink.setVisible(false);
         }
 
+        quoteTextArea.setValue(messageBundle.getMessage("msgSalesCV"));
     }
 
     @Subscribe
@@ -433,9 +438,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
             List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
 
-/*            Set<SkillTree> st = new HashSet<>(skillTrees);
+            Set<SkillTree> st = new HashSet<>(skillTrees);
             skillTrees.clear();
-            skillTrees.addAll(st); */
+            skillTrees.addAll(st);
 
             getEditedEntity().setSkillTree(skillTrees);
 
@@ -450,9 +455,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         String inputText = Jsoup.parse(candidateCVFieldOpenPosition.getValue().getComment()).text();
         List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
 
-        Set<SkillTree> st = new HashSet<>(skillTreesFromJD);
+/*        Set<SkillTree> st = new HashSet<>(skillTreesFromJD);
         skillTreesFromJD.clear();
-        skillTrees.addAll(st);
+        skillTrees.addAll(st); */
 
         if(candidateCVFieldOpenPosition.getValue() != null) {
             SkillTreeBrowseCheck s = screenBuilders.screen(this)

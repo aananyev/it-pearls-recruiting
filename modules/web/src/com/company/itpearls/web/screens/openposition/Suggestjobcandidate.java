@@ -2,8 +2,13 @@ package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.ProgressBarScreen;
+import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -40,6 +45,15 @@ public class Suggestjobcandidate extends Screen {
     private Label<String> vacancyNameLabel;
     @Inject
     private UserSession userSession;
+    @Inject
+    private Screens screens;
+    @Inject
+    private CollectionContainer<CandidateCV> candidateCVDc;
+
+    ProgressBarScreen progressBarScreen = null;
+    Integer countGenerator = 0;
+    @Inject
+    private ScreenBuilders screenBuilders;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -50,6 +64,7 @@ public class Suggestjobcandidate extends Screen {
         });
 
         suitableCheckDataGrid.getColumn("relevance").setRenderer(suitableCheckDataGridRelevanceRenderer);
+
     }
 
     @Subscribe
@@ -66,11 +81,20 @@ public class Suggestjobcandidate extends Screen {
 
         candidateCVDl.load();
 
+        progressBarScreen = screens.create(ProgressBarScreen.class);
+        progressBarScreen.setMaxValue(candidateCVDc.getItems().size());
+        progressBarScreen.show();
+
         jobPositionLookupPickerField.setValue(this.openPosition.getPositionType());
         useLocationCheckBox.setValue(false);
         vacancyNameLabel.setValue(openPosition.getVacansyName());
 
         setCityPosition();
+    }
+
+    @Subscribe
+    public void onBeforeShow1(BeforeShowEvent event) {
+        progressBarScreen.closeWithDefaultAction();
     }
 
     private void setCityPosition() {
@@ -111,6 +135,7 @@ public class Suggestjobcandidate extends Screen {
 
         String percent = (skillsFromJD.size() != 0 ? String.valueOf(counter * 100 / skillsFromJD.size()) : "...") + "%";
 
+        progressBarScreen.setProgress(++countGenerator);
 
         return percent;
 
@@ -172,6 +197,16 @@ public class Suggestjobcandidate extends Screen {
             return null;
     }
 
+    @Subscribe("useLocationCheckBox")
+    public void onUseLocationCheckBoxValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
+        if(event.getValue())
+        candidateCVDl.setParameter("cityOfResidence", openPosition.getCityPosition());
+        else
+            candidateCVDl.removeParameter("cityOfResidence");
+
+        candidateCVDl.load();
+    }
+
     @Install(to = "suitableCheckDataGrid.lastIteraction", subject = "columnGenerator")
     private String suitableCheckDataGridLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         IteractionList iteractionList = getLastIteraction(event.getItem().getCandidate());
@@ -223,4 +258,20 @@ public class Suggestjobcandidate extends Screen {
             return null;
         }
     }
+
+    @Subscribe("suitableCheckDataGrid")
+    public void onSuitableCheckDataGridItemClick(DataGrid.ItemClickEvent<CandidateCV> event) {
+        screenBuilders.editor(JobCandidate.class, this)
+                .withScreenClass(JobCandidateEdit.class)
+                .editEntity(dataManager.load(JobCandidate.class)
+                        .query("select e from itpearls_JobCandidate e where e = :candidate")
+                        .view("jobCandidate-view")
+                        .parameter("candidate", event.getItem().getCandidate())
+                        .one()
+                )
+                .build()
+                .show();
+    }
+
+
 }

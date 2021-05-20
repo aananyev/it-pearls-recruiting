@@ -147,8 +147,8 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
+    <dialogMode height="7500"
+                width="1200"/>
     <layout expand="forExpand"
             spacing="true">
         <groupBox spacing="true">

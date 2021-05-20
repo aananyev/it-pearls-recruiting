@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://progressBarScreen.caption"
+        messagesPack="com.company.itpearls.web.screens">
+    <dialogMode height="100"
+                width="800"
+                forceDialog="true"/>
+    <layout>
+        <progressBar id="progressBar" width="100%"/>
+    </layout>
+</window>

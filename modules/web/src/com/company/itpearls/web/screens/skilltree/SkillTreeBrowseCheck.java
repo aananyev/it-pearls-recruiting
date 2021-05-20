@@ -12,7 +12,9 @@ import org.jsoup.Jsoup;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @UiController("itpearls_SkillTreeCheck.browse")
 @UiDescriptor("skill-tree-browse-check.xml")
@@ -39,21 +41,21 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
         }
 
         if (candidateCVSkills.size() != 0 && openPositionSkills.size() != 0) {
+            Set<SkillTree> stJD = new HashSet<>(openPositionSkills);
+            Set<SkillTree> stOP = new HashSet<>(candidateCVSkills);
 
             int countForPercent = 0;
 
-            for (SkillTree op : openPositionSkills) {
-                for(SkillTree opCand : candidateCVSkills) {
+            for (SkillTree op : stJD) {
+                for(SkillTree opCand : stOP) {
                     if(op.equals(opCand)) {
                         countForPercent ++;
                     }
                 }
             }
 
-            int percentInt = countForPercent * 100 / openPositionSkills.size();
+            int percentInt = countForPercent * 100 / stJD.size();
 
-//            int percentInt = (openPositionSkills.size() > 0 ?
-//                    (candidateCVSkills.size() *100 / openPositionSkills.size()) : 0);
             percent.setValue("Процент релевантности: " + percentInt + "%");
         }
     }

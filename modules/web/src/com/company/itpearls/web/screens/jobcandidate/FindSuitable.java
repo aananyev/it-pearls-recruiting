@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
@@ -357,6 +358,16 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
         return style;
     }
+
+    @Subscribe("suitableCheckDataGrid")
+    public void onSuitableCheckDataGridItemClick(DataGrid.ItemClickEvent<OpenPosition> event) {
+        screenBuilders.editor(OpenPosition.class, this)
+                .withScreenClass(OpenPositionEdit.class)
+                .editEntity(event.getItem())
+                .build()
+                .show();
+    }
+    
     
     
 }
