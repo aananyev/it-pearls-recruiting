@@ -90,13 +90,15 @@
                     <columns>
                         <column id="candidate"
                                 property="candidate.fullName"
+                                sort="ASCENDING"
                                 width="180px"/>
                         <column id="resumePosition"
                                 property="resumePosition"
-                                width="180px"/>
+                                caption="msg://msgPosition"
+                                width="150px"/>
                         <column id="toVacancy"
                                 property="toVacancy"
-                                width="300px"/>
+                                width="270px"/>
                         <column id="cityOfResidence"
                                 property="candidate.cityOfResidence"
                                 width="120px"/>
@@ -105,7 +107,13 @@
                                 sortable="true"
                                 caption="msg://msgPercentOfRelevance">
                         </column>
+                        <column id="lastIteraction"
+                                width="80px"
+                                caption="msg://msgLastIteraction">
+                            <htmlRenderer nullRepresentation="null"/>
+                        </column>
                     </columns>
+                    <rowsCount autoLoad="true"/>
                 </dataGrid>
                 <richTextArea id="candidateCVRichTextArea"
                               box.expandRatio="1"

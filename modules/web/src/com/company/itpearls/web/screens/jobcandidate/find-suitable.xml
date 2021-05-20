@@ -112,6 +112,7 @@
                                 caption="msg://msgPercentOfRelevance">
                         </column>
                     </columns>
+                    <rowsCount autoLoad="true"/>
                 </dataGrid>
                 <richTextArea id="commentCVRichTextArea"
                               box.expandRatio="1"

@@ -6,10 +6,13 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +38,8 @@ public class Suggestjobcandidate extends Screen {
     private RichTextArea candidateCVRichTextArea;
     @Inject
     private Label<String> vacancyNameLabel;
+    @Inject
+    private UserSession userSession;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -140,6 +145,74 @@ public class Suggestjobcandidate extends Screen {
                     .getSingleSelected()
                     .getTextCV());
         }
+    }
+
+
+    private IteractionList getLastIteraction(JobCandidate jobCandidate) {
+        if (jobCandidate.getIteractionList() != null) {
+            IteractionList maxIteraction = null;
+
+            List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
+                    .query("select e from itpearls_IteractionList e where e.candidate = :candidate")
+                    .view("iteractionList-view")
+                    .parameter("candidate", jobCandidate)
+                    .list();
+
+            for (IteractionList iteractionList : iteractionLists) {
+                if (maxIteraction == null)
+                    maxIteraction = iteractionList;
+
+                if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
+                    maxIteraction = iteractionList;
+                }
+            }
+
+            return maxIteraction;
+        } else
+            return null;
+    }
+
+    @Install(to = "suitableCheckDataGrid.lastIteraction", subject = "columnGenerator")
+    private String suitableCheckDataGridLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        IteractionList iteractionList = getLastIteraction(event.getItem().getCandidate());
+
+        String date = null;
+
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy").format(iteractionList.getDateIteraction());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        String retStr = "";
+
+        if (iteractionList != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(iteractionList.getDateIteraction());
+            calendar.add(Calendar.MONTH, 1);
+
+            Calendar calendar1 = Calendar.getInstance();
+
+            if (calendar.after(calendar1)) {
+                if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                    retStr = "button_table_red";
+                } else {
+                    retStr = "button_table_yellow";
+                }
+            } else {
+                retStr = "button_table_green";
+            }
+        } else {
+            retStr = "button_table_white";
+        }
+
+        return
+                "<div class=\"" +
+                        retStr
+                        + "\">" +
+                        date
+                        + "</div>"
+                ;
     }
 
     @Install(to = "suitableCheckDataGrid.toVacancy", subject = "descriptionProvider")

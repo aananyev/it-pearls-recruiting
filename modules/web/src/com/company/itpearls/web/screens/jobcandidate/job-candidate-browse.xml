@@ -55,9 +55,6 @@ order by e.secondName, e.firstName]]>
                         width="50px">
                     <iconRenderer/>
                 </column>
-                <!--                <column id="freeCandidate" caption="msg://msgFreeCandidate" width="60px" maximumWidth="60px">
-                                    <iconRenderer/>
-                                </column> -->
                 <column id="fileImageFace"
                         property="fileImageFace"
                         width="60px">
