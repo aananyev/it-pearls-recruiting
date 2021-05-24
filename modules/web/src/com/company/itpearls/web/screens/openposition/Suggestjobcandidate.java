@@ -1,8 +1,9 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.core.PdfParserService;
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
-import com.company.itpearls.web.screens.ProgressBarScreen;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -16,7 +17,6 @@ import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -50,20 +50,26 @@ public class Suggestjobcandidate extends Screen {
     @Inject
     private CollectionContainer<CandidateCV> candidateCVDc;
 
-    ProgressBarScreen progressBarScreen = null;
     Integer countGenerator = 0;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private Button viewCandidateButton;
+    @Inject
+    private Button viewCandidateCVButton;
 
     @Subscribe
     public void onInit(InitEvent event) {
-        DataGrid.ButtonRenderer<OpenPosition> suitableCheckDataGridRelevanceRenderer = suitableCheckDataGrid
+/*        DataGrid.ButtonRenderer<OpenPosition> suitableCheckDataGridRelevanceRenderer = suitableCheckDataGrid
                 .createRenderer(DataGrid.ButtonRenderer.class);
 
         suitableCheckDataGridRelevanceRenderer.setRendererClickListener(clickableTextRendererClickEvent -> {
         });
 
-        suitableCheckDataGrid.getColumn("relevance").setRenderer(suitableCheckDataGridRelevanceRenderer);
+        suitableCheckDataGrid.getColumn("relevance").setRenderer(suitableCheckDataGridRelevanceRenderer);*/
+
 
     }
 
@@ -81,20 +87,28 @@ public class Suggestjobcandidate extends Screen {
 
         candidateCVDl.load();
 
-        progressBarScreen = screens.create(ProgressBarScreen.class);
-        progressBarScreen.setMaxValue(candidateCVDc.getItems().size());
-        progressBarScreen.show();
-
         jobPositionLookupPickerField.setValue(this.openPosition.getPositionType());
         useLocationCheckBox.setValue(false);
         vacancyNameLabel.setValue(openPosition.getVacansyName());
 
         setCityPosition();
+        setButtoncActions();
     }
 
-    @Subscribe
-    public void onBeforeShow1(BeforeShowEvent event) {
-        progressBarScreen.closeWithDefaultAction();
+    private void setButtoncActions() {
+
+        viewCandidateButton.setEnabled(false);
+        viewCandidateCVButton.setEnabled(false);
+
+        suitableCheckDataGrid.addSelectionListener( e -> {
+            if(e.getSelected() == null) {
+                viewCandidateButton.setEnabled(false);
+                viewCandidateCVButton.setEnabled(false);
+            } else {
+                viewCandidateCVButton.setEnabled(true);
+                viewCandidateButton.setEnabled(true);
+            }
+        });
     }
 
     private void setCityPosition() {
@@ -111,9 +125,8 @@ public class Suggestjobcandidate extends Screen {
         setCityPosition();
     }
 
-    @Install(to = "suitableCheckDataGrid.relevance", subject = "columnGenerator")
-    private String suitableCheckDataGridRelevanceColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        List<SkillTree> skillsFromCV = pdfParserService.parseSkillTree(event.getItem().getTextCV());
+    private String getRelevancePercent(CandidateCV candidateCV) {
+        List<SkillTree> skillsFromCV = pdfParserService.parseSkillTree(candidateCV.getTextCV());
         List<SkillTree> skillsFromJD = pdfParserService.parseSkillTree(openPosition.getComment());
 
         Integer counter = 0;
@@ -135,11 +148,14 @@ public class Suggestjobcandidate extends Screen {
 
         String percent = (skillsFromJD.size() != 0 ? String.valueOf(counter * 100 / skillsFromJD.size()) : "...") + "%";
 
-        progressBarScreen.setProgress(++countGenerator);
-
         return percent;
 
     }
+
+/*    @Install(to = "suitableCheckDataGrid.relevance", subject = "columnGenerator")
+    private String suitableCheckDataGridRelevanceColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        return getRelevancePercent(event.getItem());
+    } */
 
     public List<SkillTree> rescanResume(CandidateCV candidateCV) {
         if (candidateCV.getTextCV() != null) {
@@ -259,7 +275,115 @@ public class Suggestjobcandidate extends Screen {
         }
     }
 
-    @Subscribe("suitableCheckDataGrid")
+    public void viewCandidateButton() {
+        screenBuilders.editor(JobCandidate.class, this)
+                .withScreenClass(JobCandidateEdit.class)
+                .editEntity(dataManager.load(JobCandidate.class)
+                        .query("select e from itpearls_JobCandidate e where e = :candidate")
+                        .view("jobCandidate-view")
+                        .parameter("candidate", suitableCheckDataGrid.getSingleSelected().getCandidate())
+                        .one()
+                )
+                .build()
+                .show();
+    }
+
+    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
+    private String suitableCheckDataGridBlackRectangleColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        String percentStr = getRelevancePercent(event.getItem());
+
+        int percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
+
+        if(percent < 5) {
+            return "";
+        }
+
+        if(percent < 20) {
+            return starsAndOtherService.setBlackRectangle(1);
+        }
+
+        if(percent < 45) {
+            return starsAndOtherService.setBlackRectangle(2);
+        }
+
+        if (percent < 60) {
+            return starsAndOtherService.setBlackRectangle(3);
+        }
+
+
+        if (percent < 85) {
+            return starsAndOtherService.setBlackRectangle(4);
+        }
+
+        return starsAndOtherService.setBlackRectangle(5);
+    }
+
+    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "descriptionProvider")
+    private String suitableCheckDataGridBlackRectangleDescriptionProvider(CandidateCV candidateCV) {
+        return getRelevancePercent(candidateCV);
+    }
+
+    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "styleProvider")
+    private String suitableCheckDataGridBlackRectangleStyleProvider(CandidateCV candidateCV) {
+        String percentStr = getRelevancePercent(candidateCV);
+
+        int percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
+
+        if(percent < 5) {
+            return "";
+        }
+
+        if(percent < 20) {
+            return "rating_battery_red_1";
+        }
+
+        if(percent < 45) {
+            return "rating_battery_orange_2";
+        }
+
+        if (percent < 60) {
+            return "rating_battery_yellow_3";
+        }
+
+
+        if (percent < 85) {
+            return "rating_battery_green_4";
+        }
+
+        return "rating_battery_blue_5";
+    }
+
+    @Install(to = "suitableCheckDataGrid.lastIteraction", subject = "descriptionProvider")
+    private String suitableCheckDataGridLastIteractionDescriptionProvider(CandidateCV candidateCV) {
+        IteractionList iteractionList = getLastIteraction(candidateCV.getCandidate());
+        String recrutierName = "";
+
+        if (iteractionList != null) {
+            if (iteractionList.getRecrutier() != null) {
+                if (iteractionList.getRecrutier().getName() != null) {
+                    recrutierName = iteractionList.getRecrutier().getName();
+                }
+            }
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        return iteractionList != null ?
+                simpleDateFormat.format(iteractionList.getDateIteraction())
+                        + "\n"
+                        + iteractionList.getIteractionType().getIterationName()
+                        + "\n"
+                        + recrutierName : "";
+    }
+
+    public void viewCandidateCVButton() {
+        screenBuilders.editor(CandidateCV.class, this)
+                .withScreenClass(CandidateCVEdit.class)
+                .editEntity(suitableCheckDataGrid.getSingleSelected())
+                .build();
+    }
+
+/*    @Subscribe("suitableCheckDataGrid")
     public void onSuitableCheckDataGridItemClick(DataGrid.ItemClickEvent<CandidateCV> event) {
         screenBuilders.editor(JobCandidate.class, this)
                 .withScreenClass(JobCandidateEdit.class)
@@ -271,7 +395,6 @@ public class Suggestjobcandidate extends Screen {
                 )
                 .build()
                 .show();
-    }
-
+    } */
 
 }

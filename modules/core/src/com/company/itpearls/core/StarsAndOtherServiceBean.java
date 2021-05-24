@@ -18,4 +18,15 @@ public class StarsAndOtherServiceBean implements StarsAndOtherService {
 
         return retStr;
     }
+
+    @Override
+    public String setBlackRectangle(int blackRenctangle) {
+        String retStr = "";
+
+        for (int i = 1; i <= blackRenctangle; i++) {
+                retStr = retStr + "\u25AE";
+        }
+
+        return retStr;
+    }
 }

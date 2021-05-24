@@ -81,6 +81,14 @@
                   spacing="true"
                   expand="candidateCVRichTextArea"
                   height="100%">
+                <buttonsPanel>
+                    <button id="viewCandidateButton"
+                            caption="msg://msgViewCandidate"
+                            invoke="viewCandidateButton"/>
+                    <button id="viewCandidateCVButton"
+                            caption="msg://msgViewCandidateCV"
+                            invoke="viewCandidateCVButton"/>
+                </buttonsPanel>
                 <dataGrid id="suitableCheckDataGrid"
                           columnResizeMode="ANIMATED"
                           box.expandRatio="1"
@@ -102,10 +110,15 @@
                         <column id="cityOfResidence"
                                 property="candidate.cityOfResidence"
                                 width="120px"/>
-                        <column id="relevance"
+<!--                        <column id="relevance"
                                 width="80px"
                                 sortable="true"
                                 caption="msg://msgPercentOfRelevance">
+                        </column> -->
+                        <column id="blackRectangle"
+                                width="80px"
+                                caption="msg://msgPercentOfRelevance">
+                            <htmlRenderer nullRepresentation="null"/>
                         </column>
                         <column id="lastIteraction"
                                 width="80px"

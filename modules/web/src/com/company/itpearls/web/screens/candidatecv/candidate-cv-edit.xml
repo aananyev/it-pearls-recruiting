@@ -44,20 +44,27 @@
     </data>
     <dialogMode height="800"
                 modal="true"
-                width="800"/>
+                width="1200"/>
     <layout expand="tabSheet" spacing="true" height="100%" width="100%">
         <groupBox spacing="true" expand="candidateLabel">
             <hbox id="candidateLabel"
                   spacing="true"
                   width="100%">
                 <vbox box.expandRatio="4"
-                      align="MIDDLE_LEFT">
-                    <label id="iteractionListLabelCandidate" stylename="h2"
+                      align="TOP_LEFT">
+                    <label id="iteractionListLabelCandidate"
+                           stylename="h2"
                            align="TOP_LEFT"
-                           dataContainer="candidateCVDc" property="candidate"/>
+                           dataContainer="candidateCVDc"
+                           property="candidate.fullName"/>
+                    <label id="iteractionListLabelPosition"
+                           stylename="h3"
+                           align="TOP_LEFT"
+                           dataContainer="candidateCVDc"
+                           property="candidate.personPosition"/>
                     <label id="labelLastRecrutier"/>
                 </vbox>
-                <hbox box.expandRatio="3"
+                <hbox box.expandRatio="4"
                       stylename="quote-border"
                       width="100%"
                       expand="quoteTextArea">
