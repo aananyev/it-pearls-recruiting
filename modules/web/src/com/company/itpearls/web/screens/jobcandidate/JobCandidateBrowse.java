@@ -23,6 +23,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
@@ -478,6 +479,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
         Component newIteraction = createNewIteractionButton(entity);
+        Component copyLastIteraction = createButtonCopyLastIteraction(entity);
         Component listIteraction = createListIteractionButton(entity);
 
         Label<String> cvLabelHeader = uiComponents.create(Label.NAME);
@@ -500,6 +502,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         headerBox.add(iteractionLabelHeader);
         headerBox.add(newIteraction);
+        headerBox.add(copyLastIteraction);
         headerBox.add(listIteraction);
 
         headerBox.add(cvLabelHeader);
@@ -531,6 +534,47 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         mainLayout.expand(fragment);
 
         return mainLayout;
+    }
+
+    private Component createButtonCopyLastIteraction(JobCandidate entity) {
+        Button lastIteractionButton = uiComponents.create(Button.class);
+        lastIteractionButton.setDescription("Копировать последнее взаимодействие с кандидатом");
+        lastIteractionButton.setIconFromSet(CubaIcon.COPY);
+
+
+        lastIteractionButton.setAction(new BaseAction("copyLastIteraction")
+                .withHandler(actionPerformedEvent -> {
+                    screenBuilders.editor(IteractionList.class, this)
+                            .newEntity()
+                            .withScreenClass(IteractionListEdit.class)
+                            .withInitializer(iteractionList1 -> {
+                                iteractionList1.setCandidate(jobCandidatesTable.getSingleSelected());
+
+                                BigDecimal maxNumberIteraction = BigDecimal.ZERO;
+                                IteractionList lastIteraction = null;
+
+                                for (IteractionList list : jobCandidatesTable
+                                        .getSingleSelected()
+                                        .getIteractionList()) {
+                                    if (maxNumberIteraction.compareTo(list.getNumberIteraction()) < 0) {
+                                        maxNumberIteraction = list.getNumberIteraction();
+                                        lastIteraction = list;
+                                    }
+                                }
+
+                                if (lastIteraction != null) {
+                                    iteractionList1.setVacancy(lastIteraction.getVacancy());
+                                    iteractionList1.setNumberIteraction(dataManager.loadValue(
+                                            "select max(e.numberIteraction) " +
+                                                    "from itpearls_IteractionList e", BigDecimal.class)
+                                            .one().add(BigDecimal.ONE));
+                                }
+                            })
+                            .build()
+                            .show();
+                }));
+
+        return lastIteractionButton;
     }
 
     private Component findSuitableButton(JobCandidate entity) {

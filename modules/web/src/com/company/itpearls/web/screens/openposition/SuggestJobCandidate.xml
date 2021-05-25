@@ -88,6 +88,9 @@
                     <button id="viewCandidateCVButton"
                             caption="msg://msgViewCandidateCV"
                             invoke="viewCandidateCVButton"/>
+                    <button id="viewCandidateCheckSkillsButton"
+                            caption="msg://msgCheckSkills"
+                            invoke="viewCandidateCheckSkillsButton"/>
                 </buttonsPanel>
                 <dataGrid id="suitableCheckDataGrid"
                           columnResizeMode="ANIMATED"
@@ -118,7 +121,7 @@
                         <column id="blackRectangle"
                                 width="80px"
                                 caption="msg://msgPercentOfRelevance">
-                            <htmlRenderer nullRepresentation="null"/>
+                            <componentRenderer/>
                         </column>
                         <column id="lastIteraction"
                                 width="80px"

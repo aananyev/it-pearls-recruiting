@@ -5,9 +5,11 @@ import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
+import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -59,6 +61,10 @@ public class Suggestjobcandidate extends Screen {
     private Button viewCandidateButton;
     @Inject
     private Button viewCandidateCVButton;
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private Button viewCandidateCheckSkillsButton;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -99,14 +105,17 @@ public class Suggestjobcandidate extends Screen {
 
         viewCandidateButton.setEnabled(false);
         viewCandidateCVButton.setEnabled(false);
+        viewCandidateCheckSkillsButton.setEnabled(false);
 
         suitableCheckDataGrid.addSelectionListener( e -> {
             if(e.getSelected() == null) {
                 viewCandidateButton.setEnabled(false);
                 viewCandidateCVButton.setEnabled(false);
+                viewCandidateCheckSkillsButton.setEnabled(false);
             } else {
                 viewCandidateCVButton.setEnabled(true);
                 viewCandidateButton.setEnabled(true);
+                viewCandidateCheckSkillsButton.setEnabled(true);
             }
         });
     }
@@ -287,7 +296,7 @@ public class Suggestjobcandidate extends Screen {
                 .build()
                 .show();
     }
-
+/*
     @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
     private String suitableCheckDataGridBlackRectangleColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         String percentStr = getRelevancePercent(event.getItem());
@@ -317,12 +326,47 @@ public class Suggestjobcandidate extends Screen {
 
         return starsAndOtherService.setBlackRectangle(5);
     }
-
+*/
     @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "descriptionProvider")
     private String suitableCheckDataGridBlackRectangleDescriptionProvider(CandidateCV candidateCV) {
         return getRelevancePercent(candidateCV);
     }
 
+    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
+    private Component suitableCheckDataGridBlackRectangleColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        Label labelBattery = uiComponents.create(Label.NAME);
+
+        String percentStr = getRelevancePercent(event.getItem());
+
+        int percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
+
+        if(percent < 5) {
+            labelBattery.setStyleName("");
+        }
+
+        if(percent < 20) {
+            labelBattery.setStyleName("rating_battery_red_1");
+        }
+
+        if(percent < 45) {
+            labelBattery.setStyleName("rating_battery_orange_2");
+        }
+
+        if (percent < 60) {
+            labelBattery.setStyleName("rating_battery_yellow_3");
+        }
+
+
+        if (percent < 85) {
+            labelBattery.setStyleName("rating_battery_green_4");
+        } else {
+            labelBattery.setStyleName("rating_battery_blue_5");
+        }
+
+
+        return labelBattery;
+    }
+/*
     @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "styleProvider")
     private String suitableCheckDataGridBlackRectangleStyleProvider(CandidateCV candidateCV) {
         String percentStr = getRelevancePercent(candidateCV);
@@ -352,6 +396,7 @@ public class Suggestjobcandidate extends Screen {
 
         return "rating_battery_blue_5";
     }
+*/
 
     @Install(to = "suitableCheckDataGrid.lastIteraction", subject = "descriptionProvider")
     private String suitableCheckDataGridLastIteractionDescriptionProvider(CandidateCV candidateCV) {
@@ -383,18 +428,23 @@ public class Suggestjobcandidate extends Screen {
                 .build();
     }
 
-/*    @Subscribe("suitableCheckDataGrid")
-    public void onSuitableCheckDataGridItemClick(DataGrid.ItemClickEvent<CandidateCV> event) {
-        screenBuilders.editor(JobCandidate.class, this)
-                .withScreenClass(JobCandidateEdit.class)
-                .editEntity(dataManager.load(JobCandidate.class)
-                        .query("select e from itpearls_JobCandidate e where e = :candidate")
-                        .view("jobCandidate-view")
-                        .parameter("candidate", event.getItem().getCandidate())
-                        .one()
-                )
-                .build()
-                .show();
-    } */
+    public void viewCandidateCheckSkillsButton() {
+        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(suitableCheckDataGrid
+                .getSingleSelected()
+                .getTextCV());
+        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(suitableCheckDataGrid
+                .getSingleSelected()
+                .getToVacancy()
+                .getComment());
 
+        SkillTreeBrowseCheck s = screenBuilders.screen(this)
+                .withScreenClass(SkillTreeBrowseCheck.class)
+                .build();
+
+        s.setCandidateCVSkills(skillTrees);
+        s.setOpenPositionSkills(skillTreesFromJD);
+        s.setTitle(suitableCheckDataGrid.getSingleSelected().getToVacancy().getVacansyName());
+
+        s.show();
+    }
 }

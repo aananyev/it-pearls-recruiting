@@ -150,14 +150,14 @@
 @mixin rating_battery_round($color_p) {
     font-size: large;
     font-weight: bold;
-/*    font-family: bold;
-    width: 20px;
+    font-family: bold;
+/*    width: 20px;
+    line-height: 17px;
     height: 20px; */
     border: 1px solid;
     border-radius: 3px;
-    line-height: 17px;
     color: $color_p;
-    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
+/*    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333;  Параметры теней */
 }
 
 @mixin rating_candidate_round($color_p) {
@@ -175,33 +175,37 @@
     box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
 }
 
-
 .rating_battery_red_1 {
     @include rating_battery_round(red);
+    content: '\25AE\25AF\25AF\25AF\25AF';
 /*    color: red;
     box-shadow: 0 0 0 2px red, 0 0 13px #333; Параметры теней */
 }
 
 .rating_battery_orange_2 {
     @include rating_battery_round(orange);
+    content: '\25AE\25AE\25AF\25AF\25AF';
 /*    color: orange;
     box-shadow: 0 0 0 2px orange, 0 0 13px #333; Параметры теней */
 }
 
 .rating_battery_yellow_3 {
     @include rating_battery_round(yellow);
+    content: '\25AE\25AE\25AE\25AF\25AF';
 /*    color: yellow;
     box-shadow: 0 0 0 2px yellow, 0 0 13px #333; Параметры теней */
 }
 
 .rating_battery_green_4 {
-    @include rating_round(green);
+    @include rating_battery_round(green);
+    content: '\25AE\25AE\25AE\25AE\25AF';
 /*    color: green;
     box-shadow: 0 0 0 2px green, 0 0 13px #333; Параметры теней */
 }
 
 .rating_battery_blue_5 {
     @include rating_round(blue);
+    content: '\25AE\25AE\25AE\25AE\25AE';
 /*    color: blue;
     box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
 }
