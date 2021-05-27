@@ -23,8 +23,6 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     @Inject
     private Button copyLastIteractionButton;
     @Inject
-    private Button createNewIteractionButton;
-    @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
     private DataGrid<IteractionList> iteractionListsTable;

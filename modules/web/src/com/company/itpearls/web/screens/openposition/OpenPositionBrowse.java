@@ -83,6 +83,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Events events;
     @Inject
     private Notifications notifications;
+    @Inject
+    private Button buttonSubscribe;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -464,6 +466,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             Button suitableButton = uiComponents.create(Button.class);
             suitableButton.setDescription("Подобрать резюме по вакансии");
+            suitableButton.setCaption("Подобрать");
             suitableButton.setIconFromSet(CubaIcon.EYE);
 
             suitableButton.setAction(new BaseAction("Suggestjobcandidate")
@@ -488,6 +491,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Component createOpenCloseButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
 
+        retButton.setIcon(!entity.getOpenClose() ? CubaIcon.REMOVE_ACTION.iconName() : CubaIcon.ADD_ACTION.iconName());
+
         retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
         retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
 
@@ -498,7 +503,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
             retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
 
-            if(!entity.getOpenClose()) {
+            if (!entity.getOpenClose()) {
                 events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
                         entity.getVacansyName()));
             } else {
@@ -645,8 +650,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             events.publish(new UiNotificationEvent(this,
                     "Изменен приоритет вакансии <b>"
-                    + openPositionsTable.getSingleSelected().getVacansyName()
-                    + "</b> на <b>" + result.get() + "</b>"));
+                            + openPositionsTable.getSingleSelected().getVacansyName()
+                            + "</b> на <b>" + result.get() + "</b>"));
         });
 
         retField.setLookupSelectHandler(e -> {
@@ -694,7 +699,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Component createEditButton(OpenPosition entity) {
         Button editButton = uiComponents.create(Button.class);
         editButton.setCaption("Изменить");
-        editButton.setIcon("EDIT");
+        editButton.setIcon(CubaIcon.EDIT.iconName());
         editButton.setAlignment(Component.Alignment.TOP_RIGHT);
 
         BaseAction editAction = new BaseAction("edit")
@@ -782,6 +787,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setUrgentlyPositios(3);
 
         clearUrgentFilter();
+        setButtonsEnableDisable();
+    }
+
+    private void setButtonsEnableDisable() {
+        buttonSubscribe.setEnabled(false);
+
+        openPositionsTable.addSelectionListener(e -> {
+            if (e.getSelected() == null) {
+                buttonSubscribe.setEnabled(false);
+            } else {
+                buttonSubscribe.setEnabled(true);
+            }
+        });
     }
 
     @Subscribe("remoteWorkLookupField")
@@ -950,8 +968,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private void setSubcribersFilter() {
         if (checkBoxOnlyMySubscribe.getValue()) {
-            openPositionsDl.setParameter("recrutier", userSession.getUser());
-            openPositionsDl.setParameter("nowDate", new Date());
+//            openPositionsDl.setParameter("recrutier", userSession.getUser());
+//            openPositionsDl.setParameter("nowDate", new Date());
+
+            openPositionsDl.removeParameter("recrutier");
+            openPositionsDl.removeParameter("nowDate");
         } else {
             openPositionsDl.removeParameter("recrutier");
             openPositionsDl.removeParameter("nowDate");
@@ -1139,7 +1160,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         int retInt;
 
-        if(getTemplateLetter(event.getItem()) != "") {
+        if (getTemplateLetter(event.getItem()) != "") {
             retInt = 1;
         } else {
             retInt = 0;
@@ -1151,20 +1172,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String getTemplateLetter(OpenPosition openPosition) {
         String retStr = "";
 
-        if(openPosition.getTemplateLetter() != null &&
-            openPosition.getTemplateLetter() != "") {
+        if (openPosition.getTemplateLetter() != null &&
+                openPosition.getTemplateLetter() != "") {
             retStr = "Требования к вакансии: " + Jsoup.parse(openPosition.getTemplateLetter()).text() + "\n\n";
         }
 
-        if(openPosition.getProjectName().getTemplateLetter() != null &&
-            openPosition.getProjectName().getTemplateLetter() != "") {
+        if (openPosition.getProjectName().getTemplateLetter() != null &&
+                openPosition.getProjectName().getTemplateLetter() != "") {
             retStr = retStr +
                     "Требования проекта: " +
                     Jsoup.parse(openPosition.getProjectName().getTemplateLetter()).text() + "\n\n";
         }
 
-        if(openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != null &&
-            openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != "") {
+        if (openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != null &&
+                openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != "") {
             retStr = retStr +
                     "Требования департамента: " +
                     Jsoup.parse(openPosition.getProjectName().getProjectDepartment().getTemplateLetter()).text();
@@ -1190,7 +1211,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         return style;
     }
-
 
 
 }

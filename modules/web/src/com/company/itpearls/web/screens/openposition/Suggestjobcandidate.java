@@ -377,7 +377,7 @@ public class Suggestjobcandidate extends Screen {
         }
 
         if (percent < 5) {
-            labelBattery.setStyleName("");
+            labelBattery.setStyleName("rating_battery_grey_0");
         } else if (percent < 20) {
             labelBattery.setStyleName("rating_battery_red_1");
         } else if (percent < 45) {

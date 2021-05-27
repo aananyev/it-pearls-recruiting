@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.recrutiestasks" icon="TASKS">
     <data>
-        <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-rtasks-view">
+        <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition"
+                    view="openPosition-rtasks-view">
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
@@ -18,7 +18,12 @@
                   view="recrutiesTasks-view">
             <loader id="recrutiesTasksDl" entityId=""/>
         </instance>
-        <collection id="usersDc" class="com.haulmont.cuba.security.entity.User" view="_local">
+        <collection id="usersDc" class="com.haulmont.cuba.security.entity.User">
+            <view extends="_local">
+                <property name="name"/>
+                <property name="group" view="_local"/>
+                <property name="active"/>
+            </view>
             <loader id="usersDl">
                 <query>
                     <![CDATA[select e from sec$User e
@@ -27,48 +32,59 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
+    <dialogMode height="400"
                 width="800"/>
     <layout spacing="true"
             width="100%">
-        <form id="form"
-              dataContainer="recrutiesTasksDc"
-              width="100%">
-            <column width="250px">
-                <dateField id="startDateField"
-                           property="startDate"/>
-                <dateField id="endDateField"
-                           property="endDate"/>
-                <lookupPickerField id="recrutiesTasksFieldUser"
-                                   dataContainer="recrutiesTasksDc"
-                                   optionsContainer="usersDc"
-                                   width="50%"
-                                   property="reacrutier">
-                    <actions>
-                        <action id="lookup"
-                                type="picker_lookup"/>
-                        <action id="open"
-                                type="picker_open"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="openPositionField"
-                                   width="50%"
-                                   dataContainer="recrutiesTasksDc"
-                                   optionsContainer="openPositionsDc"
-                                   property="openPosition">
-                    <actions>
-                        <action id="lookup"
-                                type="picker_lookup"/>
-                        <action id="open"
-                                type="picker_open"/>
-                    </actions>
-                </lookupPickerField>
-                <checkBox id="recrutiesTasksSubscribeCheckBox"
-                          dataContainer="recrutiesTasksDc"
-                          property="subscribe"
-                          caption="msg://msgSubscribe"/>
-            </column>
-        </form>
+        <hbox spacing="true" width="100%">
+            <dateField id="startDateField"
+                       caption="msg://msgStartDate"
+                       dataContainer="recrutiesTasksDc"
+                       property="startDate"/>
+            <dateField id="endDateField"
+                       caption="msg://msgEndDate"
+                       dataContainer="recrutiesTasksDc"
+                       property="endDate"/>
+        </hbox>
+        <hbox spacing="true"
+              width="100%"
+              expand="recrutiesTasksFieldUser">
+            <lookupPickerField id="recrutiesTasksFieldUser"
+                               dataContainer="recrutiesTasksDc"
+                               optionsContainer="usersDc"
+                               caption="msg://msgRecrutier"
+                               align="BOTTOM_LEFT"
+                               width="50%"
+                               property="reacrutier">
+                <actions>
+                    <action id="lookup"
+                            type="picker_lookup"/>
+                    <action id="open"
+                            type="picker_open"/>
+                </actions>
+            </lookupPickerField>
+            <checkBox id="allSubscribeCheckBox"
+                      caption="msg://msgAllSubscribe"
+                      align="BOTTOM_LEFT"
+                      description="msg://msgAllSubscribeDescription"/>
+        </hbox>
+        <lookupPickerField id="openPositionField"
+                           width="50%"
+                           caption="msg://msgOpenPosition"
+                           dataContainer="recrutiesTasksDc"
+                           optionsContainer="openPositionsDc"
+                           property="openPosition">
+            <actions>
+                <action id="lookup"
+                        type="picker_lookup"/>
+                <action id="open"
+                        type="picker_open"/>
+            </actions>
+        </lookupPickerField>
+        <checkBox id="recrutiesTasksSubscribeCheckBox"
+                  dataContainer="recrutiesTasksDc"
+                  property="subscribe"
+                  caption="msg://msgSubscribe"/>
         <hbox id="editActions"
               spacing="true"
               align="BOTTOM_RIGHT"

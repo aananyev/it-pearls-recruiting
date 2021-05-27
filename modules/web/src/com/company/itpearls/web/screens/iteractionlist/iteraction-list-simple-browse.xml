@@ -68,10 +68,6 @@
                         icon="COPY"/>
             </buttonsPanel>
         </dataGrid>
-        <hbox id="lookupActions" spacing="true" visible="false">
-            <button action="lookupSelectAction"/>
-            <button action="lookupCancelAction"/>
-        </hbox>
         <button action="lookupCancelAction"
                 align="BOTTOM_RIGHT"/>
     </layout>

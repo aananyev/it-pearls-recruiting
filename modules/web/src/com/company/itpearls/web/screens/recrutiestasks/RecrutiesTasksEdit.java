@@ -1,15 +1,17 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.service.GetUserRoleService;
 import com.company.itpearls.service.SubscribeDateService;
 import com.haulmont.cuba.core.app.EmailService;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.EmailInfo;
-import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.core.config.ConfigStorageCommon;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.RecrutiesTasks;
@@ -67,31 +69,41 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private GetRoleService getRoleService;
 
     private String MANAGER = "Manager";
+    @Inject
+    private CheckBox allSubscribeCheckBox;
+    @Inject
+    private ConfigStorageCommon configStorageCommon;
+    @Inject
+    private GetUserRoleService getUserRoleService;
+    @Inject
+    private CollectionContainer<User> usersDc;
+    @Inject
+    private Events events;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
-        getEditedEntity().setEndDate( subscribeDateService.dateOfNextMonday() );
+        getEditedEntity().setEndDate(subscribeDateService.dateOfNextMonday());
 
         commitChanges();
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        String  role = "Researcher";
+        String role = "Researcher";
 
-        if( openPosition != null ) {
-            openPositionField.setValue( openPosition );
+        if (openPosition != null) {
+            openPositionField.setValue(openPosition);
         }
 
-        startDateField.setValue( new Date() );
+        startDateField.setValue(new Date());
 
         // если роль - ресерчер, то автоматически вставить себя
         Collection<String> s = userSessionSource.getUserSession().getRoles();
         // установить поле рекрутера
-        if( s.contains(role) || !fromOpenPosition ) {
+        if (s.contains(role) || !fromOpenPosition) {
             recrutiesTasksFieldUser.setValue(userSession.getUser());
 
-            if( s.contains(role) )
+            if (s.contains(role))
                 recrutiesTasksFieldUser.setEnabled(false);
             else
                 recrutiesTasksFieldUser.setEnabled(true);
@@ -103,21 +115,77 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                     .atStartOfDay(ZoneId.systemDefault())
                     .toInstant();
 
-            Date legacyDate = Date.from( instant );
+            Date legacyDate = Date.from(instant);
 
-            endDateField.setValue( legacyDate );
+            endDateField.setValue(legacyDate);
+        }
+
+        allSubscribeCheckBoxSet();
+    }
+
+    private String GROUP_RESEARCHING_NAME ="Ресерчинг";
+    private String GROUP_RECRUTING_NAME = "Рекрутинг";
+    private String GROUP_MANAGEMENT_NAME = "Менеджмент";
+    private String GROUP_ACCOUNTING_NAME = "Аккаунтинг";
+
+    private void allSubscribeCheckBoxSet() {
+        if (userSession.getUser().getGroup().getName().equals(GROUP_ACCOUNTING_NAME) ||
+                userSession.getUser().getGroup().getName().equals(GROUP_MANAGEMENT_NAME)) {
+            allSubscribeCheckBox.setVisible(true);
+
+            allSubscribeCheckBox.addValueChangeListener(e -> {
+                if (e.getValue() != null) {
+                    recrutiesTasksFieldUser.setEnabled(!e.getValue());
+                }
+            });
+        } else {
+            allSubscribeCheckBox.setVisible(false);
+        }
+
+        allSubscribeCheckBox.setValue(false);
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges1(BeforeCommitChangesEvent event) {
+        if (allSubscribeCheckBox.getValue()) {
+            //подписать всех
+
+            for(User user : usersDc.getItems()) {
+                if(!user.equals(userSession.getUser())
+                        && user.getActive()
+                        && (user.getGroup().getName().equals(GROUP_RESEARCHING_NAME) ||
+                        user.getGroup().getName().equals(GROUP_RECRUTING_NAME))) {
+                    CommitContext commitContext = new CommitContext();
+
+                    RecrutiesTasks recrutiesTasks = new RecrutiesTasks();
+
+                    recrutiesTasks.setStartDate(startDateField.getValue());
+                    recrutiesTasks.setEndDate(endDateField.getValue());
+                    recrutiesTasks.setReacrutier(user);
+                    recrutiesTasks.setSubscribe(false);
+                    recrutiesTasks.setOpenPosition(openPositionField.getValue());
+
+                    commitContext.addInstanceToCommit(recrutiesTasks);
+                    dataManager.commit(commitContext);
+
+                    events.publish(new UiNotificationEvent(this, "Подписан рекрутер "
+                            + user.getName()
+                            + " на вакансию "
+                            + openPositionField.getValue().getVacansyName()));
+                }
+            }
         }
     }
 
     @Subscribe
     public void onBeforeCommitChanges(AfterCommitChangesEvent event) {
-        getEditedEntity().setRecrutierName( userSession.getUser().getName() );
+        getEditedEntity().setRecrutierName(userSession.getUser().getName());
 
         // если были изменения, то послать оповещение по почте
         sendMessage();
 
         // если не установлен флаг подписки, то установить его в false
-        if( recrutiesTasksSubscribeCheckBox.getValue() == null ) {
+        if (recrutiesTasksSubscribeCheckBox.getValue() == null) {
             dialogs.createOptionDialog()
                     .withCaption("Warning")
                     .withMessage("Подписатся на изменение вакансии?")
@@ -134,7 +202,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         }
     }
 
-    private static DateFormatSymbols ruDateFormatSymbols = new DateFormatSymbols(){
+    private static DateFormatSymbols ruDateFormatSymbols = new DateFormatSymbols() {
 
         @Override
         public String[] getMonths() {
@@ -146,15 +214,15 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
     private Boolean checkSubscribePosition() {
         Integer countSubscrine = dataManager
-                .loadValue( "select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
-                    "where e.reacrutier = :recrutier and " +
-                    "e.openPosition = :openPosition and " +
-                    ":nowDate between e.startDate and e.endDate", Integer.class )
+                .loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
+                        "where e.reacrutier = :recrutier and " +
+                        "e.openPosition = :openPosition and " +
+                        ":nowDate between e.startDate and e.endDate", Integer.class)
 //                .parameter( "recrutier", recrutiesTasksFieldUser.getValue() )
-                .parameter( "recrutier", getEditedEntity().getReacrutier() )
-                .parameter( "openPosition", getEditedEntity().getOpenPosition() )
+                .parameter("recrutier", getEditedEntity().getReacrutier())
+                .parameter("openPosition", getEditedEntity().getOpenPosition())
 //                .parameter( "openPosition", openPositionField.getValue() )
-                .parameter( "nowDate", new Date() )
+                .parameter("nowDate", new Date())
                 .one();
 
         // если нет соответствия, значит нет еще подписки, значит можно подписаться,
@@ -165,20 +233,20 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         notifications.create(Notifications.NotificationType.TRAY)
-                .withCaption("Подписка" )
-                .withDescription( recrutiesTasksFieldUser.getValue().getName() +
+                .withCaption("Подписка")
+                .withDescription(recrutiesTasksFieldUser.getValue().getName() +
                         " подписан на позицию: \n" +
-                        openPositionField.getValue().getVacansyName() )
+                        openPositionField.getValue().getVacansyName())
                 .show();
-        
+
     }
 
     public void sendMessage() {
         String email = recrutiesTasksDc.getItem().getReacrutier().getEmail();
 
-        EmailInfo   emailInfo;
+        EmailInfo emailInfo;
 
-        if(email != null) {
+        if (email != null) {
             if (!email.isEmpty()) {
                 emailInfo = new EmailInfo(email,
                         "Вы подписаны на вакансию " + openPositionField.getValue().getVacansyName(),
@@ -199,26 +267,26 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         }
     }
 
-    public void setOpenPosition( OpenPosition op ) {
-      this.openPosition = op;
-      fromOpenPosition = true;
+    public void setOpenPosition(OpenPosition op) {
+        this.openPosition = op;
+        fromOpenPosition = true;
     }
 
     @Subscribe("okButton")
     private void onOkButtonClick(Button.ClickEvent event) {
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat( "dd MMMM YYYY",
-                ruDateFormatSymbols );
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM YYYY",
+                ruDateFormatSymbols);
 
         // проверить, а вдруг вы уже подписаны на эту вакансию?
-        if( checkSubscribePosition() && !getRoleService.isUserRoles( userSession.getUser(), MANAGER)) {
+        if (checkSubscribePosition() && !getRoleService.isUserRoles(userSession.getUser(), MANAGER)) {
             dialogs.createMessageDialog()
-                    .withCaption( "Внимание" )
-                    .withModal( true )
-                    .withMessage( "Вы уже подписаны на вакансию " + openPositionField.getValue().getVacansyName() +
-                            "\n c " + dateFormat.format( startDateField.getValue() ) +
-                            " по " + dateFormat.format( endDateField.getValue() ) )
-                   .show();
+                    .withCaption("Внимание")
+                    .withModal(true)
+                    .withMessage("Вы уже подписаны на вакансию " + openPositionField.getValue().getVacansyName() +
+                            "\n c " + dateFormat.format(startDateField.getValue()) +
+                            " по " + dateFormat.format(endDateField.getValue()))
+                    .show();
 
             close(WINDOW_DISCARD_AND_CLOSE_ACTION);
         } else

@@ -4,6 +4,7 @@ import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -481,6 +482,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Component newIteraction = createNewIteractionButton(entity);
         Component copyLastIteraction = createButtonCopyLastIteraction(entity);
         Component listIteraction = createListIteractionButton(entity);
+        Component cvSimpleBrowseButton = createCvSimpleBrowse(entity);
 
         Label<String> cvLabelHeader = uiComponents.create(Label.NAME);
         cvLabelHeader.setHtmlEnabled(true);
@@ -508,6 +510,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         headerBox.add(cvLabelHeader);
         headerBox.add(newResumeButton);
         headerBox.add(editLastResumeButton);
+        headerBox.add(cvSimpleBrowseButton);
 //        headerBox.add(getLetterButton);
 //        headerBox.add(getCVButton);
 
@@ -534,6 +537,27 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         mainLayout.expand(fragment);
 
         return mainLayout;
+    }
+
+    private Component createCvSimpleBrowse(JobCandidate entity) {
+        Button cvSimpleBrowseButton = uiComponents.create(Button.class);
+        cvSimpleBrowseButton.setDescription("Копировать резюме кандидата");
+        cvSimpleBrowseButton.setIconFromSet(CubaIcon.FILE_TEXT_O);
+
+        createDataComponentsResume();
+
+        cvSimpleBrowseButton.setAction(new BaseAction("candidateCV")
+                .withHandler(actionPerformedEvent -> {
+                    candidateCVDl.setParameter("candidate", entity);
+                    candidateCVDl.load();
+
+                    CandidateCVSimpleBrowse candidateCVSimpleBrowse = screens.create(CandidateCVSimpleBrowse.class);
+                    candidateCVSimpleBrowse.setSelectedCandidate(entity);
+                    screens.show(candidateCVSimpleBrowse);
+
+                }));
+
+        return cvSimpleBrowseButton;
     }
 
     private Component createButtonCopyLastIteraction(JobCandidate entity) {

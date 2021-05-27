@@ -176,10 +176,10 @@
                         action="openPositionsTable.edit"/>
                 <button id="removeBtn"
                         action="openPositionsTable.remove"/>
-                <button id="buttonSubscribe"
-                        caption="msg://mshSubscibe"
-                        invoke="subscribePosition"
-                        icon="BELL"/>
+                    <button id="buttonSubscribe"
+                            caption="msg://mshSubscibe"
+                            invoke="subscribePosition"
+                            icon="BELL"/>
                 <button id="groupSubscribe"
                         caption="msg://msgGroupSubscribe"
                         invoke="groupSubscribe"
