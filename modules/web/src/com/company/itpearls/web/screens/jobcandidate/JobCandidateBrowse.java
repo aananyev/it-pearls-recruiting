@@ -1142,50 +1142,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             return "";
     }
 
-/*    private String avgRating(JobCandidate item) {
-        float countRating = 0,
-                sumRating = 0;
-
-        for (IteractionList iteractionList : item.getIteractionList()) {
-            if (iteractionList.getRating() != null) {
-                countRating++;
-                sumRating = sumRating + iteractionList.getRating();
-            }
-        }
-
-        if (countRating != 0) {
-            float avgRating = (float) sumRating / (float) countRating + 1;
-            BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
-            String ratingStr = String.valueOf(avgRatiog.setScale(1));
-
-
-            String style = "";
-
-            switch (ratingStr.substring(0, 1)) {
-                case "1":
-                    style = "<div class=\"rating_red_1\">";
-                    break;
-                case "2":
-                    style = "<div class=\"rating_orange_2\">";
-                    break;
-                case "3":
-                    style = "<div class=\"rating_yellow_3\">";
-                    break;
-                case "4":
-                    style = "<div class=\"rating_green_4\">";
-                    break;
-                case "5":
-                    style = "<div class=\"rating_blue_5\">";
-                    break;
-            }
-
-//            return style + ratingStr + "</div>";
-            return starsAndOtherService.setStars(avgRatiog.intValue());
-        } else {
-            return "";
-        }
-    } */
-
     @Install(to = "jobCandidatesTable.rating", subject = "styleProvider")
     private String jobCandidatesTableRatingStyleProvider(JobCandidate jobCandidate) {
         String retStr = "rating";

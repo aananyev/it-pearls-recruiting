@@ -56,13 +56,23 @@
             </columns>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button action="lookupCancelAction"
-                        align="BOTTOM_RIGHT"/>
+                <button id="createNewIteractionButton"
+                        invoke="createNewIteractionButton"
+                        caption="msg://msgCreateNewIteraction"
+                        description="msg://msgCreateNewIteraction"
+                        icon="CREATE_ACTION"/>
+                <button id="copyLastIteractionButton"
+                        invoke="copyLastIteractionButton"
+                        caption="msg://msgCopyLastIteraction"
+                        description="msg://msgCopyLastIteraction"
+                        icon="COPY"/>
             </buttonsPanel>
         </dataGrid>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>
+        <button action="lookupCancelAction"
+                align="BOTTOM_RIGHT"/>
     </layout>
 </window>

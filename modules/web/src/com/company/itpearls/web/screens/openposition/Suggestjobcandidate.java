@@ -19,10 +19,8 @@ import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @UiController("itpearls_SuggestJobCandidate")
 @UiDescriptor("SuggestJobCandidate.xml")
@@ -65,6 +63,8 @@ public class Suggestjobcandidate extends Screen {
     private UiComponents uiComponents;
     @Inject
     private Button viewCandidateCheckSkillsButton;
+    @Inject
+    private CollectionContainer<Position> personPositionDc;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -99,6 +99,16 @@ public class Suggestjobcandidate extends Screen {
 
         setCityPosition();
         setButtoncActions();
+        setJobPositionLookupPickerField();
+    }
+
+    private void setJobPositionLookupPickerField() {
+        try {
+            List<Position> positionsList = personPositionDc.getItems();
+            jobPositionLookupPickerField.setOptionsList(positionsList);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setButtoncActions() {
@@ -107,8 +117,8 @@ public class Suggestjobcandidate extends Screen {
         viewCandidateCVButton.setEnabled(false);
         viewCandidateCheckSkillsButton.setEnabled(false);
 
-        suitableCheckDataGrid.addSelectionListener( e -> {
-            if(e.getSelected() == null) {
+        suitableCheckDataGrid.addSelectionListener(e -> {
+            if (e.getSelected() == null) {
                 viewCandidateButton.setEnabled(false);
                 viewCandidateCVButton.setEnabled(false);
                 viewCandidateCheckSkillsButton.setEnabled(false);
@@ -135,23 +145,39 @@ public class Suggestjobcandidate extends Screen {
     }
 
     private String getRelevancePercent(CandidateCV candidateCV) {
-        List<SkillTree> skillsFromCV = pdfParserService.parseSkillTree(candidateCV.getTextCV());
-        List<SkillTree> skillsFromJD = pdfParserService.parseSkillTree(openPosition.getComment());
+        List<SkillTree> skillsFromCV = new ArrayList<>();
+        List<SkillTree> skillsFromJD = new ArrayList<>();
+
+        if (candidateCV.getTextCV() != null) {
+            skillsFromCV = pdfParserService.parseSkillTree(candidateCV.getTextCV());
+        }
+
+        if (openPosition.getComment() != null) {
+            skillsFromJD = pdfParserService.parseSkillTree(openPosition.getComment());
+        }
 
         Integer counter = 0;
 
-        Set<SkillTree> setSt = new HashSet<>(skillsFromJD);
-        skillsFromJD.clear();
-        skillsFromJD.addAll(setSt);
+        if(skillsFromJD.size() != 0) {
+            Set<SkillTree> setSt = new HashSet<>(skillsFromJD);
+            skillsFromJD.clear();
+            skillsFromJD.addAll(setSt);
+        }
 
-        Set<SkillTree> setStCV = new HashSet<>(skillsFromCV);
-        skillsFromCV.clear();
-        skillsFromCV.addAll(setStCV);
+        if(skillsFromCV.size() != 0) {
+            Set<SkillTree> setStCV = new HashSet<>(skillsFromCV);
+            skillsFromCV.clear();
+            skillsFromCV.addAll(setStCV);
+        }
 
-        for (SkillTree skillTree : skillsFromJD) {
-            for (SkillTree st : skillsFromCV) {
-                if (skillTree.equals(st))
-                    counter++;
+        if(skillsFromJD.size() != 0) {
+            for (SkillTree skillTree : skillsFromJD) {
+                if(skillsFromCV.size() != 0) {
+                    for (SkillTree st : skillsFromCV) {
+                        if (skillTree.equals(st))
+                            counter++;
+                    }
+                }
             }
         }
 
@@ -160,11 +186,6 @@ public class Suggestjobcandidate extends Screen {
         return percent;
 
     }
-
-/*    @Install(to = "suitableCheckDataGrid.relevance", subject = "columnGenerator")
-    private String suitableCheckDataGridRelevanceColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        return getRelevancePercent(event.getItem());
-    } */
 
     public List<SkillTree> rescanResume(CandidateCV candidateCV) {
         if (candidateCV.getTextCV() != null) {
@@ -202,18 +223,26 @@ public class Suggestjobcandidate extends Screen {
         if (jobCandidate.getIteractionList() != null) {
             IteractionList maxIteraction = null;
 
-            List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
-                    .query("select e from itpearls_IteractionList e where e.candidate = :candidate")
-                    .view("iteractionList-view")
-                    .parameter("candidate", jobCandidate)
-                    .list();
+            List<IteractionList> iteractionLists = new ArrayList<>();
 
-            for (IteractionList iteractionList : iteractionLists) {
-                if (maxIteraction == null)
-                    maxIteraction = iteractionList;
+            try {
+                iteractionLists = dataManager.load(IteractionList.class)
+                        .query("select e from itpearls_IteractionList e where e.candidate = :candidate")
+                        .view("iteractionList-view")
+                        .parameter("candidate", jobCandidate)
+                        .list();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-                if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
-                    maxIteraction = iteractionList;
+            if(iteractionLists.size() != 0) {
+                for (IteractionList iteractionList : iteractionLists) {
+                    if (maxIteraction == null)
+                        maxIteraction = iteractionList;
+
+                    if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
+                        maxIteraction = iteractionList;
+                    }
                 }
             }
 
@@ -224,8 +253,8 @@ public class Suggestjobcandidate extends Screen {
 
     @Subscribe("useLocationCheckBox")
     public void onUseLocationCheckBoxValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
-        if(event.getValue())
-        candidateCVDl.setParameter("cityOfResidence", openPosition.getCityPosition());
+        if (event.getValue())
+            candidateCVDl.setParameter("cityOfResidence", openPosition.getCityPosition());
         else
             candidateCVDl.removeParameter("cityOfResidence");
 
@@ -296,37 +325,38 @@ public class Suggestjobcandidate extends Screen {
                 .build()
                 .show();
     }
-/*
-    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
-    private String suitableCheckDataGridBlackRectangleColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        String percentStr = getRelevancePercent(event.getItem());
 
-        int percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
+    /*
+        @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
+        private String suitableCheckDataGridBlackRectangleColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+            String percentStr = getRelevancePercent(event.getItem());
 
-        if(percent < 5) {
-            return "";
+            int percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
+
+            if(percent < 5) {
+                return "";
+            }
+
+            if(percent < 20) {
+                return starsAndOtherService.setBlackRectangle(1);
+            }
+
+            if(percent < 45) {
+                return starsAndOtherService.setBlackRectangle(2);
+            }
+
+            if (percent < 60) {
+                return starsAndOtherService.setBlackRectangle(3);
+            }
+
+
+            if (percent < 85) {
+                return starsAndOtherService.setBlackRectangle(4);
+            }
+
+            return starsAndOtherService.setBlackRectangle(5);
         }
-
-        if(percent < 20) {
-            return starsAndOtherService.setBlackRectangle(1);
-        }
-
-        if(percent < 45) {
-            return starsAndOtherService.setBlackRectangle(2);
-        }
-
-        if (percent < 60) {
-            return starsAndOtherService.setBlackRectangle(3);
-        }
-
-
-        if (percent < 85) {
-            return starsAndOtherService.setBlackRectangle(4);
-        }
-
-        return starsAndOtherService.setBlackRectangle(5);
-    }
-*/
+    */
     @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "descriptionProvider")
     private String suitableCheckDataGridBlackRectangleDescriptionProvider(CandidateCV candidateCV) {
         return getRelevancePercent(candidateCV);
@@ -338,26 +368,23 @@ public class Suggestjobcandidate extends Screen {
 
         String percentStr = getRelevancePercent(event.getItem());
 
-        int percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
+        int percent = 0;
 
-        if(percent < 5) {
+        try {
+            percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        if (percent < 5) {
             labelBattery.setStyleName("");
-        }
-
-        if(percent < 20) {
+        } else if (percent < 20) {
             labelBattery.setStyleName("rating_battery_red_1");
-        }
-
-        if(percent < 45) {
+        } else if (percent < 45) {
             labelBattery.setStyleName("rating_battery_orange_2");
-        }
-
-        if (percent < 60) {
+        } else if (percent < 60) {
             labelBattery.setStyleName("rating_battery_yellow_3");
-        }
-
-
-        if (percent < 85) {
+        } else if (percent < 85) {
             labelBattery.setStyleName("rating_battery_green_4");
         } else {
             labelBattery.setStyleName("rating_battery_blue_5");
@@ -366,37 +393,6 @@ public class Suggestjobcandidate extends Screen {
 
         return labelBattery;
     }
-/*
-    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "styleProvider")
-    private String suitableCheckDataGridBlackRectangleStyleProvider(CandidateCV candidateCV) {
-        String percentStr = getRelevancePercent(candidateCV);
-
-        int percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
-
-        if(percent < 5) {
-            return "";
-        }
-
-        if(percent < 20) {
-            return "rating_battery_red_1";
-        }
-
-        if(percent < 45) {
-            return "rating_battery_orange_2";
-        }
-
-        if (percent < 60) {
-            return "rating_battery_yellow_3";
-        }
-
-
-        if (percent < 85) {
-            return "rating_battery_green_4";
-        }
-
-        return "rating_battery_blue_5";
-    }
-*/
 
     @Install(to = "suitableCheckDataGrid.lastIteraction", subject = "descriptionProvider")
     private String suitableCheckDataGridLastIteractionDescriptionProvider(CandidateCV candidateCV) {
