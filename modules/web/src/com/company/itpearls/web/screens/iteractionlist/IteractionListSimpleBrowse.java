@@ -6,6 +6,7 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DataGrid;
+import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -34,6 +35,10 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     private DataManager dataManager;
     @Inject
     private CollectionContainer<IteractionList> iteractionListsDc;
+    @Inject
+    private Label<String> vacancyNameLabel;
+    @Inject
+    private Label<String> recrutierLabel;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -48,6 +53,22 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 copyLastIteractionButton.setEnabled(false);
             } else {
                 copyLastIteractionButton.setEnabled(true);
+
+                if(iteractionListsTable.getSingleSelected().getRating() != null) {
+                    recrutierLabel.setValue(iteractionListsTable
+                            .getSingleSelected()
+                            .getRecrutier()
+                            .getName());
+                    recrutierLabel.setVisible(true);
+                }
+
+                if(iteractionListsTable.getSingleSelected().getVacancy() != null) {
+                    vacancyNameLabel.setValue(iteractionListsTable
+                            .getSingleSelected()
+                            .getVacancy()
+                            .getVacansyName());
+                    vacancyNameLabel.setVisible(true);
+                }
             }
         });
     }

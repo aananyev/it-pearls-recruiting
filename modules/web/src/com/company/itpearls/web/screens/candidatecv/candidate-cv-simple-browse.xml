@@ -15,6 +15,7 @@
                 <property name="candidate" view="_local">
                     <property name="personPosition" view="_local"/>
                 </property>
+                <property name="owner" view="_local"/>
             </view>
             <loader id="candidateCVsDl">
                 <query>
@@ -33,6 +34,19 @@
                 forceDialog="true"/>
     <layout expand="candidateCVsTable"
             spacing="true">
+        <vbox height="AUTO"
+              spacing="true"
+              width="AUTO"
+              align="TOP_LEFT">
+            <label id="vacancyNameLabel"
+                   stylename="h3"
+                   width="AUTO"
+                   visible="false"/>
+            <label id="recrutierLabel"
+                   stylename="h4/"
+                   width="AUTO"
+                   visible="false"/>
+        </vbox>
         <dataGrid id="candidateCVsTable"
                   width="100%"
                   dataContainer="candidateCVsDc">

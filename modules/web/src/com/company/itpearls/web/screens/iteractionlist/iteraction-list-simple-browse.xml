@@ -25,6 +25,19 @@
                 forceDialog="true"/>
     <layout expand="iteractionListsTable"
             spacing="true">
+        <vbox height="AUTO"
+              spacing="true"
+              width="AUTO"
+              align="TOP_LEFT">
+                <label id="vacancyNameLabel"
+                       stylename="h3"
+                       width="AUTO"
+                       visible="false"/>
+                <label id="recrutierLabel"
+                       stylename="h4/"
+                       width="AUTO"
+                       visible="false"/>
+        </vbox>
         <dataGrid id="iteractionListsTable"
                   width="100%"
                   dataContainer="iteractionListsDc">

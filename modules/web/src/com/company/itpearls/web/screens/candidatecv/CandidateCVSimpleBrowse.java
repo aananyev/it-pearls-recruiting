@@ -4,6 +4,7 @@ import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DataGrid;
+import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -31,6 +32,10 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
     private ScreenBuilders screenBuilders;
     @Inject
     private UserSession userSession;
+    @Inject
+    private Label<String> recrutierLabel;
+    @Inject
+    private Label<String> vacancyNameLabel;
 
     public void setSelectedCandidate(JobCandidate entity) {
         candidateCVsDl.setParameter("candidate", entity);
@@ -50,6 +55,24 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
                 copyCVButton.setEnabled(false);
             } else {
                 copyCVButton.setEnabled(true);
+
+                if(candidateCVsTable.getSingleSelected().getOwner() != null) {
+                    recrutierLabel.setValue(candidateCVsTable
+                            .getSingleSelected()
+                            .getOwner()
+                            .getName());
+
+                    recrutierLabel.setVisible(true);
+                }
+
+                if(candidateCVsTable.getSingleSelected().getToVacancy() != null) {
+                    vacancyNameLabel.setValue(candidateCVsTable
+                            .getSingleSelected()
+                            .getToVacancy()
+                            .getVacansyName());
+
+                    vacancyNameLabel.setVisible(true);
+                }
             }
         });
     }
