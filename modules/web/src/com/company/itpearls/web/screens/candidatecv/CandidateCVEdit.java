@@ -9,7 +9,7 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
+import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
@@ -22,13 +22,18 @@ import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.extractor.POITextExtractor;
+import org.apache.poi.ooxml.extractor.ExtractorFactory;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.xmlbeans.XmlException;
 import org.jsoup.Jsoup;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 @UiController("itpearls_CandidateCV.edit")
@@ -83,6 +88,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private TextArea<String> quoteTextArea;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private FileUploadField fileCVField;
+    @Inject
+    private FileLoader fileLoader;
+    @Inject
+    private ExportDisplay exportDisplay;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -92,6 +103,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
             if (fileOriginalCVField.getFileId() != null) {
                 File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+
+                candidateCVRichTextArea.setValue(parsePdfCV(file));
 
                 commitChanges();
 
@@ -114,10 +127,37 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         fileOriginalCVField.addFileUploadErrorListener(uploadErrorEvent ->
                 notifications.create()
-                        .withCaption("File upload error")
+                        .withCaption("Ошибка загрузки файла " + fileOriginalCVField.getFileName())
+                        .show());
+
+
+        fileCVField.addFileUploadErrorListener(uploadErrorEvent ->
+                notifications.create()
+                        .withCaption("Ошибка загрузки файла " + fileCVField.getFileName())
                         .show());
 
         skillImageColumnRenderer();
+    }
+
+    //метод определения расширения файла
+    private static String getFileExtension(File file) {
+        String fileName = file.getName();
+        // если в имени файла есть точка и она не является первым символом в названии файла
+        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            // то вырезаем все знаки после последней точки в названии файла, то есть ХХХХХ.txt -> txt
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+            // в противном случае возвращаем заглушку, то есть расширение не найдено
+        else return "";
+    }
+
+    //метод определения расширения файла
+    private static String getFileExtension(String fileName) {
+        // если в имени файла есть точка и она не является первым символом в названии файла
+        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            // то вырезаем все знаки после последней точки в названии файла, то есть ХХХХХ.txt -> txt
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+            // в противном случае возвращаем заглушку, то есть расширение не найдено
+        else return "";
     }
 
     void openURL(String url) {
@@ -202,7 +242,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {
-        if(candidateCVRichTextArea.getValue() != null)
+        if (candidateCVRichTextArea.getValue() != null)
             rescanResume();
     }
 
@@ -272,7 +312,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             letterRichTextArea.setValue(templateLetter);
 
-            if(!templateLetter.equals("")) {
+            if (!templateLetter.equals("")) {
                 questionLetterRichTextArea.setVisible(true);
                 questionLetterRichTextArea.setValue(templateLetter);
             } else {
@@ -334,25 +374,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     @Subscribe("fileOriginalCVField")
-    public void onFileOriginalCVFieldFileUploadSucceed1(FileUploadField.FileUploadSucceedEvent event) {
+    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
         File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
         String textResume = "";
-        File imageFace = null;
 
-        try {
-            textResume = parsePdfCV(loadFile);
-//            imageFace = pdfParserService.getImageFromPDF(loadFile);
-//            candidatePic.setSource(ClasspathResource.class)
-//                    .setPath(imageFace.getAbsolutePath());
-
-            candidateCVRichTextArea.setValue(textResume.replace("\n", "<br>"));
-        } catch (IOException e) {
-            notifications.create()
-                    .withType(Notifications.NotificationType.WARNING)
-                    .withDescription("ВНИМАНИЕ!")
-                    .withCaption("Ошибка расшифровки резюме.\nЗагрузите PDF для расшифровки.")
-                    .show();
-        }
+        textResume = parsePdfCV(loadFile);
+        candidateCVRichTextArea.setValue(textResume);
 
         rescanResume();
     }
@@ -377,29 +404,81 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         pdDocument.close();
     }
 
-    private String parsePdfCV(File fileName) throws IOException {
+    private String parsePdfCV(File fileName) {
         String parsedText = "";
 
-        if(fileOriginalCVField.getFileName().contains("pdf")) {
+        if (fileOriginalCVField.getFileName().endsWith(".pdf")) {
 
-            PDFParser parser = new PDFParser(new RandomAccessFile(fileName, "r"));
-            parser.parse();
+            try {
+                PDFParser parser = new PDFParser(new RandomAccessFile(fileName, "r"));
+                parser.parse();
 
-            COSDocument cosDoc = parser.getDocument();
-            PDFTextStripper pdfStripper = new PDFTextStripper();
-            PDDocument pdDoc = new PDDocument(cosDoc);
-            parsedText = pdfStripper.getText(pdDoc);
+                COSDocument cosDoc = parser.getDocument();
+                PDFTextStripper pdfStripper = new PDFTextStripper();
+                PDDocument pdDoc = new PDDocument(cosDoc);
+                parsedText = pdfStripper.getText(pdDoc).replace("\n", "<br>");
 
-            candidateCVRichTextArea.setValue(parsedText.replace("\n", "<br>"));
-        } else {
-            notifications.create()
-                    .withDescription("ОШИБКА")
-                    .withCaption("Файл не является PDF")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
+            } catch (IOException e) {
+                notifications.create()
+                        .withType(Notifications.NotificationType.WARNING)
+                        .withCaption("ВНИМАНИЕ!")
+                        .withDescription("Ошибка расшифровки PDF резюме.\nЗагрузите PDF/DOC/DOCX для расшифровки.")
+                        .show();
+
+                e.printStackTrace();
+            }
+        } else if (fileOriginalCVField.getFileName().endsWith(".docx")) {
+            try {
+                InputStream fis = new FileInputStream(fileName);
+
+                XWPFDocument doc = new XWPFDocument(fis);
+                POITextExtractor extractor = new XWPFWordExtractor(doc);
+                parsedText = extractor.getText();
+            } catch (IOException | IncompatibleClassChangeError e) {
+                notifications.create()
+                        .withType(Notifications.NotificationType.WARNING)
+                        .withCaption("ВНИМАНИЕ!")
+                        .withDescription("Ошибка расшифровки DOCX резюме.\nЗагрузите PDF для расшифровки.")
+                        .show();
+
+                e.printStackTrace();
+            }
+
+        } else if (fileOriginalCVField.getFileName().endsWith(".doc")) {
+
+            try {
+                POITextExtractor extractor = ExtractorFactory.createExtractor(fileName);
+                parsedText = extractor.getText();
+            } catch (IOException | NoClassDefFoundError | XmlException | OpenXML4JException e) {
+                notifications.create()
+                        .withType(Notifications.NotificationType.WARNING)
+                        .withCaption("ВНИМАНИЕ!")
+                        .withDescription("Ошибка расшифровки DOC резюме.\nЗагрузите PDF для расшифровки.")
+                        .show();
+
+                e.printStackTrace();
+            }
         }
 
-        return parsedText;
+
+        return parsedText.replace("\n", "<br>");
+    }
+
+    @Install(to = "skillTreesTable.wikiPage", subject = "columnGenerator")
+    private Object skillTreesTableWikiPageColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
+        Link retLink = uiComponents.create(Link.NAME);
+
+        if (event.getItem().getWikiPage() != null) {
+            retLink.setUrl(event.getItem().getWikiPage());
+            retLink.setTarget("_blank");
+            retLink.setHeightAuto();
+            retLink.setWidthAuto();
+            retLink.setAlignment(Component.Alignment.BOTTOM_LEFT);
+            retLink.setCaption(event.getItem().getWikiPage());
+            retLink.setVisible(true);
+        }
+
+        return retLink;
     }
 
     public void setParameter(CandidateCV entity) {
@@ -425,16 +504,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 .show();
     }
 
-/*    public void rescanResume() {
-        String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
-        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
-
-        getEditedEntity().setSkillTree(skillTrees);
-    }*/
-
-
     public List<SkillTree> rescanResume() {
-        if(candidateCVRichTextArea.getValue() != null) {
+
+        if (candidateCVRichTextArea.getValue() != null) {
             String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
             List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
 
@@ -459,7 +531,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         skillTreesFromJD.clear();
         skillTrees.addAll(st); */
 
-        if(candidateCVFieldOpenPosition.getValue() != null) {
+        if (candidateCVFieldOpenPosition.getValue() != null) {
             SkillTreeBrowseCheck s = screenBuilders.screen(this)
                     .withScreenClass(SkillTreeBrowseCheck.class)
                     .build();
@@ -479,7 +551,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Install(to = "skillTreesTable.isComment", subject = "columnGenerator")
     private Object skillTreesTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
-        if(event.getItem().getComment() != null && !event.getItem().equals("")) {
+        if (event.getItem().getComment() != null && !event.getItem().equals("")) {
             return CubaIcon.PLUS_CIRCLE;
         } else {
             return CubaIcon.MINUS_CIRCLE;
@@ -497,7 +569,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
 
     private void skillImageColumnRenderer() {
-        skillTreesTable.addGeneratedColumn("fileImageLogo", entity -> {
+/*        skillTreesTable.addGeneratedColumn("fileImageLogo", entity -> {
             Image image = uiComponents.create(Image.NAME);
             image.setValueSource(new ContainerValueSource<SkillTree, FileDescriptor>(entity.getContainer(),
                     "fileImageLogo"));
@@ -506,13 +578,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             image.setScaleMode(Image.ScaleMode.CONTAIN);
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
             return image;
-        });
+        });*/
     }
 
     @Install(to = "candidateField", subject = "optionImageProvider")
     private Resource candidateFieldOptionImageProvider(JobCandidate jobCandidate) {
 
-        if(jobCandidate.getFileImageFace() != null) {
+        if (jobCandidate.getFileImageFace() != null) {
             Image image = uiComponents.create(Image.NAME);
             image.setStyleName("round-photo");
             FileDescriptorResource resource = image.createResource(FileDescriptorResource.class)
@@ -521,5 +593,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         return null;
+    }
+
+    public void rescanCV() {
+        rescanResume();
     }
 }

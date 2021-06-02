@@ -69,5 +69,7 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
                 })
                 .build()
                 .show();
+
+        candidateCVsDl.load();
     }
 }

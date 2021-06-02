@@ -161,5 +161,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 })
                 .build()
                 .show();
+
+        iteractionListsDl.load();
     }
 }
