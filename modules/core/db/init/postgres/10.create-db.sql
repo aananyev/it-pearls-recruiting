@@ -269,6 +269,7 @@ create table ITPEARLS_POSITION (
     POSITION_RU_NAME varchar(80) not null,
     POSITION_EN_NAME varchar(80),
     JOB_CANDIDATE_ID uuid,
+    STANDART_DECRIPTION text,
     --
     primary key (ID)
 )^

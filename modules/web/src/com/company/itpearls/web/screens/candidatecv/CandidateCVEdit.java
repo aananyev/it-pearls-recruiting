@@ -100,30 +100,30 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         AppUI ui = AppBeans.get(AppUI.class);
         webBrowserTools = ui.getWebBrowserTools();
 
-        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
-            if (fileOriginalCVField.getFileId() != null) {
-                File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+/*        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
+            File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+            String textResume = "";
 
-                candidateCVRichTextArea.setValue(parsePdfCV(file));
+            textResume = parsePdfCV(loadFile);
+            candidateCVRichTextArea.setValue(textResume);
 
-                commitChanges();
+            FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
 
-                FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
-
-                try {
-                    fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
-                } catch (FileStorageException e) {
-                    throw new RuntimeException("Error saving file to FileStorage", e);
-                }
-
+            try {
+                fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
                 dataManager.commit(fd);
 
                 notifications.create()
                         .withType(Notifications.NotificationType.TRAY)
                         .withCaption("Uploaded file: " + fileOriginalCVField.getFileName())
                         .show();
+            } catch (FileStorageException e) {
+                throw new RuntimeException("Error saving file to FileStorage", e);
             }
-        });
+
+            rescanResume();
+
+        }); */
 
         fileOriginalCVField.addFileUploadErrorListener(uploadErrorEvent ->
                 notifications.create()
@@ -137,6 +137,18 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                         .show());
 
         skillImageColumnRenderer();
+    }
+
+    String fileName = "";
+
+    @Subscribe("fileOriginalCVField")
+    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        String textResume = "";
+
+        File loadFile = new File(fileName);
+
+        textResume = parsePdfCV(loadFile);
+        candidateCVRichTextArea.setValue(textResume);
     }
 
     //метод определения расширения файла
@@ -373,7 +385,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
     }
 
-    @Subscribe("fileOriginalCVField")
+
+
+/*    @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
         File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
         String textResume = "";
@@ -381,8 +395,22 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         textResume = parsePdfCV(loadFile);
         candidateCVRichTextArea.setValue(textResume);
 
+        FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
+
+        try {
+            fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
+            dataManager.commit(fd);
+
+            notifications.create()
+                    .withType(Notifications.NotificationType.TRAY)
+                    .withCaption("Uploaded file: " + fileOriginalCVField.getFileName())
+                    .show();
+        } catch (FileStorageException e) {
+            throw new RuntimeException("Error saving file to FileStorage", e);
+        }
+
         rescanResume();
-    }
+    }*/
 
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadError(UploadField.FileUploadErrorEvent event) {

@@ -175,6 +175,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TextField<String> shortDescriptionTextArea;
     @Inject
     private Button scanJDButton;
+    @Inject
+    private RichTextArea openPositionStandartDescriptionRichTextArea;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1431,6 +1433,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
 
             shortDescriptionTextArea.setValue(retStr);
+        }
+    }
+
+    @Subscribe("positionTypeField")
+    public void onPositionTypeFieldValueChange1(HasValue.ValueChangeEvent<Position> event) {
+        if(!event.getValue().getStandartDescription().isEmpty()) {
+            openPositionStandartDescriptionRichTextArea.setValue(event.getValue().getStandartDescription());
         }
     }
 }

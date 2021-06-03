@@ -164,7 +164,7 @@
                                     width="AUTO"
                                     description="msg://msgOriginalCV"
                                     dataContainer="candidateCVDc"
-                                    fileStoragePutMode="MANUAL"
+                                    fileStoragePutMode="IMMEDIATE"
                                     showClearButton="true"/>
                         </vbox>
                     <vbox expand="fileCVField"

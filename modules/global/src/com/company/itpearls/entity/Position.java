@@ -1,15 +1,10 @@
 package com.company.itpearls.entity;
 
-import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
-import com.haulmont.cuba.core.entity.annotation.OnDelete;
-import com.haulmont.cuba.core.global.DeletePolicy;
-import org.springframework.beans.factory.annotation.Lookup;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @NamePattern("%s|positionRuName")
 @Table(name = "ITPEARLS_POSITION", indexes = {
@@ -32,6 +27,18 @@ public class Position extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_CANDIDATE_ID")
     protected JobCandidate jobCandidate;
+
+    @Lob
+    @Column(name = "STANDART_DECRIPTION")
+    private String standartDescription;
+
+    public String getStandartDescription() {
+        return standartDescription;
+    }
+
+    public void setStandartDescription(String standartDescription) {
+        this.standartDescription = standartDescription;
+    }
 
     public String getPositionRuName() {
         return positionRuName;

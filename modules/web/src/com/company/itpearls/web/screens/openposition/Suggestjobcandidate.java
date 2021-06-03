@@ -1,14 +1,12 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.core.PdfParserService;
-import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -31,8 +29,6 @@ public class Suggestjobcandidate extends Screen {
     private DataManager dataManager;
     @Inject
     private PdfParserService pdfParserService;
-
-    private OpenPosition openPosition = null;
     @Inject
     private CollectionLoader<CandidateCV> candidateCVDl;
     @Inject
@@ -46,15 +42,7 @@ public class Suggestjobcandidate extends Screen {
     @Inject
     private UserSession userSession;
     @Inject
-    private Screens screens;
-    @Inject
-    private CollectionContainer<CandidateCV> candidateCVDc;
-
-    Integer countGenerator = 0;
-    @Inject
     private ScreenBuilders screenBuilders;
-    @Inject
-    private StarsAndOtherService starsAndOtherService;
     @Inject
     private Button viewCandidateButton;
     @Inject
@@ -66,18 +54,9 @@ public class Suggestjobcandidate extends Screen {
     @Inject
     private CollectionContainer<Position> personPositionDc;
 
-    @Subscribe
-    public void onInit(InitEvent event) {
-/*        DataGrid.ButtonRenderer<OpenPosition> suitableCheckDataGridRelevanceRenderer = suitableCheckDataGrid
-                .createRenderer(DataGrid.ButtonRenderer.class);
-
-        suitableCheckDataGridRelevanceRenderer.setRendererClickListener(clickableTextRendererClickEvent -> {
-        });
-
-        suitableCheckDataGrid.getColumn("relevance").setRenderer(suitableCheckDataGridRelevanceRenderer);*/
-
-
-    }
+    private OpenPosition openPosition = null;
+    @Inject
+    private CollectionContainer<CandidateCV> candidateCVDc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -104,8 +83,14 @@ public class Suggestjobcandidate extends Screen {
 
     private void setJobPositionLookupPickerField() {
         try {
-            List<Position> positionsList = personPositionDc.getItems();
-            jobPositionLookupPickerField.setOptionsList(positionsList);
+            Map<String, Position> positionsList = new LinkedHashMap<>();
+            List<Position> positionList = dataManager.load(Position.class).list();
+
+            for(Position position : positionList) {
+                positionsList.put(position.getPositionRuName(), position);
+            }
+
+            jobPositionLookupPickerField.setOptionsMap(positionsList);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -158,21 +143,21 @@ public class Suggestjobcandidate extends Screen {
 
         Integer counter = 0;
 
-        if(skillsFromJD.size() != 0) {
+        if (skillsFromJD.size() != 0) {
             Set<SkillTree> setSt = new HashSet<>(skillsFromJD);
             skillsFromJD.clear();
             skillsFromJD.addAll(setSt);
         }
 
-        if(skillsFromCV.size() != 0) {
+        if (skillsFromCV.size() != 0) {
             Set<SkillTree> setStCV = new HashSet<>(skillsFromCV);
             skillsFromCV.clear();
             skillsFromCV.addAll(setStCV);
         }
 
-        if(skillsFromJD.size() != 0) {
+        if (skillsFromJD.size() != 0) {
             for (SkillTree skillTree : skillsFromJD) {
-                if(skillsFromCV.size() != 0) {
+                if (skillsFromCV.size() != 0) {
                     for (SkillTree st : skillsFromCV) {
                         if (skillTree.equals(st))
                             counter++;
@@ -235,7 +220,7 @@ public class Suggestjobcandidate extends Screen {
                 e.printStackTrace();
             }
 
-            if(iteractionLists.size() != 0) {
+            if (iteractionLists.size() != 0) {
                 for (IteractionList iteractionList : iteractionLists) {
                     if (maxIteraction == null)
                         maxIteraction = iteractionList;
@@ -326,37 +311,6 @@ public class Suggestjobcandidate extends Screen {
                 .show();
     }
 
-    /*
-        @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
-        private String suitableCheckDataGridBlackRectangleColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-            String percentStr = getRelevancePercent(event.getItem());
-
-            int percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
-
-            if(percent < 5) {
-                return "";
-            }
-
-            if(percent < 20) {
-                return starsAndOtherService.setBlackRectangle(1);
-            }
-
-            if(percent < 45) {
-                return starsAndOtherService.setBlackRectangle(2);
-            }
-
-            if (percent < 60) {
-                return starsAndOtherService.setBlackRectangle(3);
-            }
-
-
-            if (percent < 85) {
-                return starsAndOtherService.setBlackRectangle(4);
-            }
-
-            return starsAndOtherService.setBlackRectangle(5);
-        }
-    */
     @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "descriptionProvider")
     private String suitableCheckDataGridBlackRectangleDescriptionProvider(CandidateCV candidateCV) {
         return getRelevancePercent(candidateCV);
