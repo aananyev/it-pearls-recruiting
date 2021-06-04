@@ -62,6 +62,8 @@
                 </column>
                 <column property="iteractionType"
                         id="iteractionType"/>
+                <column id="project.projectName"
+                        property="project.projectName"/>
                 <column property="vacancy"
                         id="vacancy"/>
                 <column property="recrutier"

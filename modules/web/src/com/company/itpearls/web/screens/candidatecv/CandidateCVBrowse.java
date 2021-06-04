@@ -5,6 +5,8 @@ import com.company.itpearls.UiNotificationEvent;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
@@ -27,8 +29,6 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
     private CheckBox checkBoxSetOnlyMy;
     @Inject
     private UserSession userSession;
-    @Inject
-    private Notifications notifications;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -51,7 +51,67 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         candidateCVsDl.load();
     }
 
-    @Install(to = "candidateCVsTable", subject = "iconProvider")
+    @Install(to = "candidateCVsTable.originalFileCVcolumn", subject = "columnGenerator")
+    private Icons.Icon candidateCVsTableOriginalFileCVcolumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        if (!(event.getItem().getOriginalFileCV() == null &&
+                event.getItem().getLinkOriginalCv() == null )) {
+            return CubaIcon.FILE_TEXT;
+        } else {
+            return CubaIcon.FILE_TEXT_O;
+        }
+    }
+
+    @Install(to = "candidateCVsTable.itPearlsCVcolumn", subject = "columnGenerator")
+    private Icons.Icon candidateCVsTableItPearlsCVcolumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        if (!(event.getItem().getLinkItPearlsCV() == null)) {
+            return CubaIcon.FILE_TEXT;
+        } else {
+            return CubaIcon.FILE_TEXT_O;
+        }
+    }
+
+    @Install(to = "candidateCVsTable.itPearlsCVcolumn", subject = "styleProvider")
+    private String candidateCVsTableItPearlsCVcolumnStyleProvider(CandidateCV candidateCV) {
+        if (!(candidateCV.getLinkItPearlsCV() == null)) {
+            return "open-position-pic-center-large-green";
+        } else {
+            return "open-position-pic-center-large-red";
+        }
+    }
+
+    @Install(to = "candidateCVsTable.originalFileCVcolumn", subject = "styleProvider")
+    private String candidateCVsTableOriginalFileCVcolumnStyleProvider(CandidateCV candidateCV) {
+        if (!(candidateCV.getOriginalFileCV() == null &&
+                candidateCV.getLinkOriginalCv() == null)) {
+            return "open-position-pic-center-large-green";
+        } else {
+            return "open-position-pic-center-large-red";
+        }
+    }
+
+    @Install(to = "candidateCVsTable.cvReady", subject = "columnGenerator")
+    private Icons.Icon candidateCVsTableCvReadyColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        return CubaIcon.PENCIL_SQUARE_O;
+    }
+
+    @Install(to = "candidateCVsTable.cvReady", subject = "styleProvider")
+    private String candidateCVsTableCvReadyStyleProvider(CandidateCV candidateCV) {
+        if (candidateCV.getLetter() != null &&
+                candidateCV.getTextCV() != null &&
+                candidateCV.getLinkItPearlsCV() != null) {
+            return "open-position-pic-center-large-green";
+        } else {
+            if ((candidateCV.getLetter() == null ||
+                    candidateCV.getLinkItPearlsCV() == null ) &&
+                    candidateCV.getOriginalFileCV() != null ) {
+                return "open-position-pic-center-large-yellow";
+            } else {
+                return "open-position-pic-center-large-red";
+            }
+        }
+    }
+
+/*    @Install(to = "candidateCVsTable", subject = "iconProvider")
     protected String candidateCVsTableiconProvider(CandidateCV candidateCV) {
         if (candidateCV.getLetter() != null &&
                 candidateCV.getTextCV() != null &&
@@ -68,18 +128,5 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
             }
         }
     }
-
-    /* @EventListener
-    public void onUiNotificationEvent(UiNotificationEvent event) {
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withDescription( event.getMessage() )
-                .withCaption("INFO")
-                .show();
-    }
-
-    // screens do not receive non-UI events!
-    @EventListener
-    public void onBeanNotificationEvent(BeanNotificationEvent event) {
-        throw new IllegalStateException("Received " + event);
-    } */
+*/
 }

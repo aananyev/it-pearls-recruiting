@@ -1,0 +1,1 @@
+alter table ITPEARLS_CANDIDATE_CV rename column original_file_name to original_file_name__u53024 ;

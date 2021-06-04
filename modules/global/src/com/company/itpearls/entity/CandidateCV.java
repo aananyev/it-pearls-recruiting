@@ -89,7 +89,6 @@ public class CandidateCV extends StandardEntity {
     @JoinColumn(name = "FILE_IMAGE_FACE")
     protected FileDescriptor fileImageFace;
 
-
     public List<SomeFiles> getSomeFiles() {
         return someFiles;
     }

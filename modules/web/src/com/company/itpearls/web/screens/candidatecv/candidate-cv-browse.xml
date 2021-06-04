@@ -31,7 +31,7 @@
                         exclude="letter|lintToCloudFile|textCV|fileCV|linkItPearlsCV|linkOriginalCv|originalFileCV|id"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="candidateCVsTable"
+        <dataGrid id="candidateCVsTable"
                     width="100%"
                     dataContainer="candidateCVsDc">
             <actions>
@@ -40,13 +40,49 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <group>
-                    <column id="candidate" caption="msg://msgCandidate"/>
-                </group>
-                <column id="datePost" caption="msg://msgDatePost"/>
-                <column id="toVacancy.vacansyName" caption="mainMsg://msgCVtoVacansy"/>
-                <column id="resumePosition" caption="msg://msgPosition"/>
-                <column id="owner" caption="mainMsg://msgRecrutier"/>
+                <column id="cvReady"
+                        caption="msg://msgCVReady"
+                        width="80px">
+                    <iconRenderer/>
+                </column>
+                <column id="candidate"
+                        property="candidate"
+                        width="350px"
+                        sort="ASCENDING"
+                        sortable="true"
+                        caption="msg://msgCandidate"/>
+                <column id="toVacancy.vacansyName"
+                        property="toVacancy.vacansyName"
+                        width="300px"
+                        sortable="true"
+                        caption="mainMsg://msgCVtoVacansy"/>
+                <column id="resumePosition"
+                        property="resumePosition"
+                        width="300px"
+                        sortable="true"
+                        caption="msg://msgPosition"/>
+                <column id="originalFileCVcolumn"
+                        caption="msg://msgOriginalCV"
+                        sortable="false"
+                        width="80px">
+                    <iconRenderer/>
+                </column>
+                <column id="itPearlsCVcolumn"
+                        sortable="false"
+                        caption="msg://msgItPearlsCV"
+                        width="80px">
+                    <iconRenderer/>
+                </column>
+                <column id="owner"
+                        property="owner"
+                        sortable="true"
+                        width="150px"
+                        caption="mainMsg://msgRecrutier"/>
+                <column id="datePost"
+                        property="datePost"
+                        width="150px"
+                        sortable="true"
+                        caption="msg://msgDatePost"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -55,7 +91,7 @@
                 <button id="editBtn" action="candidateCVsTable.edit"/>
                 <button id="removeBtn" action="candidateCVsTable.remove"/>
             </buttonsPanel>
-        </groupTable>
+        </dataGrid>
         <checkBox id="checkBoxSetOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>

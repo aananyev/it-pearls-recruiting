@@ -1438,7 +1438,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("positionTypeField")
     public void onPositionTypeFieldValueChange1(HasValue.ValueChangeEvent<Position> event) {
-        if(!event.getValue().getStandartDescription().isEmpty()) {
+        if(event.getValue().getStandartDescription() != null) {
             openPositionStandartDescriptionRichTextArea.setValue(event.getValue().getStandartDescription());
         }
     }

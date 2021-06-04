@@ -23,7 +23,7 @@
         <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
             <loader id="candidatesLc">
                 <query>
-                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                    <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
                 </query>
             </loader>
         </collection>

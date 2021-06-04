@@ -3,13 +3,9 @@ package com.company.itpearls.web.screens.candidatecv;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
-import com.company.itpearls.web.screens.somefiles.SomeFilesEdit;
-import com.haulmont.bali.util.ParamsMap;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
@@ -20,7 +16,6 @@ import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.POITextExtractor;
 import org.apache.poi.ooxml.extractor.ExtractorFactory;
@@ -30,9 +25,7 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
 import org.jsoup.Jsoup;
 
-import javax.imageio.ImageIO;
 import javax.inject.Inject;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 
@@ -53,11 +46,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private FileUploadField fileOriginalCVField;
     @Inject
-    private FileUploadingAPI fileUploadingAPI;
-    @Inject
     private Notifications notifications;
-    @Inject
-    private DataManager dataManager;
     @Inject
     private LookupPickerField<OpenPosition> candidateCVFieldOpenPosition;
     @Inject
@@ -69,8 +58,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
-    private DataContext dataContext;
-    @Inject
     private Link itpearlsCVLink;
     @Inject
     private Link originalCVLink;
@@ -81,8 +68,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private PdfParserService pdfParserService;
     @Inject
-    private TreeDataGrid<SkillTree> skillTreesTable;
-    @Inject
     private UiComponents uiComponents;
     @Inject
     private TextArea<String> quoteTextArea;
@@ -90,10 +75,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private MessageBundle messageBundle;
     @Inject
     private FileUploadField fileCVField;
-    @Inject
-    private FileLoader fileLoader;
-    @Inject
-    private ExportDisplay exportDisplay;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -135,84 +116,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 notifications.create()
                         .withCaption("Ошибка загрузки файла " + fileCVField.getFileName())
                         .show());
-
-        skillImageColumnRenderer();
-    }
-
-    String fileName = "";
-
-    @Subscribe("fileOriginalCVField")
-    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        String textResume = "";
-
-        File loadFile = new File(fileName);
-
-        textResume = parsePdfCV(loadFile);
-        candidateCVRichTextArea.setValue(textResume);
-    }
-
-    //метод определения расширения файла
-    private static String getFileExtension(File file) {
-        String fileName = file.getName();
-        // если в имени файла есть точка и она не является первым символом в названии файла
-        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
-            // то вырезаем все знаки после последней точки в названии файла, то есть ХХХХХ.txt -> txt
-            return fileName.substring(fileName.lastIndexOf(".") + 1);
-            // в противном случае возвращаем заглушку, то есть расширение не найдено
-        else return "";
-    }
-
-    //метод определения расширения файла
-    private static String getFileExtension(String fileName) {
-        // если в имени файла есть точка и она не является первым символом в названии файла
-        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
-            // то вырезаем все знаки после последней точки в названии файла, то есть ХХХХХ.txt -> txt
-            return fileName.substring(fileName.lastIndexOf(".") + 1);
-            // в противном случае возвращаем заглушку, то есть расширение не найдено
-        else return "";
-    }
-
-    void openURL(String url) {
-
-        String mylaunch = url;
-        String os = System.getProperty("os.name").toLowerCase();
-
-        if (os.indexOf("win") >= 0) {
-            try {
-                Runtime rt = Runtime.getRuntime();
-                rt.exec("rundll32 url.dll,FileProtocolHandler " + mylaunch);
-            } catch (IOException e) {
-                //System.out.println("THROW::: make sure we handle browser error");
-                e.printStackTrace();
-            }
-        }
-
-        if (os.indexOf("mac") >= 0) {
-            try {
-                Runtime rt = Runtime.getRuntime();
-                rt.exec("open " + mylaunch);
-            } catch (IOException e) {
-                //System.out.println("THROW::: make sure we handle browser error");
-                e.printStackTrace();
-            }
-        }
-
-        if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
-            try {
-                Runtime rt = Runtime.getRuntime();
-                String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
-                        "netscape", "opera", "links", "lynx"};
-                StringBuffer cmd = new StringBuffer();
-
-                for (int i = 0; i < browsers.length; i++)
-                    cmd.append((i == 0 ? "" : " || ") + browsers[i] + " \"" + mylaunch + "\" ");
-
-                rt.exec(new String[]{"sh", "-c", cmd.toString()});
-            } catch (IOException e) {
-                //System.out.println("THROW::: make sure we handle browser error");
-                e.printStackTrace();
-            }
-        }
     }
 
     @Subscribe("textFieldIOriginalCV")
@@ -258,51 +161,24 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             rescanResume();
     }
 
-    public void onLinkButtonClick(String mylaunch) {
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.indexOf("win") >= 0) {
-            try {
-                Runtime rt = Runtime.getRuntime();
-                rt.exec("rundll32 url.dll,FileProtocolHandler " + mylaunch);
-            } catch (IOException e) {
-                //System.out.println("THROW::: make sure we handle browser error");
-                e.printStackTrace();
-            }
-            if (os.indexOf("mac") >= 0) {
-                try {
-                    Runtime rt = Runtime.getRuntime();
-                    rt.exec("open" + mylaunch);
-                } catch (IOException e) {
-                    //System.out.println("THROW::: make sure we handle browser error");
-                    e.printStackTrace();
-                }
-            }
-            if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
-                try {
-                    Runtime rt = Runtime.getRuntime();
-                    String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
-                            "netscape", "opera", "links", "lynx"};
-                    StringBuffer cmd = new StringBuffer();
-                    for (int i = 0; i < browsers.length; i++)
-                        cmd.append((i == 0 ? "" : " || ") + browsers[i] + " \"" + mylaunch + "\" ");
-                    rt.exec(new String[]{"sh", "-c", cmd.toString()});
-                } catch (IOException e) {
-                    //System.out.println("THROW::: make sure we handle browser error");
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     private void setTemplateLetter() {
         String templateLetter = "";
 
         if (getEditedEntity().getLetter() == null) {
             if (candidateCVFieldOpenPosition.getValue() != null) {
-                if (candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter() != null) {
-                    templateLetter = templateLetter
-                            + candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter()
-                            + "\n<br>";
+                if(candidateCVFieldOpenPosition.getValue().getProjectName() != null) {
+                    if(candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment() != null) {
+                        if (candidateCVFieldOpenPosition
+                                .getValue()
+                                .getProjectName()
+                                .getProjectDepartment()
+                                .getTemplateLetter() != null) {
+
+                            templateLetter = templateLetter
+                                    + candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment().getTemplateLetter()
+                                    + "\n<br>";
+                        }
+                    }
                 }
             }
 
@@ -347,16 +223,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    public void setUrlOriginalCV() {
-        String value = textFieldIOriginalCV.getValue();
-
-        if (value == null)
-            return;
-        if (!value.startsWith("http://") && !value.startsWith("https://"))
-            value = "http://" + value;
-        onLinkButtonClick(value);
-    }
-
     @Subscribe("tabFiles")
     public void onTabFilesLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
@@ -374,32 +240,28 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    public void setUrlITPearlsCV() {
-        String value = textFieldITPearlsCV.getValue();
-
-        if (value == null)
-            return;
-        if (!value.startsWith("http://"))
-            value = "http://" + value;
-
-        webBrowserTools.showWebPage(value, ParamsMap.of("target", "_blank"));
-    }
 
 
-
-/*    @Subscribe("fileOriginalCVField")
+/*
+    @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+        File parseFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
         String textResume = "";
 
-        textResume = parsePdfCV(loadFile);
+        textResume = parsePdfCV(parseFile);
         candidateCVRichTextArea.setValue(textResume);
 
+        File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
         FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
+
+        CommitContext commitContext = new CommitContext();
+        commitContext.addInstanceToCommit(getEditedEntity());
+        commitContext.addInstanceToCommit(fd);
+
 
         try {
             fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
-            dataManager.commit(fd);
+            dataManager.commit(commitContext);
 
             notifications.create()
                     .withType(Notifications.NotificationType.TRAY)
@@ -410,26 +272,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         rescanResume();
-    }*/
+    } */
 
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
         notifications.create()
                 .withCaption("Ошибка загрузки файла в хранилище.")
                 .show();
-    }
-
-    private void getPhotofromPDF(String fileName) throws IOException {
-        File file = new File(fileName);
-        PDDocument pdDocument = PDDocument.load(file);
-
-        PDFRenderer renderer = new PDFRenderer(pdDocument);
-
-        BufferedImage image = renderer.renderImage(0);
-        String TMP_IMAGE = "tmp_image.jpg";
-        ImageIO.write(image, "JPEG", new File(TMP_IMAGE));
-
-        pdDocument.close();
     }
 
     private String parsePdfCV(File fileName) {
@@ -514,24 +363,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         candidateField.setValue(entity.getCandidate());
     }
 
-    @Subscribe("candidateField")
-    public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
-//        someFilesesDl.setParameter("candidate", candidateField.getValue());
-//        someFilesesDl.load();
-    }
-
-    public void createSomeFileButtonAction() {
-        screenBuilders.editor(SomeFiles.class, this)
-                .newEntity()
-                .withScreenClass(SomeFilesEdit.class)
-                .withParentDataContext(dataContext)
-                .withInitializer(someFiles -> {
-                    someFiles.setCandidateCV(this.getEditedEntity());
-                })
-                .build()
-                .show();
-    }
-
     public List<SkillTree> rescanResume() {
 
         if (candidateCVRichTextArea.getValue() != null) {
@@ -554,10 +385,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         List<SkillTree> skillTrees = rescanResume();
         String inputText = Jsoup.parse(candidateCVFieldOpenPosition.getValue().getComment()).text();
         List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
-
-/*        Set<SkillTree> st = new HashSet<>(skillTreesFromJD);
-        skillTreesFromJD.clear();
-        skillTrees.addAll(st); */
 
         if (candidateCVFieldOpenPosition.getValue() != null) {
             SkillTreeBrowseCheck s = screenBuilders.screen(this)
@@ -593,20 +420,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         } else {
             return "pic-center-large-red";
         }
-    }
-
-
-    private void skillImageColumnRenderer() {
-/*        skillTreesTable.addGeneratedColumn("fileImageLogo", entity -> {
-            Image image = uiComponents.create(Image.NAME);
-            image.setValueSource(new ContainerValueSource<SkillTree, FileDescriptor>(entity.getContainer(),
-                    "fileImageLogo"));
-            image.setWidth("50px");
-            image.setStyleName("image-candidate-face-little-image");
-            image.setScaleMode(Image.ScaleMode.CONTAIN);
-            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            return image;
-        });*/
     }
 
     @Install(to = "candidateField", subject = "optionImageProvider")
