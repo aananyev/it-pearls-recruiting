@@ -23,7 +23,7 @@ order by e.positionRuName]]></query>
             <properties include=".*"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="positionsTable"
+        <dataGrid id="positionsTable"
                     width="100%"
                     dataContainer="positionsDc">
             <actions>
@@ -32,8 +32,17 @@ order by e.positionRuName]]></query>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="positionRuName" caption="msg://msgPositionEnName"/>
-                <column id="positionEnName" caption="msg://msgPositionRuName"/>
+                <column id="positionRuName"
+                        property="positionRuName"
+                        caption="msg://msgPositionEnName"/>
+                <column id="positionEnName"
+                        property="positionEnName"
+                        caption="msg://msgPositionRuName"/>
+                <column id="standartDescriptionIcon"
+                        maximumWidth="85px"
+                        caption="msg://msgStandartDescription">
+                    <iconRenderer/>
+                </column>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -42,7 +51,7 @@ order by e.positionRuName]]></query>
                 <button id="editBtn" action="positionsTable.edit"/>
                 <button id="removeBtn" action="positionsTable.remove"/>
             </buttonsPanel>
-        </groupTable>
+        </dataGrid>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

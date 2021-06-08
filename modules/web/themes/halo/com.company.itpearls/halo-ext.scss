@@ -600,6 +600,20 @@ rating_battery_yellow_3:before {
     font-weight: italic;
 }
 
+.open-position-notification-open {
+    color: black;
+    font-size: large;
+    font-weight: bold;
+    background-color: red;
+}
+
+.open-position-notification-close {
+    color: black;
+    font-size: large;
+    font-weight: bold;
+    background-color: yellow;
+}
+
 .open-position-internal-project-job-recrutier {
     color: brown;
     font-weight: bold;

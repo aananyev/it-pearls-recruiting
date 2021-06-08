@@ -1346,9 +1346,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             this.getEditedEntity().setCities(selectCitiesLocation.getCitiesList());
             changeCityListsLabel();
         });
+
         selectCitiesLocation.show();
 
     }
+
+    @Subscribe
+    public void onBeforeCommitChanges2(BeforeCommitChangesEvent event) {
+        if(shortDescriptionTextArea.getValue().length() > 250) {
+            notifications
+                    .create(Notifications.NotificationType.ERROR)
+                    .withCaption("Строка \"Краткое описание ключевых навыков не более 250 символов")
+                    .show();
+            shortDescriptionTextArea.focus();
+            event.preventCommit();
+        }
+
+    }
+
 
     private void changeCityListsLabel() {
         String outStr = "";

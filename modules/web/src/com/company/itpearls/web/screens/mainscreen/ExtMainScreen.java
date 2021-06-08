@@ -24,21 +24,26 @@ public class ExtMainScreen extends MainScreen {
             if (event.getMessage().startsWith("Открыта")) {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withDescription(event.getMessage())
+                        .withHideDelayMs(10000)
                         .withCaption("INFO")
+                        .withStyleName("open-position-notification-open")
                         .withContentMode(ContentMode.HTML)
                         .show();
             } else {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withDescription(event.getMessage())
+                        .withHideDelayMs(5000)
                         .withCaption("INFO")
                         .withContentMode(ContentMode.HTML)
                         .show();
             }
         } else {
-            notifications.create(Notifications.NotificationType.HUMANIZED)
+            notifications.create(Notifications.NotificationType.TRAY)
                     .withDescription(event.getMessage())
                     .withCaption("WARNING")
+                    .withHideDelayMs(10000)
                     .withContentMode(ContentMode.HTML)
+                    .withStyleName("open-position-notification-close")
                     .show();
         }
     }

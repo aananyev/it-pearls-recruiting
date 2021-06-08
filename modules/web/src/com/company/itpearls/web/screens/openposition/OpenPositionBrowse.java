@@ -503,7 +503,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
             retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
 
-            if (!entity.getOpenClose()) {
+            if (entity.getOpenClose() || entity.getOpenClose() == null) {
                 events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
                         entity.getVacansyName()));
             } else {
@@ -549,7 +549,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
                         + " т.р.";
             }
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | StringIndexOutOfBoundsException e) {
             retStr = "";
         }
 
@@ -955,14 +955,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         checkBoxOnlyNotPaused.setValue(true);
     }
 
-    private void setInternalProjectFilter() {
+    private void setInternalProjectFilter() { /*
         if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), ROLE_ADMINISTRATOR)) {
             openPositionsDl.removeParameter("internalProject");
         } else {
             openPositionsDl.setParameter("internalProject", false);
-        }
+        } */
 
+        openPositionsDl.setParameter("internalProject", false);
         openPositionsDl.load();
     }
 

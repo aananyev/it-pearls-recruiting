@@ -1,9 +1,5 @@
 package com.company.itpearls.web.screens.candidatecv;
 
-import com.company.itpearls.BeanNotificationEvent;
-import com.company.itpearls.UiNotificationEvent;
-import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
@@ -12,11 +8,8 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.CandidateCV;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
-import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.FileDescriptor;
 
 @UiController("itpearls_CandidateCV.browse")
 @UiDescriptor("candidate-cv-browse.xml")
@@ -30,10 +23,13 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
     @Inject
     private UserSession userSession;
 
+    static String GROUP_INTERN = "Стажер";
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if (userSession.getUser().getGroup().getName().equals("Стажер")) {
+        if (userSession.getUser().getGroup().getName().equals(GROUP_INTERN)) {
             candidateCVsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+            candidateCVsDl.load();
 
             checkBoxSetOnlyMy.setValue(true);
             checkBoxSetOnlyMy.setEditable(false);
