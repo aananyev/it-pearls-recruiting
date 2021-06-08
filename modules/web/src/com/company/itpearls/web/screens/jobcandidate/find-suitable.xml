@@ -9,7 +9,9 @@
                     view="openPosition-view">
             <loader id="openPositionDl">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e where e.openClose = false order by e.vacansyName]]>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                        where e.openClose = false
+                        order by e.vacansyName]]>
                     <condition>
                         <and>
                             <c:jpql>
@@ -81,6 +83,11 @@
                   spacing="true"
                   expand="commentCVRichTextArea"
                   height="100%">
+                <buttonsPanel>
+                    <button id="viewOpenPosition"
+                            caption="msg://msgViewOpenPositions"
+                            invoke="viewOpenPositions"/>
+                </buttonsPanel>
                 <dataGrid id="suitableCheckDataGrid"
                           columnResizeMode="ANIMATED"
                           box.expandRatio="1"
@@ -106,10 +113,15 @@
                                 width="100px">
                             <iconRenderer/>
                         </column>
-                        <column id="relevance"
+<!--                        <column id="relevance"
                                 width="100px"
                                 sortable="true"
                                 caption="msg://msgPercentOfRelevance">
+                        </column> -->
+                        <column id="blackRectangle"
+                                width="80px"
+                                caption="msg://msgPercentOfRelevance">
+                            <componentRenderer/>
                         </column>
                     </columns>
                     <rowsCount autoLoad="true"/>

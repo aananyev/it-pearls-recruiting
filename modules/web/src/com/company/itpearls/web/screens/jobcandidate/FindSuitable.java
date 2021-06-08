@@ -7,6 +7,7 @@ import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
@@ -56,6 +57,10 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     private Label<String> cityOfResidenceLabel;
     @Inject
     private CollectionContainer<OpenPosition> openPositionDc;
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private Button viewOpenPosition;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -73,8 +78,11 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                 checkSkillFromJD(candidateCVs.get(0), clickableTextRendererClickEvent.getItem());
             }
         });
+    }
 
-        suitableCheckDataGrid.getColumn("relevance").setRenderer(suitableCheckDataGridRelevanceRenderer);
+    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "descriptionProvider")
+    private String suitableCheckDataGridBlackRectangleDescriptionProvider(OpenPosition openPosition) {
+        return getRelevancePercent(openPosition);
     }
 
     public void checkSkillFromJD(CandidateCV candidateCV, OpenPosition item) {
@@ -113,7 +121,117 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
         }
     }
 
-    @Install(to = "suitableCheckDataGrid.relevance", subject = "columnGenerator")
+    private String getRelevancePercent(OpenPosition openPosition) {
+        List<SkillTree> skillsFromCV = new ArrayList<>();
+        List<SkillTree> skillsFromJD = new ArrayList<>();
+        List<SkillTree> skillTrees = new ArrayList<>();
+
+
+        List<CandidateCV> candidateCVs = dataManager.load(CandidateCV.class)
+                .query("select e from itpearls_CandidateCV e where e.candidate = :candidate")
+                .parameter("candidate", jobCandidate)
+                .list();
+
+        if (candidateCVs != null) {
+            for (CandidateCV candidateCV : candidateCVs) {
+                List<SkillTree> st = new ArrayList<>();
+
+                if (candidateCV.getTextCV() != null) {
+                    st = pdfParserService.parseSkillTree(candidateCV.getTextCV());
+                }
+
+                skillTrees.addAll(st);
+            }
+        }
+
+        if (openPosition.getComment() != null) {
+            skillsFromJD = pdfParserService.parseSkillTree(openPosition.getComment());
+        }
+
+        Set<SkillTree> stJD = new HashSet<>(skillsFromJD);
+        skillsFromJD.clear();
+        skillsFromJD.addAll(stJD);
+
+        Set<SkillTree> stCV = new HashSet<>(skillTrees);
+        skillTrees.clear();
+        skillTrees.addAll(stCV);
+
+        Integer counter = 0;
+
+        if (skillsFromJD.size() != 0) {
+            Set<SkillTree> setSt = new HashSet<>(skillsFromJD);
+            skillsFromJD.clear();
+            skillsFromJD.addAll(setSt);
+        }
+
+        if (skillsFromCV.size() != 0) {
+            Set<SkillTree> setStCV = new HashSet<>(skillsFromCV);
+            skillsFromCV.clear();
+            skillsFromCV.addAll(setStCV);
+        }
+
+        if(skillsFromJD.size() != 0 ) {
+            for (SkillTree skillTree : skillsFromJD) {
+                for (SkillTree st : skillTrees) {
+                    if (skillTree.equals(st))
+                        counter++;
+                }
+            }
+        }
+
+        String percent = (skillsFromJD.size() != 0 ? String.valueOf(counter * 100 / skillsFromJD.size()) : "...") + "%";
+
+        return percent;
+
+    }
+
+    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
+    private Component suitableCheckDataGridBlackRectangleColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        Label labelBattery = uiComponents.create(Label.NAME);
+
+        String percentStr = getRelevancePercent(event.getItem());
+
+        int percent = 0;
+
+        try {
+            percent = Integer.parseInt(percentStr.substring(0, percentStr.length() - 1));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        if (percent < 5) {
+            labelBattery.setStyleName("rating_battery_grey_0");
+        } else if (percent < 20) {
+            labelBattery.setStyleName("rating_battery_red_1");
+        } else if (percent < 45) {
+            labelBattery.setStyleName("rating_battery_orange_2");
+        } else if (percent < 60) {
+            labelBattery.setStyleName("rating_battery_yellow_3");
+        } else if (percent < 85) {
+            labelBattery.setStyleName("rating_battery_green_4");
+        } else {
+            labelBattery.setStyleName("rating_battery_blue_5");
+        }
+
+
+        return labelBattery;
+    }
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+
+        viewOpenPosition.setEnabled(false);
+
+        suitableCheckDataGrid.addSelectionListener(e -> {
+            if(e.getSelected() == null) {
+                viewOpenPosition.setEnabled(false);
+            } else {
+                viewOpenPosition.setEnabled(true);
+            }
+        });
+    }
+
+/*    @Install(to = "suitableCheckDataGrid.relevance", subject = "columnGenerator")
     private String suitableCheckDataGridRelevanceColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         List<CandidateCV> candidateCVs = dataManager.load(CandidateCV.class)
                 .query("select e from itpearls_CandidateCV e where e.candidate = :candidate")
@@ -161,7 +279,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
         String percent = (skillTreesJD.size() != 0 ? String.valueOf(counter * 100 / skillTreesJD.size()) : "...") + "%";
 
         return percent;
-    }
+    } */
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -358,7 +476,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
         return style;
     }
-
+/*
     @Subscribe("suitableCheckDataGrid")
     public void onSuitableCheckDataGridItemClick(DataGrid.ItemClickEvent<OpenPosition> event) {
         screenBuilders.editor(OpenPosition.class, this)
@@ -366,8 +484,20 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                 .editEntity(event.getItem())
                 .build()
                 .show();
+    }*/
+
+
+    public void viewOpenPositions() {
+        screenBuilders.editor(OpenPosition.class, this)
+                .withScreenClass(OpenPositionEdit.class)
+                .editEntity(suitableCheckDataGrid.getSingleSelected())
+/*                .editEntity(dataManager.load(OpenPosition.class)
+                        .query("select e from itpearls_OpenPosition e where e = :openPosition")
+                        .view("openPosition-view")
+                        .parameter("openPosition", suitableCheckDataGrid.getSingleSelected())
+                        .one()
+                )*/
+                .build()
+                .show();
     }
-    
-    
-    
 }

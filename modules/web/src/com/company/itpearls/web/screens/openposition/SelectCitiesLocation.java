@@ -29,8 +29,6 @@ public class SelectCitiesLocation extends Screen {
     private List<City> cityList = new ArrayList<>();
     @Inject
     private RadioButtonGroup countries;
-    @Inject
-    private InstanceLoader<OpenPosition> citiesDl;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

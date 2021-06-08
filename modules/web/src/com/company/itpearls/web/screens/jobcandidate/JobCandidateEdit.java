@@ -1154,9 +1154,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
 
         selectPersonPositions.addAfterCloseListener(e -> {
-            this.getEditedEntity().setPositionList(selectPersonPositions.getPositionsList());
+            List<Position> positions = selectPersonPositions.getPositionsList();
+
+            getEditedEntity().setPositionList(positions);
+            CommitContext commitContext = new CommitContext(positions);
+
+            dataManager.commit(commitContext);
+
             setPositionsLabel();
         });
+
         selectPersonPositions.show();
     }
 

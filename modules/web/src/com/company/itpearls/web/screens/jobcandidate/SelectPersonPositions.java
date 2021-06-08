@@ -47,6 +47,6 @@ public class SelectPersonPositions extends Screen {
 
     public List<Position> getPositionsList() {
         positionList = (List<Position>) positionTwinColumn.getValue();
-        return this.positionList;
+        return positionList;
     }
 }

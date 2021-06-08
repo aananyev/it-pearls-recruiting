@@ -154,15 +154,10 @@
     margin: -5px -5px -5px -5px;
     padding: -5px -5px -5px -5px;
     top: 50%;
-/*    width: 20px;
-    transform: translate(0, -50%);
-    position: absolute;
-    line-height: 17px; */
     height: 20px;
     border: 1px solid;
     border-radius: 2px;
     color: $color_p;
-/*    box-shadow: 0 0 0 2px $color_p, 0 0 3px #333;   Параметры теней */
 }
 
 @mixin rating_candidate_round($color_p) {
