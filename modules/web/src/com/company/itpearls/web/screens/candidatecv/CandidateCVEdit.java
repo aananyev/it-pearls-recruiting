@@ -3,11 +3,11 @@ package com.company.itpearls.web.screens.candidatecv;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
@@ -75,13 +75,21 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private MessageBundle messageBundle;
     @Inject
     private FileUploadField fileCVField;
+    @Inject
+    private FileUploadingAPI fileUploadingAPI;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private RichTextArea cvResomandation;
+    @Inject
+    private RichTextArea letterRecommendation;
 
     @Subscribe
     public void onInit(InitEvent event) {
         AppUI ui = AppBeans.get(AppUI.class);
         webBrowserTools = ui.getWebBrowserTools();
 
-/*        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
+        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
             File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
             String textResume = "";
 
@@ -104,7 +112,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             rescanResume();
 
-        }); */
+        });
 
         fileOriginalCVField.addFileUploadErrorListener(uploadErrorEvent ->
                 notifications.create()
@@ -153,6 +161,48 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         quoteTextArea.setValue(messageBundle.getMessage("msgSalesCV"));
+
+        setCVRecommendation();
+        setLetterRecommendation();
+    }
+
+    private void setCVRecommendation() {
+        String text = "<ol>" +
+                "<li>Резюме должно быть информативным и кратким, даже если за плечами 15+ лет опыта. Сфокусируйтесь на трех последних местах работы, это интересует работодателя в первую очередь.</li>" +
+                "<li>Включите в резюме только самые ключевые задачи, функциональные обязанности и достижения. Не используйте закрученных словооборотов, составляйте описание тезисно и лаконично.</li>" +
+                "<li>Обязательно указывайте ваши успехи (достижения) для каждого места работы. Они должны быть конкретны, измеримы и соответствовать должности.</li>" +
+                "<li>Если вы работали на разных проектах, объедините информацию под одним названием «Проектная деятельность», а в описании можете расписать проекты подробнее.</li>" +
+                "<li>Указанные в резюме профессиональные и личностные компетенции будут являться словами-маркерами, по которым будущий работодатель сможет вас быстро идентифицировать и соотнести с должностью.</li>" +
+                "</ol>";
+
+        cvResomandation.setValue(text);
+    }
+
+    private void setLetterRecommendation() {
+        String caption = "Структура письма:";
+        String text = "<ol>\n" +
+                "<li>Представление кандидата, его ФИО, текущей позиции, позиции на которую он претендует в компании партнера или проекте. </li>" +
+                "<li>Опыт работы кандидата и значимые компании или проекты, которые должны быть значимы для нашего заказчика. 2-3 предложения не более.</li>" +
+                "<li>Управленческие скилы кандидата, такие как навык управления людьми или командами разработчиков, навыки управления проектами и владением методологиями (RAP, Waterfall, Scrum, Agile и т.п.). Или отсутствие скилов ввиду, например, направленостью кандидата (не хочет быть менеджером, хочет быть разработчиком)</li>" +
+                "<li>Общая структура мотивации кандидата, а также мотивация смены работы.</li>" +
+                "<li>Зарплатные ожидания кандидата, текущий уровень зарплаты. Если зарплатные ожидания завышены, то можно этот пункт либо опустить, либо обосновать почему кандидат хочет повысить планку.</li>" +
+                "<li>Личностные качества, которые кандидат показал на собеседовании. Умение и желание работать в команде, активная жизненная позиция, обучаемость и самообучаемость, дополнительное образование, речь, навыки ведения переговоров или общения с заказчиком.</li>" +
+                "<li>Матрица компетенций кандидата из резюме.</li>" +
+                "</ol>";
+
+        String example = "Пример:\n" +
+                "\n" +
+                "Уважаемые коллеги, хочу представить Вам Александра Катаева Devops инженера в компании Грид Динамикс в саратовском офисе. Мы предложили Алексею поговорить о сотрудничестве с Вашей командой на позиции DevOps инженера.\n" +
+                "\n" +
+                "Алексей имеет общий опыт работы более 5 лет на позиции IT Engineer в компании Нет Крекер и с февраля 2018 года DevOps Engineer в компании Grid Dynamics.\n" +
+                "\n" +
+                "Алексей в настоящее время не находится в активном поиске работы, но у него есть интерес в программировании “железа” и он согласился пообщаться с Вами. Алексей рассматривает возможность своей релокации за рубеж в будущем.\n" +
+                "\n" +
+                "Алексей в процессе беседы показал себя как сдержанный и вежливый человек. Алексей - надежный сотрудник и не склонен к частой смене работы (время работы в компании Нет Крекер - 5 лет). Алексей командный игрок и комфортно чувствует себя в коллективе единомышленников.\n";
+
+        letterRecommendation.setValue(text);
+        letterRecommendation.setCaption(caption);
+        letterRecommendation.setDescription(example);
     }
 
     @Subscribe

@@ -167,25 +167,25 @@
                                     fileStoragePutMode="IMMEDIATE"
                                     showClearButton="true"/>
                         </vbox>
-                    <vbox expand="fileCVField"
-                          width="70%"
-                          spacing="true">
-                        <hbox width="100%"
-                              expand="textFieldITPearlsCV"
+                        <vbox expand="fileCVField"
+                              width="70%"
                               spacing="true">
-                            <textField id="textFieldITPearlsCV"
-                                       dataContainer="candidateCVDc"
-                                       property="linkItPearlsCV"
-                                       caption="mainMsg://msgLinkToItPearlsCV"
-                                       align="MIDDLE_LEFT"/>
-                            <link id="itpearlsCVLink"
-                                  icon="font-icon:FILE_WORD_O"
-                                  align="BOTTOM_LEFT"
-                                  target="_blank"
-                                  width="AUTO"
-                                  caption="msg://msgGoTo"
-                                  description="msg://msgGoTo"/>
-                        </hbox>
+                            <hbox width="100%"
+                                  expand="textFieldITPearlsCV"
+                                  spacing="true">
+                                <textField id="textFieldITPearlsCV"
+                                           dataContainer="candidateCVDc"
+                                           property="linkItPearlsCV"
+                                           caption="mainMsg://msgLinkToItPearlsCV"
+                                           align="MIDDLE_LEFT"/>
+                                <link id="itpearlsCVLink"
+                                      icon="font-icon:FILE_WORD_O"
+                                      align="BOTTOM_LEFT"
+                                      target="_blank"
+                                      width="AUTO"
+                                      caption="msg://msgGoTo"
+                                      description="msg://msgGoTo"/>
+                            </hbox>
                             <upload id="fileCVField"
                                     fileStoragePutMode="IMMEDIATE"
                                     property="fileCV"
@@ -195,7 +195,7 @@
                                     description="msg://msgCV"
                                     dataContainer="candidateCVDc"
                                     showClearButton="true"/>
-                    </vbox>
+                        </vbox>
                     </vbox>
                     <vbox id="dropZone"
                           spacing="true"
@@ -233,16 +233,30 @@
                       spacing="true"
                       width="100%"
                       height="100%"
-                      expand="candidateCVRichTextArea">
+                      expand="candidateCVHBox">
                     <button id="rescanSkills"
                             caption="msg://msgRescanResume"
                             align="BOTTOM_LEFT"
                             invoke="rescanCV"/>
-                    <richTextArea id="candidateCVRichTextArea"
-                                  dataContainer="candidateCVDc"
-                                  property="textCV"
-                                  width="100%"
-                                  required="true"/>
+                    <hbox id="candidateCVHBox"
+                          expand="candidateCVRichTextArea"
+                          height="100%"
+                          spacing="true"
+                          width="100%">
+                        <richTextArea id="candidateCVRichTextArea"
+                                      dataContainer="candidateCVDc"
+                                      property="textCV"
+                                      width="100%"
+                                      height="100%"
+                                      box.expandRatio="4"
+                                      required="true"/>
+                        <richTextArea id="cvResomandation"
+                                      width="100%"
+                                      height="100%"
+                                      editable="false"
+                                      box.expandRatio="1"
+                                      stylename="borderless"/>
+                    </hbox>
 
                 </vbox>
             </tab>
@@ -282,25 +296,40 @@
             <tab id="tabLetter"
                  caption="msg://msgLetter"
                  margin="true,true,true,true"
-                 expand="letterVbox"
+                 expand="letterHBox"
                  spacing="true">
-                <vbox id="letterVbox"
-                      spacing="true"
+                <hbox id="letterHBox"
                       width="100%"
-                      expand="letterRichTextArea">
-                    <richTextArea id="questionLetterRichTextArea"
+                      expand="letterVbox"
+                      spacing="true"
+                      height="100%">
+                    <vbox id="letterVbox"
+                          spacing="true"
+                          width="100%"
+                          height="100%"
+                          box.expandRatio="4"
+                          expand="letterRichTextArea">
+                        <richTextArea id="questionLetterRichTextArea"
+                                      width="100%"
+                                      editable="false"
+                                      visible="false"
+                                      caption="msg://msgPatternLetter"
+                                      stylename="text-field-title-form"
+                                      height="100%"/>
+                        <richTextArea id="letterRichTextArea"
+                                      dataContainer="candidateCVDc"
+                                      property="letter"
+                                      height="100%"
+                                      caption="msg://msgLetter"
+                                      width="100%"/>
+                    </vbox>
+                    <richTextArea id="letterRecommendation"
                                   width="100%"
+                                  height="100%"
+                                  stylename="borderless"
                                   editable="false"
-                                  visible="false"
-                                  caption="msg://msgPatternLetter"
-                                  stylename="text-field-title-form"
-                                  height="120px"/>
-                    <richTextArea id="letterRichTextArea"
-                                  dataContainer="candidateCVDc"
-                                  property="letter"
-                                  caption="msg://msgLetter"
-                                  width="100%"/>
-                </vbox>
+                                  box.expandRatio="1"/>
+                </hbox>
             </tab>
             <tab id="tabSkillTree"
                  caption="msg://msgCVSkillTree"

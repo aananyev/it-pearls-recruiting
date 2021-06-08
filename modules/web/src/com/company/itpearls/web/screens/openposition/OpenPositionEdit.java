@@ -177,6 +177,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Button scanJDButton;
     @Inject
     private RichTextArea openPositionStandartDescriptionRichTextArea;
+    @Named("openPositionAccordion.openPositionStandartDescriptionAccorden")
+    private VBoxLayout openPositionStandartDescriptionAccorden;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -195,9 +197,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setWorkExperienceRadioButton();
         setCommandExperienceRadioButton();
         changeCityListsLabel();
-
+        standartDescriptionDisable(event);
 
     }
+
+    private void standartDescriptionDisable(BeforeShowEvent event) {
+        if(getEditedEntity().getPositionType() != null) {
+            if(getEditedEntity().getPositionType().getStandartDescription() == null) {
+                openPositionStandartDescriptionAccorden.setVisible(false);
+                openPositionStandartDescriptionRichTextArea.setEnabled(false);
+            } else {
+                openPositionStandartDescriptionAccorden.setVisible(true);
+                openPositionStandartDescriptionRichTextArea.setEnabled(true);
+            }
+        }
+    }
+
 
     private void setInternalProject() {
         if (getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
