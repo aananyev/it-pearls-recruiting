@@ -1358,7 +1358,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             selectCitiesLocation.setCitiesList(this.getEditedEntity().getCities());
         });
         selectCitiesLocation.addAfterCloseListener(e -> {
-            this.getEditedEntity().setCities(selectCitiesLocation.getCitiesList());
+
+            List<City> cities = selectCitiesLocation.getCitiesList();
+
+            this.getEditedEntity().setCities(cities);
+            CommitContext commitContext = new CommitContext(cities);
+
+            dataManager.commit(commitContext);
+
             changeCityListsLabel();
         });
 

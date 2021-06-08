@@ -616,8 +616,11 @@
             <hbox id="editActions"
                   spacing="true"
                   align="BOTTOM_RIGHT">
-                <button invoke="subscribePosition" caption="msg://msgSubscribe" icon="BELL"/>
-                <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
+                <button invoke="subscribePosition"
+                        caption="msg://msgSubscribe"
+                        icon="BELL"/>
+                <button id="windowCommitAndCloseButton"
+                        action="windowCommitAndClose"/>
                 <button action="windowClose"/>
             </hbox>
         </vbox>
