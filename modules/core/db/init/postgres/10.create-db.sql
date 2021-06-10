@@ -209,6 +209,7 @@ create table ITPEARLS_ITERACTION (
     CALENDAR_ITEM_STYLE varchar(255),
     CALENDAR_ITEM_DESCRIPTION varchar(80),
     FIND_TO_DIC boolean,
+    WIDGET_CHACK_JOB_CANDIDATES boolean,
     --
     primary key (ID)
 )^

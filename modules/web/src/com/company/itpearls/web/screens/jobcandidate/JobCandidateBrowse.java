@@ -469,6 +469,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                             .one().add(BigDecimal.ONE));
                                 }
                             })
+                            .withAfterCloseListener(e -> {
+                                jobCandidatesDl.load();
+                            })
                             .build()
                             .show();
                 }));
@@ -660,6 +663,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 .withScreenClass(IteractionListEdit.class)
                                 .withInitializer(iteractionList1 -> {
                                     iteractionList1.setCandidate(jobCandidatesTable.getSingleSelected());
+                                })
+                                .withAfterCloseListener(e -> {
+                                    jobCandidatesDl.load();
                                 })
                                 .build()
                                 .show())

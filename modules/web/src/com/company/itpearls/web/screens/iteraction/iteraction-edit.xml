@@ -134,6 +134,10 @@ order by e.number]]>
                 </groupBox>
             </tab>
             <tab id="setupWidgets" spacing="true" caption="msg://msgWidgetsSetup" expand="widgetSetupGroupBox">
+                <checkBox id="myJobCandidatesWingetCheckBox"
+                          dataContainer="iteractionDc"
+                          property="widgetChackJobCandidates"
+                          caption="msg://msgCheckJobCandidateWidget"/>
                 <groupBox id="widgetSetupGroupBox">
                     <accordion id="widgetSetupAccordion" height="100%">
                         <tab id="widgetPausedTab" margin="trus" spacing="true" caption="msg://msgWidgetPaused">

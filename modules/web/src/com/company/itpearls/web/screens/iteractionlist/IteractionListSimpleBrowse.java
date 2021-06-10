@@ -54,12 +54,14 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
             } else {
                 copyLastIteractionButton.setEnabled(true);
 
-                if(iteractionListsTable.getSingleSelected().getRating() != null) {
-                    recrutierLabel.setValue(iteractionListsTable
-                            .getSingleSelected()
-                            .getRecrutier()
-                            .getName());
-                    recrutierLabel.setVisible(true);
+                if(iteractionListsTable.getSingleSelected() != null) {
+                    if (iteractionListsTable.getSingleSelected().getRating() != null) {
+                        recrutierLabel.setValue(iteractionListsTable
+                                .getSingleSelected()
+                                .getRecrutier()
+                                .getName());
+                        recrutierLabel.setVisible(true);
+                    }
                 }
 
                 if(iteractionListsTable.getSingleSelected().getVacancy() != null) {
@@ -125,7 +127,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                         iteractionList.getVacancy().getProjectName().getProjectDepartment().getDepartamentRuName() + "\n" +
                         iteractionList.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName();
             } catch (NullPointerException e) {
-
+                e.printStackTrace();
             }
         }
 
@@ -160,7 +162,9 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 .newEntity()
                 .withScreenClass(IteractionListEdit.class)
                 .withInitializer(iteractionList1 -> {
-                    iteractionList1.setCandidate(iteractionListsTable.getSingleSelected().getCandidate());
+                    if(iteractionListsTable.getSingleSelected() != null) {
+                        iteractionList1.setCandidate(iteractionListsTable.getSingleSelected().getCandidate());
+                    }
 
                     BigDecimal maxNumberIteraction = BigDecimal.ZERO;
                     IteractionList lastIteraction = null;
@@ -179,6 +183,9 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                                         "from itpearls_IteractionList e", BigDecimal.class)
                                 .one().add(BigDecimal.ONE));
                     }
+                })
+                .withAfterCloseListener(e -> {
+                    iteractionListsDl.load();
                 })
                 .build()
                 .show();

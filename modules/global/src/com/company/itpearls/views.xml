@@ -219,7 +219,7 @@
         <property name="cityOfCompany" view="_local"/>
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
-        <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="fileCompanyLogo" view="_local"/>
         <property name="companyDirector" view="_local"/>
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
@@ -282,30 +282,59 @@
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
-            <property name="candidateCv"/>
+            <property name="candidateCv" view="_local">
+                <property name="originalFileCV" view="_minimal"/>
+                <property name="toVacancy" view="_minimal"/>
+            </property>
             <property name="socialNetwork"/>
             <property name="cityOfResidence"/>
-            <property name="personPosition" view="_local">
-                <property name="positionRuName"/>
-            </property>
             <property name="email"/>
             <property name="telegramName"/>
             <property name="telegramGroup"/>
             <property name="skypeName"/>
             <property name="positionList"/>
+            <property name="fileImageFace" view="_local"/>
         </property>
         <property name="vacancy" view="_local">
-            <property name="positionType" view="_minimal">
-                <property name="positionRuName"/>
+            <property name="positionType" view="_local">
             </property>
             <property name="projectName" view="_local">
                 <property name="projectOwner" view="_local"/>
                 <property name="projectDepartment" view="_local">
-                    <property name="companyName" view="_local"/>
+                    <property name="companyName" view="_local">
+                        <property name="departmentOfCompany" view="_local"/>
+                    </property>
                 </property>
             </property>
         </property>
-        <property name="project" view="project-view"/>
+        <property name="project" view="project-view">
+            <property name="openPosition" view="openPosition-view">
+                <property name="remoteWork"/>
+                <property name="remoteComment"/>
+                <property name="salaryMin"/>
+                <property name="salaryMax"/>
+                <property name="salaryFixLimit"/>
+                <property name="numberPosition"/>
+                <property name="workExperience"/>
+                <property name="commandExperience"/>
+                <property name="comment"/>
+                <property name="commentEn"/>
+                <property name="shortDescription"/>
+                <property name="templateLetter"/>
+                <property name="needLetter"/>
+                <property name="exercise"/>
+                <property name="needExercise"/>
+                <property name="priority"/>
+                <property name="internalProject"/>
+                <property name="projectName" view="_local">
+                    <property name="projectDepartment" view="_local">
+                        <property name="companyName" view="_local">
+                            <property name="fileCompanyLogo" view="_minimal"/>
+                        </property>
+                    </property>
+                </property>
+            </property>
+        </property>
         <property name="iteractionType" view="_minimal">
             <property name="pic"/>
             <property name="addCaption"/>
@@ -321,7 +350,6 @@
         <property name="recrutier" view="_local">
             <property name="group" view="_minimal"/>
         </property>
-        <property name="rating"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">

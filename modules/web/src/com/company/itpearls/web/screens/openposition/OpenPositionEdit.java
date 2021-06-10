@@ -62,7 +62,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private Boolean booOpenClosePosition = false;
     private Boolean entityIsChanged = false;
-    private EmailInfo emailInfo;
     private String emails = "";
     private Boolean setOK;
     private static final String MANAGEMENT_GROUP = "Менеджмент";
@@ -154,27 +153,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Named("tabSheetOpenPosition.tabPayments")
     private VBoxLayout tabPayments;
     @Inject
-    private CollectionLoader<OpenPosition> openPositionParentDl;
-    @Inject
-    private InstanceLoader<OpenPosition> openPositionDl;
-    @Inject
     private PdfParserService pdfParserService;
     @Inject
-    private RichTextArea openPositionEnRichTextArea;
-    @Inject
     private RichTextArea openPositionRichTextArea;
-    @Inject
-    private CollectionPropertyContainer<SkillTree> openPositionSkillsListsDc;
-    @Inject
-    private InstanceContainer<OpenPosition> openPositionDc;
     @Inject
     private UiComponents uiComponents;
     @Inject
     private TreeDataGrid<SkillTree> openPositionSkillsListTable;
     @Inject
     private TextField<String> shortDescriptionTextArea;
-    @Inject
-    private Button scanJDButton;
     @Inject
     private RichTextArea openPositionStandartDescriptionRichTextArea;
     @Named("openPositionAccordion.openPositionStandartDescriptionAccorden")
@@ -329,9 +316,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void setCityNameOfCompany() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (companyNameField.getValue() != null && cityOpenPositionField.getValue() == null) {
-                if (companyDepartamentField.getValue().getCompanyName() != null) {
-                    if (companyDepartamentField.getValue().getCompanyName().getCityOfCompany() != null)
-                        cityOpenPositionField.setValue(companyDepartamentField.getValue().getCompanyName().getCityOfCompany());
+                if (companyDepartamentField.getValue() != null) {
+                    if (companyDepartamentField.getValue().getCompanyName() != null) {
+                        if (companyDepartamentField.getValue().getCompanyName().getCityOfCompany() != null)
+                            cityOpenPositionField.setValue(companyDepartamentField.getValue().getCompanyName().getCityOfCompany());
+                    }
                 }
             }
         }
@@ -1139,19 +1128,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("projectNameField")
     public void onProjectNameFieldValueChange1(HasValue.ValueChangeEvent<Project> event) {
-        if (event.getValue().getProjectIsClosed()) {
-            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
-                    .withContentMode(ContentMode.HTML)
-                    .withMessage("Вы пытаетесь открыть позицию по закрытому проекту.<br>" +
-                            "Открыть проект заново?")
-                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                        event.getValue().setEndProjectDate(null);
-                        event.getValue().setProjectIsClosed(false);
-                    }), new DialogAction(DialogAction.Type.NO).withHandler((f -> {
-                        projectNameField.setValue(null);
-                    })));
+        if(event.getValue() != null) {
+            if (event.getValue().getProjectIsClosed()) {
+                dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                        .withContentMode(ContentMode.HTML)
+                        .withMessage("Вы пытаетесь открыть позицию по закрытому проекту.<br>" +
+                                "Открыть проект заново?")
+                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                            event.getValue().setEndProjectDate(null);
+                            event.getValue().setProjectIsClosed(false);
+                        }), new DialogAction(DialogAction.Type.NO).withHandler((f -> {
+                            projectNameField.setValue(null);
+                        })));
+            }
         }
-
     }
 
     private void setGroupSubscribeButton() {
@@ -1244,7 +1234,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("positionTypeField")
     public void onPositionTypeFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
-        if (vacansyNameField.getValue() == null || vacansyNameField.getValue() == "") {
+        if (vacansyNameField.getValue() == null || vacansyNameField.getValue().equals("")) {
             vacansyNameField.setValue(generatePositionName());
             if (projectNameField.getValue() != null) {
                 vacansyNameField.setValue(generatePositionNameInProject());
@@ -1267,8 +1257,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (vacansyNameField.getValue() != null) {
             if (generatePositionName().equals(retValue)) {
-                if (projectNameField.getValue().getProjectName() != null) {
-                    retValue = retValue + " (" + projectNameField.getValue().getProjectName() + ")";
+                if (projectNameField.getValue() != null) {
+                    if (projectNameField.getValue().getProjectName() != null) {
+                        retValue = retValue + " (" + projectNameField.getValue().getProjectName() + ")";
+                    }
                 }
             }
         }
@@ -1375,17 +1367,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges2(BeforeCommitChangesEvent event) {
-        if(shortDescriptionTextArea.getValue().length() > 250) {
-            notifications
-                    .create(Notifications.NotificationType.ERROR)
-                    .withCaption("Строка \"Краткое описание ключевых навыков не более 250 символов")
-                    .show();
-            shortDescriptionTextArea.focus();
-            event.preventCommit();
+        if(shortDescriptionTextArea.getValue() != null) {
+            if (shortDescriptionTextArea.getValue().length() > 250) {
+                notifications
+                        .create(Notifications.NotificationType.ERROR)
+                        .withCaption("Строка \"Краткое описание ключевых навыков не более 250 символов")
+                        .show();
+                shortDescriptionTextArea.focus();
+                event.preventCommit();
+            }
         }
-
     }
-
 
     private void changeCityListsLabel() {
         String outStr = "";
@@ -1475,8 +1467,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("positionTypeField")
     public void onPositionTypeFieldValueChange1(HasValue.ValueChangeEvent<Position> event) {
-        if(event.getValue().getStandartDescription() != null) {
-            openPositionStandartDescriptionRichTextArea.setValue(event.getValue().getStandartDescription());
+        if(event.getValue() != null) {
+            if (event.getValue().getStandartDescription() != null) {
+                openPositionStandartDescriptionRichTextArea.setValue(event.getValue().getStandartDescription());
+            }
         }
     }
 }

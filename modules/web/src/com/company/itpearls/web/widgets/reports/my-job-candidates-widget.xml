@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <data>
+        <collection id="iteractionCheckDc"
+                    class="com.company.itpearls.entity.Iteraction"
+                    view="_local">
+            <loader id="iteractionCheckDl">
+                <query>
+                    <![CDATA[select e from itpearls_Iteraction e where e.widgetChackJobCandidates = true]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout stylename="widget-border"
+            expand="funnelHuntingWindgetGroupBox"
+            spacing="false"
+            height="100%"
+            width="100%">
+        <vbox id="funnelHuntingWindgetGroupBox"
+              width="100%"
+              height="100%"
+              expand="widgetTitleBox"
+              spacing="false">
+            <cssLayout id="widgetTitleBox"
+                       width="100%"
+                       height="AUTO"
+                       stylename="widget-title">
+                <label id="widgetTitle"
+                       width="100%"
+                       htmlEnabled="false"
+                       height="100%"/>
+                <accordion id="jobCandidatesIteractionAccordion"
+                           height="100%"
+                           width="100%"/>
+            </cssLayout>
+        </vbox>
+    </layout>
+</fragment>

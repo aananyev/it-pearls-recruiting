@@ -3,18 +3,24 @@ package com.company.itpearls.web.screens.candidatecv;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
+import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.AppUI;
+import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.POITextExtractor;
@@ -83,6 +89,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private RichTextArea cvResomandation;
     @Inject
     private RichTextArea letterRecommendation;
+    @Inject
+    private InstanceContainer<CandidateCV> candidateCVDc;
+    @Inject
+    private FileStorageService fileStorageService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -97,6 +107,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             candidateCVRichTextArea.setValue(textResume);
 
             FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
+            candidateCVDc.getItem().setOriginalFileCV(fd);
 
             try {
                 fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
@@ -124,6 +135,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 notifications.create()
                         .withCaption("Ошибка загрузки файла " + fileCVField.getFileName())
                         .show());
+    }
+
+    @Subscribe("fileOriginalCVField")
+    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileDescriptor().getId());
+
+        String textResume = "";
+
+        textResume = parsePdfCV(file);
+        candidateCVRichTextArea.setValue(textResume);
+
     }
 
     @Subscribe("textFieldIOriginalCV")

@@ -1,16 +1,12 @@
 package com.company.itpearls.entity;
 
-import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.core.entity.annotation.OnDelete;
-import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @NamePattern("%s|iterationName")
 @Table(name = "ITPEARLS_ITERACTION", indexes = {
@@ -59,7 +55,7 @@ public class Iteraction extends StandardEntity {
     protected Integer addType;
 
     @Column(name = "CHECK_TRACE")
-    protected  Integer checkTrace = 1;
+    protected Integer checkTrace = 1;
 
     @Column(name = "ADD_FIELD", length = 40)
     protected String addField;
@@ -81,6 +77,17 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "FIND_TO_DIC")
     protected Boolean findToDic;
+
+    @Column(name = "WIDGET_CHACK_JOB_CANDIDATES")
+    private Boolean widgetChackJobCandidates;
+
+    public Boolean getWidgetChackJobCandidates() {
+        return widgetChackJobCandidates;
+    }
+
+    public void setWidgetChackJobCandidates(Boolean widgetChackJobCandidates) {
+        this.widgetChackJobCandidates = widgetChackJobCandidates;
+    }
 
     public Boolean getFindToDic() { return findToDic; }
 

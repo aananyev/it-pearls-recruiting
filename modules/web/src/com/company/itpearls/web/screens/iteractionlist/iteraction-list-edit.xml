@@ -12,8 +12,9 @@
             <loader id="iteractionListDl"/>
         </instance>
         <collection id="iteractionTypesDc"
-                    class="com.company.itpearls.entity.Iteraction"
-                    view="iteraction-view">
+                    class="com.company.itpearls.entity.Iteraction">
+            <view extends="_local">
+            </view>
             <loader id="iteractionTypesLc"
                     cacheable="true">
                 <query>
@@ -29,16 +30,25 @@
             </loader>
         </collection>
         <collection id="candidatesDc"
-                    class="com.company.itpearls.entity.JobCandidate"
-                    view="_minimal">
+                    class="com.company.itpearls.entity.JobCandidate">
+            <view extends="_local">
+                <property name="personPosition" view="_local"/>
+            </view>
             <loader id="candidatesLc"
                     cacheable="true">
                 <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
         <collection id="vacancyDc"
-                    class="com.company.itpearls.entity.OpenPosition"
-                    view="openPosition-view-iteraction-list">
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local">
+                <property name="positionType" view="_local"/>
+                <property name="projectName" view="_local">
+                    <property name="projectDepartment" view="_local">
+                        <property name="companyName" view="_local"/>
+                    </property>
+                </property>
+            </view>
             <loader id="openPositionsDl"
                     cacheable="true">
                 <query>

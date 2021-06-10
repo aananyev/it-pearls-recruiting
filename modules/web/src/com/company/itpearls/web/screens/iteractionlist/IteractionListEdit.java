@@ -9,7 +9,6 @@ import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
-import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -20,7 +19,6 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.Calendar;
@@ -64,8 +62,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private TextField<Integer> addInteger;
     @Inject
     private LookupPickerField<OpenPosition> vacancyFiels;
-    @Named("candidateField.lookup")
-    private LookupAction candidateFieldLookup;
     @Inject
     private LookupPickerField<User> recrutierField;
     @Inject
@@ -126,17 +122,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void changeField() {
-        Integer _addType;
-        Boolean _addFlag;
+        Integer _addType = null;
+        Boolean _addFlag = null;
 
         try {
-            _addType = iteractionTypeField.getValue().getAddType();
+            if (iteractionTypeField.getValue() != null) {
+                _addType = iteractionTypeField.getValue().getAddType();
+            }
         } catch (NullPointerException e) {
             _addType = 0;
         }
 
         try {
-            _addFlag = iteractionTypeField.getValue().getAddFlag();
+            if (iteractionTypeField.getValue() != null)
+                _addFlag = iteractionTypeField.getValue().getAddFlag();
         } catch (NullPointerException e) {
             _addFlag = false;
         }
@@ -197,19 +196,28 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     }
                 }
             } else {
-                Boolean callForm;
+                Boolean callForm = null;
 
                 try {
-                    callForm = iteractionTypeField.getValue().getCallForm();
+                    if(iteractionTypeField.getValue() != null) {
+                        callForm = iteractionTypeField.getValue().getCallForm();
+                    }
                 } catch (NullPointerException e) {
                     callForm = false;
                 }
 
-                if (callForm) {
-                    addDate.setVisible(false);
-                    addString.setVisible(false);
-                    addInteger.setVisible(false);
-                    buttonCallAction.setVisible(true);
+                if(callForm != null) {
+                    if (callForm) {
+                        addDate.setVisible(false);
+                        addString.setVisible(false);
+                        addInteger.setVisible(false);
+                        buttonCallAction.setVisible(true);
+                    } else {
+                        addDate.setVisible(false);
+                        addString.setVisible(false);
+                        addInteger.setVisible(false);
+                        buttonCallAction.setVisible(false);
+                    }
                 } else {
                     addDate.setVisible(false);
                     addString.setVisible(false);
@@ -264,11 +272,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             // есть
             // взаимодействия с кандидатом по этой позиции
-            if (countIteraction.compareTo(a) != 0)
+            if (countIteraction.compareTo(a) != 0) {
                 newProject = false;
-            else
+            } else {
                 // новое взаимодействие с кандидатом
                 newProject = true;
+            }
 
             if (newProject) {
                 // это начало цепочки - обрезаем выбор
@@ -355,7 +364,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private Boolean isClosedVacancy() {
         Boolean r = true;
-        Boolean oc;
 
         if (vacancyFiels.getValue() != null) {
             // if( !PersistenceHelper.isDetached( getEditedEntity().getVacancy() ) )
@@ -431,11 +439,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if (iteractionTypeField.getValue().getNumber() != null) {
-            String s = iteractionTypeField.getValue().getNumber();
-            Integer i = Integer.parseInt(s);
+        if(iteractionTypeField.getValue() != null) {
+            if (iteractionTypeField.getValue().getNumber() != null) {
+                String s = iteractionTypeField.getValue().getNumber();
+                Integer i = Integer.parseInt(s);
 
-            candidateField.getValue().setStatus(i);
+                if(candidateField.getValue() != null) {
+                    candidateField.getValue().setStatus(i);
+                }
+            }
         }
 
         sendMessages();
@@ -454,52 +466,58 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void sendMessages() {
-        LoadContext<SubscribeCandidateAction> loadContext = LoadContext.create(SubscribeCandidateAction.class)
-                .setQuery(LoadContext.createQuery("select e from itpearls_SubscribeCandidateAction e " +
-                        "where e.candidate = :candidate and " +
-                        "e.subscriber = :subscriber and " +
-                        ":curDate between e.startDate and e.endDate")
-                        .setCacheable(true)
-                        .setParameter("candidate", candidateField.getValue())
-                        .setParameter("subscriber", userSession.getUser())
-                        .setParameter("curDate", new Date()))
-                .setView("subscribeCandidateAction-view");
+        if(candidateField.getValue() != null) {
+            LoadContext<SubscribeCandidateAction> loadContext = LoadContext.create(SubscribeCandidateAction.class)
+                    .setQuery(LoadContext.createQuery("select e from itpearls_SubscribeCandidateAction e " +
+                            "where e.candidate = :candidate and " +
+                            "e.subscriber = :subscriber and " +
+                            ":curDate between e.startDate and e.endDate")
+                            .setCacheable(true)
+                            .setParameter("candidate", candidateField.getValue())
+                            .setParameter("subscriber", userSession.getUser())
+                            .setParameter("curDate", new Date()))
+                    .setView("subscribeCandidateAction-view");
 
-        if (dataManager.getCount(loadContext) != 0) {
-            EmailInfo emailInfo = new EmailInfo(userSession.getUser().getEmail(),
-                    candidateField.getValue().getFullName() + " : " +
-                            iteractionTypeField.getValue().getIterationName(), null,
-                    "com/company/itpearls/templates/iteraction.html",
-                    Collections.singletonMap("IteractionList", getEditedEntity()));
+            if (dataManager.getCount(loadContext) != 0) {
+                if(candidateField.getValue() != null && iteractionTypeField.getValue() != null) {
+                    EmailInfo emailInfo = new EmailInfo(userSession.getUser().getEmail(),
+                            candidateField.getValue().getFullName() + " : " +
+                                    iteractionTypeField.getValue().getIterationName(), null,
+                            "com/company/itpearls/templates/iteraction.html",
+                            Collections.singletonMap("IteractionList", getEditedEntity()));
 
-            emailInfo.setBodyContentType("text/html; charset=UTF-8");
+                    emailInfo.setBodyContentType("text/html; charset=UTF-8");
 
-            emailService.sendEmailAsync(emailInfo);
-        }
-        // высплывающее сообщение
-        if (iteractionTypeField.getValue().getNotificationType() != null) {
-            switch (iteractionTypeField.getValue().getNotificationType()) {
-                case 0: // ???
-                    break;
-                case 1: // Нет
-                    break;
-                case 2: // Только менеджеру"
-                    break;
-                case 3: // Подписчику вакансии
-                    break;
-                case 4: // Подписчику кандидата
-                    break;
-                case 5: // Определенным адресам (список)
-                    break;
-                case 6: // всем
-                    events.publish(new UiNotificationEvent(this,
-                            "<img src=\"VAADIN/themes/halo/" + iteractionTypeField.getValue().getPic() +
-                                    "\"> <b>" +
-                                    getEditedEntity().getCandidate().getFullName() + " : " +
-                                    getEditedEntity().getIteractionType().getIterationName() + "</b>"));
-                    break;
-                default:
-                    break;
+                    emailService.sendEmailAsync(emailInfo);
+                }
+            }
+            // высплывающее сообщение
+            if(iteractionTypeField.getValue() != null) {
+                if (iteractionTypeField.getValue().getNotificationType() != null) {
+                    switch (iteractionTypeField.getValue().getNotificationType()) {
+                        case 0: // ???
+                            break;
+                        case 1: // Нет
+                            break;
+                        case 2: // Только менеджеру"
+                            break;
+                        case 3: // Подписчику вакансии
+                            break;
+                        case 4: // Подписчику кандидата
+                            break;
+                        case 5: // Определенным адресам (список)
+                            break;
+                        case 6: // всем
+                            events.publish(new UiNotificationEvent(this,
+                                    "<img src=\"VAADIN/themes/halo/" + iteractionTypeField.getValue().getPic() +
+                                            "\"> <b>" +
+                                            getEditedEntity().getCandidate().getFullName() + " : " +
+                                            getEditedEntity().getIteractionType().getIterationName() + "</b>"));
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         }
     }
@@ -520,21 +538,21 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private boolean yourCandidate() {
         // твой ли это кандидат?
-        User user = userSession.getUser();
-
         myClient = false;
-        BigDecimal numberIteraction;
+        BigDecimal numberIteraction = null;
         // проверка прошлого взаимодействия
         try {
-            numberIteraction = dataManager.loadValue("select e.numberIteraction " +
-                    "from itpearls_IteractionList e " +
-                    "where e.candidate = :candidate and " +
-                    "e.numberIteraction = " +
-                    "(select max(f.numberIteraction) " +
-                    "from itpearls_IteractionList f " +
-                    "where f.candidate = :candidate)", BigDecimal.class)
-                    .parameter("candidate", candidateField.getValue())
-                    .one();
+            if(candidateField.getValue() != null) {
+                numberIteraction = dataManager.loadValue("select e.numberIteraction " +
+                        "from itpearls_IteractionList e " +
+                        "where e.candidate = :candidate and " +
+                        "e.numberIteraction = " +
+                        "(select max(f.numberIteraction) " +
+                        "from itpearls_IteractionList f " +
+                        "where f.candidate = :candidate)", BigDecimal.class)
+                        .parameter("candidate", candidateField.getValue())
+                        .one();
+            }
         } catch (IllegalStateException e) {
             // не было взаимодействий с кандидатом
             numberIteraction = null;
@@ -571,16 +589,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private Integer getIteractionCount() {
-        Integer d;
+        Integer d = null;
 
         try {
-            d = dataManager.loadValue(
-                    "select count(e) " +
-                            "from itpearls_IteractionList e " +
-                            "where e.candidate = :candidate",
-                    Integer.class)
-                    .parameter("candidate", candidateField.getValue())
-                    .one();
+            if(candidateField.getValue() != null) {
+                d = dataManager.loadValue(
+                        "select count(e) " +
+                                "from itpearls_IteractionList e " +
+                                "where e.candidate = :candidate",
+                        Integer.class)
+                        .parameter("candidate", candidateField.getValue())
+                        .one();
+            }
         } catch (NullPointerException | IllegalStateException e) {
             d = 0;
         }
@@ -641,25 +661,27 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     // изменение надписи на кнопке в зависимости от щначения поля ItercationType
     @Subscribe("iteractionTypeField")
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
-        if (!event.getValue().equals(event.getPrevValue())) {
-            changeField();
-            // надпись на кнопке
-            if (iteractionTypeField.getValue().getCallButtonText() != null)
-                buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
-            // если установлен тип взаиподейтвия и нужно действие
-            if (iteractionTypeField.getValue() != null)
-                if (iteractionTypeField.getValue().getCallForm() != null)
-                    if (iteractionTypeField.getValue().getCallForm())
-                        buttonCallAction.setVisible(true);
-                    else
-                        buttonCallAction.setVisible(false);
+        if(event.getPrevValue() != null){
+            if (!event.getValue().equals(event.getPrevValue())) {
+                changeField();
+                // надпись на кнопке
+                if (iteractionTypeField.getValue().getCallButtonText() != null)
+                    buttonCallAction.setCaption(iteractionTypeField.getValue().getCallButtonText());
+                // если установлен тип взаиподейтвия и нужно действие
+                if (iteractionTypeField.getValue() != null)
+                    if (iteractionTypeField.getValue().getCallForm() != null)
+                        if (iteractionTypeField.getValue().getCallForm())
+                            buttonCallAction.setVisible(true);
+                        else
+                            buttonCallAction.setVisible(false);
 
-            if (iteractionTypeField.getValue() != null) {
-                if (iteractionTypeField.getValue().getSetDateTime() != null) {
-                    if (iteractionTypeField.getValue().getSetDateTime()) {
-                        if (addDate.getValue() == null) {
-                            Date date = new Date();
-                            addDate.setValue(date);
+                if (iteractionTypeField.getValue() != null) {
+                    if (iteractionTypeField.getValue().getSetDateTime() != null) {
+                        if (iteractionTypeField.getValue().getSetDateTime()) {
+                            if (addDate.getValue() == null) {
+                                Date date = new Date();
+                                addDate.setValue(date);
+                            }
                         }
                     }
                 }
@@ -675,20 +697,32 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         String dialogMessage = "";
 
         try {
-            candidatePosition = candidateField
-                    .getValue()
-                    .getPersonPosition()
-                    .getPositionRuName();
+            if(candidateField.getValue() != null) {
+                if (candidateField.getValue().getPersonPosition() != null) {
+                    if (candidateField.getValue().getPersonPosition().getPositionRuName() != null) {
+                        candidatePosition = candidateField
+                                .getValue()
+                                .getPersonPosition()
+                                .getPositionRuName();
+                    }
+                }
+            }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         try {
-            vacansyPosition = event.getValue()
-                    .getPositionType()
-                    .getPositionRuName();
+            if(event.getValue() != null) {
+                if (event.getValue().getPositionType() != null) {
+                    if (event.getValue().getPositionType().getPositionRuName() != null) {
+                        vacansyPosition = event.getValue()
+                                .getPositionType()
+                                .getPositionRuName();
+                    }
+                }
+            }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         if (vacansyPosition != null && candidatePosition != null) {
@@ -935,6 +969,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                 .withInitializer(e -> {
                                 })
                                 .build();
+                        
+                        a.show();
                     } else {
                         Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
                                 .newEntity()
