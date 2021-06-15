@@ -54,7 +54,6 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
 
-    @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "jobCandidate")
     protected List<Position> positionList;

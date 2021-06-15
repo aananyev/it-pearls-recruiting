@@ -55,6 +55,10 @@ public class OpenPosition extends StandardEntity {
     @JoinColumn(name = "CITY_POSITION_ID")
     protected City cityPosition;
 
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "openPosition")
+    protected List<City> cities;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "POSITION_TYPE_ID")
@@ -108,11 +112,6 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "openPosition")
     protected List<SkillTree> skillsList;
-
-    @Composition
-    @OnDelete(DeletePolicy.CASCADE)
-    @OneToMany(mappedBy = "openPosition")
-    protected List<City> cities;
 
     @JoinTable(name = "ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK", joinColumns = @JoinColumn(name = "OPEN_POSITION_ID"), inverseJoinColumns = @JoinColumn(name = "RECRUTIES_TASKS_ID"))
     @ManyToMany

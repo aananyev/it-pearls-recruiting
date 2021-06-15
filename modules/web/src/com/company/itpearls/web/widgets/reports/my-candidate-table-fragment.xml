@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data>
+        <collection id="listOfCandidatesDc"
+                    class="com.company.itpearls.entity.IteractionList">
+            <view extends="_local">
+                <property name="iteractionType" view="_minimal"/>
+                <property name="candidate" view="_local"/>
+                <property name="dateIteraction"/>
+            </view>
+            <loader id="listOfCandidatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_IteractionList e order by e.iteractionDate]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>(e.iteractionDate between :startDate and :endDate)</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.recrutier = :userName</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.iteractionType = :iteractionType</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="iteractionCheckDc"
+                    class="com.company.itpearls.entity.Iteraction"
+                    view="_local">
+            <loader id="iteractionCheckDl">
+                <query>
+                    <![CDATA[select e
+                            from itpearls_Iteraction e
+                            where e.widgetChackJobCandidates = true]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <vbox spacing="true">
+            <table id="jobCandidatesTable"
+                   height="AUTO"
+                   caption="кандидатов"
+                   width="100%"
+                   dataContainer="listOfCandidatesDc">
+                <columns>
+                    <column id="candidate"
+                            caption="mainMsg://msgFullName"/>
+                    <column id="candidate.personPosition"
+                            caption="mainMsg://msgPersonPosition"/>
+                    <column id="dateIteraction"
+                            caption="mainMsg://msgDate"/>
+                </columns>
+            </table>
+        </vbox>
+    </layout>
+</fragment>

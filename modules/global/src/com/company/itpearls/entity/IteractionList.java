@@ -22,6 +22,12 @@ public class IteractionList extends StandardEntity {
     @Column(name = "NUMBER_ITERACTION")
     protected BigDecimal numberIteraction;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ITERACTION_TYPE_ID")
+    protected Iteraction iteractionType;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "DATE_ITERACTION")
     protected Date dateIteraction;
@@ -57,12 +63,6 @@ public class IteractionList extends StandardEntity {
 //    @JoinColumn(name = "COMPANY_DEPARTMENT_ID")
 //    protected CompanyDepartament companyDepartment;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ITERACTION_TYPE_ID")
-    protected Iteraction iteractionType;
-
     @Column(name = "COMMUNICATION_METHOD", length = 80)
     protected String communicationMethod;
 
@@ -78,11 +78,6 @@ public class IteractionList extends StandardEntity {
 
     @Column(name = "RECRUTIER_NAME", length = 80)
     protected String recrutierName;
-
-    @Lookup(type = LookupType.DROPDOWN, actions = {})
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ITERACTION_CHAIN_ID")
-    protected IteractionList iteractionChain;
 
     @Column(name = "ADD_TYPE")
     protected Integer addType;
@@ -138,14 +133,6 @@ public class IteractionList extends StandardEntity {
 
     public void setAddDate(Date addDate) {
         this.addDate = addDate;
-    }
-
-    public IteractionList getIteractionChain() {
-        return iteractionChain;
-    }
-
-    public void setIteractionChain(IteractionList iteractionChain) {
-        this.iteractionChain = iteractionChain;
     }
 
     public void setCurrentJobPosition(Position currentJobPosition) {

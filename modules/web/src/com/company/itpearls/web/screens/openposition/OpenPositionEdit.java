@@ -1350,19 +1350,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             selectCitiesLocation.setCitiesList(this.getEditedEntity().getCities());
         });
         selectCitiesLocation.addAfterCloseListener(e -> {
+                List<City> cities = selectCitiesLocation.getCitiesList();
 
-            List<City> cities = selectCitiesLocation.getCitiesList();
+                getEditedEntity().setCities(cities);
+                CommitContext commitContext = new CommitContext(cities);
+                dataManager.commit(commitContext);
 
-            this.getEditedEntity().setCities(cities);
-            CommitContext commitContext = new CommitContext(cities);
-
-            dataManager.commit(commitContext);
-
-            changeCityListsLabel();
+                changeCityListsLabel();
         });
 
         selectCitiesLocation.show();
-
     }
 
     @Subscribe
@@ -1395,6 +1392,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
 
         }
+
         if (!outStr.equals("")) {
             citiesLabel.setValue(outStr);
             citiesLabel.setDescription(description);

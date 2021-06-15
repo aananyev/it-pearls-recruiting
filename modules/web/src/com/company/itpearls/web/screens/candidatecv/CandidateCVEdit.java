@@ -14,13 +14,9 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.AppUI;
-import org.apache.pdfbox.contentstream.operator.Operator;
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.POITextExtractor;
@@ -99,7 +95,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         AppUI ui = AppBeans.get(AppUI.class);
         webBrowserTools = ui.getWebBrowserTools();
 
-        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
+/*        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
             File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
             String textResume = "";
 
@@ -123,7 +119,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             rescanResume();
 
-        });
+        });*/
 
         fileOriginalCVField.addFileUploadErrorListener(uploadErrorEvent ->
                 notifications.create()
@@ -139,7 +135,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileDescriptor().getId());
+        File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
 
         String textResume = "";
 

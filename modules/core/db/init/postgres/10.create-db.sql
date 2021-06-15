@@ -99,7 +99,6 @@ create table ITPEARLS_ITERACTION_LIST (
     COMMENT_ text,
     RECRUTIER_ID uuid,
     RECRUTIER_NAME varchar(80),
-    ITERACTION_CHAIN_ID uuid,
     ADD_TYPE integer,
     ADD_DATE timestamp,
     ADD_STRING varchar(255),

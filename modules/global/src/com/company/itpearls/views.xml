@@ -130,7 +130,6 @@
                 <property name="pic"/>
             </property>
             <property name="recrutier" view="_minimal"/>
-            <property name="iteractionChain" view="_minimal"/>
         </property>
         <property name="specialisation" view="_local"/>
         <property name="jobHistory" view="_local">
@@ -378,7 +377,6 @@
         </property> -->
         <property name="iteractionType" view="_local"/>
         <property name="recrutier" view="_minimal"/>
-        <property name="iteractionChain" view="_minimal"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
         <property name="projectName" view="_minimal"/>
@@ -408,7 +406,6 @@
                 <property name="name"/>
             </property>
         </property>
-        <property name="iteractionChain" view="_minimal"/>
         <property name="dateIteraction"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_base">

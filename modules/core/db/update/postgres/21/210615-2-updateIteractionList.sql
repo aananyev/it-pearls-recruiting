@@ -1,0 +1,3 @@
+alter table ITPEARLS_ITERACTION_LIST rename column iteraction_chain_id to iteraction_chain_id__u40184 ;
+alter table ITPEARLS_ITERACTION_LIST drop constraint FK_ITPEARLS_ITERACTION_LIST_ON_ITERACTION_CHAIN ;
+drop index IDX_ITPEARLS_ITERACTION_LIST_ON_ITERACTION_CHAIN ;
