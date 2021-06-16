@@ -44,15 +44,19 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "FULL_NAME", length = 160)
     protected String fullName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CURRENT_COMPANY_ID")
-    protected Company currentCompany;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "BIRDH_DATE")
+    protected Date birdhDate;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CURRENT_COMPANY_ID")
+    protected Company currentCompany;
 
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "jobCandidate")
@@ -63,9 +67,10 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "CITY_OF_RESIDENCE_ID")
     protected City cityOfResidence;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "BIRDH_DATE")
-    protected Date birdhDate;
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "POSITION_COUNTRY_ID")
+    protected Country positionCountry;
 
     @Email
     @Column(name = "EMAIL", length = 50)
@@ -91,11 +96,6 @@ public class JobCandidate extends StandardEntity {
 
     @Column(name = "WHATSUP_NAME", length = 30)
     protected String whatsupName;
-
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_COUNTRY_ID")
-    protected Country positionCountry;
 
     @Composition
     @OnDelete(DeletePolicy.CASCADE)

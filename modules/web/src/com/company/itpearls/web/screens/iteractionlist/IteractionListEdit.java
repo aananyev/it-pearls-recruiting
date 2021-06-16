@@ -28,7 +28,6 @@ import java.util.Calendar;
 @EditedEntityContainer("iteractionListDc")
 @LoadDataBeforeShow
 public class IteractionListEdit extends StandardEditor<IteractionList> {
-    protected Boolean noSubscribe = false;
 
     @Inject
     private UserSession userSession;
@@ -44,14 +43,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Dialogs dialogs;
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
-    private Boolean newProject;
-    static Boolean myClient;
-    private Boolean transferFlag = false;
-    private IteractionList oldIteraction = null;
-    private JobCandidate candidate = null;
-    private Boolean askFlag = false;
-    private Boolean askFlag2 = false;
-
     @Inject
     private CollectionLoader<Iteraction> iteractionTypesLc;
     @Inject
@@ -88,11 +79,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> companyLabel;
     @Inject
     private InstanceLoader<IteractionList> iteractionListDl;
-
-    static String RESEARCHER = "Researcher";
-    static String RECRUITER = "Recruiter";
-    static String MANAGER = "Manager";
-    static String ADMINISTRATOR = "Administrators";
     @Inject
     private Notifications notifications;
     @Inject
@@ -103,6 +89,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> ratingLabel;
     @Inject
     private StarsAndOtherService starsAndOtherService;
+
+    static String RESEARCHER = "Researcher";
+    static String RECRUITER = "Recruiter";
+    static String MANAGER = "Manager";
+    static String ADMINISTRATOR = "Administrators";
+    private Boolean newProject;
+    static Boolean myClient;
+    private Boolean transferFlag = false;
+    private IteractionList oldIteraction = null;
+    private JobCandidate candidate = null;
+    private Boolean askFlag = false;
+    private Boolean askFlag2 = false;
+    protected Boolean noSubscribe = false;
+
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
