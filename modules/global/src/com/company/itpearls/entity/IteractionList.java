@@ -32,19 +32,11 @@ public class IteractionList extends StandardEntity {
     @Column(name = "DATE_ITERACTION")
     protected Date dateIteraction;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "END_DATE_ITERACTION")
-    protected Date endDateIteraction;
-
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "CANDIDATE_ID")
     protected JobCandidate candidate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CURRENT_JOB_POSITION_ID")
-    protected Position currentJobPosition;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @NotNull
@@ -52,12 +44,7 @@ public class IteractionList extends StandardEntity {
     @JoinColumn(name = "VACANCY_ID")
     protected OpenPosition vacancy;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PROJECT_ID")
-    protected Project project;
-
-//    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
+    //    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
 //    @NotNull
 //    @ManyToOne(fetch = FetchType.LAZY, optional = false)
 //    @JoinColumn(name = "COMPANY_DEPARTMENT_ID")
@@ -95,14 +82,6 @@ public class IteractionList extends StandardEntity {
     @Column(name = "RATING")
     protected Integer rating;
 
-    public void setEndDateIteraction(Date endDateIteraction) {
-        this.endDateIteraction = endDateIteraction;
-    }
-
-    public Date getEndDateIteraction() {
-        return endDateIteraction;
-    }
-
     public Integer getAddInteger() {
         return addInteger;
     }
@@ -133,10 +112,6 @@ public class IteractionList extends StandardEntity {
 
     public void setAddDate(Date addDate) {
         this.addDate = addDate;
-    }
-
-    public void setCurrentJobPosition(Position currentJobPosition) {
-        this.currentJobPosition = currentJobPosition;
     }
 
     public String getRecrutierName() {
@@ -202,18 +177,6 @@ public class IteractionList extends StandardEntity {
 //    public void setCompanyDepartment(CompanyDepartament companyDepartment) {
 //        this.companyDepartment = companyDepartment;
 //    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    public Position getCurrentJobPosition() {
-        return currentJobPosition;
-    }
 
     public JobCandidate getCandidate() {
         return candidate;

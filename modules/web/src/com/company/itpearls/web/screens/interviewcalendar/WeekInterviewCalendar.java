@@ -206,13 +206,13 @@ public class WeekInterviewCalendar extends Screen {
 
             if (list.getIteractionType().getCalendarItemDescription() != null)
                 calendarEvent.setDescription(typeIteraction +
-                        (list.getProject() != null ? list.getProject().getProjectName() + ":" : "") +
+                        (list.getVacancy().getProjectName() != null ? list.getVacancy().getProjectName() + ":" : "") +
                         list.getIteractionType().getCalendarItemDescription() +
                         "\n" + nameCandidate +
                         list.getCandidate().getFullName() + "");
             else
                 calendarEvent.setDescription(typeIteraction +
-                        (list.getProject() != null ? list.getProject().getProjectName() + ":\n" : "") +
+                        (list.getVacancy().getProjectName() != null ? list.getVacancy().getProjectName() + ":\n" : "") +
                         nameCandidate +
                         list.getCandidate().getFullName() + "");
 

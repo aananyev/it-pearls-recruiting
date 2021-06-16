@@ -24,7 +24,7 @@ public class Project extends StandardEntity {
     @Column(name = "PROJECT_NAME", length = 80)
     protected String projectName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PROJECT_TREE_ID")
     protected Project projectTree;
@@ -55,11 +55,6 @@ public class Project extends StandardEntity {
     @OneToMany(mappedBy = "projectName")
     protected List<OpenPosition> openPosition;
 
-    @Composition
-    @OnDelete(DeletePolicy.CASCADE)
-    @OneToMany(mappedBy = "project")
-    protected List<IteractionList> jobCandidate;
-
     @Lob
     @Column(name = "PROJECT_DESCRIPTION")
     protected String projectDescription;
@@ -76,20 +71,12 @@ public class Project extends StandardEntity {
         this.projectDescription = projectDescription;
     }
 
-    public List<IteractionList> getJobCandidate() {
-        return jobCandidate;
-    }
-
     public Boolean getProjectIsClosed() {
         return projectIsClosed;
     }
 
     public void setProjectIsClosed(Boolean projectIsClosed) {
         this.projectIsClosed = projectIsClosed;
-    }
-
-    public void setJobCandidate(List<IteractionList> jobCandidate) {
-        this.jobCandidate = jobCandidate;
     }
 
     public List<OpenPosition> getOpenPosition() {

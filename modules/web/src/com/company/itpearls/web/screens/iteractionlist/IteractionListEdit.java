@@ -228,7 +228,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         if (vacancyFiels.getValue() != null) {
             if (vacancyFiels.getValue().getProjectName() != null) {
-                getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
+                // getEditedEntity().setProject(vacancyFiels.getValue().getProjectName());
             }
         }
 
@@ -523,11 +523,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         gregorianCalendar.setGregorianChange(getEditedEntity().getDateIteraction());
         gregorianCalendar.add(Calendar.HOUR, 1);
 
-        if (getEditedEntity().getEndDateIteraction() == null) {
+/*        if (getEditedEntity().getEndDateIteraction() == null) {
             if (getEditedEntity().getDateIteraction() != null) {
                 getEditedEntity().setEndDateIteraction(gregorianCalendar.getTime());
             }
-        }
+        }*/
 
     }
 

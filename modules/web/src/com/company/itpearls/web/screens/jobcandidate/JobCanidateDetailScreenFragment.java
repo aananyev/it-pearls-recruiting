@@ -218,7 +218,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
             try {
                 project = iteractionList.get(0)
-                        .getProject()
+                        .getVacancy()
+                        .getProjectName()
                         .getProjectDepartment()
                         .getCompanyName()
                         .getComanyName();
@@ -237,7 +238,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
             try {
                 departament = iteractionList.get(0)
-                        .getProject()
+                        .getVacancy()
+                        .getProjectName()
                         .getProjectDepartment()
                         .getDepartamentRuName();
             } catch (Exception e) {
@@ -269,7 +271,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
             try {
                 projectName = iteractionList.get(0)
-                        .getProject()
+                        .getVacancy()
+                        .getProjectName()
                         .getProjectName();
             } catch (Exception e) {
                 projectName = "";

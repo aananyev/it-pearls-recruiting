@@ -45,7 +45,6 @@
             </property>
             <property name="positionType" view="_local"/>
         </property>
-        <property name="jobCandidate" view="_local"/>
     </view>
     <view entity="itpearls_Person" name="person-view" extends="_local">
         <property name="positionCountry" view="_minimal"/>
@@ -121,11 +120,7 @@
             <property name="candidate" view="_local">
                 <property name="personPosition" view="_local"/>
             </property>
-            <property name="currentJobPosition" view="_minimal"/>
             <property name="vacancy" view="_minimal"/>
-            <property name="project" view="_minimal">
-                <property name="projectDepartment" view="_minimal"/>
-            </property>
             <property name="iteractionType" view="_minimal">
                 <property name="pic"/>
             </property>
@@ -306,34 +301,6 @@
                 </property>
             </property>
         </property>
-        <property name="project" view="project-view">
-            <property name="openPosition" view="openPosition-view">
-                <property name="remoteWork"/>
-                <property name="remoteComment"/>
-                <property name="salaryMin"/>
-                <property name="salaryMax"/>
-                <property name="salaryFixLimit"/>
-                <property name="numberPosition"/>
-                <property name="workExperience"/>
-                <property name="commandExperience"/>
-                <property name="comment"/>
-                <property name="commentEn"/>
-                <property name="shortDescription"/>
-                <property name="templateLetter"/>
-                <property name="needLetter"/>
-                <property name="exercise"/>
-                <property name="needExercise"/>
-                <property name="priority"/>
-                <property name="internalProject"/>
-                <property name="projectName" view="_local">
-                    <property name="projectDepartment" view="_local">
-                        <property name="companyName" view="_local">
-                            <property name="fileCompanyLogo" view="_minimal"/>
-                        </property>
-                    </property>
-                </property>
-            </property>
-        </property>
         <property name="iteractionType" view="_minimal">
             <property name="pic"/>
             <property name="addCaption"/>
@@ -355,26 +322,9 @@
         <property name="candidate" view="_local">
             <property name="personPosition" view="position-view"/>
         </property>
-        <property name="currentJobPosition" view="position-view"/>
         <property name="vacancy" view="_minimal">
             <property name="openClose"/>
         </property>
-        <property name="project" view="_minimal">
-            <property name="projectDepartment" view="_minimal"/>
-        </property>
-        <!-- <property name="companyDepartment" view="_minimal">
-            <property name="departamentHrDirector" view="_minimal"/>
-            <property name="departamentDirector" view="_minimal"/>
-            <property name="departamentDescription"/>
-            <property name="departamentNumberOfProgrammers"/>
-            <property name="projectOfDepartment" view="_local">
-                <property name="projectDepartment" view="_minimal"/>
-                <property name="projectOwner" view="_minimal"/>
-                <property name="openPosition" view="_minimal">
-                </property>
-                <property name="jobCandidate" view="_minimal"/>
-            </property>
-        </property> -->
         <property name="iteractionType" view="_local"/>
         <property name="recrutier" view="_minimal"/>
     </view>
@@ -391,15 +341,9 @@
             <property name="fullName"/>
             <property name="personPosition" view="_local"/>
         </property>
-        <property name="currentJobPosition" view="_minimal"/>
         <property name="vacancy" view="_local">
             <property name="positionType" view="_local"/>
         </property>
-        <property name="project" view="_minimal">
-            <property name="projectName"/>
-            <property name="projectDepartment" view="_minimal"/>
-        </property>
-        <!--        <property name="companyDepartment" view="_minimal"/> -->
         <property name="iteractionType" view="iteraction-view"/>
         <property name="recrutier" view="_minimal">
             <property name="group" view="_minimal">
@@ -437,8 +381,6 @@
         <property name="iteractionList" view="_minimal">
             <property name="dateIteraction"/>
             <property name="vacancy" view="_minimal"/>
-            <property name="project" view="_minimal"/>
-<!--            <property name="companyDepartment" view="_minimal"/> -->
             <property name="iteractionType" view="_minimal"/>
             <property name="recrutier" view="_minimal"/>
             <property name="recrutierName"/>

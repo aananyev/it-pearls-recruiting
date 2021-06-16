@@ -605,14 +605,20 @@ rating_battery_yellow_3:before {
     color: black;
     font-size: large;
     font-weight: bold;
-    background-color: red;
+    background-color: #FFC0CB;
+    border: 2px solid #7a7b7e;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
 }
 
 .open-position-notification-close {
     color: black;
     font-size: large;
     font-weight: bold;
-    background-color: yellow;
+    background-color: #98FB98;
+    border: 2px solid #7a7b7e;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
 }
 
 .open-position-internal-project-job-recrutier {

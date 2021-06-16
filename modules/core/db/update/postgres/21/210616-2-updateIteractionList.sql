@@ -1,0 +1,7 @@
+alter table ITPEARLS_ITERACTION_LIST rename column end_date_iteraction to end_date_iteraction__u05352 ;
+alter table ITPEARLS_ITERACTION_LIST rename column project_id to project_id__u56134 ;
+alter table ITPEARLS_ITERACTION_LIST drop constraint FK_ITPEARLS_ITERACTION_LIST_ON_PROJECT ;
+drop index IDX_ITPEARLS_ITERACTION_LIST_ON_PROJECT ;
+alter table ITPEARLS_ITERACTION_LIST rename column current_job_position_id to current_job_position_id__u98446 ;
+alter table ITPEARLS_ITERACTION_LIST drop constraint FK_ITPEARLS_ITERACTION_LIST_ON_CURRENT_JOB_POSITION ;
+drop index IDX_ITPEARLS_ITERACTION_LIST_ON_CURRENT_JOB_POSITION ;

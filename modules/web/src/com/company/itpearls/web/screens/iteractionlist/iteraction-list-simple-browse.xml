@@ -21,7 +21,7 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="900"
+                width="1000"
                 forceDialog="true"/>
     <layout expand="iteractionListsTable"
             spacing="true">
@@ -56,17 +56,27 @@
                     <htmlRenderer nullRepresentation="null"/>
                 </column>
                 <column property="dateIteraction"
+                        maximumWidth="100px"
+                        minimumWidth="80px"
                         id="dateIteraction">
                     <formatter format="dd.MM.yyyy"
                                class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                 </column>
                 <column property="iteractionType"
+                        maximumWidth="200px"
+                        minimumWidth="150px"
                         id="iteractionType"/>
                 <column id="project.projectName"
-                        property="project.projectName"/>
+                        maximumWidth="250px"
+                        minimumWidth="200px"
+                        property="vacancy.projectName"/>
                 <column property="vacancy"
+                        maximumWidth="250px"
+                        minimumWidth="200px"
                         id="vacancy"/>
                 <column property="recrutier"
+                        maximumWidth="200px"
+                        minimumWidth="150px"
                         id="recrutier"/>
             </columns>
             <buttonsPanel id="buttonsPanel"

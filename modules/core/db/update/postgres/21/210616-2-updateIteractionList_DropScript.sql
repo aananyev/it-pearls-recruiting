@@ -1,0 +1,3 @@
+alter table ITPEARLS_ITERACTION_LIST drop column CURRENT_JOB_POSITION_ID__U98446 cascade ;
+alter table ITPEARLS_ITERACTION_LIST drop column PROJECT_ID__U56134 cascade ;
+alter table ITPEARLS_ITERACTION_LIST drop column END_DATE_ITERACTION__U05352 cascade ;

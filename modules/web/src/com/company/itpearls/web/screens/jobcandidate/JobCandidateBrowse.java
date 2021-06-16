@@ -745,8 +745,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         String retStr = "";
 
         for (IteractionList a : iteractionList) {
-            if (a.getProject() != null)
-                retStr = a.getProject().getProjectName();
+            if (a.getVacancy().getProjectName() != null)
+                retStr = a.getVacancy().getProjectName().getProjectName();
             else
                 retStr = "";
         }
