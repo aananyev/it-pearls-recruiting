@@ -6,22 +6,32 @@
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="_local">
                 <property name="iteractionType" view="_minimal"/>
-                <property name="candidate" view="_local"/>
+                <property name="candidate" view="_local">
+                    <property name="personPosition" view="_minimal"/>
+                </property>
                 <property name="dateIteraction"/>
             </view>
             <loader id="listOfCandidatesDl">
                 <query>
-                    <![CDATA[select e from itpearls_IteractionList e order by e.iteractionDate]]>
+                    <![CDATA[select e from itpearls_IteractionList e
+                             where e.numberIteraction >=
+                                (select max(f.numberIteraction)
+                                 from itpearls_IteractionList f
+                                 where f.candidate = e.candidate)
+                             order by e.numberIteraction]]>
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>(e.iteractionDate between :startDate and :endDate)</c:where>
+                                <c:where>(e.dateIteraction between :startDate and :endDate)</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.recrutier = :userName</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.iteractionType = :iteractionType</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.iteractionType.widgetChackJobCandidates = true</c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -40,14 +50,19 @@
             </loader>
         </collection>
     </data>
-    <layout>
-        <vbox spacing="true">
+    <layout spacing="true" expand="vbox">
+        <vbox id="vbox"
+              spacing="true"
+              expand="jobCandidatesTable"
+              margin="10px, 5px, 5px, 5px">
             <table id="jobCandidatesTable"
                    height="AUTO"
-                   caption="кандидатов"
                    width="100%"
+                   stylename="small"
                    dataContainer="listOfCandidatesDc">
                 <columns>
+                    <column id="numberIteraction"
+                            caption="mainMsg://msgNumberIteraction"/>
                     <column id="candidate"
                             caption="mainMsg://msgFullName"/>
                     <column id="candidate.personPosition"

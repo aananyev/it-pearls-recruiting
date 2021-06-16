@@ -51,10 +51,14 @@ public class MyCandidateTableFragment extends ScreenFragment {
 
     public void load() {
         listOfCandidatesDl.setParameter("userName", user);
-//        listOfCandidatesDl.setParameter("startDate", startDate);
-//        listOfCandidatesDl.setParameter("endDate", endDate);
+        listOfCandidatesDl.setParameter("startDate", startDate);
+        listOfCandidatesDl.setParameter("endDate", endDate);
         listOfCandidatesDl.setParameter("iteractionType", iteractionType);
 
         listOfCandidatesDl.load();
+    }
+
+    public int getCountCandidates() {
+        return listOfCandidatesDc.getItems().size();
     }
 }

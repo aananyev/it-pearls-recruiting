@@ -35,8 +35,6 @@ public class MyJobCandidatesWidget extends ScreenFragment {
     protected Date endDate;
 
     @Inject
-    private CollectionContainer<Iteraction> iteractionCheckDc;
-    @Inject
     private Accordion jobCandidatesIteractionAccordion;
     @Inject
     private UiComponents uiComponents;
@@ -53,11 +51,7 @@ public class MyJobCandidatesWidget extends ScreenFragment {
     @Inject
     private Label<String> widgetTitle;
     @Inject
-    private CollectionLoader<JobCandidate> listOfCandidatesDl;
-    @Inject
     private UserSession userSession;
-    @Inject
-    private CollectionContainer<JobCandidate> listOfCandidatesDc;
     @Inject
     private Fragments fragments;
 
@@ -66,7 +60,6 @@ public class MyJobCandidatesWidget extends ScreenFragment {
         setDefaultDate();
         setAccordionTabs(event);
         setWidgetTitle();
-        myCandidate();
     }
 
     private void setDefaultDate() {
@@ -84,12 +77,6 @@ public class MyJobCandidatesWidget extends ScreenFragment {
             startDate = calendar.getTime();
 
         }
-    }
-
-    private void myCandidate() {
-        listOfCandidatesDl.removeParameter("user");
-//        listOfCandidatesDl.setParameter("user", userSession.getUser());
-        listOfCandidatesDl.load();
     }
 
     private void setWidgetTitle() {
@@ -119,21 +106,29 @@ public class MyJobCandidatesWidget extends ScreenFragment {
 
             MyCandidateTableFragment myCandidateTableFragment = fragments.create(this,
                     MyCandidateTableFragment.class);
+
             myCandidateTableFragment.setUser();
             myCandidateTableFragment.setStartDate(startDate);
             myCandidateTableFragment.setEndDate(endDate);
-
+            myCandidateTableFragment.setIteractionType(itr);
             myCandidateTableFragment.load();
 
-            Fragment fragment = myCandidateTableFragment.getFragment();
-            groupBoxLayout.add(fragment);
+            if(myCandidateTableFragment.getCountCandidates() != 0) {
+                Fragment fragment = myCandidateTableFragment.getFragment();
+                fragment.setHeightFull();
 
-            Accordion.Tab tab = jobCandidatesIteractionAccordion.addTab(
-                    toLatinTrans.transliterate(itr.getIterationName()),
-                    groupBoxLayout);
+                groupBoxLayout.add(fragment);
+                groupBoxLayout.setHeightFull();
+                groupBoxLayout.expand(fragment);
 
-            tab.setCaption(itr.getIterationName());
-            tab.setStyleName("last_status_widget");
+                Accordion.Tab tab = jobCandidatesIteractionAccordion.addTab(
+                        toLatinTrans.transliterate(itr.getIterationName()),
+                        groupBoxLayout);
+
+                tab.setCaption(itr.getIterationName());
+                tab.setStyleName("last_status_widget");
+                tab.setIcon(itr.getPic());
+            }
         }
     }
 }
