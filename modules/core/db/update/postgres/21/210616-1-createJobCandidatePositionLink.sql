@@ -1,0 +1,5 @@
+create table ITPEARLS_JOB_CANDIDATE_POSITION_LINK (
+    POSITION_ID uuid,
+    JOB_CANDIDATE_ID uuid,
+    primary key (POSITION_ID, JOB_CANDIDATE_ID)
+);

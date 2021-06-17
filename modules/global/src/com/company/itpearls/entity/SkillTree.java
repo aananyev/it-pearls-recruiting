@@ -25,14 +25,10 @@ public class SkillTree extends StandardEntity {
     @Column(name = "SKILL_NAME", nullable = false, unique = true, length = 80)
     protected String skillName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SKILL_TREE_ID")
     protected SkillTree skillTree;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "JOB_CANDIDATE_ID")
-    protected JobCandidate jobCandidate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
@@ -43,12 +39,12 @@ public class SkillTree extends StandardEntity {
     @OneToMany(mappedBy = "skillTree")
     protected List<JobCandidate> candidates;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CANDIDATE_CV_ID")
     protected CandidateCV candidateCV;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne
     @JoinColumn(name = "SPECIALISATION_ID")
     protected Specialisation specialisation;
@@ -78,14 +74,6 @@ public class SkillTree extends StandardEntity {
 
     public void setOpenPosition(OpenPosition openPosition) {
         this.openPosition = openPosition;
-    }
-
-    public JobCandidate getJobCandidate() {
-        return jobCandidate;
-    }
-
-    public void setJobCandidate(JobCandidate jobCandidate) {
-        this.jobCandidate = jobCandidate;
     }
 
     public SkillTree getSkillTree() {

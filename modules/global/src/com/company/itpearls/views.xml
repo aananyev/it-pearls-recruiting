@@ -110,12 +110,6 @@
         <property name="cityOfResidence" view="_local">
             <property name="cityRegion" view="_local"/>
         </property>
-        <property name="positionCountry" view="_local">
-            <property name="countryOfRegion" view="_minimal">
-                <property name="regionCountry" view="_minimal"/>
-                <property name="regionOfCity" view="_minimal"/>
-            </property>
-        </property>
         <property name="iteractionList" view="_local">
             <property name="candidate" view="_local">
                 <property name="personPosition" view="_local"/>
@@ -140,16 +134,6 @@
             <property name="resumePosition" view="_minimal"/>
             <property name="toVacancy" view="_minimal"/>
         </property>
-        <property name="skills" view="_local"/>
-        <property name="openPosition" view="_local">
-            <property name="cityPosition" view="_minimal"/>
-            <property name="positionType" view="_local"/>
-            <property name="projectName" view="_minimal"/>
-            <property name="skillsList" view="_minimal"/>
-            <property name="candidates" view="_local">
-                <property name="openPosition" view="_local"/>
-            </property>
-        </property>
         <property name="fileImageFace" view="_local"/>
         <property name="positionList" view="_local"/>
     </view>
@@ -172,7 +156,6 @@
             <property name="currentCompany" view="_local"/>
             <property name="personPosition" view="_local"/>
             <property name="cityOfResidence" view="_local"/>
-            <property name="positionCountry" view="_local"/>
             <property name="iteractionList" view="_local"/>
             <property name="specialisation" view="_local"/>
             <property name="jobHistory" view="_local"/>
@@ -220,7 +203,6 @@
         <property name="candidate" view="_minimal">
             <property name="currentCompany" view="_minimal"/>
             <property name="cityOfResidence" view="_minimal"/>
-            <property name="positionCountry" view="_minimal"/>
             <property name="jobHistory" view="_minimal"/>
             <property name="candidateCv" view="_local">
                 <property name="fileCV" view="_local"/>
@@ -388,10 +370,6 @@
         <property name="specialisation" view="_minimal"/>
         <property name="candidateCv" view="_minimal">
             <property name="fileImageFace" view="_local"/>
-        </property>
-        <property name="openPosition" view="_minimal">
-            <property name="cityPosition" view="_minimal"/>
-            <property name="positionType" view="_minimal"/>
         </property>
     </view>
     <view entity="itpearls_Company" name="company-view-search" extends="_local">

@@ -19,7 +19,6 @@ import org.jsoup.Jsoup;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,8 +50,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LookupPickerField<Company> currentCompanyField;
     @Inject
     private TextField<String> emailField;
-    @Inject
-    private LookupPickerField<Specialisation> jobCandidateSpecialisationField;
     @Inject
     private LookupPickerField<City> jobCityCandidateField;
     @Inject
@@ -116,8 +113,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private SuggestionField<String> middleNameField;
     @Inject
-    private Screens screens;
-    @Inject
     private Label<String> positionsLabel;
     @Inject
     private PdfParserService pdfParserService;
@@ -144,6 +139,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
     @Inject
     private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private InstanceContainer<JobCandidate> jobCandidateDc;
+    @Inject
+    private InstanceLoader<JobCandidate> jobCandidateDl;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -158,7 +157,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         return candidates.size() == 0 ? false : true;
     }
-
 
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
@@ -188,7 +186,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         socialNetworkURLs.setNetworkName(s.getSocialNetwork());
                         socialNetworkURLs.setJobCandidate(getEditedEntity());
 
-                        dataManager.commit(socialNetworkURLs);
+//                        dataManager.commit(socialNetworkURLs);
                     }
                 }
             }
@@ -222,7 +220,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setCreatedUpdatedLabel() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.mm.yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             String retStr = "Создано: " + getEditedEntity().getCreatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") "
@@ -313,24 +311,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return Jsoup.parse(retStr).text();
-    }
-
-    private Boolean checkSubscibe(LayoutClickNotifier.LayoutClickEvent event) {
-        Integer countSubscrine = dataManager
-                .loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
-                        "where e.reacrutier = :recrutier and " +
-                        "e.openPosition = :openPosition and " +
-                        ":nowDate between e.startDate and e.endDate", Integer.class)
-//                .parameter( "recrutier", recrutiesTasksFieldUser.getValue() )
-                .parameter("recrutier", userSession.getUser())
-                .parameter("openPosition", getEditedEntity().getOpenPosition())
-//                .parameter( "openPosition", openPositionField.getValue() )
-                .parameter("nowDate", new Date())
-                .one();
-
-        // если нет соответствия, значит нет еще подписки, значит можно подписаться,
-        // если уже есть, то не надо подписываться
-        return countSubscrine > 0 ? true : false;
     }
 
     @Subscribe("firstNameField")
@@ -609,8 +589,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (secondNameField.getValue() != null)        // 6
             qPercent = ++qPercent;
 
-        if (jobCandidateSpecialisationField != null)   // 7
-            qPercent = ++qPercent;
+//        if (jobCandidateSpecialisationField != null)   // 7
+//            qPercent = ++qPercent;
 
         if (jobCityCandidateField.getValue() != null)  // 8
             qPercent = ++qPercent;
@@ -815,51 +795,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .collect(Collectors.toList()));
     }
 
-    private Boolean needDublicateDialog() {
-        if (ifCandidateIsExist()) {
-            Dialogs.OptionDialogBuilder d = dialogs.createOptionDialog()
-                    .withCaption("WARNING")
-                    .withMessage("Кандидат <b>" + getEditedEntity().getFullName() +
-                            "</b> есть в базе!\n Вы точно хотите создать еще одного?")
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
-                                    .withHandler(e -> {
-                                        close(StandardOutcome.COMMIT);
-                                        returnE.set(true);
-                                    }),
-                            new DialogAction(DialogAction.Type.NO)
-                                    .withHandler(f -> {
-                                        returnE.set(false);
-                                    })
-                    );
-
-            d.withContentMode(ContentMode.HTML);
-            d.show();
-        } else
-            close(StandardOutcome.COMMIT);
-
-        return returnE.get();
-    }
-
-    public void onBtnOkAndCheck() {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            needDublicateDialog();
-            return;
-        } else {
-            close(StandardOutcome.COMMIT);
-            return;
-        }
-    }
-
     public void addIteractionJobCandidate() {
         screenBuilders.editor(IteractionList.class, this)
                 .newEntity()
-//                .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new JobCandidateScreenOptions(false))
                 .withParentDataContext(dataContext)
-                .withContainer(jobCandidateIteractionDc)
                 .withInitializer(candidate -> {
                     candidate.setCandidate(getEditedEntity());
+
+                    DataContext dataContext = jobCandidateDl.getDataContext();
+                    IteractionList iteractionList = dataContext.merge(candidate);
+                    jobCandidateDc.getItem().getIteractionList().add(iteractionList);
                 })
                 .build()
                 .show();
@@ -908,13 +854,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 IteractionList finalLastIteraction = lastIteraction;
 
                 screenBuilders.editor(IteractionList.class, this)
-//                        .withOpenMode(OpenMode.DIALOG)
                         .withParentDataContext(dataContext)
-                        .withContainer(jobCandidateIteractionDc)
                         .withInitializer(candidate -> {
-                            candidate.setCandidate(getEditedEntity());
                             candidate.setVacancy(finalLastIteraction.getVacancy());
                             candidate.setNumberIteraction(numBerIteractionForNewEntity());
+
+                            IteractionList iteractionList = dataContext.merge(candidate);
+                            jobCandidateDc.getItem().getIteractionList().add(iteractionList);
                         })
                         .newEntity()
                         .build()
@@ -933,13 +879,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         } else {
             screenBuilders.editor(IteractionList.class, this)
-//                    .withOpenMode(OpenMode.DIALOG)
                     .withParentDataContext(dataContext)
-                    .withContainer(jobCandidateIteractionDc)
                     .withInitializer(candidate -> {
                         candidate.setCandidate(jobCandidateIteractionListTable.getSingleSelected().getCandidate());
                         candidate.setVacancy(jobCandidateIteractionListTable.getSingleSelected().getVacancy());
                         candidate.setNumberIteraction(numBerIteractionForNewEntity());
+
+                        IteractionList iteractionList = dataContext.merge(candidate);
+                        jobCandidateDc.getItem().getIteractionList().add(iteractionList);
                     })
                     .newEntity()
                     .build()
@@ -1138,7 +1085,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 //        jobCandidateIteractionListDataGridDl.load();
     }
 
-    public void addPositionList() {
+    public void addPositionList() { /*
         SelectPersonPositions selectPersonPositions = screens.create(SelectPersonPositions.class);
 
         List<Position> setPos = new ArrayList<>();
@@ -1154,17 +1101,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
 
         selectPersonPositions.addAfterCloseListener(e -> {
+            dataContext.create(Position.class);
             List<Position> positions = selectPersonPositions.getPositionsList();
 
-            getEditedEntity().setPositionList(positions);
-            CommitContext commitContext = new CommitContext(positions);
-
-            dataManager.commit(commitContext);
+            for(Position p : positions) {
+                metadata.create(Project.class);
+                jobCandidateDc.getItem().getPositionList().add(p);
+            }
 
             setPositionsLabel();
         });
 
-        selectPersonPositions.show();
+        selectPersonPositions.show();*/
     }
 
     private void setPositionsLabel() {
@@ -1189,10 +1137,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Install(to = "jobCandidateSkillListTable.skillName", subject = "descriptionProvider")
-    private String jobCandidateSkillListTableSkillNameDescriptionProvider(SkillTree skillTree) {
-        return skillTree.getComment();
-    }
+//    @Install(to = "jobCandidateSkillListTable.skillName", subject = "descriptionProvider")
+//    private String jobCandidateSkillListTableSkillNameDescriptionProvider(SkillTree skillTree) {
+//        return skillTree.getComment();
+//    }
 
     public void copyCVJobCandidate() {
         if (jobCandidateCandidateCvTable.getSingleSelected() == null) {
@@ -1215,10 +1163,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             if (candidateCV != null) {
                 screenBuilders.editor(CandidateCV.class, this)
-                        .withParentDataContext(dataContext)
-                        .withContainer(jobCandidateCandidateCvsDc)
                         .withInitializer(candidate -> {
                             candidate.setCandidate(getEditedEntity());
+
+                            DataContext dataContext = getScreenData().getDataContext();
+                            CandidateCV cv = dataContext.merge(candidate);
+
+                            jobCandidateDc.getItem().getCandidateCv().add(cv);
                         })
                         .newEntity()
                         .build()
@@ -1238,7 +1189,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         } else {
             screenBuilders.editor(CandidateCV.class, this)
                     .withParentDataContext(dataContext)
-                    .withContainer(jobCandidateCandidateCvsDc)
                     .withInitializer(candidate -> {
                         candidate.setCandidate(jobCandidateCandidateCvTable.getSingleSelected().getCandidate());
                         candidate.setTextCV(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
@@ -1248,6 +1198,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         candidate.setLinkItPearlsCV(jobCandidateCandidateCvTable.getSingleSelected().getLinkItPearlsCV());
                         candidate.setLintToCloudFile(jobCandidateCandidateCvTable.getSingleSelected().getLintToCloudFile());
                         candidate.setOwner(userSession.getUser());
+
+                        DataContext dataContext = getScreenData().getDataContext();
+                        CandidateCV cv = dataContext.merge(candidate);
+                        jobCandidateDc.getItem().getCandidateCv().add(cv);
                     })
                     .newEntity()
                     .build()
@@ -1264,6 +1218,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             SkillTreeBrowseCheck s = screenBuilders.screen(this)
                     .withScreenClass(SkillTreeBrowseCheck.class)
                     .build();
+
             s.setCandidateCVSkills(skillTrees);
             s.setOpenPositionSkills(skillTreesFromJD);
             s.setTitle(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getVacansyName());
@@ -1283,6 +1238,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (jobCandidateCandidateCvTable
                     .getSingleSelected()
                     .getTextCV() != null) {
+
                 String inputText = Jsoup.parse(jobCandidateCandidateCvTable
                         .getSingleSelected()
                         .getTextCV())

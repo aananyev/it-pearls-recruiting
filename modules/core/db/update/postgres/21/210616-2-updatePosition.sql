@@ -1,0 +1,3 @@
+alter table ITPEARLS_POSITION rename column job_candidate_id to job_candidate_id__u64046 ;
+alter table ITPEARLS_POSITION drop constraint FK_ITPEARLS_POSITION_ON_JOB_CANDIDATE ;
+drop index IDX_ITPEARLS_POSITION_ON_JOB_CANDIDATE ;

@@ -14,7 +14,6 @@
         </instance>
         <collection id="positionsOptionDc" class="com.company.itpearls.entity.Position">
             <view extends="position-view">
-                <property name="jobCandidate" view="_local"/>
                 <property name="positionRuName"/>
             </view>
             <loader id="positionsOptionDl">

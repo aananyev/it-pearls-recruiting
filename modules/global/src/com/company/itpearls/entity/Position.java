@@ -5,6 +5,7 @@ import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @NamePattern("%s|positionRuName")
 @Table(name = "ITPEARLS_POSITION", indexes = {
@@ -24,13 +25,23 @@ public class Position extends StandardEntity {
     @Column(name = "POSITION_EN_NAME", unique = true, length = 80)
     protected String positionEnName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "JOB_CANDIDATE_ID")
-    protected JobCandidate jobCandidate;
-
     @Lob
     @Column(name = "STANDART_DECRIPTION")
     private String standartDescription;
+
+    @JoinTable(name = "ITPEARLS_JOB_CANDIDATE_POSITION_LINK",
+            joinColumns = @JoinColumn(name = "POSITION_ID"),
+            inverseJoinColumns = @JoinColumn(name = "JOB_CANDIDATE_ID"))
+    @ManyToMany
+    private List<JobCandidate> jobCandidates;
+
+    public List<JobCandidate> getJobCandidates() {
+        return jobCandidates;
+    }
+
+    public void setJobCandidates(List<JobCandidate> jobCandidates) {
+        this.jobCandidates = jobCandidates;
+    }
 
     public String getStandartDescription() {
         return standartDescription;
@@ -56,11 +67,4 @@ public class Position extends StandardEntity {
         return positionEnName;
     }
 
-    public JobCandidate getJobCandidate() {
-        return jobCandidate;
-    }
-
-    public void setJobCandidate(JobCandidate jobCandidate) {
-        this.jobCandidate = jobCandidate;
-    }
 }

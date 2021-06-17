@@ -1,0 +1,3 @@
+alter table ITPEARLS_JOB_CANDIDATE rename column position_country_id to position_country_id__u27324 ;
+alter table ITPEARLS_JOB_CANDIDATE drop constraint FK_ITPEARLS_JOB_CANDIDATE_ON_POSITION_COUNTRY ;
+drop index IDX_ITPEARLS_JOB_CANDIDATE_ON_POSITION_COUNTRY ;

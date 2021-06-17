@@ -1,0 +1,3 @@
+alter table ITPEARLS_SKILL_TREE rename column job_candidate_id to job_candidate_id__u16384 ;
+alter table ITPEARLS_SKILL_TREE drop constraint FK_ITPEARLS_SKILL_TREE_ON_JOB_CANDIDATE ;
+drop index IDX_ITPEARLS_SKILL_TREE_ON_JOB_CANDIDATE ;

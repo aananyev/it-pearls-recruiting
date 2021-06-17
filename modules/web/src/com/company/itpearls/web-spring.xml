@@ -16,6 +16,8 @@
                 <entry key="itpearls_SubscribeDateService" value="com.company.itpearls.service.SubscribeDateService"/>
                 <entry key="itpearls_PdfParserService" value="com.company.itpearls.core.PdfParserService"/>
                 <entry key="itpearls_StarsAndOtherService" value="com.company.itpearls.core.StarsAndOtherService"/>
+                <entry key="itpearls_ResumeRecognitionService"
+                       value="com.company.itpearls.core.ResumeRecognitionService"/>
             </map>
         </property>
     </bean>

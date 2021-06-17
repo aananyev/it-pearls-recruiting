@@ -32,10 +32,10 @@ create table ITPEARLS_JOB_CANDIDATE (
     MIDDLE_NAME varchar(80),
     SECOND_NAME varchar(80) not null,
     FULL_NAME varchar(160),
-    CURRENT_COMPANY_ID uuid,
-    PERSON_POSITION_ID uuid,
-    CITY_OF_RESIDENCE_ID uuid,
     BIRDH_DATE date,
+    PERSON_POSITION_ID uuid,
+    CURRENT_COMPANY_ID uuid,
+    CITY_OF_RESIDENCE_ID uuid,
     EMAIL varchar(50),
     PHONE varchar(18),
     MOBILE_PHONE varchar(18),
@@ -44,10 +44,8 @@ create table ITPEARLS_JOB_CANDIDATE (
     TELEGRAM_GROUP varchar(50),
     WIBER_NAME varchar(30),
     WHATSUP_NAME varchar(30),
-    POSITION_COUNTRY_ID uuid,
     SPECIALISATION_ID uuid,
     SKILL_TREE_ID uuid,
-    OPEN_POSITION_ID uuid,
     STATUS integer,
     FILE_IMAGE_FACE uuid,
     --
@@ -265,7 +263,6 @@ create table ITPEARLS_POSITION (
     --
     POSITION_RU_NAME varchar(80) not null,
     POSITION_EN_NAME varchar(80),
-    JOB_CANDIDATE_ID uuid,
     STANDART_DECRIPTION text,
     --
     primary key (ID)
@@ -335,7 +332,6 @@ create table ITPEARLS_SKILL_TREE (
     --
     SKILL_NAME varchar(80) not null,
     SKILL_TREE_ID uuid,
-    JOB_CANDIDATE_ID uuid,
     OPEN_POSITION_ID uuid,
     CANDIDATE_CV_ID uuid,
     SPECIALISATION_ID uuid,
@@ -623,3 +619,10 @@ create table ITPEARLS_ITEARCTION_REQUIREMENTS (
     primary key (ID)
 )^
 -- end ITPEARLS_ITEARCTION_REQUIREMENTS
+-- begin ITPEARLS_JOB_CANDIDATE_POSITION_LINK
+create table ITPEARLS_JOB_CANDIDATE_POSITION_LINK (
+    POSITION_ID uuid,
+    JOB_CANDIDATE_ID uuid,
+    primary key (POSITION_ID, JOB_CANDIDATE_ID)
+)^
+-- end ITPEARLS_JOB_CANDIDATE_POSITION_LINK

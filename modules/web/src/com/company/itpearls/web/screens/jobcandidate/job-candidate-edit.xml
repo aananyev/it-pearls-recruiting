@@ -11,29 +11,28 @@
             <loader id="jobCandidateDl"/>
             <view extends="_local">
                 <property name="positionList" view="_local"/>
-                <property name="openPosition" view="_local"/>
                 <property name="personPosition" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
                 <property name="candidateCv" view="_local">
                     <property name="candidate" view="_local"/>
                     <property name="resumePosition" view="_local"/>
                     <property name="toVacancy" view="_local">
-                        <property name="projectName" view="_local">
-                            <property name="projectOwner" view="_local"/>
-                            <property name="projectDepartment" view="companyDepartament-view"/>
-                        </property>
+                        <property name="projectName" view="_local"/>
                     </property>
                 </property>
-                <property name="fileImageFace" view="_local"/>
-                <property name="iteractionList" view="iteractionList-view">
-                    <property name="vacancy" view="_local">
-                        <property name="projectName" view="project-view">
-                            <property name="projectOwner" view="person-view"/>
+                <property name="fileImageFace" view="_minimal"/>
+                <property name="iteractionList" view="_minimal">
+                    <property name="candidate" view="_minimal"/>
+                    <property name="vacancy" view="_minimal">
+                        <property name="projectName" view="_minimal">
+                            <property name="projectDepartment" view="_minimal">
+                                <property name="companyName" view="_minimal"/>
+                            </property>
                         </property>
                     </property>
                     <property name="iteractionType" view="_local"/>
+                    <property name="recrutier" view="_minimal"/>
                 </property>
-                <property name="skills" view="_local"/>
                 <property name="socialNetwork" view="_local"/>
                 <property name="jobHistory" view="_local"/>
                 <property name="currentCompany" view="_local"/>
@@ -43,24 +42,9 @@
             <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
-            <collection id="jobCandidateSkillsesDc" property="skills"/>
             <collection id="jobCandidateIteractionDc" property="iteractionList"/>
+            <collection id="positionListDc" property="positionList"/>
         </instance>
-        <!--        <collection id="jobCandidateIteractionListDataGridDc"
-                            class="com.company.itpearls.entity.IteractionList"
-                            view="iteractionList-view">
-                    <loader id="jobCandidateIteractionListDataGridDl">
-                        <query>
-                            <![CDATA[select e from itpearls_IteractionList e
-                            order by e.numberIteraction desc]]>
-                            <condition>
-                                <c:jpql>
-                                    <c:where>e.candidate = :candidate</c:where>
-                                </c:jpql>
-                            </condition>
-                        </query>
-                    </loader>
-                </collection> -->
         <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_local">
             <loader id="personPositionsLc">
                 <query>
@@ -495,15 +479,17 @@ order by e.cityRuName]]>
                           reorderingAllowed="true"
                           height="350px">
                     <actions>
+                        <action id="create" type="create"/>
                         <action type="edit" id="edit"/>
                         <action id="remove" type="remove"/>
                         <action id="refresh" type="refresh"/>
                     </actions>
                     <buttonsPanel>
-                        <button id="addIteractionButton"
+                        <button action="jobCandidateIteractionListTable.create"/>
+<!--                        <button id="addIteractionButton"
                                 caption="msg://msgCreate"
                                 icon="ADD_ACTION"
-                                invoke="addIteractionJobCandidate"/>
+                                invoke="addIteractionJobCandidate"/> -->
                         <button action="jobCandidateIteractionListTable.edit"/>
                         <button id="copyIteractionButton"
                                 caption="msg://msgCopy"
@@ -533,9 +519,6 @@ order by e.cityRuName]]>
                                 caption="msg://msgProject"/>
                         <column id="companyName"
                                 property="vacancy.projectName.projectDepartment.companyName.comanyName"/>
-                        <column id="departamentRuName"
-                                property="vacancy.projectName.projectDepartment.departamentRuName"
-                                caption="msg://msgDepartament"/>
                         <column id="recrutier"
                                 property="recrutier"/>
                         <column id="dateIteraction"
@@ -548,7 +531,7 @@ order by e.cityRuName]]>
                     <rowsCount/>
                 </dataGrid>
             </tab>
-            <tab id="tabSkills"
+<!--            <tab id="tabSkills"
                  caption="msg://msgSkills"
                  margin="true,true,true,true"
                  expand="tabSkillsVbox"
@@ -583,7 +566,7 @@ order by e.cityRuName]]>
                         </buttonsPanel>
                     </dataGrid>
                 </vbox>
-            </tab>
+            </tab> -->
             <tab id="tabResume"
                  caption="msg://msgResume"
                  margin="true,true,true,true"
@@ -638,7 +621,8 @@ order by e.cityRuName]]>
                             <action id="remove" type="remove"/>
                         </actions>
                         <buttonsPanel>
-                            <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
+                            <button id="addButtonCV"
+                                    action="jobCandidateCandidateCvTable.create"/>
                             <button id="copyCVButton"
                                     caption="msg://msgCopy"
                                     icon="COPY"

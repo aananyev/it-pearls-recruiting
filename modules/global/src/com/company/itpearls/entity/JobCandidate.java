@@ -13,6 +13,7 @@ import com.haulmont.cuba.core.global.DeletePolicy;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -23,7 +24,6 @@ import java.util.List;
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CURRENT_COMPANY_ID", columnList = "CURRENT_COMPANY_ID"),
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_PERSON_POSITION_ID", columnList = "PERSON_POSITION_ID"),
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CITY_OF_RESIDENCE_ID", columnList = "CITY_OF_RESIDENCE_ID"),
-        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_OPEN_POSITION_ID", columnList = "OPEN_POSITION_ID"),
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FULL_NAME", columnList = "FULL_NAME")
 })
 @Entity(name = "itpearls_JobCandidate")
@@ -53,24 +53,22 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
 
+    @JoinTable(name = "ITPEARLS_JOB_CANDIDATE_POSITION_LINK",
+            joinColumns = @JoinColumn(name = "JOB_CANDIDATE_ID"),
+            inverseJoinColumns = @JoinColumn(name = "POSITION_ID"))
+    @OnDelete(DeletePolicy.UNLINK)
+    @ManyToMany
+    private List<Position> positionList;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CURRENT_COMPANY_ID")
     protected Company currentCompany;
 
-    @OnDelete(DeletePolicy.CASCADE)
-    @OneToMany(mappedBy = "jobCandidate")
-    protected List<Position> positionList;
-
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_OF_RESIDENCE_ID")
     protected City cityOfResidence;
-
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_COUNTRY_ID")
-    protected Country positionCountry;
 
     @Email
     @Column(name = "EMAIL", length = 50)
@@ -100,7 +98,7 @@ public class JobCandidate extends StandardEntity {
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
-    protected List<IteractionList> iteractionList;
+    protected Collection<IteractionList> iteractionList;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -126,15 +124,6 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "SKILL_TREE_ID")
     protected SkillTree skillTree;
 
-    @Composition
-    @OnDelete(DeletePolicy.DENY)
-    @OneToMany(mappedBy = "jobCandidate")
-    protected List<SkillTree> skills;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "OPEN_POSITION_ID")
-    protected OpenPosition openPosition;
-
     @Column(name = "STATUS")
     protected Integer status;
 
@@ -142,6 +131,22 @@ public class JobCandidate extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_IMAGE_FACE")
     protected FileDescriptor fileImageFace;
+
+    public void setIteractionList(Collection<IteractionList> iteractionList) {
+        this.iteractionList = iteractionList;
+    }
+
+    public Collection<IteractionList> getIteractionList() {
+        return iteractionList;
+    }
+
+    public List<Position> getPositionList() {
+        return positionList;
+    }
+
+    public void setPositionList(List<Position> positionList) {
+        this.positionList = positionList;
+    }
 
 
     public FileDescriptor getFileImageFace() {
@@ -160,36 +165,12 @@ public class JobCandidate extends StandardEntity {
         this.status = status;
     }
 
-    public List<SkillTree> getSkills() {
-        return skills;
-    }
-
-    public void setSkills(List<SkillTree> skills) {
-        this.skills = skills;
-    }
-
     public String getFullName() {
         return fullName;
     }
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public OpenPosition getOpenPosition() {
-        return openPosition;
-    }
-
-    public List<Position> getPositionList() {
-        return positionList;
-    }
-
-    public void setPositionList(List<Position> positionList) {
-        this.positionList = positionList;
-    }
-
-    public void setOpenPosition(OpenPosition openPosition) {
-        this.openPosition = openPosition;
     }
 
     public SkillTree getSkillTree() {
@@ -240,14 +221,6 @@ public class JobCandidate extends StandardEntity {
         this.specialisation = specialisation;
     }
 
-    public List<IteractionList> getIteractionList() {
-        return iteractionList;
-    }
-
-    public void setIteractionList(List<IteractionList> iteractionList) {
-        this.iteractionList = iteractionList;
-    }
-
     public Company getCurrentCompany() {
         return currentCompany;
     }
@@ -262,14 +235,6 @@ public class JobCandidate extends StandardEntity {
 
     public void setPersonPosition(Position personPosition) {
         this.personPosition = personPosition;
-    }
-
-    public Country getPositionCountry() {
-        return positionCountry;
-    }
-
-    public void setPositionCountry(Country positionCountry) {
-        this.positionCountry = positionCountry;
     }
 
     public String getWhatsupName() {

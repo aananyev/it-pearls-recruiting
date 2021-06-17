@@ -3,17 +3,13 @@ package com.company.itpearls.web.screens.candidatecv;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
-import com.haulmont.cuba.core.app.FileStorageService;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.cuba.web.AppUI;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
@@ -41,8 +37,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private UserSession userSession;
     @Inject
     private TextField<String> textFieldIOriginalCV;
-
-    private WebBrowserTools webBrowserTools;
     @Inject
     private TextField<String> textFieldITPearlsCV;
     @Inject
@@ -80,21 +74,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private FileUploadingAPI fileUploadingAPI;
     @Inject
-    private DataManager dataManager;
-    @Inject
     private RichTextArea cvResomandation;
     @Inject
     private RichTextArea letterRecommendation;
-    @Inject
-    private InstanceContainer<CandidateCV> candidateCVDc;
-    @Inject
-    private FileStorageService fileStorageService;
 
     @Subscribe
     public void onInit(InitEvent event) {
-        AppUI ui = AppBeans.get(AppUI.class);
-        webBrowserTools = ui.getWebBrowserTools();
-
 /*        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
             File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
             String textResume = "";
@@ -119,7 +104,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             rescanResume();
 
-        });*/
+        });
 
         fileOriginalCVField.addFileUploadErrorListener(uploadErrorEvent ->
                 notifications.create()
@@ -130,7 +115,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         fileCVField.addFileUploadErrorListener(uploadErrorEvent ->
                 notifications.create()
                         .withCaption("Ошибка загрузки файла " + fileCVField.getFileName())
-                        .show());
+                        .show());*/
     }
 
     @Subscribe("fileOriginalCVField")
@@ -291,7 +276,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    @Subscribe("tabFiles")
+/*    @Subscribe("tabFiles")
     public void onTabFilesLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()
@@ -307,7 +292,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     .show();
         }
     }
-
+*/
 
 
 /*
@@ -345,6 +330,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
         notifications.create()
+                .withType(Notifications.NotificationType.ERROR)
                 .withCaption("Ошибка загрузки файла в хранилище.")
                 .show();
     }
@@ -506,5 +492,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void rescanCV() {
         rescanResume();
+    }
+
+    public void resumeRecognition() {
+        Screen resumeRecognition = screenBuilders.screen(this)
+                .withScreenClass(ResumeRecognition.class)
+                .build()
+                .show();
     }
 }

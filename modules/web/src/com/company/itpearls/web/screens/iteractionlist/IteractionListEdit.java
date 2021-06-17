@@ -209,11 +209,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 e.printStackTrace();
             }
 
-            if (callForm) {
-                addDate.setVisible(false);
-                addString.setVisible(false);
-                addInteger.setVisible(false);
-                buttonCallAction.setVisible(true);
+            if(callForm != null) {
+                if (callForm) {
+                    addDate.setVisible(false);
+                    addString.setVisible(false);
+                    addInteger.setVisible(false);
+                    buttonCallAction.setVisible(true);
+                } else {
+                    addDate.setVisible(false);
+                    addString.setVisible(false);
+                    addInteger.setVisible(false);
+                    buttonCallAction.setVisible(false);
+                }
             } else {
                 addDate.setVisible(false);
                 addString.setVisible(false);
@@ -640,6 +647,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         candidate = candidateField.getValue();
 
         changeField();
+
+        if(parentCandidate != null) {
+            getEditedEntity().setCandidate(parentCandidate);
+        }
     }
 
     @Subscribe
@@ -1048,5 +1059,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .build()
                     .show();
         }
+    }
+
+    private JobCandidate parentCandidate = null;
+
+    public void setParentCandidate(JobCandidate candidate) {
+        this.parentCandidate = candidate;
     }
 }

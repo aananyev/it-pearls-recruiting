@@ -452,13 +452,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 BigDecimal maxNumberIteraction = BigDecimal.ZERO;
                                 IteractionList lastIteraction = null;
 
-                                for (IteractionList list : jobCandidatesTable
-                                        .getSingleSelected()
-                                        .getIteractionList()) {
-                                    if (maxNumberIteraction.compareTo(list.getNumberIteraction()) < 0) {
-                                        maxNumberIteraction = list.getNumberIteraction();
-                                        lastIteraction = list;
+                                if(jobCandidatesTable.getSingleSelected() != null) {
+                                    for (IteractionList list : jobCandidatesTable
+                                            .getSingleSelected()
+                                            .getIteractionList()) {
+                                        if (maxNumberIteraction.compareTo(list.getNumberIteraction()) < 0) {
+                                            maxNumberIteraction = list.getNumberIteraction();
+                                            lastIteraction = list;
+                                        }
                                     }
+                                } else {
+                                    notifications.create(Notifications.NotificationType.WARNING)
+                                            .withDescription("ВНИМАНИЕ!")
+                                            .withCaption("Нужно выделить строку в таблице для добавления взаимодействия!")
+                                            .show();
                                 }
 
                                 if (lastIteraction != null) {
@@ -903,8 +910,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                         jobCandidate.getMiddleName() == null ||
                         jobCandidate.getCityOfResidence() == null ||
                         jobCandidate.getCurrentCompany() == null ||
-                        jobCandidate.getPersonPosition() == null ||
-                        jobCandidate.getPositionCountry() == null) {
+                        jobCandidate.getPersonPosition() == null) {
                     return 0;
                 }
             }

@@ -57,6 +57,7 @@ public class OpenPosition extends StandardEntity {
 
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "openPosition")
+    @Composition
     protected List<City> cities;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")

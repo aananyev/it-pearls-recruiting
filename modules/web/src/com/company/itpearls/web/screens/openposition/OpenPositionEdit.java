@@ -166,6 +166,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private RichTextArea openPositionStandartDescriptionRichTextArea;
     @Named("openPositionAccordion.openPositionStandartDescriptionAccorden")
     private VBoxLayout openPositionStandartDescriptionAccorden;
+    @Inject
+    private InstanceContainer<OpenPosition> openPositionDc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1352,9 +1354,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         selectCitiesLocation.addAfterCloseListener(e -> {
                 List<City> cities = selectCitiesLocation.getCitiesList();
 
-                getEditedEntity().setCities(cities);
-                CommitContext commitContext = new CommitContext(cities);
-                dataManager.commit(commitContext);
+                openPositionDc.getItem().setCities(cities);
 
                 changeCityListsLabel();
         });

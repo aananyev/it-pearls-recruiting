@@ -164,7 +164,7 @@
                                     width="AUTO"
                                     description="msg://msgOriginalCV"
                                     dataContainer="candidateCVDc"
-                                    fileStoragePutMode="MANUAL"
+                                    fileStoragePutMode="IMMEDIATE"
                                     showClearButton="true"/>
                         </vbox>
                         <vbox expand="fileCVField"
@@ -238,6 +238,10 @@
                             caption="msg://msgRescanResume"
                             align="BOTTOM_LEFT"
                             invoke="rescanCV"/>
+                    <button id="resumeRecognitionButton"
+                            caption="msg://msgResumeRecognition"
+                            align="BOTTOM_LEFT"
+                            invoke="resumeRecognition"/>
                     <hbox id="candidateCVHBox"
                           expand="candidateCVRichTextArea"
                           height="100%"
@@ -269,7 +273,10 @@
                       spacing="true"
                       expand="someFilesTable"
                       width="100%">
-                    <table id="someFilesTable" height="300px" width="100%" dataContainer="someFilesesDc">
+                    <table id="someFilesTable"
+                           height="300px"
+                           width="100%"
+                           dataContainer="someFilesesDc">
                         <columns>
                             <column id="fileDescription"/>
                             <column id="fileType.nameFileType"/>

@@ -1,0 +1,1 @@
+alter table ITPEARLS_JOB_CANDIDATE drop column POSITION_COUNTRY_ID__U27324 cascade ;
