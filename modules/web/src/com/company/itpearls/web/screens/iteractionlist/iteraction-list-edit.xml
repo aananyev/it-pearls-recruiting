@@ -79,9 +79,9 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="700"
+    <dialogMode height="650"
                 modal="true"
-                width="900"/>
+                width="1000"/>
     <layout expand="editActions"
             spacing="true">
         <groupBox spacing="true">

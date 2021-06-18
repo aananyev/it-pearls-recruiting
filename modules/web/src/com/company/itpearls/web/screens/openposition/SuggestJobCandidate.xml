@@ -5,8 +5,16 @@
         messagesPack="com.company.itpearls.web.screens.openposition">
     <data readOnly="true">
         <collection id="candidateCVDc"
-                    class="com.company.itpearls.entity.CandidateCV"
-                    view="candidateCV-view">
+                    class="com.company.itpearls.entity.CandidateCV">
+            <view extends="_local">
+                <property name="candidate" view="_local">
+                    <property name="fullName"/>
+                    <property name="cityOfResidence" view="_minimal"/>
+                    <property name="iteractionList" view="_minimal"/>
+                </property>
+                <property name="resumePosition" view="_minimal"/>
+                <property name="toVacancy" view="_minimal"/>
+            </view>
             <loader id="candidateCVDl">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName]]>

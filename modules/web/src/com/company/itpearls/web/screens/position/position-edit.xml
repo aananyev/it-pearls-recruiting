@@ -17,8 +17,8 @@
             <label id="textPositionName" stylename="h1"/>
         </groupBox>
         <vbox id="positionEditVBox"
-                spacing="true"
-              expand="standartDescriptionTextArea">
+              spacing="true"
+              expand="textAreaBox">
             <textField id="positionRuNameField"
                        dataContainer="positionDc"
                        width="100%"
@@ -29,12 +29,20 @@
                        width="100%"
                        property="positionEnName"
                        caption="msg://msgPositionRuName"/>
-            <richTextArea id="standartDescriptionTextArea"
-                          dataContainer="positionDc"
-                          property="standartDescription"
-                          width="100%"
-                          height="100%"
-                          caption="msg://msgStandartDescription"/>
+            <hbox id="textAreaBox" width="100%" spacing="true">
+                <richTextArea id="standartDescriptionTextArea"
+                              dataContainer="positionDc"
+                              property="standartDescription"
+                              width="100%"
+                              height="100%"
+                              caption="msg://msgStandartDescription"/>
+                <richTextArea id="whoIsThisGuyTextArea"
+                              dataContainer="positionDc"
+                              property="whoIsThisGuy"
+                              width="100%"
+                              height="100%"
+                              caption="msg://msgWhoThisGuyDescription"/>
+            </hbox>
         </vbox>
         <hbox id="editActions"
               spacing="true"

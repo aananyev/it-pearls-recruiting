@@ -124,14 +124,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Label<String> labelTopComissionResearcher;
     @Inject
     private Label<String> labelTopComissionRecrutier;
-
-    static String RESEARCHER = "Researcher";
-    static String RECRUITER = "Recruiter";
-    static String MANAGER = "Manager";
-    static String ADMINISTRATOR = "Administrators";
-    static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
-    private OpenPosition beforeEdit = null;
-
     @Inject
     private RadioButtonGroup workExperienceRadioButton;
     @Inject
@@ -168,6 +160,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private VBoxLayout openPositionStandartDescriptionAccorden;
     @Inject
     private InstanceContainer<OpenPosition> openPositionDc;
+    @Named("openPositionAccordion.openPositionWhoIsThisGuyAccorden")
+    private VBoxLayout openPositionWhoIsThisGuyAccorden;
+    @Inject
+    private RichTextArea openPositionWhoIsThisGuyRichTextArea;
+
+    static String RESEARCHER = "Researcher";
+    static String RECRUITER = "Recruiter";
+    static String MANAGER = "Manager";
+    static String ADMINISTRATOR = "Administrators";
+    static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
+    private OpenPosition beforeEdit = null;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -187,7 +190,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommandExperienceRadioButton();
         changeCityListsLabel();
         standartDescriptionDisable(event);
-
+        whiIsThisGuyDisable(event);
     }
 
     private void standartDescriptionDisable(BeforeShowEvent event) {
@@ -198,6 +201,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             } else {
                 openPositionStandartDescriptionAccorden.setVisible(true);
                 openPositionStandartDescriptionRichTextArea.setEnabled(true);
+            }
+        }
+    }
+
+    private void whiIsThisGuyDisable(BeforeShowEvent event) {
+        if(getEditedEntity().getPositionType() != null) {
+            if(getEditedEntity().getPositionType().getStandartDescription() == null) {
+                openPositionWhoIsThisGuyAccorden.setVisible(false);
+                openPositionWhoIsThisGuyRichTextArea.setEnabled(false);
+            } else {
+                openPositionWhoIsThisGuyAccorden.setVisible(true);
+                openPositionWhoIsThisGuyRichTextArea.setEnabled(true);
             }
         }
     }
@@ -1355,6 +1370,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 List<City> cities = selectCitiesLocation.getCitiesList();
 
                 openPositionDc.getItem().setCities(cities);
+                dataContext.merge(openPositionDc.getItem());
 
                 changeCityListsLabel();
         });
@@ -1468,6 +1484,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if(event.getValue() != null) {
             if (event.getValue().getStandartDescription() != null) {
                 openPositionStandartDescriptionRichTextArea.setValue(event.getValue().getStandartDescription());
+            }
+
+            if(event.getValue().getWhoIsThisGuy() != null) {
+                openPositionWhoIsThisGuyRichTextArea.setValue(event.getValue().getWhoIsThisGuy());
             }
         }
     }

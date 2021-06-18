@@ -11,7 +11,7 @@
             <loader id="jobCandidatesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e
-order by e.secondName, e.firstName]]>
+                             order by e.secondName, e.firstName]]>
                     <condition>
                         <and>
                             <c:jpql>
@@ -22,6 +22,9 @@ order by e.secondName, e.firstName]]>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>not e.status = :param3</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>(select count(f) from itpearls_IteractionList f where f.candidate = :candidate and f.rating >= :rating) is not null</c:where>
                             </c:jpql>
                         </and>
                     </condition>

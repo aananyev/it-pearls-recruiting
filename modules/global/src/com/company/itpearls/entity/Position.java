@@ -29,11 +29,23 @@ public class Position extends StandardEntity {
     @Column(name = "STANDART_DECRIPTION")
     private String standartDescription;
 
+    @Lob
+    @Column(name = "WHO_IS_THIS_GUY")
+    private String whoIsThisGuy;
+
     @JoinTable(name = "ITPEARLS_JOB_CANDIDATE_POSITION_LINK",
             joinColumns = @JoinColumn(name = "POSITION_ID"),
             inverseJoinColumns = @JoinColumn(name = "JOB_CANDIDATE_ID"))
     @ManyToMany
     private List<JobCandidate> jobCandidates;
+
+    public String getWhoIsThisGuy() {
+        return whoIsThisGuy;
+    }
+
+    public void setWhoIsThisGuy(String whoIsThisGuy) {
+        this.whoIsThisGuy = whoIsThisGuy;
+    }
 
     public List<JobCandidate> getJobCandidates() {
         return jobCandidates;

@@ -56,6 +56,7 @@
     <view entity="itpearls_Position" name="position-view" extends="_minimal">
         <property name="positionEnName"/>
         <property name="standartDescription"/>
+        <property name="whoIsThisGuy"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_minimal" systemProperties="true">
         <property name="openClose"/>

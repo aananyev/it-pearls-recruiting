@@ -284,10 +284,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         String retStr = "";
 
         try {
-            if (event.getItem().getCandidateCv().size() == 0) {
-                retStr = "FILE";
+            if(event.getItem().getCandidateCv() != null) {
+                if (event.getItem().getCandidateCv().size() == 0) {
+                    retStr = "FILE";
+                } else {
+                    retStr = "FILE_TEXT";
+                }
             } else {
-                retStr = "FILE_TEXT";
+                retStr = "FILE";
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -1095,10 +1099,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         ratingFieldNotLower.setOptionsMap(map);
 
         ratingFieldNotLower.addValueChangeListener(e -> {
-            if (ratingFieldNotLower.getValue() != null)
+            if (ratingFieldNotLower.getValue() != null) {
                 jobCandidatesDl.setParameter("rating", ratingFieldNotLower.getValue());
-            else
+                jobCandidatesDl.setParameter("candidate", e);
+            } else {
                 jobCandidatesDl.removeParameter("rating");
+            }
 
             jobCandidatesDl.load();
         });

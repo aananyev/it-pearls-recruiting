@@ -38,7 +38,29 @@ public class PositionBrowse extends StandardLookup<Position> {
         }
     }
 
+    @Install(to = "positionsTable.whoThisGuyIcon", subject = "columnGenerator")
+    private Icons.Icon positionsTableWhoThisGuyIconColumnGenerator(DataGrid.ColumnGeneratorEvent<Position> event) {
+        if(event.getItem().getWhoIsThisGuy() == null) {
+            return CubaIcon.FILE;
+        } else
+            return CubaIcon.FILE_TEXT;
+    }
 
+    @Install(to = "positionsTable.whoThisGuyIcon", subject = "styleProvider")
+    private String positionsTableWhoThisGuyIconStyleProvider(Position position) {
+        if(position.getWhoIsThisGuy() == null) {
+            return "open-position-pic-center-large-red";
+        } else {
+            return "open-position-pic-center-large-green";
+        }
+    }
 
-
+    @Install(to = "positionsTable.whoThisGuyIcon", subject = "descriptionProvider")
+    private String positionsTableWhoThisGuyIconDescriptionProvider(Position position) {
+        if(position.getWhoIsThisGuy() != null) {
+            return Jsoup.parse(position.getWhoIsThisGuy()).text();
+        } else {
+            return null;
+        }
+    }
 }

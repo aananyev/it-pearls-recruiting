@@ -944,10 +944,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Install(to = "vacancyFiels", subject = "optionStyleProvider")
     private String vacancyFielsOptionStyleProvider(OpenPosition openPosition) {
-        if (openPosition.getOpenClose()) {
-            return "vacancy-filed-close-gray";
+        if (!openPosition.getOpenClose()) {
+            return "open-position-lookup-field-black";
         } else {
-            return "vacancy-filed-close-black";
+            return "open-position-lookup-field-gray";
         }
     }
 

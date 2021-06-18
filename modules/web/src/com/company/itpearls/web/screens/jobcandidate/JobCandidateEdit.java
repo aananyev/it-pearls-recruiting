@@ -143,6 +143,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private InstanceContainer<JobCandidate> jobCandidateDc;
     @Inject
     private InstanceLoader<JobCandidate> jobCandidateDl;
+    @Inject
+    private Screens screens;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -1085,8 +1087,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 //        jobCandidateIteractionListDataGridDl.load();
     }
 
-    public void addPositionList() { /*
-        SelectPersonPositions selectPersonPositions = screens.create(SelectPersonPositions.class);
+    public void addPositionList() {/*
+        SelectPersonPositions selectPersonPositions = screens
+                .create(SelectPersonPositions.class);
 
         List<Position> setPos = new ArrayList<>();
 
@@ -1109,11 +1112,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 jobCandidateDc.getItem().getPositionList().add(p);
             }
 
+            JobCandidate jobCandidate = dataContext.merge(jobCandidateDc.getItem());
+            jobCandidateDc.setItem(jobCandidate);
+
             setPositionsLabel();
         });
 
-        selectPersonPositions.show();*/
-    }
+        selectPersonPositions.show();
+    */}
 
     private void setPositionsLabel() {
         String outStr = "";
@@ -1187,7 +1193,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .show();
             }
         } else {
-            screenBuilders.editor(CandidateCV.class, this)
+            Screen s = screenBuilders.editor(CandidateCV.class, this)
                     .withParentDataContext(dataContext)
                     .withInitializer(candidate -> {
                         candidate.setCandidate(jobCandidateCandidateCvTable.getSingleSelected().getCandidate());
@@ -1206,6 +1212,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .newEntity()
                     .build()
                     .show();
+
+            s.addAfterCloseListener(e ->{
+                jobCandidateDl.load();
+            });
         }
     }
 

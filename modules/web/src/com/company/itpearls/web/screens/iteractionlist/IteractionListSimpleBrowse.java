@@ -164,9 +164,14 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 .withInitializer(iteractionList1 -> {
                     if(iteractionListsTable.getSingleSelected() != null) {
                         iteractionList1.setCandidate(iteractionListsTable.getSingleSelected().getCandidate());
+                        iteractionList1.setVacancy(iteractionListsTable.getSingleSelected().getVacancy());
+                        iteractionList1.setNumberIteraction(dataManager.loadValue(
+                                "select max(e.numberIteraction) " +
+                                        "from itpearls_IteractionList e", BigDecimal.class)
+                                .one().add(BigDecimal.ONE));
                     }
 
-                    BigDecimal maxNumberIteraction = BigDecimal.ZERO;
+/*                    BigDecimal maxNumberIteraction = BigDecimal.ZERO;
                     IteractionList lastIteraction = null;
 
                     for (IteractionList list : iteractionListsDc.getItems()){
@@ -174,15 +179,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                             maxNumberIteraction = list.getNumberIteraction();
                             lastIteraction = list;
                         }
-                    }
-
-                    if (lastIteraction != null) {
-                        iteractionList1.setVacancy(lastIteraction.getVacancy());
-                        iteractionList1.setNumberIteraction(dataManager.loadValue(
-                                "select max(e.numberIteraction) " +
-                                        "from itpearls_IteractionList e", BigDecimal.class)
-                                .one().add(BigDecimal.ONE));
-                    }
+                    }*/
                 })
                 .withAfterCloseListener(e -> {
                     iteractionListsDl.load();

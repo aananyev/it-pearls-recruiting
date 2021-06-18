@@ -58,15 +58,13 @@
             <table id="jobCandidatesTable"
                    height="AUTO"
                    width="100%"
-                   stylename="small"
+                   stylename="no-header"
                    dataContainer="listOfCandidatesDc">
                 <columns>
                     <column id="numberIteraction"
                             caption="mainMsg://msgNumberIteraction"/>
                     <column id="candidate"
                             caption="mainMsg://msgFullName"/>
-                    <column id="candidate.personPosition"
-                            caption="mainMsg://msgPersonPosition"/>
                     <column id="dateIteraction"
                             caption="mainMsg://msgDate"/>
                 </columns>

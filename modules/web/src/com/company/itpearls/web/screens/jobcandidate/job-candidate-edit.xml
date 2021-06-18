@@ -16,8 +16,12 @@
                 <property name="candidateCv" view="_local">
                     <property name="candidate" view="_local"/>
                     <property name="resumePosition" view="_local"/>
-                    <property name="toVacancy" view="_local">
-                        <property name="projectName" view="_local"/>
+                    <property name="toVacancy" view="_minimal">
+                        <property name="projectName" view="_minimal">
+                            <property name="projectDepartment" view="_minimal">
+                                <property name="companyName" view="_minimal"/>
+                            </property>
+                        </property>
                     </property>
                 </property>
                 <property name="fileImageFace" view="_minimal"/>
@@ -34,18 +38,17 @@
                     <property name="recrutier" view="_minimal"/>
                 </property>
                 <property name="socialNetwork" view="_local"/>
-                <property name="jobHistory" view="_local"/>
                 <property name="currentCompany" view="_local"/>
                 <property name="specialisation" view="_local"/>
                 <property name="telegramGroup"/>
             </view>
-            <collection id="jobCandidateJobHistoriesDc" property="jobHistory"/>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
             <collection id="jobCandidateIteractionDc" property="iteractionList"/>
-            <collection id="positionListDc" property="positionList"/>
         </instance>
-        <collection id="personPositionsDc" class="com.company.itpearls.entity.Position" view="_local">
+        <collection id="personPositionsDc"
+                    class="com.company.itpearls.entity.Position"
+                    view="_local">
             <loader id="personPositionsLc">
                 <query>
                     <![CDATA[select e from itpearls_Position e
@@ -61,12 +64,6 @@
             <loader id="currentCompaniesLc">
                 <query><![CDATA[select e from itpearls_Company e
 order by e.comanyName]]></query>
-            </loader>
-        </collection>
-        <collection id="positionCountriesDc" class="com.company.itpearls.entity.Country" view="_minimal">
-            <loader id="positionCountriesLc">
-                <query><![CDATA[select e from itpearls_Country e
-order by e.countryRuName]]></query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City">
@@ -511,13 +508,17 @@ order by e.cityRuName]]>
                             <htmlRenderer nullRepresentation="null"/>
                         </column>
                         <column id="vacancy"
+                                maximumWidth="300px"
                                 property="vacancy"/>
                         <column id="iteractionType"
+                                maximumWidth="250px"
                                 property="iteractionType"/>
                         <column id="projectName"
+                                maximumWidth="200px"
                                 property="vacancy.projectName"
                                 caption="msg://msgProject"/>
                         <column id="companyName"
+                                maximumWidth="200px"
                                 property="vacancy.projectName.projectDepartment.companyName.comanyName"/>
                         <column id="recrutier"
                                 property="recrutier"/>

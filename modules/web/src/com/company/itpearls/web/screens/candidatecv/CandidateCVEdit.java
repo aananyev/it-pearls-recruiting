@@ -7,6 +7,7 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
@@ -77,6 +78,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private RichTextArea cvResomandation;
     @Inject
     private RichTextArea letterRecommendation;
+    @Inject
+    private InstanceContainer<CandidateCV> candidateCVDc;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -118,9 +121,27 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                         .show());*/
     }
 
+    @Install(to = "candidateCVFieldOpenPosition", subject = "optionIconProvider")
+    private String candidateCVFieldOpenPositionOptionIconProvider(OpenPosition openPosition) {
+        if (!openPosition.getOpenClose()) {
+            return CubaIcon.PLUS_CIRCLE.source();
+        } else {
+            return CubaIcon.MINUS_CIRCLE.source();
+        }
+    }
+
+    @Install(to = "candidateCVFieldOpenPosition", subject = "optionStyleProvider")
+    private String candidateCVFieldOpenPositionOptionStyleProvider(OpenPosition openPosition) {
+        if (!openPosition.getOpenClose()) {
+            return "open-position-lookup-field-black";
+        } else {
+            return "open-position-lookup-field-gray";
+        }
+    }
+
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        File file = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
+        File file = fileUploadingAPI.getFile(getEditedEntity().getOriginalFileCV().getId());
 
         String textResume = "";
 

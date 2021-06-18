@@ -9,7 +9,7 @@
                     view="openPosition-view">
             <loader id="openPositionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e order by e.vacansyName]]>
+                    <![CDATA[select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName]]>
                 </query>
             </loader>
         </collection>
@@ -234,14 +234,16 @@
                       width="100%"
                       height="100%"
                       expand="candidateCVHBox">
-                    <button id="rescanSkills"
-                            caption="msg://msgRescanResume"
-                            align="BOTTOM_LEFT"
-                            invoke="rescanCV"/>
-                    <button id="resumeRecognitionButton"
-                            caption="msg://msgResumeRecognition"
-                            align="BOTTOM_LEFT"
-                            invoke="resumeRecognition"/>
+                    <hbox>
+                        <button id="rescanSkills"
+                                caption="msg://msgRescanResume"
+                                align="BOTTOM_LEFT"
+                                invoke="rescanCV"/>
+                        <button id="resumeRecognitionButton"
+                                caption="msg://msgResumeRecognition"
+                                align="BOTTOM_LEFT"
+                                invoke="resumeRecognition"/>
+                    </hbox>
                     <hbox id="candidateCVHBox"
                           expand="candidateCVRichTextArea"
                           height="100%"

@@ -9,8 +9,19 @@
         <hbox id="mainBox"
               width="100%"
               spacing="true">
-            <textArea id="originalCvTextAred"/>
-            <textArea id="recognitionCVTextArea"/>
+            <textArea id="originalCvTextAred"
+                      width="100%"
+                      box.expandRatio="1"
+                      height="100%"
+                      caption="msg://msgOriginalText"/>
+            <textArea id="recognitionCVTextArea"
+                      width="100%"
+                      box.expandRatio="1"
+                      height="100%"
+                      caption="msg://msgRecornisedData"/>
+        </hbox>
+        <hbox align="BOTTOM_RIGHT"
+              spacing="true">
         </hbox>
     </layout>
 </window>

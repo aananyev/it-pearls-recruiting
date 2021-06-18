@@ -6,8 +6,16 @@
         messagesPack="com.company.itpearls.web.screens.candidatecv" icon="FILE_WORD_O">
     <data readOnly="true">
         <collection id="candidateCVsDc"
-                    class="com.company.itpearls.entity.CandidateCV"
-                    view="candidateCV-view">
+                    class="com.company.itpearls.entity.CandidateCV">
+            <view extends="_local">
+                <property name="candidate" view="_minimal">
+                    <property name="fullName"/>
+                </property>
+                <property name="toVacancy" view="_minimal"/>
+                <property name="resumePosition" view="_minimal"/>
+                <property name="owner" view="_minimal"/>
+                <property name="originalFileCV" view="_minimal"/>
+            </view>
             <loader id="candidateCVsDl">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName, e.datePost desc]]>
@@ -46,8 +54,8 @@
                         width="80px">
                     <iconRenderer/>
                 </column>
-                <column id="candidate"
-                        property="candidate"
+                <column id="candidate.fullName"
+                        property="candidate.fullName"
                         width="350px"
                         sort="ASCENDING"
                         sortable="true"

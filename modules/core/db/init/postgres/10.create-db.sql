@@ -264,6 +264,7 @@ create table ITPEARLS_POSITION (
     POSITION_RU_NAME varchar(80) not null,
     POSITION_EN_NAME varchar(80),
     STANDART_DECRIPTION text,
+    WHO_IS_THIS_GUY text,
     --
     primary key (ID)
 )^

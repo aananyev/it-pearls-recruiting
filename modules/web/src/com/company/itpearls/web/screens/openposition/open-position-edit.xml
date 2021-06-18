@@ -497,6 +497,14 @@
                                               height="350px"
                                               editable="false"/>
                             </tab>
+                            <tab id="openPositionWhoIsThisGuyAccorden"
+                                 caption="msg://msgWhoIsThisGuy">
+                                <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
+                                              width="100%"
+                                              box.expandRatio="1"
+                                              height="350px"
+                                              editable="false"/>
+                            </tab>
                         </accordion>
                     </hbox>
                     <hbox width="100%"
