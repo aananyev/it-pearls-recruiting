@@ -57,6 +57,10 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private RadioButtonGroup typeTraceRadioButtons;
     @Inject
     private TwinColumn checkTraceTwinColumn;
+    @Inject
+    private CheckBox neetToSendEmailCheckBox;
+    @Inject
+    private RichTextArea textEmailToSendRichTextArea;
 
     @Subscribe("checkBoxCalendar")
     public void onCheckBoxCalendarValueChange(HasValue.ValueChangeEvent<Boolean> event) {
@@ -143,6 +147,22 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
             lookupFieldEmails.setEditable(radioButtonTypeNotifications.getValue().equals(5));
         else
             lookupFieldEmails.setEditable(false);
+
+        needSendEmail();
+    }
+
+    private void needSendEmail() {
+        neetToSendEmailCheckBox.addValueChangeListener(event -> {
+            textEmailToSendRichTextArea.setEnabled(false);
+
+            if(event.getValue() != null) {
+                if(event.getValue()) {
+                    textEmailToSendRichTextArea.setEnabled(true);
+                } else {
+                    textEmailToSendRichTextArea.setEnabled(false);
+                }
+            }
+        });
     }
 
     @Subscribe("radioButtonTypeNotifications")

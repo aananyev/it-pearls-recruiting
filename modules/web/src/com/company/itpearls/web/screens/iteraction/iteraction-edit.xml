@@ -131,6 +131,33 @@ order by e.number]]>
                                        property="calendarItemDescription"/>
                         </groupBox>
                     </hbox>
+                    <groupBox width="100%"
+                          height="100%"
+                          spacing="true"
+                          expand="textEmailHBox">
+                        <checkBox id="neetToSendEmailCheckBox"
+                                  dataContainer="iteractionDc"
+                                  caption="msg://msgNeedSendEmail"
+                                  property="needSendLetter"/>
+                        <hbox id="textEmailHBox"
+                              expand="textEmailToSendRichTextArea"
+                              width="100%"
+                              height="100%"
+                              spacing="true">
+                            <richTextArea id="textEmailToSendRichTextArea"
+                                          height="100%"
+                                          width="100%"
+                                          box.expandRatio="8"
+                                          dataContainer="iteractionDc"
+                                          property="textEmailToSend"/>
+                            <richTextArea id="commentKeysRichTextArea"
+                                          box.expandRatio="2"
+                                          stylename="borderless"
+                                          width="100%"
+                                          height="100%"
+                                          editable="false"/>
+                        </hbox>
+                    </groupBox>
                 </groupBox>
             </tab>
             <tab id="setupWidgets" spacing="true" caption="msg://msgWidgetsSetup" expand="widgetSetupGroupBox">
@@ -151,38 +178,38 @@ order by e.number]]>
                  caption="msg://msgCheckTrace"
                  spacing="true"
                  expand="traceHBox">
-                    <vbox id="traceHBox"
-                          width="AUTO"
-                          expand="checkTraceTwinGroupBox"
-                          height="100%"
-                          spacing="true">
-                        <groupBox id="checkTraceOption"
-                                  expand="typeTraceRadioButtons"
-                                  spacing="true"
-                                  captionAsHtml="true"
-                                  caption="msg://msgTypeOptions"
-                                  width="100%"
-                                  height="100%">
-                            <radioButtonGroup id="typeTraceRadioButtons"
-                                              dataContainer="iteractionsTreeDc"
-                                              width="AUTO"
-                                              property="checkTrace"/>
-                        </groupBox>
-                        <groupBox id="checkTraceTwinGroupBox"
-                                  expand="checkTraceTwinColumn"
-                                  caption="msg://msgTraceTwinColumn"
-                                  height="100%"
-                                  width="100%"
-                                  spacing="true">
-                            <twinColumn id="checkTraceTwinColumn"
-                                        addAllBtnEnabled="true"
-                                        width="AUTO"
-                                        columns="20"
-                                        height="100%"
-                                        reorderable="true"
-                                        optionsContainer="iteractionElementsDc"/>
-                        </groupBox>
-                    </vbox>
+                <vbox id="traceHBox"
+                      width="AUTO"
+                      expand="checkTraceTwinGroupBox"
+                      height="100%"
+                      spacing="true">
+                    <groupBox id="checkTraceOption"
+                              expand="typeTraceRadioButtons"
+                              spacing="true"
+                              captionAsHtml="true"
+                              caption="msg://msgTypeOptions"
+                              width="100%"
+                              height="100%">
+                        <radioButtonGroup id="typeTraceRadioButtons"
+                                          dataContainer="iteractionsTreeDc"
+                                          width="AUTO"
+                                          property="checkTrace"/>
+                    </groupBox>
+                    <groupBox id="checkTraceTwinGroupBox"
+                              expand="checkTraceTwinColumn"
+                              caption="msg://msgTraceTwinColumn"
+                              height="100%"
+                              width="100%"
+                              spacing="true">
+                        <twinColumn id="checkTraceTwinColumn"
+                                    addAllBtnEnabled="true"
+                                    width="AUTO"
+                                    columns="20"
+                                    height="100%"
+                                    reorderable="true"
+                                    optionsContainer="iteractionElementsDc"/>
+                    </groupBox>
+                </vbox>
             </tab>
         </tabSheet>
         <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">

@@ -81,6 +81,29 @@ public class Iteraction extends StandardEntity {
     @Column(name = "WIDGET_CHACK_JOB_CANDIDATES")
     private Boolean widgetChackJobCandidates;
 
+    @Column(name = "NEED_SEND_LETTER")
+    private Boolean needSendLetter;
+
+    @Lob
+    @Column(name = "TEXT_EMAIL_TO_SEND")
+    private String textEmailToSend;
+
+    public String getTextEmailToSend() {
+        return textEmailToSend;
+    }
+
+    public void setTextEmailToSend(String textEmailToSend) {
+        this.textEmailToSend = textEmailToSend;
+    }
+
+    public Boolean getNeedSendLetter() {
+        return needSendLetter;
+    }
+
+    public void setNeedSendLetter(Boolean needSendLetter) {
+        this.needSendLetter = needSendLetter;
+    }
+
     public Boolean getWidgetChackJobCandidates() {
         return widgetChackJobCandidates;
     }

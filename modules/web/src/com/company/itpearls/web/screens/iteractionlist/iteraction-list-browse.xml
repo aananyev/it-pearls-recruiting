@@ -7,8 +7,23 @@
         icon="REORDER">
     <data readOnly="true">
         <collection id="iteractionListsDc"
-                    class="com.company.itpearls.entity.IteractionList"
-                    view="iteractionList-view">
+                    class="com.company.itpearls.entity.IteractionList">
+            <view extends="_local">
+                <property name="candidate" view="_local">
+                    <property name="fullName"/>
+                    <property name="candidateCv" view="_minimal"/>
+                    <property name="socialNetwork" view="_minimal"/>
+                    <property name="positionList" view="_minimal"/>
+                    <property name="createdBy"/>
+                </property>
+                <property name="iteractionType" view="_minimal">
+                    <property name="pic"/>
+                </property>
+                <property name="recrutier" view="_minimal"/>
+                <property name="vacancy" view="_minimal">
+                    <property name="projectName" view="_minimal"/>
+                </property>
+            </view>
             <loader id="iteractionListsDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
                     <condition>
@@ -30,7 +45,7 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="800"/>
+                width="1000"/>
     <layout expand="iteractionListsTable"
             spacing="true">
         <filter id="filter"

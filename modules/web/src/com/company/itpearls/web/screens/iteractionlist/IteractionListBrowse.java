@@ -59,12 +59,15 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private Screens screens;
     @Inject
     private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private Button jobCandidateCardButton;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), MANAGER));
 
         filterStagerField();
+        addTableListeners();
 //        filterInternalProject();
     }
 
@@ -169,11 +172,24 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         addIconColumn();
     }
 
+    private void addTableListeners() {
+        jobCandidateCardButton.setEnabled(false);
+
+        iteractionListsTable.addSelectionListener(event -> {
+            if(event.getSelected() == null) {
+                jobCandidateCardButton.setEnabled(false);
+            } else {
+                jobCandidateCardButton.setEnabled(true);
+            }
+        });
+    }
+
     public void onJobCandidateButtonClick() {
         JobCandidateEdit jobCandidateEdit = screens.create(JobCandidateEdit.class);
 
         jobCandidateEdit.setEntityToEdit(iteractionListsTable.getSingleSelected().getCandidate());
         screens.show(jobCandidateEdit);
+
     }
 
     @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")

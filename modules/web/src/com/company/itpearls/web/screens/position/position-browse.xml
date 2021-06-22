@@ -41,6 +41,8 @@ order by e.positionRuName]]></query>
                 <column id="standartDescriptionIcon"
                         maximumWidth="85px"
                         caption="msg://msgStandartDescription">
+                    <iconRenderer/>
+                </column>
                 <column id="whoThisGuyIcon"
                         maximumWidth="85px"
                         caption="msg://msgWhoThisGuy">
