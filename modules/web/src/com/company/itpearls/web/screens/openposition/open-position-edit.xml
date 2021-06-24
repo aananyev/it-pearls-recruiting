@@ -149,7 +149,7 @@
     </data>
     <dialogMode height="700px"
                 width="900px"/>
-    <layout expand="forExpand"
+    <layout expand="tabSheetGroupBox"
             spacing="true">
         <groupBox spacing="true">
             <vbox>
@@ -163,463 +163,491 @@
                        htmlEnabled="true"/>
             </vbox>
         </groupBox>
-        <tabSheet id="tabSheetOpenPosition"
-                  stylename="framed">
-            <tab id="tabOpenPosition"
-                 caption="msg://msgNamePosition"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 icon="USERS">
-                <hbox id="hboxProject1"
-                      spacing="true"
-                      align="MIDDLE_LEFT"
-                      expand="spaceBox"
-                      width="100%">
-                    <hbox spacing="true" align="MIDDLE_LEFT">
-                        <checkBox id="openClosePositionCheckBox"
-                                  dataContainer="openPositionDc"
-                                  property="openClose"
-                                  caption="mainMsg://msgPositionClose"
-                                  width="50%"
-                                  align="BOTTOM_LEFT"/>
-                        <checkBox id="internalProjectCheckBox"
-                                  dataContainer="openPositionDc"
-                                  width="50%"
-                                  property="internalProject"
-                                  caption="msg://msgInternalProject"
-                                  align="BOTTOM_LEFT"/>
-                    </hbox>
-                    <hbox id="spaceBox"/>
-                    <hbox id="commandFieldHBox"
+        <vbox id="tabSheetGroupBox"
+                  expand="tabSheetOpenPosition">
+            <tabSheet id="tabSheetOpenPosition"
+                      stylename="framed">
+                <tab id="tabOpenPosition"
+                     caption="msg://msgNamePosition"
+                     margin="true,true,true,true"
+                     spacing="true"
+                     icon="USERS">
+                    <hbox id="hboxProject1"
                           spacing="true"
-                          align="MIDDLE_RIGHT">
-                        <radioButtonGroup id="commandOrPosition"
-                                          orientation="horizontal"
-                                          required="true"
-                                          dataContainer="openPositionDc"
-                                          property="commandCandidate"
-                                          description="msg://msgCommandOrPosition"
-                                          align="BOTTOM_LEFT"
-                                          caption="msg://msgCommandOrPosition"/>
-                        <lookupPickerField id="parentOpenPositionField"
-                                           dataContainer="openPositionDc"
-                                           property="parentOpenPosition"
-                                           align="BOTTOM_LEFT"
-                                           caption="msg://msgCommand"
-                                           optionsContainer="openPositionParentDc"/>
-                        <lookupField id="priorityField"
-                                     dataContainer="openPositionDc"
-                                     property="priority"
-                                     caption="msg://msgPriorityPosition"
-                                     required="true"
-                                     align="BOTTOM_LEFT"
-                                     width="100%">
-                        </lookupField>
-                    </hbox>
+                          align="MIDDLE_LEFT"
+                          expand="spaceBox"
+                          width="100%">
+                        <hbox spacing="true" align="MIDDLE_LEFT">
+                            <checkBox id="openClosePositionCheckBox"
+                                      dataContainer="openPositionDc"
+                                      property="openClose"
+                                      caption="mainMsg://msgPositionClose"
+                                      width="50%"
+                                      align="BOTTOM_LEFT"/>
+                            <checkBox id="internalProjectCheckBox"
+                                      dataContainer="openPositionDc"
+                                      width="50%"
+                                      property="internalProject"
+                                      caption="msg://msgInternalProject"
+                                      align="BOTTOM_LEFT"/>
+                        </hbox>
+                        <hbox id="spaceBox"/>
+                        <hbox id="commandFieldHBox"
+                              spacing="true"
+                              align="MIDDLE_RIGHT">
+                            <radioButtonGroup id="commandOrPosition"
+                                              orientation="horizontal"
+                                              required="true"
+                                              dataContainer="openPositionDc"
+                                              property="commandCandidate"
+                                              description="msg://msgCommandOrPosition"
+                                              align="BOTTOM_LEFT"
+                                              caption="msg://msgCommandOrPosition"/>
+                            <lookupPickerField id="parentOpenPositionField"
+                                               dataContainer="openPositionDc"
+                                               property="parentOpenPosition"
+                                               align="BOTTOM_LEFT"
+                                               caption="msg://msgCommand"
+                                               optionsContainer="openPositionParentDc"/>
+                            <lookupField id="priorityField"
+                                         dataContainer="openPositionDc"
+                                         property="priority"
+                                         caption="msg://msgPriorityPosition"
+                                         required="true"
+                                         align="BOTTOM_LEFT"
+                                         width="100%">
+                            </lookupField>
+                        </hbox>
 
-                </hbox>
-                <textField id="vacansyNameField"
-                           dataContainer="openPositionDc"
-                           property="vacansyName"
-                           caption="msg://msgVacansy"
-                           stylename="text-field-title-form"
-                           width="100%"
-                           required="true"/>
-                <hbox id="hboxVacansy"
-                      spacing="true"
-                      width="100%">
-                    <lookupPickerField id="positionTypeField"
-                                       optionsContainer="positionTypesDc"
-                                       dataContainer="openPositionDc"
-                                       property="positionType"
-                                       caption="msg://msgPositionType"
-                                       width="100%"
-                                       required="true">
-                        <actions>
-                            <action id="lookup"
-                                    type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <hbox spacing="true"
-                          width="100%">
-                        <lookupField id="remoteWorkField"
-                                     dataContainer="openPositionDc"
-                                     property="remoteWork"
-                                     required="true"
-                                     align="MIDDLE_LEFT"
-                                     caption="msg://msgRemoteWork"
-                                     width="100%">
-                        </lookupField>
-                        <textField id="remoteWorkCommentField"
-                                   dataContainer="openPositionDc"
-                                   property="remoteComment"
-                                   required="false"
-                                   caption="msg://msgRemoteWorkCommant"
-                                   align="MIDDLE_LEFT"
-                                   width="100%"/>
                     </hbox>
-                </hbox>
-                <hbox id="hboxProject"
-                      spacing="true"
-                      width="100%">
-                    <lookupPickerField id="projectNameField"
-                                       optionsContainer="projectNamesDc"
-                                       dataContainer="openPositionDc"
-                                       property="projectName"
-                                       caption="msg://msgNamePosition"
-                                       width="100%"
-                                       required="true">
-                        <actions>
-                            <action id="lookup"
-                                    type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="companyDepartamentField"
-                                       optionsContainer="companyDepartamentsDc"
-                                       caption="msg://msgDepartment"
-                                       width="100%"
-                                       required="true">
-                        <actions>
-                            <action id="lookup"
-                                    type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                </hbox>
-                <hbox id="hboxCompany"
-                      spacing="true"
-                      width="100%">
-                    <lookupPickerField id="companyNameField"
-                                       optionsContainer="companyNamesDc"
-                                       caption="msg://msgCompanyName"
-                                       width="100%"
-                                       required="true">
-                        <actions>
-                            <action id="lookup"
-                                    type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <hbox spacing="true"
-                          expand="cityOpenPositionField"
+                    <textField id="vacansyNameField"
+                               dataContainer="openPositionDc"
+                               property="vacansyName"
+                               caption="msg://msgVacansy"
+                               stylename="text-field-title-form"
+                               width="100%"
+                               required="true"/>
+                    <hbox id="hboxVacansy"
+                          spacing="true"
                           width="100%">
-                        <lookupPickerField id="cityOpenPositionField"
+                        <lookupPickerField id="positionTypeField"
+                                           optionsContainer="positionTypesDc"
                                            dataContainer="openPositionDc"
-                                           optionsContainer="citiesDc"
-                                           property="cityPosition"
+                                           property="positionType"
+                                           caption="msg://msgPositionType"
                                            width="100%"
-                                           caption="mainMsg://msgCity"
-                                           align="BOTTOM_LEFT"
                                            required="true">
                             <actions>
                                 <action id="lookup"
                                         type="picker_lookup"/>
                             </actions>
                         </lookupPickerField>
-                        <button id="addCity"
-                                caption="msg://msgAddCity"
-                                width="AUTO"
-                                enable="true"
-                                align="BOTTOM_RIGHT"
-                                description="msg://msgAddCityDescription"
-                                invoke="addListCity"/>
+                        <hbox spacing="true"
+                              width="100%">
+                            <lookupField id="remoteWorkField"
+                                         dataContainer="openPositionDc"
+                                         property="remoteWork"
+                                         required="true"
+                                         align="MIDDLE_LEFT"
+                                         caption="msg://msgRemoteWork"
+                                         width="100%">
+                            </lookupField>
+                            <textField id="remoteWorkCommentField"
+                                       dataContainer="openPositionDc"
+                                       property="remoteComment"
+                                       required="false"
+                                       caption="msg://msgRemoteWorkCommant"
+                                       align="MIDDLE_LEFT"
+                                       width="100%"/>
+                        </hbox>
                     </hbox>
-                </hbox>
-                <hbox align="TOP_RIGHT"
-                      spacing="true"
-                      width="50%"
-                      expand="citiesLabel">
-                    <label id="citiesLabel"
-                           stylename="h4"
-                           width="AUTO"
-                           align="MIDDLE_RIGHT"/>
-                </hbox>
-                <textField id="numberPositionField"
-                           dataContainer="openPositionDc"
-                           property="numberPosition"
-                           required="true"
-                           caption="msg://msgNumberOpenPosition"
-                           width="50%"/>
-                <hbox id="hboxSalary"
-                      spacing="true"
-                      width="100%">
-                    <textField id="openPositionFieldSalaryMin"
-                               dataContainer="openPositionDc"
-                               property="salaryMin"
-                               caption="mainMsg://msgSalaryMin"
-                               width="100%"
-                               required="true"/>
-                    <textField id="openPositionFieldSalaryMax"
-                               dataContainer="openPositionDc"
-                               property="salaryMax"
-                               caption="msg://msgSalaryMax"
-                               width="100%"
-                               required="true"/>
-                </hbox>
-                <checkBox id="salaryStrongLimitCheckBox"
-                          align="BOTTOM_RIGHT"
-                          dataContainer="openPositionDc"
-                          property="salaryFixLimit"
-                          caption="msg://msgSalaryStrongLimit"/>
-            </tab>
-            <tab id="tabPayments"
-                 caption="msg://msgPayments"
-                 margin="tue,true,true,true"
-                 spacing="true"
-                 icon="BULK_EDIT_ACTION">
-                <groupBox id="groupBoxPaymentsResearcher"
-                          orientation="horizontal"
+                    <hbox id="hboxProject"
                           spacing="true"
-                          caption="msg://msgResearcherPayment">
-                    <label id="labelResearcherSalary"
-                           htmlEnabled="true"/>
-                </groupBox>
-                <groupBox id="groupBoxPaymentsRecrutier"
-                          spacing="true"
-                          caption="msg://msgRecrutierSalary">
-                    <label id="labelRecrutierSalary"
-                           htmlEnabled="true"/>
-                </groupBox>
-                <groupBox id="groupBoxPaymentsDetail"
-                          orientation="horizontal"
-                          collapsable="true"
-                          collapsed="true"
-                          spacing="true"
-                          caption="msg://msgPaymentsDetail"
                           width="100%">
-                    <hbox spacing="true"
-                          width="100%"
-                          height="100%">
-                        <vbox spacing="true"
-                              height="100%"
-                              width="33%">
-                            <radioButtonGroup id="radioButtonGroupPaymentsType"
-                                              dataContainer="openPositionDc"
-                                              property="typeCompanyComission"
-                                              caption="msg://msgPaymentType"/>
-                            <checkBox id="checkBoxUseNDFL"
-                                      caption="msg://msgUseNDFL"
-                                      dataContainer="openPositionDc"
-                                      property="useTaxNDFL"/>
-                            <vbox spacing="true"
-                                  align="BOTTOM_LEFT">
-                                <textField id="textFieldPercentOrSum"
-                                           align="BOTTOM_LEFT"
-                                           caption="msg://msgPercentOrSum"
+                        <lookupPickerField id="projectNameField"
+                                           optionsContainer="projectNamesDc"
                                            dataContainer="openPositionDc"
-                                           property="percentComissionOfCompany"/>
-                                <textField id="textFieldCompanyPayment" caption="msg://msgCompanyComission"
-                                           align="BOTTOM_LEFT"/>
-                            </vbox>
-                        </vbox>
-                        <vbox spacing="true" height="100%" width="33%">
-                            <radioButtonGroup id="radioButtonGroupResearcherSalary" caption="msg://msgResearcherSalary"
-                                              dataContainer="openPositionDc" property="typeSalaryOfRecrutier"/>
-                            <vbox spacing="true" align="BOTTOM_LEFT" width="100%">
-                                <textField id="textFieldResearcherSalaryPercentOrSum"
-                                           caption="msg://msgResearcherComission" align="BOTTOM_LEFT"
-                                           dataContainer="openPositionDc" property="percentSalaryOfResearcher"/>
-                                <textField id="textFieldResearcherSalary" align="BOTTOM_LEFT"
-                                           caption="msg://msgResearcherSalary"/>
-                            </vbox>
-                        </vbox>
-                        <vbox spacing="true" height="100%">
-                            <radioButtonGroup
-                                    id="radioButtonGroupRecrutierSalary" caption="msg://msgRecrutierSalary"
-                                    dataContainer="openPositionDc" property="typeSalaryOfResearcher"/>
-                            <vbox spacing="true" width="100%">
-                                <textField id="textFieldRecrutierPercentOrSum" align="BOTTOM_LEFT"
-                                           caption="msg://msgRecrutierComission" dataContainer="openPositionDc"
-                                           property="percentSalaryOfRecrutier"/>
-                                <textField id="textFieldRecrutierSalary" align="BOTTOM_LEFT"
-                                           caption="msg://msgRecrutierSalary"/>
-                            </vbox>
-                        </vbox>
+                                           property="projectName"
+                                           caption="msg://msgNamePosition"
+                                           width="100%"
+                                           required="true">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupPickerField id="companyDepartamentField"
+                                           optionsContainer="companyDepartamentsDc"
+                                           caption="msg://msgDepartment"
+                                           width="100%"
+                                           required="true">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
                     </hbox>
-                </groupBox>
-            </tab>
-            <tab caption="mainMsg://msgJobDescription"
-                 margin="true,true,true,true"
-                 expand="jobDescriptionVBox"
-                 spacing="true"
-                 id="tabJobDescription"
-                 icon="DRIVERS_LICENSE">
-                <scrollBox id="jobDescriptionVBox"
-                           box.expandRatio="1"
-                           spacing="true">
-                    <groupBox id="workExperienceGroupBox"
+                    <hbox id="hboxCompany"
+                          spacing="true"
+                          width="100%">
+                        <lookupPickerField id="companyNameField"
+                                           optionsContainer="companyNamesDc"
+                                           caption="msg://msgCompanyName"
+                                           width="100%"
+                                           required="true">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <hbox spacing="true"
+                              expand="cityOpenPositionField"
+                              width="100%">
+                            <lookupPickerField id="cityOpenPositionField"
+                                               dataContainer="openPositionDc"
+                                               optionsContainer="citiesDc"
+                                               property="cityPosition"
+                                               width="100%"
+                                               caption="mainMsg://msgCity"
+                                               align="BOTTOM_LEFT"
+                                               required="true">
+                                <actions>
+                                    <action id="lookup"
+                                            type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                            <button id="addCity"
+                                    caption="msg://msgAddCity"
+                                    width="AUTO"
+                                    enable="true"
+                                    align="BOTTOM_RIGHT"
+                                    description="msg://msgAddCityDescription"
+                                    invoke="addListCity"/>
+                        </hbox>
+                    </hbox>
+                    <hbox align="TOP_RIGHT"
+                          spacing="true"
+                          width="50%"
+                          expand="citiesLabel">
+                        <label id="citiesLabel"
+                               stylename="h4"
+                               width="AUTO"
+                               align="MIDDLE_RIGHT"/>
+                    </hbox>
+                    <textField id="numberPositionField"
+                               dataContainer="openPositionDc"
+                               property="numberPosition"
+                               required="true"
+                               caption="msg://msgNumberOpenPosition"
+                               width="50%"/>
+                    <hbox id="hboxSalary"
+                          spacing="true"
+                          width="100%">
+                        <textField id="openPositionFieldSalaryMin"
+                                   dataContainer="openPositionDc"
+                                   property="salaryMin"
+                                   caption="mainMsg://msgSalaryMin"
+                                   width="100%"
+                                   required="true"/>
+                        <textField id="openPositionFieldSalaryMax"
+                                   dataContainer="openPositionDc"
+                                   property="salaryMax"
+                                   caption="msg://msgSalaryMax"
+                                   width="100%"
+                                   required="true"/>
+                    </hbox>
+                    <checkBox id="salaryStrongLimitCheckBox"
+                              align="BOTTOM_RIGHT"
+                              dataContainer="openPositionDc"
+                              property="salaryFixLimit"
+                              caption="msg://msgSalaryStrongLimit"/>
+                </tab>
+                <tab id="tabPayments"
+                     caption="msg://msgPayments"
+                     margin="tue,true,true,true"
+                     spacing="true"
+                     icon="BULK_EDIT_ACTION">
+                    <groupBox id="groupBoxPaymentsResearcher"
+                              orientation="horizontal"
+                              spacing="true"
+                              caption="msg://msgResearcherPayment">
+                        <label id="labelResearcherSalary"
+                               htmlEnabled="true"/>
+                    </groupBox>
+                    <groupBox id="groupBoxPaymentsRecrutier"
+                              spacing="true"
+                              caption="msg://msgRecrutierSalary">
+                        <label id="labelRecrutierSalary"
+                               htmlEnabled="true"/>
+                    </groupBox>
+                    <groupBox id="groupBoxPaymentsDetail"
+                              orientation="horizontal"
                               collapsable="true"
                               collapsed="true"
-                              caption="msg://msgWorkExperience"
                               spacing="true"
+                              caption="msg://msgPaymentsDetail"
                               width="100%">
-                        <radioButtonGroup id="workExperienceRadioButton"
-                                          orientation="horizontal"
-                                          required="true"
-                                          description="msg://msgWorkExperience"
+                        <hbox spacing="true"
+                              width="100%"
+                              height="100%">
+                            <vbox spacing="true"
+                                  height="100%"
+                                  width="33%">
+                                <radioButtonGroup id="radioButtonGroupPaymentsType"
+                                                  dataContainer="openPositionDc"
+                                                  property="typeCompanyComission"
+                                                  caption="msg://msgPaymentType"/>
+                                <checkBox id="checkBoxUseNDFL"
+                                          caption="msg://msgUseNDFL"
                                           dataContainer="openPositionDc"
-                                          property="workExperience"
-                                          caption="msg://msgWorkExperience"/>
-                        <radioButtonGroup id="commanExperienceRadioButton"
-                                          orientation="horizontal"
-                                          required="true"
-                                          description="msg://msgCommandExperience"
-                                          dataContainer="openPositionDc"
-                                          property="commandExperience"
-                                          caption="msg://msgCommandExperience"/>
+                                          property="useTaxNDFL"/>
+                                <vbox spacing="true"
+                                      align="BOTTOM_LEFT">
+                                    <textField id="textFieldPercentOrSum"
+                                               align="BOTTOM_LEFT"
+                                               caption="msg://msgPercentOrSum"
+                                               dataContainer="openPositionDc"
+                                               property="percentComissionOfCompany"/>
+                                    <textField id="textFieldCompanyPayment" caption="msg://msgCompanyComission"
+                                               align="BOTTOM_LEFT"/>
+                                </vbox>
+                            </vbox>
+                            <vbox spacing="true" height="100%" width="33%">
+                                <radioButtonGroup id="radioButtonGroupResearcherSalary"
+                                                  caption="msg://msgResearcherSalary"
+                                                  dataContainer="openPositionDc" property="typeSalaryOfRecrutier"/>
+                                <vbox spacing="true" align="BOTTOM_LEFT" width="100%">
+                                    <textField id="textFieldResearcherSalaryPercentOrSum"
+                                               caption="msg://msgResearcherComission" align="BOTTOM_LEFT"
+                                               dataContainer="openPositionDc" property="percentSalaryOfResearcher"/>
+                                    <textField id="textFieldResearcherSalary" align="BOTTOM_LEFT"
+                                               caption="msg://msgResearcherSalary"/>
+                                </vbox>
+                            </vbox>
+                            <vbox spacing="true" height="100%">
+                                <radioButtonGroup
+                                        id="radioButtonGroupRecrutierSalary" caption="msg://msgRecrutierSalary"
+                                        dataContainer="openPositionDc" property="typeSalaryOfResearcher"/>
+                                <vbox spacing="true" width="100%">
+                                    <textField id="textFieldRecrutierPercentOrSum" align="BOTTOM_LEFT"
+                                               caption="msg://msgRecrutierComission" dataContainer="openPositionDc"
+                                               property="percentSalaryOfRecrutier"/>
+                                    <textField id="textFieldRecrutierSalary" align="BOTTOM_LEFT"
+                                               caption="msg://msgRecrutierSalary"/>
+                                </vbox>
+                            </vbox>
+                        </hbox>
                     </groupBox>
-                    <hbox spacing="true" width="100%">
-                        <accordion id="openPositionAccordion"
-                                   height="100%">
-                            <tab id="openPositionRuTabAccordion"
-                                 caption="msg://msgRuComment">
-                                <richTextArea id="openPositionRichTextArea"
+                </tab>
+                <tab caption="mainMsg://msgJobDescription"
+                     margin="true,true,true,true"
+                     expand="jobDescriptionVBox"
+                     spacing="true"
+                     id="tabJobDescription"
+                     icon="DRIVERS_LICENSE">
+                    <scrollBox id="jobDescriptionVBox"
+                               box.expandRatio="1"
+                               spacing="true">
+                        <groupBox id="workExperienceGroupBox"
+                                  collapsable="true"
+                                  collapsed="true"
+                                  caption="msg://msgWorkExperience"
+                                  spacing="true"
+                                  width="100%">
+                            <radioButtonGroup id="workExperienceRadioButton"
+                                              orientation="horizontal"
+                                              required="true"
+                                              description="msg://msgWorkExperience"
                                               dataContainer="openPositionDc"
-                                              property="comment"
-                                              width="100%"
-                                              box.expandRatio="1"
-                                              height="350px"
-                                              required="true"/>
-                            </tab>
-                            <tab id="openPositionEnTabAccordion"
-                                 caption="msg://msgEnComment">
-                                <richTextArea id="openPositionEnRichTextArea"
+                                              property="workExperience"
+                                              caption="msg://msgWorkExperience"/>
+                            <radioButtonGroup id="commanExperienceRadioButton"
+                                              orientation="horizontal"
+                                              required="true"
+                                              description="msg://msgCommandExperience"
                                               dataContainer="openPositionDc"
-                                              property="commentEn"
-                                              width="100%"
-                                              box.expandRatio="1"
-                                              height="350px"
-                                              required="false"/>
-                            </tab>
-                            <tab id="openPositionStandartDescriptionAccorden"
-                                 caption="msg://msgStandartDescription">
-                                <richTextArea id="openPositionStandartDescriptionRichTextArea"
-                                              width="100%"
-                                              box.expandRatio="1"
-                                              height="350px"
-                                              editable="false"/>
-                            </tab>
-                            <tab id="openPositionWhoIsThisGuyAccorden"
-                                 caption="msg://msgWhoIsThisGuy">
-                                <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
-                                              width="100%"
-                                              box.expandRatio="1"
-                                              height="350px"
-                                              editable="false"/>
-                            </tab>
-                        </accordion>
-                    </hbox>
-                    <hbox width="100%"
+                                              property="commandExperience"
+                                              caption="msg://msgCommandExperience"/>
+                        </groupBox>
+                        <hbox spacing="true" width="100%">
+                            <accordion id="openPositionAccordion"
+                                       height="100%">
+                                <tab id="openPositionRuTabAccordion"
+                                     caption="msg://msgRuComment">
+                                    <richTextArea id="openPositionRichTextArea"
+                                                  dataContainer="openPositionDc"
+                                                  property="comment"
+                                                  width="100%"
+                                                  box.expandRatio="1"
+                                                  height="350px"
+                                                  required="true"/>
+                                </tab>
+                                <tab id="openPositionEnTabAccordion"
+                                     caption="msg://msgEnComment">
+                                    <richTextArea id="openPositionEnRichTextArea"
+                                                  dataContainer="openPositionDc"
+                                                  property="commentEn"
+                                                  width="100%"
+                                                  box.expandRatio="1"
+                                                  height="350px"
+                                                  required="false"/>
+                                </tab>
+                                <tab id="openPositionStandartDescriptionAccorden"
+                                     caption="msg://msgStandartDescription">
+                                    <richTextArea id="openPositionStandartDescriptionRichTextArea"
+                                                  width="100%"
+                                                  box.expandRatio="1"
+                                                  height="350px"
+                                                  editable="false"/>
+                                </tab>
+                                <tab id="openPositionWhoIsThisGuyAccorden"
+                                     caption="msg://msgWhoIsThisGuy">
+                                    <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
+                                                  width="100%"
+                                                  box.expandRatio="1"
+                                                  height="350px"
+                                                  editable="false"/>
+                                </tab>
+                            </accordion>
+                        </hbox>
+                        <hbox width="100%"
+                              spacing="true"
+                              expand="shortDescriptionTextArea">
+                            <textField id="shortDescriptionTextArea"
+                                       dataContainer="openPositionDc"
+                                       caption="msg://msgShortCaption"
+                                       property="shortDescription"
+                                       maxLength="250"
+                                       width="100%"/>
+                            <button id="scanJDButton"
+                                    caption="msg://msgScanJD"
+                                    align="BOTTOM_RIGHT"
+                                    description="msg://msgScanJDAndPut"
+                                    invoke="addShortDescription"/>
+                        </hbox>
+                    </scrollBox>
+                </tab>
+                <tab id="tabExercise"
+                     caption="msg://msgExercise"
+                     margin="true,true,true,true"
+                     spacing="true"
+                     expand="exerciseVbox"
+                     icon="ADJUST">
+                    <vbox id="exerciseVbox"
+                          height="100%"
+                          width="100%"
                           spacing="true"
-                          expand="shortDescriptionTextArea">
-                        <textField id="shortDescriptionTextArea"
-                                   dataContainer="openPositionDc"
-                                   caption="msg://msgShortCaption"
-                                   property="shortDescription"
-                                   maxLength="250"
-                                   width="100%"/>
-                        <button id="scanJDButton"
-                                caption="msg://msgScanJD"
-                                align="BOTTOM_RIGHT"
-                                description="msg://msgScanJDAndPut"
-                                invoke="addShortDescription"/>
-                    </hbox>
-                </scrollBox>
-            </tab>
-            <tab id="tabExercise"
-                 caption="msg://msgExercise"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 expand="exerciseVbox"
-                 icon="ADJUST">
-                <vbox id="exerciseVbox"
-                      height="100%"
-                      width="100%"
-                      spacing="true"
-                      expand="exerciseRichTextArea">
-                    <checkBox id="needExerciseCheckBox"
-                              dataContainer="openPositionDc"
-                              property="needExercise"
-                              caption="msg://msgNeedExercice"/>
-                    <richTextArea id="exerciseRichTextArea"
+                          expand="exerciseRichTextArea">
+                        <checkBox id="needExerciseCheckBox"
                                   dataContainer="openPositionDc"
-                                  property="exercise"
-                                  height="100%"
-                                  width="100%"/>
-                </vbox>
-            </tab>
-            <tab id="tabTemplateLetter"
-                 caption="msg://msgTemplateLetter"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 expand="templateLetterBox"
-                 icon="font-icon:MAIL_FORWARD">
-                <vbox id="templateLetterBox"
-                      width="100%"
-                      height="100%"
-                      spacing="true"
-                      expand="templateLetterRichTextArea">
-                    <checkBox id="needLetterCheckBox"
-                              dataContainer="openPositionDc"
-                              property="needLetter"
-                              caption="msg://msgNeedLetter"/>
-                    <richTextArea id="templateLetterRichTextArea"
+                                  property="needExercise"
+                                  caption="msg://msgNeedExercice"/>
+                        <richTextArea id="exerciseRichTextArea"
+                                      dataContainer="openPositionDc"
+                                      property="exercise"
+                                      height="100%"
+                                      width="100%"/>
+                    </vbox>
+                </tab>
+                <tab id="tabMemoForInterview"
+                     caption="msg://msgMemoForInterview"
+                     margin="true,true,true,true"
+                     spacing="true"
+                     expand="memoVbox"
+                     icon="ADJUST">
+                    <vbox id="memoVbox"
+                          height="100%"
+                          width="100%"
+                          spacing="true"
+                          expand="memoForInterviewRichTextArea">
+                        <checkBox id="needMemoCheckBox"
                                   dataContainer="openPositionDc"
-                                  property="templateLetter"
-                                  width="100%"
-                                  height="100%"
-                                  required="false"/>
-                </vbox>
-            </tab>
-            <tab id="tabSkills"
-                 caption="msg://msgSkilsPosition"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 expand="skillsBox"
-                 icon="FILTER">
-                <vbox id="skillsBox"
-                      width="100%"
-                      spacing="true"
-                      expand="openPositionSkillsListTable">
-                    <button id="rescanSkills"
-                            caption="msg://msgRescanJobDescription"
-                            align="BOTTOM_LEFT"
-                            invoke="rescanJobDescription"/>
-                    <treeDataGrid id="openPositionSkillsListTable"
-                                  width="100%"
-                                  hierarchyColumn="skillName"
-                                  dataContainer="openPositionSkillsListsDc"
-                                  hierarchyProperty="skillTree">
-                        <columns>
-                            <column id="fileImageLogo"
-                                    property="fileImageLogo"
-                                    maximumWidth="120px"
-                                    caption="msg://msgSkillLogo">
-                                <componentRenderer/>
-                            </column>
-                            <column id="skillName" property="skillName" caption="msg://msgSkill"/>
-                            <column id="specialisation" property="specialisation" caption="msg://msgSpecialisation"/>
-                            <column id="wikiPage" property="wikiPage" maximumWidth="250px" caption="msg://msgWikiPage"/>
-                            <column id="isComment" caption="msg://msgIsComment" maximumWidth="120px">
-                                <iconRenderer/>
-                            </column>
-                        </columns>
-                        <rowsCount/>
-                        <!--                    <actions>
-                                                <action id="add"
-                                                        type="add"/>
-                                                <action id="edit"
-                                                        type="edit"/>
-                                                <action id="remove"
-                                                        type="remove"/>
-                                            </actions>
-                                            <buttonsPanel>
-                                                <button action="openPositionSkillsListTable.add"/>
-                                                <button action="openPositionSkillsListTable.edit"/>
-                                                <button action="openPositionSkillsListTable.remove"/>
-                                            </buttonsPanel> -->
-                    </treeDataGrid>
-                </vbox>
-            </tab>
-        </tabSheet>
+                                  property="needMemoForInterview"
+                                  caption="msg://msgNeedMemoForInterview"/>
+                        <richTextArea id="memoForInterviewRichTextArea"
+                                      dataContainer="openPositionDc"
+                                      property="memoForInterview"
+                                      height="100%"
+                                      width="100%"/>
+                    </vbox>
+                </tab>
+                <tab id="tabTemplateLetter"
+                     caption="msg://msgTemplateLetter"
+                     margin="true,true,true,true"
+                     spacing="true"
+                     expand="templateLetterBox"
+                     icon="font-icon:MAIL_FORWARD">
+                    <vbox id="templateLetterBox"
+                          width="100%"
+                          height="100%"
+                          spacing="true"
+                          expand="templateLetterRichTextArea">
+                        <checkBox id="needLetterCheckBox"
+                                  dataContainer="openPositionDc"
+                                  property="needLetter"
+                                  caption="msg://msgNeedLetter"/>
+                        <richTextArea id="templateLetterRichTextArea"
+                                      dataContainer="openPositionDc"
+                                      property="templateLetter"
+                                      width="100%"
+                                      height="100%"
+                                      required="false"/>
+                    </vbox>
+                </tab>
+                <tab id="tabSkills"
+                     caption="msg://msgSkilsPosition"
+                     margin="true,true,true,true"
+                     spacing="true"
+                     expand="skillsBox"
+                     icon="FILTER">
+                    <vbox id="skillsBox"
+                          width="100%"
+                          spacing="true"
+                          expand="openPositionSkillsListTable">
+                        <button id="rescanSkills"
+                                caption="msg://msgRescanJobDescription"
+                                align="BOTTOM_LEFT"
+                                invoke="rescanJobDescription"/>
+                        <treeDataGrid id="openPositionSkillsListTable"
+                                      width="100%"
+                                      hierarchyColumn="skillName"
+                                      dataContainer="openPositionSkillsListsDc"
+                                      hierarchyProperty="skillTree">
+                            <columns>
+                                <column id="fileImageLogo"
+                                        property="fileImageLogo"
+                                        maximumWidth="120px"
+                                        caption="msg://msgSkillLogo">
+                                    <componentRenderer/>
+                                </column>
+                                <column id="skillName" property="skillName" caption="msg://msgSkill"/>
+                                <column id="specialisation" property="specialisation"
+                                        caption="msg://msgSpecialisation"/>
+                                <column id="wikiPage" property="wikiPage" maximumWidth="250px"
+                                        caption="msg://msgWikiPage"/>
+                                <column id="isComment" caption="msg://msgIsComment" maximumWidth="120px">
+                                    <iconRenderer/>
+                                </column>
+                            </columns>
+                            <rowsCount/>
+                            <!--                    <actions>
+                                                    <action id="add"
+                                                            type="add"/>
+                                                    <action id="edit"
+                                                            type="edit"/>
+                                                    <action id="remove"
+                                                            type="remove"/>
+                                                </actions>
+                                                <buttonsPanel>
+                                                    <button action="openPositionSkillsListTable.add"/>
+                                                    <button action="openPositionSkillsListTable.edit"/>
+                                                    <button action="openPositionSkillsListTable.remove"/>
+                                                </buttonsPanel> -->
+                        </treeDataGrid>
+                    </vbox>
+                </tab>
+            </tabSheet>
+        </vbox>
         <vbox id="forExpand" spacing="false" align="BOTTOM_RIGHT">
             <hbox id="editActions"
                   spacing="true"

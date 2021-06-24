@@ -1,14 +1,14 @@
 package com.company.itpearls.web.screens.iteraction;
 
+import com.company.itpearls.core.EmailGenerationService;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Iteraction;
-import com.company.itpearls.BeanNotificationEvent;
-import com.company.itpearls.UiNotificationEvent;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -61,6 +61,10 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private CheckBox neetToSendEmailCheckBox;
     @Inject
     private RichTextArea textEmailToSendRichTextArea;
+    @Inject
+    private EmailGenerationService emailGenerationService;
+    @Inject
+    private RichTextArea commentKeysRichTextArea;
 
     @Subscribe("checkBoxCalendar")
     public void onCheckBoxCalendarValueChange(HasValue.ValueChangeEvent<Boolean> event) {
@@ -163,6 +167,16 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
                 }
             }
         });
+
+        HashMap<String, String> emailKeys = emailGenerationService.generateKeys();
+        String retStr = "";
+
+        for(Map.Entry<String, String> entry : emailKeys.entrySet()) {
+            retStr = retStr + entry.getKey() + " - " + entry.getValue() + "<br>";
+        }
+
+        commentKeysRichTextArea.setValue(retStr);
+
     }
 
     @Subscribe("radioButtonTypeNotifications")

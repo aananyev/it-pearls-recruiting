@@ -527,13 +527,27 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if (beforeEdit.getOpenClose() != getEditedEntity().getOpenClose()) {
+        if(getEditedEntity().getOpenClose() != true && PersistenceHelper.isNew(getEditedEntity()) ) {
+            sendOpenPositionMessage();
+        } else {
+            if(getEditedEntity().getOpenClose() && beforeEdit.getOpenClose() != true) {
+                sendClosePositionMessage();
+            }
+
+            if(getEditedEntity().getOpenClose() != true
+                    && !PersistenceHelper.isNew(getEditedEntity())
+                    && beforeEdit.getOpenClose() != getEditedEntity().getOpenClose()) {
+                sendOpenPositionMessage();
+            }
+        }
+
+/*        if (beforeEdit.getOpenClose() != getEditedEntity().getOpenClose()) {
             if (!getEditedEntity().getOpenClose()) {
                 sendOpenPositionMessage();
             } else {
                 sendClosePositionMessage();
             }
-        }
+        } */
     }
 
     private void sendClosePositionMessage() {

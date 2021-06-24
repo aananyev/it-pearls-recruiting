@@ -18,6 +18,7 @@
                 <entry key="itpearls_StarsAndOtherService" value="com.company.itpearls.core.StarsAndOtherService"/>
                 <entry key="itpearls_ResumeRecognitionService"
                        value="com.company.itpearls.core.ResumeRecognitionService"/>
+                <entry key="itpearls_EmailGenerationService" value="com.company.itpearls.core.EmailGenerationService"/>
             </map>
         </property>
     </bean>

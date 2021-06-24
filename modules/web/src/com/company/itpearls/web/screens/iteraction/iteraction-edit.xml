@@ -139,6 +139,10 @@ order by e.number]]>
                                   dataContainer="iteractionDc"
                                   caption="msg://msgNeedSendEmail"
                                   property="needSendLetter"/>
+                        <checkBox id="neetSendMemoCheckBox"
+                                  dataContainer="iteractionDc"
+                                  property="needSendMemo"
+                                  caption="msg://msgNeedSendMemo"/>
                         <hbox id="textEmailHBox"
                               expand="textEmailToSendRichTextArea"
                               width="100%"

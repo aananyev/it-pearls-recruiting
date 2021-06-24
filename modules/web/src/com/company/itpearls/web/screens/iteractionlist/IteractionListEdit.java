@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
@@ -17,9 +18,11 @@ import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
 
@@ -102,6 +105,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Boolean askFlag = false;
     private Boolean askFlag2 = false;
     protected Boolean noSubscribe = false;
+    @Inject
+    private EmailGenerationService emailGenerationService;
+    @Inject
+    private Logger log;
 
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
@@ -130,7 +137,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (iteractionTypeField.getValue().getAddType() != null)
                     _addType = iteractionTypeField.getValue().getAddType();
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            log.error("Error", e);
             _addType = 0;
         }
 
@@ -139,7 +146,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (iteractionTypeField.getValue().getAddFlag() != null)
                     _addFlag = iteractionTypeField.getValue().getAddFlag();
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            log.error("Error", e);
             _addFlag = false;
         }
 
@@ -206,10 +213,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             } catch (NullPointerException e) {
                 callForm = false;
-                e.printStackTrace();
+                log.error("Error", e);
             }
 
-            if(callForm != null) {
+            if (callForm != null) {
                 if (callForm) {
                     addDate.setVisible(false);
                     addString.setVisible(false);
@@ -342,7 +349,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     dialogs.createOptionDialog()
                             .withCaption("ВНИМАНИЕ !")
                             .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
-                                    ".\nПодписаться до будущео понедельника?")
+                                    ".\nПодписаться до будущего понедельника?")
                             .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                                         screenBuilders.editor(RecrutiesTasks.class, this)
                                                 .newEntity()
@@ -453,6 +460,95 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         sendMessages();
+        sendMessagesToCandidate();
+    }
+
+    private void sendMessagesToCandidate() {
+        if (getEditedEntity().getIteractionType() != null) {
+            if (getEditedEntity().getIteractionType().getNeedSendLetter() != null) {
+                if (getEditedEntity().getIteractionType().getNeedSendLetter()) {
+                    if (getEditedEntity().getIteractionType().getTextEmailToSend() != null) {
+                        if (getEditedEntity().getCandidate().getEmail() != null) {
+
+                            String message = preparingMessage(getEditedEntity());
+
+                            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                                    .withContentMode(ContentMode.HTML)
+                                    .withType(Dialogs.MessageType.CONFIRMATION)
+                                    .withWidth("600px")
+                                    .withHeight("400px")
+                                    .withMessage("Высылать ли кандидату оповещение по электронной почте?<br><i>"
+                                            + message
+                                            + "</i>")
+                                    .withActions(new DialogAction(DialogAction.Type.YES,
+                                                    Action.Status.PRIMARY).withHandler(e -> {
+                                                IteractionList newsItem = getEditedEntity();
+                                                String bodyMessage = preparingMessage(newsItem);
+
+                                                if (newsItem.getVacancy().getNeedMemoForInterview() != null) {
+                                                    if (newsItem.getVacancy().getNeedMemoForInterview()) {
+                                                        if (newsItem.getVacancy().getMemoForInterview() != null) {
+                                                            if (newsItem.getIteractionType().getNeedSendMemo() != null) {
+                                                                if (newsItem.getIteractionType().getNeedSendMemo()) {
+                                                                    bodyMessage = bodyMessage
+                                                                            + "<br><br><b>Памятка для собеседования</b><br><br>"
+                                                                            + newsItem.getVacancy().getMemoForInterview();
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                EmailInfo emailInfo = EmailInfoBuilder.create()
+                                                        .setAddresses(newsItem.getCandidate().getEmail())
+                                                        .setCaption("IT Pearls - "
+                                                                + newsItem.getVacancy().getVacansyName()
+                                                                + "/"
+                                                                + newsItem.getIteractionType().getIterationName())
+                                                        .setFrom(null)
+                                                        .setBody(bodyMessage)
+                                                        .setTemplateParameters(Collections.singletonMap("newsItem", newsItem))
+                                                        .build();
+
+                                                emailInfo.setBodyContentType("text/html; charset=UTF-8");
+
+                                                emailService.sendEmailAsync(emailInfo);
+                                            }),
+                                            new DialogAction(DialogAction.Type.NO))
+                                    .show();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private String preparingMessage(IteractionList newsItem) {
+        HashMap<String, String> emailKeys = emailGenerationService.generateKeys();
+
+        String retStr = newsItem.getIteractionType().getTextEmailToSend();
+
+        try {
+            retStr = retStr.replace(emailKeys.get("Имя"), newsItem.getCandidate().getFirstName());
+            retStr = retStr.replace(emailKeys.get("Фамилия"), newsItem.getCandidate().getSecondName());
+            retStr = retStr.replace(emailKeys.get("Вакансия"), newsItem.getVacancy().getVacansyName());
+            retStr = retStr.replace(emailKeys.get("Проект"), newsItem.getVacancy().getProjectName().getProjectName());
+            retStr = retStr.replace(emailKeys.get("Компания"), newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName());
+            retStr = retStr.replace(emailKeys.get("Департамент"), newsItem.getVacancy().getProjectName().getProjectName());
+            retStr = retStr.replace(emailKeys.get("Ресерчер"), newsItem.getRecrutier().getName());
+            retStr = retStr.replace(emailKeys.get("ОписаниеВакансии"), newsItem.getVacancy().getComment());
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            retStr = retStr.replace(emailKeys.get("Дата"), simpleDateFormat.format(newsItem.getAddDate()));
+
+            SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("hh:mm");
+            retStr = retStr.replace(emailKeys.get("Время"), simpleDateFormat1.format(newsItem.getAddDate()));
+        } catch (NullPointerException e) {
+            log.error("Error", e);
+        }
+
+        return retStr;
+
     }
 
     @Subscribe
@@ -560,6 +656,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             numberIteraction = null;
 
             myClient = true;
+            log.error("SQLError", e);
         }
 
         if (numberIteraction != null) {
@@ -648,7 +745,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         changeField();
 
-        if(parentCandidate != null) {
+        if (parentCandidate != null) {
             getEditedEntity().setCandidate(parentCandidate);
         }
     }
@@ -693,7 +790,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            log.error("Error", e);
         }
     }
 
@@ -716,7 +813,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error", e);
         }
 
         try {
@@ -730,7 +827,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error", e);
         }
 
         if (vacansyPosition != null && candidatePosition != null) {
@@ -753,16 +850,19 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         try {
             vacansyCity = event.getValue().getCityPosition().getCityRuName();
         } catch (Exception e) {
+            log.error("Error", e);
         }
 
         try {
             candidateCity = candidateField.getValue().getCityOfResidence().getCityRuName();
         } catch (Exception e) {
+            log.error("Error", e);
         }
 
         try {
             remoteWork = event.getValue().getRemoteWork();
         } catch (Exception e) {
+            log.error("Error", e);
         }
 
         if (vacansyCity != null && candidateCity != null) {

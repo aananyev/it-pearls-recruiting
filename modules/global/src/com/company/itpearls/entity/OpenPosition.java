@@ -77,7 +77,6 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "WORK_EXPERIENCE")
     protected Integer workExperience;
 
-
     @Column(name = "COMMAND_EXPERIENCE")
     protected Integer commandExperience;
 
@@ -150,6 +149,30 @@ public class OpenPosition extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PARENT_OPEN_POSITION_ID")
     protected OpenPosition parentOpenPosition;
+
+    @Column(name = "NEED_MEMO_FOR_INTERVIEW")
+    private Boolean needMemoForInterview;
+
+    @Lob
+    @Column(name = "MEMO_FOR_INTERVIEW")
+    private String memoForInterview;
+
+    public Boolean getNeedMemoForInterview() {
+        return needMemoForInterview;
+    }
+
+    public void setNeedMemoForInterview(Boolean needMemoForInterview) {
+        this.needMemoForInterview = needMemoForInterview;
+    }
+
+
+    public String getMemoForInterview() {
+        return memoForInterview;
+    }
+
+    public void setMemoForInterview(String memoForInterview) {
+        this.memoForInterview = memoForInterview;
+    }
 
     public Boolean getInternalProject() {
         return internalProject;

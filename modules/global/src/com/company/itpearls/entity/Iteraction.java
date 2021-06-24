@@ -88,6 +88,17 @@ public class Iteraction extends StandardEntity {
     @Column(name = "TEXT_EMAIL_TO_SEND")
     private String textEmailToSend;
 
+    @Column(name = "NEED_SEND_MEMO")
+    private Boolean needSendMemo;
+
+    public Boolean getNeedSendMemo() {
+        return needSendMemo;
+    }
+
+    public void setNeedSendMemo(Boolean needSendMemo) {
+        this.needSendMemo = needSendMemo;
+    }
+
     public String getTextEmailToSend() {
         return textEmailToSend;
     }

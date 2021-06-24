@@ -206,6 +206,7 @@ create table ITPEARLS_ITERACTION (
     WIDGET_CHACK_JOB_CANDIDATES boolean,
     NEED_SEND_LETTER boolean,
     TEXT_EMAIL_TO_SEND text,
+    NEED_SEND_MEMO boolean,
     --
     primary key (ID)
 )^
@@ -437,6 +438,8 @@ create table ITPEARLS_OPEN_POSITION (
     PERCENT_SALARY_OF_RESEARCHER varchar(5),
     PERCENT_SALARY_OF_RECRUTIER varchar(5),
     PARENT_OPEN_POSITION_ID uuid,
+    NEED_MEMO_FOR_INTERVIEW boolean,
+    MEMO_FOR_INTERVIEW text,
     --
     primary key (ID)
 )^

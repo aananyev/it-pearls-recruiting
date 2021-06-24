@@ -25,6 +25,7 @@ public class ExtMainScreen extends MainScreen {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withDescription(event.getMessage())
                         .withHideDelayMs(10000)
+                        .withPosition(Notifications.Position.TOP_RIGHT)
                         .withCaption("INFO")
                         .withStyleName("open-position-notification-open")
                         .withContentMode(ContentMode.HTML)
@@ -33,6 +34,7 @@ public class ExtMainScreen extends MainScreen {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withDescription(event.getMessage())
                         .withHideDelayMs(5000)
+                        .withPosition(Notifications.Position.TOP_RIGHT)
                         .withCaption("INFO")
                         .withContentMode(ContentMode.HTML)
                         .show();
@@ -41,6 +43,7 @@ public class ExtMainScreen extends MainScreen {
             notifications.create(Notifications.NotificationType.TRAY)
                     .withDescription(event.getMessage())
                     .withCaption("WARNING")
+                    .withPosition(Notifications.Position.TOP_RIGHT)
                     .withHideDelayMs(10000)
                     .withContentMode(ContentMode.HTML)
                     .withStyleName("open-position-notification-close")
