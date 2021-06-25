@@ -1,11 +1,12 @@
 package com.company.itpearls.web.widgets.reports;
 
 import com.company.itpearls.entity.Iteraction;
+import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
+import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
-import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.entity.User;
@@ -28,6 +29,8 @@ public class MyCandidateTableFragment extends ScreenFragment {
     private Date endDate =  null;
     private Iteraction iteractionType = null;
     private User user = null;
+    @Inject
+    private Table<IteractionList> jobCandidatesTable;
 
     public void setUser(User user) {
         this.user = user;

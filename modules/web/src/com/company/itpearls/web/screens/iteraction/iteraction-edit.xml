@@ -132,17 +132,19 @@ order by e.number]]>
                         </groupBox>
                     </hbox>
                     <groupBox width="100%"
-                          height="100%"
-                          spacing="true"
-                          expand="textEmailHBox">
-                        <checkBox id="neetToSendEmailCheckBox"
-                                  dataContainer="iteractionDc"
-                                  caption="msg://msgNeedSendEmail"
-                                  property="needSendLetter"/>
-                        <checkBox id="neetSendMemoCheckBox"
-                                  dataContainer="iteractionDc"
-                                  property="needSendMemo"
-                                  caption="msg://msgNeedSendMemo"/>
+                              height="100%"
+                              spacing="true"
+                              expand="textEmailHBox">
+                        <hbox spacing="true">
+                            <checkBox id="neetToSendEmailCheckBox"
+                                      dataContainer="iteractionDc"
+                                      caption="msg://msgNeedSendEmail"
+                                      property="needSendLetter"/>
+                            <checkBox id="neetSendMemoCheckBox"
+                                      dataContainer="iteractionDc"
+                                      property="needSendMemo"
+                                      caption="msg://msgNeedSendMemo"/>
+                        </hbox>
                         <hbox id="textEmailHBox"
                               expand="textEmailToSendRichTextArea"
                               width="100%"

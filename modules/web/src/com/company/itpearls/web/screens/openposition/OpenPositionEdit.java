@@ -194,8 +194,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void standartDescriptionDisable(BeforeShowEvent event) {
-        if(getEditedEntity().getPositionType() != null) {
-            if(getEditedEntity().getPositionType().getStandartDescription() == null) {
+        if (getEditedEntity().getPositionType() != null) {
+            if (getEditedEntity().getPositionType().getStandartDescription() == null) {
                 openPositionStandartDescriptionAccorden.setVisible(false);
                 openPositionStandartDescriptionRichTextArea.setEnabled(false);
             } else {
@@ -206,8 +206,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void whiIsThisGuyDisable(BeforeShowEvent event) {
-        if(getEditedEntity().getPositionType() != null) {
-            if(getEditedEntity().getPositionType().getStandartDescription() == null) {
+        if (getEditedEntity().getPositionType() != null) {
+            if (getEditedEntity().getPositionType().getStandartDescription() == null) {
                 openPositionWhoIsThisGuyAccorden.setVisible(false);
                 openPositionWhoIsThisGuyRichTextArea.setEnabled(false);
             } else {
@@ -527,27 +527,27 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if(getEditedEntity().getOpenClose() != true && PersistenceHelper.isNew(getEditedEntity()) ) {
-            sendOpenPositionMessage();
-        } else {
-            if(getEditedEntity().getOpenClose() && beforeEdit.getOpenClose() != true) {
-                sendClosePositionMessage();
-            }
-
-            if(getEditedEntity().getOpenClose() != true
-                    && !PersistenceHelper.isNew(getEditedEntity())
-                    && beforeEdit.getOpenClose() != getEditedEntity().getOpenClose()) {
-                sendOpenPositionMessage();
-            }
+        if(getEditedEntity().getOpenClose() == null) {
+            getEditedEntity().setOpenClose(false);
         }
 
-/*        if (beforeEdit.getOpenClose() != getEditedEntity().getOpenClose()) {
-            if (!getEditedEntity().getOpenClose()) {
-                sendOpenPositionMessage();
-            } else {
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            if(getEditedEntity().getOpenClose()) {
                 sendClosePositionMessage();
+            } else {
+                sendOpenPositionMessage();
             }
-        } */
+        } else {
+            if(getEditedEntity().getOpenClose()) {
+                if(!beforeEdit.getOpenClose().equals(getEditedEntity().getOpenClose())) {
+                    sendClosePositionMessage();
+                }
+            } else {
+                if(!beforeEdit.getOpenClose().equals(getEditedEntity().getOpenClose())) {
+                    sendOpenPositionMessage();
+                }
+            }
+        }
     }
 
     private void sendClosePositionMessage() {
@@ -1159,7 +1159,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("projectNameField")
     public void onProjectNameFieldValueChange1(HasValue.ValueChangeEvent<Project> event) {
-        if(event.getValue() != null) {
+        if (event.getValue() != null) {
             if (event.getValue().getProjectIsClosed()) {
                 dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
                         .withContentMode(ContentMode.HTML)
@@ -1381,12 +1381,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             selectCitiesLocation.setCitiesList(this.getEditedEntity().getCities());
         });
         selectCitiesLocation.addAfterCloseListener(e -> {
-                List<City> cities = selectCitiesLocation.getCitiesList();
+            List<City> cities = selectCitiesLocation.getCitiesList();
 
-                openPositionDc.getItem().setCities(cities);
-                dataContext.merge(openPositionDc.getItem());
+            openPositionDc.getItem().setCities(cities);
+            dataContext.merge(openPositionDc.getItem());
 
-                changeCityListsLabel();
+            changeCityListsLabel();
         });
 
         selectCitiesLocation.show();
@@ -1394,7 +1394,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges2(BeforeCommitChangesEvent event) {
-        if(shortDescriptionTextArea.getValue() != null) {
+        if (shortDescriptionTextArea.getValue() != null) {
             if (shortDescriptionTextArea.getValue().length() > 250) {
                 notifications
                         .create(Notifications.NotificationType.ERROR)
@@ -1485,7 +1485,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             for (SkillTree skillTree : skillTrees) {
                 if (skillTree.getSkillTree() != null) {
-                        retStr = skillTree.getSkillName() + ";" + retStr;
+                    retStr = skillTree.getSkillName() + ";" + retStr;
                 }
             }
 
@@ -1495,12 +1495,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("positionTypeField")
     public void onPositionTypeFieldValueChange1(HasValue.ValueChangeEvent<Position> event) {
-        if(event.getValue() != null) {
+        if (event.getValue() != null) {
             if (event.getValue().getStandartDescription() != null) {
                 openPositionStandartDescriptionRichTextArea.setValue(event.getValue().getStandartDescription());
             }
 
-            if(event.getValue().getWhoIsThisGuy() != null) {
+            if (event.getValue().getWhoIsThisGuy() != null) {
                 openPositionWhoIsThisGuyRichTextArea.setValue(event.getValue().getWhoIsThisGuy());
             }
         }

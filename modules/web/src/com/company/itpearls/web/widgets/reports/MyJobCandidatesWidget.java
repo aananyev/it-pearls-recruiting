@@ -125,7 +125,7 @@ public class MyJobCandidatesWidget extends ScreenFragment {
                         toLatinTrans.transliterate(itr.getIterationName()),
                         groupBoxLayout);
 
-                tab.setCaption(itr.getIterationName());
+                tab.setCaption(itr.getIterationName() + " [" + myCandidateTableFragment.getCountCandidates() + "]");
                 tab.setStyleName("last_status_widget");
                 tab.setIcon(itr.getPic());
             }

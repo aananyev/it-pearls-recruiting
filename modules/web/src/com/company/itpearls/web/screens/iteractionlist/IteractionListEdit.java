@@ -475,9 +475,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
                                     .withContentMode(ContentMode.HTML)
                                     .withType(Dialogs.MessageType.CONFIRMATION)
-                                    .withWidth("600px")
-                                    .withHeight("400px")
-                                    .withMessage("Высылать ли кандидату оповещение по электронной почте?<br><i>"
+                                    .withWidth("800px")
+                                    .withHeight("600px")
+                                    .withMessage("<h3>Высылать ли кандидату оповещение по электронной почте?</h3><br><br><i>"
                                             + message
                                             + "</i>")
                                     .withActions(new DialogAction(DialogAction.Type.YES,
