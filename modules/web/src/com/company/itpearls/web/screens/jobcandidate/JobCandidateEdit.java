@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 // TODO сделать сортировку по номеру взаимодействия или дате в таблице IteractioNList.Borwse
 
+import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
@@ -145,6 +146,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private InstanceLoader<JobCandidate> jobCandidateDl;
     @Inject
     private Screens screens;
+    @Inject
+    private Button scanContactsFromCVButton;
+    @Inject
+    private ParseCVService parseCVService;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -708,12 +713,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
         checkSkillFromJD.setEnabled(false);
+        scanContactsFromCVButton.setEnabled(false);
 
         jobCandidateCandidateCvTable.addSelectionListener(e -> {
             if (e.getSelected() == null) {
                 checkSkillFromJD.setEnabled(false);
+                scanContactsFromCVButton.setEnabled(false);
             } else {
                 checkSkillFromJD.setEnabled(true);
+                scanContactsFromCVButton.setEnabled(true);
             }
         });
     }
@@ -1119,7 +1127,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
 
         selectPersonPositions.show();
-    */}
+    */
+    }
 
     private void setPositionsLabel() {
         String outStr = "";
@@ -1213,7 +1222,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .build()
                     .show();
 
-            s.addAfterCloseListener(e ->{
+            s.addAfterCloseListener(e -> {
                 jobCandidateDl.load();
             });
         }
@@ -1318,5 +1327,59 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Install(to = "jobCandidateIteractionListTable.rating", subject = "columnGenerator")
     private String jobCandidateIteractionListTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
         return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
+    }
+
+    public void scanContactsFromCV() {
+        String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
+        String newPhone = parseCVService.parsePhone(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
+        String newEmail = parseCVService.parseEmail(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
+        Boolean flag = false;
+
+        if (newEmail != null ) {
+            if (!newEmail.equals(emailField.getValue())) {
+                message = message
+                        + "<i> - адрес электронной почты старый "
+                        + "<b>" + emailField.getValue() + "</b>"
+                        + " новый "
+                        + "<b>" + newEmail + "</b>"
+                        + "</i><br>";
+
+                flag = true;
+            }
+        }
+
+        if (newPhone != null) {
+            if (newPhone.equals(phoneField.getValue())) {
+                message = message
+                        + "<i> - телефон старый "
+                        + "<b>" + phoneField.getValue() + "</b>"
+                        + " новый "
+                        + "<b>" + newPhone + "</b>"
+                        + "</i><br>";
+
+                flag = true;
+            }
+        }
+
+        if(flag) {
+            dialogs.createOptionDialog()
+                    .withType(Dialogs.MessageType.WARNING)
+                    .withWidth("600px")
+                    .withMessage(message
+                            + "<br><br>"
+                            + "<b>Заменить в карточке кандидата?</b>")
+                    .withContentMode(ContentMode.HTML)
+                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
+                        phoneField.setValue(newPhone);
+                        emailField.setValue(newEmail);
+                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
+                    }))
+                    .show();
+        } else {
+            notifications.create(Notifications
+                    .NotificationType.WARNING)
+                    .withCaption("Не найдено новой контактной информации в резюме кандидата")
+                    .show();
+        }
     }
 }

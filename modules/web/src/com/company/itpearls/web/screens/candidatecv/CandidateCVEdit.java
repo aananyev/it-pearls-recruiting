@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.candidatecv;
 
+import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
@@ -80,6 +81,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private RichTextArea letterRecommendation;
     @Inject
     private InstanceContainer<CandidateCV> candidateCVDc;
+    @Inject
+    private ParseCVService parseCVService;
+    @Inject
+    private Label<String> machRegexpFromCV;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -240,8 +245,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         if (getEditedEntity().getLetter() == null) {
             if (candidateCVFieldOpenPosition.getValue() != null) {
-                if(candidateCVFieldOpenPosition.getValue().getProjectName() != null) {
-                    if(candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment() != null) {
+                if (candidateCVFieldOpenPosition.getValue().getProjectName() != null) {
+                    if (candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment() != null) {
                         if (candidateCVFieldOpenPosition
                                 .getValue()
                                 .getProjectName()
@@ -515,10 +520,15 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         rescanResume();
     }
 
-    public void resumeRecognition() {
+    public void resumeRecognition() { /*
         Screen resumeRecognition = screenBuilders.screen(this)
                 .withScreenClass(ResumeRecognition.class)
                 .build()
-                .show();
+                .show(); */
+
+        machRegexpFromCV.setValue(parseCVService.parseEmail(candidateCVRichTextArea.getValue())
+                + " "
+                + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
+
     }
 }

@@ -19,6 +19,7 @@
                 <entry key="itpearls_ResumeRecognitionService"
                        value="com.company.itpearls.core.ResumeRecognitionService"/>
                 <entry key="itpearls_EmailGenerationService" value="com.company.itpearls.core.EmailGenerationService"/>
+                <entry key="itpearls_ParseCVService" value="com.company.itpearls.core.ParseCVService"/>
             </map>
         </property>
     </bean>
