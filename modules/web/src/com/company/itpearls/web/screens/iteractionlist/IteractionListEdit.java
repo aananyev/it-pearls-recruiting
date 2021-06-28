@@ -530,6 +530,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         try {
             retStr = retStr.replace(emailKeys.get("Имя"), newsItem.getCandidate().getFirstName());
+            retStr = retStr.replace(emailKeys.get("Отчество"), newsItem.getCandidate().getFullName());
             retStr = retStr.replace(emailKeys.get("Фамилия"), newsItem.getCandidate().getSecondName());
             retStr = retStr.replace(emailKeys.get("Вакансия"), newsItem.getVacancy().getVacansyName());
             retStr = retStr.replace(emailKeys.get("Проект"), newsItem.getVacancy().getProjectName().getProjectName());
@@ -537,6 +538,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             retStr = retStr.replace(emailKeys.get("Департамент"), newsItem.getVacancy().getProjectName().getProjectName());
             retStr = retStr.replace(emailKeys.get("Ресерчер"), newsItem.getRecrutier().getName());
             retStr = retStr.replace(emailKeys.get("ОписаниеВакансии"), newsItem.getVacancy().getComment());
+            retStr = retStr.replace(emailKeys.get("Позиция"), newsItem.getVacancy().getPositionType().getPositionEnName());
+            retStr = retStr.replace(emailKeys.get("ЗарплатаМмин"), newsItem.getVacancy().getSalaryMin().toString());
+            retStr = retStr.replace(emailKeys.get("ЗарплатаМакс"), newsItem.getVacancy().getSalaryMax().toString());
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
             retStr = retStr.replace(emailKeys.get("Дата"), simpleDateFormat.format(newsItem.getAddDate()));

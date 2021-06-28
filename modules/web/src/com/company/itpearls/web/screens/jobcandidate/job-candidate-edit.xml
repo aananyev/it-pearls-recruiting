@@ -168,122 +168,147 @@ order by e.cityRuName]]>
                  margin="true,true,true,true"
                  spacing="true"
                  icon="ID_CARD">
-                <hbox id="cardBox"
-                      spacing="true"
-                      width="100%"
-                      expand="cardTextBox">
-                    <groupBox id="cardTextBox"
-                              width="AUTO"
-                              spacing="true"
-                              stylename="light"
-                              align="TOP_LEFT"
-                              height="100%">
-                        <hbox spacing="false">
-                            <label id="jobTitleTitle"
-                                   value="msg://msgFIO"
-                                   stylename="h3"
-                                   htmlEnabled="true"/>
-                            <label id="jobTitle"
-                                   dataContainer="jobCandidateDc"
-                                   property="fullName"
-                                   stylename="h3"/>
-                            <label value=", " stylename="h3" htmlEnabled="true"/>
-                            <label id="currentCompanyLabel"
-                                   dataContainer="jobCandidateDc"
-                                   property="currentCompany"
-                                   stylename="h3"/>
-                            <label value=", "
-                                   stylename="h3"
-                                   htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc"
-                                   property="cityOfResidence"
-                                   stylename="h3"
-                                   htmlEnabled="true"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label id="personPositionTitle"
-                                   value="msg://msgPosition"
-                                   stylename="h4"
-                                   htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc"
-                                   property="personPosition"
-                                   stylename="h4"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label id="emailTitle"
-                                   value="msg://msgEmail"
-                                   align="MIDDLE_LEFT"
-                                   stylename="h4"
-                                   htmlEnabled="true"/>
-                            <linkButton id="emailLinkButton"
-                                        align="MIDDLE_LEFT"
-                                        description="msg://msgEmail"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label id="phoneTitle"
-                                   value="msg://msgPhone" stylename="h4"
-                                   htmlEnabled="true"/>
-                            <label dataContainer="jobCandidateDc"
-                                   property="phone"
-                                   stylename="h4"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label id="telegramTitle"
-                                   value="msg://msgTelegram"
-                                   stylename="h4"
-                                   align="MIDDLE_LEFT"
-                                   htmlEnabled="true"/>
-                            <linkButton id="telegrammLinkButton"
-                                        align="MIDDLE_LEFT"
-                                        description="msg://msgTelegram"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label id="telegramGroupTitle"
-                                   value="msg://msgTelegramGroup"
-                                   stylename="h4"
-                                   align="MIDDLE_LEFT"
-                                   htmlEnabled="true"/>
-                            <linkButton id="telegrammGroupLinkButton"
-                                        align="MIDDLE_LEFT"
-                                        description="msg://msgTelegramGroup"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label id="skypeTitle"
-                                   value="msg://msgSkype"
-                                   align="MIDDLE_LEFT"
-                                   stylename="h4"
-                                   htmlEnabled="true"/>
-                            <linkButton id="skypeLinkButton"
-                                        align="MIDDLE_LEFT"
-                                        description="msg://msgSkype"/>
-                        </hbox>
-                    </groupBox>
-                    <vbox id="dropZone"
+                <vbox>
+                    <hbox id="cardBox"
                           spacing="true"
-                          width="200px"
-                          height="266px"
-                          align="BOTTOM_RIGHT"
-                          expand="candidatePic"
-                          stylename="dropzone-container">
-                        <image id="candidatePic"
-                               dataContainer="jobCandidateDc"
-                               property="fileImageFace"
-                               width="100%"
-                               align="TOP_RIGHT"
-                               height="100%"
-                               stylename="widget-border"
-                               scaleMode="FILL"/>
-                        <upload id="fileImageFaceUpload"
-                                fileStoragePutMode="IMMEDIATE"
-                                dataContainer="jobCandidateDc"
-                                align="BOTTOM_CENTER"
-                                showFileName="false"
-                                dropZone="dropZone"
-                                showClearButton="true"
-                                property="fileImageFace"/>
-                    </vbox>
-                </hbox>
-
+                          width="100%"
+                          expand="cardTextBox">
+                        <groupBox id="cardTextBox"
+                                  width="AUTO"
+                                  spacing="true"
+                                  stylename="light"
+                                  align="TOP_LEFT"
+                                  height="100%">
+                            <hbox spacing="false">
+                                <label id="jobTitleTitle"
+                                       value="msg://msgFIO"
+                                       stylename="h3"
+                                       htmlEnabled="true"/>
+                                <label id="jobTitle"
+                                       dataContainer="jobCandidateDc"
+                                       property="fullName"
+                                       stylename="h3"/>
+                                <label value=", " stylename="h3" htmlEnabled="true"/>
+                                <label id="currentCompanyLabel"
+                                       dataContainer="jobCandidateDc"
+                                       property="currentCompany"
+                                       stylename="h3"/>
+                                <label value=", "
+                                       stylename="h3"
+                                       htmlEnabled="true"/>
+                                <label dataContainer="jobCandidateDc"
+                                       property="cityOfResidence"
+                                       stylename="h3"
+                                       htmlEnabled="true"/>
+                            </hbox>
+                            <hbox spacing="true">
+                                <label id="personPositionTitle"
+                                       value="msg://msgPosition"
+                                       stylename="h4"
+                                       htmlEnabled="true"/>
+                                <label dataContainer="jobCandidateDc"
+                                       property="personPosition"
+                                       stylename="h4"/>
+                            </hbox>
+                            <hbox spacing="true">
+                                <label id="emailTitle"
+                                       value="msg://msgEmail"
+                                       align="MIDDLE_LEFT"
+                                       stylename="h4"
+                                       htmlEnabled="true"/>
+                                <linkButton id="emailLinkButton"
+                                            align="MIDDLE_LEFT"
+                                            description="msg://msgEmail"/>
+                            </hbox>
+                            <hbox spacing="true">
+                                <label id="phoneTitle"
+                                       value="msg://msgPhone" stylename="h4"
+                                       htmlEnabled="true"/>
+                                <label dataContainer="jobCandidateDc"
+                                       property="phone"
+                                       stylename="h4"/>
+                            </hbox>
+                            <hbox spacing="true">
+                                <label id="telegramTitle"
+                                       value="msg://msgTelegram"
+                                       stylename="h4"
+                                       align="MIDDLE_LEFT"
+                                       htmlEnabled="true"/>
+                                <linkButton id="telegrammLinkButton"
+                                            align="MIDDLE_LEFT"
+                                            description="msg://msgTelegram"/>
+                            </hbox>
+                            <hbox spacing="true">
+                                <label id="telegramGroupTitle"
+                                       value="msg://msgTelegramGroup"
+                                       stylename="h4"
+                                       align="MIDDLE_LEFT"
+                                       htmlEnabled="true"/>
+                                <linkButton id="telegrammGroupLinkButton"
+                                            align="MIDDLE_LEFT"
+                                            description="msg://msgTelegramGroup"/>
+                            </hbox>
+                            <hbox spacing="true">
+                                <label id="skypeTitle"
+                                       value="msg://msgSkype"
+                                       align="MIDDLE_LEFT"
+                                       stylename="h4"
+                                       htmlEnabled="true"/>
+                                <linkButton id="skypeLinkButton"
+                                            align="MIDDLE_LEFT"
+                                            description="msg://msgSkype"/>
+                            </hbox>
+                        </groupBox>
+                        <vbox id="dropZone"
+                              spacing="true"
+                              width="200px"
+                              height="266px"
+                              align="BOTTOM_RIGHT"
+                              expand="candidatePic"
+                              stylename="dropzone-container">
+                            <image id="candidatePic"
+                                   dataContainer="jobCandidateDc"
+                                   property="fileImageFace"
+                                   width="100%"
+                                   align="TOP_RIGHT"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <upload id="fileImageFaceUpload"
+                                    fileStoragePutMode="IMMEDIATE"
+                                    dataContainer="jobCandidateDc"
+                                    align="BOTTOM_CENTER"
+                                    showFileName="false"
+                                    dropZone="dropZone"
+                                    showClearButton="true"
+                                    property="fileImageFace"/>
+                        </vbox>
+                        <!--
+                        <chart:ganttChart id="jobCandidateGanttChart"
+                                          dataContainer="jobCandidateIteractionDc"
+                                          startDateField="dateIteraction"
+                                          startDate="2020-01-01"
+                                          width="100%"
+                                          height="AUTO"
+                                          segmentsField="iteractionType">
+                            <chart:graph fillAlphas="1"
+                                         lineAlpha="1"
+                                         lineColor="YELLOW"/>
+                            <chart:valueAxis type="DATE"/>
+                            <chart:valueScrollbar autoGridCount="true"
+                                                  color="BLACK"/>
+                            <chart:chartCursor cursorAlpha="0"
+                                               cursorColor="ALICEBLUE"
+                                               fullWidth="true"
+                                               valueLineAlpha="0.5"
+                                               valueBalloonsEnabled="false"
+                                               valueLineEnabled="true"
+                                               valueZoomable="true"
+                                               zoomable="false"/>
+                            <chart:export/>
+                        </chart:ganttChart>-->
+                    </hbox>
+                </vbox>
             </tab>
             <tab id="tabCandidate"
                  caption="msg://candidate"
@@ -294,126 +319,126 @@ order by e.cityRuName]]>
                       spacing="true"
                       width="100%"
                       expand="tabCabdidateGrid">
-                <grid id="tabCabdidateGrid"
-                      height="100%"
-                      spacing="true"
-                      width="100%">
-                    <columns count="2"/>
-                    <rows>
-                        <row>
-                            <suggestionField id="firstNameField"
-                                             dataContainer="jobCandidateDc"
-                                             property="firstName"
-                                             width="100%"
-                                             caption="msg://msgFirstName"
-                                             rowspan="1"
-                                             colspan="1"
-                                             minSearchStringLength="1"
-                                             required="true"
-                                             editable="true"
-                                             inputPrompt="msg://msgPressEnter">
-                                <query entityClass="com.company.itpearls.entity.JobCandidate"
-                                       escapeValueForLike="false"
-                                       view="_local"
-                                       searchStringFormat="%$searchString%">
-                                    select e.firstName from itpearls_JobCandidate e where lower(e.firstName) like
-                                    lower(:searchString) escape '\'
-                                </query>
-                            </suggestionField>
-                            <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
-                                               dataContainer="jobCandidateDc" property="currentCompany" width="100%"
-                                               caption="msg://msgCorrentCompany" required="true">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                        </row>
-                        <row>
-                            <suggestionField id="middleNameField"
-                                             dataContainer="jobCandidateDc"
-                                             property="middleName"
-                                             width="100%"
-                                             minSearchStringLength="1"
-                                             caption="msg://msgMiddleName"
-                                             editable="true"
-                                             inputPrompt="msg://msgPressEnter">
-                                <query entityClass="com.company.itpearls.entity.JobCandidate"
-                                       searchStringFormat="%$searchString%"
-                                       view="_minimal"
-                                       escapeValueForLike="true">
-                                    select e from itpearls_JobCandidate e where lower(e.middleName) like
-                                    lower(:searchString) escape '\'
-                                </query>
-                            </suggestionField>
-                            <hbox expand="personPositionField"
-                                  spacing="true"
-                                  align="MIDDLE_LEFT"
-                                  width="100%">
-                                <lookupPickerField id="personPositionField"
-                                                   optionsContainer="personPositionsDc"
-                                                   dataContainer="jobCandidateDc"
-                                                   property="personPosition"
-                                                   width="100%"
-                                                   align="BOTTOM_RIGHT"
-                                                   caption="msg://msgPersonPosition"
-                                                   required="true">
+                    <grid id="tabCabdidateGrid"
+                          height="100%"
+                          spacing="true"
+                          width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row>
+                                <suggestionField id="firstNameField"
+                                                 dataContainer="jobCandidateDc"
+                                                 property="firstName"
+                                                 width="100%"
+                                                 caption="msg://msgFirstName"
+                                                 rowspan="1"
+                                                 colspan="1"
+                                                 minSearchStringLength="1"
+                                                 required="true"
+                                                 editable="true"
+                                                 inputPrompt="msg://msgPressEnter">
+                                    <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                           escapeValueForLike="false"
+                                           view="_local"
+                                           searchStringFormat="%$searchString%">
+                                        select e.firstName from itpearls_JobCandidate e where lower(e.firstName) like
+                                        lower(:searchString) escape '\'
+                                    </query>
+                                </suggestionField>
+                                <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
+                                                   dataContainer="jobCandidateDc" property="currentCompany" width="100%"
+                                                   caption="msg://msgCorrentCompany" required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
                                 </lookupPickerField>
-                                <button id="addPositions"
-                                        caption="msg://msgSetPositions"
-                                        width="AUTO"
-                                        enable="true"
-                                        align="BOTTOM_RIGHT"
-                                        description="msg://msgSetPositions"
-                                        invoke="addPositionList"/>
-                            </hbox>
-                        </row>
-                        <row>
-                            <hbox></hbox>
-                            <hbox align="MIDDLE_RIGHT"
-                                  spacing="true"
-                                  width="100%"
-                                  expand="positionsLabel">
-                                <label id="positionsLabel"
-                                       stylename="h4"
-                                       width="AUTO"
-                                       align="TOP_RIGHT"/>
-                            </hbox>
-                        </row>
-                        <row>
-                            <suggestionField id="secondNameField"
-                                             dataContainer="jobCandidateDc"
-                                             property="secondName"
-                                             width="100%"
-                                             minSearchStringLength="1"
-                                             caption="msg://msgSecondName"
-                                             editable="true"
-                                             inputPrompt="msg://msgPressEnter">
-                                <query entityClass="com.company.itpearls.entity.JobCandidate"
-                                       escapeValueForLike="true"
-                                       searchStringFormat="%$searchString%">
-                                    select e from itpearls_JobCandidate e where lower(e.secondName) like
-                                    lower(:searchString) escape '\'
-                                </query>
-                            </suggestionField>
-                            <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc"
-                                               width="100%"
-                                               caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
-                                               property="cityOfResidence" required="true">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                        </row>
-                        <row>
-                            <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate"
-                                       width="100%"
-                                       caption="msg://msgBirthDate"/>
-                        </row>
-                    </rows>
-                </grid>
+                            </row>
+                            <row>
+                                <suggestionField id="middleNameField"
+                                                 dataContainer="jobCandidateDc"
+                                                 property="middleName"
+                                                 width="100%"
+                                                 minSearchStringLength="1"
+                                                 caption="msg://msgMiddleName"
+                                                 editable="true"
+                                                 inputPrompt="msg://msgPressEnter">
+                                    <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                           searchStringFormat="%$searchString%"
+                                           view="_minimal"
+                                           escapeValueForLike="true">
+                                        select e from itpearls_JobCandidate e where lower(e.middleName) like
+                                        lower(:searchString) escape '\'
+                                    </query>
+                                </suggestionField>
+                                <hbox expand="personPositionField"
+                                      spacing="true"
+                                      align="MIDDLE_LEFT"
+                                      width="100%">
+                                    <lookupPickerField id="personPositionField"
+                                                       optionsContainer="personPositionsDc"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="personPosition"
+                                                       width="100%"
+                                                       align="BOTTOM_RIGHT"
+                                                       caption="msg://msgPersonPosition"
+                                                       required="true">
+                                        <actions>
+                                            <action id="lookup" type="picker_lookup"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                    <button id="addPositions"
+                                            caption="msg://msgSetPositions"
+                                            width="AUTO"
+                                            enable="true"
+                                            align="BOTTOM_RIGHT"
+                                            description="msg://msgSetPositions"
+                                            invoke="addPositionList"/>
+                                </hbox>
+                            </row>
+                            <row>
+                                <hbox></hbox>
+                                <hbox align="MIDDLE_RIGHT"
+                                      spacing="true"
+                                      width="100%"
+                                      expand="positionsLabel">
+                                    <label id="positionsLabel"
+                                           stylename="h4"
+                                           width="AUTO"
+                                           align="TOP_RIGHT"/>
+                                </hbox>
+                            </row>
+                            <row>
+                                <suggestionField id="secondNameField"
+                                                 dataContainer="jobCandidateDc"
+                                                 property="secondName"
+                                                 width="100%"
+                                                 minSearchStringLength="1"
+                                                 caption="msg://msgSecondName"
+                                                 editable="true"
+                                                 inputPrompt="msg://msgPressEnter">
+                                    <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        select e from itpearls_JobCandidate e where lower(e.secondName) like
+                                        lower(:searchString) escape '\'
+                                    </query>
+                                </suggestionField>
+                                <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc"
+                                                   width="100%"
+                                                   caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
+                                                   property="cityOfResidence" required="true">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                            <row>
+                                <dateField id="birdhDateField" dataContainer="jobCandidateDc" property="birdhDate"
+                                           width="100%"
+                                           caption="msg://msgBirthDate"/>
+                            </row>
+                        </rows>
+                    </grid>
                 </hbox>
             </tab>
             <tab id="tabContactInfo"
@@ -438,7 +463,8 @@ order by e.cityRuName]]>
                                        width="100%" caption="msg://msgTelegramGrouep"/>
                         </row>
                         <row>
-                            <textField id="mobilePhoneField" dataContainer="jobCandidateDc" property="mobilePhone" width="100%"
+                            <textField id="mobilePhoneField" dataContainer="jobCandidateDc" property="mobilePhone"
+                                       width="100%"
                                        caption="msg://msgMobilePhone" required="true"/>
                             <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName"
                                        width="100%"
@@ -483,10 +509,10 @@ order by e.cityRuName]]>
                     </actions>
                     <buttonsPanel>
                         <button action="jobCandidateIteractionListTable.create"/>
-<!--                        <button id="addIteractionButton"
-                                caption="msg://msgCreate"
-                                icon="ADD_ACTION"
-                                invoke="addIteractionJobCandidate"/> -->
+                        <!--                        <button id="addIteractionButton"
+                                                        caption="msg://msgCreate"
+                                                        icon="ADD_ACTION"
+                                                        invoke="addIteractionJobCandidate"/> -->
                         <button action="jobCandidateIteractionListTable.edit"/>
                         <button id="copyIteractionButton"
                                 caption="msg://msgCopy"
@@ -532,42 +558,42 @@ order by e.cityRuName]]>
                     <rowsCount/>
                 </dataGrid>
             </tab>
-<!--            <tab id="tabSkills"
-                 caption="msg://msgSkills"
-                 margin="true,true,true,true"
-                 expand="tabSkillsVbox"
-                 icon="font-icon:MEDKIT"
-                 spacing="true">
-                <vbox id="tabSkillsVbox"
-                      expand="jobCandidateSkillListTable"
-                      spacing="true">
-                    <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc"
-                                       property="specialisation"
-                                       caption="msg://msgSpecialisation" width="50%">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="open" type="picker_open"/>
-                        </actions>
-                    </lookupPickerField>
-                    <dataGrid id="jobCandidateSkillListTable"
-                              width="100%"
-                              dataContainer="jobCandidateSkillsesDc">
-                        <columns>
-                            <column id="skillName" caption="mainMsg://msgSkills" property="skillName"/>
-                        </columns>
-                        <actions>
-                            <action id="add" type="add"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
-                        <buttonsPanel>
-                            <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
-                            <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
-                            <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
-                        </buttonsPanel>
-                    </dataGrid>
-                </vbox>
-            </tab> -->
+            <!--            <tab id="tabSkills"
+                             caption="msg://msgSkills"
+                             margin="true,true,true,true"
+                             expand="tabSkillsVbox"
+                             icon="font-icon:MEDKIT"
+                             spacing="true">
+                            <vbox id="tabSkillsVbox"
+                                  expand="jobCandidateSkillListTable"
+                                  spacing="true">
+                                <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc"
+                                                   property="specialisation"
+                                                   caption="msg://msgSpecialisation" width="50%">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <dataGrid id="jobCandidateSkillListTable"
+                                          width="100%"
+                                          dataContainer="jobCandidateSkillsesDc">
+                                    <columns>
+                                        <column id="skillName" caption="mainMsg://msgSkills" property="skillName"/>
+                                    </columns>
+                                    <actions>
+                                        <action id="add" type="add"/>
+                                        <action id="edit" type="edit"/>
+                                        <action id="remove" type="remove"/>
+                                    </actions>
+                                    <buttonsPanel>
+                                        <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
+                                        <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
+                                        <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
+                                    </buttonsPanel>
+                                </dataGrid>
+                            </vbox>
+                        </tab> -->
             <tab id="tabResume"
                  caption="msg://msgResume"
                  margin="true,true,true,true"

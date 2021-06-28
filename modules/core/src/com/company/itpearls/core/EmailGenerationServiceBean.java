@@ -12,6 +12,7 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
         HashMap<String, String> emailKeys = new HashMap<>();
 
         emailKeys.put("Имя", "$first_name");
+        emailKeys.put("Отчество", "$middle_name");
         emailKeys.put("Фамилия", "$second_name");
         emailKeys.put("Вакансия", "$vacancy");
         emailKeys.put("Проект", "$project");
@@ -21,6 +22,9 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
         emailKeys.put("Время", "$time");
         emailKeys.put("Ресерчер", "$researcher_name");
         emailKeys.put("ОписаниеВакансии", "$job_description");
+        emailKeys.put("Позиция", "$position");
+        emailKeys.put("ЗарплатаМин", "$salary_min");
+        emailKeys.put("ЗарплатаМакс", "$salary_max");
 
         return emailKeys;
     }

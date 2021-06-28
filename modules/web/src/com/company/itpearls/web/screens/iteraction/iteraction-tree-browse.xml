@@ -25,15 +25,34 @@ order by e.number]]></query>
                         exclude="id|addDate|addInteger|addString|addFlag|addType|number|pic|addCaption|addField|iteractionTree|notificationType|callClass|mandatoryIteraction|callButtonText|calendarItem|calendarItemDescription|findToDic|setDateTime|calendarItemStyle|callForm"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <treeTable id="iteractionTreeTable"
+        <treeDataGrid id="iteractionTreeTable"
                    height="200px"
                    width="100%"
                    dataContainer="iteractionsTreeDc"
                    hierarchyProperty="iteractionTree">
             <columns>
-                <column id="number" width="70" align="CENTER"/>
-                <column id="mandatoryIteraction" caption="msg://msgMandatoryItercation" width="10" align="CENTER"/>
-                <column id="iterationName"/>
+                <column id="number" width="70" property="number"/>
+                <column id="mandatoryIteraction"
+                        caption="msg://msgMandatoryItercation"
+                        width="20px"
+                        property="mandatoryIteraction"/>
+                <column id="iterationName"
+                        property="iterationName"/>
+                <column id="notification"
+                        maximumWidth="100px"
+                        caption="msg://msgNotifocation">
+                    <iconRenderer/>
+                </column>
+                <column id="needSendEmail"
+                        maximumWidth="100px"
+                        caption="msg://msgNeedSendEmail">
+                    <iconRenderer/>
+                </column>
+                <column id="needSendMemo"
+                        maximumWidth="100px"
+                        caption="msg://msgNeedSendMemo">
+                    <iconRenderer/>
+                </column>
             </columns>
             <actions>
                 <action id="add" type="add"/>
@@ -45,7 +64,7 @@ order by e.number]]></query>
                 <button id="editButton" action="iteractionTreeTable.edit"/>
                 <button id="removeButton" action="iteractionTreeTable.remove"/>
             </buttonsPanel>
-        </treeTable>
+        </treeDataGrid>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
