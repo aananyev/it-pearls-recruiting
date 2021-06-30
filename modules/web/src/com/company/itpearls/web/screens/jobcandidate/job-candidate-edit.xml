@@ -21,6 +21,7 @@
                             <property name="projectDepartment" view="_minimal">
                                 <property name="companyName" view="_minimal"/>
                             </property>
+                            <property name="projectOwner" view="_minimal"/>
                         </property>
                     </property>
                 </property>

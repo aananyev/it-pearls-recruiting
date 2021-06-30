@@ -159,6 +159,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
     @Inject
     private Logger log;
+    @Inject
+    private TextField<String> telegramGroupField;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -269,20 +271,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     protected boolean isRequiredAddresField() {
         Boolean isEmptySN = false;
 
-        for (SocialNetworkURLs a : jobCandidateSocialNetworksDc.getItems()) {
+/*        for (SocialNetworkURLs a : jobCandidateSocialNetworksDc.getItems()) {
             if (a.getNetworkURLS() != null) {
                 isEmptySN = true;
                 break;
             }
-        }
+        } */
 
-        return ((emailField.getValue() == null) &&
+        isEmptySN = ((emailField.getValue() == null) &&
                 (skypeNameField.getValue() == null) &&
                 (telegramNameField.getValue() == null) &&
                 (wiberNameField.getValue() == null) &&
                 (whatsupNameField.getValue() == null) &&
                 (mobilePhoneField.getValue() == null) &&
-                (phoneField.getValue() == null)) && !isEmptySN;
+                (telegramGroupField.getValue() == null) &&
+                (phoneField.getValue() == null));
+
+        return isEmptySN;
     }
 
     @Subscribe
@@ -324,7 +329,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         try {
             retStr = "Ответственный за проект: ";
 
-            retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
+            if(iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
+                retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
+            }
 
             if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
                 retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
@@ -449,9 +456,44 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
     }
 
+    @Subscribe("tabSheetSocialNetworks")
+    public void onTabSheetSocialNetworksSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
+        enableDisableContacts();
+    }
+
     protected void enableDisableContacts() {
+        Boolean flag = true;
+
+        for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
+            if (s.getNetworkURLS() != null) {
+                if (!s.getNetworkURLS().equals("")) {
+                    flag = false;
+                    break;
+                }
+            }
+        }
+
+        skypeNameField.setRequired(true);
+        phoneField.setRequired(true);
+        mobilePhoneField.setRequired(true);
+        emailField.setRequired(true);
+        telegramNameField.setRequired(true);
+        whatsupNameField.setRequired(true);
+        wiberNameField.setRequired(true);
+        telegramGroupField.setRequired(true);
+
+        if(!isRequiredAddresField() || !flag) {
+            skypeNameField.setRequired(false);
+            phoneField.setRequired(false);
+            mobilePhoneField.setRequired(false);
+            emailField.setRequired(false);
+            telegramNameField.setRequired(false);
+            whatsupNameField.setRequired(false);
+            wiberNameField.setRequired(false);
+            telegramGroupField.setRequired(false);
+        }
         // ХОТЯ БЫ ОДИН КОНТАКТ
-        if (isRequiredAddresField()) {
+/*        if (isRequiredAddresField() || flag) {
             skypeNameField.setRequired(true);
             phoneField.setRequired(true);
             mobilePhoneField.setRequired(true);
@@ -459,6 +501,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             telegramNameField.setRequired(true);
             whatsupNameField.setRequired(true);
             wiberNameField.setRequired(true);
+            telegramGroupField.setRequired(true);
         } else {
             skypeNameField.setRequired(false);
             phoneField.setRequired(false);
@@ -467,7 +510,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             telegramNameField.setRequired(false);
             whatsupNameField.setRequired(false);
             wiberNameField.setRequired(false);
-        }
+            telegramGroupField.setRequired(false);
+        } */
     }
 
     // загрузить таблицу взаимодействий
@@ -1274,7 +1318,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         List<SkillTree> skillTrees = rescanResume();
         String inputText = null;
 
-        if(jobCandidateCandidateCvTable.getSingleSelected() != null) {
+        if (jobCandidateCandidateCvTable.getSingleSelected() != null) {
             if (jobCandidateCandidateCvTable.getSingleSelected().getToVacancy() != null) {
                 if (jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment() != null) {
                     inputText = Jsoup.parse(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment()).text();
@@ -1395,7 +1439,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String newEmail = parseCVService.parseEmail(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
         Boolean flag = false;
 
-        if (newEmail != null ) {
+        if (newEmail != null) {
             if (!newEmail.equals(emailField.getValue())) {
                 message = message
                         + "<i> - адрес электронной почты старый "
@@ -1421,7 +1465,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         }
 
-        if(flag) {
+        if (flag) {
             dialogs.createOptionDialog()
                     .withType(Dialogs.MessageType.WARNING)
                     .withWidth("600px")
@@ -1447,10 +1491,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Component socialNetworkTableLinkToWebColumnGenerator(DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
         Link link = uiComponents.create(Link.NAME);
 
-        if(!PersistenceHelper.isNew(getEditedEntity())) {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (event.getItem().getNetworkURLS() != null) {
                 String urlS = "";
-                if(!event.getItem().getNetworkURLS().contains("http")) {
+                if (!event.getItem().getNetworkURLS().contains("http")) {
                     URI uri = null;
                     URL url = null;
 
@@ -1461,7 +1505,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         log.error("Error", e);
                     }
 
-                    urlS = url.toString();
+                    if (url != null) {
+                        urlS = url.toString();
+                    } else {
+                        urlS = "";
+                    }
                 }
 
                 link.setUrl(urlS);
