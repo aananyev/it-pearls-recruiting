@@ -40,7 +40,6 @@
                 <property name="socialNetwork" view="_local"/>
                 <property name="currentCompany" view="_local"/>
                 <property name="specialisation" view="_local"/>
-                <property name="telegramGroup"/>
             </view>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
@@ -396,7 +395,7 @@ order by e.cityRuName]]>
                                 </hbox>
                             </row>
                             <row>
-                                <hbox></hbox>
+                                <hbox/>
                                 <hbox align="MIDDLE_RIGHT"
                                       spacing="true"
                                       width="100%"
@@ -444,49 +443,94 @@ order by e.cityRuName]]>
             <tab id="tabContactInfo"
                  caption="msg://msgTabContactInfo"
                  margin="true,true,true,true"
-                 expand="socialNetworkTable"
+                 expand="socialNetworkTableHbox"
                  icon="font-icon:USER"
                  spacing="true">
-                <grid id="contactInfoGrid" spacing="true" width="100%">
-                    <columns count="2"/>
-                    <rows>
-                        <row>
-                            <textField id="emailField" dataContainer="jobCandidateDc" property="email" width="100%"
-                                       caption="msg://msgEmail" required="true"/>
-                            <textField id="telegramNameField" dataContainer="jobCandidateDc" property="telegramName"
-                                       width="100%" caption="msg://msgTelegramAccount"/>
-                        </row>
-                        <row>
-                            <textField id="phoneField" dataContainer="jobCandidateDc" property="phone" width="100%"
-                                       caption="msg://msgPhone" required="true"/>
-                            <textField id="telegramGroupField" dataContainer="jobCandidateDc" property="telegramGroup"
-                                       width="100%" caption="msg://msgTelegramGrouep"/>
-                        </row>
-                        <row>
-                            <textField id="mobilePhoneField" dataContainer="jobCandidateDc" property="mobilePhone"
-                                       width="100%"
-                                       caption="msg://msgMobilePhone" required="true"/>
-                            <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName"
-                                       width="100%"
-                                       caption="msg://msgViberAccount"/>
-                        </row>
-                        <row>
-                            <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName"
-                                       width="100%"
-                                       caption="msg://msgSkypeAccaunt" required="true"/>
-                            <textField id="whatsupNameField" dataContainer="jobCandidateDc" property="whatsupName"
-                                       width="100%"
-                                       caption="msg://msgWhatsAppAccount"/>
-                        </row>
-                    </rows>
-                </grid>
-                <table id="socialNetworkTable" height="160px" width="100%"
-                       editable="true" dataContainer="jobCandidateSocialNetworksDc">
-                    <columns>
-                        <column id="networkName"/>
-                        <column id="networkURLS" editable="true"/>
-                    </columns>
-                </table>
+                <hbox id="contactInfoGroupBox"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true">
+                    <grid id="contactInfoGrid"
+                          spacing="true"
+                          height="AUTO"
+                          box.expandRatio="9"
+                          width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row>
+                                <textField id="emailField" dataContainer="jobCandidateDc" property="email"
+                                           width="100%"
+                                           caption="msg://msgEmail" required="true"/>
+                                <textField id="telegramNameField" dataContainer="jobCandidateDc"
+                                           property="telegramName"
+                                           width="100%" caption="msg://msgTelegramAccount"/>
+                            </row>
+                            <row>
+                                <textField id="phoneField" dataContainer="jobCandidateDc" property="phone"
+                                           width="100%"
+                                           caption="msg://msgPhone" required="true"/>
+                                <textField id="telegramGroupField" dataContainer="jobCandidateDc"
+                                           property="telegramGroup"
+                                           width="100%" caption="msg://msgTelegramGrouep"/>
+                            </row>
+                            <row>
+                                <textField id="mobilePhoneField" dataContainer="jobCandidateDc"
+                                           property="mobilePhone"
+                                           width="100%"
+                                           caption="msg://msgMobilePhone" required="true"/>
+                                <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName"
+                                           width="100%"
+                                           caption="msg://msgViberAccount"/>
+                            </row>
+                            <row>
+                                <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName"
+                                           width="100%"
+                                           caption="msg://msgSkypeAccaunt" required="true"/>
+                                <textField id="whatsupNameField" dataContainer="jobCandidateDc"
+                                           property="whatsupName"
+                                           width="100%"
+                                           caption="msg://msgWhatsAppAccount"/>
+                            </row>
+                        </rows>
+                    </grid>
+                    <groupBox spacing="true"
+                              width="100%"
+                              height="AUTO"
+                              box.expandRatio="2">
+                        <radioButtonGroup id="priorityCommunicationMethodRadioButton"
+                                          caption="msg://msgPriorityCommunicationMethod"
+                                          width="100%"
+                                          required="true"
+                                          dataContainer="jobCandidateDc"
+                                          property="priorityContact"
+                                          height="100%"/> -->
+                    </groupBox>
+                </hbox>
+                <hbox id="socialNetworkTableHbox"
+                      width="100%"
+                      height="AUTO"
+                      expand="socialNetworkTable">
+                    <dataGrid id="socialNetworkTable"
+                              height="100%"
+                              width="100%"
+                              editorEnabled="true"
+                              dataContainer="jobCandidateSocialNetworksDc">
+                        <columns>
+                            <column id="networkName"
+                                    editable="false"
+                                    property="socialNetworkURL.socialNetwork"
+                                    maximumWidth="300px"/>
+                            <column id="networkURLS"
+                                    editable="true"
+                                    property="networkURLS"/>
+                            <column id="linkToWeb"
+                                    caption="msg://msgLinkURL"
+                                    maximumWidth="150px">
+                                <componentRenderer/>
+                            </column>
+                        </columns>
+                    </dataGrid>
+                </hbox>
             </tab>
             <tab id="tabIteraction"
                  caption="msg://candidateIteration"

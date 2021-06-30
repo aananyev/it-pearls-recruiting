@@ -111,6 +111,9 @@
                         action="jobCandidatesTable.excel"
                         visible="false"
                         enable="false"/>
+                <button id="quickLoadCV"
+                        caption="msg://msgQuickLoadCV"
+                        invoke="quickLoadCVButton"/>
             </buttonsPanel>
         </dataGrid>
         <hbox align="MIDDLE_LEFT"

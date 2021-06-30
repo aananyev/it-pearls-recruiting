@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://quickLoadCv.caption"
+        messagesPack="com.company.itpearls.web.screens.candidatecv">
+    <data>
+        <instance id="candidateCVDc" class="com.company.itpearls.entity.CandidateCV">
+            <view extends="_minimal">
+                <property name="candidate" view="_minimal"/>
+                <property name="toVacancy" view="_minimal"/>
+                <property name="fileCV" view="_minimal"/>
+                <property name="resumePosition" view="_minimal"/>
+            </view>
+            <collection id="jobCandidateDc" property="candidate"/>
+        </instance>
+    </data>
+    <dialogMode height="800"
+                modal="true"
+                width="1200"/>
+    <layout>
+        <upload id="candidateCVUpload"
+                width="100%"
+                property="fileCV"
+                dataContainer="candidateCVDc"/>
+        <buttonsPanel width="AUTO" align="BOTTOM_RIGHT">
+            <button id="buttonOk"
+        </buttonsPanel>
+    </layout>
+</window>

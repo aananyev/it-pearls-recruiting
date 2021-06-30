@@ -16,14 +16,17 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -150,6 +153,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Button scanContactsFromCVButton;
     @Inject
     private ParseCVService parseCVService;
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
+    @Inject
+    private Logger log;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -201,14 +210,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             List<SocialNetworkURLs> sn = new ArrayList<SocialNetworkURLs>();
 
             for (SocialNetworkType s : socialNetworkType) {
-                SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
+                SocialNetworkURLs socialNetworkURLs = new SocialNetworkURLs();
+                socialNetworkURLs.setSocialNetworkURL(s);
+                socialNetworkURLs.setNetworkURLS(s.getSocialNetworkURL());
+                socialNetworkURLs.setJobCandidate(getEditedEntity());
+                socialNetworkURLs.setNetworkName(s.getSocialNetwork());
+
+                jobCandidateSocialNetworksDc.getMutableItems().add(socialNetworkURLs);
+/*                SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
 
                 socialNetworkURLs.setSocialNetworkURL(s);
                 socialNetworkURLs.setNetworkName(s.getSocialNetwork());
                 socialNetworkURLs.setJobCandidate(getEditedEntity());
 
                 jobCandidateSocialNetworksDc.getMutableItems().add(socialNetworkURLs);
-                sn.add(socialNetworkURLs);
+                sn.add(socialNetworkURLs); */
             }
 
             DataContext dc = socialNetworkURLsesDl.getDataContext();
@@ -403,8 +419,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
     }
 
-    @Subscribe("socialNetworkTable")
+/*    @Subscribe("socialNetworkTable")
     public void onSocialNetworkTableSelection(Table.SelectionEvent<SocialNetworkURLs> event) {
+        enableDisableContacts();
+    }*/
+
+    @Subscribe("socialNetworkTable")
+    public void onSocialNetworkTableEditorPostCommit(DataGrid.EditorPostCommitEvent event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("socialNetworkTable")
+    public void onSocialNetworkTableEditorClose(DataGrid.EditorCloseEvent event) {
         enableDisableContacts();
     }
 
@@ -484,6 +510,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         // проверить в названии должности (не использовать)
         checkNotUsePosition();
+        priorityCommenicationMethodRadioButtonInit();
+    }
+
+    private void priorityCommenicationMethodRadioButtonInit() {
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+
+        priorityMap.put("Email", 1);
+        priorityMap.put("Phone", 2);
+        priorityMap.put("Telegramm", 3);
+        priorityMap.put("Skype", 4);
+        priorityMap.put("Viber", 5);
+        priorityMap.put("WhatsApp", 6);
+        priorityMap.put("Social Network", 7);
+        priorityMap.put("Other", 9);
+
+        priorityCommunicationMethodRadioButton.setOptionsMap(priorityMap);
     }
 
     private void checkNotUsePosition() {
@@ -1230,25 +1272,43 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public void checkSkillFromJD() {
         List<SkillTree> skillTrees = rescanResume();
-        String inputText = Jsoup.parse(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment()).text();
-        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
+        String inputText = null;
 
-        if (jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment() != null) {
-            SkillTreeBrowseCheck s = screenBuilders.screen(this)
-                    .withScreenClass(SkillTreeBrowseCheck.class)
-                    .build();
+        if(jobCandidateCandidateCvTable.getSingleSelected() != null) {
+            if (jobCandidateCandidateCvTable.getSingleSelected().getToVacancy() != null) {
+                if (jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment() != null) {
+                    inputText = Jsoup.parse(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment()).text();
+                }
 
-            s.setCandidateCVSkills(skillTrees);
-            s.setOpenPositionSkills(skillTreesFromJD);
-            s.setTitle(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getVacansyName());
+                List<SkillTree> skillTreesFromJD = new ArrayList<>();
+                if (inputText != null) {
+                    skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
+                }
 
-            s.show();
-        } else {
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("ВНИМАНИЕ!")
-                    .withDescription("Для проверки навыков кандидата по резюме " +
-                            "\nнеобходимозаполнить поле \"Вакансия\".")
-                    .show();
+                if (jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getComment() != null) {
+                    SkillTreeBrowseCheck s = screenBuilders.screen(this)
+                            .withScreenClass(SkillTreeBrowseCheck.class)
+                            .build();
+
+                    s.setCandidateCVSkills(skillTrees);
+                    s.setOpenPositionSkills(skillTreesFromJD);
+                    s.setTitle(jobCandidateCandidateCvTable.getSingleSelected().getToVacancy().getVacansyName());
+
+                    s.show();
+                } else {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("ВНИМАНИЕ!")
+                            .withDescription("Для проверки навыков кандидата по резюме " +
+                                    "\nнеобходимозаполнить поле \"Вакансия\".")
+                            .show();
+                }
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("ВНИМАНИЕ!")
+                        .withDescription("Для проверки навыков кандидата по резюме " +
+                                "\nнеобходимозаполнить поле \"Вакансия\".")
+                        .show();
+            }
         }
     }
 
@@ -1381,5 +1441,41 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withCaption("Не найдено новой контактной информации в резюме кандидата")
                     .show();
         }
+    }
+
+    @Install(to = "socialNetworkTable.linkToWeb", subject = "columnGenerator")
+    private Component socialNetworkTableLinkToWebColumnGenerator(DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
+        Link link = uiComponents.create(Link.NAME);
+
+        if(!PersistenceHelper.isNew(getEditedEntity())) {
+            if (event.getItem().getNetworkURLS() != null) {
+                String urlS = "";
+                if(!event.getItem().getNetworkURLS().contains("http")) {
+                    URI uri = null;
+                    URL url = null;
+
+                    try {
+                        uri = new URI("https", event.getItem().getNetworkURLS(), null, null);
+                        url = uri.toURL();
+                    } catch (URISyntaxException | MalformedURLException e) {
+                        log.error("Error", e);
+                    }
+
+                    urlS = url.toString();
+                }
+
+                link.setUrl(urlS);
+                link.setCaption("Перейти");
+                link.setTarget("_blank");
+                link.setWidthAuto();
+                link.setVisible(true);
+            } else {
+                link.setVisible(false);
+            }
+        } else {
+            link.setVisible(false);
+        }
+
+        return link;
     }
 }

@@ -1109,4 +1109,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             jobCandidatesDl.load();
         });
     }
+
+    public void quickLoadCVButton() {
+
+    }
 }

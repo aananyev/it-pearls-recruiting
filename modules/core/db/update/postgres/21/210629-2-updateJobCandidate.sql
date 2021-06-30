@@ -1,0 +1,3 @@
+alter table ITPEARLS_JOB_CANDIDATE add column PRIORITY_CONTACT integer ^
+update ITPEARLS_JOB_CANDIDATE set PRIORITY_CONTACT = 0 where PRIORITY_CONTACT is null ;
+alter table ITPEARLS_JOB_CANDIDATE alter column PRIORITY_CONTACT set not null ;

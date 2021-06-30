@@ -132,6 +132,18 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "FILE_IMAGE_FACE")
     protected FileDescriptor fileImageFace;
 
+    @NotNull
+    @Column(name = "PRIORITY_CONTACT", nullable = false)
+    private Integer priorityContact;
+
+    public Integer getPriorityContact() {
+        return priorityContact;
+    }
+
+    public void setPriorityContact(Integer priorityContact) {
+        this.priorityContact = priorityContact;
+    }
+
     public void setIteractionList(Collection<IteractionList> iteractionList) {
         this.iteractionList = iteractionList;
     }

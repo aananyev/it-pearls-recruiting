@@ -48,6 +48,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     SKILL_TREE_ID uuid,
     STATUS integer,
     FILE_IMAGE_FACE uuid,
+    PRIORITY_CONTACT integer not null,
     --
     primary key (ID)
 )^

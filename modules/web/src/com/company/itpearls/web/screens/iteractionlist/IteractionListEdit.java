@@ -964,7 +964,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
 
-            String rating_style = "rating_" + rating_color
+            String rating_style = "rating_" + rating_color + "_"
                     + String.valueOf(ratingField.getValue() != null ? ((int) ratingField.getValue()) + 1 : 1);
 
 //            ratingField.setStyleName(rating_style);
