@@ -208,6 +208,9 @@
             <property name="candidateCv" view="_local">
                 <property name="fileCV" view="_local"/>
             </property>
+            <property name="fileImageFace" view="_minimal">
+                <property name="size"/>
+            </property>
         </property>
         <property name="resumePosition" view="_minimal"/>
         <property name="toVacancy" view="_minimal"/>
@@ -217,8 +220,6 @@
         </property>
         <property name="lintToCloudFile"/>
         <property name="fileCV" view="_local">
-            <property name="name"/>
-            <property name="size"/>
             <property name="createTs"/>
             <property name="createdBy"/>
         </property>

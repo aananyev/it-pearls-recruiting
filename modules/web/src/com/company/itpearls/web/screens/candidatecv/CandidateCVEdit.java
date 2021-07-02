@@ -463,7 +463,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void checkSkillFromJD() {
         List<SkillTree> skillTrees = rescanResume();
-        String inputText = Jsoup.parse(candidateCVFieldOpenPosition.getValue().getComment()).text();
+        String inputText = "";
+
+        if(candidateCVFieldOpenPosition.getValue().getComment() != null) {
+            inputText = Jsoup.parse(candidateCVFieldOpenPosition.getValue().getComment()).text();
+        }
+
         List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(inputText);
 
         if (candidateCVFieldOpenPosition.getValue() != null) {

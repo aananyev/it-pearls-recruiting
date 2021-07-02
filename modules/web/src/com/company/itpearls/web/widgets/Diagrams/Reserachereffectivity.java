@@ -155,7 +155,8 @@ public class Reserachereffectivity extends ScreenFragment {
 
                             countWeek = dataManager.load(IteractionList.class)
                                     .query(queryCount)
-                                    .view("iteractionList-view")
+//                                    .view("iteractionList-view")
+                                    .view("_local")
                                     .parameter("user", a)
                                     .parameter("iteractionName", iteractionName)
                                     .parameter("startDate", firsDayOfWeek.getTime())

@@ -25,7 +25,9 @@
                         </property>
                     </property>
                 </property>
-                <property name="fileImageFace" view="_minimal"/>
+                <property name="fileImageFace" view="_minimal">
+                    <property name="size"/>
+                </property>
                 <property name="iteractionList" view="_minimal">
                     <property name="candidate" view="_minimal"/>
                     <property name="vacancy" view="_minimal">
@@ -451,65 +453,76 @@ order by e.cityRuName]]>
                       width="100%"
                       height="AUTO"
                       spacing="true">
-                    <grid id="contactInfoGrid"
-                          spacing="true"
-                          height="AUTO"
-                          box.expandRatio="9"
-                          width="100%">
-                        <columns count="2"/>
-                        <rows>
-                            <row>
-                                <textField id="emailField" dataContainer="jobCandidateDc" property="email"
-                                           width="100%"
-                                           caption="msg://msgEmail" required="true"/>
-                                <textField id="telegramNameField" dataContainer="jobCandidateDc"
-                                           property="telegramName"
-                                           width="100%" caption="msg://msgTelegramAccount"/>
-                            </row>
-                            <row>
-                                <textField id="phoneField" dataContainer="jobCandidateDc" property="phone"
-                                           width="100%"
-                                           caption="msg://msgPhone" required="true"/>
-                                <textField id="telegramGroupField" dataContainer="jobCandidateDc"
-                                           property="telegramGroup"
-                                           width="100%" caption="msg://msgTelegramGrouep"/>
-                            </row>
-                            <row>
-                                <textField id="mobilePhoneField" dataContainer="jobCandidateDc"
-                                           property="mobilePhone"
-                                           width="100%"
-                                           caption="msg://msgMobilePhone" required="true"/>
-                                <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName"
-                                           width="100%"
-                                           caption="msg://msgViberAccount"/>
-                            </row>
-                            <row>
-                                <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName"
-                                           width="100%"
-                                           caption="msg://msgSkypeAccaunt" required="true"/>
-                                <textField id="whatsupNameField" dataContainer="jobCandidateDc"
-                                           property="whatsupName"
-                                           width="100%"
-                                           caption="msg://msgWhatsAppAccount"/>
-                            </row>
-                        </rows>
-                    </grid>
-                    <groupBox spacing="true"
-                              width="100%"
+                    <vbox spacing="true"
+                          width="100%"
+                          height="100%"
+                          margin="true,true,true,true"
+                          stylename="card"
+                          box.expandRatio="12">
+                        <grid id="contactInfoGrid"
+                              spacing="true"
                               height="AUTO"
-                              box.expandRatio="2">
+                              width="100%">
+                            <columns count="2"/>
+                            <rows>
+                                <row>
+                                    <textField id="emailField" dataContainer="jobCandidateDc" property="email"
+                                               width="100%"
+                                               caption="msg://msgEmail" required="true"/>
+                                    <textField id="telegramNameField" dataContainer="jobCandidateDc"
+                                               property="telegramName"
+                                               width="100%" caption="msg://msgTelegramAccount"/>
+                                </row>
+                                <row>
+                                    <textField id="phoneField" dataContainer="jobCandidateDc" property="phone"
+                                               width="100%"
+                                               caption="msg://msgPhone" required="true"/>
+                                    <textField id="telegramGroupField" dataContainer="jobCandidateDc"
+                                               property="telegramGroup"
+                                               width="100%" caption="msg://msgTelegramGrouep"/>
+                                </row>
+                                <row>
+                                    <textField id="mobilePhoneField" dataContainer="jobCandidateDc"
+                                               property="mobilePhone"
+                                               width="100%"
+                                               caption="msg://msgMobilePhone" required="true"/>
+                                    <textField id="wiberNameField" dataContainer="jobCandidateDc" property="wiberName"
+                                               width="100%"
+                                               caption="msg://msgViberAccount"/>
+                                </row>
+                                <row>
+                                    <textField id="skypeNameField" dataContainer="jobCandidateDc" property="skypeName"
+                                               width="100%"
+                                               caption="msg://msgSkypeAccaunt" required="true"/>
+                                    <textField id="whatsupNameField" dataContainer="jobCandidateDc"
+                                               property="whatsupName"
+                                               width="100%"
+                                               caption="msg://msgWhatsAppAccount"/>
+                                </row>
+                            </rows>
+                        </grid>
+                    </vbox>
+                    <vbox spacing="true"
+                          width="100%"
+                          height="100%"
+                          expand="priorityCommunicationMethodRadioButton"
+                          margin="true,true,true,true"
+                          stylename="card"
+                          box.expandRatio="2">
                         <radioButtonGroup id="priorityCommunicationMethodRadioButton"
                                           caption="msg://msgPriorityCommunicationMethod"
                                           width="100%"
                                           required="true"
                                           dataContainer="jobCandidateDc"
                                           property="priorityContact"
-                                          height="100%"/> -->
-                    </groupBox>
+                                          height="100%"/>
+                    </vbox>
                 </hbox>
                 <hbox id="socialNetworkTableHbox"
                       width="100%"
                       height="AUTO"
+                      stylename="borderless"
+                      margin="false,false,false,false"
                       expand="socialNetworkTable">
                     <dataGrid id="socialNetworkTable"
                               height="100%"
@@ -603,42 +616,6 @@ order by e.cityRuName]]>
                     <rowsCount/>
                 </dataGrid>
             </tab>
-            <!--            <tab id="tabSkills"
-                             caption="msg://msgSkills"
-                             margin="true,true,true,true"
-                             expand="tabSkillsVbox"
-                             icon="font-icon:MEDKIT"
-                             spacing="true">
-                            <vbox id="tabSkillsVbox"
-                                  expand="jobCandidateSkillListTable"
-                                  spacing="true">
-                                <lookupPickerField id="jobCandidateSpecialisationField" dataContainer="jobCandidateDc"
-                                                   property="specialisation"
-                                                   caption="msg://msgSpecialisation" width="50%">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                        <action id="open" type="picker_open"/>
-                                    </actions>
-                                </lookupPickerField>
-                                <dataGrid id="jobCandidateSkillListTable"
-                                          width="100%"
-                                          dataContainer="jobCandidateSkillsesDc">
-                                    <columns>
-                                        <column id="skillName" caption="mainMsg://msgSkills" property="skillName"/>
-                                    </columns>
-                                    <actions>
-                                        <action id="add" type="add"/>
-                                        <action id="edit" type="edit"/>
-                                        <action id="remove" type="remove"/>
-                                    </actions>
-                                    <buttonsPanel>
-                                        <button id="addButton_1" action="jobCandidateSkillListTable.add"/>
-                                        <button id="editButton_1" action="jobCandidateSkillListTable.edit"/>
-                                        <button id="removeButton_1" action="jobCandidateSkillListTable.remove"/>
-                                    </buttonsPanel>
-                                </dataGrid>
-                            </vbox>
-                        </tab> -->
             <tab id="tabResume"
                  caption="msg://msgResume"
                  margin="true,true,true,true"

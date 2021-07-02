@@ -14,8 +14,33 @@
             </loader>
         </collection>
         <instance id="candidateCVDc"
-                  class="com.company.itpearls.entity.CandidateCV"
-                  view="candidateCV-view">
+                  class="com.company.itpearls.entity.CandidateCV">
+            <view extends="_minimal">
+                <property name="candidate" view="_minimal">
+                    <property name="fullName"/>
+                </property>
+                <property name="resumePosition" view="_minimal"/>
+                <property name="fileCV" view="_minimal"/>
+                <property name="toVacancy" view="_minimal"/>
+                <property name="fileImageFace" view="_minimal"/>
+                <property name="originalFileCV" view="_minimal"/>
+                <property name="skillTree" view="_minimal"/>
+                <property name="someFiles" view="_minimal">
+                    <property name="fileType" view="_minimal"/>
+                    <property name="fileComment"/>
+                    <property name="fileDescriptor" view="_minimal">
+                        <property name="size"/>
+                    </property>
+                    <property name="fileDescription"/>
+                    <property name="fileOwner" view="_minimal"/>
+                </property>
+                <property name="letter"/>
+                <property name="owner" view="_minimal"/>
+                <property name="linkOriginalCv"/>
+                <property name="linkItPearlsCV"/>
+                <property name="textCV"/>
+                <property name="datePost"/>
+            </view>
             <loader/>
             <collection id="someFilesesDc" property="someFiles"/>
             <collection id="skillTreesDc" property="skillTree"/>
@@ -57,13 +82,15 @@
                            align="TOP_LEFT"
                            dataContainer="candidateCVDc"
                            property="candidate.fullName"/>
-                    <label id="iteractionListLabelPosition"
-                           stylename="h3"
-                           align="TOP_LEFT"
-                           dataContainer="candidateCVDc"
-                           property="candidate.personPosition"/>
-                    <label id="labelLastRecrutier"/>
-                    <label id="machRegexpFromCV"/>
+                    <hbox spacing="true">
+                        <label id="iteractionListLabelPosition"
+                               stylename="h3"
+                               align="TOP_LEFT"
+                               dataContainer="candidateCVDc"
+                               property="candidate.personPosition"/>
+                        <label id="labelLastRecrutier"/>
+                        <label id="machRegexpFromCV"/>
+                    </hbox>
                 </vbox>
                 <hbox box.expandRatio="4"
                       stylename="quote-border"
@@ -264,7 +291,6 @@
                                       box.expandRatio="1"
                                       stylename="borderless"/>
                     </hbox>
-
                 </vbox>
             </tab>
             <tab id="tabFiles"
@@ -289,7 +315,6 @@
                             <column id="fileOwner.name" caption="mainMsg://msgOwner"/>
                         </columns>
                         <buttonsPanel>
-                            <!--                                <button id="createSomeFile" icon="CREATE_ACTION" invoke="createSomeFileButtonAction"/> -->
                             <button action="someFilesTable.create"/>
                             <button action="someFilesTable.edit"/>
                             <button action="someFilesTable.remove"/>
@@ -398,6 +423,7 @@
         <hbox id="editActions"
               spacing="true"
               width="100%"
+              height="AUTO"
               margin="true,true,true,true"
               align="BOTTOM_RIGHT">
             <dateField id="datePostField"

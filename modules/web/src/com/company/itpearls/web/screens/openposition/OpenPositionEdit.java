@@ -17,6 +17,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -171,6 +172,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     static String ADMINISTRATOR = "Administrators";
     static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
     private OpenPosition beforeEdit = null;
+    @Inject
+    private Logger log;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -570,24 +573,31 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private OpenPosition checkDublicateOpenPosition(BeforeCommitChangesEvent event) {
-        List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
-                .query("select e from itpearls_OpenPosition e " +
-                        "where e.positionType = :positionType " +
-                        "and e.vacansyName like :vacansyName " +
-                        "and e.projectName = :projectName " +
-                        "and e.parentOpenPosition = :parentOpenPosition " +
-                        "and e.vacansyName = :vacansyName " +
-                        "and e.remoteWork = :remoteWork " +
-                        "and e.cityPosition = :cityPosition")
-                .parameter("vacansyName", vacansyNameField.getValue())
-                .parameter("positionType", positionTypeField.getValue())
-                .parameter("projectName", projectNameField.getValue())
-                .parameter("cityPosition", cityOpenPositionField.getValue())
-                .parameter("parentOpenPosition", parentOpenPositionField.getValue())
-                .parameter("remoteWork", remoteWorkField.getValue())
-                .parameter("vacansyName", vacansyNameField.getValue())
-                .view("openPosition-view")
-                .list();
+        // StringIndexOutOfBoundsException: begin 0, end -1, length 2
+        List<OpenPosition> openPositions = new ArrayList<>();
+
+        try {
+            openPositions = dataManager.load(OpenPosition.class)
+                    .query("select e from itpearls_OpenPosition e " +
+                            "where e.positionType = :positionType " +
+                            "and e.vacansyName like :vacansyName " +
+                            "and e.projectName = :projectName " +
+                            "and e.parentOpenPosition = :parentOpenPosition " +
+                            "and e.vacansyName = :vacansyName " +
+                            "and e.remoteWork = :remoteWork " +
+                            "and e.cityPosition = :cityPosition")
+                    .parameter("vacansyName", vacansyNameField.getValue())
+                    .parameter("positionType", positionTypeField.getValue())
+                    .parameter("projectName", projectNameField.getValue())
+                    .parameter("cityPosition", cityOpenPositionField.getValue())
+                    .parameter("parentOpenPosition", parentOpenPositionField.getValue())
+                    .parameter("remoteWork", remoteWorkField.getValue())
+                    .parameter("vacansyName", vacansyNameField.getValue())
+                    .view("openPosition-view")
+                    .list();
+        } catch (NullPointerException e) {
+            log.error("Error", e);
+        }
 
         if (openPositions.size() == 0) {
             return null;

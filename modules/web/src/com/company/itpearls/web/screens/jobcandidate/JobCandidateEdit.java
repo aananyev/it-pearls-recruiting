@@ -214,7 +214,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             for (SocialNetworkType s : socialNetworkType) {
                 SocialNetworkURLs socialNetworkURLs = new SocialNetworkURLs();
                 socialNetworkURLs.setSocialNetworkURL(s);
-                socialNetworkURLs.setNetworkURLS(s.getSocialNetworkURL());
+//                socialNetworkURLs.setNetworkURLS(s.getSocialNetworkURL());
                 socialNetworkURLs.setJobCandidate(getEditedEntity());
                 socialNetworkURLs.setNetworkName(s.getSocialNetwork());
 
@@ -394,6 +394,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 //        notifications.create(Notifications.NotificationType.WARNING)
 //                .withCaption("Открытие JobCandadateEdit: " + msec)
 //                .show();
+
+        checkContactsCandidateListener();
     }
 
     private void setPercentLabel() {
@@ -555,6 +557,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // проверить в названии должности (не использовать)
         checkNotUsePosition();
         priorityCommenicationMethodRadioButtonInit();
+    }
+
+    private void checkContactsCandidateListener() {
+        jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
+            scanContactsFromCVs();
+        });
+    }
+
+    @Subscribe
+    public void onBeforeClose1(BeforeCloseEvent event) {
+        // удалить листенер изменения, чтобы  не пугало сообщение о ненадйенности новых контактов в резюмехе
+        jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {});
     }
 
     private void priorityCommenicationMethodRadioButtonInit() {
@@ -1433,11 +1447,89 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
     }
 
+    private void scanContactsFromCVs() {
+        String newPhone = null,
+                newEmail = null;
+
+        for(CandidateCV candidateCV : jobCandidateCandidateCvsDc.getItems()) {
+            try {
+                newEmail = parseCVService.parseEmail(candidateCV.getTextCV());
+                newPhone = parseCVService.parsePhone(candidateCV.getTextCV());
+            } catch (NullPointerException e) {
+                log.error("Error", e);
+            }
+        }
+
+        makeDialogNewEmailPhone(newEmail, newPhone);
+    }
+
+    private void makeDialogNewEmailPhone(String newEmail, String newPhone) {
+        String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
+        Boolean flag = false;
+
+        if (newEmail != null) {
+            if (!newEmail.equals(emailField.getValue())) {
+                message = message
+                        + "<i> - адрес электронной почты старый "
+                        + "<b>" + emailField.getValue() + "</b>"
+                        + " новый "
+                        + "<b>" + newEmail + "</b>"
+                        + "</i><br>";
+
+                flag = true;
+            }
+        }
+
+        if (newPhone != null) {
+            if (newPhone.equals(phoneField.getValue())) {
+                message = message
+                        + "<i> - телефон старый "
+                        + "<b>" + phoneField.getValue() + "</b>"
+                        + " новый "
+                        + "<b>" + newPhone + "</b>"
+                        + "</i><br>";
+
+                flag = true;
+            }
+        }
+
+        if (flag) {
+            dialogs.createOptionDialog()
+                    .withType(Dialogs.MessageType.WARNING)
+                    .withWidth("600px")
+                    .withMessage(message
+                            + "<br><br>"
+                            + "<b>Заменить в карточке кандидата?</b>")
+                    .withContentMode(ContentMode.HTML)
+                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
+                        phoneField.setValue(newPhone);
+                        emailField.setValue(newEmail);
+                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
+                    }))
+                    .show();
+        } else {
+//            notifications.create(Notifications
+//                    .NotificationType.WARNING)
+//                    .withCaption("Не найдено новой контактной информации в резюме кандидата")
+//                    .show();
+        }
+    }
+
     public void scanContactsFromCV() {
         String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
         String newPhone = parseCVService.parsePhone(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
         String newEmail = parseCVService.parseEmail(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
+        List<String> urls = parseCVService.extractUrls(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
+
         Boolean flag = false;
+
+        if(urls.size() != 0) {
+            for(String s : urls) {
+                for(SocialNetworkURLs ssocial : jobCandidateDc.getItem().getSocialNetwork()) {
+                    String a = ssocial.getNetworkURLS();
+                }
+            }
+        }
 
         if (newEmail != null) {
             if (!newEmail.equals(emailField.getValue())) {
