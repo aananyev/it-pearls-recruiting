@@ -1525,8 +1525,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if(urls.size() != 0) {
             for(String s : urls) {
-                for(SocialNetworkURLs ssocial : jobCandidateDc.getItem().getSocialNetwork()) {
-                    String a = ssocial.getNetworkURLS();
+                for(SocialNetworkURLs social : jobCandidateDc.getItem().getSocialNetwork()) {
+                    String a = social.getNetworkURLS();
+                    String hostCandidate = "";
+                    String hostSocial = "";
+
+                    try {
+                        URI uriSocial = new URI(social.getNetworkURLS());
+                        URI uriCandidate = new URI(s);
+
+                        hostCandidate = uriCandidate.getHost();
+                        hostSocial = uriSocial.getHost();
+
+                    } catch (URISyntaxException e) {
+                        log.error("Error", e);
+                    }
                 }
             }
         }

@@ -500,4 +500,8 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
                 .build()
                 .show();
     }
+
+    public void closeButton() {
+        closeWithDefaultAction();
+    }
 }

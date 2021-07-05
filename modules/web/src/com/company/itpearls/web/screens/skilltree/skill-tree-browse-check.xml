@@ -33,6 +33,7 @@
     <layout expand="skillTreesTable"
             spacing="true">
         <label id="header" stylename="h3"/>
+        <label id="headerToVacancy" stylename="h4"/>
         <label id="percent" stylename="h4"/>
         <treeDataGrid id="skillTreesTable"
                       width="100%"

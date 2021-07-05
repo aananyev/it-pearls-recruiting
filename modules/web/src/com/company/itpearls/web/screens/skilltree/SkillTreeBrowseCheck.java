@@ -21,9 +21,10 @@ import java.util.Set;
 @LookupComponent("skillTreesTable")
 @LoadDataBeforeShow
 public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
-    List<SkillTree> candidateCVSkills = new ArrayList<>();
-    List<SkillTree> openPositionSkills = new ArrayList<>();
-    String title = "";
+    private List<SkillTree> candidateCVSkills = new ArrayList<>();
+    private List<SkillTree> openPositionSkills = new ArrayList<>();
+    private String title = "";
+    private String titleToVacancy = "";
 
     @Inject
     private CollectionLoader<SkillTree> skillTreesDl;
@@ -33,11 +34,17 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
     private Label<String> header;
     @Inject
     private Label<String> percent;
+    @Inject
+    private Label<String> headerToVacancy;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (title != null) {
             header.setValue(title);
+        }
+
+        if(titleToVacancy != null) {
+            headerToVacancy.setValue(titleToVacancy);
         }
 
         if (candidateCVSkills.size() != 0 && openPositionSkills.size() != 0) {
@@ -71,6 +78,10 @@ public class SkillTreeBrowseCheck extends StandardLookup<SkillTree> {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public void setTitleToVacancy(String title) {
+        this.titleToVacancy = title;
     }
 
     @Install(to = "skillTreesTable.cvSkills", subject = "columnGenerator")

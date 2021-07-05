@@ -189,6 +189,11 @@
                         icon="EXCEL_ACTION"
                         enable="false"
                         visible="false"/>
+                <button id="suggestCandidateButton"
+                        caption="msg://msgSuggestCandidates"
+                        icon="EYE"
+                        enable="false"
+                        invoke="suggestCandidateButton"/>
             </buttonsPanel>
         </treeDataGrid>
         <hbox spacing="true"

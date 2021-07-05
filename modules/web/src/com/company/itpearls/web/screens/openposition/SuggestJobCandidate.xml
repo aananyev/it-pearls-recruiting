@@ -44,8 +44,8 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="900"
-                forceDialog="true"/>
+                width="1000"
+                forceDialog="false"/>
     <layout spacing="true" expand="suitableCheckVBox">
         <vbox id="suitableCheckVBox"
               width="100%"
@@ -141,10 +141,21 @@
                               editable="false"
                               height="100%"/>
             </vbox>
-            <hbox spacing="true">
+            <hbox spacing="true"
+                  width="100%">
                 <checkBox id="useLocationCheckBox"
+                          align="MIDDLE_LEFT"
                           caption="msg://msgUseLocation"/>
+                <button id="closeButton"
+                        align="MIDDLE_RIGHT"
+                        caption="msg://msgClose"
+                        invoke="closeButton"/>
             </hbox>
         </vbox>
+        <hbox id="lookupActions"
+              spacing="true"
+              visible="false"
+              align="TOP_RIGHT">
+        </hbox>
     </layout>
 </window>

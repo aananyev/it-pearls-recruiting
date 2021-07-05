@@ -36,8 +36,8 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="900"
-                forceDialog="true"/>
+                width="1000"
+                forceDialog="false"/>
     <layout spacing="true" expand="suitableCheckVBox">
         <vbox id="suitableCheckVBox"
               width="100%"
@@ -135,6 +135,10 @@
             <hbox spacing="true">
                 <checkBox id="useLocationCheckBox"
                           caption="msg://msgUseLocation"/>
+                <button id="closeButton"
+                        align="MIDDLE_RIGHT"
+                        caption="msg://msgClose"
+                        invoke="closeButton"/>
             </hbox>
         </vbox>
     </layout>

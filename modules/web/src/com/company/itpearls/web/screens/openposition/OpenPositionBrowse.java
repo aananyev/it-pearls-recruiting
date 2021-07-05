@@ -85,6 +85,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Notifications notifications;
     @Inject
     private Button buttonSubscribe;
+    @Inject
+    private Button suggestCandidateButton;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -1213,6 +1215,21 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return style;
     }
 
+    @Subscribe("openPositionsTable")
+    public void onOpenPositionsTableSelection(DataGrid.SelectionEvent<OpenPosition> event) {
+        if (openPositionsTable.getSingleSelected() != null) {
+            suggestCandidateButton.setEnabled(true);
+        } else {
+            suggestCandidateButton.setEnabled(false);
+        }
 
+    }
+
+    public void suggestCandidateButton() {
+        Suggestjobcandidate suggestjobcandidate = screens.create(Suggestjobcandidate.class);
+        suggestjobcandidate.setOpenPosition(openPositionsTable.getSingleSelected());
+
+        suggestjobcandidate.show();
+    }
 }
 

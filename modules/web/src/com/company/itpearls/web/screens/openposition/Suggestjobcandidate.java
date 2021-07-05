@@ -382,10 +382,11 @@ public class Suggestjobcandidate extends Screen {
         List<SkillTree> skillTrees = pdfParserService.parseSkillTree(suitableCheckDataGrid
                 .getSingleSelected()
                 .getTextCV());
-        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(suitableCheckDataGrid
+/*        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(suitableCheckDataGrid
                 .getSingleSelected()
                 .getToVacancy()
-                .getComment());
+                .getComment());*/
+        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(openPosition.getComment());
 
         SkillTreeBrowseCheck s = screenBuilders.screen(this)
                 .withScreenClass(SkillTreeBrowseCheck.class)
@@ -393,8 +394,13 @@ public class Suggestjobcandidate extends Screen {
 
         s.setCandidateCVSkills(skillTrees);
         s.setOpenPositionSkills(skillTreesFromJD);
-        s.setTitle(suitableCheckDataGrid.getSingleSelected().getToVacancy().getVacansyName());
+        s.setTitle("Кандидат: " + suitableCheckDataGrid.getSingleSelected().getToVacancy().getVacansyName());
+        s.setTitleToVacancy("Вакансия: " + openPosition.getVacansyName());
 
         s.show();
+    }
+
+    public void closeButton() {
+        closeWithDefaultAction();
     }
 }
