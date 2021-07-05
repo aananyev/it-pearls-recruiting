@@ -3,10 +3,14 @@ package com.company.itpearls.web.screens.openposition;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.jobcandidate.IteractionListBrowse;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -57,6 +61,10 @@ public class Suggestjobcandidate extends Screen {
     private OpenPosition openPosition = null;
     @Inject
     private CollectionContainer<CandidateCV> candidateCVDc;
+    @Inject
+    private Screens screens;
+    @Inject
+    private Button viewIteractionListButton;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -98,19 +106,17 @@ public class Suggestjobcandidate extends Screen {
 
     private void setButtoncActions() {
 
-        viewCandidateButton.setEnabled(false);
-        viewCandidateCVButton.setEnabled(false);
-        viewCandidateCheckSkillsButton.setEnabled(false);
-
         suitableCheckDataGrid.addSelectionListener(e -> {
             if (e.getSelected() == null) {
                 viewCandidateButton.setEnabled(false);
                 viewCandidateCVButton.setEnabled(false);
                 viewCandidateCheckSkillsButton.setEnabled(false);
+                viewIteractionListButton.setEnabled(false);
             } else {
                 viewCandidateCVButton.setEnabled(true);
                 viewCandidateButton.setEnabled(true);
                 viewCandidateCheckSkillsButton.setEnabled(true);
+                viewIteractionListButton.setEnabled(true);
             }
         });
     }
@@ -402,5 +408,12 @@ public class Suggestjobcandidate extends Screen {
 
     public void closeButton() {
         closeWithDefaultAction();
+    }
+
+    public void viewIteractionListButton() {
+        IteractionListSimpleBrowse iteractionListSimpleBrowse = screens.create(IteractionListSimpleBrowse.class);
+        iteractionListSimpleBrowse.setSelectedCandidate(suitableCheckDataGrid.getSingleSelected().getCandidate());
+        screens.show(iteractionListSimpleBrowse);
+
     }
 }

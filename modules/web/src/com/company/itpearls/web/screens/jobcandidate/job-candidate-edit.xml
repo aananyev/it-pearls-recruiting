@@ -629,6 +629,7 @@ order by e.cityRuName]]>
                     <button id="checkSkillFromJD"
                             caption="msg://msgCheckSkills"
                             align="BOTTOM_LEFT"
+                            enable="false"
                             invoke="checkSkillFromJD"/>
                     <dataGrid id="jobCandidateCandidateCvTable"
                               width="100%"
@@ -678,7 +679,10 @@ order by e.cityRuName]]>
                                     invoke="copyCVJobCandidate"/>
                             <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
                             <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
-                            <button id="scanContactsFromCVButton" caption="msg://msgScan" invoke="scanContactsFromCV"/>
+                            <button id="scanContactsFromCVButton"
+                                    caption="msg://msgScan"
+                                    enable="false"
+                                    invoke="scanContactsFromCV"/>
                         </buttonsPanel>
                     </dataGrid>
                 </vbox>

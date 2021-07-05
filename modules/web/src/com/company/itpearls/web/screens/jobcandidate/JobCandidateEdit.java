@@ -562,6 +562,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void checkContactsCandidateListener() {
         jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
             scanContactsFromCVs();
+            scanContactsFromCV();
         });
     }
 
@@ -812,8 +813,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         msec = System.currentTimeMillis();
 
 
-        checkSkillFromJD.setEnabled(false);
-        scanContactsFromCVButton.setEnabled(false);
+//        checkSkillFromJD.setEnabled(false);
+//        scanContactsFromCVButton.setEnabled(false);
 
         jobCandidateCandidateCvTable.addSelectionListener(e -> {
             if (e.getSelected() == null) {
@@ -1525,17 +1526,28 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if(urls.size() != 0) {
             for(String s : urls) {
-                for(SocialNetworkURLs social : jobCandidateDc.getItem().getSocialNetwork()) {
-                    String a = social.getNetworkURLS();
+                for(SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
+                    String a = social.getSocialNetworkURL().getSocialNetworkURL();
                     String hostCandidate = "";
                     String hostSocial = "";
 
                     try {
-                        URI uriSocial = new URI(social.getNetworkURLS());
                         URI uriCandidate = new URI(s);
+                        URI uriSocial = new URI(a);
 
                         hostCandidate = uriCandidate.getHost();
                         hostSocial = uriSocial.getHost();
+
+                        if(hostCandidate.equals(hostSocial)) {
+//                            social.getSocialNetworkURL().setSocialNetworkURL(s);
+                            social.setNetworkURLS(s);
+                            social.setNetworkName(s);
+
+                            flag = true;
+
+                            message = message + "<i> социальная сеть </i>"
+                                    + "<b>" + s + "</b><br>";
+                        }
 
                     } catch (URISyntaxException e) {
                         log.error("Error", e);
@@ -1547,7 +1559,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (newEmail != null) {
             if (!newEmail.equals(emailField.getValue())) {
                 message = message
-                        + "<i> - адрес электронной почты старый "
+                        + "<i> - адрес электронной почты старый </i>"
                         + "<b>" + emailField.getValue() + "</b>"
                         + " новый "
                         + "<b>" + newEmail + "</b>"
@@ -1560,7 +1572,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (newPhone != null) {
             if (newPhone.equals(phoneField.getValue())) {
                 message = message
-                        + "<i> - телефон старый "
+                        + "<i> - телефон старый </i>"
                         + "<b>" + phoneField.getValue() + "</b>"
                         + " новый "
                         + "<b>" + newPhone + "</b>"

@@ -93,13 +93,20 @@
                 <buttonsPanel>
                     <button id="viewCandidateButton"
                             caption="msg://msgViewCandidate"
+                            enable="false"
                             invoke="viewCandidateButton"/>
                     <button id="viewCandidateCVButton"
                             caption="msg://msgViewCandidateCV"
+                            enable="false"
                             invoke="viewCandidateCVButton"/>
                     <button id="viewCandidateCheckSkillsButton"
                             caption="msg://msgCheckSkills"
+                            enable="false"
                             invoke="viewCandidateCheckSkillsButton"/>
+                    <button id="viewIteractionListButton"
+                            caption="msg://mshIteractionList"
+                            enable="false"
+                            invoke="viewIteractionListButton"/>
                 </buttonsPanel>
                 <dataGrid id="suitableCheckDataGrid"
                           columnResizeMode="ANIMATED"
