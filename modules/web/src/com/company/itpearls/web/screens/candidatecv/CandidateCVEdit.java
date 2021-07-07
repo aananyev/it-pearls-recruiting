@@ -24,6 +24,7 @@ import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.io.*;
@@ -85,6 +86,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ParseCVService parseCVService;
     @Inject
     private Label<String> machRegexpFromCV;
+    @Inject
+    private Logger log;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -302,25 +305,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-/*    @Subscribe("tabFiles")
-    public void onTabFilesLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            dialogs.createOptionDialog()
-                    .withCaption("Warning")
-                    .withMessage("Сохранить резюме кандидата?")
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES,
-                                    Action.Status.PRIMARY).withHandler(y -> {
-                                this.commitChanges();
-                            }),
-                            new DialogAction(DialogAction.Type.NO)
-                    )
-                    .show();
-        }
-    }
-*/
-
-
 /*
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
@@ -367,13 +351,21 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         if (fileOriginalCVField.getFileName().endsWith(".pdf")) {
 
             try {
-                PDFParser parser = new PDFParser(new RandomAccessFile(fileName, "r"));
-                parser.parse();
+                try {
+                    PDFParser parser = new PDFParser(new RandomAccessFile(fileName, "r"));
+                    parser.parse();
 
-                COSDocument cosDoc = parser.getDocument();
-                PDFTextStripper pdfStripper = new PDFTextStripper();
-                PDDocument pdDoc = new PDDocument(cosDoc);
-                parsedText = pdfStripper.getText(pdDoc).replace("\n", "<br>");
+                    COSDocument cosDoc = parser.getDocument();
+                    PDFTextStripper pdfStripper = new PDFTextStripper();
+                    PDDocument pdDoc = new PDDocument(cosDoc);
+                    parsedText = pdfStripper.getText(pdDoc).replace("\n", "<br>");
+                } catch (NullPointerException e) {
+                    notifications.create(Notifications.NotificationType.ERROR)
+                            .withCaption("Ошибка загрузки файла " + fileName)
+                            .show();
+
+                    log.error("Error", e);
+                }
 
             } catch (IOException e) {
                 notifications.create()

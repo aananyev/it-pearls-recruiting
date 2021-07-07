@@ -1073,27 +1073,29 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (!iteractionTypeField.getValue().getCallForm()) {
                 } else {
                     // Это лишнее - тут надо вызов формы сиска резюме или других документов
-                    if (iteractionTypeField.getValue().getFindToDic()) {
-                        Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
-                                .newEntity()
-                                .withScreenId(calledClass + ".edit")
-                                .withLaunchMode(OpenMode.NEW_TAB)
-                                .withInitializer(e -> {
-                                })
-                                .build();
+                    if(iteractionTypeField.getValue() != null) {
+                        if (iteractionTypeField.getValue().getFindToDic()) {
+                            Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+                                    .newEntity()
+                                    .withScreenId(calledClass + ".edit")
+                                    .withLaunchMode(OpenMode.NEW_TAB)
+                                    .withInitializer(e -> {
+                                    })
+                                    .build();
 
-                        a.show();
-                    } else {
-                        Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
-                                .newEntity()
-                                .withScreenId(calledClass + ".edit")
-                                .withLaunchMode(OpenMode.NEW_TAB)
-                                .withInitializer(e -> {
-                                    // e.setValue( "exchange", exchangeBean );
-                                })
-                                .build();
+                            a.show();
+                        } else {
+                            Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
+                                    .newEntity()
+                                    .withScreenId(calledClass + ".edit")
+                                    .withLaunchMode(OpenMode.NEW_TAB)
+                                    .withInitializer(e -> {
+                                        // e.setValue( "exchange", exchangeBean );
+                                    })
+                                    .build();
 
-                        a.show();
+                            a.show();
+                        }
                     }
                 }
     }

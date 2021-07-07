@@ -26,6 +26,9 @@
                             <c:jpql>
                                 <c:where>(select count(f) from itpearls_IteractionList f where f.candidate = :candidate and f.rating >= :rating) is not null</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>(select count(g) from itpearls_CandidateCV g where g.candidate = :candidateCV) is not null</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -128,6 +131,9 @@
             <checkBox id="checkBoxOnWork"
                       align="MIDDLE_LEFT"
                       caption="msg://msgCandidateOnWork"/>
+            <checkBox id="withCVCheckBox"
+                      align="MIDDLE_LEFT"
+                      caption="msg://mshWithCV"/>
             <hbox>
                 <lookupField id="ratingFieldNotLower"
                              caption="msg://msgRatingNotLower"

@@ -16,18 +16,22 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parseEmail(String cv) {
-        Pattern emailPattern = Pattern.compile(emailPtrn);
-        Matcher emailMatcher = emailPattern.matcher(Jsoup.parse(cv).text());
+        if(cv != null) {
+            Pattern emailPattern = Pattern.compile(emailPtrn);
+            Matcher emailMatcher = emailPattern.matcher(Jsoup.parse(cv).text());
 
-        String retStr = "";
+            String retStr = "";
 
-        if(emailMatcher.find()) {
-            retStr = emailMatcher.group();
+            if (emailMatcher.find()) {
+                retStr = emailMatcher.group();
+            } else {
+                retStr = null;
+            }
+
+            return retStr;
         } else {
-            retStr = null;
+            return null;
         }
-
-        return retStr;
     }
 
     @Override
@@ -36,11 +40,15 @@ public class ParseCVServiceBean implements ParseCVService {
     }
 
     private String getDataModel(String onStr, String pattern) {
-        Pattern patt = Pattern.compile(pattern);
-        Matcher matcher = patt.matcher(Jsoup.parse(onStr).text());
+        if(onStr != null) {
+            Pattern patt = Pattern.compile(pattern);
+            Matcher matcher = patt.matcher(Jsoup.parse(onStr).text());
 
-        if(matcher.find()) {
-            return matcher.group();
+            if (matcher.find()) {
+                return matcher.group();
+            } else {
+                return null;
+            }
         } else {
             return null;
         }

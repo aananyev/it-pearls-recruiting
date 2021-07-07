@@ -82,6 +82,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private LookupField ratingFieldNotLower;
     @Inject
     private CollectionContainer<JobCandidate> jobCandidatesDc;
+    @Inject
+    private CheckBox withCVCheckBox;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -988,6 +990,21 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .setRenderer(jobCandidatesTable.createRenderer(DataGrid.HtmlRenderer.class));
 
         setRatingField();
+        setWithCVCheckBox();
+    }
+
+    private void setWithCVCheckBox() {
+        withCVCheckBox.addValueChangeListener(e -> {
+            if(withCVCheckBox.getValue() != null) {
+                if(withCVCheckBox.getValue()) {
+                    jobCandidatesDl.setParameter("candidateCV", e.getValue());
+                } else {
+                    jobCandidatesDl.removeParameter("candidateCV");
+                }
+
+                jobCandidatesDl.load();
+            }
+        });
     }
 
 
@@ -1042,10 +1059,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         float countRating = 0,
                 sumRating = 0;
 
-        for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
-            if (iteractionList.getRating() != null) {
-                countRating++;
-                sumRating = sumRating + iteractionList.getRating();
+        if(jobCandidate.getIteractionList() != null) {
+            for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
+                if (iteractionList.getRating() != null) {
+                    countRating++;
+                    sumRating = sumRating + iteractionList.getRating();
+                }
             }
         }
 
@@ -1111,6 +1130,5 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     public void quickLoadCVButton() {
-
     }
 }

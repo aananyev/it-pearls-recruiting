@@ -329,7 +329,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         try {
             retStr = "Ответственный за проект: ";
 
-            if(iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
+            if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
                 retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
             }
 
@@ -484,7 +484,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         wiberNameField.setRequired(true);
         telegramGroupField.setRequired(true);
 
-        if(!isRequiredAddresField() || !flag) {
+        if (!isRequiredAddresField() || !flag) {
             skypeNameField.setRequired(false);
             phoneField.setRequired(false);
             mobilePhoneField.setRequired(false);
@@ -569,7 +569,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onBeforeClose1(BeforeCloseEvent event) {
         // удалить листенер изменения, чтобы  не пугало сообщение о ненадйенности новых контактов в резюмехе
-        jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {});
+        jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
+        });
     }
 
     private void priorityCommenicationMethodRadioButtonInit() {
@@ -1452,7 +1453,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String newPhone = null,
                 newEmail = null;
 
-        for(CandidateCV candidateCV : jobCandidateCandidateCvsDc.getItems()) {
+        for (CandidateCV candidateCV : jobCandidateCandidateCvsDc.getItems()) {
             try {
                 newEmail = parseCVService.parseEmail(candidateCV.getTextCV());
                 newPhone = parseCVService.parsePhone(candidateCV.getTextCV());
@@ -1518,15 +1519,35 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public void scanContactsFromCV() {
         String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
-        String newPhone = parseCVService.parsePhone(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
-        String newEmail = parseCVService.parseEmail(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
-        List<String> urls = parseCVService.extractUrls(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
+        String textCVAll = "";
+        // ОШИБКА ТУТ
+        String newPhone = null;
+        String newEmail = null;
+
+        if(getEditedEntity().getCandidateCv() != null) {
+            for (CandidateCV candidateCV : getEditedEntity().getCandidateCv()) {
+                if (candidateCV.getTextCV() != null) {
+                    textCVAll = textCVAll + Jsoup.parse(candidateCV.getTextCV()).text();
+                }
+            }
+        }
+
+        if(textCVAll != null) {
+            newPhone = parseCVService.parsePhone(textCVAll);
+            newEmail = parseCVService.parseEmail(textCVAll);
+        }
+
+        List<String> urls = parseCVService.extractUrls(Jsoup.parse(textCVAll).text());
+        Set<String> set = new HashSet<>(urls);
+
+        urls.clear();
+        urls.addAll(set);
 
         Boolean flag = false;
 
-        if(urls.size() != 0) {
-            for(String s : urls) {
-                for(SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
+        if (urls.size() != 0) {
+            for (String s : urls) {
+                for (SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
                     String a = social.getSocialNetworkURL().getSocialNetworkURL();
                     String hostCandidate = "";
                     String hostSocial = "";
@@ -1538,17 +1559,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         hostCandidate = uriCandidate.getHost();
                         hostSocial = uriSocial.getHost();
 
-                        if(hostCandidate.equals(hostSocial)) {
-//                            social.getSocialNetworkURL().setSocialNetworkURL(s);
-                            social.setNetworkURLS(s);
-                            social.setNetworkName(s);
+                        if (hostCandidate != null && hostSocial != null) {
+                            if (hostCandidate.equals(hostSocial)) {
+                                social.setNetworkURLS(s);
+                                social.setNetworkName(s);
 
-                            flag = true;
+                                flag = true;
 
-                            message = message + "<i> социальная сеть </i>"
-                                    + "<b>" + s + "</b><br>";
+                                message = message + "<i> социальная сеть </i>"
+                                        + "<b>" + s + "</b><br>";
+                            }
                         }
-
                     } catch (URISyntaxException e) {
                         log.error("Error", e);
                     }
@@ -1583,6 +1604,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         if (flag) {
+            String finalNewPhone = newPhone;
+            String finalNewEmail = newEmail;
+
             dialogs.createOptionDialog()
                     .withType(Dialogs.MessageType.WARNING)
                     .withWidth("600px")
@@ -1591,8 +1615,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             + "<b>Заменить в карточке кандидата?</b>")
                     .withContentMode(ContentMode.HTML)
                     .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
-                        phoneField.setValue(newPhone);
-                        emailField.setValue(newEmail);
+                        phoneField.setValue(finalNewPhone);
+                        emailField.setValue(finalNewEmail);
                     }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
                     }))
                     .show();
