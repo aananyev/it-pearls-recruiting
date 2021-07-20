@@ -24,10 +24,16 @@
                                 <c:where>not e.status = :param3</c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>(select count(f) from itpearls_IteractionList f where f.candidate = :candidate and f.rating >= :rating) is not null</c:where>
+                                <c:where>e in (select f.candidate
+                                    from itpearls_IteractionList f
+                                    where f.candidate = :candidate and f.rating >= :rating)
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>(select count(g) from itpearls_CandidateCV g where g.candidate = :candidateCV) is not null</c:where>
+                                <c:where>e in (select g.candidate
+                                    from itpearls_CandidateCV g
+                                    where g.candidate = :candidateCV)
+                                </c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -124,18 +130,24 @@
               stylename="card"
               margin="true,true,true,true"
               height="AUTO"
-              spacing="false">
-            <checkBox id="checkBoxShowOnlyMy"
-                      align="MIDDLE_LEFT"
-                      caption="mainMsg://msgVisibleOnlyMyCandidate"/>
-            <checkBox id="checkBoxOnWork"
-                      align="MIDDLE_LEFT"
-                      caption="msg://msgCandidateOnWork"/>
-            <checkBox id="withCVCheckBox"
-                      align="MIDDLE_LEFT"
-                      caption="msg://mshWithCV"/>
+              spacing="true">
+            <hbox spacing="true">
+                <checkBox id="checkBoxShowOnlyMy"
+                          align="MIDDLE_LEFT"
+                          width="AUTO"
+                          caption="mainMsg://msgVisibleOnlyMyCandidate"/>
+                <checkBox id="checkBoxOnWork"
+                          align="MIDDLE_LEFT"
+                          width="AUTO"
+                          caption="msg://msgCandidateOnWork"/>
+                <checkBox id="withCVCheckBox"
+                          align="MIDDLE_LEFT"
+                          width="AUTO"
+                          caption="msg://mshWithCV"/>
+            </hbox>
             <hbox>
                 <lookupField id="ratingFieldNotLower"
+                             visible="false"
                              caption="msg://msgRatingNotLower"
                              description="msg://msgRatingNotLoweerDecription"
                              width="50%"/>

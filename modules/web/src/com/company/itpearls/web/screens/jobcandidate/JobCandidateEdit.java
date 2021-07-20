@@ -204,7 +204,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         socialNetworkURLs.setNetworkName(s.getSocialNetwork());
                         socialNetworkURLs.setJobCandidate(getEditedEntity());
 
-//                        dataManager.commit(socialNetworkURLs);
+                        dataManager.commit(socialNetworkURLs);
                     }
                 }
             }
@@ -398,6 +398,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         checkContactsCandidateListener();
     }
 
+    @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        // чтоб после закрытия не возникало
+        jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
+        });
+    }
+
     private void setPercentLabel() {
         // вычислить процент заполнения карточки кандидата
         Integer qualityPercent = setQualityPercent() * 100 / 16;
@@ -562,7 +569,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void checkContactsCandidateListener() {
         jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
             scanContactsFromCVs();
-            scanContactsFromCV();
+//            scanContactsFromCV();
         });
     }
 
@@ -1501,11 +1508,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withWidth("600px")
                     .withMessage(message
                             + "<br><br>"
-                            + "<b>Заменить в карточке кандидата?</b>")
+                            + "<b>Разместить в карточке кандидата?</b>")
                     .withContentMode(ContentMode.HTML)
                     .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
-                        phoneField.setValue(newPhone);
-                        emailField.setValue(newEmail);
+                        if (newPhone != null) {
+                            if (!newPhone.equals("")) {
+                                phoneField.setValue(newPhone);
+                            }
+                        }
+
+                        if (newEmail != null) {
+                            if (!newEmail.equals("")) {
+                                emailField.setValue(newEmail);
+                            }
+                        }
                     }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
                     }))
                     .show();
@@ -1524,7 +1540,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String newPhone = null;
         String newEmail = null;
 
-        if(getEditedEntity().getCandidateCv() != null) {
+        if (getEditedEntity().getCandidateCv() != null) {
             for (CandidateCV candidateCV : getEditedEntity().getCandidateCv()) {
                 if (candidateCV.getTextCV() != null) {
                     textCVAll = textCVAll + Jsoup.parse(candidateCV.getTextCV()).text();
@@ -1532,7 +1548,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         }
 
-        if(textCVAll != null) {
+        if (textCVAll != null) {
             newPhone = parseCVService.parsePhone(textCVAll);
             newEmail = parseCVService.parseEmail(textCVAll);
         }
@@ -1621,10 +1637,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     }))
                     .show();
         } else {
-            notifications.create(Notifications
-                    .NotificationType.WARNING)
-                    .withCaption("Не найдено новой контактной информации в резюме кандидата")
-                    .show();
+            if (getEditedEntity().getCandidateCv() != null) {
+                notifications.create(Notifications
+                        .NotificationType.WARNING)
+                        .withCaption("Не найдено новой контактной информации в резюме кандидата")
+                        .show();
+            }
         }
     }
 
@@ -1661,6 +1679,42 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             } else {
                 link.setVisible(false);
             }
+        } else {
+            link.setVisible(false);
+        }
+
+        return link;
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.candidateITPearlsCVColumn", subject = "columnGenerator")
+    private Component jobCandidateCandidateCvTableCandidateITPearlsCVColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        Link link = uiComponents.create(Link.NAME);
+
+        if (event.getItem().getLinkItPearlsCV() != null) {
+            link.setUrl(event.getItem().getLinkItPearlsCV());
+            link.setCaption("Резюме IT Pearls");
+            link.setTarget("_blank");
+            link.setWidthAuto();
+            link.setVisible(true);
+        } else {
+            link.setVisible(false);
+        }
+
+        return link;
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.candidateOriginalCVColumn", subject = "columnGenerator")
+    private Component jobCandidateCandidateCvTableCandidateOriginalCVColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        Link link = uiComponents.create(Link.NAME);
+
+        if (event.getItem().getLinkOriginalCv() != null) {
+            String url = event.getItem().getLinkOriginalCv();
+
+            link.setUrl(url);
+            link.setCaption("Резюме IT Pearls");
+            link.setTarget("_blank");
+            link.setWidthAuto();
+            link.setVisible(true);
         } else {
             link.setVisible(false);
         }

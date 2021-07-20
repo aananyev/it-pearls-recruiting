@@ -512,6 +512,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 events.publish(new UiNotificationEvent(this, "Открыта вакансия: " +
                         entity.getVacansyName()));
             }
+
+            if(!entity.getOpenClose()) {
+                entity.getProjectName().setProjectIsClosed(false);
+            }
         });
 
         return retButton;

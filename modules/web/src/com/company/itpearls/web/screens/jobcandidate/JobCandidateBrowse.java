@@ -286,7 +286,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         String retStr = "";
 
         try {
-            if(event.getItem().getCandidateCv() != null) {
+            if (event.getItem().getCandidateCv() != null) {
                 if (event.getItem().getCandidateCv().size() == 0) {
                     retStr = "FILE";
                 } else {
@@ -458,7 +458,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 BigDecimal maxNumberIteraction = BigDecimal.ZERO;
                                 IteractionList lastIteraction = null;
 
-                                if(jobCandidatesTable.getSingleSelected() != null) {
+                                if (jobCandidatesTable.getSingleSelected() != null) {
                                     for (IteractionList list : jobCandidatesTable
                                             .getSingleSelected()
                                             .getIteractionList()) {
@@ -995,11 +995,34 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private void setWithCVCheckBox() {
         withCVCheckBox.addValueChangeListener(e -> {
-            if(withCVCheckBox.getValue() != null) {
-                if(withCVCheckBox.getValue()) {
-                    jobCandidatesDl.setParameter("candidateCV", e.getValue());
+            if (withCVCheckBox.getValue() != null) {
+                if (!withCVCheckBox.getValue()) {
+                    if (ratingFieldNotLower.getValue() == null) {
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                                + "order by e.secondName, e.firstName");
+                    } else {
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                                + "where e in (select f.candidate "
+                                + "from itpearls_IteractionList f "
+                                + "where f.candidate = e) "
+                                + "and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= " + ratingFieldNotLower.getValue().toString() + ") "
+                                + "order by e.secondName, e.firstName");
+                    }
                 } else {
-                    jobCandidatesDl.removeParameter("candidateCV");
+                    if (ratingFieldNotLower.getValue() == null) {
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                                + "where e in (select g.candidate "
+                                + "from itpearls_CandidateCV g "
+                                + "where g.candidate = e) "
+                                + "order by e.secondName, e.firstName");
+                    } else {
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                                + "where e in (select g.candidate "
+                                + "from itpearls_CandidateCV g "
+                                + "where g.candidate = e) "
+                                + "and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= " + ratingFieldNotLower.getValue().toString() + ") "
+                                + "order by e.secondName, e.firstName");
+                    }
                 }
 
                 jobCandidatesDl.load();
@@ -1059,7 +1082,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         float countRating = 0,
                 sumRating = 0;
 
-        if(jobCandidate.getIteractionList() != null) {
+        if (jobCandidate.getIteractionList() != null) {
             for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
                 if (iteractionList.getRating() != null) {
                     countRating++;
@@ -1119,10 +1142,45 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         ratingFieldNotLower.addValueChangeListener(e -> {
             if (ratingFieldNotLower.getValue() != null) {
-                jobCandidatesDl.setParameter("rating", ratingFieldNotLower.getValue());
-                jobCandidatesDl.setParameter("candidate", e);
+                if (withCVCheckBox.getValue() != null) {
+                    if (!withCVCheckBox.getValue()) {
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                                + "order by e.secondName, e.firstName");
+                    } else {
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                                + "where e in (select f.candidate "
+                                + "from itpearls_IteractionList f "
+                                + "where f.candidate = e) "
+                                + "and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= " + ratingFieldNotLower.getValue().toString() + ") "
+                                + "order by e.secondName, e.firstName");
+                    }
+                } else {
+                    jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                            + "order by e.secondName, e.firstName");
+                }
             } else {
-                jobCandidatesDl.removeParameter("rating");
+                if (withCVCheckBox.getValue() != null) {
+                    if (!withCVCheckBox.getValue()) {
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                                + "where e in (select g.candidate "
+                                + "from itpearls_CandidateCV g "
+                                + "where g.candidate = e) "
+                                + "order by e.secondName, e.firstName");
+                    } else {
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                                + "where e in (select g.candidate "
+                                + "from itpearls_CandidateCV g "
+                                + "where g.candidate = e) "
+                                + "and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= " + ratingFieldNotLower.getValue().toString() + ") "
+                                + "order by e.secondName, e.firstName");
+                    }
+                } else {
+                    jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
+                            + "where e in (select g.candidate "
+                            + "from itpearls_CandidateCV g "
+                            + "where g.candidate = e) "
+                            + "order by e.secondName, e.firstName");
+                }
             }
 
             jobCandidatesDl.load();

@@ -67,6 +67,8 @@
                             caption="mainMsg://msgFullName"/>
                     <column id="dateIteraction"
                             caption="mainMsg://msgDate"/>
+                    <column id="recrutierName"
+                            caption="msg://msgUser"/>
                 </columns>
             </table>
         </vbox>

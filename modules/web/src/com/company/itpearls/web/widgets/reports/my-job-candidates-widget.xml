@@ -26,6 +26,12 @@
                            height="100%"
                            width="100%"/>
             </vbox>
+            <hbox spacing="true"
+                  margin="true,true,true,true">
+                <checkBox id="allCandidatesChackBox"
+                          caption="msg://msgOnlyMyCandidates"
+                          description="msg://msgOnlyMyCandidatesDesc"/>
+            </hbox>
         </vbox>
     </layout>
 </fragment>

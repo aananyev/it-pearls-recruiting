@@ -660,6 +660,16 @@ order by e.cityRuName]]>
                                     caption="msg://msgCoverLetter">
                                 <iconRenderer/>
                             </column>
+                            <column id="candidateOriginalCVColumn"
+                                    width="120px"
+                                    caption="msg://msgOriginalCV">
+                                <componentRenderer/>
+                            </column>
+                            <column id="candidateITPearlsCVColumn"
+                                    width="120px"
+                                    caption="msg://msgITPearlsCV">
+                                <componentRenderer/>
+                            </column>
                             <column id="createdBy"
                                     property="createdBy"
                                     width="100px"

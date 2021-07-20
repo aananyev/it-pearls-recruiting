@@ -25,7 +25,6 @@ import java.util.*;
 @UiDescriptor("my-job-candidates-widget.xml")
 @DashboardWidget(name = "Last Status") //+
 public class MyJobCandidatesWidget extends ScreenFragment {
-
     @WidgetParam
     @WindowParam
     protected Date startDate;
@@ -48,18 +47,26 @@ public class MyJobCandidatesWidget extends ScreenFragment {
             "from itpearls_Iteraction e " +
             "where e.widgetChackJobCandidates = true " +
             "order by e.iterationName";
+
+    private MyCandidateTableFragment myCandidateTableFragment = null;
+    private List<MyCandidateTableFragment> allFragments = new ArrayList<>();
+
     @Inject
     private Label<String> widgetTitle;
     @Inject
     private UserSession userSession;
     @Inject
     private Fragments fragments;
+    @Inject
+    private CheckBox allCandidatesChackBox;
 
     @Subscribe
     public void onInit(InitEvent event) {
         setDefaultDate();
-        setAccordionTabs(event);
+        setAccordionTabs();
         setWidgetTitle();
+
+        allCandidatesChackBox.setValue(true);
     }
 
     private void setDefaultDate() {
@@ -91,7 +98,7 @@ public class MyJobCandidatesWidget extends ScreenFragment {
         }
     }
 
-    private void setAccordionTabs(InitEvent event) {
+    private void setAccordionTabs() {
         List<Iteraction> iteractions = dataManager.load(Iteraction.class)
                 .query(QUERY_ITERACTIONS)
                 .view("iteraction-view")
@@ -104,13 +111,17 @@ public class MyJobCandidatesWidget extends ScreenFragment {
             VBoxLayout groupBoxLayout = uiComponents.create(VBoxLayout.NAME);
             groupBoxLayout.setCaption("Список");
 
-            MyCandidateTableFragment myCandidateTableFragment = fragments.create(this,
+            myCandidateTableFragment = fragments.create(this,
                     MyCandidateTableFragment.class);
 
             myCandidateTableFragment.setUser();
             myCandidateTableFragment.setStartDate(startDate);
             myCandidateTableFragment.setEndDate(endDate);
             myCandidateTableFragment.setIteractionType(itr);
+            myCandidateTableFragment.setAllCandidatesFlag(allCandidatesChackBox.getValue());
+
+            allFragments.add(myCandidateTableFragment);
+
             myCandidateTableFragment.load();
 
             if(myCandidateTableFragment.getCountCandidates() != 0) {
@@ -129,6 +140,15 @@ public class MyJobCandidatesWidget extends ScreenFragment {
                 tab.setStyleName("last_status_widget");
                 tab.setIcon(itr.getPic());
             }
+        }
+    }
+
+    @Subscribe("allCandidatesChackBox")
+    public void onAllCandidatesChackBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if(myCandidateTableFragment != null) {
+            myCandidateTableFragment.setAllCandidatesFlag(true);
+            jobCandidatesIteractionAccordion.removeAllTabs();
+            setAccordionTabs();
         }
     }
 }

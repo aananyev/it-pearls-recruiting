@@ -7,6 +7,7 @@ import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
+import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.entity.User;
@@ -31,6 +32,19 @@ public class MyCandidateTableFragment extends ScreenFragment {
     private User user = null;
     @Inject
     private Table<IteractionList> jobCandidatesTable;
+    private Boolean flagAllCandidates;
+
+    public void setAllCandidatesFlag(Boolean flag) {
+        this.flagAllCandidates = flag;
+
+        if(flagAllCandidates) {
+            listOfCandidatesDl.setParameter("userName", user);
+        } else {
+            listOfCandidatesDl.removeParameter("userName");
+        }
+
+        listOfCandidatesDl.load();
+    }
 
     public void setUser(User user) {
         this.user = user;
@@ -53,7 +67,12 @@ public class MyCandidateTableFragment extends ScreenFragment {
     }
 
     public void load() {
-        listOfCandidatesDl.setParameter("userName", user);
+        if(flagAllCandidates) {
+            listOfCandidatesDl.setParameter("userName", user);
+        } else {
+            listOfCandidatesDl.removeParameter("userName");
+        }
+
         listOfCandidatesDl.setParameter("startDate", startDate);
         listOfCandidatesDl.setParameter("endDate", endDate);
         listOfCandidatesDl.setParameter("iteractionType", iteractionType);

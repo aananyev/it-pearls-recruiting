@@ -25,8 +25,6 @@
                     </property>
                 </property>
                 <property name="commandCandidate"/>
-                <property name="candidates"
-                          view="_minimal"/>
                 <property name="parentOpenPosition"
                           view="_local">
                 </property>
@@ -147,8 +145,8 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="700px"
-                width="900px"/>
+    <dialogMode height="800px"
+                width="1100px"/>
     <layout expand="tabSheetGroupBox"
             spacing="true">
         <groupBox spacing="true">

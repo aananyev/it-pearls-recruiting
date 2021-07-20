@@ -174,6 +174,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private OpenPosition beforeEdit = null;
     @Inject
     private Logger log;
+    @Inject
+    private CheckBox needMemoCheckBox;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -445,6 +447,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             companyDepartamentField.setEditable(true);
 
         }
+
+        if(!event.getValue()) {
+            if(getEditedEntity().getProjectName() != null) {
+                getEditedEntity().getProjectName().setProjectIsClosed(false);
+            }
+        }
     }
 
     @Subscribe
@@ -503,6 +511,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         return r;
+    }
+
+    @Subscribe("memoForInterviewRichTextArea")
+    public void onMemoForInterviewRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
+        if(event.getValue() != null && !event.getValue().equals("")) {
+            needMemoCheckBox.setValue(true);
+        } else {
+            needMemoCheckBox.setValue(false);
+        }
     }
 
     @Subscribe
