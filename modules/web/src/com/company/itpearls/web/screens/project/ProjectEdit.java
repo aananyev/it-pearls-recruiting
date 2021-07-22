@@ -96,6 +96,9 @@ public class ProjectEdit extends StandardEditor<Project> {
 
             CommitContext commitContext = new CommitContext(a);
             dataManager.commit(commitContext);
+
+            events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
+                    a.getVacansyName()));
         }
     }
 

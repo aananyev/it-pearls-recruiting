@@ -125,7 +125,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         // запомним кандидата
         candidate = candidateField.getValue();
         // предложить копирование если до этого было взаимодействие и узнать чей это был кандидат
-        copyAndCheckCandidate();
+//        copyAndCheckCandidate();
     }
 
     private void changeField() {
@@ -752,6 +752,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (parentCandidate != null) {
             getEditedEntity().setCandidate(parentCandidate);
         }
+;
     }
 
     @Subscribe
@@ -924,6 +925,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         getScreenOptionsNoSubscribers(event);
         setRatingField();
+
+        candidateField.addValueChangeListener(e -> {
+            copyAndCheckCandidate();
+        });
     }
 
     private void setRatingField() {
