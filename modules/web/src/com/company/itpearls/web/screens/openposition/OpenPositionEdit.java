@@ -545,8 +545,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
-    @Subscribe
-    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+    private void publishEventMessage(BeforeCommitChangesEvent event) {
         if(getEditedEntity().getOpenClose() == null) {
             getEditedEntity().setOpenClose(false);
         }
@@ -568,6 +567,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 }
             }
         }
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges3(BeforeCommitChangesEvent event) {
+        publishEventMessage(event);
+
     }
 
     private void sendClosePositionMessage() {

@@ -1,10 +1,12 @@
 package com.company.itpearls.web.screens.project;
 
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.CompanyDepartament;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Person;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.*;
@@ -40,11 +42,15 @@ public class ProjectEdit extends StandardEditor<Project> {
     @Inject
     private DataManager dataManager;
 
+    private Project beforeEdit = null;
+
     List<OpenPosition> openPositions = new ArrayList<>();
 //    @Inject
 //    private CollectionLoader<OpenPosition> projectOpenPositionsDl;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private Events events;
 
     @Subscribe("checkBoxProjectIsClosed")
     public void onCheckBoxProjectIsClosedValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
@@ -95,6 +101,8 @@ public class ProjectEdit extends StandardEditor<Project> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        beforeEdit = getEditedEntity();
+
         if (PersistenceHelper.isNew(getEditedEntity())) {
             Date date = new Date();
 
@@ -147,6 +155,46 @@ public class ProjectEdit extends StandardEditor<Project> {
             projectDepartmentField.setEditable(true);
             projectOwnerField.setEditable(true);
         }
-
     }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        sendGlobalEventsMessage(event);
+    }
+
+    private void sendGlobalEventsMessage(BeforeCommitChangesEvent event) {
+        if(getEditedEntity().getProjectIsClosed() == null) {
+            getEditedEntity().setProjectIsClosed(false);
+        }
+
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            if(getEditedEntity().getProjectIsClosed()) {
+                sendCloseProjectMessage();
+            } else {
+                sendOpenProjectMessage();
+            }
+        } else {
+            if(getEditedEntity().getProjectIsClosed()) {
+                if(!beforeEdit.getProjectIsClosed().equals(getEditedEntity().getProjectIsClosed())) {
+                    sendCloseProjectMessage();
+                }
+            } else {
+                if(!beforeEdit.getProjectIsClosed().equals(getEditedEntity().getProjectIsClosed())) {
+                    sendOpenProjectMessage();
+                }
+            }
+        }
+    }
+
+
+    private void sendCloseProjectMessage() {
+        events.publish(new UiNotificationEvent(this, "Закрыт проект: " +
+                getEditedEntity().getProjectName()));
+    }
+
+    private void sendOpenProjectMessage() {
+        events.publish(new UiNotificationEvent(this, "Открыт новый проект: " +
+                getEditedEntity().getProjectName()));
+    }
+
 }

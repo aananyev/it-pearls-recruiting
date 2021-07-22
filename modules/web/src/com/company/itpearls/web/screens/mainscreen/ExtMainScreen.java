@@ -20,8 +20,8 @@ public class ExtMainScreen extends MainScreen {
 
     @EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {
-        if(!event.getMessage().startsWith("Закрыта")) {
-            if (event.getMessage().startsWith("Открыта")) {
+        if(!event.getMessage().startsWith("Закрыт")) {
+            if (event.getMessage().startsWith("Открыт")) {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withDescription(event.getMessage())
                         .withHideDelayMs(10000)
