@@ -1692,7 +1692,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if (event.getItem().getLinkItPearlsCV() != null) {
             link.setUrl(event.getItem().getLinkItPearlsCV());
-            link.setCaption("Резюме IT Pearls");
+            link.setCaption("CV IT Pearls");
             link.setTarget("_blank");
             link.setWidthAuto();
             link.setVisible(true);
@@ -1711,7 +1711,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             String url = event.getItem().getLinkOriginalCv();
 
             link.setUrl(url);
-            link.setCaption("Резюме IT Pearls");
+            link.setCaption("Оригинальное CV");
             link.setTarget("_blank");
             link.setWidthAuto();
             link.setVisible(true);

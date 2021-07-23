@@ -51,13 +51,17 @@
             </loader>
         </collection>
     </data>
-    <layout spacing="true" expand="vbox">
+    <layout spacing="false"
+            width="100%"
+            height="100%"
+            expand="vbox">
         <vbox id="vbox"
-              spacing="true"
-              expand="jobCandidatesTable"
-              margin="10px, 5px, 5px, 5px">
+              spacing="false"
+              width="100%"
+              height="100%"
+              expand="jobCandidatesTable">
             <table id="jobCandidatesTable"
-                   height="AUTO"
+                   height="100%"
                    width="100%"
                    stylename="no-header"
                    dataContainer="listOfCandidatesDc">

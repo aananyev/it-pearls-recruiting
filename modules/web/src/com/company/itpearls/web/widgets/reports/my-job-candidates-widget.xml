@@ -11,27 +11,36 @@
         <vbox id="funnelHuntingWindgetGroupBox"
               width="100%"
               height="100%"
-              expand="widgetTitleBox"
+              expand="mainVbox"
               spacing="false">
             <vbox id="widgetTitleBox"
                   width="100%"
                   height="AUTO"
-                  expand="jobCandidatesIteractionAccordion"
+                  spacing="false"
                   stylename="widget-title">
                 <label id="widgetTitle"
                        width="100%"
                        htmlEnabled="false"
                        height="AUTO"/>
-                <accordion id="jobCandidatesIteractionAccordion"
-                           height="100%"
-                           width="100%"/>
             </vbox>
-            <hbox spacing="true"
-                  margin="true,true,true,true">
+            <vbox id="mainVbox"
+                  spacing="false"
+                  width="100%"
+                  height="100%"
+                  expand="scrollBox">
+                <scrollBox id="scrollBox"
+                           width="100%"
+                           height="100%"
+                           spacing="false"
+                           margin="false,false,true,false">
+                    <accordion id="jobCandidatesIteractionAccordion"
+                               height="100%"
+                               width="100%"/>
+                </scrollBox>
                 <checkBox id="allCandidatesChackBox"
                           caption="msg://msgOnlyMyCandidates"
                           description="msg://msgOnlyMyCandidatesDesc"/>
-            </hbox>
+            </vbox>
         </vbox>
     </layout>
 </fragment>
