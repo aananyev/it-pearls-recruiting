@@ -1,22 +1,21 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.core.StarsAndOtherService;
-import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.ui.JavaScript;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
@@ -61,6 +60,10 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private StarsAndOtherService starsAndOtherService;
     @Inject
     private Button jobCandidateCardButton;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private Button clipBtn;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -178,8 +181,10 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         iteractionListsTable.addSelectionListener(event -> {
             if(event.getSelected() == null) {
                 jobCandidateCardButton.setEnabled(false);
+                clipBtn.setEnabled(false);
             } else {
                 jobCandidateCardButton.setEnabled(true);
+                clipBtn.setEnabled(true);
             }
         });
     }
@@ -201,5 +206,23 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Install(to = "iteractionListsTable.rating", subject = "styleProvider")
     private String iteractionListsTableRatingStyleProvider(IteractionList iteractionList) {
         return "rating_box";
+    }
+
+    public void onButtonCopyToClibboard() {
+        String clipboardText = "";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        if(iteractionListsTable.getSelected() != null) {
+            for (IteractionList i : iteractionListsTable.getSelected()) {
+                clipboardText = clipboardText + i.getCandidate().getFullName() + "," +
+                        simpleDateFormat.format(i.getDateIteraction()) + "," +
+                        i.getVacancy().getVacansyName();
+            }
+        }
+
+        JavaScript.getCurrent().execute("navigator.clipboard.writeText('" +
+                clipboardText
+                + "');");
+        notifications.create().withCaption("Copied to clipboard").show();
     }
 }

@@ -15,6 +15,9 @@
                     <property name="socialNetwork" view="_minimal"/>
                     <property name="positionList" view="_minimal"/>
                     <property name="createdBy"/>
+                    <property name="createTs"/>
+                    <property name="updatedBy"/>
+                    <property name="updateTs"/>
                 </property>
                 <property name="iteractionType" view="_minimal">
                     <property name="pic"/>
@@ -119,6 +122,10 @@
                         caption="msg://msgJobCandidateButton"
                         invoke="onJobCandidateButtonClick"
                         icon="FILE_ARCHIVE_O"/>
+                <button id="clipBtn"
+                        caption="msg://msgCopyToClipboard"
+                        enable="false"
+                        invoke="onButtonCopyToClibboard"/>
             </buttonsPanel>
         </dataGrid>
         <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>

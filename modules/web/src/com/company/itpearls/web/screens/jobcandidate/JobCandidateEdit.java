@@ -848,7 +848,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void setCopyCVButton() {
         copyCVButton.setEnabled(false);
         jobCandidateCandidateCvTable.addItemClickListener(e -> {
-            if (jobCandidateCandidateCvTable.getSingleSelected() == null) {
+            if (e.getItem() != null) {
                 copyCVButton.setEnabled(true);
             } else {
                 copyCVButton.setEnabled(false);
@@ -1061,7 +1061,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private String getIcon(IteractionList item) {
-        return item.getIteractionType().getPic();
+        if(item.getIteractionType() != null) {
+            if (item.getIteractionType().getPic() != null) {
+                return item.getIteractionType().getPic();
+            } else {
+                return null;
+            }
+        } else
+            return null;
     }
 
     private void addIconColumn() {

@@ -159,6 +159,9 @@
                         </lookupPickerField>
                     </row>
                     <row>
+                        <hbox id="mostPopularIteractionHBox"/>
+                    </row>
+                    <row>
                         <lookupPickerField id="iteractionTypeField"
                                            optionsContainer="iteractionTypesDc"
                                            caption="msg://msgIteractionType"
@@ -234,10 +237,6 @@
                     invoke="onButtonSubscribeClick"
                     caption="mainMsg://msgSubscribe"
                     icon="BELL"/>
-            <!--            <button id="buttonAddNewIteraction"
-                                invoke="addNewIteraction"
-                                caption="msg://msgAddNewIteraction"
-                                icon="COPY"/> -->
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

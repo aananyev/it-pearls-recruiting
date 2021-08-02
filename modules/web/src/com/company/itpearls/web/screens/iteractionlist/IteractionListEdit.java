@@ -8,13 +8,12 @@ import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.haulmont.cuba.core.app.EmailService;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.InstanceContainer;
-import com.haulmont.cuba.gui.model.InstanceLoader;
+import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
@@ -109,7 +108,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private EmailGenerationService emailGenerationService;
     @Inject
     private Logger log;
-
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -753,6 +751,52 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             getEditedEntity().setCandidate(parentCandidate);
         }
 ;
+        setMostPopularIteraction();
+    }
+
+    private void setMostPopularIteraction() {
+        getMostPolularIteraction(userSession.getUser(), 3);
+    }
+
+    public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
+        String QUERY = "select e.iteractionType, count(e.iteractionType) "
+                + "from itpearls_IteractionList e "
+                + "where e.iteractionType is not null and "
+                + "(e.dateIteraction between :startDate and :endDate) "
+                + "and e.recrutier = :user "
+                + "group by e.iteractionType"
+                ;
+
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+
+        Date startDate = gregorianCalendar.getTime();
+        gregorianCalendar.add(Calendar.MONTH, -1);
+        Date endDate = gregorianCalendar.getTime();
+
+        ValueLoadContext context = ValueLoadContext.create()
+                .setQuery(ValueLoadContext.createQuery(QUERY)
+                        .setParameter("user", user)
+                        .setParameter("startDate", startDate)
+                        .setParameter("endDate", endDate))
+                .addProperty("Iteraction")
+                .addProperty("Integer");
+
+        List<KeyValueEntity> list = dataManager.loadValues(QUERY)
+                .properties("iteractionType", "count")
+                .parameter("user", user)
+                .parameter("startDate", startDate)
+                .parameter("endDate", endDate)
+                .list();
+
+        Integer max = list.get(0).getValue("count");
+
+        for(KeyValueEntity e : list) {
+            if(max.compareTo(e.getValue("count")) < 0) {
+                max = e.getValue("count");
+            }
+        }
+        return null;
     }
 
     @Subscribe
