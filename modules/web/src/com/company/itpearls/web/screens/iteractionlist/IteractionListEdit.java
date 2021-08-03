@@ -761,10 +761,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
         String QUERY = "select e.iteractionType, count(e.iteractionType) "
                 + "from itpearls_IteractionList e "
-                + "where e.iteractionType is not null and "
-                + "(e.dateIteraction between :startDate and :endDate) "
-                + "and e.recrutier = :user "
-                + "group by e.iteractionType"
+                + "where "
+                + "(e.dateIteraction between :endDate and :startDate) and "
+                + "e.iteractionType is not null and "
+                + "e.recrutier = :user "
+                + "group by e.iteractionType "
+                + "order by count(e.iteractionType) desc"
                 ;
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
@@ -774,14 +776,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         gregorianCalendar.add(Calendar.MONTH, -1);
         Date endDate = gregorianCalendar.getTime();
 
-        ValueLoadContext context = ValueLoadContext.create()
-                .setQuery(ValueLoadContext.createQuery(QUERY)
-                        .setParameter("user", user)
-                        .setParameter("startDate", startDate)
-                        .setParameter("endDate", endDate))
-                .addProperty("Iteraction")
-                .addProperty("Integer");
-
         List<KeyValueEntity> list = dataManager.loadValues(QUERY)
                 .properties("iteractionType", "count")
                 .parameter("user", user)
@@ -789,14 +783,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .parameter("endDate", endDate)
                 .list();
 
-        Integer max = list.get(0).getValue("count");
+        List<Iteraction> retIteraction = new ArrayList<>();
 
-        for(KeyValueEntity e : list) {
-            if(max.compareTo(e.getValue("count")) < 0) {
-                max = e.getValue("count");
-            }
+        for(int i = 0 ; i < maxCount ; i++) {
+            retIteraction.add(list.get(i).getValue("iteractionType"));
         }
-        return null;
+
+        return retIteraction;
     }
 
     @Subscribe
