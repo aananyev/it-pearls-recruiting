@@ -104,10 +104,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Boolean askFlag = false;
     private Boolean askFlag2 = false;
     protected Boolean noSubscribe = false;
+    private List<Iteraction> mostPopular = new ArrayList<>();
+
     @Inject
     private EmailGenerationService emailGenerationService;
     @Inject
     private Logger log;
+    @Inject
+    private HBoxLayout mostPopularHbox;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -755,7 +759,24 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setMostPopularIteraction() {
-        getMostPolularIteraction(userSession.getUser(), 3);
+        int maxCount = 5;
+        mostPopular = getMostPolularIteraction(userSession.getUser(), maxCount);
+
+        if(maxCount > mostPopular.size())
+            maxCount= mostPopular.size();
+
+        for(int i = 0 ; i < maxCount ; i++) {
+            LinkButton mostPopularLabel = uiComponents.create(LinkButton.NAME);
+            mostPopularLabel.setCaption(mostPopular.get(i).getIterationName() + " (" + i + ")");
+            mostPopularLabel.setStyleName("transition-green");
+            mostPopularLabel.addClickListener(e -> {
+               String mostPopNumber = e.getSource().getCaption().substring(e.getSource().getCaption().length() - 2, e.getSource().getCaption().length() - 1);
+
+               iteractionTypeField.setValue(mostPopular.get(Integer.parseInt(mostPopNumber)));
+            });
+
+            mostPopularHbox.add(mostPopularLabel);
+        }
     }
 
     public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
@@ -784,6 +805,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .list();
 
         List<Iteraction> retIteraction = new ArrayList<>();
+
+        if(maxCount > list.size())
+            maxCount = list.size();
 
         for(int i = 0 ; i < maxCount ; i++) {
             retIteraction.add(list.get(i).getValue("iteractionType"));

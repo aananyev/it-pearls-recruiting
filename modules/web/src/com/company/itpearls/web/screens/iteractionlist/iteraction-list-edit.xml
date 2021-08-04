@@ -111,6 +111,15 @@
                 </hbox>
             </hbox>
         </groupBox>
+        <groupBox width="100%"
+                  caption="msg://mshMostPopular"
+                  stylename="light"
+                  collapsable="true">
+            <hbox id="mostPopularHbox"
+                  width="AUTO"
+                  spacing="true"
+                  align="MIDDLE_CENTER"/>
+        </groupBox>
         <groupBox id="groupBoxIterationData">
             <grid id="gridIterationData"
                   spacing="true"
@@ -118,8 +127,7 @@
                 <columns count="2"/>
                 <rows>
                     <row id="rating">
-                        <label width="100%"
-                               align="MIDDLE_RIGHT"/>
+                        <label/>
                         <lookupField id="ratingField"
                                      required="true"
                                      align="MIDDLE_RIGHT"
