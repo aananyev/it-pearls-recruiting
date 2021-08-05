@@ -4,6 +4,10 @@
         <item screen="itpearls_Interviewcalendar" icon="CALENDAR"/>
         <item screen="itpearls_WeekInterviewCalendar" icon="CALENDAR"/>
     </menu>
+    <menu id="application-hrmasters" insertAfter="application-calendars">
+        <item screen="itpearls_OpenPositionMaster.browse"
+              caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse"/>
+    </menu>
     <menu id="application-hunting" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>

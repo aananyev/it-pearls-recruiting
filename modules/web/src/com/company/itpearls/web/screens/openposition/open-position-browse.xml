@@ -46,8 +46,8 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
+    <dialogMode height="800"
+                width="1000"/>
     <layout expand="openPositionsTable"
             spacing="true">
         <groupBox id="urgentlyPositons"
@@ -160,6 +160,14 @@
                 <column id="queryQuestion"
                         sortable="false"
                         caption="msg://msgQuestionQuery"
+                        resizable="true"
+                        maximumWidth="65px"
+                        minimumWidth="45px">
+                    <iconRenderer/>
+                </column>
+                <column id="memoForCandidateColumn"
+                        sortable="false"
+                        caption="msg://msgMemoForCandidate"
                         resizable="true"
                         maximumWidth="65px"
                         minimumWidth="45px">

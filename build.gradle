@@ -1,5 +1,5 @@
 buildscript {
-    ext.cubaVersion = '7.2.13'
+    ext.cubaVersion = '7.2.14'
     repositories {
         maven {
             url 'https://repo.cuba-platform.com/content/groups/work'
@@ -85,7 +85,6 @@ configure(globalModule) {
         compile 'org.webjars.npm:domelementtype:2.2.0'
         runtime 'org.apache.poi:poi:5.0.0'
         compile 'com.ibm.icu:icu4j:69.1'
-        compile 'org.apache.opennlp:opennlp-tools:1.9.3'
     }
 
     entitiesEnhancing {

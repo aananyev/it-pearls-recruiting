@@ -531,24 +531,48 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         String retStr = newsItem.getIteractionType().getTextEmailToSend();
 
         try {
-            retStr = retStr.replace(emailKeys.get("Имя"), newsItem.getCandidate().getFirstName());
-            retStr = retStr.replace(emailKeys.get("Отчество"), newsItem.getCandidate().getFullName());
-            retStr = retStr.replace(emailKeys.get("Фамилия"), newsItem.getCandidate().getSecondName());
-            retStr = retStr.replace(emailKeys.get("Вакансия"), newsItem.getVacancy().getVacansyName());
-            retStr = retStr.replace(emailKeys.get("Проект"), newsItem.getVacancy().getProjectName().getProjectName());
-            retStr = retStr.replace(emailKeys.get("Компания"), newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName());
-            retStr = retStr.replace(emailKeys.get("Департамент"), newsItem.getVacancy().getProjectName().getProjectName());
-            retStr = retStr.replace(emailKeys.get("Ресерчер"), newsItem.getRecrutier().getName());
-            retStr = retStr.replace(emailKeys.get("ОписаниеВакансии"), newsItem.getVacancy().getComment());
-            retStr = retStr.replace(emailKeys.get("Позиция"), newsItem.getVacancy().getPositionType().getPositionEnName());
-            retStr = retStr.replace(emailKeys.get("ЗарплатаМмин"), newsItem.getVacancy().getSalaryMin().toString());
-            retStr = retStr.replace(emailKeys.get("ЗарплатаМакс"), newsItem.getVacancy().getSalaryMax().toString());
-
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            retStr = retStr.replace(emailKeys.get("Дата"), simpleDateFormat.format(newsItem.getAddDate()));
+            retStr = retStr.replace(emailKeys.get("Дата"),
+                    simpleDateFormat.format(newsItem.getAddDate()).toString());
 
             SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("hh:mm");
-            retStr = retStr.replace(emailKeys.get("Время"), simpleDateFormat1.format(newsItem.getAddDate()));
+            retStr = retStr.replace(emailKeys.get("Время"),
+                    simpleDateFormat1.format(newsItem.getAddDate()).toString());
+
+            if (newsItem.getCandidate().getFirstName() != null)
+                retStr = retStr.replace(emailKeys.get("Имя"), newsItem.getCandidate().getFirstName());
+            if (newsItem.getCandidate().getMiddleName() != null)
+                retStr = retStr.replace(emailKeys.get("Отчество"), newsItem.getCandidate().getMiddleName());
+            if (newsItem.getCandidate().getSecondName() != null)
+                retStr = retStr.replace(emailKeys.get("Фамилия"), newsItem.getCandidate().getSecondName());
+            if (newsItem.getVacancy().getVacansyName() != null)
+                retStr = retStr.replace(emailKeys.get("Вакансия"), newsItem.getVacancy().getVacansyName());
+            if (newsItem.getVacancy().getProjectName() != null)
+                if (newsItem.getVacancy().getProjectName().getProjectName() != null)
+                    retStr = retStr.replace(emailKeys.get("Проект"), newsItem.getVacancy().getProjectName().getProjectName());
+            if (newsItem.getVacancy() != null)
+                if (newsItem.getVacancy().getProjectName() != null)
+                    if (newsItem.getVacancy().getProjectName().getProjectDepartment() != null)
+                        if (newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName() != null)
+                            if (newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName() != null)
+                                retStr = retStr.replace(emailKeys.get("Компания"), newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName());
+            if (newsItem.getVacancy().getProjectName() != null)
+                if (newsItem.getVacancy().getProjectName().getProjectName() != null)
+                    retStr = retStr.replace(emailKeys.get("Департамент"), newsItem.getVacancy().getProjectName().getProjectName());
+            if (newsItem.getRecrutier() != null)
+                if (newsItem.getRecrutier().getName() != null)
+                    retStr = retStr.replace(emailKeys.get("Ресерчер"), newsItem.getRecrutier().getName());
+            if (newsItem.getVacancy() != null)
+                if (newsItem.getVacancy().getComment() != null)
+                    retStr = retStr.replace(emailKeys.get("ОписаниеВакансии"), newsItem.getVacancy().getComment());
+            if (newsItem.getVacancy().getPositionType() != null)
+                if (newsItem.getVacancy().getPositionType().getPositionEnName() != null)
+                    retStr = retStr.replace(emailKeys.get("Позиция"), newsItem.getVacancy().getPositionType().getPositionEnName());
+            if (newsItem.getVacancy().getSalaryMin() != null)
+                retStr = retStr.replace(emailKeys.get("ЗарплатаМмин"), newsItem.getVacancy().getSalaryMin().toString());
+            if (newsItem.getVacancy().getSalaryMax() != null)
+                retStr = retStr.replace(emailKeys.get("ЗарплатаМакс"), newsItem.getVacancy().getSalaryMax().toString());
+
         } catch (NullPointerException e) {
             log.error("Error", e);
         }
@@ -754,7 +778,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (parentCandidate != null) {
             getEditedEntity().setCandidate(parentCandidate);
         }
-;
+        ;
         setMostPopularIteraction();
     }
 
@@ -762,17 +786,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         int maxCount = 5;
         mostPopular = getMostPolularIteraction(userSession.getUser(), maxCount);
 
-        if(maxCount > mostPopular.size())
-            maxCount= mostPopular.size();
+        if (maxCount > mostPopular.size())
+            maxCount = mostPopular.size();
 
-        for(int i = 0 ; i < maxCount ; i++) {
+        for (int i = 0; i < maxCount; i++) {
             LinkButton mostPopularLabel = uiComponents.create(LinkButton.NAME);
             mostPopularLabel.setCaption(mostPopular.get(i).getIterationName() + " (" + i + ")");
             mostPopularLabel.setStyleName("transition-green");
             mostPopularLabel.addClickListener(e -> {
-               String mostPopNumber = e.getSource().getCaption().substring(e.getSource().getCaption().length() - 2, e.getSource().getCaption().length() - 1);
+                String mostPopNumber = e.getSource().getCaption().substring(e.getSource().getCaption().length() - 2, e.getSource().getCaption().length() - 1);
 
-               iteractionTypeField.setValue(mostPopular.get(Integer.parseInt(mostPopNumber)));
+                iteractionTypeField.setValue(mostPopular.get(Integer.parseInt(mostPopNumber)));
             });
 
             mostPopularHbox.add(mostPopularLabel);
@@ -787,8 +811,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 + "e.iteractionType is not null and "
                 + "e.recrutier = :user "
                 + "group by e.iteractionType "
-                + "order by count(e.iteractionType) desc"
-                ;
+                + "order by count(e.iteractionType) desc";
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.setTime(new Date());
@@ -806,10 +829,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         List<Iteraction> retIteraction = new ArrayList<>();
 
-        if(maxCount > list.size())
+        if (maxCount > list.size())
             maxCount = list.size();
 
-        for(int i = 0 ; i < maxCount ; i++) {
+        for (int i = 0; i < maxCount; i++) {
             retIteraction.add(list.get(i).getValue("iteractionType"));
         }
 
@@ -1139,7 +1162,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (!iteractionTypeField.getValue().getCallForm()) {
                 } else {
                     // Это лишнее - тут надо вызов формы сиска резюме или других документов
-                    if(iteractionTypeField.getValue() != null) {
+                    if (iteractionTypeField.getValue() != null) {
                         if (iteractionTypeField.getValue().getFindToDic()) {
                             Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
                                     .newEntity()

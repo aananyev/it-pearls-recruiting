@@ -1235,5 +1235,43 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         suggestjobcandidate.show();
     }
+
+    @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "descriptionProvider")
+    private String openPositionsTableMemoForCandidateColumnDescriptionProvider(OpenPosition openPosition) {
+        if(openPosition.getMemoForInterview() != null)
+            return Jsoup.parse(openPosition.getMemoForInterview()).text();
+        else
+            return null;
+    }
+
+    @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "styleProvider")
+    private String openPositionsTableMemoForCandidateColumnStyleProvider(OpenPosition openPosition) {
+        String style = "open-position-pic-center-large-red";
+
+        if(openPosition.getMemoForInterview() != null) {
+            if (!openPosition.getMemoForInterview().equals("")) {
+                style = "open-position-pic-center-large-green";
+            } else {
+                style = "open-position-pic-center-large-red";
+            }
+        }
+
+        return style;
+    }
+
+    @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "columnGenerator")
+    private Object openPositionsTableMemoForCandidateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        Object returnIcon = CubaIcon.MINUS_CIRCLE;
+
+        if(event.getItem().getMemoForInterview() != null) {
+            if(event.getItem().getMemoForInterview().equals("")) {
+                returnIcon = CubaIcon.MINUS_CIRCLE;
+            } else {
+                returnIcon = CubaIcon.PLUS_CIRCLE;
+            }
+        }
+
+        return returnIcon;
+    }
 }
 

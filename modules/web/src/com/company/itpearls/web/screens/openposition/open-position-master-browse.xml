@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://openPositionMasterBrowse.caption"
+        focusComponent="openPositionsTable"
+        messagesPack="com.company.itpearls.web.screens.openposition">
+    <data readOnly="true">
+        <collection id="openPositionsDc"
+                    class="com.company.itpearls.entity.Position">
+            <view extends="_minimal">
+                <property name="positionRuName"/>
+            </view>
+            <loader id="openPositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_Position e
+                            where e in
+                            (select f.positionType
+                                from itpearls_OpenPosition f
+                                where f.openClose <> true and f.commandCandidate = 0)
+                            order by e.positionRuName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="800"
+                width="800"/>
+    <layout expand="mainHBox"
+            spacing="true">
+        <filter id="filter"
+                applyTo="openPositionsTable"
+                dataLoader="openPositionsDl">
+            <properties include=".*"/>
+        </filter>
+        <hbox id="mainHBox" spacing="true">
+            <dataGrid id="openPositionsTable"
+                      width="100%"
+                      dataContainer="openPositionsDc">
+                <actions>
+                </actions>
+                <columns>
+                    <column property="positionRuName" id="positionRuName"/>
+                </columns>
+                <rowsCount/>
+                <buttonsPanel id="buttonsPanel"
+                              alwaysVisible="true">
+                </buttonsPanel>
+            </dataGrid>
+        </hbox>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>
