@@ -21,32 +21,140 @@
                 </query>
             </loader>
         </collection>
+        <collection id="companyDc"
+                    class="com.company.itpearls.entity.Company">
+            <view extends="_minimal">
+                <property name="comanyName"/>
+            </view>
+            <loader id="companyDl">
+                <query>
+                    <![CDATA[select e from itpearls_Company e
+                            order by e.comanyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e in (select f.companyName from itpearls_CompanyDepartament f where f in
+                                                (select g.projectDepartment from itpearls_Project g where g in
+                                                    (select i.projectName
+                                                            from itpearls_OpenPosition i
+                                                            where i.positionType = :positionType and (not i.openClose = true))))
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="projectNamcDc"
+                    class="com.company.itpearls.entity.Project">
+            <view extends="_minimal">
+                <property name="projectName"/>
+            </view>
+            <loader id="projectNameDl">
+                <query>
+                    <![CDATA[select e from itpearls_Project e
+                            order by e.projectName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e in (select f.projectName
+                                    from itpearls_OpenPosition f
+                                    where f.positionType = :positionType and (not f.openClose = true))</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="vacansyNameDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_minimal">
+                <property name="vacansyName"/>
+            </view>
+            <loader id="vacansyNameDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                            where not e.openClose = true
+                            order by e.vacansyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.positionType in (select f.positionType
+                                                from itpearls_OpenPosition f
+                                                where f.positionType = :positionType and (not f.openClose = true))</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="800"
-                width="800"/>
+                width="600"/>
     <layout expand="mainHBox"
             spacing="true">
-        <filter id="filter"
-                applyTo="openPositionsTable"
-                dataLoader="openPositionsDl">
-            <properties include=".*"/>
-        </filter>
-        <hbox id="mainHBox" spacing="true">
-            <dataGrid id="openPositionsTable"
-                      width="100%"
-                      dataContainer="openPositionsDc">
-                <actions>
-                </actions>
-                <columns>
-                    <column property="positionRuName" id="positionRuName"/>
-                </columns>
-                <rowsCount/>
-                <buttonsPanel id="buttonsPanel"
-                              alwaysVisible="true">
-                </buttonsPanel>
-            </dataGrid>
+        <hbox id="mainHBox"
+              width="100%"
+              height="100%"
+              spacing="true">
+            <vbox spacing="true"
+                  width="100%"
+                  height="100%">
+                <dataGrid id="openPositionsTable"
+                          width="100%"
+                          height="100%" editorEnabled="false" contextMenuEnabled="false"
+                          dataContainer="openPositionsDc">
+                    <actions>
+                    </actions>
+                    <columns>
+                        <column property="positionRuName"
+                                id="positionRuName"/>
+                    </columns>
+                    <buttonsPanel id="buttonsPanel"
+                                  alwaysVisible="true">
+                    </buttonsPanel>
+                </dataGrid>
+            </vbox>
+            <vbox spacing="true" width="100%" height="100%">
+                <dataGrid id="companyTable"
+                          width="100%"
+                          editorEnabled="false"
+                          contextMenuEnabled="false"
+                          dataContainer="companyDc"
+                          height="100%">
+                    <actions>
+                    </actions>
+                    <columns>
+                        <column id="comanyName"
+                                property="comanyName"/>
+                    </columns>
+                </dataGrid>
+                <dataGrid id="projectNameTable"
+                          width="100%"
+                          editorEnabled="false"
+                          contextMenuEnabled="false"
+                          height="100%"
+                          dataContainer="projectNamcDc">
+                    <columns>
+                        <column id="projectName"
+                                property="projectName"/>
+                    </columns>
+                </dataGrid>
+                <dataGrid id="vacansyNameTable"
+                          width="100%"
+                          editorEnabled="false"
+                          contextMenuEnabled="false"
+                          height="100%"
+                          dataContainer="vacansyNameDc">
+                    <columns>
+                        <column id="vacansyName" property="vacansyName"/>
+                    </columns>
+                </dataGrid>
+            </vbox>
         </hbox>
-        <hbox id="lookupActions" spacing="true" visible="false">
+        <hbox id="lookupActions"
+              spacing="true"
+              visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>
