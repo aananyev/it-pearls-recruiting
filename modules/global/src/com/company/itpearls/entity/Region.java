@@ -11,7 +11,10 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NamePattern("%s|regionRuName")
-@Table(name = "ITPEARLS_REGION")
+@Table(name = "ITPEARLS_REGION", indexes = {
+        @Index(name = "IDX_ITPEARLS_REGION_COUNTRY_ID", columnList = "REGION_COUNTRY_ID"),
+        @Index(name = "IDX_ITPEARLS_REGION", columnList = "ID")
+})
 @Entity(name = "itpearls_Region")
 public class Region extends StandardEntity {
     private static final long serialVersionUID = 6717889040534438099L;
@@ -20,7 +23,7 @@ public class Region extends StandardEntity {
     @Column(name = "REGION_RU_NAME", nullable = false, unique = true, length = 50)
     protected String regionRuName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REGION_COUNTRY_ID")
     protected Country regionCountry;

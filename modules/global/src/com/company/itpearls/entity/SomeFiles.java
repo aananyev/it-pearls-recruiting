@@ -13,7 +13,11 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|fileDescription")
-@Table(name = "ITPEARLS_SOME_FILES")
+@Table(name = "ITPEARLS_SOME_FILES", indexes = {
+        @Index(name = "IDX_ITPEARLS_SOME_FILES", columnList = "ID"),
+        @Index(name = "IDX_ITPEARLS_SOME_FILES_FILE_OWNER_ID", columnList = "FILE_OWNER_ID"),
+        @Index(name = "IDX_ITPEARLS_SOME_FILES_FILE_TYPE_ID", columnList = "FILE_TYPE_ID")
+})
 @Entity(name = "itpearls_SomeFiles")
 public class SomeFiles extends StandardEntity {
     private static final long serialVersionUID = 5350354177979238926L;
@@ -36,18 +40,18 @@ public class SomeFiles extends StandardEntity {
     protected String fileComment;
 
     @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FILE_OWNER_ID")
     protected User fileOwner;
 
     @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FILE_TYPE_ID")
     protected FileType fileType;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CANDIDATE_CV_ID")
     protected CandidateCV candidateCV;

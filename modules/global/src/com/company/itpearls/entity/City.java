@@ -11,7 +11,9 @@ import javax.validation.constraints.NotNull;
 @NamePattern("%s|cityRuName")
 @Table(name = "ITPEARLS_CITY", indexes = {
         @Index(name = "IDX_CITY_ID", columnList = "ID"),
-        @Index(name = "IDX_CITY_CITY_RU_NAME", columnList = "CITY_RU_NAME")
+        @Index(name = "IDX_CITY_CITY_RU_NAME", columnList = "CITY_RU_NAME"),
+        @Index(name = "IDX_ITPEARLS_CITY_REGION_ID", columnList = "CITY_REGION_ID"),
+        @Index(name = "IDX_ITPEARLS_CITY_OPEN_POSITION_ID", columnList = "OPEN_POSITION_ID")
 })
 @Entity(name = "itpearls_City")
 public class City extends StandardEntity {
@@ -24,7 +26,7 @@ public class City extends StandardEntity {
     @Column(name = "CITY_PHONE_CODE", unique = true, length = 5)
     protected String cityPhoneCode;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_REGION_ID")
     protected Region cityRegion;

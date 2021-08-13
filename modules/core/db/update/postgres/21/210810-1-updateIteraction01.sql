@@ -1,0 +1,1 @@
+drop index IDX_ITPEARLS_ITERACTION_1 ;

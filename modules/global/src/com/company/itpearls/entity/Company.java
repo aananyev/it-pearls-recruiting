@@ -71,6 +71,18 @@ public class Company extends StandardEntity {
     @Column(name = "ADDRESS_OF_COMPANY")
     protected String addressOfCompany;
 
+    @Lob
+    @Column(name = "COMPANY_DESCRIPTION")
+    private String companyDescription;
+
+    public String getCompanyDescription() {
+        return companyDescription;
+    }
+
+    public void setCompanyDescription(String companyDescription) {
+        this.companyDescription = companyDescription;
+    }
+
     public Boolean getOurClient() {
         return ourClient;
     }

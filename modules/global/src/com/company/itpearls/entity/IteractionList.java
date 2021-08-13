@@ -12,7 +12,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Table(name = "ITPEARLS_ITERACTION_LIST", indexes = {
-        @Index(name = "IDX_ITERACTION_NAME_NUMBER_ITERACTION", columnList = "NUMBER_ITERACTION")
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_ID", columnList = "ID"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_CANDIDATE_ID", columnList = "CANDIDATE_ID"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_RECRUTIER_ID", columnList = "RECRUTIER_ID"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_DATE_ITERACTION", columnList = "DATE_ITERACTION"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_NUMBER_ITERACTION", columnList = "NUMBER_ITERACTION"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_VACANCY_ID", columnList = "VACANCY_ID"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_LIST_ITERACTION_TYPE_ID", columnList = "ITERACTION_TYPE_ID")
 })
 @Entity(name = "itpearls_IteractionList")
 @NamePattern("%s|candidate")

@@ -13,11 +13,18 @@
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_Position e
-                            where e in
-                            (select f.positionType
-                                from itpearls_OpenPosition f
-                                where f.openClose <> true and f.commandCandidate = 0)
                             order by e.positionRuName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e in (select g.positionType
+                                    from itpearls_OpenPosition g
+                                    where g.priority >= :priority
+                                    and not g.openClose = true
+                                    and g.commandCandidate = 0)</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -34,10 +41,10 @@
                         <and>
                             <c:jpql>
                                 <c:where>e in (select f.companyName from itpearls_CompanyDepartament f where f in
-                                                (select g.projectDepartment from itpearls_Project g where g in
-                                                    (select i.projectName
-                                                            from itpearls_OpenPosition i
-                                                            where i.positionType = :positionType and (not i.openClose = true))))
+                                    (select g.projectDepartment from itpearls_Project g where g in
+                                    (select i.projectName
+                                    from itpearls_OpenPosition i
+                                    where i.positionType = :positionType and (not i.openClose = true))))
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -59,7 +66,8 @@
                             <c:jpql>
                                 <c:where>e in (select f.projectName
                                     from itpearls_OpenPosition f
-                                    where f.positionType = :positionType and (not f.openClose = true))</c:where>
+                                    where f.positionType = :positionType and (not f.openClose = true))
+                                </c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -80,8 +88,14 @@
                         <and>
                             <c:jpql>
                                 <c:where>e.positionType in (select f.positionType
-                                                from itpearls_OpenPosition f
-                                                where f.positionType = :positionType and (not f.openClose = true))</c:where>
+                                    from itpearls_OpenPosition f
+                                    where f.positionType = :positionType and (not f.openClose = true))
+                                </c:where>
+                                <c:where>
+                                    e.positionType in (select g.positionType
+                                    from itpearls_OpenPosition g
+                                    where g.priority >= :priority)
+                                </c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -96,10 +110,20 @@
         <hbox id="mainHBox"
               width="100%"
               height="100%"
+              expand="openPositionTableVBox"
               spacing="true">
-            <vbox spacing="true"
+            <vbox id="openPositionTableVBox"
+                  spacing="true"
                   width="100%"
+                  box.expandRatio="2"
+                  align="TOP_LEFT"
+                  expand="openPositionsTable"
                   height="100%">
+                <lookupField id="notLowerRatingLookupField"
+                             align="MIDDLE_RIGHT"
+                             width="100%"
+                             caption="msg://msgPriorityPosition"
+                             description="msg://msgStatusNotLower"/>
                 <dataGrid id="openPositionsTable"
                           width="100%"
                           height="100%" editorEnabled="false" contextMenuEnabled="false"
@@ -115,41 +139,73 @@
                     </buttonsPanel>
                 </dataGrid>
             </vbox>
-            <vbox spacing="true" width="100%" height="100%">
-                <dataGrid id="companyTable"
-                          width="100%"
-                          editorEnabled="false"
-                          contextMenuEnabled="false"
-                          dataContainer="companyDc"
-                          height="100%">
-                    <actions>
-                    </actions>
-                    <columns>
-                        <column id="comanyName"
-                                property="comanyName"/>
-                    </columns>
-                </dataGrid>
-                <dataGrid id="projectNameTable"
-                          width="100%"
-                          editorEnabled="false"
-                          contextMenuEnabled="false"
-                          height="100%"
-                          dataContainer="projectNamcDc">
-                    <columns>
-                        <column id="projectName"
-                                property="projectName"/>
-                    </columns>
-                </dataGrid>
-                <dataGrid id="vacansyNameTable"
-                          width="100%"
-                          editorEnabled="false"
-                          contextMenuEnabled="false"
-                          height="100%"
-                          dataContainer="vacansyNameDc">
-                    <columns>
-                        <column id="vacansyName" property="vacansyName"/>
-                    </columns>
-                </dataGrid>
+            <vbox spacing="true"
+                  width="100%"
+                  height="100%"
+                  box.expandRatio="6">
+                <hbox spacing="true"
+                      width="100%"
+                      height="100%">
+                    <dataGrid id="companyTable"
+                              width="100%"
+                              editorEnabled="false"
+                              contextMenuEnabled="false"
+                              dataContainer="companyDc"
+                              height="100%">
+                        <actions>
+                        </actions>
+                        <columns>
+                            <column id="comanyName"
+                                    property="comanyName"/>
+                        </columns>
+                    </dataGrid>
+                    <richTextArea id="companyInfoRichTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </hbox>
+                <hbox spacing="true" width="100%" height="100%">
+                    <dataGrid id="projectNameTable"
+                              width="100%"
+                              editorEnabled="false"
+                              contextMenuEnabled="false"
+                              height="100%"
+                              dataContainer="projectNamcDc">
+                        <columns>
+                            <column id="projectName"
+                                    property="projectName"/>
+                        </columns>
+                    </dataGrid>
+                    <richTextArea id="projectInfoRichTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </hbox>
+                <hbox spacing="true" width="100%" height="100%">
+                    <dataGrid id="vacansyNameTable"
+                              width="100%"
+                              editorEnabled="false"
+                              contextMenuEnabled="false"
+                              height="100%"
+                              dataContainer="vacansyNameDc">
+                        <columns>
+                            <column id="priorityColumn"
+                                    width="60px"
+                                    caption="msg://msgPriority">
+                                <iconRenderer/>
+                            </column>
+                            <column id="vacansyName"
+                                    property="vacansyName"
+                                    width="450px"/>
+                        </columns>
+                    </dataGrid>
+                    <richTextArea id="vacansyInfoRictTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </hbox>
+            </vbox>
+            <vbox spacing="true">
             </vbox>
         </hbox>
         <hbox id="lookupActions"
