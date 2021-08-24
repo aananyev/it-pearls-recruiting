@@ -136,7 +136,10 @@
             <property name="toVacancy" view="_minimal"/>
         </property>
         <property name="fileImageFace" view="_local"/>
-        <property name="positionList" view="_local"/>
+        <property name="positionList" view="_local">
+            <property name="positionList" view="_minimal"/>
+            <property name="jobCandidate" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="jobCandidate" view="_local">

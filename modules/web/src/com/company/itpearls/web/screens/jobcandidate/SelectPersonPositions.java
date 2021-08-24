@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.Position;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.Button;
@@ -12,6 +13,7 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @UiController("itpearls_SelectPersonPositions")
 @UiDescriptor("select-person-positions.xml")
@@ -21,6 +23,8 @@ public class SelectPersonPositions extends Screen {
 
     private List<Position> positions = new ArrayList<>();
     private List<Position> positionList = new ArrayList<>();
+    private JobCandidate jobCandidate = null;
+
     @Inject
     private TwinColumn<Position> positionTwinColumn;
 
@@ -48,5 +52,13 @@ public class SelectPersonPositions extends Screen {
     public List<Position> getPositionsList() {
         positionList = (List<Position>) positionTwinColumn.getValue();
         return positionList;
+    }
+
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
+    }
+
+    public JobCandidate getJobCandidate() {
+        return this.jobCandidate;
     }
 }

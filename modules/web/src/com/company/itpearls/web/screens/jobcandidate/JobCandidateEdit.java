@@ -101,8 +101,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private FileUploadField fileImageFaceUpload;
     @Inject
-    private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
-    @Inject
     private LinkButton emailLinkButton;
     @Inject
     private LinkButton skypeLinkButton;
@@ -163,6 +161,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Logger log;
     @Inject
     private TextField<String> telegramGroupField;
+    @Inject
+    private CollectionPropertyContainer<Position> positionsListDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -1213,18 +1213,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 //        jobCandidateIteractionListDataGridDl.load();
     }
 
-    private void setPositionListScreen() {
-
-    }
-
     public void addPositionList() {
         SelectPersonPositions selectPersonPositions = screens
                 .create(SelectPersonPositions.class);
 
+        selectPersonPositions.setJobCandidate(getEditedEntity());
+
 
         if (getEditedEntity().getPositionList() != null) {
-            for (Position p : getEditedEntity().getPositionList()) {
-                setPos.add(p);
+            for (JobCandidatePositionLists p : getEditedEntity().getPositionList()) {
+                setPos.add(p.getPositionList());
             }
         }
 
@@ -1233,16 +1231,27 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
 
         selectPersonPositions.addAfterCloseListener(e -> {
-            setPositionsLabel();
-
             List<Position> positions = selectPersonPositions.getPositionsList();
 
-            DataContext dc = socialNetworkURLsesDl.getDataContext();
-            dc.setParent(dataContext);
-            socialNetworkURLsesDl.setParameter("candidate", getEditedEntity());
+            for(Position p : positions) {
+                JobCandidatePositionLists position = metadata.create(JobCandidatePositionLists.class);
 
-            dataContext.merge(positions);
-            // dataContext.commit();
+                position.setJobCandidate(selectPersonPositions.getJobCandidate());
+                position.setPositionList(p);
+
+                Boolean flag = false;
+                for(JobCandidatePositionLists s : getEditedEntity().getPositionList()) {
+                    if(position.getPositionList().getPositionRuName().equals(
+                            s.getPositionList().getPositionRuName())) {
+                        flag = true;
+                    }
+                }
+
+                if(!flag) {
+                    jobCandidateDc.getItem().getPositionList().add(position);
+                    dataContext.commit();
+                }
+            }
 
             setPositionsLabel();
         });
@@ -1255,14 +1264,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String description = "";
 
         if (getEditedEntity().getPositionList() != null) {
-            for (Position s : getEditedEntity().getPositionList()) {
+            for (JobCandidatePositionLists s : getEditedEntity().getPositionList()) {
                 if (!outStr.equals("")) {
                     outStr = outStr + ",";
                     description = description + "\n";
                 }
 
-                outStr = outStr + s.getPositionRuName();
-                description = description + s.getPositionRuName();
+                outStr = outStr + s.getPositionList().getPositionRuName();
+                description = description + s.getPositionList().getPositionRuName();
             }
 
         }

@@ -29,5 +29,6 @@
         <class>com.company.itpearls.entity.SocialNetworkType</class>
         <class>com.company.itpearls.entity.SubscribeCandidateAction</class>
         <class>com.company.itpearls.entity.ItearctionRequirements</class>
+        <class>com.company.itpearls.entity.JobCandidatePositionLists</class>
     </persistence-unit>
 </persistence>

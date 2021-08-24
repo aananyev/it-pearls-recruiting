@@ -51,9 +51,10 @@ public class JobCandidate extends StandardEntity {
     protected Position personPosition;
 
     @OnDeleteInverse(DeletePolicy.UNLINK)
-    @OnDelete(DeletePolicy.UNLINK)
+    @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "jobCandidate")
-    private List<Position> positionList;
+    @Composition
+    private List<JobCandidatePositionLists> positionList;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -131,12 +132,12 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "PRIORITY_CONTACT", nullable = false)
     private Integer priorityContact;
 
-    public List<Position> getPositionList() {
-        return positionList;
+    public void setPositionList(List<JobCandidatePositionLists> positionList) {
+        this.positionList = positionList;
     }
 
-    public void setPositionList(List<Position> positionList) {
-        this.positionList = positionList;
+    public List<JobCandidatePositionLists> getPositionList() {
+        return positionList;
     }
 
     public Integer getPriorityContact() {

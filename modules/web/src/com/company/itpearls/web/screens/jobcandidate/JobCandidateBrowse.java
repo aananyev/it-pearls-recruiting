@@ -1060,14 +1060,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         String retStr = "";
 
         if (jobCandidate.getPositionList() != null) {
-            for (Position s : jobCandidate.getPositionList()) {
+            for (JobCandidatePositionLists s : jobCandidate.getPositionList()) {
                 if (!retStr.equals("")) {
                     retStr = retStr + ",";
                 }
 
-                retStr = retStr + s.getPositionRuName();
+                retStr = retStr + s.getPositionList().getPositionRuName();
             }
-
         }
 
         return retStr;
