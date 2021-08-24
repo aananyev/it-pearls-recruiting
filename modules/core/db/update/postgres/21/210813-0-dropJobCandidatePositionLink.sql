@@ -1,0 +1,1 @@
+alter table itpearls_job_candidate_position_link rename to ITPEARLS_JOB_CANDIDATE_POSITION_LINK__U59616 ;

@@ -35,6 +35,14 @@
     @include date_iteraction_button(orange);
 }
 
+.button_table_orange {
+    @include date_iteraction_button(orange);
+}
+
+.button_table_blue {
+    @include date_iteraction_button(blue);
+}
+
 .button_table_green {
     @include date_iteraction_button(green);
 }
@@ -347,6 +355,46 @@ rating_battery_yellow_3:before {
     margin-left: auto;
     margin-right: auto;
     margin: 1px;
+}
+
+.label_button_blue {
+    background: blue; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_button_green {
+    background: green; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_button_gray {
+    background: grey; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_button_red {
+    background: red; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_button_orange {
+    background: orange; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
 }
 
 .transition-blue {

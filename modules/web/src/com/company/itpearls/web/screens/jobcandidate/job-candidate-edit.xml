@@ -10,7 +10,10 @@
                   class="com.company.itpearls.entity.JobCandidate">
             <loader id="jobCandidateDl"/>
             <view extends="_local">
-                <property name="positionList" view="_local"/>
+                <property name="positionList" view="_local">
+                    <property name="positionRuName"/>
+                    <property name="positionEnName"/>
+                </property>
                 <property name="personPosition" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
                 <property name="candidateCv" view="_local">
@@ -78,6 +81,18 @@ order by e.comanyName]]></query>
                 <query>
                     <![CDATA[select e from itpearls_City e
 order by e.cityRuName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="positionListDc" class="com.company.itpearls.entity.Position">
+            <view extends="_local">
+                <property name="positionEnName"/>
+                <property name="positionRuName"/>
+                <property name="jobCandidate" view="_local"/>
+            </view>
+            <loader id="positionListDl">
+                <query>
+                    <![CDATA[select e from itpearls_Position e]]>
                 </query>
             </loader>
         </collection>

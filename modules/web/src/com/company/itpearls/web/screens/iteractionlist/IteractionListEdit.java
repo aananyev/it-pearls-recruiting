@@ -792,7 +792,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         for (int i = 0; i < maxCount; i++) {
             LinkButton mostPopularLabel = uiComponents.create(LinkButton.NAME);
             mostPopularLabel.setCaption(mostPopular.get(i).getIterationName() + " (" + i + ")");
-            mostPopularLabel.setStyleName("transition-green");
+            mostPopularLabel.setStyleName("label_button_green");
             mostPopularLabel.addClickListener(e -> {
                 String mostPopNumber = e.getSource().getCaption().substring(e.getSource().getCaption().length() - 2, e.getSource().getCaption().length() - 1);
 

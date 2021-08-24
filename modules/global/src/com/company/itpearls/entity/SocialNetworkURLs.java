@@ -12,7 +12,8 @@ import javax.persistence.*;
 @Table(name = "ITPEARLS_SOCIAL_NETWORK_UR_LS", indexes = {
         @Index(name = "IDX_NETWORK_NAME", columnList = "NETWORK_NAME"),
         @Index(name = "IDX_ITPEARLS_SOCIAL_NETWORK_U_R_LS_JOB_CANDIDATE_ID", columnList = "JOB_CANDIDATE_ID"),
-        @Index(name = "IDX_ITPEARLS_SOCIAL_NETWORK_U_R_LS", columnList = "ID")
+        @Index(name = "IDX_ITPEARLS_SOCIAL_NETWORK_U_R_LS", columnList = "ID"),
+        @Index(name = "IDX_ITPEARLS_SOCIAL_NETWORK_U_R_LS_ID", columnList = "SOCIAL_NETWORK_URL_ID")
 })
 @Entity(name = "itpearls_SocialNetworkURLs")
 public class SocialNetworkURLs extends StandardEntity {

@@ -140,7 +140,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Label<String> candidateRatingLabel;
 
+    List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
+
     @Inject
     private StarsAndOtherService starsAndOtherService;
     @Inject
@@ -1211,11 +1213,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 //        jobCandidateIteractionListDataGridDl.load();
     }
 
-    public void addPositionList() {/*
+    private void setPositionListScreen() {
+
+    }
+
+    public void addPositionList() {
         SelectPersonPositions selectPersonPositions = screens
                 .create(SelectPersonPositions.class);
 
-        List<Position> setPos = new ArrayList<>();
 
         if (getEditedEntity().getPositionList() != null) {
             for (Position p : getEditedEntity().getPositionList()) {
@@ -1228,22 +1233,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
 
         selectPersonPositions.addAfterCloseListener(e -> {
-            dataContext.create(Position.class);
+            setPositionsLabel();
+
             List<Position> positions = selectPersonPositions.getPositionsList();
 
-            for(Position p : positions) {
-                metadata.create(Project.class);
-                jobCandidateDc.getItem().getPositionList().add(p);
-            }
+            DataContext dc = socialNetworkURLsesDl.getDataContext();
+            dc.setParent(dataContext);
+            socialNetworkURLsesDl.setParameter("candidate", getEditedEntity());
 
-            JobCandidate jobCandidate = dataContext.merge(jobCandidateDc.getItem());
-            jobCandidateDc.setItem(jobCandidate);
+            dataContext.merge(positions);
+            // dataContext.commit();
 
             setPositionsLabel();
         });
 
         selectPersonPositions.show();
-    */
     }
 
     private void setPositionsLabel() {

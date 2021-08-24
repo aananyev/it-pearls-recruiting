@@ -122,20 +122,20 @@
                         <column id="resumePosition"
                                 property="resumePosition"
                                 caption="msg://msgPosition"
-                                width="150px"/>
+                                width="250px"/>
                         <column id="toVacancy"
                                 property="toVacancy"
-                                width="270px"/>
+                                width="470px"/>
                         <column id="cityOfResidence"
                                 property="candidate.cityOfResidence"
                                 width="120px"/>
                         <column id="blackRectangle"
-                                width="80px"
+                                width="100px"
                                 caption="msg://msgPercentOfRelevance">
                             <componentRenderer/>
                         </column>
                         <column id="lastIteraction"
-                                width="80px"
+                                width="100px"
                                 caption="msg://msgLastIteraction">
                             <htmlRenderer nullRepresentation="null"/>
                         </column>

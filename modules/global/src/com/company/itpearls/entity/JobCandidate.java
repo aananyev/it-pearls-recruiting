@@ -4,10 +4,7 @@ import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
-import com.haulmont.cuba.core.entity.annotation.Lookup;
-import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.core.entity.annotation.OnDelete;
-import com.haulmont.cuba.core.entity.annotation.PublishEntityChangedEvents;
+import com.haulmont.cuba.core.entity.annotation.*;
 import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
@@ -20,10 +17,11 @@ import java.util.List;
 @PublishEntityChangedEvents
 @NamePattern("%s %s %s %s|secondName,firstName,middleName,personPosition")
 @Table(name = "ITPEARLS_JOB_CANDIDATE", indexes = {
-        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_ID", columnList = "ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_ID", columnList = "ID", unique = true),
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_PERSON_POSITION_ID", columnList = "PERSON_POSITION_ID"),
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CURRENT_COMPANY_ID", columnList = "CURRENT_COMPANY_ID"),
-        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CITY_OF_RESIDENCE_ID", columnList = "CITY_OF_RESIDENCE_ID")
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CITY_OF_RESIDENCE_ID", columnList = "CITY_OF_RESIDENCE_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FULL_NAME", columnList = "FULL_NAME")
 })
 @Entity(name = "itpearls_JobCandidate")
 public class JobCandidate extends StandardEntity {
@@ -52,11 +50,9 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "PERSON_POSITION_ID")
     protected Position personPosition;
 
-    @JoinTable(name = "ITPEARLS_JOB_CANDIDATE_POSITION_LINK",
-            joinColumns = @JoinColumn(name = "JOB_CANDIDATE_ID"),
-            inverseJoinColumns = @JoinColumn(name = "POSITION_ID"))
+    @OnDeleteInverse(DeletePolicy.UNLINK)
     @OnDelete(DeletePolicy.UNLINK)
-    @ManyToMany
+    @OneToMany(mappedBy = "jobCandidate")
     private List<Position> positionList;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
@@ -135,6 +131,14 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "PRIORITY_CONTACT", nullable = false)
     private Integer priorityContact;
 
+    public List<Position> getPositionList() {
+        return positionList;
+    }
+
+    public void setPositionList(List<Position> positionList) {
+        this.positionList = positionList;
+    }
+
     public Integer getPriorityContact() {
         return priorityContact;
     }
@@ -149,14 +153,6 @@ public class JobCandidate extends StandardEntity {
 
     public Collection<IteractionList> getIteractionList() {
         return iteractionList;
-    }
-
-    public List<Position> getPositionList() {
-        return positionList;
-    }
-
-    public void setPositionList(List<Position> positionList) {
-        this.positionList = positionList;
     }
 
 

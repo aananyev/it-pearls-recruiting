@@ -20,7 +20,8 @@ import java.util.List;
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_POSITION_TYPE_ID", columnList = "POSITION_TYPE_ID"),
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_OPEN_CLOSE", columnList = "OPEN_CLOSE"),
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PROJECT_NAME_ID", columnList = "PROJECT_NAME_ID"),
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PARENT_OPEN_POSITION_ID", columnList = "PARENT_OPEN_POSITION_ID")
+        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PARENT_OPEN_POSITION_ID", columnList = "PARENT_OPEN_POSITION_ID"),
+        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PRIORITY", columnList = "PRIORITY")
 })
 @Entity(name = "itpearls_OpenPosition")
 public class OpenPosition extends StandardEntity {

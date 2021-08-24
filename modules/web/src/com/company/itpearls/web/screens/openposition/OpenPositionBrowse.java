@@ -905,19 +905,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             switch ((int) op.getValue()) {
                 case 1:
-                    label.setStyleName("transition-blue");
+                    label.setStyleName("label_button_blue");
                     break;
                 case 2:
-                    label.setStyleName("transition-green");
+                    label.setStyleName("label_button_green");
                     break;
                 case 3:
-                    label.setStyleName("transition-orange");
+                    label.setStyleName("label_button_orange");
                     break;
                 case 4:
-                    label.setStyleName("transition-red");
+                    label.setStyleName("label_button_red");
                     break;
                 default:
-                    label.setStyleName("transition-grey");
+                    label.setStyleName("label_button_grey");
                     break;
             }
 

@@ -2,10 +2,12 @@ package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @NamePattern("%s|positionRuName")
 @Table(name = "ITPEARLS_POSITION", indexes = {
@@ -33,11 +35,19 @@ public class Position extends StandardEntity {
     @Column(name = "WHO_IS_THIS_GUY")
     private String whoIsThisGuy;
 
-    @JoinTable(name = "ITPEARLS_JOB_CANDIDATE_POSITION_LINK",
-            joinColumns = @JoinColumn(name = "POSITION_ID"),
-            inverseJoinColumns = @JoinColumn(name = "JOB_CANDIDATE_ID"))
-    @ManyToMany
-    private List<JobCandidate> jobCandidates;
+    @OnDeleteInverse(DeletePolicy.UNLINK)
+    @OnDelete(DeletePolicy.UNLINK)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_CANDIDATE_ID")
+    private JobCandidate jobCandidate;
+
+    public JobCandidate getJobCandidate() {
+        return jobCandidate;
+    }
+
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
+    }
 
     public String getWhoIsThisGuy() {
         return whoIsThisGuy;
@@ -45,14 +55,6 @@ public class Position extends StandardEntity {
 
     public void setWhoIsThisGuy(String whoIsThisGuy) {
         this.whoIsThisGuy = whoIsThisGuy;
-    }
-
-    public List<JobCandidate> getJobCandidates() {
-        return jobCandidates;
-    }
-
-    public void setJobCandidates(List<JobCandidate> jobCandidates) {
-        this.jobCandidates = jobCandidates;
     }
 
     public String getStandartDescription() {
