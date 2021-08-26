@@ -38,6 +38,7 @@
                     <property name="candidate" view="_minimal"/>
                     <property name="vacancy" view="_minimal">
                         <property name="projectName" view="_minimal">
+                            <property name="projectOwner" view="_minimal"/>
                             <property name="projectDepartment" view="_minimal">
                                 <property name="companyName" view="_minimal"/>
                             </property>

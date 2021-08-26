@@ -4,11 +4,9 @@ import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WebBrowserTools;
-import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.Image;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.LinkButton;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.*;
 
@@ -62,6 +60,12 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private LinkButton skypeLinkButton;
     @Inject
     private LinkButton emailLinkButton;
+
+    List<IteractionList> iteractionList = new ArrayList<>();
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private HBoxLayout statisticsHLabelBox;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -120,7 +124,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
 
     public void setLinkButtonSkype() {
-        if(jobCandidate == null) {
+        if (jobCandidate == null) {
             if (jobCandidatesDc.getItem().getSkypeName() != null) {
                 skypeLinkButton.setCaption(jobCandidatesDc.getItem().getSkypeName());
             }
@@ -168,7 +172,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     }
 
     public void setStatistics() {
-        List<IteractionList> iteractionList = getAllCandidateIteractions();
+        iteractionList = getAllCandidateIteractions();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         // найти последнего рекрутера
@@ -344,5 +348,27 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         }
 
         return iteractionList;
+    }
+
+    public void setStatisticsLabel() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        if (iteractionList.size() > 0) {
+            Label startIteraction = uiComponents.create(Label.NAME);
+            startIteraction.setValue("Старт:"
+                    + simpleDateFormat.format(iteractionList.get(iteractionList.size() - 1).getDateIteraction()));
+            startIteraction.setAlignment(Component.Alignment.MIDDLE_LEFT);
+            startIteraction.setStyleName("statistic_label_candidate_blue");
+
+            statisticsHLabelBox.add(startIteraction);
+
+            Label endIteraction = uiComponents.create(Label.NAME);
+            endIteraction.setValue("Последнее:"
+                    + simpleDateFormat.format(iteractionList.get(0).getDateIteraction()));
+            endIteraction.setAlignment(Component.Alignment.MIDDLE_LEFT);
+            endIteraction.setStyleName("statistic_label_candidate_blue");
+
+            statisticsHLabelBox.add(endIteraction);
+        }
     }
 }

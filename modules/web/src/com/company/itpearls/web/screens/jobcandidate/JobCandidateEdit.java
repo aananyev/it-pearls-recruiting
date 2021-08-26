@@ -331,15 +331,27 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         try {
             retStr = "Ответственный за проект: ";
 
-            if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
-                retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
+            if(iteractionList.getVacancy() != null) {
+                if (iteractionList.getVacancy().getProjectName() != null) {
+                    if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
+                        if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
+                            retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
+                        }
+                    }
+                }
             }
 
-            if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
-                retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
+            if(iteractionList.getVacancy() != null) {
+                if (iteractionList.getVacancy().getProjectName() != null) {
+                    if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
+                        if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
+                            retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
+                        }
+                    }
+                }
             }
         } catch (IllegalStateException | NullPointerException e) {
-            e.printStackTrace();
+            log.error("Error", e);
         }
 
         return Jsoup.parse(retStr).text();
@@ -436,11 +448,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onMobilePhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         enableDisableContacts();
     }
-
-/*    @Subscribe("socialNetworkTable")
-    public void onSocialNetworkTableSelection(Table.SelectionEvent<SocialNetworkURLs> event) {
-        enableDisableContacts();
-    }*/
 
     @Subscribe("socialNetworkTable")
     public void onSocialNetworkTableEditorPostCommit(DataGrid.EditorPostCommitEvent event) {

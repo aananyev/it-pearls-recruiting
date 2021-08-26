@@ -8,6 +8,11 @@
     <layout width="100%"
             spacing="false"
             expand="mainHbox">
+        <hbox id="statisticsHLabelBox"
+              spacing="true"
+              align="BOTTOM_LEFT"
+              width="AUTO"
+              height="100%"/>
         <hbox id="mainHbox"
               spacing="true"
               align="BOTTOM_LEFT"

@@ -372,8 +372,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         Component newResumeButton = addNewResume(entity);
         Component editLastResumeButton = editLastResume(entity);
-//        Component getLetterButton = getLastLetterToClipboard(entity);
-//        Component getCVButton = getLastCVtoClipboard(entity);
 
         headerBox.add(infoLabel);
 
@@ -392,8 +390,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         headerBox.add(newResumeButton);
         headerBox.add(editLastResumeButton);
         headerBox.add(cvSimpleBrowseButton);
-//        headerBox.add(getLetterButton);
-//        headerBox.add(getCVButton);
 
         headerBox.add(closeButton);
         headerBox.expand(infoLabel);
@@ -409,6 +405,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCanidateDetailScreenFragment.setLinkButtonTelegremGroup();
         jobCanidateDetailScreenFragment.setLinkButtonEmail();
         jobCanidateDetailScreenFragment.setLinkButtonSkype();
+        jobCanidateDetailScreenFragment.setStatisticsLabel();
 
         Fragment fragment = jobCanidateDetailScreenFragment.getFragment();
         fragment.setWidth("100%");

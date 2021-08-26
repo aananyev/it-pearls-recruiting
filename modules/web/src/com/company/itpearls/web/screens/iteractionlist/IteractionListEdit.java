@@ -656,6 +656,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         gregorianCalendar.setGregorianChange(getEditedEntity().getDateIteraction());
         gregorianCalendar.add(Calendar.HOUR, 1);
 
+        candidateField.addValueChangeListener(e -> {
+        });
+
 /*        if (getEditedEntity().getEndDateIteraction() == null) {
             if (getEditedEntity().getDateIteraction() != null) {
                 getEditedEntity().setEndDateIteraction(gregorianCalendar.getTime());
