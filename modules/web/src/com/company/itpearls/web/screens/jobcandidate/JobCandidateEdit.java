@@ -163,6 +163,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> telegramGroupField;
     @Inject
     private CollectionPropertyContainer<Position> positionsListDc;
+    @Inject
+    private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -981,7 +983,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (lastIteraction != null) {
                 IteractionList finalLastIteraction = lastIteraction;
 
-                screenBuilders.editor(IteractionList.class, this)
+                Screen copyIteractionScreen = screenBuilders.editor(IteractionList.class, this)
                         .withParentDataContext(dataContext)
                         .withInitializer(candidate -> {
                             candidate.setVacancy(finalLastIteraction.getVacancy());
@@ -991,8 +993,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             jobCandidateDc.getItem().getIteractionList().add(iteractionList);
                         })
                         .newEntity()
-                        .build()
-                        .show();
+                        .build();
+
+                copyIteractionScreen.addAfterCloseListener(e -> {
+                    jobCandidateDl.load();
+                });
+
+                copyIteractionScreen.show();
             } else {
                 dialogs.createOptionDialog()
                         .withCaption("Нет взаимодействий с кандидатом")

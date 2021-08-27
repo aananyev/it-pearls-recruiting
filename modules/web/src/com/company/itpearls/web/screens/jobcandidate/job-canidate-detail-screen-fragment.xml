@@ -8,11 +8,17 @@
     <layout width="100%"
             spacing="false"
             expand="mainHbox">
-        <hbox id="statisticsHLabelBox"
-              spacing="true"
-              align="BOTTOM_LEFT"
-              width="AUTO"
-              height="100%"/>
+        <groupBox id="statisticsGroupBox"
+                  collapsable="true"
+                  spacing="true"
+                  width="100%"
+                  stylename="light"
+                  height="100%">
+            <hbox id="statisticsHLabelBox"
+                  spacing="true"
+                  width="AUTO"
+                  height="100%"/>
+        </groupBox>
         <hbox id="mainHbox"
               spacing="true"
               align="BOTTOM_LEFT"

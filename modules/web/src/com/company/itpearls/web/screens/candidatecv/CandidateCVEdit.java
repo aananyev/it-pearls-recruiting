@@ -383,7 +383,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 XWPFDocument doc = new XWPFDocument(fis);
                 POITextExtractor extractor = new XWPFWordExtractor(doc);
                 parsedText = extractor.getText();
-            } catch (IOException | IncompatibleClassChangeError e) {
+            } catch (IOException | IncompatibleClassChangeError | NullPointerException e) {
                 notifications.create()
                         .withType(Notifications.NotificationType.WARNING)
                         .withCaption("ВНИМАНИЕ!")

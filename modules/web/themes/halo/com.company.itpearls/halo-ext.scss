@@ -199,7 +199,7 @@
 
 @mixin rating_statistic_label($color_p) {
     font-family: 'Antonio', sans-serif;
-    font-size: large;
+    font-size: medium;
     font-weight: bold;
     text-align: center;
 /*    font-family: bold; */
@@ -207,7 +207,7 @@
     border-radius: 5px;
     line-height: 17px;
     color: $color_p;
-    padding: 3px, 3px, 3px, 3px;
+    padding: 5px;
     box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
 }
 
@@ -295,6 +295,10 @@ rating_battery_yellow_3:before {
     @include rating_statistic_label(blue);
 /*    color: red;
     box-shadow: 0 0 0 2px red, 0 0 13px #333; Параметры теней */
+}
+
+.statistic_label_candidate_blue:hover {
+        border-color: blue;
 }
 
 .rating_candidate_red_1 {
