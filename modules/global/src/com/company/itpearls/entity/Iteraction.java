@@ -89,6 +89,39 @@ public class Iteraction extends StandardEntity {
     @Column(name = "NEED_SEND_MEMO")
     private Boolean needSendMemo;
 
+    @Column(name = "SIGN_OUR_INTERVIEW")
+    private Boolean signOurInterview;
+
+    @Column(name = "SIGN_CLIENT_INTERVIEW")
+    private Boolean signClientInterview;
+
+    @Column(name = "SIGN_SEND_TO_CLIENT")
+    private Boolean signSendToClient;
+
+    public Boolean getSignSendToClient() {
+        return signSendToClient;
+    }
+
+    public void setSignSendToClient(Boolean signSendToClient) {
+        this.signSendToClient = signSendToClient;
+    }
+
+    public Boolean getSignClientInterview() {
+        return signClientInterview;
+    }
+
+    public void setSignClientInterview(Boolean signClientInterview) {
+        this.signClientInterview = signClientInterview;
+    }
+
+    public Boolean getSignOurInterview() {
+        return signOurInterview;
+    }
+
+    public void setSignOurInterview(Boolean signOurInterview) {
+        this.signOurInterview = signOurInterview;
+    }
+
     public Boolean getNeedSendMemo() {
         return needSendMemo;
     }

@@ -47,6 +47,11 @@
     @include date_iteraction_button(green);
 }
 
+
+.button_table_gray {
+    @include date_iteraction_button(gray);
+}
+
 @mixin ratingfield($primary-stylename: ratingfield) {
   .#{$primary-stylename}-star {
   font-family: FontAwesome;

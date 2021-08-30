@@ -209,6 +209,9 @@ create table ITPEARLS_ITERACTION (
     NEED_SEND_LETTER boolean,
     TEXT_EMAIL_TO_SEND text,
     NEED_SEND_MEMO boolean,
+    SIGN_OUR_INTERVIEW boolean,
+    SIGN_CLIENT_INTERVIEW boolean,
+    SIGN_SEND_TO_CLIENT boolean,
     --
     primary key (ID)
 )^

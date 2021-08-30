@@ -54,6 +54,26 @@ order by e.number]]>
                     </hbox>
                 </groupBox>
             </tab>
+            <tab id="tabSigns" spacing="true" caption="msg://msgSings">
+                <groupBox height="AUTO" spacing="true">
+                    <vbox id="signsVBox"
+                          height="AUTO"
+                          width="AUTO">
+                        <checkBox id="signOurInterviewCheckBox"
+                                  caption="msg://msgSignOurInterview"
+                                  dataContainer="iteractionDc"
+                                  property="signOurInterview"/>
+                        <checkBox id="signClientInterviewCheckBox"
+                                  caption="msg://msgSignClientInterview"
+                                  dataContainer="iteractionDc"
+                                  property="signClientInterview"/>
+                        <checkBox id="signSentToClientCheckBox"
+                                  caption="msg://msgSignSendToClient"
+                                  dataContainer="iteractionDc"
+                                  property="signSendToClient"/>
+                    </vbox>
+                </groupBox>
+            </tab>
             <tab caption="msg://Tab" spacing="true" id="tabIcons">
                 <groupBox height="AUTO" spacing="true">
                     <hbox id="callDialogHbox"

@@ -11,6 +11,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import com.ibm.icu.impl.CalendarCache;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
@@ -353,6 +354,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                     .parameter("candidate", jobCandidatesDc.getItem())
                     .one();
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return iteractionList;
@@ -360,79 +362,339 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
     static private String DESC_DATE_ITERACTION = "Даты процессинга кандидата: начало с ним работы и дата последнего взаимодействия";
     static private String DESC_DAYS_LAST_ITERCATION = "Дней с даты последнего взаимодействия";
+    static private String DESC_DAYS_ON_LAST_PROJECT = "Количество дней на рассмотрении последнего проекта";
 
     public void setStatisticsLabel() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-
-        if (iteractionList.size() > 0) {
-            Label activityCanidate = uiComponents.create(Label.NAME);
-            String style = "";
-            String activity = "";
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(iteractionList.get(0).getDateIteraction());
-            calendar.add(Calendar.MONTH, 1);
-
-            Calendar calendar1 = Calendar.getInstance();
-
-            if (calendar.after(calendar1)) {
-                if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
-                    style = "button_table_red";
-                    activity = "В работе";
-                } else {
-                    style = "button_table_yellow";
-                    activity = "В работе";
-                }
-            } else {
-                style = "button_table_green";
-                activity = "СВОБОДЕН";
-            }
-
-            activityCanidate.setValue(activity);
-            activityCanidate.setStyleName(style);
-            // даты взаимодействия
-            Label startIteraction = uiComponents.create(Label.NAME);
-            startIteraction.setValue("Даты: c "
-                    + simpleDateFormat.format(iteractionList.get(iteractionList.size() - 1).getDateIteraction())
-                    + " по "
-                    + simpleDateFormat.format(iteractionList.get(0).getDateIteraction()));
-            startIteraction.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            startIteraction.setDescription(DESC_DATE_ITERACTION);
-            startIteraction.setStyleName("button_table_green");
-            // дней с последнего взаиможействия
-            Label lastItercationDayCount = uiComponents.create(Label.NAME);
-
+        if(iteractionList.size() != 0) {
             LocalDate d1 = LocalDate.now();
             LocalDate d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            long days = ChronoUnit.DAYS.between(d2, d1);
-            lastItercationDayCount.setValue("Свободен " + days + " дней");
-            lastItercationDayCount.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            lastItercationDayCount.setStyleName(style);
-            lastItercationDayCount.setDescription(DESC_DAYS_LAST_ITERCATION);
+            long days = ChronoUnit.DAYS.between(d2, d1) - 30;
 
-            statisticsHLabelBox.add(activityCanidate);
-            statisticsHLabelBox.add(startIteraction);
-            statisticsHLabelBox.add(lastItercationDayCount);
-            // процессинг последнего проекта
-            OpenPosition lastOpenPosition = iteractionList.get(0).getVacancy();
-            IteractionList firstIteractionOnProject = null;
+            if (iteractionList.size() > 0) {
+                Label activityCandidate = getActivityCandidatePeriod();
 
-            for(IteractionList iteraction : iteractionList) {
-                if(lastOpenPosition.equals(iteraction.getVacancy())) {
-                    firstIteractionOnProject = iteraction;
-                    break;
+                Label startIteractionDate = getStartIteractionDate();
+                // даты взаимодействия
+
+                // дней с последнего взаиможействия
+                Label lastItercationDayCount = lastIterDayCount();
+
+                statisticsHLabelBox.add(activityCandidate);
+                statisticsHLabelBox.add(startIteractionDate);
+
+                if (days > 0) {
+                    statisticsHLabelBox.add(lastItercationDayCount);
+                }
+
+                Label countDaysOnLastProject = getCountDaysLastProject();
+
+                if (countDaysOnLastProject != null) {
+                    statisticsHLabelBox.add(countDaysOnLastProject);
+                }
+
+                // количество дней после собеседования последнего
+                Label countAfterITPearlsInterview = getCountAfterITPearlsInterview();
+
+                if (countAfterITPearlsInterview != null) {
+                    statisticsHLabelBox.add(countAfterITPearlsInterview);
+                }
+
+                // Количество дней с момента передачи резюме заказчику
+                Label countAfterSendCVToClient = getCountAfterSendCVToClient();
+
+                if (countAfterSendCVToClient != null) {
+                    statisticsHLabelBox.add(countAfterSendCVToClient);
+                }
+
+                // число дней с момента интервью на стороне заказчика
+                Label countAfrerClientInterview = getCountAfrerClientInterview();
+
+                if (countAfrerClientInterview != null) {
+                    statisticsHLabelBox.add(countAfrerClientInterview);
                 }
             }
-            if(firstIteractionOnProject != null) {
-                Label countDaysOnLastProject = uiComponents.create(Label.NAME);
-                countDaysOnLastProject.setStyleName("button_table_green");
-                LocalDate d3 = firstIteractionOnProject.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                long daysOnProject = ChronoUnit.DAYS.between(d3, d1);
+        }
+    }
 
-                countDaysOnLastProject.setValue("На последнем проекте " + daysOnProject + " дней");
+    private Label getCountAfterSendCVToClient() {
+        Label countAfterSendCVToClient = uiComponents.create(Label.NAME);
 
-                statisticsHLabelBox.add(countDaysOnLastProject);
+        for (IteractionList iList : iteractionList) {
+            if (iList.getIteractionType().getSignSendToClient() != null) {
+                if (iList.getIteractionType().getSignSendToClient()) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(iList.getDateIteraction());
+                    calendar.add(Calendar.DAY_OF_MONTH, 3);
+
+                    Calendar calendar1 = Calendar.getInstance();
+
+                    Calendar calendar2 = Calendar.getInstance();
+                    calendar2.setTime(iteractionList.get(0).getDateIteraction());
+                    calendar2.add(Calendar.DAY_OF_MONTH, 7);
+
+                    LocalDate d1 = LocalDate.now();
+                    LocalDate d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    long days = ChronoUnit.DAYS.between(d2, d1);
+
+
+                    if(days != 0) {
+                        countAfterSendCVToClient.setValue("CV у заказчика: " + days + " дней");
+                        countAfterSendCVToClient.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
+                    } else {
+                        countAfterSendCVToClient.setValue("Сегодня CV отправлено");
+                        countAfterSendCVToClient.setStyleName("button_table_blue");
+                    }
+
+                    countAfterSendCVToClient.setDescription("Число дней с момента передачи резюме заказчику.");
+
+                    return countAfterSendCVToClient;
+                }
             }
         }
+
+        return null;
+
+    }
+
+    private Label getCountAfrerClientInterview() {
+        Label countAfrerClientInterview = uiComponents.create(Label.NAME);
+
+        for (IteractionList iList : iteractionList) {
+            if (iList.getIteractionType().getSignClientInterview() != null) {
+                if (iList.getIteractionType().getSignClientInterview()) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(iList.getDateIteraction());
+                    calendar.add(Calendar.DAY_OF_MONTH, 3);
+
+                    Calendar calendar1 = Calendar.getInstance();
+
+                    Calendar calendar2 = Calendar.getInstance();
+                    calendar2.setTime(iteractionList.get(0).getDateIteraction());
+                    calendar2.add(Calendar.DAY_OF_MONTH, 7);
+
+                    LocalDate d1 = LocalDate.now();
+                    LocalDate d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    long days = ChronoUnit.DAYS.between(d2, d1);
+
+
+                    if(days != 0) {
+                        countAfrerClientInterview.setValue("Интервью заказчика: " + days + " дней");
+                        countAfrerClientInterview.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
+                    } else {
+                        countAfrerClientInterview.setValue("Сегодня интервью у заказчика");
+                        countAfrerClientInterview.setStyleName("button_table_blue");
+
+                    }
+                    countAfrerClientInterview.setDescription("Число дней с момента последнего интервью на стороне заказчика: технического или  рекрутером.");
+
+                    return countAfrerClientInterview;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Label getCountAfterITPearlsInterview() {
+        Label countAfterITPearlsInterview = uiComponents.create(Label.NAME);
+
+        for (IteractionList iList : iteractionList) {
+            if (iList.getIteractionType().getSignOurInterview() != null) {
+                if (iList.getIteractionType().getSignOurInterview()) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(iList.getDateIteraction());
+                    calendar.add(Calendar.DAY_OF_MONTH, 3);
+
+                    Calendar calendar1 = Calendar.getInstance();
+
+                    Calendar calendar2 = Calendar.getInstance();
+                    calendar2.setTime(iteractionList.get(0).getDateIteraction());
+                    calendar2.add(Calendar.DAY_OF_MONTH, 7);
+
+                    LocalDate d1 = LocalDate.now();
+                    LocalDate d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    long days = ChronoUnit.DAYS.between(d2, d1);
+
+
+                    if (days != 0) {
+                        countAfterITPearlsInterview.setValue("Локальное интервью: " + days + " дней");
+                        countAfterITPearlsInterview.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
+                    } else {
+                        countAfterITPearlsInterview.setValue("Сегодня локальное интервью");
+                        countAfterITPearlsInterview.setStyleName("button_table_blue");
+                    }
+
+                    countAfterITPearlsInterview.setDescription("Число дней с момента последнего интервью на нашей стороне рекрутером IT Pearls.");
+
+                    return countAfterITPearlsInterview;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private String getStyleOnlastProcess(Calendar cal, Calendar cal1, Calendar cal2) {
+        String style;
+
+        if (cal.after(cal1)) {
+            if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
+                style = "button_table_grey";
+            } else {
+                style = "button_table_yellow";
+            }
+        } else {
+            if (cal1.after(cal2)) {
+                style = "button_table_gray";
+            } else {
+                style = "button_table_red";
+
+            }
+        }
+
+        return style;
+    }
+
+    private Label getCountDaysLastProject() {
+        // процессинг последнего проекта
+        OpenPosition lastOpenPosition = iteractionList.get(0).getVacancy();
+        IteractionList firstIteractionOnProject = null;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(iteractionList.get(0).getDateIteraction());
+        calendar.add(Calendar.MONTH, 1);
+
+        Calendar calendar1 = Calendar.getInstance();
+
+        Calendar calendar2 = Calendar.getInstance();
+        calendar2.setTime(iteractionList.get(0).getDateIteraction());
+        calendar2.add(Calendar.MONTH, 3);
+
+        LocalDate d1 = LocalDate.now();
+        LocalDate d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        long days = ChronoUnit.DAYS.between(d2, d1) - 30;
+
+        for (IteractionList iteraction : iteractionList) {
+            if (lastOpenPosition.equals(iteraction.getVacancy())) {
+                firstIteractionOnProject = iteraction;
+                break;
+            }
+        }
+
+        if (firstIteractionOnProject != null) {
+            Label countDaysOnLastProject = uiComponents.create(Label.NAME);
+            countDaysOnLastProject.setStyleName(getStyleOnTime(calendar, calendar1, calendar1));
+            LocalDate d3 = firstIteractionOnProject.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            long daysOnProject = ChronoUnit.DAYS.between(d3, d1);
+
+            countDaysOnLastProject.setValue("На последнем проекте " + daysOnProject + " дней");
+            countDaysOnLastProject.setDescription(DESC_DAYS_ON_LAST_PROJECT);
+
+            statisticsHLabelBox.add(countDaysOnLastProject);
+
+            return countDaysOnLastProject;
+        } else {
+            return null;
+        }
+    }
+
+    private Label getStartIteractionDate() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        Label startIteraction = uiComponents.create(Label.NAME);
+        startIteraction.setValue("Даты: c "
+                + simpleDateFormat.format(iteractionList.get(iteractionList.size() - 1).getDateIteraction())
+                + " по "
+                + simpleDateFormat.format(iteractionList.get(0).getDateIteraction()));
+        startIteraction.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        startIteraction.setDescription(DESC_DATE_ITERACTION);
+        startIteraction.setStyleName("button_table_green");
+
+        return startIteraction;
+    }
+
+    private Label lastIterDayCount() {
+        Label lastItercationDayCount = uiComponents.create(Label.NAME);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(iteractionList.get(0).getDateIteraction());
+        calendar.add(Calendar.MONTH, 1);
+
+        Calendar calendar1 = Calendar.getInstance();
+
+        Calendar calendar2 = Calendar.getInstance();
+        calendar2.setTime(iteractionList.get(0).getDateIteraction());
+        calendar2.add(Calendar.MONTH, 3);
+
+        LocalDate d1 = LocalDate.now();
+        LocalDate d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        long days = ChronoUnit.DAYS.between(d2, d1) - 30;
+
+        if (days > 0) {
+            lastItercationDayCount.setValue("Свободен " + days + " дней");
+            lastItercationDayCount.setAlignment(Component.Alignment.MIDDLE_LEFT);
+            lastItercationDayCount.setStyleName(getStyleOnTime(calendar, calendar1, calendar2));
+            lastItercationDayCount.setDescription(DESC_DAYS_LAST_ITERCATION);
+        }
+
+        return lastItercationDayCount;
+    }
+
+    private Label getActivityCandidatePeriod() {
+        Label activityCanidate = uiComponents.create(Label.NAME);
+        String style = "";
+        String activity = "";
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(iteractionList.get(0).getDateIteraction());
+        calendar.add(Calendar.MONTH, 1);
+
+        Calendar calendar1 = Calendar.getInstance();
+
+        Calendar calendar2 = Calendar.getInstance();
+        calendar2.setTime(iteractionList.get(0).getDateIteraction());
+        calendar2.add(Calendar.MONTH, 3);
+
+        style = getStyleOnTime(calendar, calendar1, calendar2);
+
+        if (calendar.after(calendar1)) {
+            if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
+                activity = "В работе";
+            } else {
+                activity = "В работе";
+            }
+        } else {
+            if (calendar1.after(calendar2)) {
+                activity = "СВОБОДЕН";
+            } else {
+                activity = "СВОБОДЕН";
+            }
+        }
+
+        activityCanidate.setValue(activity);
+        activityCanidate.setStyleName(style);
+
+        return activityCanidate;
+    }
+
+    private String getStyleOnTime(Calendar cal, Calendar cal1, Calendar cal2) {
+        String style;
+
+        if (cal.after(cal1)) {
+            if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
+                style = "button_table_red";
+            } else {
+                style = "button_table_yellow";
+            }
+        } else {
+            if (cal1.after(cal2)) {
+                style = "button_table_gray";
+            } else {
+                style = "button_table_green";
+
+            }
+        }
+
+        return style;
     }
 }
