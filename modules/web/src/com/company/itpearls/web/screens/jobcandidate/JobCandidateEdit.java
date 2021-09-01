@@ -1493,22 +1493,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     newPhone = phone;
                 }
 
-                // newCompany = parseCVService.parseCompany(candidateCV.getTextCV());
+                newCompany = parseCVService.parseCompany(candidateCV.getTextCV());
             } catch (NullPointerException e) {
                 log.error("Error", e);
             }
         }
 
-        makeDialogNewEmailPhone1(newEmail, newPhone);
+        makeDialogNewEmailPhone1(newEmail, newPhone, newCompany);
     }
 
-    private void makeDialogNewEmailPhone1(String newEmail, String newPhone) {
+    private void makeDialogNewEmailPhone1(String newEmail, String newPhone, Company newCompany) {
         String message = "В резюме есть новые контактные данные кандидата. Заменить на новые?";
-        String messageEmail = null, messagePhone = null;
+        String messageEmail = null,
+                messagePhone = null,
+                messageCompany = null;
 
         String newPhoneNew = parseCVService.normalizePhoneStr(newPhone);
         String oldEmail = emailField.getValue();
         String oldPhone = parseCVService.normalizePhoneStr(phoneField.getValue());
+        Company oldCompany = currentCompanyField.getValue();
 
         Boolean flag = false;
 
@@ -1532,7 +1535,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         if (newPhone != null) {
-            if(oldPhone == null && newPhone != null) {
+            if (oldPhone == null && newPhone != null) {
                 messagePhone = "Добавить телефон в карточку "
                         + newPhoneNew + "?";
 
@@ -1547,6 +1550,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                         flag = true;
                     }
+                }
+            }
+        }
+
+        if (newCompany != null) {
+            if (oldCompany == null && newCompany != null) {
+                messageCompany = "Добавить текущую компанию в карточку "
+                        + newCompany.getComanyName() + "?";
+
+                flag = true;
+            } else {
+                if (!newCompany.equals(oldCompany)) {
+                    messageCompany = "Компания была "
+                            + currentCompanyField.getValue().getComanyName()
+                            + ", в резюме отмечена "
+                            + newCompany.getComanyName()
+                    + ". Заменить?";
+
+                    flag = true;
                 }
             }
         }
@@ -1574,10 +1596,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             }
 
+            if (newCompany != null) {
+                if (!Objects.equals(newCompany, oldCompany)) {
+                    dialog.withParameter(InputParameter.booleanParameter("newCompany")
+                    .withCaption(messageCompany).withRequired(true));
+                }
+            }
+
             dialog.withCloseListener(closeEvent -> {
                 if (closeEvent.closedWith(DialogOutcome.OK)) {
                     Boolean newEmailFlag = closeEvent.getValue("newEmail");
                     Boolean newPhoneFlag = closeEvent.getValue("newPhone");
+                    Boolean newCompanyFlag = closeEvent.getValue("newCompany");
 
                     if (newEmailFlag != null) {
                         if (newEmailFlag) {
@@ -1588,6 +1618,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     if (newPhoneFlag != null) {
                         if (newPhoneFlag) {
                             phoneField.setValue(newPhoneNew);
+                        }
+                    }
+
+                    if(newCompanyFlag != null) {
+                        if(newCompanyFlag) {
+                            currentCompanyField.setValue(newCompany);
                         }
                     }
                 }
