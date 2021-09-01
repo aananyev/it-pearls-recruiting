@@ -118,6 +118,9 @@
             <property name="vacancy" view="_minimal"/>
             <property name="iteractionType" view="_minimal">
                 <property name="pic"/>
+                <property name="signOurInterview"/>
+                <property name="signClientInterview"/>
+                <property name="signSendToClient"/>
             </property>
             <property name="recrutier" view="_minimal"/>
         </property>

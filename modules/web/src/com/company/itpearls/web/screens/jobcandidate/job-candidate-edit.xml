@@ -44,7 +44,11 @@
                             </property>
                         </property>
                     </property>
-                    <property name="iteractionType" view="_local"/>
+                    <property name="iteractionType" view="_local">
+                        <property name="signSendToClient"/>
+                        <property name="signClientInterview"/>
+                        <property name="signOurInterview"/>
+                    </property>
                     <property name="recrutier" view="_minimal"/>
                 </property>
                 <property name="socialNetwork" view="_local"/>
@@ -474,10 +478,13 @@ order by e.cityRuName]]>
                             <columns count="2"/>
                             <rows>
                                 <row>
-                                    <textField id="emailField" dataContainer="jobCandidateDc" property="email"
+                                    <textField id="emailField"
+                                               dataContainer="jobCandidateDc"
+                                               property="email"
                                                width="100%"
                                                caption="msg://msgEmail" required="true"/>
-                                    <textField id="telegramNameField" dataContainer="jobCandidateDc"
+                                    <textField id="telegramNameField"
+                                               dataContainer="jobCandidateDc"
                                                property="telegramName"
                                                width="100%" caption="msg://msgTelegramAccount"/>
                                 </row>
@@ -700,7 +707,7 @@ order by e.cityRuName]]>
                             <button id="scanContactsFromCVButton"
                                     caption="msg://msgScan"
                                     enable="false"
-                                    invoke="scanContactsFromCV"/>
+                                    invoke="scanContactsFromCVs"/>
                         </buttonsPanel>
                     </dataGrid>
                 </vbox>

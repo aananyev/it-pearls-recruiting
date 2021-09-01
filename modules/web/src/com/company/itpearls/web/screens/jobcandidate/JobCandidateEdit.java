@@ -8,6 +8,10 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
@@ -333,7 +337,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         try {
             retStr = "Ответственный за проект: ";
 
-            if(iteractionList.getVacancy() != null) {
+            if (iteractionList.getVacancy() != null) {
                 if (iteractionList.getVacancy().getProjectName() != null) {
                     if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
                         if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
@@ -343,7 +347,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             }
 
-            if(iteractionList.getVacancy() != null) {
+            if (iteractionList.getVacancy() != null) {
                 if (iteractionList.getVacancy().getProjectName() != null) {
                     if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
                         if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
@@ -407,11 +411,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         msec = System.currentTimeMillis() - msec;
 
         System.out.println(msec);
-//        notifications.create(Notifications.NotificationType.WARNING)
-//                .withCaption("Открытие JobCandadateEdit: " + msec)
-//                .show();
-
-        checkContactsCandidateListener();
     }
 
     @Subscribe
@@ -512,26 +511,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             wiberNameField.setRequired(false);
             telegramGroupField.setRequired(false);
         }
-        // ХОТЯ БЫ ОДИН КОНТАКТ
-/*        if (isRequiredAddresField() || flag) {
-            skypeNameField.setRequired(true);
-            phoneField.setRequired(true);
-            mobilePhoneField.setRequired(true);
-            emailField.setRequired(true);
-            telegramNameField.setRequired(true);
-            whatsupNameField.setRequired(true);
-            wiberNameField.setRequired(true);
-            telegramGroupField.setRequired(true);
-        } else {
-            skypeNameField.setRequired(false);
-            phoneField.setRequired(false);
-            mobilePhoneField.setRequired(false);
-            emailField.setRequired(false);
-            telegramNameField.setRequired(false);
-            whatsupNameField.setRequired(false);
-            wiberNameField.setRequired(false);
-            telegramGroupField.setRequired(false);
-        } */
     }
 
     // загрузить таблицу взаимодействий
@@ -580,7 +559,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void checkContactsCandidateListener() {
         jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
             scanContactsFromCVs();
-//            scanContactsFromCV();
         });
     }
 
@@ -1077,7 +1055,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private String getIcon(IteractionList item) {
-        if(item.getIteractionType() != null) {
+        if (item.getIteractionType() != null) {
             if (item.getIteractionType().getPic() != null) {
                 return item.getIteractionType().getPic();
             } else {
@@ -1247,21 +1225,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         selectPersonPositions.addAfterCloseListener(e -> {
             List<Position> positions = selectPersonPositions.getPositionsList();
 
-            for(Position p : positions) {
+            for (Position p : positions) {
                 JobCandidatePositionLists position = metadata.create(JobCandidatePositionLists.class);
 
                 position.setJobCandidate(selectPersonPositions.getJobCandidate());
                 position.setPositionList(p);
 
                 Boolean flag = false;
-                for(JobCandidatePositionLists s : getEditedEntity().getPositionList()) {
-                    if(position.getPositionList().getPositionRuName().equals(
+                for (JobCandidatePositionLists s : getEditedEntity().getPositionList()) {
+                    if (position.getPositionList().getPositionRuName().equals(
                             s.getPositionList().getPositionRuName())) {
                         flag = true;
                     }
                 }
 
-                if(!flag) {
+                if (!flag) {
                     jobCandidateDc.getItem().getPositionList().add(position);
                     dataContext.commit();
                 }
@@ -1367,8 +1345,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             s.addAfterCloseListener(e -> {
                 jobCandidateDl.load();
+                scanContactsFromCVs();
             });
         }
+    }
+
+    @Subscribe(id = "jobCandidateCandidateCvsDc", target = Target.DATA_CONTAINER)
+    public void onJobCandidateCandidateCvsDcItemChange(InstanceContainer.ItemChangeEvent<CandidateCV> event) {
+        scanContactsFromCVs();
     }
 
     public void checkSkillFromJD() {
@@ -1490,23 +1474,130 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
     }
 
-    private void scanContactsFromCVs() {
+    public void scanContactsFromCVs() {
         String newPhone = null,
                 newEmail = null;
+        Company newCompany = null;
 
         for (CandidateCV candidateCV : jobCandidateCandidateCvsDc.getItems()) {
             try {
-                newEmail = parseCVService.parseEmail(candidateCV.getTextCV());
-                newPhone = parseCVService.parsePhone(candidateCV.getTextCV());
+                String email = parseCVService.parseEmail(candidateCV.getTextCV());
+
+                if (email != null) {
+                    newEmail = email;
+                }
+
+                String phone = parseCVService.parsePhone(candidateCV.getTextCV());
+
+                if (phone != null) {
+                    newPhone = phone;
+                }
+
+                // newCompany = parseCVService.parseCompany(candidateCV.getTextCV());
             } catch (NullPointerException e) {
                 log.error("Error", e);
             }
         }
 
-        makeDialogNewEmailPhone(newEmail, newPhone);
+        makeDialogNewEmailPhone1(newEmail, newPhone);
     }
 
-    private void makeDialogNewEmailPhone(String newEmail, String newPhone) {
+    private void makeDialogNewEmailPhone1(String newEmail, String newPhone) {
+        String message = "В резюме есть новые контактные данные кандидата. Заменить на новые?";
+        String messageEmail = null, messagePhone = null;
+
+        String newPhoneNew = parseCVService.normalizePhoneStr(newPhone);
+        String oldEmail = emailField.getValue();
+        String oldPhone = parseCVService.normalizePhoneStr(phoneField.getValue());
+
+        Boolean flag = false;
+
+        if (newEmail != null) {
+            if (oldEmail == null && newEmail != null) {
+                messageEmail = "Добавить адрес электронной почты в карточку"
+                        + newEmail + "?";
+
+                flag = true;
+
+            } else {
+                if (!StringUtils.equals(newEmail, oldEmail)) {
+                    messageEmail = "Адрес электронной почты старый "
+                            + emailField.getValue()
+                            + " новый "
+                            + newEmail;
+
+                    flag = true;
+                }
+            }
+        }
+
+        if (newPhone != null) {
+            if(oldPhone == null && newPhone != null) {
+                messagePhone = "Добавить телефон в карточку "
+                        + newPhoneNew + "?";
+
+                flag = true;
+            } else {
+                if (!StringUtils.equals(newPhone, oldPhone)) {
+                    if (!newPhoneNew.equals(oldPhone)) {
+                        messagePhone = "Телефон старый "
+                                + phoneField.getValue()
+                                + " новый "
+                                + newPhoneNew;
+
+                        flag = true;
+                    }
+                }
+            }
+        }
+
+        if (flag) {
+            Dialogs.InputDialogBuilder dialog = dialogs.createInputDialog(this)
+                    .withCaption(message)
+                    .withWidth("AUTO")
+                    .withHeight("AUTO")
+                    .withActions(DialogActions.OK_CANCEL);
+
+            if (newEmail != null) {
+                if (!StringUtils.equals(newEmail, oldEmail)) {
+                    if (!newEmail.equals(emailField.getValue())) {
+                        dialog.withParameter(InputParameter.booleanParameter("newEmail")
+                                .withCaption(messageEmail).withRequired(true));
+                    }
+                }
+            }
+
+            if (newPhone != null) {
+                if (!StringUtils.equals(newPhone, oldPhone)) {
+                    dialog.withParameter(InputParameter.booleanParameter("newPhone")
+                            .withCaption(messagePhone).withRequired(true));
+                }
+            }
+
+            dialog.withCloseListener(closeEvent -> {
+                if (closeEvent.closedWith(DialogOutcome.OK)) {
+                    Boolean newEmailFlag = closeEvent.getValue("newEmail");
+                    Boolean newPhoneFlag = closeEvent.getValue("newPhone");
+
+                    if (newEmailFlag != null) {
+                        if (newEmailFlag) {
+                            emailField.setValue(newEmail);
+                        }
+                    }
+
+                    if (newPhoneFlag != null) {
+                        if (newPhoneFlag) {
+                            phoneField.setValue(newPhoneNew);
+                        }
+                    }
+                }
+            });
+
+            dialog.show();
+        }
+    }
+
+/*    private void makeDialogNewEmailPhone(String newEmail, String newPhone) {
         String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
         Boolean flag = false;
 
@@ -1565,7 +1656,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 //                    .withCaption("Не найдено новой контактной информации в резюме кандидата")
 //                    .show();
         }
-    }
+    } */
 
     public void scanContactsFromCV() {
         String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
@@ -1681,7 +1772,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     @Install(to = "socialNetworkTable.linkToWeb", subject = "columnGenerator")
-    private Component socialNetworkTableLinkToWebColumnGenerator(DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
+    private Component socialNetworkTableLinkToWebColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
         Link link = uiComponents.create(Link.NAME);
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
@@ -1721,7 +1813,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     @Install(to = "jobCandidateCandidateCvTable.candidateITPearlsCVColumn", subject = "columnGenerator")
-    private Component jobCandidateCandidateCvTableCandidateITPearlsCVColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+    private Component jobCandidateCandidateCvTableCandidateITPearlsCVColumnColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         Link link = uiComponents.create(Link.NAME);
 
         if (event.getItem().getLinkItPearlsCV() != null) {
@@ -1738,7 +1831,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     @Install(to = "jobCandidateCandidateCvTable.candidateOriginalCVColumn", subject = "columnGenerator")
-    private Component jobCandidateCandidateCvTableCandidateOriginalCVColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+    private Component jobCandidateCandidateCvTableCandidateOriginalCVColumnColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         Link link = uiComponents.create(Link.NAME);
 
         if (event.getItem().getLinkOriginalCv() != null) {

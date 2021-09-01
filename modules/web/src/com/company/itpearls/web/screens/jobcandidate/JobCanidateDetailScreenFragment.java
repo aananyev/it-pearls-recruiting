@@ -575,9 +575,11 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         long days = ChronoUnit.DAYS.between(d2, d1) - 30;
 
         for (IteractionList iteraction : iteractionList) {
-            if (lastOpenPosition.equals(iteraction.getVacancy())) {
-                firstIteractionOnProject = iteraction;
-                break;
+            if(iteraction.getVacancy() != null) {
+                if (lastOpenPosition.equals(iteraction.getVacancy())) {
+                    firstIteractionOnProject = iteraction;
+                    break;
+                }
             }
         }
 
