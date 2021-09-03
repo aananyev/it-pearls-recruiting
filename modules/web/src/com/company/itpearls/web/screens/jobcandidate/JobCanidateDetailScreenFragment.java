@@ -539,7 +539,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
         if (cal.after(cal1)) {
             if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
-                style = "button_table_grey";
+                style = "button_table_gray";
             } else {
                 style = "button_table_yellow";
             }
@@ -548,7 +548,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                 style = "button_table_gray";
             } else {
                 style = "button_table_red";
-
             }
         }
 
@@ -559,6 +558,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         // процессинг последнего проекта
         OpenPosition lastOpenPosition = iteractionList.get(0).getVacancy();
         IteractionList firstIteractionOnProject = null;
+        IteractionList lastItercationOnProject = iteractionList.get(0);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(iteractionList.get(0).getDateIteraction());
@@ -572,7 +572,13 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
         LocalDate d1 = LocalDate.now();
         LocalDate d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        long days = ChronoUnit.DAYS.between(d2, d1) - 30;
+
+        for(int i = iteractionList.size() ; i > 0 ; i--) {
+            if(iteractionList.get(i - 1).equals(iteractionList.get(0))) {
+                lastItercationOnProject = iteractionList.get(i - 1);
+                break;
+            }
+        }
 
         for (IteractionList iteraction : iteractionList) {
             if(iteraction.getVacancy() != null) {
@@ -586,7 +592,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         if (firstIteractionOnProject != null) {
             Label countDaysOnLastProject = uiComponents.create(Label.NAME);
             countDaysOnLastProject.setStyleName(getStyleOnTime(calendar, calendar1, calendar1));
-            LocalDate d3 = firstIteractionOnProject.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//            LocalDate d3 = firstIteractionOnProject.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate d3 = lastItercationOnProject.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             long daysOnProject = ChronoUnit.DAYS.between(d3, d1);
 
             countDaysOnLastProject.setValue("На последнем проекте " + daysOnProject + " дней");

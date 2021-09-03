@@ -74,6 +74,10 @@
                         maximumWidth="250px"
                         minimumWidth="200px"
                         id="vacancy"/>
+                <column property="vacancy.projectName.projectOwner"
+                        maximumWidth="280px"
+                        minimumWidth="150px"
+                        id="projectOwner"/>
                 <column property="recrutier"
                         maximumWidth="200px"
                         minimumWidth="150px"

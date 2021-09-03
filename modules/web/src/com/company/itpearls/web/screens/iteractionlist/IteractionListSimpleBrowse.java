@@ -113,7 +113,9 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable.iteractionType", subject = "descriptionProvider")
     private String iteractionListsTableIteractionTypeDescriptionProvider(IteractionList iteractionList) {
-        return Jsoup.parse(iteractionList.getComment() != null ? iteractionList.getComment() : "").text();
+        return Jsoup.parse(iteractionList.getComment() != null ? iteractionList.getComment() : "").text()
+                + (iteractionList.getAddString() != null ? "\nДополнительно: " + iteractionList.getAddString() : "")
+                + (iteractionList.getAddDate() != null ? "\nДата: " + iteractionList.getAddDate().toString() : "");
     }
 
     @Install(to = "iteractionListsTable.vacancy", subject = "descriptionProvider")
@@ -170,16 +172,6 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                                         "from itpearls_IteractionList e", BigDecimal.class)
                                 .one().add(BigDecimal.ONE));
                     }
-
-/*                    BigDecimal maxNumberIteraction = BigDecimal.ZERO;
-                    IteractionList lastIteraction = null;
-
-                    for (IteractionList list : iteractionListsDc.getItems()){
-                        if (maxNumberIteraction.compareTo(list.getNumberIteraction()) < 0) {
-                            maxNumberIteraction = list.getNumberIteraction();
-                            lastIteraction = list;
-                        }
-                    }*/
                 })
                 .withAfterCloseListener(e -> {
                     iteractionListsDl.load();
