@@ -1521,7 +1521,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 messagePhone = null,
                 messageCompany = null;
 
-        HashMap<String, String> messageSocial = new HashMap<>();
+        HashMap<String, List<String>> messageSocial = new HashMap<>();
 
         String newPhoneNew = parseCVService.normalizePhoneStr(newPhone);
         String oldEmail = emailField.getValue();
@@ -1533,7 +1533,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (newEmail != null) {
             if (oldEmail == null && newEmail != null) {
                 messageEmail = "Добавить адрес электронной почты в карточку "
-                        + newEmail + "?";
+                        + newEmail + "? ";
 
                 flag = true;
 
@@ -1542,7 +1542,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     messageEmail = "Адрес электронной почты старый "
                             + emailField.getValue()
                             + " новый "
-                            + newEmail;
+                            + newEmail + " ";
 
                     flag = true;
                 }
@@ -1552,7 +1552,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (newPhone != null) {
             if (oldPhone == null && newPhone != null) {
                 messagePhone = "Добавить телефон в карточку "
-                        + newPhoneNew + "?";
+                        + newPhoneNew + "? ";
 
                 flag = true;
             } else {
@@ -1561,7 +1561,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         messagePhone = "Телефон старый "
                                 + phoneField.getValue()
                                 + " новый "
-                                + newPhoneNew;
+                                + newPhoneNew + " ";
 
                         flag = true;
                     }
@@ -1572,7 +1572,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (newCompany != null) {
             if (oldCompany == null && newCompany != null) {
                 messageCompany = "Добавить текущую компанию в карточку "
-                        + newCompany.getComanyName() + "?";
+                        + newCompany.getComanyName() + "? ";
 
                 flag = true;
             } else {
@@ -1581,7 +1581,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             + currentCompanyField.getValue().getComanyName()
                             + ", в резюме отмечена "
                             + newCompany.getComanyName()
-                            + ". Заменить?";
+                            + " ";
 
                     flag = true;
                 }
@@ -1606,22 +1606,35 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                         if (hostCandidateFromCV != null && hostSocialFromCandidate != null) {
                             if (hostCandidateFromCV.equals(hostSocialFromCandidate)) {
-//                                social.setNetworkURLS(sFromCV);
-//                                social.setNetworkName(sFromCV);
 
                                 flag = true;
 
                                 if (hostCandidateFromCV != null) {
                                     String messageSN = "";
 
-                                    if (hostCandidateFromCV.equals(hostSocialFromCandidate)) {
-                                        messageSN = "Ссылка на социальную сеть старая "
-                                                + socialOld
-//                                                + social.getSocialNetworkURL().getSocialNetwork()
-                                                + " новая "
-                                                + sFromCV;
+                                    if (socialOld != null) {
+                                        if (!sFromCV.equals(socialOld)) {
+                                            messageSN = "Ссылка на социальную сеть старая "
+                                                    + socialOld
+                                                    + " новая "
+                                                    + sFromCV + " ";
 
-                                        messageSocial.put(hostSocialFromCandidate, messageSN);
+                                            List<String> urls = new ArrayList<>();
+                                            urls.add(messageSN);
+                                            urls.add(socialOld);
+                                            urls.add(sFromCV);
+
+                                            messageSocial.put(hostSocialFromCandidate, urls);
+                                        }
+                                    } else {
+                                        messageSN = "Найдена новая ссылка: " + sFromCV + " ";
+
+                                        List<String> urls = new ArrayList<>();
+                                        urls.add(messageSN);
+                                        urls.add(socialOld);
+                                        urls.add(sFromCV);
+
+                                        messageSocial.put(hostSocialFromCandidate, urls);
                                     }
                                 }
                             }
@@ -1665,9 +1678,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
             if (messageSocial.size() > 0) {
-                for (Map.Entry<String, String> entry : messageSocial.entrySet()) {
+                for (Map.Entry<String, List<String>> entry : messageSocial.entrySet()) {
                     dialog.withParameter(InputParameter.booleanParameter(entry.getKey())
-                            .withCaption(entry.getValue()).withRequired(true));
+                            .withCaption(entry.getValue().get(0)).withRequired(true));
                 }
             }
 
@@ -1697,15 +1710,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                     HashMap<String, Boolean> getSocial = new HashMap<>();
                     if (messageSocial.size() > 0) {
-                        for (Map.Entry<String, String> entry : messageSocial.entrySet()) {
+                        for (Map.Entry<String, List<String>> entry : messageSocial.entrySet()) {
                             getSocial.put(entry.getKey(), closeEvent.getValue(entry.getKey()));
                         }
 
                         for (SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
                             for (Map.Entry<String, Boolean> entry : getSocial.entrySet()) {
-                                if(social.getSocialNetworkURL().getSocialNetwork().equals(entry.getKey())) {
-                                    if(entry.getValue()) {
-                                        social.setNetworkURLS(messageSocial.get(entry.getKey()));
+                                if (social.getSocialNetworkURL().getSocialNetworkURL().contains(entry.getKey())) {
+                                    if (entry.getValue()) {
+                                        social.setNetworkURLS(messageSocial.get(entry.getKey()).get(2));
                                     }
                                 }
                             }

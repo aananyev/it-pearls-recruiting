@@ -9,7 +9,7 @@ import com.haulmont.cuba.core.global.DeletePolicy;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@NamePattern("%s|positionRuName")
+@NamePattern("%s / %s|positionRuName,positionEnName")
 @Table(name = "ITPEARLS_POSITION", indexes = {
         @Index(name = "IDX_ITPEARLS_POSITION_ID", columnList = "ID"),
         @Index(name = "IDX_ITPEARLS_POSITION_RU_NAME", columnList = "POSITION_RU_NAME"),
