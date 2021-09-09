@@ -516,6 +516,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if(!entity.getOpenClose()) {
                 entity.getProjectName().setProjectIsClosed(false);
             }
+
+            openPositionsDl.load();
         });
 
         return retButton;
@@ -658,11 +660,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     "Изменен приоритет вакансии <b>"
                             + openPositionsTable.getSingleSelected().getVacansyName()
                             + "</b> на <b>" + result.get() + "</b>"));
+
+            openPositionsDl.load();
         });
 
         retField.setLookupSelectHandler(e -> {
             openPositionsTable.getSingleSelected().setPriority((int) retField.getValue());
             dataManager.commit(entity);
+            openPositionsDl.load();
         });
 
         retField.setOptionIconProvider(g -> {

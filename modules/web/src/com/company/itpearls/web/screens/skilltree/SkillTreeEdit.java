@@ -70,29 +70,6 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
 
         return imageUrl;
     }
-/*
-    @Subscribe("skillNameField")
-    public void onSkillNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        String wikipedia = "https://ru.wikipedia.org/wiki/";
-        String setUrl = wikipedia + event.getValue().replace(" ", "_").trim();
-
-        if(event.getValue() != null) {
-            if(getEditedEntity().getWikiPage() != null) {
-                if (getEditedEntity().getWikiPage().equals(setUrl)) {
-                    wikiPateField.setValue(setUrl);
-                } else {
-                    dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
-                            .withCaption("ВНИМАНИЕ")
-                            .withMessage("Поле \"Ссылка на Wiki\" заполнено.\nВнести туда новые данные?")
-                            .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                                        wikiPateField.setValue(setUrl);
-                                    }),
-                                    new DialogAction((DialogAction.Type.NO)))
-                            .show();
-                }
-            }
-        }
-    } */
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -141,6 +118,4 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
             setLogo();
         }
     }
-
-
 }

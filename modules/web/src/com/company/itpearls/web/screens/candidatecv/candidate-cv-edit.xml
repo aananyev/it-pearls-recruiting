@@ -177,6 +177,13 @@
                                            property="linkOriginalCv"
                                            caption="mainMsg://msgLinkOriginalCV"
                                            align="MIDDLE_LEFT"/>
+                                <button id="loadToCVTextArea"
+                                        icon="font-icon:DOWNLOAD"
+                                        align="BOTTOM_LEFT"
+                                        caption="msg://msgLoadToCVTextArea"
+                                        enable="false"
+                                        description="msg://msgLoarToTextAreaDecription"
+                                        invoke="loadToCVTextArea"/>
                                 <link id="originalCVLink"
                                       icon="font-icon:FILE_WORD_O"
                                       align="BOTTOM_LEFT"

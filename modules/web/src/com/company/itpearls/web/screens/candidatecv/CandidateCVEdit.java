@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.candidatecv;
 
 import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
+import com.company.itpearls.core.WebLoadService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.*;
@@ -24,6 +25,8 @@ import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -89,44 +92,14 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private Logger log;
 
+    static String referer = "http://www.google.com";
+    @Inject
+    private Button loadToCVTextArea;
+    @Inject
+    private WebLoadService webLoadService;
+
     @Subscribe
     public void onInit(InitEvent event) {
-/*        fileOriginalCVField.addFileUploadSucceedListener(uploadSucceedEvent -> {
-            File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
-            String textResume = "";
-
-            textResume = parsePdfCV(loadFile);
-            candidateCVRichTextArea.setValue(textResume);
-
-            FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
-            candidateCVDc.getItem().setOriginalFileCV(fd);
-
-            try {
-                fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
-                dataManager.commit(fd);
-
-                notifications.create()
-                        .withType(Notifications.NotificationType.TRAY)
-                        .withCaption("Uploaded file: " + fileOriginalCVField.getFileName())
-                        .show();
-            } catch (FileStorageException e) {
-                throw new RuntimeException("Error saving file to FileStorage", e);
-            }
-
-            rescanResume();
-
-        });
-
-        fileOriginalCVField.addFileUploadErrorListener(uploadErrorEvent ->
-                notifications.create()
-                        .withCaption("Ошибка загрузки файла " + fileOriginalCVField.getFileName())
-                        .show());
-
-
-        fileCVField.addFileUploadErrorListener(uploadErrorEvent ->
-                notifications.create()
-                        .withCaption("Ошибка загрузки файла " + fileCVField.getFileName())
-                        .show());*/
     }
 
     @Install(to = "candidateCVFieldOpenPosition", subject = "optionIconProvider")
@@ -155,7 +128,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         textResume = parsePdfCV(file);
         candidateCVRichTextArea.setValue(textResume);
-
     }
 
     @Subscribe("textFieldIOriginalCV")
@@ -163,8 +135,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         if (textFieldIOriginalCV.getValue() != null) {
             originalCVLink.setUrl(textFieldIOriginalCV.getValue());
             originalCVLink.setVisible(true);
-        } else
+            loadToCVTextArea.setEnabled(true);
+        } else {
             originalCVLink.setVisible(false);
+            loadToCVTextArea.setEnabled(false);
+        }
     }
 
     @Subscribe("textFieldITPearlsCV")
@@ -305,38 +280,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-/*
-    @Subscribe("fileOriginalCVField")
-    public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        File parseFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
-        String textResume = "";
-
-        textResume = parsePdfCV(parseFile);
-        candidateCVRichTextArea.setValue(textResume);
-
-        File loadFile = fileUploadingAPI.getFile(fileOriginalCVField.getFileId());
-        FileDescriptor fd = fileOriginalCVField.getFileDescriptor();
-
-        CommitContext commitContext = new CommitContext();
-        commitContext.addInstanceToCommit(getEditedEntity());
-        commitContext.addInstanceToCommit(fd);
-
-
-        try {
-            fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fd);
-            dataManager.commit(commitContext);
-
-            notifications.create()
-                    .withType(Notifications.NotificationType.TRAY)
-                    .withCaption("Uploaded file: " + fileOriginalCVField.getFileName())
-                    .show();
-        } catch (FileStorageException e) {
-            throw new RuntimeException("Error saving file to FileStorage", e);
-        }
-
-        rescanResume();
-    } */
-
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
         notifications.create()
@@ -457,7 +400,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         List<SkillTree> skillTrees = rescanResume();
         String inputText = "";
 
-        if(candidateCVFieldOpenPosition.getValue().getComment() != null) {
+        if (candidateCVFieldOpenPosition.getValue().getComment() != null) {
             inputText = Jsoup.parse(candidateCVFieldOpenPosition.getValue().getComment()).text();
         }
 
@@ -517,15 +460,28 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         rescanResume();
     }
 
-    public void resumeRecognition() { /*
-        Screen resumeRecognition = screenBuilders.screen(this)
-                .withScreenClass(ResumeRecognition.class)
-                .build()
-                .show(); */
-
+    public void resumeRecognition() {
         machRegexpFromCV.setValue(parseCVService.parseEmail(candidateCVRichTextArea.getValue())
                 + " "
                 + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
+    }
 
+    public void loadToCVTextArea() {
+        Document doc = null;
+        try {
+/*            doc = Jsoup.connect(textFieldIOriginalCV.getValue())
+                    .userAgent("Chrome/4.0.249.0 Safari/532.5")
+                    .referrer(referer)
+                    .get();
+
+            Elements elements = doc.select("div#mw-content-text.mw-content-ltr"); */
+            candidateCVRichTextArea.setValue(webLoadService.getCVWebPage(textFieldIOriginalCV.getValue()));
+        } catch (IOException|NullPointerException e) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withDescription("Ошибка загрузки страницы: " + textFieldIOriginalCV.getValue())
+                    .show();
+
+            e.printStackTrace();
+        }
     }
 }

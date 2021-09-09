@@ -1183,6 +1183,17 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         });
     }
 
+    @Subscribe("showOnlyWithMyParticipationCheckBox")
+    public void onShowOnlyWithMyParticipationCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if(event.getValue()) {
+            jobCandidatesDl.setParameter("recrutier", userSession.getUser());
+        } else {
+            jobCandidatesDl.removeParameter("recrutier");
+        }
+
+        jobCandidatesDl.load();
+    }
+
     public void quickLoadCVButton() {
     }
 }

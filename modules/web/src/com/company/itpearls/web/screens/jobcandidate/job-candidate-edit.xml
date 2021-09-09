@@ -76,8 +76,7 @@
                 <property name="companyOwnership" view="_minimal"/>
             </view>
             <loader id="currentCompaniesLc">
-                <query><![CDATA[select e from itpearls_Company e
-order by e.comanyName]]></query>
+                <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City">
@@ -88,8 +87,7 @@ order by e.comanyName]]></query>
             </view>
             <loader id="citiesDl">
                 <query>
-                    <![CDATA[select e from itpearls_City e
-order by e.cityRuName]]>
+                    <![CDATA[select e from itpearls_City e order by e.cityRuName]]>
                 </query>
             </loader>
         </collection>

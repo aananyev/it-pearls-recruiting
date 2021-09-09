@@ -1348,6 +1348,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 scanContactsFromCVs();
             });
         }
+
+        jobCandidateDl.load();
     }
 
     @Subscribe(id = "jobCandidateCandidateCvsDc", target = Target.DATA_CONTAINER)

@@ -30,6 +30,12 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
+                                <c:where>e in (select k.candidate
+                                    from itpearls_IteractionList k
+                                    where k.recrutier = :recrutier)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
                                 <c:where>e in (select g.candidate
                                     from itpearls_CandidateCV g
                                     where g.candidate = :candidateCV)
@@ -136,6 +142,10 @@
                           align="MIDDLE_LEFT"
                           width="AUTO"
                           caption="mainMsg://msgVisibleOnlyMyCandidate"/>
+                <checkBox id="showOnlyWithMyParticipationCheckBox"
+                          align="MIDDLE_LEFT"
+                          width="AUTO"
+                          caption="msg://msgShowOnlyWithMyParticipation"/>
                 <checkBox id="checkBoxOnWork"
                           align="MIDDLE_LEFT"
                           width="AUTO"
