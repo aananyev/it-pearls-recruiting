@@ -617,6 +617,12 @@
                         <column id="companyName"
                                 maximumWidth="200px"
                                 property="vacancy.projectName.projectDepartment.companyName.comanyName"/>
+                        <column id="commentColumn"
+                                maximumWidth="80px"
+                                width="60px"
+                                caption="msg://msgIsComment">
+                            <iconRenderer/>
+                        </column>
                         <column id="recrutier"
                                 property="recrutier"/>
                         <column id="dateIteraction"

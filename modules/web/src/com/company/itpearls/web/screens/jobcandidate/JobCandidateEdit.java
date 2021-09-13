@@ -1986,4 +1986,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         return link;
     }
+
+    @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "descriptionProvider")
+    private String jobCandidateIteractionListTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
+        return iteractionList.getComment() != null ? Jsoup.parse(iteractionList.getComment()).text() : null;
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "columnGenerator")
+    private Icons.Icon jobCandidateIteractionListTableCommentColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        return event.getItem().getComment() != null ? CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "styleProvider")
+    private String jobCandidateIteractionListTableCommentColumnStyleProvider(IteractionList iteractionList) {
+        return iteractionList.getComment() != null ? "pic-center-large-green" : "pic-center-large-red";
+    }
+
+
 }

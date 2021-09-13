@@ -475,8 +475,19 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     .get();
 
             Elements elements = doc.select("div#mw-content-text.mw-content-ltr"); */
-            candidateCVRichTextArea.setValue(webLoadService.getCVWebPage(textFieldIOriginalCV.getValue()));
-        } catch (IOException|NullPointerException e) {
+            String retStr = webLoadService.getCVWebPage(textFieldIOriginalCV.getValue());
+
+            if (candidateCVRichTextArea.getValue() == null) {
+                candidateCVRichTextArea.setValue(retStr + "<br><br>Ссылка: " + textFieldIOriginalCV.getValue());
+            } else {
+                dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                        .withMessage("Заменить старый текст резюме на новый?")
+                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                            candidateCVRichTextArea.setValue(retStr);
+                        }), new DialogAction(DialogAction.Type.NO))
+                .show();
+            }
+        } catch (IOException | NullPointerException e) {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withDescription("Ошибка загрузки страницы: " + textFieldIOriginalCV.getValue())
                     .show();

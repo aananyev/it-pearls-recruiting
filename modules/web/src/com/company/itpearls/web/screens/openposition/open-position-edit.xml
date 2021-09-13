@@ -477,7 +477,7 @@
                                                   property="comment"
                                                   width="100%"
                                                   box.expandRatio="1"
-                                                  height="350px"
+                                                  height="300px"
                                                   required="true"/>
                                 </tab>
                                 <tab id="openPositionEnTabAccordion"
@@ -487,7 +487,7 @@
                                                   property="commentEn"
                                                   width="100%"
                                                   box.expandRatio="1"
-                                                  height="350px"
+                                                  height="300px"
                                                   required="false"/>
                                 </tab>
                                 <tab id="openPositionStandartDescriptionAccorden"
@@ -495,7 +495,7 @@
                                     <richTextArea id="openPositionStandartDescriptionRichTextArea"
                                                   width="100%"
                                                   box.expandRatio="1"
-                                                  height="350px"
+                                                  height="300px"
                                                   editable="false"/>
                                 </tab>
                                 <tab id="openPositionWhoIsThisGuyAccorden"
@@ -503,7 +503,7 @@
                                     <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
                                                   width="100%"
                                                   box.expandRatio="1"
-                                                  height="350px"
+                                                  height="300px"
                                                   editable="false"/>
                                 </tab>
                             </accordion>

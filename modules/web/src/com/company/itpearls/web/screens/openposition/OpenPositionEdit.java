@@ -172,6 +172,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     static String ADMINISTRATOR = "Administrators";
     static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
     private OpenPosition beforeEdit = null;
+    List<SkillTree> skillTrees;
     @Inject
     private Logger log;
     @Inject
@@ -462,8 +463,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         if (openPositionRichTextArea.getValue() != null &&
-                !openPositionRichTextArea.getValue().trim().equals(""))
+                !openPositionRichTextArea.getValue().trim().equals("")) {
             rescanJobDescription();
+
+            openPositionRichTextArea.setValue(showKeyCompetition(openPositionRichTextArea.getValue()));
+        }
+    }
+
+    private String showKeyCompetition(String value) {
+
+        for(SkillTree skillTree : skillTrees) {
+            String keyWithStyle = "<b><i><u>"
+                    + skillTree.getSkillName()
+                    + "</u></i></b>";
+            if(!value.contains(keyWithStyle)) {
+                value.replaceAll(skillTree.getSkillName(), keyWithStyle);
+            }
+        }
+
+        return value;
     }
 
     private void sendMessage() {
@@ -1105,6 +1123,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         setTopLabel();
 
+        if (openPositionRichTextArea.getValue() != null) {
+            openPositionRichTextArea.setValue(showKeyCompetition(openPositionRichTextArea.getValue()));
+        }
+
         openClosePositionCheckBox.setValue(openClosePositionCheckBox.getValue() == null ? false : true);
     }
 
@@ -1463,7 +1485,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     public void rescanJobDescription() {
         String inputText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
-        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
+        skillTrees = pdfParserService.parseSkillTree(inputText);
         getEditedEntity().setSkillsList(skillTrees);
     }
 
