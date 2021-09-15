@@ -7,6 +7,7 @@ import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -38,6 +39,9 @@ public class OpenPosition extends StandardEntity {
     @NotNull
     @Column(name = "REMOTE_WORK", nullable = false)
     protected Integer remoteWork;
+
+    @Column(name = "REGISTRATION_FOR_WORK")
+    private Integer registrationForWork;
 
     @Column(name = "REMOTE_COMMENT", length = 40)
     protected String remoteComment;
@@ -94,6 +98,7 @@ public class OpenPosition extends StandardEntity {
     protected String commentEn;
 
     @Column(name = "SHORT_DESCRIPTION", length = 250)
+    @Length(message = "{msg://itpearls_OpenPosition.shortDescription.validation.Length}", max = 250)
     protected String shortDescription;
 
     @Lob
@@ -161,6 +166,14 @@ public class OpenPosition extends StandardEntity {
     @Lob
     @Column(name = "MEMO_FOR_INTERVIEW")
     private String memoForInterview;
+
+    public Integer getRegistrationForWork() {
+        return registrationForWork;
+    }
+
+    public void setRegistrationForWork(Integer registrationForWork) {
+        this.registrationForWork = registrationForWork;
+    }
 
     public Boolean getNeedMemoForInterview() {
         return needMemoForInterview;

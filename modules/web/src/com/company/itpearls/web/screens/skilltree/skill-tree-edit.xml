@@ -76,6 +76,13 @@ order by e.skillName]]>
                                    trim="true"
                                    dataContainer="skillTreeDc"
                                    property="wikiPage" width="50%"/>
+                        <textField id="styleHighlightingField"
+                                   caption="msg://msgStyleHighlighting"
+                                   dataContainer="skillTreeDc"
+                                   property="styleHighlighting"
+                                   maxLength="64"
+                                   align="BOTTOM_LEFT"
+                                   width="50%"/>
                         <button id="parseWikiText"
                                 align="BOTTOM_LEFT"
                                 caption="msg://msgParseWikiText"

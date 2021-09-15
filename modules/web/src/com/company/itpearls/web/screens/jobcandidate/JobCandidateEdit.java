@@ -222,25 +222,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             for (SocialNetworkType s : socialNetworkType) {
                 SocialNetworkURLs socialNetworkURLs = new SocialNetworkURLs();
                 socialNetworkURLs.setSocialNetworkURL(s);
-//                socialNetworkURLs.setNetworkURLS(s.getSocialNetworkURL());
                 socialNetworkURLs.setJobCandidate(getEditedEntity());
                 socialNetworkURLs.setNetworkName(s.getSocialNetwork());
 
                 jobCandidateSocialNetworksDc.getMutableItems().add(socialNetworkURLs);
-/*                SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
-
-                socialNetworkURLs.setSocialNetworkURL(s);
-                socialNetworkURLs.setNetworkName(s.getSocialNetwork());
-                socialNetworkURLs.setJobCandidate(getEditedEntity());
-
-                jobCandidateSocialNetworksDc.getMutableItems().add(socialNetworkURLs);
-                sn.add(socialNetworkURLs); */
             }
 
             DataContext dc = socialNetworkURLsesDl.getDataContext();
-
             dc.setParent(dataContext);
-
             dataContext.merge(sn);
         }
 
@@ -1989,17 +1978,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null ? Jsoup.parse(iteractionList.getComment()).text() : null;
+        return iteractionList.getComment() != null && !iteractionList.getComment().equals("")? Jsoup.parse(iteractionList.getComment()).text() : null;
     }
 
     @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "columnGenerator")
     private Icons.Icon jobCandidateIteractionListTableCommentColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return event.getItem().getComment() != null ? CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+        return event.getItem().getComment() != null && !event.getItem().getComment().equals("")? CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
     }
 
     @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "styleProvider")
     private String jobCandidateIteractionListTableCommentColumnStyleProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null ? "pic-center-large-green" : "pic-center-large-red";
+        return iteractionList.getComment() != null && !iteractionList.getComment().equals("")? "pic-center-large-green" : "pic-center-large-red";
     }
 
 

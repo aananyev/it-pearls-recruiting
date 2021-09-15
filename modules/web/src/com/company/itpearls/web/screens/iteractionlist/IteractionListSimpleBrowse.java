@@ -7,6 +7,8 @@ import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -180,5 +182,22 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 .show();
 
         iteractionListsDl.load();
+    }
+
+    @Install(to = "iteractionListsTable.commentColumn", subject = "columnGenerator")
+    private Icons.Icon iteractionListsTableCommentColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        return (event.getItem().getComment() == null || event.getItem().getComment().equals("")) ?
+                CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+    }
+
+    @Install(to = "iteractionListsTable.commentColumn", subject = "styleProvider")
+    private String iteractionListsTableCommentColumnStyleProvider(IteractionList iteractionList) {
+        return iteractionList.getComment() != null && !iteractionList.getComment().equals("")? "pic-center-large-green" : "pic-center-large-red";
+    }
+
+    @Install(to = "iteractionListsTable.commentColumn", subject = "descriptionProvider")
+    private String iteractionListsTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
+        return iteractionList.getComment() != null || !iteractionList.getComment().equals("") ?
+                iteractionList.getComment() : null;
     }
 }

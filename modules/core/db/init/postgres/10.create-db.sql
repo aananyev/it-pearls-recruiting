@@ -348,6 +348,7 @@ create table ITPEARLS_SKILL_TREE (
     COMMENT text,
     WIKI_PAGE varchar(250),
     FILE_IMAGE_LOGO uuid,
+    STYLE_HIGHLIGHTING varchar(128),
     --
     primary key (ID)
 )^
@@ -415,6 +416,7 @@ create table ITPEARLS_OPEN_POSITION (
     OPEN_CLOSE boolean,
     VACANSY_NAME varchar(150) not null,
     REMOTE_WORK integer not null,
+    REGISTRATION_FOR_WORK integer,
     REMOTE_COMMENT varchar(40),
     COMMAND_CANDIDATE integer not null,
     SALARY_MIN decimal(19, 2),

@@ -162,7 +162,7 @@
             </vbox>
         </groupBox>
         <vbox id="tabSheetGroupBox"
-                  expand="tabSheetOpenPosition">
+              expand="tabSheetOpenPosition">
             <tabSheet id="tabSheetOpenPosition"
                       stylename="framed">
                 <tab id="tabOpenPosition"
@@ -188,11 +188,6 @@
                                       property="internalProject"
                                       caption="msg://msgInternalProject"
                                       align="BOTTOM_LEFT"/>
-                        </hbox>
-                        <hbox id="spaceBox"/>
-                        <hbox id="commandFieldHBox"
-                              spacing="true"
-                              align="MIDDLE_RIGHT">
                             <radioButtonGroup id="commandOrPosition"
                                               orientation="horizontal"
                                               required="true"
@@ -207,6 +202,18 @@
                                                align="BOTTOM_LEFT"
                                                caption="msg://msgCommand"
                                                optionsContainer="openPositionParentDc"/>
+                        </hbox>
+                        <hbox id="spaceBox"/>
+                        <hbox id="commandFieldHBox"
+                              spacing="true"
+                              align="MIDDLE_RIGHT">
+                            <lookupField id="registrationForWorkField"
+                                         dataContainer="openPositionDc"
+                                         property="registrationForWork"
+                                         caption="msg://msgRegistrationForWork"
+                                         required="true"
+                                         align="BOTTOM_LEFT"
+                                         width="100%"/>
                             <lookupField id="priorityField"
                                          dataContainer="openPositionDc"
                                          property="priority"
@@ -467,7 +474,8 @@
                                               property="commandExperience"
                                               caption="msg://msgCommandExperience"/>
                         </groupBox>
-                        <hbox spacing="true" width="100%">
+                        <hbox spacing="true"
+                              width="100%">
                             <accordion id="openPositionAccordion"
                                        height="100%">
                                 <tab id="openPositionRuTabAccordion"

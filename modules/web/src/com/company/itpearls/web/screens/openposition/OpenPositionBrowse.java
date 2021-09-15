@@ -974,8 +974,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             openPositionsDl.setParameter("internalProject", false);
         } */
 
-        openPositionsDl.setParameter("internalProject", false);
-        openPositionsDl.load();
+//        openPositionsDl.setParameter("internalProject", false);
+//        openPositionsDl.load();
     }
 
     private void setSubcribersFilter() {

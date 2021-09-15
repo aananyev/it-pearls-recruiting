@@ -782,6 +782,13 @@ rating_battery_yellow_3:before {
     border-radius: 6px;
 }
 
+.highlighting-competence-red {
+    border: 1px solid red;
+    padding: 3px;
+    white-space: nowrap;
+    height: 20px;
+}
+
 .v-caption-shift-field {
     white-space: pre;
 }

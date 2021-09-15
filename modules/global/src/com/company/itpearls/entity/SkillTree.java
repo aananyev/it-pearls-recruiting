@@ -8,6 +8,7 @@ import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -61,6 +62,18 @@ public class SkillTree extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_IMAGE_LOGO")
     protected FileDescriptor fileImageLogo;
+
+    @Column(name = "STYLE_HIGHLIGHTING", length = 128)
+    @Length(message = "{msg://itpearls_SkillTree.styleHighlighting.validation.Length}", max = 64)
+    private String styleHighlighting;
+
+    public String getStyleHighlighting() {
+        return styleHighlighting;
+    }
+
+    public void setStyleHighlighting(String styleHighlighting) {
+        this.styleHighlighting = styleHighlighting;
+    }
 
     public List<JobCandidate> getCandidates() {
         return candidates;

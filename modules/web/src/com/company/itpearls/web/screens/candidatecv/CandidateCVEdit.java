@@ -173,6 +173,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         setLetterRecommendation();
     }
 
+    private void setColorHighlightingCompetencies() {
+        if (candidateCVRichTextArea.getValue() != null) {
+            String htmlText = getEditedEntity().getTextCV();
+            htmlText = parseCVService.colorHighlightingCompetencies(htmlText, "browb");
+            htmlText = parseCVService.colorHighlingCompany(htmlText, "green");
+//            htmlText = parseCVService.colorHighlingPositions(htmlText, "blue");
+
+            candidateCVRichTextArea.setValue(htmlText);
+        }
+    }
+
     private void setCVRecommendation() {
         String text = "<ol>" +
                 "<li>Резюме должно быть информативным и кратким, даже если за плечами 15+ лет опыта. Сфокусируйтесь на трех последних местах работы, это интересует работодателя в первую очередь.</li>" +
@@ -216,6 +227,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onAfterShow1(AfterShowEvent event) {
         if (candidateCVRichTextArea.getValue() != null)
             rescanResume();
+        setColorHighlightingCompetencies();
     }
 
     private void setTemplateLetter() {
@@ -485,7 +497,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                         .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                             candidateCVRichTextArea.setValue(retStr);
                         }), new DialogAction(DialogAction.Type.NO))
-                .show();
+                        .show();
             }
         } catch (IOException | NullPointerException e) {
             notifications.create(Notifications.NotificationType.ERROR)

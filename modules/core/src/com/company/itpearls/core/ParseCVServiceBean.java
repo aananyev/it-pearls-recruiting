@@ -1,6 +1,8 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.Company;
+import com.company.itpearls.entity.Position;
+import com.company.itpearls.entity.SkillTree;
 import com.haulmont.cuba.core.global.DataManager;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ public class ParseCVServiceBean implements ParseCVService {
     static String phonePtrn = "[7|8][ (-]?[\\d]{3}[ )-]?[\\d]{3}[ -]?[\\d]{2}[ -]?[\\d]{2}[\\D]";
     @Inject
     private DataManager dataManager;
+    @Inject
+    private PdfParserService pdfParserService;
 
     @Override
     public String parseEmail(String cv) {
@@ -68,17 +72,17 @@ public class ParseCVServiceBean implements ParseCVService {
         String taboo = " ,.{}()[]-";
         String newStr = "";
 
-        if(input != null) {
+        if (input != null) {
             for (int i = 0; i < input.length(); i++) {
                 Boolean flagTaboo = true;
 
                 for (char c : taboo.toCharArray()) {
-                    if(input.charAt(i) == c) {
+                    if (input.charAt(i) == c) {
                         flagTaboo = false;
                     }
                 }
 
-                if(flagTaboo) {
+                if (flagTaboo) {
                     newStr += input.charAt(i);
                 }
             }
@@ -113,20 +117,128 @@ public class ParseCVServiceBean implements ParseCVService {
         return result;
     }
 
+    private List<Company> parseCompaniesPriv(String textCV) {
+        List<Company> companies = dataManager.load(Company.class).list();
+        List<Company> retCompanies = new ArrayList<>();
+
+        for (Company company : companies) {
+            if (company != null) {
+                if (company.getComanyName() != null) {
+                    if (textCV.contains(company.getComanyName())) {
+                        retCompanies.add(company);
+                    }
+                }
+            }
+        }
+
+        return retCompanies;
+    }
+
+    private List<Position> parsePosition(String textCV) {
+        List<Position> positions = dataManager.load(Position.class).list();
+        List<Position> retPositions = new ArrayList<>();
+
+        for (Position position : positions) {
+            if (position != null) {
+                if (position.getPositionEnName() != null) {
+                    if (textCV.contains(position.getPositionEnName())) {
+                        retPositions.add(position);
+                    }
+                }
+            }
+        }
+
+        return retPositions;
+    }
+
+    @Override
+    public List<Position> parsePositions(String textCV) {
+        return parsePositions(textCV);
+    }
+
+    @Override
+    public List<Company> parseCompanies(String textCV) {
+        return parseCompaniesPriv(textCV);
+    }
+
+
     @Override
     public Company parseCompany(String textCV) {
         List<Company> companies = dataManager.load(Company.class).list();
         Company retCompany = null;
 
         for (Company company : companies) {
-            if (company.getComanyName() != null) {
-                if (textCV.contains(company.getComanyName())) {
-                    retCompany = company;
-                    break;
+            if (company != null) {
+                if (company.getComanyName() != null) {
+                    if (textCV.contains(company.getComanyName())) {
+                        retCompany = company;
+                        break;
+                    }
                 }
             }
         }
 
         return retCompany;
     }
+
+    @Override
+    public String colorHighlightingCompetencies(String htmlText, String color) {
+        String retStr = htmlText;
+
+        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(htmlText);
+
+        for (SkillTree skillTree : skillTrees) {
+            String keyWithStyle = "<b><font color=\""
+                    + color
+                    + "\" face=\"serif\">"
+                    + skillTree.getSkillName()
+                    + "</font></b>";
+            if (!retStr.contains(keyWithStyle)) {
+                retStr = retStr.replaceAll(skillTree.getSkillName(), keyWithStyle);
+            }
+        }
+
+        return retStr;
+    }
+
+    @Override
+    public String colorHighlingCompany(String htmlText, String color) {
+        String retStr = htmlText;
+
+        List<Company> companies = parseCompaniesPriv(htmlText);
+
+        for (Company company : companies) {
+            String keyWithStyle = "<b><font color=\""
+                    + color
+                    + "\" face=\"serif\">"
+                    + company.getComanyName()
+                    + "</font></b>";
+            if (!retStr.contains(keyWithStyle)) {
+                retStr = retStr.replaceAll(company.getComanyName(), keyWithStyle);
+            }
+        }
+
+        return retStr;
+    }
+
+    @Override
+    public String colorHighlingPositions(String htmlText, String color) {
+        String retStr = htmlText;
+
+        List<Position> positions = parsePositions(htmlText);
+
+        for (Position position : positions) {
+            String keyWithStyle = "<b><font color=\""
+                    + color
+                    + "\" face=\"serif\">"
+                    + position.getPositionEnName()
+                    + "</font></b>";
+            if (!retStr.contains(keyWithStyle)) {
+                retStr = retStr.replaceAll(position.getPositionEnName(), keyWithStyle);
+            }
+        }
+
+        return retStr;
+    }
+
 }

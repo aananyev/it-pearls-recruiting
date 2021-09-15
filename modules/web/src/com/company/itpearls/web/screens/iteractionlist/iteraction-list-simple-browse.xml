@@ -21,7 +21,7 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="1000"
+                width="1100"
                 forceDialog="true"/>
     <layout expand="iteractionListsTable"
             spacing="true">
@@ -78,6 +78,12 @@
                         maximumWidth="280px"
                         minimumWidth="150px"
                         id="projectOwner"/>
+                <column id="commentColumn"
+                        width="60px"
+                        maximumWidth="80px"
+                        caption="msg://msgComment">
+                    <iconRenderer/>
+                </column>
                 <column property="recrutier"
                         maximumWidth="200px"
                         minimumWidth="150px"

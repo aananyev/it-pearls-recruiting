@@ -177,6 +177,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Logger log;
     @Inject
     private CheckBox needMemoCheckBox;
+    @Inject
+    private LookupField<Integer> registrationForWorkField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -449,8 +451,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         }
 
-        if(!event.getValue()) {
-            if(getEditedEntity().getProjectName() != null) {
+        if (!event.getValue()) {
+            if (getEditedEntity().getProjectName() != null) {
                 getEditedEntity().getProjectName().setProjectIsClosed(false);
             }
         }
@@ -471,13 +473,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private String showKeyCompetition(String value) {
-
-        for(SkillTree skillTree : skillTrees) {
-            String keyWithStyle = "<b><i><u>"
+        for (SkillTree skillTree : skillTrees) {
+            String keyWithStyle = "<b><font color=\"brown>\" face=\"serif\">"
                     + skillTree.getSkillName()
-                    + "</u></i></b>";
-            if(!value.contains(keyWithStyle)) {
-                value.replaceAll(skillTree.getSkillName(), keyWithStyle);
+                    + "</font></b>";
+            if (!value.contains(keyWithStyle)) {
+                value = value.replaceAll(skillTree.getSkillName(), keyWithStyle);
             }
         }
 
@@ -533,7 +534,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("memoForInterviewRichTextArea")
     public void onMemoForInterviewRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
-        if(event.getValue() != null && !event.getValue().equals("")) {
+        if (event.getValue() != null && !event.getValue().equals("")) {
             needMemoCheckBox.setValue(true);
         } else {
             needMemoCheckBox.setValue(false);
@@ -564,23 +565,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void publishEventMessage(BeforeCommitChangesEvent event) {
-        if(getEditedEntity().getOpenClose() == null) {
+        if (getEditedEntity().getOpenClose() == null) {
             getEditedEntity().setOpenClose(false);
         }
 
-        if(PersistenceHelper.isNew(getEditedEntity())) {
-            if(getEditedEntity().getOpenClose()) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            if (getEditedEntity().getOpenClose()) {
                 sendClosePositionMessage();
             } else {
                 sendOpenPositionMessage();
             }
         } else {
-            if(getEditedEntity().getOpenClose()) {
-                if(!beforeEdit.getOpenClose().equals(getEditedEntity().getOpenClose())) {
+            if (getEditedEntity().getOpenClose()) {
+                if (!beforeEdit.getOpenClose().equals(getEditedEntity().getOpenClose())) {
                     sendClosePositionMessage();
                 }
             } else {
-                if(!beforeEdit.getOpenClose().equals(getEditedEntity().getOpenClose())) {
+                if (!beforeEdit.getOpenClose().equals(getEditedEntity().getOpenClose())) {
                     sendOpenPositionMessage();
                 }
             }
@@ -694,6 +695,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setRadioButtons() {
+        Map<String, Integer> rwMap = new LinkedHashMap<>();
+
+        rwMap.put("Аутстаф", 0);
+        rwMap.put("В штат заказчику", 1);
+        rwMap.put("Возможны оба варианта", 2);
+
+        registrationForWorkField.setOptionsMap(rwMap);
+
         Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
         priorityMap.put("Paused", 0);
@@ -1232,6 +1241,48 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void setGroupSubscribeButton() {
 //        groupSubscribe.setVisible(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
 //                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP));
+    }
+
+    @Install(to = "registrationForWorkField", subject = "optionIconProvider")
+    private String registrationForWorkFieldOptionImageProvider(Integer integer) {
+        String returnIcon = "";
+
+        switch (integer) {
+            case 0:
+                returnIcon = "font-icon:PLUS_CIRCLE";
+                break;
+            case 1:
+                returnIcon = "font-icon:MINUS_CIRCLE";
+                break;
+            case 2:
+                returnIcon = "font-icon:QUESTION_CIRCLE";
+                break;
+            default:
+                returnIcon = "font-icon:QUESTION_CIRCLE";
+        }
+
+        return returnIcon;
+    }
+
+    @Install(to = "registrationForWorkField", subject = "optionStyleProvider")
+    private String registrationForWorkFieldOptionStyleProvider(Integer integer) {
+        String returnIcon = "";
+
+        switch (integer) {
+            case 0:
+                returnIcon = "open-position-pic-center-large-green";
+                break;
+            case 1:
+                returnIcon = "open-position-pic-center-large-red";
+                break;
+            case 2:
+                returnIcon = "open-position-pic-center-large-orange";
+                break;
+            default:
+                returnIcon = "open-position-pic-center-large-yellow";
+        }
+
+        return returnIcon;
     }
 
     @Install(to = "remoteWorkField", subject = "optionIconProvider")
