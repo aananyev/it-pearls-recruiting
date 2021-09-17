@@ -97,6 +97,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Button loadToCVTextArea;
     @Inject
     private WebLoadService webLoadService;
+    @Inject
+    private Button convertToTextButton;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -168,15 +170,37 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         quoteTextArea.setValue(messageBundle.getMessage("msgSalesCV"));
+        candidateCVRichTextArea.setValue(getEditedEntity().getTextCV());
+
+        candidateCVRichTextArea.addValidator(value -> {
+            if (value == null || value.equals("")) {
+                convertToTextButton.setEnabled(false);
+            } else {
+                convertToTextButton.setEnabled(true);
+            }
+        });
 
         setCVRecommendation();
         setLetterRecommendation();
     }
 
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+    }
+
     private void setColorHighlightingCompetencies() {
         if (candidateCVRichTextArea.getValue() != null) {
-            String htmlText = getEditedEntity().getTextCV();
-            htmlText = parseCVService.colorHighlightingCompetencies(htmlText, "browb");
+            String htmlText = candidateCVRichTextArea.getValue();
+            htmlText = parseCVService.colorHighlightingCompetencies(htmlText, "brown");
+
+            if(candidateCVFieldOpenPosition.getValue() != null) {
+                htmlText = parseCVService.colorHighlightingCompetencies(candidateCVFieldOpenPosition.getValue(),
+                        htmlText, "brown", "red");
+            } else {
+                htmlText = parseCVService.colorHighlightingCompetencies(htmlText, "brown");
+            }
+
             htmlText = parseCVService.colorHighlingCompany(htmlText, "green");
 //            htmlText = parseCVService.colorHighlingPositions(htmlText, "blue");
 
@@ -281,6 +305,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe("candidateCVFieldOpenPosition")
     public void onCandidateCVFieldOpenPositionValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
         setTemplateLetter();
+        setLetterRecommendation();
+
+        if(candidateCVRichTextArea.getValue() != null && !candidateCVRichTextArea.getValue().equals("")) {
+            setColorHighlightingCompetencies();
+        }
     }
 
     @Subscribe
@@ -505,6 +534,31 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     .show();
 
             e.printStackTrace();
+        }
+    }
+
+    Boolean flagHTML = true;
+
+    public void convertToText() {
+        if (flagHTML) {
+            candidateCVRichTextArea.setValue(Jsoup.parse(candidateCVRichTextArea.getValue()).text());
+            flagHTML = false;
+        } else {
+            candidateCVRichTextArea.setValue(getEditedEntity().getTextCV());
+            flagHTML = true;
+        }
+
+        setColorHighlightingCompetencies();
+    }
+
+
+
+    @Subscribe("candidateCVRichTextArea")
+    public void onCandidateCVRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() == null || event.getValue().equals("")) {
+            convertToTextButton.setEnabled(false);
+        } else {
+            convertToTextButton.setEnabled(true);
         }
     }
 }

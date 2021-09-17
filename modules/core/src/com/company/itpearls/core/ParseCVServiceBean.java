@@ -1,6 +1,7 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.Company;
+import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Position;
 import com.company.itpearls.entity.SkillTree;
 import com.haulmont.cuba.core.global.DataManager;
@@ -179,6 +180,49 @@ public class ParseCVServiceBean implements ParseCVService {
         }
 
         return retCompany;
+    }
+
+    @Override
+    public String colorHighlightingCompetencies(OpenPosition openPosition, String htmlText,
+                                                String color, String colorIfExist) {
+        String retStr = htmlText;
+
+        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(htmlText);
+        List<SkillTree> skillTreesFromOpenPosition = pdfParserService.parseSkillTree(openPosition.getComment());
+
+        for (SkillTree skillTree : skillTrees) {
+            String keyWithStyle;
+
+            if(skillContains(skillTreesFromOpenPosition, skillTree)) {
+                keyWithStyle = "<b><font color=\""
+                        + color
+                        + "\" face=\"serif\">"
+                        + skillTree.getSkillName()
+                        + "</font></b>";
+            } else {
+                keyWithStyle = "<b><font color=\""
+                        + colorIfExist
+                        + "\" face=\"serif\">"
+                        + skillTree.getSkillName()
+                        + "</font></b>";
+            }
+
+            if (!retStr.contains(keyWithStyle)) {
+                retStr = retStr.replaceAll(skillTree.getSkillName(), keyWithStyle);
+            }
+        }
+
+        return retStr;
+    }
+
+    private boolean skillContains(List<SkillTree> skillTreesFromOpenPosition, SkillTree skillTree) {
+        for(SkillTree st : skillTreesFromOpenPosition) {
+            if(st.getSkillName().equals(skillTree.getSkillName())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

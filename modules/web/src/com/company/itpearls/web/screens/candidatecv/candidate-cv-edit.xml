@@ -278,6 +278,11 @@
                                 caption="msg://msgResumeRecognition"
                                 align="BOTTOM_LEFT"
                                 invoke="resumeRecognition"/>
+                        <button id="convertToTextButton"
+                                caption="msg://msgConvertToText"
+                                align="BOTTOM_LEFT"
+                                enable="false"
+                                invoke="convertToText"/>
                     </hbox>
                     <hbox id="candidateCVHBox"
                           expand="candidateCVRichTextArea"
@@ -285,11 +290,11 @@
                           spacing="true"
                           width="100%">
                         <richTextArea id="candidateCVRichTextArea"
-                                      dataContainer="candidateCVDc"
-                                      property="textCV"
                                       width="100%"
                                       height="100%"
                                       box.expandRatio="4"
+                                      captionAsHtml="true"
+                                      descriptionAsHtml="true"
                                       required="true"/>
                         <richTextArea id="cvResomandation"
                                       width="100%"

@@ -1,6 +1,7 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.Company;
+import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Position;
 
 import java.util.List;
@@ -17,6 +18,9 @@ public interface ParseCVService {
     Company parseCompany(String textCV);
 
     String normalizePhoneStr(String phone);
+
+    String colorHighlightingCompetencies(OpenPosition openPosition, String htmlText,
+                                         String color, String colorIfExist);
 
     String colorHighlightingCompetencies(String htmlText, String color);
 
