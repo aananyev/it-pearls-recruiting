@@ -31,4 +31,8 @@ public interface ParseCVService {
     List<Company> parseCompanies(String textCV);
 
     String colorHighlingPositions(String htmlText, String color);
+
+    String br2nl(String html);
+
+    String nl2br(String html);
 }

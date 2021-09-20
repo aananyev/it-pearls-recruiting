@@ -25,11 +25,10 @@
                               height="100%"/>
             </tab>
         </tabSheet>
-<!--        <hbox id="lookupActions"
+        <hbox id="lookupActions"
               spacing="true"
               visible="false"
               align="TOP_RIGHT">
-            <button action="lookupCancelAction"/>
-        </hbox> -->
+        </hbox>
     </layout>
 </window>

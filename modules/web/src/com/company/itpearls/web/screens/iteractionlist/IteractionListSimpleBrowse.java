@@ -197,7 +197,11 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable.commentColumn", subject = "descriptionProvider")
     private String iteractionListsTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null || !iteractionList.getComment().equals("") ?
-                iteractionList.getComment() : null;
+        if(iteractionList.getComment() != null) {
+            return !iteractionList.getComment().equals("") ?
+                    iteractionList.getComment() : null;
+        } else {
+            return null;
+        }
     }
 }

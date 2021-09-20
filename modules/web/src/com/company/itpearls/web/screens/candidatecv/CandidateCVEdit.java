@@ -541,7 +541,20 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void convertToText() {
         if (flagHTML) {
-            candidateCVRichTextArea.setValue(Jsoup.parse(candidateCVRichTextArea.getValue()).text());
+            String break_line = "break_line";
+
+            String str = candidateCVRichTextArea.getValue()
+                    .replaceAll("<br>", break_line + break_line)
+                    .replaceAll("<li>", "<li> - ")
+                    .replaceAll("</p>", "</p>" + break_line + break_line)
+                    .replaceAll("</li>", "</li>" + break_line)
+                    .replaceAll("</dd>", "</dd>" + break_line)
+                    .replaceAll("</dt>", "</dt>" + break_line)
+                    .replaceAll("</dl>", "</dl>" + break_line)
+                    .replaceAll("</div>", "</div>" + break_line + break_line);
+            str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
+
+            candidateCVRichTextArea.setValue(str);
             flagHTML = false;
         } else {
             candidateCVRichTextArea.setValue(getEditedEntity().getTextCV());

@@ -6,6 +6,8 @@ import com.company.itpearls.entity.Position;
 import com.company.itpearls.entity.SkillTree;
 import com.haulmont.cuba.core.global.DataManager;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.safety.Whitelist;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -193,7 +195,7 @@ public class ParseCVServiceBean implements ParseCVService {
         for (SkillTree skillTree : skillTrees) {
             String keyWithStyle;
 
-            if(skillContains(skillTreesFromOpenPosition, skillTree)) {
+            if (skillContains(skillTreesFromOpenPosition, skillTree)) {
                 keyWithStyle = "<b><font color=\""
                         + color
                         + "\" face=\"sans-serif\""
@@ -218,8 +220,8 @@ public class ParseCVServiceBean implements ParseCVService {
     }
 
     private boolean skillContains(List<SkillTree> skillTreesFromOpenPosition, SkillTree skillTree) {
-        for(SkillTree st : skillTreesFromOpenPosition) {
-            if(st.getSkillName().equals(skillTree.getSkillName())) {
+        for (SkillTree st : skillTreesFromOpenPosition) {
+            if (st.getSkillName().equals(skillTree.getSkillName())) {
                 return true;
             }
         }
@@ -287,4 +289,27 @@ public class ParseCVServiceBean implements ParseCVService {
         return retStr;
     }
 
+    @Override
+    public String br2nl(String html) {
+        if (html == null)
+            return html;
+
+        Document document = Jsoup.parse(html);
+        document.outputSettings(new Document.OutputSettings().prettyPrint(false));//makes html() preserve linebreaks and spacing
+        document.select("br").append("\\n");
+        document.select("p").prepend("\\n\\n");
+        String s = document.html().replaceAll("\\\\n", "\n");
+
+        return Jsoup.clean(s, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
+    }
+
+    @Override
+    public String nl2br(String text) {
+        if (text == null)
+            return text;
+
+        String s = text.replaceAll("\n", "<br>");
+
+        return s;
+    }
 }
