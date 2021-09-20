@@ -427,6 +427,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Component editButton = createEditButton(entity);
         Component priorityField = createPriorityField(entity);
         Component openCloseButton = createOpenCloseButton(entity);
+        Component viewDescriptionButton = createViewDescriptionButton(entity);
 
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
         openCloseButton.setAlignment(Component.Alignment.TOP_RIGHT);
@@ -438,6 +439,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         buttonsHBox.add(priorityField);
         buttonsHBox.add(openCloseButton);
         buttonsHBox.add(editButton);
+        buttonsHBox.add(viewDescriptionButton);
 
         if (suitableButton != null)
             buttonsHBox.add(suitableButton);
@@ -456,6 +458,40 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         mainLayout.add(fragment);
 
         return mainLayout;
+    }
+
+    private Component createViewDescriptionButton(OpenPosition entity) {
+        Button retButton = uiComponents.create(Button.NAME);
+        retButton.setIcon(CubaIcon.STREET_VIEW.iconName());
+        retButton.setEnabled(openPositionsTable.getSingleSelected() != null);
+        retButton.setCaption("Описание");
+        retButton.setDescription("Просмотр описания вакансии и описания проекта");
+
+        retButton.addClickListener(e -> {
+
+            if(openPositionsTable.getSingleSelected() != null) {
+                QuickViewOpenPositionDescription quickViewOpenPositionDescription = screens.create(QuickViewOpenPositionDescription.class);
+                quickViewOpenPositionDescription.setJobDescription(openPositionsTable.getSingleSelected() != null ?
+                        openPositionsTable.getSingleSelected().getComment() : "");
+
+                if(openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() != null) {
+                    quickViewOpenPositionDescription.setProjectDescription(openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() != null ?
+                            openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() : "");
+                }
+
+                quickViewOpenPositionDescription.reloadDescriptions();
+                screens.show(quickViewOpenPositionDescription);
+
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("ВНИМАНИЕ")
+                        .withDescription("Куакую вакансию вы хотите просмотреть?")
+                        .show();
+            }
+
+        });
+
+        return retButton;
     }
 
 

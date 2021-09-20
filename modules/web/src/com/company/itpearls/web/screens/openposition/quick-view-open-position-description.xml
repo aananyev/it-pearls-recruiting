@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://quickViewOpenPositionDescription.caption"
+        messagesPack="com.company.itpearls.web.screens.openposition">
+    <dialogMode height="600"
+                forceDialog="true"
+                width="800"/>
+    <layout expand="jobDescriptionViewTab">
+        <tabSheet id="jobDescriptionViewTab"
+                  height="100%"
+                  stylename="framed"
+                  width="100%">
+            <tab id="jobDescriptionTab"
+                 caption="msg://msgjobDescriptionTab">
+                <richTextArea id="jobDesxriptionRichTextArea"
+                              width="100%"
+                              editable="false"
+                              height="100%"/>
+            </tab>
+            <tab id="projectDescription"
+                 caption="msg://msgProjectDescriptionTab">
+                <richTextArea id="projectDescriptionRichTextArea"
+                              width="100%"
+                              editable="false"
+                              height="100%"/>
+            </tab>
+        </tabSheet>
+<!--        <hbox id="lookupActions"
+              spacing="true"
+              visible="false"
+              align="TOP_RIGHT">
+            <button action="lookupCancelAction"/>
+        </hbox> -->
+    </layout>
+</window>

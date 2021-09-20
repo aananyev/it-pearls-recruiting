@@ -196,13 +196,15 @@ public class ParseCVServiceBean implements ParseCVService {
             if(skillContains(skillTreesFromOpenPosition, skillTree)) {
                 keyWithStyle = "<b><font color=\""
                         + color
-                        + "\" face=\"serif\">"
+                        + "\" face=\"sans-serif\""
+                        + "size=\"+1\">"
                         + skillTree.getSkillName()
                         + "</font></b>";
             } else {
                 keyWithStyle = "<b><font color=\""
                         + colorIfExist
-                        + "\" face=\"serif\">"
+                        + "\" face=\"sans-serif\""
+                        + "size=\"+1\">"
                         + skillTree.getSkillName()
                         + "</font></b>";
             }
