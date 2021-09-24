@@ -144,6 +144,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
+    IteractionList lastIteraction = null;
 
     @Inject
     private StarsAndOtherService starsAndOtherService;
@@ -169,6 +170,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionPropertyContainer<Position> positionsListDc;
     @Inject
     private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
+
+
+    String QUERY_GET_LAST_ITERACTION = "select e " +
+            "from itpearls_IteractionList e " +
+            "where e.candidate = :candidate and " +
+            "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -297,7 +304,45 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
             dataManager.commit(commitContext);
+//            createFirstIteraction();
         }
+    }
+
+    private void createFirstIteraction() {
+        String newCandidate = "Новый контакт";
+
+        String queryNewCandidate = "select e from itpearls_Iteraction e "
+                + "where e.iterationName like \'"
+                + newCandidate
+                + "\'";
+
+        String queryNewVacancy = "select e from itpearls_OpenPosition e "
+                + "where e.vacansyName like \'"
+                + newCandidate
+                + "\'";
+
+        IteractionList iteractionList = new IteractionList();
+        iteractionList.setRating(3);
+        iteractionList.setCandidate(getEditedEntity());
+        if (lastIteraction != null) {
+            iteractionList.setNumberIteraction(lastIteraction
+                    .getNumberIteraction()
+                    .add(BigDecimal.ONE));
+        }
+
+        Iteraction iteraction = dataManager.load(Iteraction.class)
+                .query(queryNewCandidate)
+                .one();
+        OpenPosition openPosition = dataManager.load(OpenPosition.class)
+                .query(queryNewVacancy)
+                .one();
+
+        iteractionList.setIteractionType(iteraction);
+        iteractionList.setVacancy(openPosition);
+
+        CommitContext commitContext = new CommitContext(getEditedEntity());
+        commitContext.addInstanceToCommit(iteractionList);
+        dataManager.commit(commitContext);
     }
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false);
@@ -400,6 +445,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         msec = System.currentTimeMillis() - msec;
 
         System.out.println(msec);
+        checkNotUsePosition();
     }
 
     @Subscribe
@@ -541,7 +587,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
 
         // проверить в названии должности (не использовать)
-        checkNotUsePosition();
         priorityCommenicationMethodRadioButtonInit();
     }
 
@@ -614,6 +659,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             event.preventCommit();
         }
+
+//        createFirstIteraction();
     }
 
     private void addIteractionOfNewCandidate() {
@@ -926,26 +973,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return candidateCV.getLinkItPearlsCV();
     }
 
+    private IteractionList getLastIteraction() {
+        try {
+            lastIteraction = dataManager.load(IteractionList.class)
+                    .query(QUERY_GET_LAST_ITERACTION)
+                    .parameter("candidate", getEditedEntity())
+                    .view("iteractionList-view")
+                    .one();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            lastIteraction = null;
+        }
+
+        return lastIteraction;
+    }
+
 
     public void copyIteractionJobCandidate() {
         if (jobCandidateIteractionListTable.getSingleSelected() == null) {
-            String QUERY_GET_LAST_ITERACTION = "select e " +
-                    "from itpearls_IteractionList e " +
-                    "where e.candidate = :candidate and " +
-                    "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
 
-            IteractionList lastIteraction = null;
-
-            try {
-                lastIteraction = dataManager.load(IteractionList.class)
-                        .query(QUERY_GET_LAST_ITERACTION)
-                        .parameter("candidate", getEditedEntity())
-                        .view("iteractionList-view")
-                        .one();
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-                lastIteraction = null;
-            }
 
             if (lastIteraction != null) {
                 IteractionList finalLastIteraction = lastIteraction;
@@ -1139,6 +1185,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         addFirstNameSuggestField();
         addSecondNameSuggestField();
         addMiddleNameSuggestField();
+
+        lastIteraction = getLastIteraction();
     }
 
     private void setLinkButtonSkype() {
@@ -1723,67 +1771,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     }
 
-/*    private void makeDialogNewEmailPhone(String newEmail, String newPhone) {
-        String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
-        Boolean flag = false;
-
-        if (newEmail != null) {
-            if (!newEmail.equals(emailField.getValue())) {
-                message = message
-                        + "<i> - адрес электронной почты старый "
-                        + "<b>" + emailField.getValue() + "</b>"
-                        + " новый "
-                        + "<b>" + newEmail + "</b>"
-                        + "</i><br>";
-
-                flag = true;
-            }
-        }
-
-        if (newPhone != null) {
-            if (newPhone.equals(phoneField.getValue())) {
-                message = message
-                        + "<i> - телефон старый "
-                        + "<b>" + phoneField.getValue() + "</b>"
-                        + " новый "
-                        + "<b>" + newPhone + "</b>"
-                        + "</i><br>";
-
-                flag = true;
-            }
-        }
-
-        if (flag) {
-            dialogs.createOptionDialog()
-                    .withType(Dialogs.MessageType.WARNING)
-                    .withWidth("600px")
-                    .withMessage(message
-                            + "<br><br>"
-                            + "<b>Разместить в карточке кандидата?</b>")
-                    .withContentMode(ContentMode.HTML)
-                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
-                        if (newPhone != null) {
-                            if (!newPhone.equals("")) {
-                                phoneField.setValue(newPhone);
-                            }
-                        }
-
-                        if (newEmail != null) {
-                            if (!newEmail.equals("")) {
-                                emailField.setValue(newEmail);
-                            }
-                        }
-                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
-                    }))
-                    .show();
-        } else {
-//            notifications.create(Notifications
-//                    .NotificationType.WARNING)
-//                    .withCaption("Не найдено новой контактной информации в резюме кандидата")
-//                    .show();
-        }
-    } */
-
     public void scanContactsFromCV() {
         String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
         String textCVAll = "";
@@ -1978,17 +1965,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null && !iteractionList.getComment().equals("")? Jsoup.parse(iteractionList.getComment()).text() : null;
+        return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ? Jsoup.parse(iteractionList.getComment()).text() : null;
     }
 
     @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "columnGenerator")
     private Icons.Icon jobCandidateIteractionListTableCommentColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return event.getItem().getComment() != null && !event.getItem().getComment().equals("")? CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+        return event.getItem().getComment() != null && !event.getItem().getComment().equals("") ? CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
     }
 
     @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "styleProvider")
     private String jobCandidateIteractionListTableCommentColumnStyleProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null && !iteractionList.getComment().equals("")? "pic-center-large-green" : "pic-center-large-red";
+        return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ? "pic-center-large-green" : "pic-center-large-red";
     }
 
 

@@ -283,6 +283,10 @@
                                 align="BOTTOM_LEFT"
                                 enable="false"
                                 invoke="convertToText"/>
+                        <button id="showOriginalButon"
+                                caption="msg://msgShowOriginal"
+                                align="BOTTOM_LEFT"
+                                invoke="showOriginalText"/>
                     </hbox>
                     <hbox id="candidateCVHBox"
                           expand="candidateCVRichTextArea"

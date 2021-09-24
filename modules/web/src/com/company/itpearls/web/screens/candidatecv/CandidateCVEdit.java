@@ -99,6 +99,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private WebLoadService webLoadService;
     @Inject
     private Button convertToTextButton;
+    @Inject
+    private Button showOriginalButon;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -180,18 +182,24 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
         });
 
+        if(!PersistenceHelper.isNew(getEditedEntity())) {
+            candidateCVRichTextArea.setEditable(false);
+        }
+
         setCVRecommendation();
         setLetterRecommendation();
     }
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+        }
     }
 
     private void setColorHighlightingCompetencies() {
-        if (candidateCVRichTextArea.getValue() != null) {
-            String htmlText = candidateCVRichTextArea.getValue();
+        if (getEditedEntity().getTextCV() != null) {
+            String htmlText = getEditedEntity().getTextCV();
             htmlText = parseCVService.colorHighlightingCompetencies(htmlText, "brown");
 
             if(candidateCVFieldOpenPosition.getValue() != null) {
@@ -572,6 +580,22 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             convertToTextButton.setEnabled(false);
         } else {
             convertToTextButton.setEnabled(true);
+        }
+    }
+
+    Boolean flagOriginal = false;
+
+    public void showOriginalText() {
+        if(flagOriginal) {
+            showOriginalButon.setCaption("Оригинальное");
+            flagOriginal = false;
+
+            setColorHighlightingCompetencies();
+        } else {
+            showOriginalButon.setCaption("Выделение");
+            flagOriginal = true;
+
+            candidateCVRichTextArea.setValue(getEditedEntity().getTextCV());
         }
     }
 }

@@ -13,15 +13,18 @@
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_Position e
+                            where e in (select g.positionType
+                            from itpearls_OpenPosition g
+                            where not g.openClose = true)
                             order by e.positionRuName]]>
                     <condition>
                         <and>
                             <c:jpql>
                                 <c:where>e in (select g.positionType
                                     from itpearls_OpenPosition g
-                                    where g.priority >= :priority
-                                    and not g.openClose = true
-                                    and g.commandCandidate = 0)</c:where>
+                                    where g.priority >= :priorityfield
+                                    and g.commandCandidate = 0)
+                                </c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -92,9 +95,7 @@
                                     where f.positionType = :positionType and (not f.openClose = true))
                                 </c:where>
                                 <c:where>
-                                    e.positionType in (select g.positionType
-                                    from itpearls_OpenPosition g
-                                    where g.priority >= :priority)
+                                    e.priority = :priorityfield
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -126,7 +127,8 @@
                              description="msg://msgStatusNotLower"/>
                 <dataGrid id="openPositionsTable"
                           width="100%"
-                          height="100%" editorEnabled="false" contextMenuEnabled="false"
+                          height="100%" editorEnabled="false"
+                          contextMenuEnabled="false"
                           dataContainer="openPositionsDc">
                     <actions>
                     </actions>

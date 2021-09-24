@@ -156,13 +156,14 @@
                         </lookupPickerField>
                         <lookupPickerField id="vacancyFiels"
                                            caption="mainMsg://msgVacancy"
-                                           width="100%"
                                            dataContainer="iteractionListDc"
                                            optionsContainer="vacancyDc"
-                                           property="vacancy">
+                                           property="vacancy" width="100%">
                             <actions>
                                 <action id="lookup"
                                         type="picker_lookup"/>
+                                <action id="open"
+                                        type="picker_open"/>
                             </actions>
                         </lookupPickerField>
                     </row>

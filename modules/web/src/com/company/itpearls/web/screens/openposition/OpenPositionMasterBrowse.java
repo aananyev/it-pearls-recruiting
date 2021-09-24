@@ -53,12 +53,12 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         if (openPositionsTable.getSingleSelected() != null) {
             projectNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
             vacansyNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
-            companyDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+//            companyDl.setParameter("positionType", openPositionsTable.getSingleSelected());
         }
 
         projectNameDl.load();
         vacansyNameDl.load();
-        companyDl.load();
+//        companyDl.load();
     }
 
     @Subscribe("companyTable")
@@ -180,15 +180,15 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         notLowerRatingLookupField.setOptionsMap(priorityMap);
 
         notLowerRatingLookupField.addValueChangeListener(e -> {
-            if(notLowerRatingLookupField.getValue() != null) {
-                openPositionsDl.setParameter("priority", notLowerRatingLookupField.getValue());
-                vacansyNameDl.setParameter("priority", notLowerRatingLookupField.getValue());
+            if (notLowerRatingLookupField.getValue() != null) {
+                openPositionsDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
+//                vacansyNameDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
             } else {
-                openPositionsDl.setParameter("priority", 1);
-                vacansyNameDl.setParameter("priority", 1);
+                openPositionsDl.setParameter("priorityfield", 1);
+//                vacansyNameDl.setParameter("priorityfield", 1);
             }
 
-            vacansyNameDl.load();
+//            vacansyNameDl.load();
             openPositionsDl.load();
         });
     }
@@ -197,9 +197,10 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     public void onBeforeShow(BeforeShowEvent event) {
         setStatusNotLower();
 
-        openPositionsDl.setParameter("priority", 1);
-        vacansyNameDl.setParameter("priority", 1);
+        openPositionsDl.setParameter("priorityfield", 1);
+//        vacansyNameDl.setParameter("priorityfield", 1);
 
         openPositionsDl.load();
+//        vacansyNameDl.load();
     }
 }

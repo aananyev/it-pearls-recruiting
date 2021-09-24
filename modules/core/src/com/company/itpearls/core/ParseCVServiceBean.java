@@ -170,12 +170,14 @@ public class ParseCVServiceBean implements ParseCVService {
         List<Company> companies = dataManager.load(Company.class).list();
         Company retCompany = null;
 
-        for (Company company : companies) {
-            if (company != null) {
-                if (company.getComanyName() != null) {
-                    if (textCV.contains(company.getComanyName())) {
-                        retCompany = company;
-                        break;
+        if(textCV != null) {
+            for (Company company : companies) {
+                if (company != null) {
+                    if (company.getComanyName() != null) {
+                        if (textCV.contains(company.getComanyName())) {
+                            retCompany = company;
+                            break;
+                        }
                     }
                 }
             }
@@ -198,21 +200,19 @@ public class ParseCVServiceBean implements ParseCVService {
             if (skillContains(skillTreesFromOpenPosition, skillTree)) {
                 keyWithStyle = "<b><font color=\""
                         + color
-                        + "\" face=\"sans-serif\""
-                        + "size=\"+1\">"
+                        + "\" face=\"sans-serif\">"
                         + skillTree.getSkillName()
                         + "</font></b>";
             } else {
                 keyWithStyle = "<b><font color=\""
                         + colorIfExist
-                        + "\" face=\"sans-serif\""
-                        + "size=\"+1\">"
+                        + "\" face=\"sans-serif\">"
                         + skillTree.getSkillName()
                         + "</font></b>";
             }
 
             if (!retStr.contains(keyWithStyle)) {
-                retStr = retStr.replaceAll(skillTree.getSkillName(), keyWithStyle);
+                retStr = retStr.replaceAll("" + skillTree.getSkillName(), keyWithStyle);
             }
         }
 
@@ -238,11 +238,11 @@ public class ParseCVServiceBean implements ParseCVService {
         for (SkillTree skillTree : skillTrees) {
             String keyWithStyle = "<b><font color=\""
                     + color
-                    + "\" face=\"serif\">"
+                    + "\">"
                     + skillTree.getSkillName()
                     + "</font></b>";
-            if (!retStr.contains(keyWithStyle)) {
-                retStr = retStr.replaceAll(skillTree.getSkillName(), keyWithStyle);
+            if (!retStr.toLowerCase().contains(keyWithStyle.toLowerCase())) {
+                retStr = retStr.replaceAll("" + skillTree.getSkillName(), keyWithStyle);
             }
         }
 
@@ -258,11 +258,11 @@ public class ParseCVServiceBean implements ParseCVService {
         for (Company company : companies) {
             String keyWithStyle = "<b><font color=\""
                     + color
-                    + "\" face=\"serif\">"
+                    + "\">"
                     + company.getComanyName()
                     + "</font></b>";
             if (!retStr.contains(keyWithStyle)) {
-                retStr = retStr.replaceAll(company.getComanyName(), keyWithStyle);
+                retStr = retStr.replaceAll("" + company.getComanyName(), keyWithStyle);
             }
         }
 
@@ -278,11 +278,11 @@ public class ParseCVServiceBean implements ParseCVService {
         for (Position position : positions) {
             String keyWithStyle = "<b><font color=\""
                     + color
-                    + "\" face=\"serif\">"
+                    + "\">"
                     + position.getPositionEnName()
                     + "</font></b>";
             if (!retStr.contains(keyWithStyle)) {
-                retStr = retStr.replaceAll(position.getPositionEnName(), keyWithStyle);
+                retStr = retStr.replaceAll("" + position.getPositionEnName(), keyWithStyle);
             }
         }
 

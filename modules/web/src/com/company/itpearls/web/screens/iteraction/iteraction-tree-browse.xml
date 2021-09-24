@@ -9,8 +9,7 @@
                     class="com.company.itpearls.entity.Iteraction"
                     view="iteraction-view">
             <loader id="iteractionsDl" cacheable="true">
-                <query><![CDATA[select e from itpearls_Iteraction e
-order by e.number]]></query>
+                <query><![CDATA[select e from itpearls_Iteraction e order by e.number]]></query>
             </loader>
         </collection>
     </data>
@@ -31,10 +30,12 @@ order by e.number]]></query>
                    dataContainer="iteractionsTreeDc"
                    hierarchyProperty="iteractionTree">
             <columns>
-                <column id="number" width="70" property="number"/>
+                <column id="number"
+                        width="70"
+                        property="number"/>
                 <column id="mandatoryIteraction"
                         caption="msg://msgMandatoryItercation"
-                        width="20px"
+                        width="30px"
                         property="mandatoryIteraction"/>
                 <column id="iterationName"
                         property="iterationName"/>
