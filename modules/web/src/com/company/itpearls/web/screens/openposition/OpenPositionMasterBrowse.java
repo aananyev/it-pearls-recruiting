@@ -174,7 +174,6 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         return icon;
     }
 
-
     private void setMapOfPriority() {
         priorityMap.put("Paused", 0);
         priorityMap.put("Low", 1);
@@ -225,7 +224,7 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                     "where e.positionType = :position " +
                     "and (not e.openClose = true)";
 
-            if(openPositionsTable.getSingleSelected() != null) {
+            if (openPositionsTable.getSingleSelected() != null) {
                 List<OpenPosition> openPositionList = dataManager.load(OpenPosition.class)
                         .query(QUERY_MIN_MAX_SALARY)
                         .parameter("position", openPositionsTable.getSingleSelected())
@@ -236,13 +235,13 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                             max = openPositionList.get(0).getSalaryMax();
 
                     for (OpenPosition op : openPositionList) {
-                        if(op.getSalaryMin() != null) {
+                        if (op.getSalaryMin() != null) {
                             if (min.compareTo(op.getSalaryMin()) > 0) {
                                 min = op.getSalaryMin();
                             }
                         }
 
-                        if(op.getSalaryMax() != null) {
+                        if (op.getSalaryMax() != null) {
                             if (max.compareTo(op.getSalaryMax()) < 0) {
                                 max = op.getSalaryMax();
                             }
@@ -256,7 +255,119 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         });
     }
 
+    @Install(to = "vacansyNameTable.salaryMinMaxColumn", subject = "columnGenerator")
+    private String vacansyNameTableSalaryMinMaxColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String retStr = "";
+
+        try {
+            retStr = getSalaryString(event.getItem());
+        } catch (NullPointerException e) {
+            retStr = "";
+        }
+
+        return retStr;
+    }
+
     private void setHeaderBox() {
         headerTextField.setValue("Мастер собеседования: ");
+    }
+
+    private String getSalaryString(OpenPosition openPosition) {
+        int minLength = openPosition.getSalaryMin().toString().length();
+        int maxLength = openPosition.getSalaryMax().toString().length();
+
+        BigDecimal salaryMin = openPosition.getSalaryMin().divide(BigDecimal.valueOf(1000));
+        BigDecimal salaryMax = openPosition.getSalaryMax().divide(BigDecimal.valueOf(1000));
+
+        String retStr = "";
+
+        try {
+            int salMin = salaryMin.divide(BigDecimal.valueOf(1000)).intValue();
+            if (salMin != 0) {
+                retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
+                        + " т.р./"
+                        + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
+                        + " т.р.";
+            } else {
+                retStr = "До "
+                        + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
+                        + " т.р.";
+            }
+        } catch (NullPointerException | StringIndexOutOfBoundsException e) {
+            retStr = "";
+        }
+
+        if (salaryMax.intValue() == 0) {
+            retStr = "неопределено";
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "vacansyNameTable.salaryMinMaxColumn", subject = "descriptionProvider")
+    private String vacansyNameTableSalaryMinMaxColumnDescriptionProvider(OpenPosition openPosition) {
+        String retStr = "";
+
+        if (openPosition.getSalaryFixLimit() != null) {
+            if (openPosition.getSalaryFixLimit()) {
+                retStr = "Фиксированное запрлатное предложение\n";
+            }
+        }
+
+        try {
+            retStr = retStr + getSalaryStringCaption(openPosition);
+        } catch (NullPointerException e) {
+            retStr = "";
+        }
+
+        return retStr;
+    }
+
+    private String getSalaryStringCaption(OpenPosition openPosition) {
+        int minLength = openPosition.getSalaryMin().toString().length();
+        int maxLength = openPosition.getSalaryMax().toString().length();
+
+        BigDecimal salaryMin = openPosition.getSalaryMin().divide(BigDecimal.valueOf(1000));
+        BigDecimal salaryMax = openPosition.getSalaryMax().divide(BigDecimal.valueOf(1000));
+
+        String retStr = "";
+
+        try {
+            retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
+                    + " т.р./"
+                    + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
+                    + " т.р.";
+        } catch (NullPointerException e) {
+            retStr = "";
+        }
+
+        if (salaryMin.intValue() == 0) {
+            retStr = "неопределено";
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "vacansyNameTable.salaryMinMaxColumn", subject = "styleProvider")
+    private String vacansyNameTableSalaryMinMaxColumnStyleProvider(OpenPosition openPosition) {
+        String retStr = "";
+
+        if (openPosition.getSalaryFixLimit() != null) {
+            if (openPosition.getSalaryFixLimit()) {
+                retStr = "salary-fix-limit";
+            }
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "vacansyNameTable.vacansyName", subject = "descriptionProvider")
+    private String vacansyNameTableVacansyNameDescriptionProvider(OpenPosition openPosition) {
+        return openPosition.getVacansyName();
+    }
+
+
+
+    public void clearFilters() {
     }
 }

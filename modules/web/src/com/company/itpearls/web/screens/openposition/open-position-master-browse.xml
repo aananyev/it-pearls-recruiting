@@ -23,9 +23,9 @@
                             <c:jpql>
                                 <c:where>e in
                                     (select g.positionType
-                                        from itpearls_OpenPosition g
-                                        where g.priority = :priorityfield
-                                            and g.commandCandidate = 0)
+                                    from itpearls_OpenPosition g
+                                    where g.priority = :priorityfield
+                                    and g.commandCandidate = 0)
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -45,15 +45,15 @@
                             <c:jpql>
                                 <c:where>e in
                                     (select f.companyName
-                                        from itpearls_CompanyDepartament f
-                                        where f in
-                                            (select g.projectDepartment
-                                                from itpearls_Project g
-                                                where g in
-                                                    (select i.projectName
-                                                        from itpearls_OpenPosition i
-                                                        where (not i.openClose = true)
-                                                            and i.positionType = :posTypeCompany)))
+                                    from itpearls_CompanyDepartament f
+                                    where f in
+                                    (select g.projectDepartment
+                                    from itpearls_Project g
+                                    where g in
+                                    (select i.projectName
+                                    from itpearls_OpenPosition i
+                                    where (not i.openClose = true)
+                                    and i.positionType = :posTypeCompany)))
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -100,9 +100,9 @@
                             <c:jpql>
                                 <c:where>x.positionType in
                                     (select f.positionType
-                                        from itpearls_OpenPosition f
-                                        where f.positionType = :posTypeVacancy
-                                            and (not f.openClose = true))
+                                    from itpearls_OpenPosition f
+                                    where f.positionType = :posTypeVacancy
+                                    and (not f.openClose = true))
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
@@ -118,11 +118,28 @@
                 width="600"/>
     <layout expand="mainHBox"
             spacing="true">
-        <groupBox height="100%"
+        <groupBox height="AUTO"
+                  width="100%"
+                  spacing="true"
+                  expand="headerHBox"
                   stylename="borderless">
-            <textField id="headerTextField"
-                       caption="msg://msgHeaderOfWizard"
-                       stylename="h3"/>
+            <hbox id="headerHBox"
+                  width="100%"
+                  spacing="true">
+                <textField id="headerTextField"
+                           caption="msg://msgHeaderOfWizard"
+                           stylename="borderless"/>
+                <lookupField id="notLowerRatingLookupField"
+                             align="MIDDLE_RIGHT"
+                             width="100%"
+                             caption="msg://msgPriorityPosition"
+                             description="msg://msgStatusNotLower"/>
+                <button id="clearButton"
+                        align="MIDDLE_RIGHT"
+                        caption="msg://msgClearButton"
+                        description="msg://msgClearButtonDescription"
+                        invoke="clearFilters"/>
+            </hbox>
         </groupBox>
         <hbox id="mainHBox"
               width="100%"
@@ -136,11 +153,6 @@
                   align="TOP_LEFT"
                   expand="openPositionsTable"
                   height="100%">
-                <lookupField id="notLowerRatingLookupField"
-                             align="MIDDLE_RIGHT"
-                             width="100%"
-                             caption="msg://msgPriorityPosition"
-                             description="msg://msgStatusNotLower"/>
                 <dataGrid id="openPositionsTable"
                           width="100%"
                           height="100%" editorEnabled="false"
@@ -222,7 +234,12 @@
                             </column>
                             <column id="vacansyName"
                                     property="vacansyName"
-                                    width="450px"/>
+                                    width="350px"/>
+                            <column id="salaryMinMaxColumn"
+                                    caption="msg://msgSalaryMax"
+                                    width="100px">
+                                <textRenderer nullRepresentation="null"/>
+                            </column>
                         </columns>
                     </dataGrid>
                     <vbox width="100%"
