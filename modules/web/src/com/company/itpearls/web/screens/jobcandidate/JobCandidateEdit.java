@@ -457,7 +457,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void setPercentLabel() {
         // вычислить процент заполнения карточки кандидата
-        Integer qualityPercent = setQualityPercent() * 100 / 16;
+        Integer qualityPercent = setQualityPercent() * 100 / 14;
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             labelQualityPercent.setValue("Процент заполнения карточки: " + qualityPercent.toString()

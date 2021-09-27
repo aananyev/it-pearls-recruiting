@@ -3,9 +3,11 @@ package com.company.itpearls.web.screens.openposition;
 import com.company.itpearls.entity.Company;
 import com.company.itpearls.entity.Position;
 import com.company.itpearls.entity.Project;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.RichTextArea;
+import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -13,7 +15,9 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @UiController("itpearls_OpenPositionMaster.browse")
@@ -30,8 +34,6 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private CollectionLoader<OpenPosition> vacansyNameDl;
     @Inject
-    private CollectionLoader<Company> companyDl;
-    @Inject
     private DataGrid<Project> projectNameTable;
     @Inject
     private DataGrid<Company> companyTable;
@@ -47,18 +49,28 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
     @Inject
     private LookupField notLowerRatingLookupField;
+    @Inject
+    private CollectionLoader<Company> companyDl;
+    @Inject
+    private TextField<String> headerTextField;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private TextField<String> minSalaryField;
+    @Inject
+    private TextField<String> maxSalaryField;
 
     @Subscribe("openPositionsTable")
     public void onOpenPositionsTableSelection(DataGrid.SelectionEvent<Position> event) {
         if (openPositionsTable.getSingleSelected() != null) {
-            projectNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
-            vacansyNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
-//            companyDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+            vacansyNameDl.setParameter("posTypeVacancy", openPositionsTable.getSingleSelected());
+            projectNameDl.setParameter("posType", openPositionsTable.getSingleSelected());
+            companyDl.setParameter("posTypeCompany", openPositionsTable.getSingleSelected());
         }
 
         projectNameDl.load();
         vacansyNameDl.load();
-//        companyDl.load();
+        companyDl.load();
     }
 
     @Subscribe("companyTable")
@@ -182,13 +194,13 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         notLowerRatingLookupField.addValueChangeListener(e -> {
             if (notLowerRatingLookupField.getValue() != null) {
                 openPositionsDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
-//                vacansyNameDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
+                vacansyNameDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
             } else {
                 openPositionsDl.setParameter("priorityfield", 1);
-//                vacansyNameDl.setParameter("priorityfield", 1);
+                vacansyNameDl.setParameter("priorityfield", 1);
             }
 
-//            vacansyNameDl.load();
+            vacansyNameDl.load();
             openPositionsDl.load();
         });
     }
@@ -196,11 +208,55 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setStatusNotLower();
+        setHeaderBox();
+        setMinMaxSalaryLabel();
 
         openPositionsDl.setParameter("priorityfield", 1);
-//        vacansyNameDl.setParameter("priorityfield", 1);
+        vacansyNameDl.setParameter("priorityfield", 1);
 
         openPositionsDl.load();
-//        vacansyNameDl.load();
+        vacansyNameDl.load();
+    }
+
+    private void setMinMaxSalaryLabel() {
+        openPositionsTable.addSelectionListener(e -> {
+            String QUERY_MIN_MAX_SALARY = "select e " +
+                    "from itpearls_OpenPosition e " +
+                    "where e.positionType = :position " +
+                    "and (not e.openClose = true)";
+
+            if(openPositionsTable.getSingleSelected() != null) {
+                List<OpenPosition> openPositionList = dataManager.load(OpenPosition.class)
+                        .query(QUERY_MIN_MAX_SALARY)
+                        .parameter("position", openPositionsTable.getSingleSelected())
+                        .list();
+
+                if (openPositionList != null) {
+                    BigDecimal min = openPositionList.get(0).getSalaryMin(),
+                            max = openPositionList.get(0).getSalaryMax();
+
+                    for (OpenPosition op : openPositionList) {
+                        if(op.getSalaryMin() != null) {
+                            if (min.compareTo(op.getSalaryMin()) > 0) {
+                                min = op.getSalaryMin();
+                            }
+                        }
+
+                        if(op.getSalaryMax() != null) {
+                            if (max.compareTo(op.getSalaryMax()) < 0) {
+                                max = op.getSalaryMax();
+                            }
+                        }
+                    }
+
+                    minSalaryField.setValue(min.toString());
+                    maxSalaryField.setValue(max.toString());
+                }
+            }
+        });
+    }
+
+    private void setHeaderBox() {
+        headerTextField.setValue("Мастер собеседования: ");
     }
 }

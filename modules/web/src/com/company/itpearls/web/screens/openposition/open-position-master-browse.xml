@@ -13,17 +13,19 @@
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_Position e
-                            where e in (select g.positionType
-                            from itpearls_OpenPosition g
-                            where not g.openClose = true)
+                            where e in
+                            (select g.positionType
+                                from itpearls_OpenPosition g
+                                where not g.openClose = true)
                             order by e.positionRuName]]>
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e in (select g.positionType
-                                    from itpearls_OpenPosition g
-                                    where g.priority >= :priorityfield
-                                    and g.commandCandidate = 0)
+                                <c:where>e in
+                                    (select g.positionType
+                                        from itpearls_OpenPosition g
+                                        where g.priority = :priorityfield
+                                            and g.commandCandidate = 0)
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -33,9 +35,7 @@
         </collection>
         <collection id="companyDc"
                     class="com.company.itpearls.entity.Company">
-            <view extends="_minimal">
-                <property name="comanyName"/>
-            </view>
+            <view extends="company-view"/>
             <loader id="companyDl">
                 <query>
                     <![CDATA[select e from itpearls_Company e
@@ -43,11 +43,17 @@
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e in (select f.companyName from itpearls_CompanyDepartament f where f in
-                                    (select g.projectDepartment from itpearls_Project g where g in
-                                    (select i.projectName
-                                    from itpearls_OpenPosition i
-                                    where i.positionType = :positionType and (not i.openClose = true))))
+                                <c:where>e in
+                                    (select f.companyName
+                                        from itpearls_CompanyDepartament f
+                                        where f in
+                                            (select g.projectDepartment
+                                                from itpearls_Project g
+                                                where g in
+                                                    (select i.projectName
+                                                        from itpearls_OpenPosition i
+                                                        where (not i.openClose = true)
+                                                            and i.positionType = :posTypeCompany)))
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -63,13 +69,15 @@
             <loader id="projectNameDl">
                 <query>
                     <![CDATA[select e from itpearls_Project e
-                            order by e.projectName]]>
+                                order by e.projectName]]>
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e in (select f.projectName
-                                    from itpearls_OpenPosition f
-                                    where f.positionType = :positionType and (not f.openClose = true))
+                                <c:where>e in
+                                    (select f.projectName
+                                        from itpearls_OpenPosition f
+                                        where f.positionType = :posType
+                                            and (not f.openClose = true))
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -84,19 +92,21 @@
             </view>
             <loader id="vacansyNameDl">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e
-                            where not e.openClose = true
-                            order by e.vacansyName]]>
+                    <![CDATA[select x from itpearls_OpenPosition x
+                                where (not x.openClose = true)
+                                order by x.vacansyName]]>
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e.positionType in (select f.positionType
-                                    from itpearls_OpenPosition f
-                                    where f.positionType = :positionType and (not f.openClose = true))
+                                <c:where>x.positionType in
+                                    (select f.positionType
+                                        from itpearls_OpenPosition f
+                                        where f.positionType = :posTypeVacancy
+                                            and (not f.openClose = true))
                                 </c:where>
-                                <c:where>
-                                    e.priority = :priorityfield
-                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>x.priority = :priorityfield</c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -108,6 +118,12 @@
                 width="600"/>
     <layout expand="mainHBox"
             spacing="true">
+        <groupBox height="100%"
+                  stylename="borderless">
+            <textField id="headerTextField"
+                       caption="msg://msgHeaderOfWizard"
+                       stylename="h3"/>
+        </groupBox>
         <hbox id="mainHBox"
               width="100%"
               height="100%"
@@ -140,6 +156,14 @@
                                   alwaysVisible="true">
                     </buttonsPanel>
                 </dataGrid>
+                <hbox>
+                    <textField id="minSalaryField"
+                               caption="msg://msgMinSalary"
+                               stylename="borderless"/>
+                    <textField id="maxSalaryField"
+                               caption="msg://msgMaxSalary"
+                               stylename="borderless"/>
+                </hbox>
             </vbox>
             <vbox spacing="true"
                   width="100%"
@@ -201,10 +225,34 @@
                                     width="450px"/>
                         </columns>
                     </dataGrid>
-                    <richTextArea id="vacansyInfoRictTextArea"
-                                  width="100%"
-                                  editable="false"
-                                  height="100%"/>
+                    <vbox width="100%"
+                          height="100%"
+                          expand="vacansyInfoRictTextArea">
+                        <richTextArea id="vacansyInfoRictTextArea"
+                                      width="100%"
+                                      editable="false"
+                                      height="100%"/>
+                        <hbox width="100%">
+                            <hbox>
+                                <label value="msg://msgMinSalary"
+                                       stylename="large"/>
+                                <label id="minSalaryVacancyField"
+                                       dataContainer="vacansyNameDc"
+                                       property="salaryMin"
+                                       width="100%"
+                                       stylename="large"/>
+                            </hbox>
+                            <hbox>
+                                <label value="msg://msgMaxSalary"
+                                       stylename="large"/>
+                                <label id="maxSalaryVacancyField"
+                                       dataContainer="vacansyNameDc"
+                                       property="salaryMax"
+                                       width="100%"
+                                       stylename="large"/>
+                            </hbox>
+                        </hbox>
+                    </vbox>
                 </hbox>
             </vbox>
             <vbox spacing="true">
