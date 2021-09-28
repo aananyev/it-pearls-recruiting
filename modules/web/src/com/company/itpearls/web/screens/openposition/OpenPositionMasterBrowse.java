@@ -4,15 +4,13 @@ import com.company.itpearls.entity.Company;
 import com.company.itpearls.entity.Position;
 import com.company.itpearls.entity.Project;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.components.DataGrid;
-import com.haulmont.cuba.gui.components.LookupField;
-import com.haulmont.cuba.gui.components.RichTextArea;
-import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -56,9 +54,9 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private DataManager dataManager;
     @Inject
-    private TextField<String> minSalaryField;
+    private Label<String> minSalaryLabel;
     @Inject
-    private TextField<String> maxSalaryField;
+    private Label<String> maxSalaryLabel;
 
     @Subscribe("openPositionsTable")
     public void onOpenPositionsTableSelection(DataGrid.SelectionEvent<Position> event) {
@@ -110,6 +108,17 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                 }
             }
         }
+
+        if (vacansyNameTable.getSelected() != null) {
+            projectNameDl.setParameter("openPosition", vacansyNameTable.getSingleSelected());
+            companyDl.setParameter("openPosition", vacansyNameTable.getSingleSelected());
+        } else {
+            projectNameDl.removeParameter("openPosition");
+            companyDl.removeParameter("openPosition");
+        }
+
+        projectNameDl.load();
+        companyDl.load();
     }
 
     @Install(to = "vacansyNameTable.priorityColumn", subject = "columnGenerator")
@@ -194,9 +203,13 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
             if (notLowerRatingLookupField.getValue() != null) {
                 openPositionsDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
                 vacansyNameDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
+                companyDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
+                projectNameDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
             } else {
                 openPositionsDl.setParameter("priorityfield", 1);
                 vacansyNameDl.setParameter("priorityfield", 1);
+                openPositionsDl.removeParameter("priorityfield");
+                vacansyNameDl.removeParameter("priorityfield");
             }
 
             vacansyNameDl.load();
@@ -209,12 +222,25 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         setStatusNotLower();
         setHeaderBox();
         setMinMaxSalaryLabel();
+        setCompanyTable();
 
-        openPositionsDl.setParameter("priorityfield", 1);
-        vacansyNameDl.setParameter("priorityfield", 1);
+        openPositionsDl.removeParameter("priorityfield");
+        vacansyNameDl.removeParameter("priorityfield");
+        projectNameDl.removeParameter("priorityfield");
+        companyDl.removeParameter("priorityfield");
 
         openPositionsDl.load();
         vacansyNameDl.load();
+    }
+
+    private void setCompanyTable() {
+        companyTable.addSelectionListener(e -> {
+            if(companyTable.getSingleSelected() != null) {
+                projectNameDl.setParameter("company", companyTable.getSingleSelected());
+            } else {
+                projectNameDl.removeParameter("company");
+            }
+        });
     }
 
     private void setMinMaxSalaryLabel() {
@@ -248,8 +274,8 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                         }
                     }
 
-                    minSalaryField.setValue(min.toString());
-                    maxSalaryField.setValue(max.toString());
+                    minSalaryLabel.setValue(min.toString());
+                    maxSalaryLabel.setValue(max.toString());
                 }
             }
         });
@@ -366,8 +392,23 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         return openPosition.getVacansyName();
     }
 
-
-
     public void clearFilters() {
+        vacansyNameDl.removeParameter("priorityfield");
+        openPositionsDl.removeParameter("priorityfield");
+        projectNameDl.removeParameter("priorityfield");
+        companyDl.removeParameter("priorityfield");
+
+        vacansyNameDl.load();
+        openPositionsDl.load();
+        projectNameDl.load();
+        companyDl.load();
+
+        notLowerRatingLookupField.setValue(null);
+
+
+        openPositionsTable.deselectAll();
+        vacansyNameTable.deselectAll();
+        companyTable.deselectAll();
+        projectNameTable.deselectAll();
     }
 }

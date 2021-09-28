@@ -588,6 +588,10 @@
                                 maximumWidth="200px"
                                 property="vacancy.projectName"
                                 caption="msg://msgProject"/>
+                        <column id="projectOwner"
+                                maximumWidth="120px"
+                                property="vacancy.projectName.projectOwner"
+                                caption="msg://msgProjectOwner"/>
                         <column id="companyName"
                                 maximumWidth="200px"
                                 property="vacancy.projectName.projectDepartment.companyName.comanyName"/>
