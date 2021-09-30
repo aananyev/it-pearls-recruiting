@@ -472,11 +472,29 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if(openPositionsTable.getSingleSelected() != null) {
                 QuickViewOpenPositionDescription quickViewOpenPositionDescription = screens.create(QuickViewOpenPositionDescription.class);
                 quickViewOpenPositionDescription.setJobDescription(openPositionsTable.getSingleSelected() != null ?
-                        openPositionsTable.getSingleSelected().getComment() : "");
+                        openPositionsTable.getSingleSelected()
+                                .getComment() : "");
 
                 if(openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() != null) {
-                    quickViewOpenPositionDescription.setProjectDescription(openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() != null ?
-                            openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() : "");
+                    quickViewOpenPositionDescription.setProjectDescription(openPositionsTable
+                            .getSingleSelected()
+                            .getProjectName()
+                            .getProjectDescription() != null ?
+                            openPositionsTable.getSingleSelected()
+                                    .getProjectName()
+                                    .getProjectDescription() : "");
+                }
+
+                if(openPositionsTable.getSingleSelected()
+                        .getProjectName()
+                        .getProjectDepartment()
+                        .getCompanyName()
+                        .getWorkingConditions() != null) {
+                    quickViewOpenPositionDescription.setCompanyWorkConditions(openPositionsTable.getSingleSelected()
+                            .getProjectName()
+                            .getProjectDepartment()
+                            .getCompanyName()
+                            .getWorkingConditions());
                 }
 
                 quickViewOpenPositionDescription.reloadDescriptions();

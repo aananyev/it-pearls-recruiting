@@ -57,7 +57,16 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.departmentOfCompany.projectOfDepartment.openPosition = :openPosition</c:where>
+                                <c:where>e in
+                                    (select f.companyName
+                                    from itpearls_CompanyDepartament f
+                                    where f in
+                                    (select g.projectDepartment
+                                    from itpearls_Project g
+                                    where g.openPosition = :openPosition))</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.ourClient = :ourClient</c:where>
                             </c:jpql>
                         </and>
                     </condition>

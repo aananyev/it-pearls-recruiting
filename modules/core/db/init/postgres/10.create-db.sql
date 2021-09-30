@@ -121,6 +121,7 @@ create table ITPEARLS_CANDIDATE_CV (
     OWNER_ID uuid,
     TEXT_CV text,
     LETTER text,
+    COMMENT_LETTER text,
     LINK_IT_PEARLS_CV varchar(255),
     LINK_ORIGINAL_CV varchar(255),
     FILE_CV_ID uuid,
@@ -153,6 +154,7 @@ create table ITPEARLS_COMPANY (
     FILE_COMPANY_LOGO uuid,
     ADDRESS_OF_COMPANY text,
     COMPANY_DESCRIPTION text,
+    WORKING_CONDITIONS text,
     --
     primary key (ID)
 )^

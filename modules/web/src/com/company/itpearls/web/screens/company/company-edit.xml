@@ -195,11 +195,17 @@
                  expand="companyDescriptionVBox">
                 <vbox id="companyDescriptionVBox"
                       height="100%"
-                      width="100%"
-                      expand="companyDescritionRichTextArea">
+                      spacing="true"
+                      width="100%">
                     <richTextArea id="companyDescritionRichTextArea"
                                   dataContainer="companyDc"
                                   property="companyDescription"
+                                  height="100%"
+                                  width="100%"/>
+                    <richTextArea id="companyWorkingConditionsRichTextArea"
+                                  dataContainer="companyDc"
+                                  property="workingConditions"
+                                  caption="msg://msgCompanyWorkCondition"
                                   width="100%"
                                   height="100%"/>
                 </vbox>

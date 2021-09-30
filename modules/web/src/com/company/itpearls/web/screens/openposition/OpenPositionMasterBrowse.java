@@ -60,10 +60,18 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe("openPositionsTable")
     public void onOpenPositionsTableSelection(DataGrid.SelectionEvent<Position> event) {
+        projectNameTable.deselectAll();
+        vacansyNameTable.deselectAll();
+        companyTable.deselectAll();
+
         if (openPositionsTable.getSingleSelected() != null) {
             vacansyNameDl.setParameter("posTypeVacancy", openPositionsTable.getSingleSelected());
             projectNameDl.setParameter("posType", openPositionsTable.getSingleSelected());
             companyDl.setParameter("posTypeCompany", openPositionsTable.getSingleSelected());
+        } else {
+            vacansyNameDl.removeParameter("posTypeVacansy");
+            projectNameDl.removeParameter("posType");
+            companyDl.removeParameter("posTypeCompany");
         }
 
         projectNameDl.load();
@@ -95,6 +103,24 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                 }
             }
         }
+
+        if(projectNameTable.getSingleSelected() != null) {
+            companyDl.setParameter("projectName", projectNameTable.getSingleSelected());
+            vacansyNameDl.setParameter("projectName", projectNameTable.getSingleSelected());
+            openPositionsDl.setParameter("projectName", projectNameTable.getSingleSelected());
+
+            companyTable.deselectAll();
+            vacansyNameTable.deselectAll();
+            openPositionsTable.deselectAll();
+        } else {
+            companyDl.removeParameter("projectName");
+            vacansyNameDl.removeParameter("projectName");
+            openPositionsDl.removeParameter("projectName");
+        }
+
+        companyDl.load();
+        vacansyNameDl.load();
+        openPositionsTable.deselectAll();
     }
 
     @Subscribe("vacansyNameTable")
@@ -229,8 +255,12 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         projectNameDl.removeParameter("priorityfield");
         companyDl.removeParameter("priorityfield");
 
+        companyDl.setParameter("ourClient", true);
+
         openPositionsDl.load();
         vacansyNameDl.load();
+        companyDl.load();
+        projectNameDl.load();
     }
 
     private void setCompanyTable() {
@@ -405,10 +435,14 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
 
         notLowerRatingLookupField.setValue(null);
 
+        deselectTables();
+    }
 
+    private void deselectTables() {
         openPositionsTable.deselectAll();
         vacansyNameTable.deselectAll();
         companyTable.deselectAll();
         projectNameTable.deselectAll();
+
     }
 }

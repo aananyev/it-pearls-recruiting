@@ -66,7 +66,6 @@ public class Company extends StandardEntity {
     @JoinColumn(name = "FILE_COMPANY_LOGO")
     protected FileDescriptor fileCompanyLogo;
 
-
     @Lob
     @Column(name = "ADDRESS_OF_COMPANY")
     protected String addressOfCompany;
@@ -74,6 +73,19 @@ public class Company extends StandardEntity {
     @Lob
     @Column(name = "COMPANY_DESCRIPTION")
     private String companyDescription;
+
+    @Lob
+    @Column(name = "WORKING_CONDITIONS")
+    private String workingConditions;
+
+
+    public String getWorkingConditions() {
+        return workingConditions;
+    }
+
+    public void setWorkingConditions(String workingConditions) {
+        this.workingConditions = workingConditions;
+    }
 
     public String getCompanyDescription() {
         return companyDescription;

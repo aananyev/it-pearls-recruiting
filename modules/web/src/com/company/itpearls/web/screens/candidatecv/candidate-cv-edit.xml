@@ -373,6 +373,11 @@
                                       height="100%"
                                       caption="msg://msgLetter"
                                       width="100%"/>
+                        <richTextArea id="commentLetterRichTextArea"
+                                      dataContainer="candidateCVDc"
+                                      property="commentLetter"
+                                      caption="msg://msgCommentLetter"
+                                      height="25%"/>
                     </vbox>
                     <richTextArea id="letterRecommendation"
                                   width="100%"

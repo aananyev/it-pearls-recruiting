@@ -34,6 +34,7 @@
                           view="skillTree-view">
                     <property name="skillTree" view="skillTree-view"/>
                 </property>
+                <property name="comment"/>§
             </view>
             <loader id="openPositionDl"/>
             <collection id="openPositionSkillsListsDc"

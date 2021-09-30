@@ -55,6 +55,10 @@ public class CandidateCV extends StandardEntity {
     @Column(name = "LETTER")
     protected String letter;
 
+    @Lob
+    @Column(name = "COMMENT_LETTER")
+    private String commentLetter;
+
     @Transient
     @MetaProperty
     @CaseConversion(type = ConversionType.LOWER)
@@ -94,6 +98,14 @@ public class CandidateCV extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_IMAGE_FACE")
     protected FileDescriptor fileImageFace;
+
+    public String getCommentLetter() {
+        return commentLetter;
+    }
+
+    public void setCommentLetter(String commentLetter) {
+        this.commentLetter = commentLetter;
+    }
 
     public List<SomeFiles> getSomeFiles() {
         return someFiles;

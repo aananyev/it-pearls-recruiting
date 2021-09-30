@@ -5,30 +5,51 @@
     <dialogMode height="600"
                 forceDialog="true"
                 width="800"/>
-    <layout expand="jobDescriptionViewTab">
-        <tabSheet id="jobDescriptionViewTab"
-                  height="100%"
-                  stylename="framed"
-                  width="100%">
-            <tab id="jobDescriptionTab"
-                 caption="msg://msgjobDescriptionTab">
-                <richTextArea id="jobDesxriptionRichTextArea"
-                              width="100%"
-                              editable="false"
-                              height="100%"/>
-            </tab>
-            <tab id="projectDescription"
-                 caption="msg://msgProjectDescriptionTab">
-                <richTextArea id="projectDescriptionRichTextArea"
-                              width="100%"
-                              editable="false"
-                              height="100%"/>
-            </tab>
-        </tabSheet>
-        <hbox id="lookupActions"
+    <layout expand="jobDescriptionViewVBox">
+        <vbox id="jobDescriptionViewVBox"
               spacing="true"
-              visible="false"
-              align="TOP_RIGHT">
-        </hbox>
+              expand="jobDescriptionViewTab"
+              width="100%"
+              height="100%">
+            <tabSheet id="jobDescriptionViewTab"
+                      height="100%"
+                      stylename="framed"
+                      width="100%">
+                <tab id="jobDescriptionTab"
+                     caption="msg://msgjobDescriptionTab">
+                    <richTextArea id="jobDesxriptionRichTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </tab>
+                <tab id="projectDescription"
+                     caption="msg://msgProjectDescriptionTab">
+                    <richTextArea id="projectDescriptionRichTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </tab>
+                <tab id="workingConditionsTab"
+                     caption="msg://msgWorkingConditions">
+                    <richTextArea id="companyWorkingConditionsRichTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </tab>
+            </tabSheet>
+            <hbox id="lookupActions"
+                  spacing="true"
+                  visible="true"
+                  align="TOP_RIGHT">
+                <checkBox id="copyAllToClipboardCheckBox"
+                          align="MIDDLE_RIGHT"
+                          caption="msg://msgCopyAllToClipboard"/>
+                <button id="copyToClipboard"
+                        icon="CLIPBOARD"
+                        align="MIDDLE_RIGHT"
+                        caption="msg://msgCopyToClipboard"
+                        invoke="copyToClipboard"/>
+            </hbox>
+        </vbox>
     </layout>
 </window>

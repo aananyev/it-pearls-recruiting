@@ -64,14 +64,10 @@
         <property name="positionType" view="position-view"/>
         <property name="projectName" view="_local">
             <property name="projectOwner" view="_local">
-                <property name="firstName"/>
-                <property name="secondName"/>
-                <property name="middleName"/>
             </property>
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local">
                     <property name="cityOfCompany" view="_local">
-                        <property name="cityRuName"/>
                     </property>
                     <property name="fileCompanyLogo" view="_minimal"/>
                 </property>
