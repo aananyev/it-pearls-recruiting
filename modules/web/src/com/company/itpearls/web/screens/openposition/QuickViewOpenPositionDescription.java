@@ -22,6 +22,7 @@ public class QuickViewOpenPositionDescription extends Screen {
     String jobDescription = "";
     String projectDescription = "";
     String companyWorkConditions = "";
+    String companyDescription = "";
 
     @Inject
     private RichTextArea jobDesxriptionRichTextArea;
@@ -37,6 +38,16 @@ public class QuickViewOpenPositionDescription extends Screen {
     private RichTextArea companyWorkingConditionsRichTextArea;
     @Inject
     private ParseCVService parseCVService;
+    @Inject
+    private RichTextArea companyDescriptionRichTextArea;
+
+    public void setCompanyDescription(String companyDescription) {
+        this.companyDescription = companyDescription;
+    }
+
+    public String getCompanyDescription() {
+        return companyDescription;
+    }
 
     public void setJobDescription(String jobDescription) {
         this.jobDescription = jobDescription;
@@ -71,6 +82,9 @@ public class QuickViewOpenPositionDescription extends Screen {
 
         if (companyWorkConditions != null && !companyWorkConditions.equals(""))
             companyWorkingConditionsRichTextArea.setValue(companyWorkConditions);
+
+        if (companyDescription != null && !companyDescription.equals(""))
+            companyDescriptionRichTextArea.setValue(companyDescription);
     }
 
     public void copyToClipboard() {
@@ -79,6 +93,7 @@ public class QuickViewOpenPositionDescription extends Screen {
         String breakStr3 = "<br><br><br>";
         String textVacansyDescription = "ОПИСАНИЕ ВАКАНСИИ";
         String textProjectDescription = "ОПИСАНИЕ ПРОЕКТА";
+        String textCompanyDescription = "ОПИСАНИЕ КОМПАНИИ";
         String textCompanyWorkingConditions = "ОПИСАНИЕ ПРЕИМУЩЕСТВ РАБОТЫ В КОМПАНИИ";
 
         if (copyAllToClipboardCheckBox.getValue()) {
@@ -88,26 +103,33 @@ public class QuickViewOpenPositionDescription extends Screen {
                     + textProjectDescription + breakStr
                     + projectDescriptionRichTextArea.getValue()
                     + breakStr3
+                    + textCompanyDescription + breakStr
+                    + companyDescriptionRichTextArea.getValue()
+                    + breakStr3
                     + textCompanyWorkingConditions + breakStr
                     + companyWorkingConditionsRichTextArea.getValue())).replaceAll("\\<.*?\\>", "");
 
         } else {
             switch (jobDescriptionViewTab.getSelectedTab().getName()) {
                 case "jobDescriptionTab":
-                    strToCopy = textVacansyDescription
+                    strToCopy = textVacansyDescription + breakStr
                             + parseCVService.br2nl(jobDesxriptionRichTextArea
                             .getValue()).replaceAll("\\<.*?\\>", "");
                     break;
                 case "projectDescription":
-                    strToCopy = textProjectDescription
+                    strToCopy = textProjectDescription + breakStr
                             + parseCVService.br2nl(projectDescriptionRichTextArea
                             .getValue()).replaceAll("\\<.*?\\>", "");
                     break;
                 case "workingConditionsTab":
-                    strToCopy = textCompanyWorkingConditions
+                    strToCopy = textCompanyWorkingConditions + breakStr
                             + parseCVService.br2nl(companyWorkingConditionsRichTextArea
                             .getValue()).replaceAll("\\<.*?\\>", "");
                     break;
+                case "companyDescriptionTab":
+                    strToCopy = textCompanyDescription + breakStr
+                            + parseCVService.br2nl(companyDescriptionRichTextArea
+                            .getValue()).replaceAll("\\<.*?\\>", "");
                 default:
                     break;
             }

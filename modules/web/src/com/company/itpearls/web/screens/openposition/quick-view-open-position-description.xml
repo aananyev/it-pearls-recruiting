@@ -29,6 +29,13 @@
                                   editable="false"
                                   height="100%"/>
                 </tab>
+                <tab id="companyDescriptionTab"
+                     caption="msg://msgCompanyDescriptionTab">
+                    <richTextArea id="companyDescriptionRichTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </tab>
                 <tab id="workingConditionsTab"
                      caption="msg://msgWorkingConditions">
                     <richTextArea id="companyWorkingConditionsRichTextArea"

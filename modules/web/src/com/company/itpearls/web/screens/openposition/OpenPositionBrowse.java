@@ -497,6 +497,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             .getWorkingConditions());
                 }
 
+                if(openPositionsTable.getSingleSelected()
+                .getProjectName()
+                .getProjectDepartment()
+                .getCompanyName() != null) {
+                    quickViewOpenPositionDescription.setCompanyDescription(openPositionsTable.getSingleSelected()
+                    .getProjectName()
+                    .getProjectDepartment()
+                    .getCompanyName().getCompanyDescription());
+                }
+
                 quickViewOpenPositionDescription.reloadDescriptions();
                 screens.show(quickViewOpenPositionDescription);
 
