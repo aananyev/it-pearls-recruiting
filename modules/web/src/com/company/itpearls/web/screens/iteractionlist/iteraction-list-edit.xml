@@ -11,7 +11,11 @@
             <view extends="_local">
                 <property name="candidate" view="_minimal"/>
                 <property name="iteractionType" view="_minimal"/>
-                <property name="vacancy" view="_minimal"/>
+                <property name="vacancy" view="_minimal">
+                    <property name="projectName" view="_minimal">
+                        <property name="projectOwner" view="_minimal"/>
+                    </property>
+                </property>
                 <property name="recrutier" view="_minimal"/>
             </view>
             <loader id="iteractionListDl"/>

@@ -40,6 +40,7 @@
                 <property name="linkItPearlsCV"/>
                 <property name="textCV"/>
                 <property name="datePost"/>
+                <property name="commentLetter"/>
             </view>
             <loader/>
             <collection id="someFilesesDc" property="someFiles"/>
