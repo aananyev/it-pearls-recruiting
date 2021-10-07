@@ -53,7 +53,7 @@
                                     (select i.projectName
                                     from itpearls_OpenPosition i
                                     where (not i.openClose = true)
-                                    and i.positionType = :posTypeCompany)))
+                                    and i.positionType = :positionType)))
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
@@ -63,7 +63,8 @@
                                     where f in
                                     (select g.projectDepartment
                                     from itpearls_Project g
-                                    where g.openPosition = :openPosition))</c:where>
+                                    where g.openPosition = :openPosition))
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.ourClient = :ourClient</c:where>
@@ -88,7 +89,7 @@
                                 <c:where>e in
                                     (select f.projectName
                                     from itpearls_OpenPosition f
-                                    where f.positionType = :posType
+                                    where f.positionType = :positionType
                                     and (not f.openClose = true))
                                 </c:where>
                             </c:jpql>
@@ -119,7 +120,7 @@
                                 <c:where>x.positionType in
                                     (select f.positionType
                                     from itpearls_OpenPosition f
-                                    where f.positionType = :posTypeVacancy
+                                    where f.positionType = :positionType
                                     and (not f.openClose = true))
                                 </c:where>
                             </c:jpql>
@@ -134,7 +135,7 @@
     </data>
     <dialogMode height="800"
                 width="600"/>
-    <layout expand="mainHBox"
+    <layout expand="mainAccordion"
             spacing="true">
         <groupBox height="AUTO"
                   width="100%"
@@ -158,11 +159,7 @@
                       width="AUTO"
                       spacing="true"
                       align="BOTTOM_LEFT">
-                    <lookupField id="notLowerRatingLookupField"
-                                 align="MIDDLE_RIGHT"
-                                 width="100%"
-                                 caption="msg://msgPriorityPosition"
-                                 description="msg://msgStatusNotLower"/>
+
                     <button id="clearButton"
                             align="BOTTOM_RIGHT"
                             width="AUTO"
@@ -172,112 +169,6 @@
                 </hbox>
             </hbox>
         </groupBox>
-        <hbox id="mainHBox"
-              width="100%"
-              height="AUTO"
-              spacing="true">
-            <vbox id="openPositionTableVBox"
-                  width="100%"
-                  spacing="false"
-                  box.expandRatio="2"
-                  align="TOP_LEFT"
-                  expand="openPositionsTable"
-                  height="100%">
-                <dataGrid id="openPositionsTable"
-                          width="100%"
-                          height="100%"
-                          align="TOP_LEFT"
-                          editorEnabled="false"
-                          contextMenuEnabled="false"
-                          dataContainer="openPositionsDc">
-                    <actions>
-                    </actions>
-                    <columns>
-                        <column property="positionRuName"
-                                id="positionRuName"/>
-                    </columns>
-                </dataGrid>
-            </vbox>
-            <vbox spacing="true"
-                  width="100%"
-                  align="TOP_LEFT"
-                  height="100%"
-                  box.expandRatio="6">
-                <hbox spacing="true"
-                      width="100%"
-                      height="100%">
-                    <dataGrid id="companyTable"
-                              width="100%"
-                              editorEnabled="false"
-                              contextMenuEnabled="false"
-                              dataContainer="companyDc"
-                              height="100%">
-                        <actions>
-                        </actions>
-                        <columns>
-                            <column id="comanyName"
-                                    property="comanyName"/>
-                        </columns>
-                    </dataGrid>
-                    <richTextArea id="companyInfoRichTextArea"
-                                  width="100%"
-                                  editable="false"
-                                  height="100%"/>
-                </hbox>
-                <hbox spacing="true" width="100%" height="100%">
-                    <dataGrid id="projectNameTable"
-                              width="100%"
-                              editorEnabled="false"
-                              contextMenuEnabled="false"
-                              height="100%"
-                              dataContainer="projectNamcDc">
-                        <columns>
-                            <column id="projectName"
-                                    property="projectName"/>
-                        </columns>
-                    </dataGrid>
-                    <richTextArea id="projectInfoRichTextArea"
-                                  width="100%"
-                                  editable="false"
-                                  height="100%"/>
-                </hbox>
-                <hbox spacing="true" width="100%" height="100%">
-                    <dataGrid id="vacansyNameTable"
-                              width="100%"
-                              editorEnabled="false"
-                              contextMenuEnabled="false"
-                              height="100%"
-                              dataContainer="vacansyNameDc">
-                        <columns>
-                            <column id="priorityColumn"
-                                    width="60px"
-                                    caption="msg://msgPriority">
-                                <iconRenderer/>
-                            </column>
-                            <column id="vacansyName"
-                                    property="vacansyName"
-                                    width="350px"/>
-                            <column id="salaryMinMaxColumn"
-                                    caption="msg://msgSalaryMax"
-                                    width="100px">
-                                <textRenderer nullRepresentation="null"/>
-                            </column>
-                        </columns>
-                    </dataGrid>
-                    <vbox width="100%"
-                          height="100%"
-                          expand="vacansyInfoRictTextArea">
-                        <richTextArea id="vacansyInfoRictTextArea"
-                                      width="100%"
-                                      editable="false"
-                                      height="100%"/>
-
-                    </vbox>
-                </hbox>
-            </vbox>
-            <vbox spacing="true">
-            </vbox>
-        </hbox>
         <hbox id="footerHBox"
               width="100%"
               height="AUTO"
@@ -316,6 +207,132 @@
                 </hbox>
             </hbox>
         </hbox>
+        <accordion id="mainAccordion">
+            <tab id="selectPriorityTab"
+                 spacing="true"
+                 caption="msg://msgSelectPriorityPosition">
+                <lookupField id="notLowerRatingLookupField"
+                             align="MIDDLE_CENTER"
+                             width="50%"
+                             caption="msg://msgSelectPriorityPosition"
+                             description="msg://msgStatusNotLower"/>
+            </tab>
+            <tab id="selectJobPositionTab"
+                 spacing="true"
+                 caption="msg://msgSelectJobPosition">
+                <hbox id="mainHBox"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true">
+                    <vbox id="openPositionTableVBox"
+                          width="100%"
+                          spacing="false"
+                          box.expandRatio="2"
+                          align="TOP_LEFT"
+                          expand="openPositionsTable"
+                          height="100%">
+                        <dataGrid id="openPositionsTable"
+                                  width="100%"
+                                  height="100%"
+                                  align="TOP_LEFT"
+                                  editorEnabled="false"
+                                  contextMenuEnabled="false"
+                                  dataContainer="openPositionsDc">
+                            <actions>
+                            </actions>
+                            <columns>
+                                <column property="positionRuName"
+                                        id="positionRuName"/>
+                            </columns>
+                        </dataGrid>
+                    </vbox>
+                </hbox>
+            </tab>
+            <tab id="selectVacansyTab"
+                 spacing="true"
+                 caption="msg://msgSelectVacancy">
+                <vbox spacing="true"
+                      width="100%"
+                      align="TOP_LEFT"
+                      height="100%"
+                      box.expandRatio="6">
+                    <hbox spacing="true"
+                          width="100%"
+                          height="100%">
+                        <dataGrid id="companyTable"
+                                  width="100%"
+                                  editorEnabled="false"
+                                  contextMenuEnabled="false"
+                                  dataContainer="companyDc"
+                                  height="100%">
+                            <actions>
+                            </actions>
+                            <columns>
+                                <column id="comanyName"
+                                        property="comanyName"/>
+                            </columns>
+                        </dataGrid>
+                        <richTextArea id="companyInfoRichTextArea"
+                                      width="100%"
+                                      editable="false"
+                                      height="100%"/>
+                    </hbox>
+                    <hbox spacing="true" width="100%" height="100%">
+                        <dataGrid id="projectNameTable"
+                                  width="100%"
+                                  editorEnabled="false"
+                                  contextMenuEnabled="false"
+                                  height="100%"
+                                  dataContainer="projectNamcDc">
+                            <columns>
+                                <column id="projectName"
+                                        property="projectName"/>
+                            </columns>
+                        </dataGrid>
+                        <richTextArea id="projectInfoRichTextArea"
+                                      width="100%"
+                                      editable="false"
+                                      height="100%"/>
+                    </hbox>
+                    <hbox spacing="true" width="100%" height="100%">
+                        <dataGrid id="vacansyNameTable"
+                                  width="100%"
+                                  editorEnabled="false"
+                                  contextMenuEnabled="false"
+                                  height="100%"
+                                  dataContainer="vacansyNameDc">
+                            <columns>
+                                <column id="priorityColumn"
+                                        width="60px"
+                                        caption="msg://msgPriority">
+                                    <iconRenderer/>
+                                </column>
+                                <column id="vacansyName"
+                                        property="vacansyName"
+                                        width="350px"/>
+                                <column id="salaryMinMaxColumn"
+                                        caption="msg://msgSalaryMax"
+                                        width="100px">
+                                    <textRenderer nullRepresentation="null"/>
+                                </column>
+                            </columns>
+                        </dataGrid>
+                        <vbox width="100%"
+                              height="100%"
+                              expand="vacansyInfoRictTextArea">
+                            <richTextArea id="vacansyInfoRictTextArea"
+                                          width="100%"
+                                          editable="false"
+                                          height="100%"/>
+
+                        </vbox>
+                    </hbox>
+                </vbox>
+                <vbox spacing="true">
+                </vbox>
+            </tab>
+
+        </accordion>
         <hbox id="lookupActions"
               spacing="true"
               width="AUTO"
@@ -326,10 +343,13 @@
             <button id="previonsButton"
                     align="BOTTOM_RIGHT"
                     icon="ARROW_LEFT"
+                    enable="false"
+                    invoke="previonsTab"
                     caption="mainMsg://msgPervionsButton"/>
             <button id="nextButton"
                     icon="ARROW_RIGHT"
                     align="BOTTOM_RIGHT"
+                    invoke="nextTab"
                     caption="mainMsg://msgNextButton"/>
         </hbox>
     </layout>

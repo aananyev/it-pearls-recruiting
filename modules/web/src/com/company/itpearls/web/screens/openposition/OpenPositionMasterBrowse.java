@@ -11,12 +11,11 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @UiController("itpearls_OpenPositionMaster.browse")
 @UiDescriptor("open-position-master-browse.xml")
@@ -43,8 +42,6 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     private DataGrid<OpenPosition> vacansyNameTable;
     @Inject
     private RichTextArea vacansyInfoRictTextArea;
-
-    private Map<String, Integer> priorityMap = new LinkedHashMap<>();
     @Inject
     private LookupField notLowerRatingLookupField;
     @Inject
@@ -57,6 +54,15 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     private Label<String> minSalaryLabel;
     @Inject
     private Label<String> maxSalaryLabel;
+    @Inject
+    private Accordion mainAccordion;
+
+    private Map<String, Integer> priorityMap = new LinkedHashMap<>();
+    private Map<Integer, String> tabCaption = new HashMap<>();
+    @Inject
+    private Button nextButton;
+    @Inject
+    private Button previonsButton;
 
     @Subscribe("openPositionsTable")
     public void onOpenPositionsTableSelection(DataGrid.SelectionEvent<Position> event) {
@@ -65,13 +71,13 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         companyTable.deselectAll();
 
         if (openPositionsTable.getSingleSelected() != null) {
-            vacansyNameDl.setParameter("posTypeVacancy", openPositionsTable.getSingleSelected());
-            projectNameDl.setParameter("posType", openPositionsTable.getSingleSelected());
-            companyDl.setParameter("posTypeCompany", openPositionsTable.getSingleSelected());
+            vacansyNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+            projectNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+            companyDl.setParameter("positionType", openPositionsTable.getSingleSelected());
         } else {
-            vacansyNameDl.removeParameter("posTypeVacansy");
-            projectNameDl.removeParameter("posType");
-            companyDl.removeParameter("posTypeCompany");
+            vacansyNameDl.removeParameter("positionType");
+            projectNameDl.removeParameter("positionType");
+            companyDl.removeParameter("positionType");
         }
 
         projectNameDl.load();
@@ -219,7 +225,51 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        setTabCaption();
+        setPrevNextButton();
         setMapOfPriority();
+    }
+
+    private void setPrevNextButton() {
+        mainAccordion.addSelectedTabChangeListener(e -> {
+            Integer maxTab = 1;
+
+            String a = mainAccordion.getSelectedTab().getCaption().substring(0,1);
+
+            if (mainAccordion.getSelectedTab().getCaption().substring(0, 1).equals(maxTab.toString())) {
+                previonsButton.setEnabled(false);
+            } else {
+                previonsButton.setEnabled(true);
+            }
+
+            for(Accordion.Tab tab : mainAccordion.getTabs()) {
+                maxTab ++;
+            }
+
+
+            if (mainAccordion.getSelectedTab().getCaption().substring(0, 1).equals((--maxTab).toString())) {
+                nextButton.setEnabled(false);
+            } else {
+                nextButton.setEnabled(true);
+            }
+        });
+    }
+
+    private void setTabCaption() {
+        tabCaption.put(1, "1. Выберите приоритет поиска позиции");
+        tabCaption.put(2, "2. Выбрать специализацию");
+        tabCaption.put(3, "3. Выбрать вакансию");
+
+        for (Accordion.Tab tab : mainAccordion.getTabs()) {
+            for (Map.Entry entry : tabCaption.entrySet()) {
+                String a = tab.getCaption();
+                String b = entry.getKey().toString();
+
+                if(tab.getCaption().equals(entry.getKey().toString())) {
+                    tab.setCaption(tabCaption.get(entry.getKey()));
+                }
+            }
+        }
     }
 
     private void setStatusNotLower() {
@@ -444,5 +494,47 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         companyTable.deselectAll();
         projectNameTable.deselectAll();
 
+    }
+
+    public void nextTab() {
+        Integer nextTab = 0;
+
+        String first = mainAccordion.getSelectedTab().getCaption();
+        for(Map.Entry entry : tabCaption.entrySet()) {
+            if (entry.getValue().equals(first)) {
+                nextTab = (Integer) entry.getKey();
+
+            }
+        }
+
+        nextTab ++;
+
+        for (Accordion.Tab tab : mainAccordion.getTabs()) {
+            if (tab.getCaption().equals(tabCaption.get(nextTab))) {
+                mainAccordion.setSelectedTab(tab);
+                break;
+            }
+        }
+    }
+
+    public void previonsTab() {
+        Integer previonsTab = 0;
+
+        String first = mainAccordion.getSelectedTab().getCaption();
+        for(Map.Entry entry : tabCaption.entrySet()) {
+            if (entry.getValue().equals(first)) {
+                previonsTab = (Integer) entry.getKey();
+
+            }
+        }
+
+        previonsTab --;
+
+        for (Accordion.Tab tab : mainAccordion.getTabs()) {
+            if (tab.getCaption().equals(tabCaption.get(previonsTab))) {
+                mainAccordion.setSelectedTab(tab);
+                break;
+            }
+        }
     }
 }
