@@ -5,6 +5,7 @@ import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.openposition.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -176,6 +177,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             "from itpearls_IteractionList e " +
             "where e.candidate = :candidate and " +
             "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
+    @Inject
+    private Button openPositionProjectDescriptionButton;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -845,10 +848,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         msec = System.currentTimeMillis();
 
-
-//        checkSkillFromJD.setEnabled(false);
-//        scanContactsFromCVButton.setEnabled(false);
-
         jobCandidateCandidateCvTable.addSelectionListener(e -> {
             if (e.getSelected() == null) {
                 checkSkillFromJD.setEnabled(false);
@@ -856,6 +855,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             } else {
                 checkSkillFromJD.setEnabled(true);
                 scanContactsFromCVButton.setEnabled(true);
+            }
+        });
+
+        jobCandidateIteractionListTable.addSelectionListener(e -> {
+            if (e.getSelected() == null) {
+                openPositionProjectDescriptionButton.setEnabled(false);
+            } else {
+                openPositionProjectDescriptionButton.setEnabled(true);
             }
         });
     }
@@ -1666,7 +1673,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                             messageSocial.put(hostSocialFromCandidate, urls);
                                         }
                                     } else {
-                                        messageSN = "Найдена новая ссылка: " + sFromCV + " ";
+                                        messageSN = "Добавить новую ссылку: " + sFromCV + "? ";
 
                                         List<String> urls = new ArrayList<>();
                                         urls.add(messageSN);
@@ -1979,4 +1986,52 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
 
+    public void openPositionDescription() {
+        QuickViewOpenPositionDescription quickViewOpenPositionDescription = screens.create(QuickViewOpenPositionDescription.class);
+        quickViewOpenPositionDescription.setJobDescription(jobCandidateIteractionListTable.getSingleSelected() != null ?
+                jobCandidateIteractionListTable.getSingleSelected().getVacancy().getComment() : "");
+
+        if(jobCandidateIteractionListTable.getSingleSelected().getVacancy().getProjectName().getProjectDescription() != null) {
+            quickViewOpenPositionDescription.setProjectDescription(jobCandidateIteractionListTable
+                    .getSingleSelected()
+                    .getVacancy()
+                    .getProjectName()
+                    .getProjectDescription() != null ?
+                    jobCandidateIteractionListTable.getSingleSelected()
+                            .getVacancy()
+                            .getProjectName()
+                            .getProjectDescription() : "");
+        }
+
+        if(jobCandidateIteractionListTable.getSingleSelected()
+                .getVacancy()
+                .getProjectName()
+                .getProjectDepartment()
+                .getCompanyName()
+                .getWorkingConditions() != null) {
+            quickViewOpenPositionDescription.setCompanyWorkConditions(jobCandidateIteractionListTable
+                    .getSingleSelected()
+                    .getVacancy()
+                    .getProjectName()
+                    .getProjectDepartment()
+                    .getCompanyName()
+                    .getWorkingConditions());
+        }
+
+        if(jobCandidateIteractionListTable.getSingleSelected()
+                .getVacancy()
+                .getProjectName()
+                .getProjectDepartment()
+                .getCompanyName() != null) {
+            quickViewOpenPositionDescription.setCompanyDescription(jobCandidateIteractionListTable
+                    .getSingleSelected()
+                    .getVacancy()
+                    .getProjectName()
+                    .getProjectDepartment()
+                    .getCompanyName().getCompanyDescription());
+        }
+
+        quickViewOpenPositionDescription.reloadDescriptions();
+        screens.show(quickViewOpenPositionDescription);
+    }
 }

@@ -125,7 +125,13 @@
                 <button id="clipBtn"
                         caption="msg://msgCopyToClipboard"
                         enable="false"
+                        icon="CLIPBOARD"
                         invoke="onButtonCopyToClibboard"/>
+                <button id="itercationListButton"
+                        caption="msg://msgIteractionList"
+                        enable="false"
+                        icon="LIST"
+                        invoke="onIteractionListButton"/>
             </buttonsPanel>
         </dataGrid>
         <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>

@@ -64,6 +64,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private Notifications notifications;
     @Inject
     private Button clipBtn;
+    @Inject
+    private Button itercationListButton;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -182,9 +184,12 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             if(event.getSelected() == null) {
                 jobCandidateCardButton.setEnabled(false);
                 clipBtn.setEnabled(false);
+                itercationListButton.setEnabled(false);
+
             } else {
                 jobCandidateCardButton.setEnabled(true);
                 clipBtn.setEnabled(true);
+                itercationListButton.setEnabled(true);
             }
         });
     }
@@ -224,5 +229,11 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
                 clipboardText
                 + "');");
         notifications.create().withCaption("Copied to clipboard").show();
+    }
+
+    public void onIteractionListButton() {
+        IteractionListSimpleBrowse iteractionListSimpleBrowse = screens.create(IteractionListSimpleBrowse.class);
+        iteractionListSimpleBrowse.setSelectedCandidate(iteractionListsTable.getSingleSelected().getCandidate());
+        screens.show(iteractionListSimpleBrowse);
     }
 }

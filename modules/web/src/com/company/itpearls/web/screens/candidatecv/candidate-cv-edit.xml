@@ -116,149 +116,150 @@
                  expand="candidateVbox"
                  margin="true,true,true,true"
                  spacing="true">
-                <hbox id="candidateVbox"
-                      spacing="true"
-                      width="100%"
-                      height="100%"
-                      align="TOP_LEFT"
-                      expand="groupBox">
-                    <vbox id="groupBox"
+                <scrollBox width="100%" height="100%">
+                    <hbox id="candidateVbox"
                           spacing="true"
-                          stylename="light">
-                        <vbox spacing="true">
-                            <lookupPickerField id="candidateField"
-                                               optionsContainer="candidatesDc"
-                                               dataContainer="candidateCVDc"
-                                               property="candidate"
-                                               caption="msg://msgCandidate"
-                                               height="50%"
-                                               width="70%">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                    <action id="open" type="picker_open"/>
-                                </actions>
-                            </lookupPickerField>
-                            <lookupPickerField id="resumePositionField"
-                                               optionsContainer="resumePositionsDc"
-                                               dataContainer="candidateCVDc"
-                                               property="resumePosition"
-                                               caption="msg://msgPosition"
-                                               height="50%"
-                                               required="true"
-                                               width="70%">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                            <lookupPickerField id="candidateCVFieldOpenPosition"
-                                               dataContainer="candidateCVDc"
-                                               optionsContainer="openPositionsDc"
-                                               property="toVacancy"
-                                               caption="mainMsg://msgVacancy"
-                                               width="70%">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                        </vbox>
-                        <lookupField id="СandidateCVField"
-                                     dataContainer="candidateCVDc"
-                                     optionsContainer="usersDc"
-                                     caption="mainMsg://msgOwner"
-                                     property="owner"
-                                     width="70%"/>
-                        <vbox expand="fileOriginalCVField"
-                              width="70%"
-                              spacing="true">
-                            <hbox width="100%"
-                                  expand="textFieldIOriginalCV"
+                          width="100%"
+                          height="100%"
+                          align="TOP_LEFT"
+                          expand="groupBox">
+                        <vbox id="groupBox"
+                              spacing="true"
+                              stylename="light">
+                            <vbox spacing="true">
+                                <lookupPickerField id="candidateField"
+                                                   optionsContainer="candidatesDc"
+                                                   dataContainer="candidateCVDc"
+                                                   property="candidate"
+                                                   caption="msg://msgCandidate"
+                                                   height="50%"
+                                                   width="70%">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <lookupPickerField id="resumePositionField"
+                                                   optionsContainer="resumePositionsDc"
+                                                   dataContainer="candidateCVDc"
+                                                   property="resumePosition"
+                                                   caption="msg://msgPosition"
+                                                   height="50%"
+                                                   required="true"
+                                                   width="70%">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <lookupPickerField id="candidateCVFieldOpenPosition"
+                                                   dataContainer="candidateCVDc"
+                                                   optionsContainer="openPositionsDc"
+                                                   property="toVacancy"
+                                                   caption="mainMsg://msgVacancy"
+                                                   width="70%">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </vbox>
+                            <lookupField id="СandidateCVField"
+                                         dataContainer="candidateCVDc"
+                                         optionsContainer="usersDc"
+                                         caption="mainMsg://msgOwner"
+                                         property="owner"
+                                         width="70%"/>
+                            <vbox expand="fileOriginalCVField"
+                                  width="70%"
                                   spacing="true">
-                                <textField id="textFieldIOriginalCV"
-                                           dataContainer="candidateCVDc"
-                                           property="linkOriginalCv"
-                                           caption="mainMsg://msgLinkOriginalCV"
-                                           align="MIDDLE_LEFT"/>
-                                <button id="loadToCVTextArea"
-                                        icon="font-icon:DOWNLOAD"
-                                        align="BOTTOM_LEFT"
-                                        caption="msg://msgLoadToCVTextArea"
-                                        enable="false"
-                                        description="msg://msgLoarToTextAreaDecription"
-                                        invoke="loadToCVTextArea"/>
-                                <link id="originalCVLink"
-                                      icon="font-icon:FILE_WORD_O"
-                                      align="BOTTOM_LEFT"
-                                      target="_blank"
-                                      width="AUTO"
-                                      caption="msg://msgGoTo"
-                                      description="msg://msgGoTo"/>
-                            </hbox>
-                            <upload id="fileOriginalCVField"
-                                    property="originalFileCV"
-                                    showFileName="true"
-                                    align="TOP_RIGHT"
-                                    width="AUTO"
-                                    description="msg://msgOriginalCV"
-                                    dataContainer="candidateCVDc"
-                                    fileStoragePutMode="IMMEDIATE"
-                                    showClearButton="true"/>
-                        </vbox>
-                        <vbox expand="fileCVField"
-                              width="70%"
-                              spacing="true">
-                            <hbox width="100%"
-                                  expand="textFieldITPearlsCV"
+                                <hbox width="100%"
+                                      expand="textFieldIOriginalCV"
+                                      spacing="true">
+                                    <textField id="textFieldIOriginalCV"
+                                               dataContainer="candidateCVDc"
+                                               property="linkOriginalCv"
+                                               caption="mainMsg://msgLinkOriginalCV"
+                                               align="MIDDLE_LEFT"/>
+                                    <button id="loadToCVTextArea"
+                                            icon="font-icon:DOWNLOAD"
+                                            align="BOTTOM_LEFT"
+                                            caption="msg://msgLoadToCVTextArea"
+                                            enable="false"
+                                            description="msg://msgLoarToTextAreaDecription"
+                                            invoke="loadToCVTextArea"/>
+                                    <link id="originalCVLink"
+                                          icon="font-icon:FILE_WORD_O"
+                                          align="BOTTOM_LEFT"
+                                          target="_blank"
+                                          width="AUTO"
+                                          caption="msg://msgGoTo"
+                                          description="msg://msgGoTo"/>
+                                </hbox>
+                                <upload id="fileOriginalCVField"
+                                        property="originalFileCV"
+                                        showFileName="true"
+                                        align="TOP_RIGHT"
+                                        width="AUTO"
+                                        description="msg://msgOriginalCV"
+                                        dataContainer="candidateCVDc"
+                                        fileStoragePutMode="IMMEDIATE"
+                                        showClearButton="true"/>
+                            </vbox>
+                            <vbox expand="fileCVField"
+                                  width="70%"
                                   spacing="true">
-                                <textField id="textFieldITPearlsCV"
-                                           dataContainer="candidateCVDc"
-                                           property="linkItPearlsCV"
-                                           caption="mainMsg://msgLinkToItPearlsCV"
-                                           align="MIDDLE_LEFT"/>
-                                <link id="itpearlsCVLink"
-                                      icon="font-icon:FILE_WORD_O"
-                                      align="BOTTOM_LEFT"
-                                      target="_blank"
-                                      width="AUTO"
-                                      caption="msg://msgGoTo"
-                                      description="msg://msgGoTo"/>
-                            </hbox>
-                            <upload id="fileCVField"
-                                    fileStoragePutMode="IMMEDIATE"
-                                    property="fileCV"
-                                    showFileName="true"
-                                    align="TOP_RIGHT"
-                                    width="AUTO"
-                                    description="msg://msgCV"
-                                    dataContainer="candidateCVDc"
-                                    showClearButton="true"/>
+                                <hbox width="100%"
+                                      expand="textFieldITPearlsCV"
+                                      spacing="true">
+                                    <textField id="textFieldITPearlsCV"
+                                               dataContainer="candidateCVDc"
+                                               property="linkItPearlsCV"
+                                               caption="mainMsg://msgLinkToItPearlsCV"
+                                               align="MIDDLE_LEFT"/>
+                                    <link id="itpearlsCVLink"
+                                          icon="font-icon:FILE_WORD_O"
+                                          align="BOTTOM_LEFT"
+                                          target="_blank"
+                                          width="AUTO"
+                                          caption="msg://msgGoTo"
+                                          description="msg://msgGoTo"/>
+                                </hbox>
+                                <upload id="fileCVField"
+                                        fileStoragePutMode="IMMEDIATE"
+                                        property="fileCV"
+                                        showFileName="true"
+                                        align="TOP_RIGHT"
+                                        width="AUTO"
+                                        description="msg://msgCV"
+                                        dataContainer="candidateCVDc"
+                                        showClearButton="true"/>
+                            </vbox>
                         </vbox>
-                    </vbox>
-                    <vbox id="dropZone"
-                          spacing="true"
-                          width="200px"
-                          height="266px"
-                          align="TOP_RIGHT"
-                          expand="candidatePic"
-                          stylename="dropzone-container">
-                        <image id="candidatePic"
-                               dataContainer="candidateCVDc"
-                               property="fileImageFace"
-                               width="100%"
-                               align="TOP_RIGHT"
-                               height="100%"
-                               stylename="widget-border"
-                               scaleMode="FILL"/>
-                        <upload id="fileImageFaceUpload"
-                                fileStoragePutMode="IMMEDIATE"
-                                dataContainer="candidateCVDc"
-                                align="BOTTOM_CENTER"
-                                showFileName="false"
-                                dropZone="dropZone"
-                                showClearButton="true"
-                                property="fileImageFace"/>
-                    </vbox>
-                </hbox>
-
+                        <vbox id="dropZone"
+                              spacing="true"
+                              width="200px"
+                              height="266px"
+                              align="TOP_RIGHT"
+                              expand="candidatePic"
+                              stylename="dropzone-container">
+                            <image id="candidatePic"
+                                   dataContainer="candidateCVDc"
+                                   property="fileImageFace"
+                                   width="100%"
+                                   align="TOP_RIGHT"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <upload id="fileImageFaceUpload"
+                                    fileStoragePutMode="IMMEDIATE"
+                                    dataContainer="candidateCVDc"
+                                    align="BOTTOM_CENTER"
+                                    showFileName="false"
+                                    dropZone="dropZone"
+                                    showClearButton="true"
+                                    property="fileImageFace"/>
+                        </vbox>
+                    </hbox>
+                </scrollBox>
             </tab>
             <tab id="tabCV"
                  caption="msg://msgCV"
