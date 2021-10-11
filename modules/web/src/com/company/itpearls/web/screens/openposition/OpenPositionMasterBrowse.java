@@ -279,13 +279,13 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
             if (notLowerRatingLookupField.getValue() != null) {
                 openPositionsDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
                 vacansyNameDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
-                companyDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
-                projectNameDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
+//                companyDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
+//                projectNameDl.setParameter("priorityfield", notLowerRatingLookupField.getValue());
             } else {
                 openPositionsDl.setParameter("priorityfield", 1);
                 vacansyNameDl.setParameter("priorityfield", 1);
-                openPositionsDl.removeParameter("priorityfield");
-                vacansyNameDl.removeParameter("priorityfield");
+//                openPositionsDl.removeParameter("priorityfield");
+//                vacansyNameDl.removeParameter("priorityfield");
             }
 
             vacansyNameDl.load();
@@ -299,18 +299,10 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         setHeaderBox();
         setMinMaxSalaryLabel();
         setCompanyTable();
-
-        openPositionsDl.removeParameter("priorityfield");
-        vacansyNameDl.removeParameter("priorityfield");
-        projectNameDl.removeParameter("priorityfield");
-        companyDl.removeParameter("priorityfield");
+        clearFilters();
 
         companyDl.setParameter("ourClient", true);
-
-        openPositionsDl.load();
-        vacansyNameDl.load();
         companyDl.load();
-        projectNameDl.load();
     }
 
     private void setCompanyTable() {
@@ -473,10 +465,17 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     }
 
     public void clearFilters() {
+        companyDl.removeParameter("positionType");
+        companyDl.removeParameter("openPosition");
+
+        projectNameDl.removeParameter("positionType");
+        projectNameDl.removeParameter("company");
+        projectNameDl.removeParameter("openPosition");
+
         vacansyNameDl.removeParameter("priorityfield");
+        vacansyNameDl.removeParameter("positionType");
+
         openPositionsDl.removeParameter("priorityfield");
-        projectNameDl.removeParameter("priorityfield");
-        companyDl.removeParameter("priorityfield");
 
         vacansyNameDl.load();
         openPositionsDl.load();

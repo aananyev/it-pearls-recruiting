@@ -214,7 +214,7 @@
                 <lookupField id="notLowerRatingLookupField"
                              align="MIDDLE_CENTER"
                              width="50%"
-                             caption="msg://msgSelectPriorityPosition"
+                             caption="msg://msgPriorityPosition"
                              description="msg://msgStatusNotLower"/>
             </tab>
             <tab id="selectJobPositionTab"
@@ -324,14 +324,12 @@
                                           width="100%"
                                           editable="false"
                                           height="100%"/>
-
                         </vbox>
                     </hbox>
                 </vbox>
                 <vbox spacing="true">
                 </vbox>
             </tab>
-
         </accordion>
         <hbox id="lookupActions"
               spacing="true"
