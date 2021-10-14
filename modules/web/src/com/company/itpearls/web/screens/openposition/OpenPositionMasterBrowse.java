@@ -95,7 +95,16 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                     companyInfoRichTextArea.setValue("");
                 }
             }
+
+            projectNameDl.setParameter("company", companyTable.getSingleSelected());
+            vacansyNameDl.setParameter("company", companyTable.getSingleSelected());
+        } else {
+            projectNameDl.removeParameter("company");
+            vacansyNameDl.removeParameter("company");
         }
+
+        projectNameDl.load();
+        vacansyNameDl.load();
     }
 
     @Subscribe("projectNameTable")
@@ -256,9 +265,10 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setTabCaption() {
-        tabCaption.put(1, "1. Выберите приоритет поиска позиции");
-        tabCaption.put(2, "2. Выбрать специализацию");
-        tabCaption.put(3, "3. Выбрать вакансию");
+        tabCaption.put(1, "1. Выберите кандидата, которого предстоит собеседовать");
+        tabCaption.put(2, "2. Выберите приоритет поиска позиции");
+        tabCaption.put(3, "3. Выбрать специализацию");
+        tabCaption.put(4, "4. Выбрать вакансию");
 
         for (Accordion.Tab tab : mainAccordion.getTabs()) {
             for (Map.Entry entry : tabCaption.entrySet()) {
