@@ -865,6 +865,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 openPositionProjectDescriptionButton.setEnabled(true);
             }
         });
+
+        jobCandidateIteractionListTable.addEditorPostCommitListener(e -> {
+//            jobCandidateDl.load();
+        });
     }
 
     private List<IteractionList> getIteractionListFromCandidate(JobCandidate editedEntity) {

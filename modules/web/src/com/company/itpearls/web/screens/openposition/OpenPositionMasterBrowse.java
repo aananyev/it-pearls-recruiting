@@ -1,15 +1,12 @@
 package com.company.itpearls.web.screens.openposition;
 
-import com.company.itpearls.entity.Company;
-import com.company.itpearls.entity.Position;
-import com.company.itpearls.entity.Project;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
@@ -63,6 +60,14 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     private Button nextButton;
     @Inject
     private Button previonsButton;
+    @Inject
+    private LookupField<JobCandidate> jobCandidateField;
+    @Inject
+    private Label<String> jobCandidateLabel;
+    @Inject
+    private Label<String> priorityLabel;
+    @Inject
+    private Label<String> selectPositionLabel;
 
     @Subscribe("openPositionsTable")
     public void onOpenPositionsTableSelection(DataGrid.SelectionEvent<Position> event) {
@@ -107,6 +112,24 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         vacansyNameDl.load();
     }
 
+    @Subscribe("jobCandidateField")
+    public void onJobCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
+        setCandidateHeaderLabel();
+    }
+
+    @Subscribe("mainAccordion")
+    public void onMainAccordionSelectedTabChange(Accordion.SelectedTabChangeEvent event) {
+        setCandidateHeaderLabel();
+    }
+
+    private void setCandidateHeaderLabel() {
+        if (jobCandidateField.getValue() != null) {
+            jobCandidateLabel.setValue(jobCandidateField.getValue().getFullName()
+                    + " / "
+                    + jobCandidateField.getValue().getPersonPosition().getPositionEnName());
+        }
+    }
+
     @Subscribe("projectNameTable")
     public void onProjectNameTableSelection(DataGrid.SelectionEvent<Project> event) {
         if (event.getSelected() != null) {
@@ -119,7 +142,7 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
             }
         }
 
-        if(projectNameTable.getSingleSelected() != null) {
+        if (projectNameTable.getSingleSelected() != null) {
             companyDl.setParameter("projectName", projectNameTable.getSingleSelected());
             vacansyNameDl.setParameter("projectName", projectNameTable.getSingleSelected());
             openPositionsDl.setParameter("projectName", projectNameTable.getSingleSelected());
@@ -243,7 +266,7 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         mainAccordion.addSelectedTabChangeListener(e -> {
             Integer maxTab = 1;
 
-            String a = mainAccordion.getSelectedTab().getCaption().substring(0,1);
+            String a = mainAccordion.getSelectedTab().getCaption().substring(0, 1);
 
             if (mainAccordion.getSelectedTab().getCaption().substring(0, 1).equals(maxTab.toString())) {
                 previonsButton.setEnabled(false);
@@ -251,8 +274,8 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                 previonsButton.setEnabled(true);
             }
 
-            for(Accordion.Tab tab : mainAccordion.getTabs()) {
-                maxTab ++;
+            for (Accordion.Tab tab : mainAccordion.getTabs()) {
+                maxTab++;
             }
 
 
@@ -275,7 +298,7 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                 String a = tab.getCaption();
                 String b = entry.getKey().toString();
 
-                if(tab.getCaption().equals(entry.getKey().toString())) {
+                if (tab.getCaption().equals(entry.getKey().toString())) {
                     tab.setCaption(tabCaption.get(entry.getKey()));
                 }
             }
@@ -317,7 +340,7 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
 
     private void setCompanyTable() {
         companyTable.addSelectionListener(e -> {
-            if(companyTable.getSingleSelected() != null) {
+            if (companyTable.getSingleSelected() != null) {
                 projectNameDl.setParameter("company", companyTable.getSingleSelected());
             } else {
                 projectNameDl.removeParameter("company");
@@ -509,14 +532,14 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         Integer nextTab = 0;
 
         String first = mainAccordion.getSelectedTab().getCaption();
-        for(Map.Entry entry : tabCaption.entrySet()) {
+        for (Map.Entry entry : tabCaption.entrySet()) {
             if (entry.getValue().equals(first)) {
                 nextTab = (Integer) entry.getKey();
 
             }
         }
 
-        nextTab ++;
+        nextTab++;
 
         for (Accordion.Tab tab : mainAccordion.getTabs()) {
             if (tab.getCaption().equals(tabCaption.get(nextTab))) {
@@ -530,20 +553,44 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         Integer previonsTab = 0;
 
         String first = mainAccordion.getSelectedTab().getCaption();
-        for(Map.Entry entry : tabCaption.entrySet()) {
+        for (Map.Entry entry : tabCaption.entrySet()) {
             if (entry.getValue().equals(first)) {
                 previonsTab = (Integer) entry.getKey();
 
             }
         }
 
-        previonsTab --;
+        previonsTab--;
 
         for (Accordion.Tab tab : mainAccordion.getTabs()) {
             if (tab.getCaption().equals(tabCaption.get(previonsTab))) {
                 mainAccordion.setSelectedTab(tab);
                 break;
             }
+        }
+    }
+
+    @Subscribe("notLowerRatingLookupField")
+    public void onNotLowerRatingLookupFieldValueChange(HasValue.ValueChangeEvent event) {
+        String retValue = "";
+
+        for( Map.Entry<String, Integer> entry: priorityMap.entrySet()) {
+            if(event.getValue().equals(entry.getValue())) {
+                retValue = entry.getKey();
+            }
+        }
+
+        if(event.getValue() != null) {
+            priorityLabel.setValue(retValue);
+        }
+    }
+
+    @Subscribe("openPositionsTable")
+    public void onOpenPositionsTableSelection1(DataGrid.SelectionEvent<Position> event) {
+        if (openPositionsTable.getSingleSelected() != null) {
+            selectPositionLabel.setValue(openPositionsTable.getSingleSelected().getPositionRuName()
+            + " / "
+            +openPositionsTable.getSingleSelected().getPositionEnName());
         }
     }
 }

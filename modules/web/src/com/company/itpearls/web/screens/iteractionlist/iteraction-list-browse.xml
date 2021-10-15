@@ -109,7 +109,11 @@
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
                 <button id="createBtn" action="iteractionListsTable.create"/>
-                <button id="buttonCopy" caption="msg://msgCopyButton" invoke="onButtonCopyClick" icon="COPY"/>
+                <button id="buttonCopy"
+                        caption="msg://msgCopyButton"
+                        enable="false"
+                        invoke="onButtonCopyClick"
+                        icon="COPY"/>
                 <button id="editBtn" action="iteractionListsTable.edit"/>
                 <button id="removeBtn" action="iteractionListsTable.remove"/>
                 <button id="buttonExcel"

@@ -114,8 +114,10 @@
             <loader id="projectNameDl">
                 <query>
                     <![CDATA[select e from itpearls_Project e
-                            where e in (select p.projectName from itpearls_OpenPosition p
-                            where not (p.openClose = true))
+                            where e in
+                            (select p.projectName
+                                from itpearls_OpenPosition p
+                                where not (p.openClose = true))
                                 order by e.projectName]]>
                     <condition>
                         <and>
@@ -196,12 +198,22 @@
                                width="100%"
                                caption="msg://msgHeaderOfWizard"
                                stylename="borderless"/>
+                    <label id="jobCandidateLabel"
+                           width="AUTO"
+                           align="MIDDLE_LEFT"
+                           stylename="large"/>
+                    <label id="priorityLabel"
+                           width="100%"
+                           align="MIDDLE_RIGHT"/>
+                    <label id="selectPositionLabel"
+                           width="AUTO"
+                           align="TOP_LEFT"
+                           stylename="large"/>
                 </hbox>
                 <hbox id="buttonBoxHBox"
                       width="AUTO"
                       spacing="true"
                       align="BOTTOM_LEFT">
-
                     <button id="clearButton"
                             align="BOTTOM_RIGHT"
                             width="AUTO"
@@ -253,7 +265,7 @@
             <tab id="selectJobCandidateTab"
                  spacing="true"
                  caption="msg://msgSelectJobCandidate">
-                <lookupField id="jobCandidate"
+                <lookupField id="jobCandidateField"
                              align="MIDDLE_CENTER"
                              width="50%"
                              optionsContainer="jobCandidateDc"

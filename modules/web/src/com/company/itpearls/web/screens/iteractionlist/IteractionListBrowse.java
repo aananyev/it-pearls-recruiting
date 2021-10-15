@@ -185,11 +185,13 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
                 jobCandidateCardButton.setEnabled(false);
                 clipBtn.setEnabled(false);
                 itercationListButton.setEnabled(false);
+                buttonCopy.setEnabled(false);
 
             } else {
                 jobCandidateCardButton.setEnabled(true);
                 clipBtn.setEnabled(true);
                 itercationListButton.setEnabled(true);
+                buttonCopy.setEnabled(true);
             }
         });
     }
