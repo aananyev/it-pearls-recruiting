@@ -74,8 +74,12 @@ public class ExtMainScreen extends MainScreen {
         String QUERY_GET_ITERACTIONS_FOR_NOTIFICATIONS = "select e from itpearls_IteractionList e " +
                 "where e.addDate between :startDate and :endDate " +
                 "and e.recrutier = :recrutier " +
+                "and e.numberIteraction >= " +
+                "(select max(g.numberIteraction) " +
+                "   from itpearls_IteractionList g " +
+                "   where g.candidate = e.candidate) " +
                 "and e.iteractionType in " +
-                "(select f from itpearls_Iteraction f  where f.notificationType = :notificationType)";
+                "(select f from itpearls_Iteraction f  where f.notificationType = :notificationType) ";
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
@@ -100,15 +104,19 @@ public class ExtMainScreen extends MainScreen {
 
         for (IteractionList list : iteractionList) {
             notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("ВНИМАНИЕ: в этом месяце требуется действие с кандидатом")
+                    .withCaption("<font size=3><b>" +
+                            "ВНИМАНИЕ: в этом месяце требуется действие с кандидатом" +
+                            "</b></font>")
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                    .withDescription(list.getCandidate().getFullName()
+                    .withDescription("<font size=2><b>" + list.getCandidate().getFullName()
                             + " статус "
                             + list.getIteractionType().getIterationName()
                             + " до "
-                            + simpleDateFormat.format(list.getAddDate()))
+                            + simpleDateFormat.format(list.getAddDate())
+                    + "</b></font>")
                     .withContentMode(ContentMode.HTML)
                     .withStyleName("notification-for-me")
+                    .withHideDelayMs(-1)
                     .show();
 
         }
