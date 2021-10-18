@@ -143,22 +143,13 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         }
 
         if (projectNameTable.getSingleSelected() != null) {
-            companyDl.setParameter("projectName", projectNameTable.getSingleSelected());
             vacansyNameDl.setParameter("projectName", projectNameTable.getSingleSelected());
-            openPositionsDl.setParameter("projectName", projectNameTable.getSingleSelected());
-
-            companyTable.deselectAll();
             vacansyNameTable.deselectAll();
-            openPositionsTable.deselectAll();
         } else {
-            companyDl.removeParameter("projectName");
             vacansyNameDl.removeParameter("projectName");
-            openPositionsDl.removeParameter("projectName");
         }
 
-        companyDl.load();
         vacansyNameDl.load();
-        openPositionsTable.deselectAll();
     }
 
     @Subscribe("vacansyNameTable")
@@ -172,17 +163,6 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                 }
             }
         }
-
-        if (vacansyNameTable.getSelected() != null) {
-            projectNameDl.setParameter("openPosition", vacansyNameTable.getSingleSelected());
-            companyDl.setParameter("openPosition", vacansyNameTable.getSingleSelected());
-        } else {
-            projectNameDl.removeParameter("openPosition");
-            companyDl.removeParameter("openPosition");
-        }
-
-        projectNameDl.load();
-        companyDl.load();
     }
 
     @Install(to = "vacansyNameTable.priorityColumn", subject = "columnGenerator")

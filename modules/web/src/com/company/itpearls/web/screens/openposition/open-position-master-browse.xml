@@ -171,6 +171,9 @@
                             <c:jpql>
                                 <c:where>x.projectName.projectDepartment.companyName = :company</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>x.projectName = :projectName</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
