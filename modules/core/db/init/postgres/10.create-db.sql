@@ -214,6 +214,9 @@ create table ITPEARLS_ITERACTION (
     SIGN_OUR_INTERVIEW boolean,
     SIGN_CLIENT_INTERVIEW boolean,
     SIGN_SEND_TO_CLIENT boolean,
+    NOTIFICATION_PERIOD_TYPE integer,
+    NOTIFICATION_BEFORE_AFTER_DAY integer,
+    NOTIFICATION_WHEN_SEND integer,
     --
     primary key (ID)
 )^

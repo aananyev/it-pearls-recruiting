@@ -1,0 +1,2 @@
+alter table ITPEARLS_ITERACTION add column NOTIFICATION_PERIOD_TYPE integer ;
+alter table ITPEARLS_ITERACTION add column NOTIFICATION_BEFORE_AFTER_DAY integer ;

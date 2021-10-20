@@ -98,6 +98,19 @@
                             <c:jpql>
                                 <c:where>e.ourClient = :ourClient</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select f.companyName
+                                    from itpearls_CompanyDepartament f
+                                    where f in
+                                    (select g.projectDepartment
+                                    from itpearls_Project g
+                                    where g in
+                                    (select i.projectName
+                                    from itpearls_OpenPosition i
+                                    where (not i.openClose = true)
+                                    and i.positionType in :positionTypeSet)))</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -135,6 +148,14 @@
                             <c:jpql>
                                 <c:where>e.openPosition = :openPosition</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select f.projectName
+                                    from itpearls_OpenPosition f
+                                    where f.positionType in :positionTypeSet
+                                    and (not f.openClose = true))
+                                </c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -162,6 +183,14 @@
                                     (select f.positionType
                                     from itpearls_OpenPosition f
                                     where f.positionType = :positionType
+                                    and (not f.openClose = true))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>x.positionType in
+                                    (select f.positionType
+                                    from itpearls_OpenPosition f
+                                    where f.positionType in :positionTypeSet
                                     and (not f.openClose = true))
                                 </c:where>
                             </c:jpql>
@@ -196,6 +225,7 @@
                   margin="5px,5px,5px,5px"
                   spacing="true">
                 <hbox id="titleHBox"
+                      spacing="true"
                       width="100%">
                     <textField id="headerTextField"
                                width="100%"
@@ -301,6 +331,7 @@
                         <dataGrid id="openPositionsTable"
                                   width="100%"
                                   height="100%"
+                                  selectionMode="MULTI_CHECK"
                                   align="TOP_LEFT"
                                   editorEnabled="false"
                                   contextMenuEnabled="false"
@@ -341,6 +372,7 @@
                         </dataGrid>
                         <richTextArea id="companyInfoRichTextArea"
                                       width="100%"
+                                      contextHelpText="?"
                                       editable="false"
                                       height="100%"/>
                     </hbox>

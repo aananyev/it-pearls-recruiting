@@ -75,14 +75,20 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         vacansyNameTable.deselectAll();
         companyTable.deselectAll();
 
-        if (openPositionsTable.getSingleSelected() != null) {
-            vacansyNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
-            projectNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
-            companyDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+        if (openPositionsTable.getSelected().size() <= 1) {
+            if (openPositionsTable.getSingleSelected() != null) {
+                vacansyNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+                projectNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+                companyDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+            } else {
+                vacansyNameDl.removeParameter("positionType");
+                projectNameDl.removeParameter("positionType");
+                companyDl.removeParameter("positionType");
+            }
         } else {
-            vacansyNameDl.removeParameter("positionType");
-            projectNameDl.removeParameter("positionType");
-            companyDl.removeParameter("positionType");
+            vacansyNameDl.setParameter("positionTypeSet", openPositionsTable.getSelected());
+            projectNameDl.setParameter("positionTypeSet", openPositionsTable.getSelected());
+            companyDl.setParameter("positionTypeSet", openPositionsTable.getSelected());
         }
 
         projectNameDl.load();
@@ -567,10 +573,32 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe("openPositionsTable")
     public void onOpenPositionsTableSelection1(DataGrid.SelectionEvent<Position> event) {
-        if (openPositionsTable.getSingleSelected() != null) {
-            selectPositionLabel.setValue(openPositionsTable.getSingleSelected().getPositionRuName()
-            + " / "
-            +openPositionsTable.getSingleSelected().getPositionEnName());
+        if (openPositionsTable.getSelected().size() <= 1) {
+            if (openPositionsTable.getSingleSelected() != null) {
+                selectPositionLabel.setValue(openPositionsTable.getSingleSelected().getPositionRuName()
+                        + " / "
+                        + openPositionsTable.getSingleSelected().getPositionEnName());
+            }
+        } else {
+            String label = "";
+            for (Position p : openPositionsTable.getSelected()) {
+                label += p.getPositionRuName() + ",";
+            }
+
+            selectPositionLabel.setValue(label.substring(0, label.length() - 1));
+            selectPositionLabel.setDescription(label.substring(0, label.length() - 1));
         }
     }
+
+    @Install(to = "companyInfoRichTextArea", subject = "contextHelpIconClickHandler")
+    private void companyInfoRichTextAreaContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        if (companyInfoRichTextArea.getValue() != null) {
+            TextViewScreen viewTextScreen = new TextViewScreen();
+            viewTextScreen.setTextView(companyInfoRichTextArea.getValue());
+
+            viewTextScreen.show();
+        }
+    }
+
+
 }

@@ -53,6 +53,9 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private Map<String, Integer> mapAddType = new LinkedHashMap<>();
     private Map<String, Integer> mapTypeNotifications = new LinkedHashMap<>();
     private Map<String, Integer> mapCheckTrace = new LinkedHashMap<>();
+    private Map<String, Integer> mapNotificationPeriod = new LinkedHashMap<>();
+    private Map<String, Integer> mapWhenSendMessage = new LinkedHashMap<>();
+
     @Inject
     private RadioButtonGroup typeTraceRadioButtons;
     @Inject
@@ -65,6 +68,12 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private EmailGenerationService emailGenerationService;
     @Inject
     private RichTextArea commentKeysRichTextArea;
+    @Inject
+    private RadioButtonGroup notificationPeriodRadioButton;
+    @Inject
+    private TextField<Integer> dayBeforeAfterTextField;
+    @Inject
+    private RadioButtonGroup<Integer> whenSendMessageRadioButton;
 
     @Subscribe("checkBoxCalendar")
     public void onCheckBoxCalendarValueChange(HasValue.ValueChangeEvent<Boolean> event) {
@@ -75,7 +84,32 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     public void onInit(InitEvent event) {
         addRadioButtonAddType();
         addTypeNotifications();
+        addNotificationPeriod();
+        addNotificationWhenSend();
         addCheckTrace();
+    }
+
+    private void addNotificationWhenSend() {
+        mapWhenSendMessage.put("На момент создания", 1);
+        mapWhenSendMessage.put("В указанное время", 2);
+
+        whenSendMessageRadioButton.setOptionsMap(mapWhenSendMessage);
+    }
+
+    private void addNotificationPeriod() {
+        mapNotificationPeriod.put("Только текущий день", 0);
+        mapNotificationPeriod.put("Текущая неделя с первого дня недели по по последний", 1);
+        mapNotificationPeriod.put("Текущий неделя с даты итерации до конца недели", 2);
+        mapNotificationPeriod.put("Текущий месяц с первого по последнее число месяца", 3);
+        mapNotificationPeriod.put("Текущий месяц с даты итерации до конца месяца", 4);
+        mapNotificationPeriod.put("Фиксированное число дней до и после", 5);
+
+        notificationPeriodRadioButton.setOptionsMap(mapNotificationPeriod);
+    }
+
+    @Subscribe
+    public void onAfterShow1(AfterShowEvent event) {
+        dayBeforeAfterTextField.setEnabled(notificationPeriodRadioButton.getValue() == NOTIFICATION_PERIOD_BEFORE_AFTER_DAY);
     }
 
     private void addCheckTrace() {
@@ -85,6 +119,19 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
         typeTraceRadioButtons.setOptionsMap(mapCheckTrace);
     }
+
+    static Integer NOTIFICATION_PERIOD_BEFORE_AFTER_DAY = 5;
+
+    @Subscribe("notificationPeriodRadioButton")
+    public void onNotificationPeriodRadioButtonValueChange(HasValue.ValueChangeEvent<Integer> event) {
+        if (event.getValue() == NOTIFICATION_PERIOD_BEFORE_AFTER_DAY) {
+            dayBeforeAfterTextField.setEnabled(true);
+        } else {
+            dayBeforeAfterTextField.setEnabled(false);
+        }
+    }
+
+
 
     @Subscribe("typeTraceRadioButtons")
     public void onTypeTraceRadioButtonsValueChange(HasValue.ValueChangeEvent<Integer> event) {

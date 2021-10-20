@@ -98,6 +98,39 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_SEND_TO_CLIENT")
     private Boolean signSendToClient;
 
+    @Column(name = "NOTIFICATION_PERIOD_TYPE")
+    private Integer notificationPeriodType;
+
+    @Column(name = "NOTIFICATION_BEFORE_AFTER_DAY")
+    private Integer notificationBeforeAfterDay;
+
+    @Column(name = "NOTIFICATION_WHEN_SEND")
+    private Integer notificationWhenSend;
+
+    public Integer getNotificationWhenSend() {
+        return notificationWhenSend;
+    }
+
+    public void setNotificationWhenSend(Integer notificationWhenSend) {
+        this.notificationWhenSend = notificationWhenSend;
+    }
+
+    public Integer getNotificationBeforeAfterDay() {
+        return notificationBeforeAfterDay;
+    }
+
+    public void setNotificationBeforeAfterDay(Integer notificationBeforeAfterDay) {
+        this.notificationBeforeAfterDay = notificationBeforeAfterDay;
+    }
+
+    public Integer getNotificationPeriodType() {
+        return notificationPeriodType;
+    }
+
+    public void setNotificationPeriodType(Integer notificationPeriodType) {
+        this.notificationPeriodType = notificationPeriodType;
+    }
+
     public Boolean getSignSendToClient() {
         return signSendToClient;
     }

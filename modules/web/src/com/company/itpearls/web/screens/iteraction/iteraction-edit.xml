@@ -103,11 +103,40 @@ order by e.number]]>
                 </groupBox>
             </tab>
             <tab id="tabNotifictions" caption="msg://msgNotifications" spacing="true">
-                <groupBox height="AUTO" spacing="true">
-                    <radioButtonGroup id="radioButtonTypeNotifications" dataContainer="iteractionDc"
-                                      property="notificationType"/>
-                    <textField id="lookupFieldEmails" caseConversion="LOWER" contextHelpText="msg://msgEmailHelpText"
-                               width="50%"/>
+                <groupBox height="AUTO"
+                          spacing="true">
+                    <hbox spacing="true">
+                        <vbox spacing="true">
+                            <radioButtonGroup id="whenSendMessageRadioButton"
+                                              caption="msg://msgWhenSendMessage"
+                                              description="msg://msgWhenSendMessageDescription"
+                                              dataContainer="iteractionDc"
+                                              property="notificationWhenSend"/>
+                        </vbox>
+                        <vbox spacing="true">
+                            <radioButtonGroup id="radioButtonTypeNotifications"
+                                              caption="msg://msgMessageRecipient"
+                                              description="msg://msgMessageRecipientDescription"
+                                              dataContainer="iteractionDc"
+                                              property="notificationType"/>
+                            <textField id="lookupFieldEmails"
+                                       caseConversion="LOWER"
+                                       width="50%"/>
+                        </vbox>
+                        <vbox spacing="true">
+                            <radioButtonGroup id="notificationPeriodRadioButton"
+                                              dataContainer="iteractionDc"
+                                              property="notificationPeriodType"
+                                              caption="msg://msgNotificationPeriod"
+                                              description="msg://msgNotificationPeriodDescription"/>
+                            <textField id="dayBeforeAfterTextField"
+                                       enable="false"
+                                       align="BOTTOM_LEFT"
+                                       width="50%"
+                                       dataContainer="iteractionDc"
+                                       property="notificationBeforeAfterDay"/>
+                        </vbox>
+                    </hbox>
                 </groupBox>
             </tab>
             <tab caption="msg://msgSetupFiels" spacing="true" id="tabSetup">
