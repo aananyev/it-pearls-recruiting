@@ -620,30 +620,34 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
             // высплывающее сообщение
-            if (iteractionTypeField.getValue() != null) {
-                if (iteractionTypeField.getValue().getNotificationType() != null) {
-                    switch (iteractionTypeField.getValue().getNotificationType()) {
-                        case 0: // ???
-                            break;
-                        case 1: // Нет
-                            break;
-                        case 2: // Только менеджеру"
-                            break;
-                        case 3: // Подписчику вакансии
-                            break;
-                        case 4: // Подписчику кандидата
-                            break;
-                        case 5: // Определенным адресам (список)
-                            break;
-                        case 6: // всем
-                            events.publish(new UiNotificationEvent(this,
-                                    "<img src=\"VAADIN/themes/halo/" + iteractionTypeField.getValue().getPic() +
-                                            "\"> <b>" +
-                                            getEditedEntity().getCandidate().getFullName() + " : " +
-                                            getEditedEntity().getIteractionType().getIterationName() + "</b>"));
-                            break;
-                        default:
-                            break;
+            if (iteractionTypeField.getValue().getNotificationNeedSend()) {
+                if(iteractionTypeField.getValue().getNotificationWhenSend() == 1) { // слать на момент создания
+                    if (iteractionTypeField.getValue() != null) {
+                        if (iteractionTypeField.getValue().getNotificationType() != null) {
+                            switch (iteractionTypeField.getValue().getNotificationType()) {
+                                case 0: // ???
+                                    break;
+                                case 1: // Нет
+                                    break;
+                                case 2: // Только менеджеру"
+                                    break;
+                                case 3: // Подписчику вакансии
+                                    break;
+                                case 4: // Подписчику кандидата
+                                    break;
+                                case 5: // Определенным адресам (список)
+                                    break;
+                                case 6: // всем
+                                    events.publish(new UiNotificationEvent(this,
+                                            "<img src=\"VAADIN/themes/halo/" + iteractionTypeField.getValue().getPic() +
+                                                    "\"> <b>" +
+                                                    getEditedEntity().getCandidate().getFullName() + " : " +
+                                                    getEditedEntity().getIteractionType().getIterationName() + "</b>"));
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
                 }
             }

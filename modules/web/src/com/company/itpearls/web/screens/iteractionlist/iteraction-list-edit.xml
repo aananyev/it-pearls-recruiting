@@ -10,7 +10,9 @@
                   class="com.company.itpearls.entity.IteractionList">
             <view extends="_local">
                 <property name="candidate" view="_minimal"/>
-                <property name="iteractionType" view="_minimal"/>
+                <property name="iteractionType" view="_minimal">
+                    <property name="notificationNeedSend"/>
+                </property>/
                 <property name="vacancy" view="_minimal">
                     <property name="projectName" view="_minimal">
                         <property name="projectOwner" view="_minimal"/>

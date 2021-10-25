@@ -131,20 +131,25 @@
                                align="MIDDLE_LEFT"/>
                         <label stylename="h2" value="|"/>
                         <label stylename="h2"
-                               align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="personPosition"/>
-
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="personPosition"/>
                         <label stylename="h2" value="|"/>
                         <label id="cityOfCandidate" stylename="h2"
-                               align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="cityOfResidence"/>
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="cityOfResidence"/>
                         <label stylename="h2" value="|"/>
                         <label id="labelCV" align="MIDDLE_CENTER" stylename="h3"/>
                         <label stylename="h2" value="|"/>
-                        <label id="labelQualityPercent" align="MIDDLE_CENTER" stylename="h3"/>
+                        <label id="labelQualityPercent"
+                               align="MIDDLE_CENTER"
+                               stylename="h3"/>
                     </row>
                 </rows>
             </grid>
             <grid spacing="true">
-                <columns count="4"/>
+                <columns count="5"/>
                 <rows>
                     <row>
                         <label id="emailLabel"
@@ -159,6 +164,11 @@
                                align="MIDDLE_LEFT"
                                dataContainer="jobCandidateDc"
                                property="phone"/>
+                        <label id="mobilePhoneLabel"
+                               description="msg://msgMobilePhone"
+                               stylename="h4"
+                               dataContainer="jobCandidateDc"
+                               property="mobilePhone"/>
                         <label id="skypuLabel"
                                description="msg://msgSkype"
                                stylename="h4"
@@ -236,10 +246,20 @@
                             </hbox>
                             <hbox spacing="true">
                                 <label id="phoneTitle"
-                                       value="msg://msgPhone" stylename="h4"
+                                       value="msg://msgPhone"
+                                       stylename="h4"
                                        htmlEnabled="true"/>
                                 <label dataContainer="jobCandidateDc"
                                        property="phone"
+                                       stylename="h4"/>
+                            </hbox>
+                            <hbox spacing="true">
+                                <label id="mobilePhoneTitle"
+                                       value="msg://msgMobilePhone"
+                                       stylename="h4"
+                                       htmlEnabled="true"/>
+                                <label dataContainer="jobCandidateDc"
+                                       property="mobilePhone"
                                        stylename="h4"/>
                             </hbox>
                             <hbox spacing="true">

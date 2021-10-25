@@ -35,7 +35,7 @@ order by e.number]]>
         </form>
         <label id="labelItercationName" stylename="h1"/>
         <label id="labelWarning" icon="WARNING" description="msg://msgWarning" stylename="h2"/>
-        <tabSheet>
+        <tabSheet stylename="framed">
             <tab caption="msg://msgIteracionType" spacing="true" id="tabType">
                 <groupBox height="AUTO" spacing="true">
                     <checkBox id="iteractionCheckBoxMandatory" dataContainer="iteractionDc"
@@ -74,7 +74,9 @@ order by e.number]]>
                     </vbox>
                 </groupBox>
             </tab>
-            <tab caption="msg://Tab" spacing="true" id="tabIcons">
+            <tab caption="msg://Tab"
+                 spacing="true"
+                 id="tabIcons">
                 <groupBox height="AUTO" spacing="true">
                     <hbox id="callDialogHbox"
                           height="AUTO"
@@ -102,41 +104,81 @@ order by e.number]]>
                                caption="msg://msgCallButtonText" width="50%" align="TOP_LEFT"/>
                 </groupBox>
             </tab>
-            <tab id="tabNotifictions" caption="msg://msgNotifications" spacing="true">
-                <groupBox height="AUTO"
+            <tab id="tabNotifictions"
+                 caption="msg://msgNotifications"
+                 expand="notificationGroupBox"
+                 spacing="true">
+                <groupBox id="notificationGroupBox"
+                          stylename="light"
+                          width="100%"
+                          height="100%"
                           spacing="true">
-                    <hbox spacing="true">
-                        <vbox spacing="true">
-                            <radioButtonGroup id="whenSendMessageRadioButton"
-                                              caption="msg://msgWhenSendMessage"
-                                              description="msg://msgWhenSendMessageDescription"
-                                              dataContainer="iteractionDc"
-                                              property="notificationWhenSend"/>
-                        </vbox>
-                        <vbox spacing="true">
-                            <radioButtonGroup id="radioButtonTypeNotifications"
-                                              caption="msg://msgMessageRecipient"
-                                              description="msg://msgMessageRecipientDescription"
-                                              dataContainer="iteractionDc"
-                                              property="notificationType"/>
-                            <textField id="lookupFieldEmails"
-                                       caseConversion="LOWER"
-                                       width="50%"/>
-                        </vbox>
-                        <vbox spacing="true">
-                            <radioButtonGroup id="notificationPeriodRadioButton"
-                                              dataContainer="iteractionDc"
-                                              property="notificationPeriodType"
-                                              caption="msg://msgNotificationPeriod"
-                                              description="msg://msgNotificationPeriodDescription"/>
-                            <textField id="dayBeforeAfterTextField"
-                                       enable="false"
-                                       align="BOTTOM_LEFT"
-                                       width="50%"
-                                       dataContainer="iteractionDc"
-                                       property="notificationBeforeAfterDay"/>
-                        </vbox>
-                    </hbox>
+                    <vbox id="notificationVBox"
+                          spacing="true"
+                          width="100%"
+                          height="100%"
+                          expand="notificationSetupHBox">
+                        <checkBox id="notificationNeedSendCheckBox"
+                                  caption="msg://msgNotificationNeedSend"
+                                  dataContainer="iteractionDc"
+                                  width="AUTO"
+                                  height="AUTO"
+                                  property="notificationNeedSend"/>
+                        <hbox id="notificationSetupHBox"
+                              width="100%"
+                              height="100%"
+                              spacing="true">
+                            <vbox spacing="true"
+                                  width="100%"
+                                  box.expandRatio="1"
+                                  height="100%">
+                                <radioButtonGroup id="whenSendMessageRadioButton"
+                                                  caption="msg://msgWhenSendMessage"
+                                                  description="msg://msgWhenSendMessageDescription"
+                                                  dataContainer="iteractionDc"
+                                                  property="notificationWhenSend"/>
+                            </vbox>
+                            <vbox spacing="true"
+                                  width="100%"
+                                  box.expandRatio="1"
+                                  height="100%">
+                                <radioButtonGroup id="radioButtonTypeNotifications"
+                                                  enable="false"
+                                                  caption="msg://msgMessageRecipient"
+                                                  description="msg://msgMessageRecipientDescription"
+                                                  dataContainer="iteractionDc"
+                                                  property="notificationType"/>
+                                <textField id="lookupFieldEmails"
+                                           caseConversion="LOWER"
+                                           width="50%"/>
+                            </vbox>
+                            <vbox spacing="true"
+                                  width="100%"
+                                  box.expandRatio="1"
+                                  height="100%">
+                                <radioButtonGroup id="notificationPeriodRadioButton"
+                                                  enable="false"
+                                                  dataContainer="iteractionDc"
+                                                  property="notificationPeriodType"
+                                                  caption="msg://msgNotificationPeriod"
+                                                  description="msg://msgNotificationPeriodDescription"/>
+                                <textField id="dayBeforeAfterTextField"
+                                           enable="false"
+                                           align="BOTTOM_LEFT"
+                                           width="50%"
+                                           dataContainer="iteractionDc"
+                                           property="notificationBeforeAfterDay"/>
+                            </vbox>
+                            <vbox spacing="true"
+                                  width="100%"
+                                  box.expandRatio="1"
+                                  height="100%"/>
+                            <vbox spacing="true"
+                                  width="100%"
+                                  box.expandRatio="1"
+                                  height="100%"/>
+                        </hbox>
+                    </vbox>
                 </groupBox>
             </tab>
             <tab caption="msg://msgSetupFiels" spacing="true" id="tabSetup">
@@ -149,6 +191,7 @@ order by e.number]]>
                                 <radioButtonGroup id="radioButtonAddType"
                                                   caption="msg://msgRadioButton"
                                                   width="AUTO"
+                                                  enable="false"
                                                   dataContainer="iteractionDc"
                                                   property="addType"/>
                                 <checkBox id="checkBoxSetDefaultDateTime"

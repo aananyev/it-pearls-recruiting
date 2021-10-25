@@ -49,13 +49,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private TextField<String> lookupFieldEmails;
     @Inject
     private CheckBox checkBoxSetDefaultDateTime;
-
-    private Map<String, Integer> mapAddType = new LinkedHashMap<>();
-    private Map<String, Integer> mapTypeNotifications = new LinkedHashMap<>();
-    private Map<String, Integer> mapCheckTrace = new LinkedHashMap<>();
-    private Map<String, Integer> mapNotificationPeriod = new LinkedHashMap<>();
-    private Map<String, Integer> mapWhenSendMessage = new LinkedHashMap<>();
-
     @Inject
     private RadioButtonGroup typeTraceRadioButtons;
     @Inject
@@ -74,6 +67,14 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private TextField<Integer> dayBeforeAfterTextField;
     @Inject
     private RadioButtonGroup<Integer> whenSendMessageRadioButton;
+
+    private Map<String, Integer> mapAddType = new LinkedHashMap<>();
+    private Map<String, Integer> mapTypeNotifications = new LinkedHashMap<>();
+    private Map<String, Integer> mapCheckTrace = new LinkedHashMap<>();
+    private Map<String, Integer> mapNotificationPeriod = new LinkedHashMap<>();
+    private Map<String, Integer> mapWhenSendMessage = new LinkedHashMap<>();
+    @Inject
+    private HBoxLayout notificationSetupHBox;
 
     @Subscribe("checkBoxCalendar")
     public void onCheckBoxCalendarValueChange(HasValue.ValueChangeEvent<Boolean> event) {
@@ -109,7 +110,25 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {
-        dayBeforeAfterTextField.setEnabled(notificationPeriodRadioButton.getValue() == NOTIFICATION_PERIOD_BEFORE_AFTER_DAY);
+        dayBeforeAfterTextField.setEnabled(notificationPeriodRadioButton.getValue()
+                == NOTIFICATION_PERIOD_BEFORE_AFTER_DAY);
+
+        radioButtonsEnable();
+    }
+
+    private void radioButtonsEnable() {
+        if (whenSendMessageRadioButton.getValue() == null) {
+            notificationPeriodRadioButton.setEnabled(false);
+            radioButtonTypeNotifications.setEnabled(false);
+        } else {
+            notificationPeriodRadioButton.setEnabled(true);
+            radioButtonTypeNotifications.setEnabled(true);
+        }
+    }
+
+    @Subscribe("whenSendMessageRadioButton")
+    public void onWhenSendMessageRadioButtonValueChange(HasValue.ValueChangeEvent<Integer> event) {
+        radioButtonsEnable();
     }
 
     private void addCheckTrace() {
@@ -195,9 +214,9 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         setDisableElements();
 
         if (radioButtonTypeNotifications.getValue() != null)
-            lookupFieldEmails.setEditable(radioButtonTypeNotifications.getValue().equals(5));
+            lookupFieldEmails.setEnabled(radioButtonTypeNotifications.getValue().equals(5));
         else
-            lookupFieldEmails.setEditable(false);
+            lookupFieldEmails.setEnabled(false);
 
         needSendEmail();
     }
@@ -228,7 +247,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe("radioButtonTypeNotifications")
     public void onRadioButtonTypeNotificationsValueChange(HasValue.ValueChangeEvent event) {
-        lookupFieldEmails.setEditable(radioButtonTypeNotifications.getValue().equals(5));
+        lookupFieldEmails.setEnabled(radioButtonTypeNotifications.getValue().equals(5));
     }
 
     @Subscribe("checkBoxFlag")
@@ -296,5 +315,10 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
             iteractionTreeField.setEditable(true);
             iterationNameField.setEditable(true);
         }
+    }
+
+    @Subscribe("notificationNeedSendCheckBox")
+    public void onNotificationNeedSendCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+         notificationSetupHBox.setEnabled(event.getValue());
     }
 }

@@ -301,6 +301,11 @@
             <property name="calendarItem"/>
             <property name="calendarItemStyle"/>
             <property name="calendarItemDescription"/>
+            <property name="notificationPeriodType"/>
+            <property name="notificationBeforeAfterDay"/>
+            <property name="notificationWhenSend"/>
+            <property name="notificationType"/>
+            <property name="notificationNeedSend"/>
         </property>
         <property name="recrutier" view="_local">
             <property name="group" view="_minimal"/>

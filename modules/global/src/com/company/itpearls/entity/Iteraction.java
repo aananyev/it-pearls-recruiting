@@ -61,9 +61,6 @@ public class Iteraction extends StandardEntity {
     @Column(name = "ADD_CAPTION", length = 80)
     protected String addCaption;
 
-    @Column(name = "NOTIFICATION_TYPE")
-    protected Integer notificationType;
-
     @Column(name = "CALENDAR_ITEM")
     protected Boolean calendarItem;
 
@@ -98,6 +95,12 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_SEND_TO_CLIENT")
     private Boolean signSendToClient;
 
+    @Column(name = "NOTIFICATION_NEED_SEND")
+    private Boolean notificationNeedSend;
+
+    @Column(name = "NOTIFICATION_TYPE")
+    protected Integer notificationType;
+
     @Column(name = "NOTIFICATION_PERIOD_TYPE")
     private Integer notificationPeriodType;
 
@@ -106,6 +109,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "NOTIFICATION_WHEN_SEND")
     private Integer notificationWhenSend;
+
+    public Boolean getNotificationNeedSend() {
+        return notificationNeedSend;
+    }
+
+    public void setNotificationNeedSend(Boolean notificationNeedSend) {
+        this.notificationNeedSend = notificationNeedSend;
+    }
 
     public Integer getNotificationWhenSend() {
         return notificationWhenSend;
