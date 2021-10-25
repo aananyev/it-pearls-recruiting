@@ -96,7 +96,8 @@ public class ExtMainScreen extends MainScreen {
                 "   from itpearls_IteractionList g " +
                 "   where g.candidate = e.candidate) " +
                 "and e.iteractionType in " +
-                "(select f from itpearls_Iteraction f  where f.notificationType = :notificationType) ";
+                "(select f from itpearls_Iteraction f where f.notificationNeedSend = true)";
+//                "(select f from itpearls_Iteraction f  where f.notificationType = :notificationType) ";
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
@@ -116,51 +117,53 @@ public class ExtMainScreen extends MainScreen {
                 .parameter("startDate", startDate)
                 .parameter("endDate", endDate)
                 .parameter("recrutier", userSession.getUser())
-                .parameter("notificationType", 2)
+//                .parameter("notificationType", 2)
                 .list();
 
         for (IteractionList list : iteractionList) {
             if (list.getIteractionType() != null) {
-                if (list.getIteractionType().getNotificationWhenSend() != null) {
-                    String caption = EVENT_NOTIFICATION_REMINDER + "<font size=3><b>" +
-                            list.getIteractionType().getIterationName() +
-                            "</b></font>";
-                    String desription = "<font size=2><b>" + list.getCandidate().getFullName()
-                            + " статус "
-                            + list.getIteractionType().getIterationName()
-                            + " дата "
-                            + simpleDateFormat.format(list.getAddDate())
-                            + "</b></font>";
-                    switch (list.getIteractionType().getNotificationWhenSend()) {
-                        case 1: // не отсылать сообщение
-                            break;
-                        case 2: // только создателю итерации
-                            Notifications.NotificationBuilder notification = notifications.create(Notifications.NotificationType.WARNING)
-                                    .withCaption(caption)
-                                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                                    .withDescription(desription)
-                                    .withContentMode(ContentMode.HTML)
-                                    .withStyleName("notification-for-me")
-                                    .withHideDelayMs(-1);
+                if(list.getIteractionType().getNotificationNeedSend() != null) {
+                    if (list.getIteractionType().getNotificationNeedSend()) {
+                        if (list.getIteractionType().getNotificationWhenSend() != null) {
+                            String caption = EVENT_NOTIFICATION_REMINDER;
+                            String desription = "<font size=2><b>" + list.getCandidate().getFullName()
+                                    + " статус \""
+                                    + list.getIteractionType().getIterationName()
+                                    + "\" дата "
+                                    + simpleDateFormat.format(list.getAddDate())
+                                    + "</b></font>";
+                            switch (list.getIteractionType().getNotificationWhenSend()) {
+                                case 1: // не отсылать сообщение
+                                    break;
+                                case 2: // только создателю итерации
+                                    Notifications.NotificationBuilder notification = notifications.create(Notifications.NotificationType.WARNING)
+                                            .withCaption(caption)
+                                            .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                                            .withDescription(desription)
+                                            .withContentMode(ContentMode.HTML)
+                                            .withStyleName("notification-for-me")
+                                            .withHideDelayMs(-1);
 
-                            if (checkNotificationNeeds(list)) {
-                                notification.show();
-                            }
-                            break;
-                        case 3: // подписчику вакансии
-                            break;
-                        case 4: // подписчику кандидата
-                            break;
-                        case 5: // списку
-                            break;
-                        case 6: // всем
-                            if(checkNotificationNeeds(list)) {
-                                events.publish(new UiNotificationEvent(this, caption + "<br>" + desription));
-                            }
+                                    if (checkNotificationNeeds(list)) {
+                                        notification.show();
+                                    }
+                                    break;
+                                case 3: // подписчику вакансии
+                                    break;
+                                case 4: // подписчику кандидата
+                                    break;
+                                case 5: // списку
+                                    break;
+                                case 6: // всем
+                                    if (checkNotificationNeeds(list)) {
+                                        events.publish(new UiNotificationEvent(this, caption + "<br>" + desription));
+                                    }
 
-                            break;
-                        default:
-                            break;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
                 }
             }
