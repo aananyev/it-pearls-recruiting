@@ -9,6 +9,12 @@
     padding: 3px;
 }
 
+.h2-red {
+    color: red;
+    font-size: $v-font-size--h2;
+    font-weight: bold;
+}
+
 .open-position-lookup-field-black {
     color: green;
 }
@@ -21,6 +27,10 @@
     font-family: 'Roboto Condensed', sans-serif;
     src: local('Roboto Condensed'), local('Roboto-Condensed'),
         url(https://fonts.google.com/share?selection.family=Roboto%20Condensed:wght@300);
+}
+
+.button_table_black {
+        @include date_iteraction_button(black);
 }
 
 .button_table_white {

@@ -181,25 +181,30 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         String retStr = "";
+        Boolean checkBlockCandidate = event.getItem().getBlockCandidate() == null ? false : event.getItem().getBlockCandidate();
 
-        if (iteractionList != null) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(iteractionList.getDateIteraction());
-            calendar.add(Calendar.MONTH, 1);
+        if(checkBlockCandidate != true) {
+            if (iteractionList != null) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(iteractionList.getDateIteraction());
+                calendar.add(Calendar.MONTH, 1);
 
-            Calendar calendar1 = Calendar.getInstance();
+                Calendar calendar1 = Calendar.getInstance();
 
-            if (calendar.after(calendar1)) {
-                if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
-                    retStr = "button_table_red";
+                if (calendar.after(calendar1)) {
+                    if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                        retStr = "button_table_red";
+                    } else {
+                        retStr = "button_table_yellow";
+                    }
                 } else {
-                    retStr = "button_table_yellow";
+                    retStr = "button_table_green";
                 }
             } else {
-                retStr = "button_table_green";
+                retStr = "button_table_white";
             }
         } else {
-            retStr = "button_table_white";
+            retStr = "button_table_black";
         }
 
         return
@@ -254,13 +259,18 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        Boolean checkBlockCandidate = jobCandidate.getBlockCandidate() == null ? false : jobCandidate.getBlockCandidate();
 
-        return iteractionList != null ?
-                simpleDateFormat.format(iteractionList.getDateIteraction())
-                        + "\n"
-                        + iteractionList.getIteractionType().getIterationName()
-                        + "\n"
-                        + recrutierName : "";
+        if(!checkBlockCandidate) {
+            return iteractionList != null ?
+                    simpleDateFormat.format(iteractionList.getDateIteraction())
+                            + "\n"
+                            + iteractionList.getIteractionType().getIterationName()
+                            + "\n"
+                            + recrutierName : "";
+        } else {
+            return "ЗАПРЕЩЕНО ВЗАИМОДЕЙСТВИЕ С КАНДИДАТОМ";
+        }
     }
 
     private IteractionList getLastIteraction(JobCandidate jobCandidate) {

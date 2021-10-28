@@ -38,6 +38,9 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "SECOND_NAME", nullable = false, length = 80)
     protected String secondName;
 
+    @Column(name = "BLOCK_CANDIDATE")
+    private Boolean blockCandidate;
+
     @Column(name = "FULL_NAME", length = 160)
     protected String fullName;
 
@@ -131,6 +134,14 @@ public class JobCandidate extends StandardEntity {
     @NotNull
     @Column(name = "PRIORITY_CONTACT", nullable = false)
     private Integer priorityContact;
+
+    public Boolean getBlockCandidate() {
+        return blockCandidate;
+    }
+
+    public void setBlockCandidate(Boolean blockCandidate) {
+        this.blockCandidate = blockCandidate;
+    }
 
     public void setPositionList(List<JobCandidatePositionLists> positionList) {
         this.positionList = positionList;

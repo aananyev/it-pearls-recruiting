@@ -36,7 +36,6 @@ public class SkillTreeBrowse extends StandardLookup<SkillTree> {
         return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).text() : "";
     }
 
-
     @Install(to = "skillTreesTable.isComment", subject = "columnGenerator")
     private Object skillTreesTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
         if (event.getItem().getComment() != null && !event.getItem().equals("")) {

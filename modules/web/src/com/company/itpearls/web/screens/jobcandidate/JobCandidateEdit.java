@@ -179,6 +179,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
     @Inject
     private Button openPositionProjectDescriptionButton;
+    @Inject
+    private TabSheet tabSheetSocialNetworks;
+    @Inject
+    private Button blockCandidateButton;
+    @Named("tabSheetSocialNetworks.jobCandidateCard")
+    private VBoxLayout jobCandidateCard;
+    @Named("tabSheetSocialNetworks.tabContactInfo")
+    private VBoxLayout tabContactInfo;
+    @Named("tabSheetSocialNetworks.tabCandidate")
+    private VBoxLayout tabCandidate;
+    @Inject
+    private Label<String> iteractionListLabelCandidate;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -1198,6 +1210,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         addMiddleNameSuggestField();
 
         lastIteraction = getLastIteraction();
+
+        blockUnblockCandidate(!getEditedEntity().getBlockCandidate());
     }
 
     private void setLinkButtonSkype() {
@@ -1995,7 +2009,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         quickViewOpenPositionDescription.setJobDescription(jobCandidateIteractionListTable.getSingleSelected() != null ?
                 jobCandidateIteractionListTable.getSingleSelected().getVacancy().getComment() : "");
 
-        if(jobCandidateIteractionListTable.getSingleSelected().getVacancy().getProjectName().getProjectDescription() != null) {
+        if (jobCandidateIteractionListTable.getSingleSelected().getVacancy().getProjectName().getProjectDescription() != null) {
             quickViewOpenPositionDescription.setProjectDescription(jobCandidateIteractionListTable
                     .getSingleSelected()
                     .getVacancy()
@@ -2007,7 +2021,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .getProjectDescription() : "");
         }
 
-        if(jobCandidateIteractionListTable.getSingleSelected()
+        if (jobCandidateIteractionListTable.getSingleSelected()
                 .getVacancy()
                 .getProjectName()
                 .getProjectDepartment()
@@ -2022,7 +2036,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .getWorkingConditions());
         }
 
-        if(jobCandidateIteractionListTable.getSingleSelected()
+        if (jobCandidateIteractionListTable.getSingleSelected()
                 .getVacancy()
                 .getProjectName()
                 .getProjectDepartment()
@@ -2037,5 +2051,36 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         quickViewOpenPositionDescription.reloadDescriptions();
         screens.show(quickViewOpenPositionDescription);
+    }
+
+    public void blockCandidateButton() {
+
+        String DIALOG_MESSAGE_BLOCK_OFF = "Разрешить взаимодейтсвия с кандидатом?";
+        String DIALOG_MESSAGE_BLOCK_ON = "Запретить взаимодейтсвия с кандидатом?";
+
+        String DIALOG_MESSAGE;
+
+        Boolean checkBlockCanidate = getEditedEntity().getBlockCandidate() == null ? false : getEditedEntity().getBlockCandidate();
+        DIALOG_MESSAGE = checkBlockCanidate ? DIALOG_MESSAGE_BLOCK_OFF : DIALOG_MESSAGE_BLOCK_ON;
+
+        dialogs.createOptionDialog()
+                .withCaption("ВНИМАНИЕ!")
+                .withMessage(DIALOG_MESSAGE)
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                    blockUnblockCandidate(checkBlockCanidate);
+                }), new DialogAction(DialogAction.Type.NO))
+                .show();
+    }
+
+    private void blockUnblockCandidate(Boolean checkBlockCanidate) {
+        String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
+        String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
+
+        getEditedEntity().setBlockCandidate(!getEditedEntity().getBlockCandidate());
+        blockCandidateButton.setCaption(checkBlockCanidate ? BLOCK_CANDIDATE_ON : BLOCK_CANDIDATE_OFF);
+        blockCandidateButton.setIcon(!checkBlockCanidate ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
+        jobCandidateIteractionListTable.setEnabled(checkBlockCanidate);
+        iteractionListLabelCandidate.setStyleName(checkBlockCanidate ? "h2" : "h2-red");
+
     }
 }

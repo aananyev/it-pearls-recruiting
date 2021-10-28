@@ -56,6 +56,7 @@
                 <property name="socialNetwork" view="_local"/>
                 <property name="currentCompany" view="_local"/>
                 <property name="specialisation" view="_local"/>
+                <property name="blockCandidate"/>
             </view>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
@@ -732,6 +733,11 @@
                        stylename="small"/>
             </hbox>
             <hbox id="buttonCancelOk" spacing="true">
+                <button id="blockCandidateButton"
+                        caption="msg://msgBlockCandidate"
+                        invoke="blockCandidateButton"
+                        icon="WINDOW_CLOSE_O"
+                        align="BOTTOM_RIGHT"/>
                 <button id="buttonSubscribe"
                         caption="msg://msgSubscribe"
                         invoke="onButtonSubscribeClick"

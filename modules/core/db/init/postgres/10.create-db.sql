@@ -31,6 +31,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     FIRST_NAME varchar(80) not null,
     MIDDLE_NAME varchar(80),
     SECOND_NAME varchar(80) not null,
+    BLOCK_CANDIDATE boolean,
     FULL_NAME varchar(160),
     BIRDH_DATE date,
     PERSON_POSITION_ID uuid,
