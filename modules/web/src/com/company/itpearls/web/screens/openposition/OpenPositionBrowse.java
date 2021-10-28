@@ -469,13 +469,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retButton.addClickListener(e -> {
 
-            if(openPositionsTable.getSingleSelected() != null) {
+            if (openPositionsTable.getSingleSelected() != null) {
                 QuickViewOpenPositionDescription quickViewOpenPositionDescription = screens.create(QuickViewOpenPositionDescription.class);
                 quickViewOpenPositionDescription.setJobDescription(openPositionsTable.getSingleSelected() != null ?
                         openPositionsTable.getSingleSelected()
                                 .getComment() : "");
 
-                if(openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() != null) {
+                if (openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() != null) {
                     quickViewOpenPositionDescription.setProjectDescription(openPositionsTable
                             .getSingleSelected()
                             .getProjectName()
@@ -485,7 +485,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                     .getProjectDescription() : "");
                 }
 
-                if(openPositionsTable.getSingleSelected()
+                if (openPositionsTable.getSingleSelected().getCommentEn() != null) {
+                    String a = openPositionsTable.getSingleSelected().getCommentEn();
+
+                    quickViewOpenPositionDescription.setJobDescriptionEng(openPositionsTable
+                            .getSingleSelected()
+                            .getCommentEn() != null ?
+                            openPositionsTable.getSingleSelected().getCommentEn() : "");
+                }
+
+                if (openPositionsTable.getSingleSelected()
                         .getProjectName()
                         .getProjectDepartment()
                         .getCompanyName()
@@ -497,14 +506,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             .getWorkingConditions());
                 }
 
-                if(openPositionsTable.getSingleSelected()
-                .getProjectName()
-                .getProjectDepartment()
-                .getCompanyName() != null) {
+                if (openPositionsTable.getSingleSelected()
+                        .getProjectName()
+                        .getProjectDepartment()
+                        .getCompanyName() != null) {
                     quickViewOpenPositionDescription.setCompanyDescription(openPositionsTable.getSingleSelected()
-                    .getProjectName()
-                    .getProjectDepartment()
-                    .getCompanyName().getCompanyDescription());
+                            .getProjectName()
+                            .getProjectDepartment()
+                            .getCompanyName().getCompanyDescription());
                 }
 
                 quickViewOpenPositionDescription.reloadDescriptions();
@@ -577,7 +586,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         entity.getVacansyName()));
             }
 
-            if(!entity.getOpenClose()) {
+            if (!entity.getOpenClose()) {
                 entity.getProjectName().setProjectIsClosed(false);
             }
 
@@ -1307,7 +1316,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "descriptionProvider")
     private String openPositionsTableMemoForCandidateColumnDescriptionProvider(OpenPosition openPosition) {
-        if(openPosition.getMemoForInterview() != null)
+        if (openPosition.getMemoForInterview() != null)
             return Jsoup.parse(openPosition.getMemoForInterview()).text();
         else
             return null;
@@ -1317,7 +1326,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableMemoForCandidateColumnStyleProvider(OpenPosition openPosition) {
         String style = "open-position-pic-center-large-red";
 
-        if(openPosition.getMemoForInterview() != null) {
+        if (openPosition.getMemoForInterview() != null) {
             if (!openPosition.getMemoForInterview().equals("")) {
                 style = "open-position-pic-center-large-green";
             } else {
@@ -1332,8 +1341,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Object openPositionsTableMemoForCandidateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         Object returnIcon = CubaIcon.MINUS_CIRCLE;
 
-        if(event.getItem().getMemoForInterview() != null) {
-            if(event.getItem().getMemoForInterview().equals("")) {
+        if (event.getItem().getMemoForInterview() != null) {
+            if (event.getItem().getMemoForInterview().equals("")) {
                 returnIcon = CubaIcon.MINUS_CIRCLE;
             } else {
                 returnIcon = CubaIcon.PLUS_CIRCLE;

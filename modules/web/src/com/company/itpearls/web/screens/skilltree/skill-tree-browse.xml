@@ -36,12 +36,6 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-<!--                <column id="fileImageLogo"
-                        property="fileImageLogo"
-                        maximumWidth="120px"
-                        caption="msg://msgSkillLogo">
-                    <componentRenderer/>
-                </column> -->
                 <column id="skillName" property="skillName" caption="mainMsg://msgSkill"/>
                 <column id="specialisation" property="specialisation" caption="msg://msgSpecialisation"/>
                 <column id="wikiPage" property="wikiPage" maximumWidth="250px" caption="msg://msgWikiPage"/>
@@ -52,12 +46,17 @@
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="skillTreesTable.create"/>
-                <button id="editBtn" action="skillTreesTable.edit"/>
-                <button id="removeBtn" action="skillTreesTable.remove"/>
+                <button id="createBtn"
+                        action="skillTreesTable.create"/>
+                <button id="editBtn"
+                        action="skillTreesTable.edit"/>
+                <button id="removeBtn"
+                        action="skillTreesTable.remove"/>
             </buttonsPanel>
         </treeDataGrid>
-        <hbox id="lookupActions" spacing="true" visible="false">
+        <hbox id="lookupActions"
+              spacing="true"
+              visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>
