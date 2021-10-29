@@ -5,6 +5,7 @@ import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
+import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.openposition.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.*;
@@ -172,6 +173,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
 
+    static String RESEARCHER = "Researcher";
+    static String RECRUITER = "Recruiter";
+    static String MANAGER = "Manager";
+    static String ADMINISTRATOR = "Administrators";
+    static String STAGER = "Стажер";
 
     String QUERY_GET_LAST_ITERACTION = "select e " +
             "from itpearls_IteractionList e " +
@@ -191,6 +197,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private VBoxLayout tabCandidate;
     @Inject
     private Label<String> iteractionListLabelCandidate;
+    @Inject
+    private GetRoleService getRoleService;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -1211,7 +1219,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         lastIteraction = getLastIteraction();
 
-        blockUnblockCandidate(!getEditedEntity().getBlockCandidate());
+        if (getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+            blockCandidateButton.setVisible(true);
+        } else {
+            blockCandidateButton.setVisible(false);
+        }
+
+        blockUnblockCandidate(!(getEditedEntity().getBlockCandidate() == null ?
+                false : getEditedEntity().getBlockCandidate()));
     }
 
     private void setLinkButtonSkype() {
@@ -2076,7 +2092,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
         String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
 
-        getEditedEntity().setBlockCandidate(!getEditedEntity().getBlockCandidate());
+        getEditedEntity().setBlockCandidate(!(getEditedEntity().getBlockCandidate() == null ? false : getEditedEntity().getBlockCandidate()));
         blockCandidateButton.setCaption(checkBlockCanidate ? BLOCK_CANDIDATE_ON : BLOCK_CANDIDATE_OFF);
         blockCandidateButton.setIcon(!checkBlockCanidate ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
         jobCandidateIteractionListTable.setEnabled(checkBlockCanidate);

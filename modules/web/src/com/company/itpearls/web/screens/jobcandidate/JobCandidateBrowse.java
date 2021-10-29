@@ -183,7 +183,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         String retStr = "";
         Boolean checkBlockCandidate = event.getItem().getBlockCandidate() == null ? false : event.getItem().getBlockCandidate();
 
-        if(checkBlockCandidate != true) {
+        if (checkBlockCandidate != true) {
             if (iteractionList != null) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(iteractionList.getDateIteraction());
@@ -261,7 +261,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
         Boolean checkBlockCandidate = jobCandidate.getBlockCandidate() == null ? false : jobCandidate.getBlockCandidate();
 
-        if(!checkBlockCandidate) {
+        if (!checkBlockCandidate) {
             return iteractionList != null ?
                     simpleDateFormat.format(iteractionList.getDateIteraction())
                             + "\n"
@@ -339,6 +339,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCanidateDetailScreenFragment.setJobCandidate(entity);
 
         HBoxLayout headerBox = uiComponents.create(HBoxLayout.NAME);
+        headerBox.setWidthAuto();
         headerBox.setWidth("100%");
         headerBox.setHeight("100%");
 
@@ -347,9 +348,18 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         header2Box.setHeight("100%");
 
         Label<String> infoLabel = uiComponents.create(Label.NAME);
+        infoLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
         infoLabel.setHtmlEnabled(true);
         infoLabel.setStyleName("h3");
         infoLabel.setValue("Информация о кандидате:");
+
+        Boolean checkBlockCandidate = !(jobCandidatesTable.getSingleSelected().getBlockCandidate() == null
+                ? false : jobCandidatesTable.getSingleSelected().getBlockCandidate());
+        Label<String> candidateStatusLabel = uiComponents.create(Label.NAME);
+        candidateStatusLabel.setHtmlEnabled(true);
+        candidateStatusLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        candidateStatusLabel.setStyleName(checkBlockCandidate ? "h2" : "h2-red");
+        candidateStatusLabel.setValue(checkBlockCandidate ? "Нормально" : "Заблокирован");
 
         Label<String> candidateTitle = uiComponents.create(Label.NAME);
         candidateTitle.setHtmlEnabled(true);
@@ -384,6 +394,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Component editLastResumeButton = editLastResume(entity);
 
         headerBox.add(infoLabel);
+        headerBox.add(candidateStatusLabel);
 
         headerBox.add(candidateTitle);
         headerBox.add(editButton);
@@ -1195,7 +1206,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe("showOnlyWithMyParticipationCheckBox")
     public void onShowOnlyWithMyParticipationCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if(event.getValue()) {
+        if (event.getValue()) {
             jobCandidatesDl.setParameter("recrutier", userSession.getUser());
         } else {
             jobCandidatesDl.removeParameter("recrutier");

@@ -138,6 +138,7 @@ public class ExtMainScreen extends MainScreen {
                                 case 2: // только создателю итерации
                                     Notifications.NotificationBuilder notification = notifications.create(Notifications.NotificationType.WARNING)
                                             .withCaption(caption)
+                                            .withType(Notifications.NotificationType.HUMANIZED)
                                             .withPosition(Notifications.Position.BOTTOM_RIGHT)
                                             .withDescription(desription)
                                             .withContentMode(ContentMode.HTML)
