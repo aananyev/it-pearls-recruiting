@@ -269,6 +269,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setPositionsLabel();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
+        setUnblock();
+    }
+
+    private void setUnblock() {
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setBlockCandidate(false);
+        } else {
+            if (getEditedEntity().getBlockCandidate() == null) {
+                getEditedEntity().setBlockCandidate(false);
+            }
+        }
     }
 
     private void setCreatedUpdatedLabel() {
