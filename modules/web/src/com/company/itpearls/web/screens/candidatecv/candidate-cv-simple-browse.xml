@@ -34,6 +34,20 @@
                 forceDialog="true"/>
     <layout expand="candidateCVsTable"
             spacing="true">
+        <hbox spacing="false">
+            <label id="candidateLabel"
+                   stylename="h3"/>
+            <label value="("
+                   stylename="h3"/>
+            <label id="candidatePositionLabel"
+                   stylename="h3"/>
+            <label value=" / "
+                   stylename="h3"/>
+            <label id="candidatePositionEnLabel"
+                   stylename="h3"/>
+            <label value=")"
+                   stylename="h3"/>
+        </hbox>
         <vbox height="AUTO"
               spacing="true"
               width="AUTO"

@@ -56,6 +56,7 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
 
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
     private Map<Integer, String> tabCaption = new HashMap<>();
+
     @Inject
     private Button nextButton;
     @Inject
@@ -69,6 +70,16 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private Label<String> selectPositionLabel;
 
+    JobCandidate jobCandidate = null;
+
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
+    }
+
+    public JobCandidate getJobCandidate() {
+        return jobCandidate;
+    }
+
     @Subscribe("openPositionsTable")
     public void onOpenPositionsTableSelection(DataGrid.SelectionEvent<Position> event) {
         projectNameTable.deselectAll();
@@ -77,9 +88,9 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
 
         if (openPositionsTable.getSelected().size() <= 1) {
             if (openPositionsTable.getSingleSelected() != null) {
-                vacansyNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
-                projectNameDl.setParameter("positionType", openPositionsTable.getSingleSelected());
-                companyDl.setParameter("positionType", openPositionsTable.getSingleSelected());
+                vacansyNameDl.setParameter("positionTypeSet", openPositionsTable.getSelected());
+                projectNameDl.setParameter("positionTypeSet", openPositionsTable.getSelected());
+                companyDl.setParameter("positionTypeSet", openPositionsTable.getSelected());
             } else {
                 vacansyNameDl.removeParameter("positionType");
                 projectNameDl.removeParameter("positionType");
@@ -319,6 +330,10 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         setMinMaxSalaryLabel();
         setCompanyTable();
         clearFilters();
+
+        if(jobCandidate != null) {
+            jobCandidateField.setValue(jobCandidate);
+        }
 
         companyDl.setParameter("ourClient", true);
         companyDl.load();
@@ -599,6 +614,5 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
             viewTextScreen.show();
         }
     }
-
 
 }

@@ -18,7 +18,7 @@
                 </property>
                 <property name="personPosition" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
-                <property name="candidateCv" view="_local">
+                <property name="candidateCv" view="_base">
                     <property name="commentLetter"/>
                     <property name="candidate" view="_local"/>
                     <property name="resumePosition" view="_local"/>
@@ -38,7 +38,7 @@
                 <property name="iteractionList" view="_local">
                     <property name="candidate" view="_minimal"/>
                     <property name="vacancy" view="_minimal">
-                        <property name="projectName" view="_minimal">
+                        <property name="projectName" view="_base">
                             <property name="openPosition" view="_minimal"/>
                             <property name="projectOwner" view="_minimal"/>
                             <property name="projectDepartment" view="_minimal">
@@ -60,7 +60,8 @@
             </view>
             <collection id="jobCandidateCandidateCvsDc" property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc" property="socialNetwork"/>
-            <collection id="jobCandidateIteractionDc" property="iteractionList"/>
+            <collection id="jobCandidateIteractionDc"
+                        property="iteractionList"/>
             <collection id="positionsListDc" property="positionList"/>
         </instance>
         <collection id="personPositionsDc"
@@ -117,6 +118,10 @@
                 width="1200"/>
     <layout expand="tabSheetSocialNetworks" spacing="true" width="100%" height="100%">
         <groupBox spacing="true">
+            <checkBox id="blockCandidateCheckBox"
+                      dataContainer="jobCandidateDc"
+                      property="blockCandidate"
+                      visible="false"/>
             <grid spacing="true">
                 <columns count="12"/>
                 <rows>
@@ -317,6 +322,12 @@
                                     dropZone="dropZone"
                                     showClearButton="true"
                                     property="fileImageFace"/>
+                            <button id="openPositionMasterBrowseButton"
+                                    caption="msg://msgOpenPositionMasterBrowse"
+                                    description="msg://msgOpenPositiionMasterBrowseDescription"
+                                    invoke="openPositionMasterBrowseStart"
+                                    width="100%"
+                                    height="AUTO"/>
                         </vbox>
                     </hbox>
                 </vbox>

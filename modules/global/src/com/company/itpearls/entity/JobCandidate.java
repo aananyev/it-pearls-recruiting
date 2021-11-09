@@ -10,7 +10,6 @@ import com.haulmont.cuba.core.global.DeletePolicy;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -94,10 +93,15 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "WHATSUP_NAME", length = 30)
     protected String whatsupName;
 
-    @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
-    protected Collection<IteractionList> iteractionList;
+    @Composition
+    protected List<IteractionList> iteractionList;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "jobCandidate")
+    protected List<SocialNetworkURLs> socialNetwork;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -108,11 +112,6 @@ public class JobCandidate extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidate")
     protected List<JobHistory> jobHistory;
-
-    @Composition
-    @OnDelete(DeletePolicy.CASCADE)
-    @OneToMany(mappedBy = "jobCandidate")
-    protected List<SocialNetworkURLs> socialNetwork;
 
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
@@ -134,6 +133,14 @@ public class JobCandidate extends StandardEntity {
     @NotNull
     @Column(name = "PRIORITY_CONTACT", nullable = false)
     private Integer priorityContact;
+
+    public void setIteractionList(List<IteractionList> iteractionList) {
+        this.iteractionList = iteractionList;
+    }
+
+    public List<IteractionList> getIteractionList() {
+        return iteractionList;
+    }
 
     public Boolean getBlockCandidate() {
         return blockCandidate;
@@ -157,14 +164,6 @@ public class JobCandidate extends StandardEntity {
 
     public void setPriorityContact(Integer priorityContact) {
         this.priorityContact = priorityContact;
-    }
-
-    public void setIteractionList(Collection<IteractionList> iteractionList) {
-        this.iteractionList = iteractionList;
-    }
-
-    public Collection<IteractionList> getIteractionList() {
-        return iteractionList;
     }
 
 

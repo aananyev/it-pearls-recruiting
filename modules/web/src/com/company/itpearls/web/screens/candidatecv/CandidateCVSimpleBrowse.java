@@ -36,15 +36,40 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
     private Label<String> recrutierLabel;
     @Inject
     private Label<String> vacancyNameLabel;
+    @Inject
+    private Label<String> candidateLabel;
+
+    JobCandidate jobCandidate = null;
+    @Inject
+    private Label<String> candidatePositionEnLabel;
+    @Inject
+    private Label<String> candidatePositionLabel;
 
     public void setSelectedCandidate(JobCandidate entity) {
         candidateCVsDl.setParameter("candidate", entity);
         candidateCVsDl.load();
     }
 
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
+    }
+
+    public JobCandidate getJobCandidate() {
+        return jobCandidate;
+    }
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setButtonActions();
+        setCandidateLabel(event);
+    }
+
+    private void setCandidateLabel(BeforeShowEvent event) {
+        if (jobCandidate != null) {
+            candidateLabel.setValue(jobCandidate.getFullName());
+            candidatePositionEnLabel.setValue(jobCandidate.getPersonPosition().getPositionEnName());
+            candidatePositionLabel.setValue(jobCandidate.getPersonPosition().getPositionRuName());
+        }
     }
 
     private void setButtonActions() {

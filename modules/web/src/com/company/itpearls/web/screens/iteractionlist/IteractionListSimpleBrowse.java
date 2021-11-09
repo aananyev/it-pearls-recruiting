@@ -42,9 +42,34 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     @Inject
     private Label<String> recrutierLabel;
 
+    JobCandidate jobCandidate = null;
+    @Inject
+    private Label<String> candidateLabel;
+    @Inject
+    private Label<String> candidatePositionLabel;
+    @Inject
+    private Label<String> candidatePositionEnLabel;
+
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
+    }
+
+    public JobCandidate getJobCandidate() {
+        return jobCandidate;
+    }
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setButtonActions();
+        setCandidateLabel(event);
+    }
+
+    private void setCandidateLabel(BeforeShowEvent event) {
+        if (jobCandidate != null) {
+            candidateLabel.setValue(jobCandidate.getFullName());
+            candidatePositionLabel.setValue(jobCandidate.getPersonPosition().getPositionRuName());
+            candidatePositionEnLabel.setValue(jobCandidate.getPersonPosition().getPositionEnName());
+        }
     }
 
     private void setButtonActions() {

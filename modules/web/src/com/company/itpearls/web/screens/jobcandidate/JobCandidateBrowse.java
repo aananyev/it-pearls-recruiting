@@ -183,28 +183,38 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         String retStr = "";
         Boolean checkBlockCandidate = event.getItem().getBlockCandidate() == null ? false : event.getItem().getBlockCandidate();
 
-        if (checkBlockCandidate != true) {
-            if (iteractionList != null) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(iteractionList.getDateIteraction());
-                calendar.add(Calendar.MONTH, 1);
+        if( checkBlockCandidate != null) {
+            if (checkBlockCandidate != true) {
+                if (iteractionList != null) {
+                    Calendar calendar = Calendar.getInstance();
 
-                Calendar calendar1 = Calendar.getInstance();
-
-                if (calendar.after(calendar1)) {
-                    if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
-                        retStr = "button_table_red";
+                    if (iteractionList.getDateIteraction() != null) {
+                        calendar.setTime(iteractionList.getDateIteraction());
                     } else {
-                        retStr = "button_table_yellow";
+                        calendar.setTime(event.getItem().getCreateTs());
+                    }
+
+                    calendar.add(Calendar.MONTH, 1);
+
+                    Calendar calendar1 = Calendar.getInstance();
+
+                    if (calendar.after(calendar1)) {
+                        if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                            retStr = "button_table_red";
+                        } else {
+                            retStr = "button_table_yellow";
+                        }
+                    } else {
+                        retStr = "button_table_green";
                     }
                 } else {
-                    retStr = "button_table_green";
+                    retStr = "button_table_white";
                 }
             } else {
-                retStr = "button_table_white";
+                retStr = "button_table_black";
             }
         } else {
-            retStr = "button_table_black";
+            retStr = "button_table_green";
         }
 
         return
@@ -281,8 +291,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 if (maxIteraction == null)
                     maxIteraction = iteractionList;
 
-                if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
-                    maxIteraction = iteractionList;
+                if(iteractionList.getNumberIteraction() != null) {
+                    if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
+                        maxIteraction = iteractionList;
+                    }
                 }
             }
 
@@ -452,6 +464,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
                     CandidateCVSimpleBrowse candidateCVSimpleBrowse = screens.create(CandidateCVSimpleBrowse.class);
                     candidateCVSimpleBrowse.setSelectedCandidate(entity);
+                    candidateCVSimpleBrowse.setJobCandidate(entity);
                     screens.show(candidateCVSimpleBrowse);
 
                 }));
@@ -644,6 +657,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
                     IteractionListSimpleBrowse iteractionListSimpleBrowse = screens.create(IteractionListSimpleBrowse.class);
                     iteractionListSimpleBrowse.setSelectedCandidate(entity);
+                    iteractionListSimpleBrowse.setJobCandidate(entity);
                     screens.show(iteractionListSimpleBrowse);
 
                 }));
@@ -980,16 +994,24 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
             if (iteractionList != null) {
                 Calendar calendar = Calendar.getInstance();
-                calendar.setTime(iteractionList.getDateIteraction());
+
+                if (iteractionList.getDateIteraction() != null) {
+                    calendar.setTime(iteractionList.getDateIteraction());
+                }
+
                 calendar.add(Calendar.MONTH, 1);
 
                 Calendar calendar1 = Calendar.getInstance();
 
                 if (calendar.after(calendar1)) {
-                    if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
-                        retStr = "button_table_red";
+                    if(iteractionList.getRecrutier() != null) {
+                        if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                            retStr = "button_table_red";
+                        } else {
+                            retStr = "button_table_yellow";
+                        }
                     } else {
-                        retStr = "button_table_yellow";
+                        retStr = "button_table_white";
                     }
                 } else {
                     retStr = "button_table_green";

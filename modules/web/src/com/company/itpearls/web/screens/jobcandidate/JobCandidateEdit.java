@@ -6,6 +6,7 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.itpearls.web.screens.openposition.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.*;
@@ -199,6 +200,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> iteractionListLabelCandidate;
     @Inject
     private GetRoleService getRoleService;
+    @Inject
+    private CheckBox blockCandidateCheckBox;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -261,6 +264,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             DataContext dc = socialNetworkURLsesDl.getDataContext();
             dc.setParent(dataContext);
             dataContext.merge(sn);
+
+            blockCandidateCheckBox.setValue(false);
         }
 
         enableDisableContacts();
@@ -269,11 +274,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setPositionsLabel();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
-        setUnblock();
     }
 
     private void setUnblock() {
-        if(PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setBlockCandidate(false);
         } else {
             if (getEditedEntity().getBlockCandidate() == null) {
@@ -309,13 +313,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     protected boolean isRequiredAddresField() {
         Boolean isEmptySN = false;
 
-/*        for (SocialNetworkURLs a : jobCandidateSocialNetworksDc.getItems()) {
-            if (a.getNetworkURLS() != null) {
-                isEmptySN = true;
-                break;
-            }
-        } */
-
         isEmptySN = ((emailField.getValue() == null) &&
                 (skypeNameField.getValue() == null) &&
                 (telegramNameField.getValue() == null) &&
@@ -331,18 +328,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
+//            setUnblock();
+
             CommitContext commitContext = new CommitContext(getEditedEntity());
+//            createFirstIteraction(commitContext);
 
             for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
                 commitContext.addInstanceToCommit(s);
             }
 
             dataManager.commit(commitContext);
-//            createFirstIteraction();
         }
     }
 
-    private void createFirstIteraction() {
+    private void createFirstIteraction(CommitContext commitContext) {
         String newCandidate = "Новый контакт";
 
         String queryNewCandidate = "select e from itpearls_Iteraction e "
@@ -355,6 +354,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 + newCandidate
                 + "\'";
 
+        List<IteractionList> il = new ArrayList<>();
         IteractionList iteractionList = new IteractionList();
         iteractionList.setRating(3);
         iteractionList.setCandidate(getEditedEntity());
@@ -374,9 +374,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         iteractionList.setIteractionType(iteraction);
         iteractionList.setVacancy(openPosition);
 
-        CommitContext commitContext = new CommitContext(getEditedEntity());
         commitContext.addInstanceToCommit(iteractionList);
-        dataManager.commit(commitContext);
+        jobCandidateIteractionDc.getMutableItems().add(iteractionList);
+
+//        DataContext dc = socialNetworkURLsesDl.getDataContext();
+//        dc.setParent(dataContext);
+//        dataContext.merge(il);
     }
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false);
@@ -594,15 +597,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (!getEditedEntity().getFullName().equals("")) {
                 if (getEditedEntity().getFullName() == null)
                     getEditedEntity().setFullName("");
-            } else {
             }
             // заблокировать вкладки с резюме и итеракицями
-            tabIteraction.setVisible(true);
-            tabResume.setVisible(true);
+//            tabIteraction.setVisible(true);
+//            tabResume.setVisible(true);
         } else {
             // заблокировать вкладки с резюме и итеракицями
-            tabIteraction.setVisible(false);
-            tabResume.setVisible(false);
+//            tabIteraction.setVisible(false);
+//            tabResume.setVisible(false);
         }
 
         // если есть резюме, то поставить галку
@@ -622,6 +624,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         // проверить в названии должности (не использовать)
         priorityCommenicationMethodRadioButtonInit();
+
+        if (getEditedEntity().getBlockCandidate() == null) {
+            getEditedEntity().setBlockCandidate(false);
+        }
     }
 
     private void checkContactsCandidateListener() {
@@ -694,6 +700,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             event.preventCommit();
         }
 
+//        setUnblock();
 //        createFirstIteraction();
     }
 
@@ -2103,11 +2110,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
         String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
 
-        getEditedEntity().setBlockCandidate(!(getEditedEntity().getBlockCandidate() == null ? false : getEditedEntity().getBlockCandidate()));
+        blockCandidateCheckBox.setValue(getEditedEntity().getBlockCandidate() == null
+                ? false
+                : getEditedEntity().getBlockCandidate());
+//        getEditedEntity().setBlockCandidate(!(getEditedEntity().getBlockCandidate() == null ? false : getEditedEntity().getBlockCandidate()));
         blockCandidateButton.setCaption(checkBlockCanidate ? BLOCK_CANDIDATE_ON : BLOCK_CANDIDATE_OFF);
         blockCandidateButton.setIcon(!checkBlockCanidate ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
         jobCandidateIteractionListTable.setEnabled(checkBlockCanidate);
         iteractionListLabelCandidate.setStyleName(checkBlockCanidate ? "h2" : "h2-red");
 
+    }
+
+    public void openPositionMasterBrowseStart() {
+        OpenPositionMasterBrowse openPositionMasterBrowse = screens.create(OpenPositionMasterBrowse.class);
+        openPositionMasterBrowse.setJobCandidate(getEditedEntity());
+        openPositionMasterBrowse.show();
     }
 }
