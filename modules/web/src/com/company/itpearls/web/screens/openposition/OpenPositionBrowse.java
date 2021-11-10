@@ -5,6 +5,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -19,11 +20,14 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import org.javatuples.KeyValue;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
+import javax.xml.crypto.Data;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.Calendar;
 
 @UiController("itpearls_OpenPosition.browse")
 @UiDescriptor("open-position-browse.xml")
@@ -58,6 +62,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String ROLE_ADMINISTRATOR = "Administrators";
     private Map<String, Integer> remoteWork = new LinkedHashMap<>();
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
+
+    String QUERY_COUNT_ITERACTIONS = "select e.iteractionType, count(e.iteractionType) " +
+            "from itpearls_IteractionList e " +
+            "where e.dateIteraction between :startDate and :endDate and " +
+            "e.vacancy = :vacancy and " +
+            "e.iteractionType.statistics = true " +
+            "group by e.iteractionType";
 
     @Inject
     private UserSessionSource userSessionSource;
@@ -1350,6 +1361,68 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return returnIcon;
+    }
+
+    Integer montOfStat = 3;
+
+    @Install(to = "openPositionsTable.idStatistics", subject = "columnGenerator")
+    private Object openPositionsTableIdStatisticsColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String retStr = "";
+
+        GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
+        Date endDate = gregorianCalendar.getTime();
+        gregorianCalendar.add(Calendar.MONTH, -montOfStat);
+        Date startDate = gregorianCalendar.getTime();
+
+        List<KeyValueEntity> iteractionIntegerKeyValue =
+                dataManager.loadValues(QUERY_COUNT_ITERACTIONS)
+                        .properties("iteractionType", "sum")
+                        .parameter("startDate", startDate)
+                        .parameter("vacancy", event.getItem())
+                        .parameter("endDate", endDate)
+                        .list();
+
+        if (iteractionIntegerKeyValue.size() != 0) {
+            for (KeyValueEntity entity : iteractionIntegerKeyValue) {
+                retStr += entity.getValue("sum") + " / ";
+
+            }
+
+            retStr = retStr.substring(0, retStr.length() - 3);
+        }
+
+        return retStr;
+    }
+
+    @Install(to = "openPositionsTable.idStatistics", subject = "descriptionProvider")
+    private String openPositionsTableIdStatisticsDescriptionProvider(OpenPosition openPosition) {
+        String retStr = "Статистика за " + montOfStat + " месяца\n";
+
+        GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
+        Date endDate = gregorianCalendar.getTime();
+        gregorianCalendar.add(Calendar.MONTH, -montOfStat);
+        Date startDate = gregorianCalendar.getTime();
+
+        List<KeyValueEntity> iteractionIntegerKeyValue =
+                dataManager.loadValues(QUERY_COUNT_ITERACTIONS)
+                        .properties("iteractionType", "sum")
+                        .parameter("startDate", startDate)
+                        .parameter("vacancy", openPosition)
+                        .parameter("endDate", endDate)
+                        .list();
+
+        if (iteractionIntegerKeyValue.size() != 0) {
+            for (KeyValueEntity entity : iteractionIntegerKeyValue) {
+                String iteractionName = ((Iteraction) entity.getValue("iteractionType"))
+                        .getIterationName();
+                retStr += iteractionName + " : " + entity.getValue("sum") + "\n";
+
+            }
+
+            retStr = retStr.substring(0, retStr.length() - 1);
+        }
+
+        return retStr;
     }
 }
 

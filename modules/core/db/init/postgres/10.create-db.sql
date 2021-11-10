@@ -219,6 +219,7 @@ create table ITPEARLS_ITERACTION (
     NOTIFICATION_PERIOD_TYPE integer,
     NOTIFICATION_BEFORE_AFTER_DAY integer,
     NOTIFICATION_WHEN_SEND integer,
+    STATISTICS_ boolean,
     --
     primary key (ID)
 )^

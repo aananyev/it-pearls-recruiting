@@ -171,8 +171,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> telegramGroupField;
     @Inject
     private CollectionPropertyContainer<Position> positionsListDc;
-    @Inject
-    private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
 
     static String RESEARCHER = "Researcher";
     static String RECRUITER = "Recruiter";
@@ -375,7 +373,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         iteractionList.setVacancy(openPosition);
 
         commitContext.addInstanceToCommit(iteractionList);
-        jobCandidateIteractionDc.getMutableItems().add(iteractionList);
+//        jobCandidateIteractionDc.getMutableItems().add(iteractionList);
 
 //        DataContext dc = socialNetworkURLsesDl.getDataContext();
 //        dc.setParent(dataContext);

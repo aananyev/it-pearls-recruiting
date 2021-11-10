@@ -71,6 +71,10 @@ order by e.number]]>
                                   caption="msg://msgSignSendToClient"
                                   dataContainer="iteractionDc"
                                   property="signSendToClient"/>
+                        <checkBox id="statisticsCheckBox"
+                                  dataContainer="iteractionDc"
+                                  property="statistics"
+                                  caption="msg://msgStatistics"/>
                     </vbox>
                 </groupBox>
             </tab>

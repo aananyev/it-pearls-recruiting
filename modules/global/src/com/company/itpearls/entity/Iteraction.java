@@ -110,6 +110,17 @@ public class Iteraction extends StandardEntity {
     @Column(name = "NOTIFICATION_WHEN_SEND")
     private Integer notificationWhenSend;
 
+    @Column(name = "STATISTICS_")
+    private Boolean statistics;
+
+    public Boolean getStatistics() {
+        return statistics;
+    }
+
+    public void setStatistics(Boolean statistics) {
+        this.statistics = statistics;
+    }
+
     public Boolean getNotificationNeedSend() {
         return notificationNeedSend;
     }
