@@ -99,13 +99,6 @@
                         width="70px"
                         minimumWidth="35px"
                         caption=""/>
-                <column id="idStatistics"
-                        resizable="true"
-                        width="70px"
-                        minimumWidth="35px"
-                        caption="msg://msgStat">
-                    <textRenderer/>
-                </column>
                 <column id="vacansyName"
                         property="vacansyName"
                         resizable="true"
@@ -180,7 +173,13 @@
                         minimumWidth="45px">
                     <iconRenderer/>
                 </column>
-
+                <column id="idStatistics"
+                        resizable="true"
+                        width="70px"
+                        minimumWidth="35px"
+                        caption="msg://msgStat">
+                    <textRenderer/>
+                </column>
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"

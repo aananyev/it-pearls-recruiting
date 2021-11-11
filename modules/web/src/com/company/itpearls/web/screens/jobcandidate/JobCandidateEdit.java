@@ -152,8 +152,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private StarsAndOtherService starsAndOtherService;
     @Inject
-    private InstanceContainer<JobCandidate> jobCandidateDc;
-    @Inject
     private InstanceLoader<JobCandidate> jobCandidateDl;
     @Inject
     private Screens screens;
@@ -200,6 +198,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private GetRoleService getRoleService;
     @Inject
     private CheckBox blockCandidateCheckBox;
+    @Inject
+    private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
+    @Inject
+    private InstanceContainer<JobCandidate> jobCandidateDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -325,19 +327,56 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        CommitContext commitContext = new CommitContext(getEditedEntity());
+
+        setupSocialNetworkURLs(commitContext);
+        setupIteractionListCommit(commitContext);
+        setupCandidateCVCommit(commitContext);
+
+        dataManager.commit(commitContext);
+    }
+
+    private void setupCandidateCVCommit(CommitContext commitContext) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-//            setUnblock();
+            if (jobCandidateCandidateCvsDc.getItems().size() != 0) {
+                for (CandidateCV candidateCV : jobCandidateCandidateCvsDc.getItems()) {
+                    commitContext.addInstanceToCommit(candidateCV);
+                }
+            }
+        }
+    }
 
-            CommitContext commitContext = new CommitContext(getEditedEntity());
-//            createFirstIteraction(commitContext);
+    private void setupIteractionListCommit(CommitContext commitContext) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            if (jobCandidateIteractionDc.getItems().size() != 0) {
+                for (IteractionList iteractionList : jobCandidateIteractionDc.getItems()) {
+                    commitContext.addInstanceToCommit(iteractionList);
+                }
+            }
+        }
+    }
 
+    private void setupSocialNetworkURLs(CommitContext commitContext) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
                 commitContext.addInstanceToCommit(s);
             }
-
-            dataManager.commit(commitContext);
         }
     }
+
+/*    private void setupIteractionListCommit() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            if (jobCandidateIteractionDc.getItems().size() != 0) {
+                CommitContext commitContext = new CommitContext(getEditedEntity());
+
+                for (IteractionList iteractionList : jobCandidateIteractionDc.getItems()) {
+                    commitContext.addInstanceToCommit(iteractionList);
+                }
+
+                dataManager.commit(commitContext);
+            }
+        }
+    }*/
 
     private void createFirstIteraction(CommitContext commitContext) {
         String newCandidate = "Новый контакт";
@@ -624,6 +663,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         priorityCommenicationMethodRadioButtonInit();
 
         if (getEditedEntity().getBlockCandidate() == null) {
+            blockCandidateCheckBox.setValue(false);
             getEditedEntity().setBlockCandidate(false);
         }
     }
@@ -701,6 +741,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 //        setUnblock();
 //        createFirstIteraction();
     }
+
 
     private void addIteractionOfNewCandidate() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
