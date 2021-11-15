@@ -364,20 +364,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-/*    private void setupIteractionListCommit() {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (jobCandidateIteractionDc.getItems().size() != 0) {
-                CommitContext commitContext = new CommitContext(getEditedEntity());
-
-                for (IteractionList iteractionList : jobCandidateIteractionDc.getItems()) {
-                    commitContext.addInstanceToCommit(iteractionList);
-                }
-
-                dataManager.commit(commitContext);
-            }
-        }
-    }*/
-
     private void createFirstIteraction(CommitContext commitContext) {
         String newCandidate = "Новый контакт";
 

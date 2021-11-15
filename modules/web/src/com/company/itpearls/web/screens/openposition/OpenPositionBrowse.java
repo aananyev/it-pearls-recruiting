@@ -1426,12 +1426,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retStr;
     }
 
+    String more_10_msg = "<font color=red>>10</font>";
+
     @Install(to = "openPositionsTable.numberPosition", subject = "columnGenerator")
     private Object openPositionsTableNumberPositionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        String more_10_msg = "<font color=red>10 и более</font>";
 
         if (event.getItem().getMore10NumberPosition() == null) {
-            return event.getItem().getNumberPosition().toString();
+            if (event.getItem().getNumberPosition() < 10) {
+                return event.getItem().getNumberPosition().toString();
+            } else {
+                return more_10_msg;
+            }
         } else {
             if (event.getItem().getMore10NumberPosition()) {
                 return more_10_msg;
@@ -1442,6 +1447,26 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     return more_10_msg;
                 }
             }
+        }
+    }
+
+    @Install(to = "openPositionsTable.numberPosition", subject = "descriptionProvider")
+    private String openPositionsTableNumberPositionDescriptionProvider(OpenPosition openPosition) {
+        if (openPosition.getMore10NumberPosition() != null) {
+            if (openPosition.getMore10NumberPosition()) {
+                if (openPosition.getNumberPosition() == null)
+                    return ">10";
+                else
+                    return openPosition.getNumberPosition().toString();
+            } else {
+                if (openPosition.getNumberPosition() != null) {
+                    return openPosition.getNumberPosition().toString();
+                } else {
+                    return null;
+                }
+            }
+        } else {
+            return openPosition.getNumberPosition().toString();
         }
     }
 }
