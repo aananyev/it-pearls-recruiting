@@ -44,7 +44,7 @@
               width="AUTO"
               align="TOP_LEFT">
             <label id="vacancyNameLabel"
-                   stylename="h3"
+                   stylename="h4"
                    width="AUTO"
                    visible="false"/>
             <label id="recrutierLabel"

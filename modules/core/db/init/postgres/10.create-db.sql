@@ -434,6 +434,7 @@ create table ITPEARLS_OPEN_POSITION (
     POSITION_TYPE_ID uuid,
     PROJECT_NAME_ID uuid not null,
     NUMBER_POSITION integer,
+    MORE10_NUMBER_POSITION boolean,
     WORK_EXPERIENCE integer,
     COMMAND_EXPERIENCE integer,
     COMMENT_ text,

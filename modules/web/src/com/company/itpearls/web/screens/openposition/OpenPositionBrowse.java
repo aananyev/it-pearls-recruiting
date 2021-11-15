@@ -34,6 +34,7 @@ import java.util.Calendar;
 @LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
+
     private static final String NULL_SALARY = "0 т.р./0 т.р.";
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
@@ -1423,6 +1424,25 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return retStr;
+    }
+
+    @Install(to = "openPositionsTable.numberPosition", subject = "columnGenerator")
+    private Object openPositionsTableNumberPositionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String more_10_msg = "<font color=red>10 и более</font>";
+
+        if (event.getItem().getMore10NumberPosition() == null) {
+            return event.getItem().getNumberPosition().toString();
+        } else {
+            if (event.getItem().getMore10NumberPosition()) {
+                return more_10_msg;
+            } else {
+                if (event.getItem().getNumberPosition() < 10) {
+                    return event.getItem().getNumberPosition().toString();
+                } else {
+                    return more_10_msg;
+                }
+            }
+        }
     }
 }
 

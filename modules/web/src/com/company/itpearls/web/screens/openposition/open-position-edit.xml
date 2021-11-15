@@ -340,12 +340,23 @@
                                width="AUTO"
                                align="MIDDLE_RIGHT"/>
                     </hbox>
-                    <textField id="numberPositionField"
-                               dataContainer="openPositionDc"
-                               property="numberPosition"
-                               required="true"
-                               caption="msg://msgNumberOpenPosition"
-                               width="50%"/>
+                    <hbox align="TOP_RIGHT"
+                          spacing="true"
+                          width="100%">
+                        <textField id="numberPositionField"
+                                   dataContainer="openPositionDc"
+                                   property="numberPosition"
+                                   required="true"
+                                   align="BOTTOM_LEFT"
+                                   caption="msg://msgNumberOpenPosition"
+                                   width="100%"/>
+                        <checkBox id="more10NumberPositionField"
+                                  dataContainer="openPositionDc"
+                                  property="more10NumberPosition"
+                                  align="BOTTOM_LEFT"
+                                  caption="msg://msgMore10NumberPosition"
+                                  width="100%"/>
+                    </hbox>
                     <hbox id="hboxSalary"
                           spacing="true"
                           width="100%">

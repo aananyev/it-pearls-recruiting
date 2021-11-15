@@ -1,0 +1,1 @@
+alter table ITPEARLS_OPEN_POSITION add column MORE10_NUMBER_POSITION integer ;

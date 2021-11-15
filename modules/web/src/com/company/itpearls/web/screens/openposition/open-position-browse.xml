@@ -127,11 +127,12 @@
                     <textRenderer/>
                 </column>
                 <column id="numberPosition"
-                        property="numberPosition"
                         width="65px"
                         maximumWidth="85px"
                         minimumWidth="65px"
-                        caption="msg://msgNumberOpenPosition"/>
+                        caption="msg://msgNumberOpenPosition">
+                    <htmlRenderer/>
+                </column>
                 <column id="description"
                         sortable="false"
                         resizable="true"

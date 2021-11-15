@@ -83,6 +83,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "NUMBER_POSITION")
     protected Integer numberPosition;
 
+    @Column(name = "MORE10_NUMBER_POSITION")
+    private Boolean more10NumberPosition;
+
     @Column(name = "WORK_EXPERIENCE")
     protected Integer workExperience;
 
@@ -166,6 +169,14 @@ public class OpenPosition extends StandardEntity {
     @Lob
     @Column(name = "MEMO_FOR_INTERVIEW")
     private String memoForInterview;
+
+    public void setMore10NumberPosition(Boolean more10NumberPosition) {
+        this.more10NumberPosition = more10NumberPosition;
+    }
+
+    public Boolean getMore10NumberPosition() {
+        return more10NumberPosition;
+    }
 
     public Integer getRegistrationForWork() {
         return registrationForWork;

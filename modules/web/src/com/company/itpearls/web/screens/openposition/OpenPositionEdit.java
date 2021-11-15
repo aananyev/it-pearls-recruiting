@@ -1610,4 +1610,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
         }
     }
+
+    @Subscribe("more10NumberPositionField")
+    public void onMore10NumberPositionFieldValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue() != null) {
+            if (event.getValue()) {
+                numberPositionField.setRequired(false);
+            } else {
+                numberPositionField.setRequired(true);
+            }
+        }
+
+    }
+
+
 }
