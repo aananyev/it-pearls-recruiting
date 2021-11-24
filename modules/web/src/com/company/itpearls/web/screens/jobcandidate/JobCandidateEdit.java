@@ -1265,6 +1265,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
             blockCandidateButton.setVisible(true);
+            jobCandidateIteractionListTable.setEnabled(true);
         } else {
             blockCandidateButton.setVisible(false);
         }

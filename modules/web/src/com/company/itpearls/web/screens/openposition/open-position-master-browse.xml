@@ -109,7 +109,8 @@
                                     (select i.projectName
                                     from itpearls_OpenPosition i
                                     where (not i.openClose = true)
-                                    and i.positionType in :positionTypeSet)))</c:where>
+                                    and i.positionType in :positionTypeSet)))
+                                </c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -143,7 +144,21 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.projectDepartment.companyName = :company</c:where>
+                                <c:where>e in (select i.projectName
+                                    from itpearls_OpenPosition i
+                                    where (not i.openClose = true)
+                                    and i.positionType in :positionTypeSet)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select f.projectName
+                                    from itpearls_OpenPosition f
+                                    where f.projectName in
+                                    (select g from itpearls_Project g
+                                    where g.projectDepartment in
+                                    (select h from itpearls_CompanyDepartament h
+                                    where h.companyName in :companySet)))
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.openPosition = :openPosition</c:where>
@@ -188,10 +203,10 @@
                             </c:jpql>
                             <c:jpql>
                                 <c:where>x.positionType in
-                                    (select f.positionType
-                                    from itpearls_OpenPosition f
-                                    where f.positionType in :positionTypeSet
-                                    and (not f.openClose = true))
+                                    (select o.positionType
+                                    from itpearls_OpenPosition o
+                                    where o.positionType in :positionTypeSet
+                                    and (not o.openClose = true))
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
@@ -199,6 +214,16 @@
                             </c:jpql>
                             <c:jpql>
                                 <c:where>x.projectName.projectDepartment.companyName = :company</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>x.projectName in
+                                    (select z
+                                    from itpearls_Project z
+                                    where z.projectDepartment in
+                                    (select y
+                                    from itpearls_CompanyDepartament y
+                                    where y.companyName in :companySet))
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>x.projectName = :projectName</c:where>
@@ -346,6 +371,35 @@
                     </vbox>
                 </hbox>
             </tab>
+            <tab id="selectCompanyTab"
+                 spacing="true"
+                 expand="mainCompanyHBox"
+                 caption="msg://msgSelectCompany">
+                <hbox id="mainCompanyHBox"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true">
+                    <dataGrid id="companyTable"
+                              width="100%"
+                              editorEnabled="false"
+                              contextMenuEnabled="false"
+                              dataContainer="companyDc"
+                              selectionMode="MULTI_CHECK"
+                              height="100%">
+                        <actions>
+                        </actions>
+                        <columns>
+                            <column id="comanyName"
+                                    property="comanyName"/>
+                        </columns>
+                    </dataGrid>
+                    <richTextArea id="companyInfoRichTextArea"
+                                  width="100%"
+                                  contextHelpText="?"
+                                  editable="false"
+                                  height="100%"/>
+                </hbox>
+            </tab>
             <tab id="selectVacansyTab"
                  spacing="true"
                  caption="msg://msgSelectVacancy">
@@ -354,28 +408,6 @@
                       align="TOP_LEFT"
                       height="100%"
                       box.expandRatio="6">
-                    <hbox spacing="true"
-                          width="100%"
-                          height="100%">
-                        <dataGrid id="companyTable"
-                                  width="100%"
-                                  editorEnabled="false"
-                                  contextMenuEnabled="false"
-                                  dataContainer="companyDc"
-                                  height="100%">
-                            <actions>
-                            </actions>
-                            <columns>
-                                <column id="comanyName"
-                                        property="comanyName"/>
-                            </columns>
-                        </dataGrid>
-                        <richTextArea id="companyInfoRichTextArea"
-                                      width="100%"
-                                      contextHelpText="?"
-                                      editable="false"
-                                      height="100%"/>
-                    </hbox>
                     <hbox spacing="true" width="100%" height="100%">
                         <dataGrid id="projectNameTable"
                                   width="100%"

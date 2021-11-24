@@ -1427,15 +1427,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     String more_10_msg = "<font color=red>>10</font>";
+    String clarification_required = "<font color=blue>???</font>";
 
     @Install(to = "openPositionsTable.numberPosition", subject = "columnGenerator")
     private Object openPositionsTableNumberPositionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
 
         if (event.getItem().getMore10NumberPosition() == null) {
-            if (event.getItem().getNumberPosition() < 10) {
-                return event.getItem().getNumberPosition().toString();
+            if (event.getItem().getNumberPosition() != null) {
+                if (event.getItem().getNumberPosition() < 10) {
+                    return event.getItem().getNumberPosition().toString();
+                } else {
+                    return more_10_msg;
+                }
             } else {
-                return more_10_msg;
+                return clarification_required;
             }
         } else {
             if (event.getItem().getMore10NumberPosition()) {

@@ -118,9 +118,15 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                 }
             }
 
-            projectNameDl.setParameter("company", companyTable.getSingleSelected());
-            vacansyNameDl.setParameter("company", companyTable.getSingleSelected());
+            projectNameDl.setParameter("companySet", companyTable.getSelected());
+            vacansyNameDl.setParameter("companySet", companyTable.getSelected());
+
+//            projectNameDl.setParameter("company", companyTable.getSingleSelected());
+//            vacansyNameDl.setParameter("company", companyTable.getSingleSelected());
         } else {
+            projectNameDl.removeParameter("companySet");
+            vacansyNameDl.removeParameter("companySet");
+
             projectNameDl.removeParameter("company");
             vacansyNameDl.removeParameter("company");
         }
@@ -288,7 +294,8 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         tabCaption.put(1, "1. Выберите кандидата, которого предстоит собеседовать");
         tabCaption.put(2, "2. Выберите приоритет поиска позиции");
         tabCaption.put(3, "3. Выбрать специализацию");
-        tabCaption.put(4, "4. Выбрать вакансию");
+        tabCaption.put(4, "4. Выбрать компанию раюотодателя");
+        tabCaption.put(5, "5. Выбрать вакансию");
 
         for (Accordion.Tab tab : mainAccordion.getTabs()) {
             for (Map.Entry entry : tabCaption.entrySet()) {
@@ -342,8 +349,10 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     private void setCompanyTable() {
         companyTable.addSelectionListener(e -> {
             if (companyTable.getSingleSelected() != null) {
-                projectNameDl.setParameter("company", companyTable.getSingleSelected());
+                projectNameDl.setParameter("companySet", companyTable.getSelected());
+//                projectNameDl.setParameter("company", companyTable.getSingleSelected());
             } else {
+                projectNameDl.removeParameter("companySet");
                 projectNameDl.removeParameter("company");
             }
         });
@@ -502,6 +511,7 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         companyDl.removeParameter("positionType");
         companyDl.removeParameter("openPosition");
 
+        projectNameDl.removeParameter("companySet");
         projectNameDl.removeParameter("positionType");
         projectNameDl.removeParameter("company");
         projectNameDl.removeParameter("openPosition");
