@@ -71,6 +71,10 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     private Label<String> selectPositionLabel;
 
     JobCandidate jobCandidate = null;
+    @Inject
+    private Label<String> interviewTabHeaderLabel;
+    @Inject
+    private Label<String> candidateNameLabel;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -166,10 +170,9 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         }
 
         if (projectNameTable.getSingleSelected() != null) {
-            vacansyNameDl.setParameter("projectName", projectNameTable.getSingleSelected());
-            vacansyNameTable.deselectAll();
+            vacansyNameDl.setParameter("projectNameSet", projectNameTable.getSelected());
         } else {
-            vacansyNameDl.removeParameter("projectName");
+            vacansyNameDl.removeParameter("projectNameSet");
         }
 
         vacansyNameDl.load();
@@ -296,6 +299,8 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         tabCaption.put(3, "3. Выбрать специализацию");
         tabCaption.put(4, "4. Выбрать компанию раюотодателя");
         tabCaption.put(5, "5. Выбрать вакансию");
+        tabCaption.put(6, "6.");
+        tabCaption.put(7, "7. Сопроводиетльное письмо");
 
         for (Accordion.Tab tab : mainAccordion.getTabs()) {
             for (Map.Entry entry : tabCaption.entrySet()) {
@@ -625,4 +630,18 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    @Subscribe("jobCandidateField")
+    public void onJobCandidateFieldValueChange1(HasValue.ValueChangeEvent<JobCandidate> event) {
+        if (event.getValue() != null) {
+            String jobCandidateLabel = event.getValue().getFullName()
+                    + " ("
+                    + event.getValue().getPersonPosition().getPositionEnName()
+                    + " / "
+                    + event.getValue().getPersonPosition().getPositionRuName()
+                    + ")";
+
+            interviewTabHeaderLabel.setValue(jobCandidateLabel);
+            candidateNameLabel.setValue(jobCandidateLabel);
+        }
+    }
 }

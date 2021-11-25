@@ -194,26 +194,14 @@
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>x.positionType in
-                                    (select f.positionType
-                                    from itpearls_OpenPosition f
-                                    where f.positionType = :positionType
-                                    and (not f.openClose = true))
+                                <c:where>x.positionType in :positionTypeSet
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>x.positionType in
-                                    (select o.positionType
-                                    from itpearls_OpenPosition o
-                                    where o.positionType in :positionTypeSet
-                                    and (not o.openClose = true))
-                                </c:where>
+                                <c:where>x.projectName in :projectNameSet</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>x.priority >= :priorityfield</c:where>
-                            </c:jpql>
-                            <c:jpql>
-                                <c:where>x.projectName.projectDepartment.companyName = :company</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>x.projectName in
@@ -225,9 +213,6 @@
                                     where y.companyName in :companySet))
                                 </c:where>
                             </c:jpql>
-                            <c:jpql>
-                                <c:where>x.projectName = :projectName</c:where>
-                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -238,10 +223,10 @@
                 width="600"/>
     <layout expand="mainAccordion"
             spacing="true">
-        <groupBox height="AUTO"
+        <groupBox height="AUTO" showAsPanel="true"
                   width="100%"
                   spacing="true"
-                  collapsable="false"
+                  collapsable="true"
                   stylename="light"
                   collapsed="false">
             <hbox id="headerHBox"
@@ -341,9 +326,11 @@
             </tab>
             <tab id="selectJobPositionTab"
                  spacing="true"
+                 expand="mainHBox"
                  caption="msg://msgSelectJobPosition">
                 <hbox id="mainHBox"
                       width="100%"
+                      expand="openPositionTableVBox"
                       height="AUTO"
                       spacing="true">
                     <vbox id="openPositionTableVBox"
@@ -413,11 +400,14 @@
                                   width="100%"
                                   editorEnabled="false"
                                   contextMenuEnabled="false"
+                                  selectionMode="MULTI_CHECK"
                                   height="100%"
                                   dataContainer="projectNamcDc">
                             <columns>
                                 <column id="projectName"
                                         property="projectName"/>
+                                <column id="projectDepartment.companyName"
+                                        property="projectDepartment.companyName"/>
                             </columns>
                         </dataGrid>
                         <richTextArea id="projectInfoRichTextArea"
@@ -431,6 +421,7 @@
                                   editorEnabled="false"
                                   contextMenuEnabled="false"
                                   height="100%"
+                                  selectionMode="MULTI_CHECK"
                                   dataContainer="vacansyNameDc">
                             <columns>
                                 <column id="priorityColumn"
@@ -460,6 +451,38 @@
                 </vbox>
                 <vbox spacing="true">
                 </vbox>
+            </tab>
+            <tab id="tempSixLetterTab"
+                 caption="msg://msgSixTempTab"
+                 spacing="true">
+                <vbox spacing="true">
+                    <hbox spacing="true" width="AUTO" height="AUTO">
+                        <label value="msg://msgInterviewHeaderLabel"
+                               stylename="h3"/>
+                        <label id="interviewTabHeaderLabel"
+                               stylename="h3"/>
+                    </hbox>
+                </vbox>
+            </tab>
+            <tab id="letterTab"
+                 spacing="true"
+                 caption="msg://msgLetterTab"
+                 expand="letterTextRichTextArea">
+                <hbox id="labelInterviewBox"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true">
+                    <label id="candidateNameLabel"
+                           stylename="h3"/>
+                    <label id="vacansyNameLabel"
+                           stylename="h3"/>
+                </hbox>
+                <htmlBox id="letterStructureHtmlBox"
+                         width="100%"
+                         height="100%"/>
+                <richTextArea id="letterTextRichTextArea"
+                              width="100%"
+                              height="100%"/>
             </tab>
         </accordion>
         <hbox id="lookupActions"
