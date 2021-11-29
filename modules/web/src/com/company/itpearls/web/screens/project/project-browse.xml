@@ -33,9 +33,11 @@
             <properties include=".*"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <dataGrid id="projectsTable"
-                    width="100%"
-                    dataContainer="projectsDc">
+        <treeDataGrid id="projectsTable"
+                      width="100%"
+                      height="100%"
+                      hierarchyProperty="projectTree"
+                      dataContainer="projectsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
@@ -55,11 +57,15 @@
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
+                <label align="MIDDLE_LEFT" value="Hierarchy Column:"/>
+                <lookupField id="columnSelector"
+                             nullOptionVisible="false"
+                             textInputAllowed="false"/>
                 <button id="createBtn" action="projectsTable.create"/>
                 <button id="editBtn" action="projectsTable.edit"/>
                 <button id="removeBtn" action="projectsTable.remove"/>
             </buttonsPanel>
-        </dataGrid>
+        </treeDataGrid>
         <groupBox>
             <checkBox id="onlyOpenProjectCheckBox" caption="msg://msgOnlyOpenedProject"/>
         </groupBox>

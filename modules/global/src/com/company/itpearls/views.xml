@@ -33,17 +33,11 @@
             <property name="projectOfDepartment" view="_minimal"/>
         </property>
         <property name="projectOwner" view="person-view">
-            <property name="personPosition" view="_local">
-                <property name="positionRuName"/>
-                <property name="positionEnName"/>
-            </property>
-            <property name="fileImageFace" view="_local"/>
         </property>
         <property name="openPosition" view="openPosition-view">
-            <property name="projectName" view="_minimal">
-                <property name="projectDepartment" view="_minimal"/>
-            </property>
-            <property name="positionType" view="_local"/>
+        </property>
+        <property name="projectTree" view="_minimal">
+            <property name="projectTree" view="_minimal"/>
         </property>
     </view>
     <view entity="itpearls_Person" name="person-view" extends="_local">

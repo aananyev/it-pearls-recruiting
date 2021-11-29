@@ -13,10 +13,23 @@
                 </property>
                 <property name="projectDepartment" view="_local"/>
                 <property name="projectOwner" view="_local"/>
+                <property name="projectTree" view="_local"/>
             </view>
             <loader/>
             <collection id="projectOpenPositionsDc" property="openPosition"/>
         </instance>
+        <collection id="projectTreeDc" class="com.company.itpearls.entity.Project">
+            <view>
+                <property name="projectTree" view="_local"/>
+                <property name="projectName"/>
+            </view>
+            <loader id="projectTreeDl">
+                <query><![CDATA[select e from itpearls_Project e
+                        where not (e.projectIsClosed = true) and
+                        e.projectName not like '%(не использовать)'
+                        order by e.projectName]]></query>
+            </loader>
+        </collection>
         <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
             <loader id="projectDepartmentsLc">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
@@ -43,82 +56,88 @@
                  spacing="true"
                  expand="projectDescriptionRichTextArea"
                  id="tabProject">
-                    <checkBox id="checkBoxProjectIsClosed"
-                              dataContainer="projectDc" property="projectIsClosed"
-                              caption="msg://msgProjectIsClosed"/>
-                    <textField id="projectNameField"
+                <checkBox id="checkBoxProjectIsClosed"
+                          dataContainer="projectDc" property="projectIsClosed"
+                          caption="msg://msgProjectIsClosed"/>
+                <lookupPickerField id="highLevelProjectLookupPickerField"
+                                   dataContainer="projectDc"
+                                   property="projectTree"
+                                   caption="msg://msgProjectTree"
+                                   optionsContainer="projectTreeDc"
+                                   width="50%"/>
+                <textField id="projectNameField"
+                           dataContainer="projectDc"
+                           property="projectName"
+                           caption="msg://msgProjectName"
+                           width="50%"
+                           required="true"/>
+                <hbox width="50%">
+                    <dateField id="startProjectDateField"
                                dataContainer="projectDc"
-                               property="projectName"
-                               caption="msg://msgProjectName"
-                               width="50%"
-                               required="true"/>
-                    <hbox width="50%">
-                        <dateField id="startProjectDateField"
+                               property="startProjectDate"
+                               caption="msg://msgProjectStartDate"
+                               width="AUTO"/>
+                    <dateField id="endProjectDateField"
+                               dataContainer="projectDc"
+                               property="endProjectDate"
+                               caption="msg://msgProjectEndDate"
+                               width="AUTO"/>
+                </hbox>
+                <lookupPickerField id="projectDepartmentField"
+                                   optionsContainer="projectDepartmentsDc"
                                    dataContainer="projectDc"
-                                   property="startProjectDate"
-                                   caption="msg://msgProjectStartDate"
-                                   width="AUTO"/>
-                        <dateField id="endProjectDateField"
+                                   property="projectDepartment"
+                                   required="true"
+                                   caption="msg://msgProjectDepartament"
+                                   width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="projectOwnerField"
+                                   required="true"
+                                   optionsContainer="projectOwnersDc"
                                    dataContainer="projectDc"
-                                   property="endProjectDate"
-                                   caption="msg://msgProjectEndDate"
-                                   width="AUTO"/>
-                    </hbox>
-                    <lookupPickerField id="projectDepartmentField"
-                                       optionsContainer="projectDepartmentsDc"
-                                       dataContainer="projectDc"
-                                       property="projectDepartment"
-                                       required="true"
-                                       caption="msg://msgProjectDepartament"
-                                       width="50%">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="projectOwnerField"
-                                       required="true"
-                                       optionsContainer="projectOwnersDc"
-                                       dataContainer="projectDc"
-                                       property="projectOwner"
-                                       caption="msg://msgProjectOwner"
-                                       width="50%">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <richTextArea id="projectDescriptionRichTextArea"
-                                  dataContainer="projectDc"
-                                  property="projectDescription"
-                                  width="100%"
-                                  height="AUTO"
-                                  caption="msg://msgProjectDescription"/>
+                                   property="projectOwner"
+                                   caption="msg://msgProjectOwner"
+                                   width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <richTextArea id="projectDescriptionRichTextArea"
+                              dataContainer="projectDc"
+                              property="projectDescription"
+                              width="100%"
+                              height="AUTO"
+                              caption="msg://msgProjectDescription"/>
             </tab>
             <tab id="tabVacansy"
                  margin="true,true,true,true"
                  spacing="true"
                  expand="projectOpenPositionTable"
                  caption="msg://msgTabVacancy">
-                    <dataGrid id="projectOpenPositionTable"
-                              height="250px" width="100%"
-                              dataContainer="projectOpenPositionsDc">
-                        <columns>
-                            <column id="openClose"
-                                    property="openClose"
-                                    width="35px"/>
-                            <column id="vacansyName"
-                                    property="vacansyName"/>
-                            <column id="numberPosition"
-                                    property="numberPosition"/>
-                            <column id="positionType"
-                                    caption="msg://msgNumberPosition"
-                                    property="positionType"/>
-                            <column property="createTs" id="createTs">
-                                <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
-                                           format="dd.MM.yyyy"
-                                           useUserTimezone="true"/>
-                            </column>
-                        </columns>
-                    </dataGrid>
+                <dataGrid id="projectOpenPositionTable"
+                          height="250px" width="100%"
+                          dataContainer="projectOpenPositionsDc">
+                    <columns>
+                        <column id="openClose"
+                                property="openClose"
+                                width="35px"/>
+                        <column id="vacansyName"
+                                property="vacansyName"/>
+                        <column id="numberPosition"
+                                property="numberPosition"/>
+                        <column id="positionType"
+                                caption="msg://msgNumberPosition"
+                                property="positionType"/>
+                        <column property="createTs" id="createTs">
+                            <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
+                                       format="dd.MM.yyyy"
+                                       useUserTimezone="true"/>
+                        </column>
+                    </columns>
+                </dataGrid>
             </tab>
             <tab id="tabTemplateLetter"
                  caption="msg://msgTemplateLetter"

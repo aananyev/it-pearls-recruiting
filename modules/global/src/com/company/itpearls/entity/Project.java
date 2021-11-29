@@ -16,19 +16,20 @@ import java.util.List;
 @Table(name = "ITPEARLS_PROJECT", indexes = {
         @Index(name = "IDX_ITPEARLS_PROJECT_ID", columnList = "ID"),
         @Index(name = "IDX_ITPEARLS_PROJECT_PROJECT_NAME", columnList = "PROJECT_NAME"),
-        @Index(name = "IDX_ITPEARLS_PROJECT_TREE_ID", columnList = "PROJECT_TREE_ID"),
+        @Index(name = "IDX_ITPEARLS_PROJECT_TREE_ID", columnList = ""),
         @Index(name = "IDX_ITPEARLS_PROJECT_DEPARTMENT_ID", columnList = "PROJECT_DEPARTMENT_ID")
 })
 @Entity(name = "itpearls_Project")
 public class Project extends StandardEntity {
     private static final long serialVersionUID = 8105712812181375543L;
 
-    @Column(name = "PROJECT_NAME", length = 80)
+    @Column(name = "PROJECT_NAME", length = 160)
     protected String projectName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "PROJECT_TREE_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     protected Project projectTree;
 
     @Column(name = "PROJECT_IS_CLOSED")
@@ -64,6 +65,14 @@ public class Project extends StandardEntity {
     @Lob
     @Column(name = "TEMPLATE_LETTER")
     protected String templateLetter;
+
+    public void setProjectTree(Project projectTree) {
+        this.projectTree = projectTree;
+    }
+
+    public Project getProjectTree() {
+        return projectTree;
+    }
 
     public String getProjectDescription() {
         return projectDescription;
@@ -137,11 +146,4 @@ public class Project extends StandardEntity {
         return templateLetter;
     }
 
-    public void setProjectTree(Project projectTree) {
-        this.projectTree = projectTree;
-    }
-
-    public Project getProjectTree() {
-        return projectTree;
-    }
 }

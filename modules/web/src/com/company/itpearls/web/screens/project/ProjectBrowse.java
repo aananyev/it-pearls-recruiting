@@ -1,17 +1,22 @@
 package com.company.itpearls.web.screens.project;
 
+import com.haulmont.chile.core.model.MetaPropertyPath;
+import com.haulmont.cuba.core.global.MessageTools;
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.DataGrid;
-import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Project;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @UiController("itpearls_Project.browse")
 @UiDescriptor("project-browse.xml")
@@ -22,6 +27,40 @@ public class ProjectBrowse extends StandardLookup<Project> {
     private CheckBox onlyOpenProjectCheckBox;
     @Inject
     private CollectionLoader<Project> projectsDl;
+    @Inject
+    private TreeDataGrid<Project> projectsTable;
+    @Inject
+    private MessageTools messageTools;
+    @Inject
+    private LookupField columnSelector;
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        initColumnSelector();
+    }
+
+    private void initColumnSelector() {
+        List<DataGrid.Column<Project>> columns = projectsTable.getColumns();
+        Map<String, String> columnsMap = columns.stream()
+                .collect(Collectors.toMap(
+                        column -> {
+                            MetaPropertyPath propertyPath = column.getPropertyPath();
+                            return propertyPath != null
+                                    ? messageTools.getPropertyCaption(propertyPath.getMetaProperty())
+                                    : column.getId();
+                        },
+                        DataGrid.Column::getId,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new));
+        columnSelector.setOptionsMap(columnsMap);
+
+        columnSelector.setValue(columns.get(0).getId());
+    }
+
+    @Subscribe("columnSelector")
+    protected void onColumnSelectorValueChange(HasValue.ValueChangeEvent<String> event) {
+        projectsTable.setHierarchyColumn(event.getValue());
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

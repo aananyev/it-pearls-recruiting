@@ -253,7 +253,7 @@ create table ITPEARLS_PROJECT (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    PROJECT_NAME varchar(80),
+    PROJECT_NAME varchar(160),
     PROJECT_TREE_ID uuid,
     PROJECT_IS_CLOSED boolean,
     START_PROJECT_DATE date,

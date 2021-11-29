@@ -222,23 +222,27 @@
     <dialogMode height="800"
                 width="600"/>
     <layout expand="mainAccordion"
+            height="100%"
+            width="100%"
             spacing="true">
-        <groupBox height="AUTO" showAsPanel="true"
+        <groupBox height="AUTO"
                   width="100%"
                   spacing="true"
                   collapsable="true"
+                  caption="msg://msgMasterOfInterview"
                   stylename="light"
                   collapsed="false">
             <hbox id="headerHBox"
                   width="100%"
+                  height="100%"
                   expand="titleHBox"
                   margin="5px,5px,5px,5px"
                   spacing="true">
                 <hbox id="titleHBox"
                       spacing="true"
+                      height="100%"
                       width="100%">
                     <textField id="headerTextField"
-                               width="100%"
                                caption="msg://msgHeaderOfWizard"
                                stylename="borderless"/>
                     <label id="jobCandidateLabel"
@@ -268,7 +272,7 @@
         </groupBox>
         <hbox id="footerHBox"
               width="100%"
-              height="AUTO"
+              height="100%"
               align="TOP_RIGHT"
               spacing="true">
             <hbox box.expandRatio="2" width="100%">

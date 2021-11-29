@@ -17,7 +17,7 @@ import java.util.List;
 @NamePattern("%s|skillName")
 @Table(name = "ITPEARLS_SKILL_TREE", indexes = {
         @Index(name = "IDX_ITPEARLS_SKILL_TREE", columnList = "SKILL_NAME"),
-        @Index(name = "IDX_ITPEARLS_SKILL_TREE_ID", columnList = "SKILL_TREE_ID"),
+        @Index(name = "IDX_ITPEARLS_SKILL_TREE_ID", columnList = ""),
         @Index(name = "IDX_ITPEARLS_SKILL_TREE_OPEN_POSITION_ID", columnList = "OPEN_POSITION_ID")
 })
 @Entity(name = "itpearls_SkillTree")
@@ -28,9 +28,9 @@ public class SkillTree extends StandardEntity {
     @Column(name = "SKILL_NAME", nullable = false, unique = true, length = 80)
     protected String skillName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SKILL_TREE_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     protected SkillTree skillTree;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -67,6 +67,14 @@ public class SkillTree extends StandardEntity {
     @Length(message = "{msg://itpearls_SkillTree.styleHighlighting.validation.Length}", max = 64)
     private String styleHighlighting;
 
+    public void setSkillTree(SkillTree skillTree) {
+        this.skillTree = skillTree;
+    }
+
+    public SkillTree getSkillTree() {
+        return skillTree;
+    }
+
     public String getStyleHighlighting() {
         return styleHighlighting;
     }
@@ -89,14 +97,6 @@ public class SkillTree extends StandardEntity {
 
     public void setOpenPosition(OpenPosition openPosition) {
         this.openPosition = openPosition;
-    }
-
-    public SkillTree getSkillTree() {
-        return skillTree;
-    }
-
-    public void setSkillTree(SkillTree skillTree) {
-        this.skillTree = skillTree;
     }
 
     public String getSkillName() {
