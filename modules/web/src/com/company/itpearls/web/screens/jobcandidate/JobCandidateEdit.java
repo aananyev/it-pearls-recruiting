@@ -2015,7 +2015,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         Link link = uiComponents.create(Link.NAME);
 
         if (event.getItem().getLinkItPearlsCV() != null) {
-            link.setUrl(event.getItem().getLinkItPearlsCV());
+            String url = event.getItem().getLinkItPearlsCV();
+
+            link.setUrl(url);
             link.setCaption("CV IT Pearls");
             link.setTarget("_blank");
             link.setWidthAuto();
