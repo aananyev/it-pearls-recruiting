@@ -45,12 +45,20 @@ public class ProjectEdit extends StandardEditor<Project> {
     private Project beforeEdit = null;
 
     List<OpenPosition> openPositions = new ArrayList<>();
-//    @Inject
+    //    @Inject
 //    private CollectionLoader<OpenPosition> projectOpenPositionsDl;
     @Inject
     private DataContext dataContext;
     @Inject
     private Events events;
+    @Inject
+    private TextField<String> generalChatTextField;
+    @Inject
+    private TextField<String> chatForCVTextField;
+    @Inject
+    private Link generalChatLink;
+    @Inject
+    private Link chatForCVLink;
 
     @Subscribe("checkBoxProjectIsClosed")
     public void onCheckBoxProjectIsClosedValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
@@ -115,10 +123,59 @@ public class ProjectEdit extends StandardEditor<Project> {
         filterOpenPositionOnProject();
         setStartDateOfProject();
         getOpenedPosition();
+        setButtonsForChats();
+    }
+
+    @Subscribe("generalChatTextField")
+    public void onGeneralChatTextFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        String general = generalChatTextField.getValue();
+        String chat = chatForCVTextField.getValue();
+
+        if (generalChatTextField.getValue() == null) {
+            generalChatLink.setEnabled(false);
+            generalChatLink.setUrl("");
+        } else {
+            generalChatLink.setEnabled(true);
+            generalChatLink.setUrl(generalChatTextField.getValue());
+
+        }
+    }
+
+    @Subscribe("chatForCVTextField")
+    public void onChatForCVTextFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        String general = generalChatTextField.getValue();
+        String chat = chatForCVTextField.getValue();
+
+        if (chatForCVTextField.getValue() == null) {
+            chatForCVLink.setEnabled(false);
+            chatForCVLink.setUrl("");
+
+        } else {
+            chatForCVLink.setEnabled(true);
+            chatForCVLink.setUrl(chatForCVTextField.getValue());
+        }
+    }
+
+    private void setButtonsForChats() {
+        if (generalChatTextField.getValue() == null) {
+            generalChatLink.setEnabled(false);
+            generalChatLink.setUrl("");
+        } else {
+            generalChatLink.setEnabled(true);
+            generalChatLink.setUrl(generalChatTextField.getValue());
+        }
+
+        if (chatForCVTextField.getValue() == null) {
+            chatForCVLink.setEnabled(false);
+            chatForCVLink.setUrl("");
+        } else {
+            chatForCVLink.setEnabled(true);
+            chatForCVLink.setUrl(chatForCVTextField.getValue());
+        }
     }
 
     private void filterOpenPositionOnProject() {
-        if(!PersistenceHelper.isNew(getEditedEntity())) {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
 //            projectOpenPositionsDl.setParameter("project", getEditedEntity());
         } else {
 //            projectOpenPositionsDl.removeParameter("project");
@@ -200,4 +257,9 @@ public class ProjectEdit extends StandardEditor<Project> {
                 getEditedEntity().getProjectName()));
     }
 
+    public void gotoChatForCV() {
+    }
+
+    public void gotoGeneralChat() {
+    }
 }

@@ -262,6 +262,8 @@ create table ITPEARLS_PROJECT (
     PROJECT_OWNER_ID uuid,
     PROJECT_DESCRIPTION text,
     TEMPLATE_LETTER text,
+    GENERAL_CHAT varchar(255),
+    CHAT_FOR_CV varchar(255),
     --
     primary key (ID)
 )^

@@ -16,7 +16,6 @@ import java.util.List;
 @Table(name = "ITPEARLS_PROJECT", indexes = {
         @Index(name = "IDX_ITPEARLS_PROJECT_ID", columnList = "ID"),
         @Index(name = "IDX_ITPEARLS_PROJECT_PROJECT_NAME", columnList = "PROJECT_NAME"),
-        @Index(name = "IDX_ITPEARLS_PROJECT_TREE_ID", columnList = ""),
         @Index(name = "IDX_ITPEARLS_PROJECT_DEPARTMENT_ID", columnList = "PROJECT_DEPARTMENT_ID")
 })
 @Entity(name = "itpearls_Project")
@@ -65,6 +64,28 @@ public class Project extends StandardEntity {
     @Lob
     @Column(name = "TEMPLATE_LETTER")
     protected String templateLetter;
+
+    @Column(name = "GENERAL_CHAT")
+    private String generalChat;
+
+    @Column(name = "CHAT_FOR_CV")
+    private String chatForCV;
+
+    public String getChatForCV() {
+        return chatForCV;
+    }
+
+    public void setChatForCV(String chatForCV) {
+        this.chatForCV = chatForCV;
+    }
+
+    public String getGeneralChat() {
+        return generalChat;
+    }
+
+    public void setGeneralChat(String generalChat) {
+        this.generalChat = generalChat;
+    }
 
     public void setProjectTree(Project projectTree) {
         this.projectTree = projectTree;

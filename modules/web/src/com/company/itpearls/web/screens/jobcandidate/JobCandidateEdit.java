@@ -648,9 +648,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // проверить в названии должности (не использовать)
         priorityCommenicationMethodRadioButtonInit();
 
-        if (getEditedEntity().getBlockCandidate() == null) {
+        if (blockCandidateCheckBox.getValue() == null) {
             blockCandidateCheckBox.setValue(false);
-            getEditedEntity().setBlockCandidate(false);
         }
     }
 
@@ -1270,8 +1269,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             blockCandidateButton.setVisible(false);
         }
 
-        blockUnblockCandidate(!(getEditedEntity().getBlockCandidate() == null ?
-                false : getEditedEntity().getBlockCandidate()));
+        blockUnblockCandidate((blockCandidateCheckBox.getValue() == null ?
+                false : blockCandidateCheckBox.getValue()));
     }
 
     private void setLinkButtonSkype() {
@@ -2120,7 +2119,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         String DIALOG_MESSAGE;
 
-        Boolean checkBlockCanidate = getEditedEntity().getBlockCandidate() == null ? false : getEditedEntity().getBlockCandidate();
+        Boolean checkBlockCanidate = blockCandidateCheckBox.getValue() == null ? false : blockCandidateCheckBox.getValue();
         DIALOG_MESSAGE = checkBlockCanidate ? DIALOG_MESSAGE_BLOCK_OFF : DIALOG_MESSAGE_BLOCK_ON;
 
         dialogs.createOptionDialog()

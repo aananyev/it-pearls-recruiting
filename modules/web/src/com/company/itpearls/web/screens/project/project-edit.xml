@@ -14,6 +14,8 @@
                 <property name="projectDepartment" view="_local"/>
                 <property name="projectOwner" view="_local"/>
                 <property name="projectTree" view="_local"/>
+                <property name="generalChat"/>
+                <property name="chatForCV"/>
             </view>
             <loader/>
             <collection id="projectOpenPositionsDc" property="openPosition"/>
@@ -54,57 +56,96 @@
             <tab caption="msg://msgProjectName"
                  margin="true,true,true,true"
                  spacing="true"
-                 expand="projectDescriptionRichTextArea"
                  id="tabProject">
-                <checkBox id="checkBoxProjectIsClosed"
-                          dataContainer="projectDc" property="projectIsClosed"
-                          caption="msg://msgProjectIsClosed"/>
-                <lookupPickerField id="highLevelProjectLookupPickerField"
-                                   dataContainer="projectDc"
-                                   property="projectTree"
-                                   caption="msg://msgProjectTree"
-                                   optionsContainer="projectTreeDc"
-                                   width="50%"/>
-                <textField id="projectNameField"
-                           dataContainer="projectDc"
-                           property="projectName"
-                           caption="msg://msgProjectName"
-                           width="50%"
-                           required="true"/>
-                <hbox width="50%">
-                    <dateField id="startProjectDateField"
+                <vbox spacing="true">
+                    <checkBox id="checkBoxProjectIsClosed"
+                              dataContainer="projectDc" property="projectIsClosed"
+                              caption="msg://msgProjectIsClosed"/>
+                    <lookupPickerField id="highLevelProjectLookupPickerField"
+                                       dataContainer="projectDc"
+                                       property="projectTree"
+                                       caption="msg://msgProjectTree"
+                                       optionsContainer="projectTreeDc"
+                                       width="50%"/>
+                    <textField id="projectNameField"
                                dataContainer="projectDc"
-                               property="startProjectDate"
-                               caption="msg://msgProjectStartDate"
-                               width="AUTO"/>
-                    <dateField id="endProjectDateField"
-                               dataContainer="projectDc"
-                               property="endProjectDate"
-                               caption="msg://msgProjectEndDate"
-                               width="AUTO"/>
-                </hbox>
-                <lookupPickerField id="projectDepartmentField"
-                                   optionsContainer="projectDepartmentsDc"
+                               property="projectName"
+                               caption="msg://msgProjectName"
+                               width="50%"
+                               required="true"/>
+                    <hbox width="50%">
+                        <dateField id="startProjectDateField"
                                    dataContainer="projectDc"
-                                   property="projectDepartment"
-                                   required="true"
-                                   caption="msg://msgProjectDepartament"
-                                   width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="projectOwnerField"
-                                   required="true"
-                                   optionsContainer="projectOwnersDc"
+                                   property="startProjectDate"
+                                   caption="msg://msgProjectStartDate"
+                                   width="AUTO"/>
+                        <dateField id="endProjectDateField"
                                    dataContainer="projectDc"
-                                   property="projectOwner"
-                                   caption="msg://msgProjectOwner"
-                                   width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
+                                   property="endProjectDate"
+                                   caption="msg://msgProjectEndDate"
+                                   width="AUTO"/>
+                    </hbox>
+                    <lookupPickerField id="projectDepartmentField"
+                                       optionsContainer="projectDepartmentsDc"
+                                       dataContainer="projectDc"
+                                       property="projectDepartment"
+                                       required="true"
+                                       caption="msg://msgProjectDepartament"
+                                       width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="projectOwnerField"
+                                       required="true"
+                                       optionsContainer="projectOwnersDc"
+                                       dataContainer="projectDc"
+                                       property="projectOwner"
+                                       caption="msg://msgProjectOwner"
+                                       width="50%">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <hbox spacing="true"
+                          width="100%"
+                          expand="generalChatTextField">
+                        <textField id="generalChatTextField"
+                                   dataContainer="projectDc"
+                                   property="generalChat"
+                                   width="100%"
+                                   inputPrompt="msg://msgChatImputPrompt"/>
+                        <link id="generalChatLink"
+                              icon="font-icon:FILE_WORD_O"
+                              align="BOTTOM_LEFT"
+                              target="_blank"
+                              width="AUTO"
+                              caption="msg://msgGoTo"
+                              description="msg://msgGoTo"/>
+                    </hbox>
+                    <hbox spacing="true"
+                          expand="chatForCVTextField"
+                          width="100%">
+                        <textField id="chatForCVTextField"
+                                   dataContainer="projectDc"
+                                   property="chatForCV"
+                                   width="100%"
+                                   inputPrompt="msg://msgChatImputPrompt"/>
+                        <link id="chatForCVLink"
+                              icon="font-icon:FILE_WORD_O"
+                              align="BOTTOM_LEFT"
+                              target="_blank"
+                              width="AUTO"
+                              caption="msg://msgGoTo"
+                              description="msg://msgGoTo"/>
+                    </hbox>
+                </vbox>
+            </tab>
+            <tab id="tabProjectDescription"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="projectDescriptionRichTextArea"
+                 caption="msg://msgProjectDescription">
                 <richTextArea id="projectDescriptionRichTextArea"
                               dataContainer="projectDc"
                               property="projectDescription"

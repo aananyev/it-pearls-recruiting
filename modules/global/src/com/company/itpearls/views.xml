@@ -300,6 +300,9 @@
             <property name="notificationWhenSend"/>
             <property name="notificationType"/>
             <property name="notificationNeedSend"/>
+            <property name="signOurInterview"/>
+            <property name="signClientInterview"/>
+            <property name="signSendToClient"/>
         </property>
         <property name="recrutier" view="_local">
             <property name="group" view="_minimal"/>
