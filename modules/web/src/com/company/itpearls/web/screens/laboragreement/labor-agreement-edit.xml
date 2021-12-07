@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://laborAgreementEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.laboragreement">
+    <data>
+        <instance id="laborAgreementDc"
+                  class="com.company.itpearls.entity.LaborAgreement">
+            <view extends="laborAgreement-view"/>
+            <loader/>
+        </instance>
+        <collection id="companiesDc"
+                    class="com.company.itpearls.entity.Company"
+                    view="company-view">
+            <loader id="companiesDl">
+                <query>
+                    <![CDATA[select e from itpearls_Company e where e.ourClient = true]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="laborAgreementTypesDc"
+                    class="com.company.itpearls.entity.LaborAgeementType"
+                    view="laborAgeementType-view">
+            <loader id="laborAgreementTypesDl">
+                <query>
+                    <![CDATA[select e from itpearls_LaborAgeementType e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="laborAgreementDc">
+            <column width="350px">
+                <lookupPickerField id="companyField" optionsContainer="companiesDc" property="company"/>
+                <lookupPickerField id="laborAgreementTypeField" optionsContainer="laborAgreementTypesDc"
+                                   property="laborAgreementType"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

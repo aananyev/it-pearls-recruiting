@@ -1,0 +1,1 @@
+drop table if exists ITPEARLS_LABOR_AGREEMENT__U20176 cascade ;

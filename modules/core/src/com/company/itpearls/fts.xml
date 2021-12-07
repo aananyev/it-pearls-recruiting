@@ -85,5 +85,11 @@
         <entity class="com.company.itpearls.entity.JobCandidatePositionLists">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.LaborAgeementType">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.LaborAgreement">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

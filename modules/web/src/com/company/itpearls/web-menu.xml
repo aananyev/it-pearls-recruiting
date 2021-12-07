@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
-    <menu id="application-calendars" insertBefore="application-hunting">
+    <menu id="application-calendars" insertBefore="application-hunting" icon="CALENDAR">
         <item screen="itpearls_Interviewcalendar" icon="CALENDAR"/>
         <item screen="itpearls_WeekInterviewCalendar" icon="CALENDAR"/>
     </menu>
-    <menu id="application-hrmasters" insertAfter="application-calendars">
+    <menu id="application-hrmasters" insertAfter="application-calendars" icon="BALANCE_SCALE">
         <item screen="itpearls_OpenPositionMaster.browse"
-              caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse"/>
+              caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse" icon="icons/clear.png"/>
     </menu>
-    <menu id="application-hunting" insertBefore="application-hadbook">
+    <menu id="application-outstaffing" insertAfter="application-hrmasters" icon="CUBES">
+        <item screen="itpearls_LaborAgeementType.browse"
+              caption="mainMsg://menu_config.itpearls_LaborAgeementType.browse"/>
+        <item screen="itpearls_LaborAgreement.browse"
+              caption="mainMsg://menu_config.itpearls_LaborAgreement.browse"/>
+    </menu>
+    <menu id="application-hunting" insertBefore="application-hadbook" icon="PRODUCT_HUNT">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>
         <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
     </menu>
-    <menu id="application-project" insertAfter="application-hunting">
+    <menu id="application-project" insertAfter="application-hunting" icon="BUILDING">
         <item screen="itpearls_Project.browse" icon="ARCHIVE"/>
         <item screen="itpearls_Person.browse" icon="USER"/>
         <item screen="itpearls_CompanyDepartament.browse" icon="GROUP"/>
         <item screen="itpearls_Company.browse" icon="BUILDING"/>
         <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
     </menu>
-    <menu id="application-researching" insertAfter="application-project">
+    <menu id="application-researching" insertAfter="application-project" icon="BOLT">
         <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>
         <item screen="itpearls_SubscribeCandidateAction.browse" icon="CLONE"/>
         <item screen="itpearls_RecrutiesGroupSubscribeTasks.browse"
@@ -38,8 +44,9 @@
         <item screen="itpearls_Ownershup.browse" icon="icons/wf-user-group-button.png"/>
         <item screen="itpearls_Position.browse" icon="OPENID"/>
         <item screen="itpearls_FileType.browse" icon="FILE_TEXT_O"/>
-        <item screen="itpearls_SomeFiles.browse" icon="COPY"/>
-        <item screen="itpearls_SocialNetworkType.browse"/>
+        <item screen="itpearls_SomeFiles.browse" icon="COPY" description="mainMsg://default.description"/>
+        <item screen="itpearls_SocialNetworkType.browse" description="mainMsg://default.description"
+              icon="FACEBOOK_OFFICIAL"/>
     </menu>
     <item screen="itpearls_CheckCandidate.browse" insertAfter="application-hadbook" openType="DIALOG"/>
 </menu-config>

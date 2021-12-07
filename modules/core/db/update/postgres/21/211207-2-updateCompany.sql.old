@@ -1,0 +1,4 @@
+-- alter table ITPEARLS_COMPANY add column LABOR_AGREEMENT_ID uuid ^
+-- update ITPEARLS_COMPANY set LABOR_AGREEMENT_ID = <default_value> ;
+-- alter table ITPEARLS_COMPANY alter column LABOR_AGREEMENT_ID set not null ;
+alter table ITPEARLS_COMPANY add column LABOR_AGREEMENT_ID uuid not null ;

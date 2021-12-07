@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://laborAgeementTypeBrowse.caption"
+        focusComponent="laborAgeementTypesTable"
+        messagesPack="com.company.itpearls.web.screens.laborageementtype">
+    <data readOnly="true">
+        <collection id="laborAgeementTypesDc"
+                    class="com.company.itpearls.entity.LaborAgeementType">
+            <view extends="_local"/>
+            <loader id="laborAgeementTypesDl">
+                <query>
+                    <![CDATA[select e from itpearls_LaborAgeementType e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="laborAgeementTypesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="laborAgeementTypesTable"
+                dataLoader="laborAgeementTypesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="laborAgeementTypesTable"
+                    width="100%"
+                    dataContainer="laborAgeementTypesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="nameAgreement"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="laborAgeementTypesTable.create"/>
+                <button id="editBtn" action="laborAgeementTypesTable.edit"/>
+                <button id="removeBtn" action="laborAgeementTypesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

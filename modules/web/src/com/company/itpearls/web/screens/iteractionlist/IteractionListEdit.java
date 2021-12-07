@@ -461,9 +461,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         }
 
-        sendMessages();
-        sendMessagesToCandidate();
+        if (!afterCommitSendMessage) {
+            sendMessages();
+        }
+
+        if (!afterCommitEmailToCandidateSended) {
+            sendMessagesToCandidate();
+        }
     }
+
+    Boolean afterCommitEmailToCandidateSended = false;
+    Boolean afterCommitSendMessage = false;
 
     private void sendMessagesToCandidate() {
         if (getEditedEntity().getIteractionType() != null) {
@@ -513,8 +521,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                         .build();
 
                                                 emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
                                                 emailService.sendEmailAsync(emailInfo);
+
+                                                afterCommitEmailToCandidateSended = true;
                                             }),
                                             new DialogAction(DialogAction.Type.NO))
                                     .show();
@@ -615,10 +624,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             Collections.singletonMap("IteractionList", getEditedEntity()));
 
                     emailInfo.setBodyContentType("text/html; charset=UTF-8");
-
                     emailService.sendEmailAsync(emailInfo);
+
+                    afterCommitSendMessage = true;
                 }
             }
+
             // высплывающее сообщение
             if (iteractionTypeField.getValue() != null) {
                 if (iteractionTypeField.getValue().getNotificationNeedSend() != null) {
@@ -645,6 +656,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                             "\"> <b>" +
                                                             getEditedEntity().getCandidate().getFullName() + " : " +
                                                             getEditedEntity().getIteractionType().getIterationName() + "</b>"));
+                                            afterCommitSendMessage = true;
                                             break;
                                         default:
                                             break;

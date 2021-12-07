@@ -30,5 +30,7 @@
         <class>com.company.itpearls.entity.SubscribeCandidateAction</class>
         <class>com.company.itpearls.entity.ItearctionRequirements</class>
         <class>com.company.itpearls.entity.JobCandidatePositionLists</class>
+        <class>com.company.itpearls.entity.LaborAgeementType</class>
+        <class>com.company.itpearls.entity.LaborAgreement</class>
     </persistence-unit>
 </persistence>

@@ -132,9 +132,13 @@
                 <columns count="12"/>
                 <rows>
                     <row>
-                        <label id="iteractionListLabelCandidate" stylename="h2"
-                               align="MIDDLE_LEFT" dataContainer="jobCandidateDc" property="fullName"/>
-                        <label stylename="h2" value="|"/>
+                        <label id="iteractionListLabelCandidate"
+                               stylename="h2"
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="fullName"/>
+                        <label stylename="h2"
+                               value="|"/>
                         <label stylename="h2"
                                value="msg://msgRating"
                                align="MIDDLE_LEFT"/>
@@ -755,6 +759,7 @@
                         caption="msg://msgSubscribe"
                         invoke="onButtonSubscribeClick"
                         icon="BELL"
+                        visible="false"
                         align="BOTTOM_RIGHT"/>
                 <button id="windowCommitAndCloseButton"
                         action="windowCommitAndClose"

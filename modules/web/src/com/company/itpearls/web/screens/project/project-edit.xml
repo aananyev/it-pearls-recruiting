@@ -113,6 +113,8 @@
                         <textField id="generalChatTextField"
                                    dataContainer="projectDc"
                                    property="generalChat"
+                                   caption="msg://msgGeneralChat"
+                                   description="msg://msgGeneralChatDescription"
                                    width="100%"
                                    inputPrompt="msg://msgChatImputPrompt"/>
                         <link id="generalChatLink"
@@ -129,6 +131,8 @@
                         <textField id="chatForCVTextField"
                                    dataContainer="projectDc"
                                    property="chatForCV"
+                                   caption="msg://msgChatForCV"
+                                   description="msg://msgChatForCVDescription"
                                    width="100%"
                                    inputPrompt="msg://msgChatImputPrompt"/>
                         <link id="chatForCVLink"

@@ -45,6 +45,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String MANAGER_GROUP = "Менеджмент";
     private static final String RECRUTIER_GROUP = "Хантинг";
     private static final String RESEARCHER_GROUP = "Ресерчинг";
+
+    String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
+    String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
+
     @Inject
     private DataManager dataManager;
     @Inject
@@ -506,6 +510,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         System.out.println(msec);
         checkNotUsePosition();
+
+        Boolean b = getEditedEntity().getBlockCandidate() == null ?
+                false : blockCandidateCheckBox.getValue();
+
+        setBlockUnblockButton(b);
     }
 
     @Subscribe
@@ -1269,8 +1278,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             blockCandidateButton.setVisible(false);
         }
 
-        blockUnblockCandidate((blockCandidateCheckBox.getValue() == null ?
-                false : blockCandidateCheckBox.getValue()));
+
+    }
+
+    private void setBlockUnblockButton(boolean b) {
+        blockCandidateCheckBox.setValue(b);
+        blockCandidateButton.setCaption(b ? BLOCK_CANDIDATE_OFF : BLOCK_CANDIDATE_ON);
+        blockCandidateButton.setIcon(b ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
+        jobCandidateIteractionListTable.setEnabled(!b);
+        iteractionListLabelCandidate.setStyleName(b ? "h2-red" : "h2");
     }
 
     private void setLinkButtonSkype() {
@@ -2134,17 +2150,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void blockUnblockCandidate(Boolean checkBlockCanidate) {
-        String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
-        String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
-
-        blockCandidateCheckBox.setValue(getEditedEntity().getBlockCandidate() == null
-                ? false
-                : getEditedEntity().getBlockCandidate());
+//        blockCandidateCheckBox.setValue(getEditedEntity().getBlockCandidate() == null
+//                ? false
+//                : getEditedEntity().getBlockCandidate());
 //        getEditedEntity().setBlockCandidate(!(getEditedEntity().getBlockCandidate() == null ? false : getEditedEntity().getBlockCandidate()));
-        blockCandidateButton.setCaption(checkBlockCanidate ? BLOCK_CANDIDATE_ON : BLOCK_CANDIDATE_OFF);
+        checkBlockCanidate = !checkBlockCanidate;
+
+        blockCandidateCheckBox.setValue(checkBlockCanidate == null ? false : checkBlockCanidate);
+        blockCandidateButton.setCaption(!checkBlockCanidate ? BLOCK_CANDIDATE_ON : BLOCK_CANDIDATE_OFF);
         blockCandidateButton.setIcon(!checkBlockCanidate ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
-        jobCandidateIteractionListTable.setEnabled(checkBlockCanidate);
-        iteractionListLabelCandidate.setStyleName(checkBlockCanidate ? "h2" : "h2-red");
+        jobCandidateIteractionListTable.setEnabled(!checkBlockCanidate);
+        iteractionListLabelCandidate.setStyleName(checkBlockCanidate ? "h2-red" : "h2");
 
     }
 

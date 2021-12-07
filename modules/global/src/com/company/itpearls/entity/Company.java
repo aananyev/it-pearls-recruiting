@@ -78,7 +78,6 @@ public class Company extends StandardEntity {
     @Column(name = "WORKING_CONDITIONS")
     private String workingConditions;
 
-
     public String getWorkingConditions() {
         return workingConditions;
     }
