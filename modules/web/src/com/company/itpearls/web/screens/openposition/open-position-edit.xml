@@ -34,11 +34,15 @@
                           view="skillTree-view">
                     <property name="skillTree" view="skillTree-view"/>
                 </property>
+                <property name="laborAgreement"
+                          view="laborAgreement-view"/>
                 <property name="comment"/>
             </view>
             <loader id="openPositionDl"/>
             <collection id="openPositionSkillsListsDc"
                         property="skillsList"/>
+            <collection id="laborAgreementDc"
+                        property="laborAgreement"/>
         </instance>
         <collection id="openPositionParentDc"
                     class="com.company.itpearls.entity.OpenPosition">
@@ -378,6 +382,45 @@
                               dataContainer="openPositionDc"
                               property="salaryFixLimit"
                               caption="msg://msgSalaryStrongLimit"/>
+                </tab>
+                <tab id="laborAgreementTab"
+                     caption="msg://msgLaborAgreementTab"
+                     margin="tue,true,true,true"
+                     spacing="true"
+                     icon="CUBES">
+                    <groupBox spacing="true"
+                              expand="laborAgreementDataGrid">
+                        <dataGrid id="laborAgreementDataGrid"
+                                  width="100%"
+                                  editorEnabled="true"
+                                  dataContainer="laborAgreementDc">
+                            <actions>
+                                <action id="create" type="create"/>
+                                <action id="edit" type="edit"/>
+                                <action id="remove" type="remove"/>
+                            </actions>
+                            <columns>
+                                <column id="perhaps"
+                                        minimumWidth="50px"
+                                        property="perhaps"
+                                        editable="true"/>
+                                <column id="company"
+                                        property="company"/>
+                                <column id="laborAgreementType"
+                                        property="laborAgreementType"/>
+                            </columns>
+                            <rowsCount autoLoad="true"/>
+                            <buttonsPanel id="buttonsPanel"
+                                          alwaysVisible="true">
+                                <button id="createBtn"
+                                        action="laborAgreementDataGrid.create"/>
+                                <button id="editBtn"
+                                        action="laborAgreementDataGrid.edit"/>
+                                <button id="removeBtn"
+                                        action="laborAgreementDataGrid.remove"/>
+                            </buttonsPanel>
+                        </dataGrid>
+                    </groupBox>
                 </tab>
                 <tab id="tabPayments"
                      caption="msg://msgPayments"

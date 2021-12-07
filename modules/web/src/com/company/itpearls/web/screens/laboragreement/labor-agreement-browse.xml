@@ -33,6 +33,7 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="perhaps"/>
                 <column id="company"/>
                 <column id="laborAgreementType"/>
             </columns>

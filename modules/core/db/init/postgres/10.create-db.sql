@@ -674,7 +674,8 @@ create table ITPEARLS_LABOR_AGEEMENT_TYPE (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    NAME_AGREEMENT varchar(80),
+    NAME_AGREEMENT varchar(80) not null,
+    COMMENT_ text,
     --
     primary key (ID)
 )^
@@ -690,9 +691,18 @@ create table ITPEARLS_LABOR_AGREEMENT (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    COMPANY_ID uuid,
-    LABOR_AGREEMENT_TYPE_ID uuid,
+    PERHAPS boolean,
+    COMPANY_ID uuid not null,
+    LABOR_AGREEMENT_TYPE_ID uuid not null,
+    COMMENT_ text,
     --
     primary key (ID)
 )^
 -- end ITPEARLS_LABOR_AGREEMENT
+-- begin ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK
+create table ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK (
+    OPEN_POSITION_ID uuid,
+    LABOR_AGREEMENT_ID uuid,
+    primary key (OPEN_POSITION_ID, LABOR_AGREEMENT_ID)
+)^
+-- end ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK

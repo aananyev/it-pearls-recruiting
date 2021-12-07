@@ -18,6 +18,15 @@
                 </query>
             </loader>
         </collection>
+        <collection id="openPositionDc"
+                    class="com.company.itpearls.entity.OpenPosition"
+                    view="openPosition-view">
+            <loader id="openPositionLd">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e]]>
+                </query>
+            </loader>
+        </collection>
         <collection id="laborAgreementTypesDc"
                     class="com.company.itpearls.entity.LaborAgeementType"
                     view="laborAgeementType-view">
@@ -33,9 +42,15 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="laborAgreementDc">
             <column width="350px">
-                <lookupPickerField id="companyField" optionsContainer="companiesDc" property="company"/>
-                <lookupPickerField id="laborAgreementTypeField" optionsContainer="laborAgreementTypesDc"
+                <checkBox id="perhapsCheckBox" property="perhaps"/>
+                <lookupPickerField id="companyField"
+                                   optionsContainer="companiesDc"
+                                   property="company"/>
+                <lookupPickerField id="laborAgreementTypeField"
+                                   optionsContainer="laborAgreementTypesDc"
                                    property="laborAgreementType"/>
+                <richTextArea id="commentField"
+                              property="comment"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

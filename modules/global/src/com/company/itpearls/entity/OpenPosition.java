@@ -170,6 +170,22 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "MEMO_FOR_INTERVIEW")
     private String memoForInterview;
 
+    @JoinTable(name = "ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK",
+            joinColumns = @JoinColumn(name = "OPEN_POSITION_ID"),
+            inverseJoinColumns = @JoinColumn(name = "LABOR_AGREEMENT_ID"))
+    @ManyToMany
+    @OnDelete(DeletePolicy.CASCADE)
+    @Composition
+    private List<LaborAgreement> laborAgreement;
+
+    public List<LaborAgreement> getLaborAgreement() {
+        return laborAgreement;
+    }
+
+    public void setLaborAgreement(List<LaborAgreement> laborAgreement) {
+        this.laborAgreement = laborAgreement;
+    }
+
     public void setMore10NumberPosition(Boolean more10NumberPosition) {
         this.more10NumberPosition = more10NumberPosition;
     }

@@ -15,7 +15,10 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="laborAgeementTypeDc">
             <column width="350px">
-                <textField id="nameAgreementField" property="nameAgreement"/>
+                <textField id="nameAgreementField"
+                           property="nameAgreement"/>
+                <richTextArea id="commentField"
+                              property="comment"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

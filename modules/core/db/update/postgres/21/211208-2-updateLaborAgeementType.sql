@@ -1,0 +1,2 @@
+update ITPEARLS_LABOR_AGEEMENT_TYPE set NAME_AGREEMENT = '' where NAME_AGREEMENT is null ;
+alter table ITPEARLS_LABOR_AGEEMENT_TYPE alter column NAME_AGREEMENT set not null ;
