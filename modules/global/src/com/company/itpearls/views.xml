@@ -441,16 +441,8 @@
         <property name="group" view="_local"/>
     </view>
     <view entity="itpearls_LaborAgreement" name="laborAgreement-view" extends="_local">
-        <property name="company" view="_minimal"/>
-        <property name="laborAgreementType" view="_minimal">
-        </property>
-        <property name="openPositions" view="_minimal">
-            <property name="projectName" view="_minimal">
-                <property name="projectDepartment" view="_minimal">
-                    <property name="companyName" view="_minimal"/>
-                </property>
-            </property>
-        </property>
+        <property name="laborAgreementType" view="_minimal"/>
+        <property name="openPositions" view="_minimal"/>
     </view>
     <view entity="itpearls_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
 </views>

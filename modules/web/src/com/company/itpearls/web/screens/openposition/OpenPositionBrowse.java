@@ -1471,7 +1471,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }
             }
         } else {
-            return openPosition.getNumberPosition().toString();
+            return openPosition.getNumberPosition().toString() == null ? "" : openPosition.getNumberPosition().toString();
         }
     }
 }

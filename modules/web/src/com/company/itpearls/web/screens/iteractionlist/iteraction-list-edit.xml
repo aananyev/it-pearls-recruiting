@@ -12,16 +12,34 @@
                 <property name="candidate" view="_minimal"/>
                 <property name="iteractionType" view="_minimal">
                     <property name="notificationNeedSend"/>
-                </property>/
+                </property>
                 <property name="vacancy" view="_minimal">
                     <property name="projectName" view="_minimal">
                         <property name="projectOwner" view="_minimal"/>
+                        <property name="projectDepartment" view="_minimal">
+                            <property name="companyName" view="_minimal"/>
+                        </property>
                     </property>
                 </property>
                 <property name="recrutier" view="_minimal"/>
+                <property name="laborAgreement" view="laborAgreement-view"/>
             </view>
             <loader id="iteractionListDl"/>
         </instance>
+        <collection id="laborAgreementDc"
+                    class="com.company.itpearls.entity.LaborAgreement"
+                    view="laborAgreement-view">
+            <loader id="laborAgreementDl">
+                <query>
+                    <![CDATA[select e from itpearls_LaborAgreement e]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.openPositions = :openPositions</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="iteractionTypesDc"
                     class="com.company.itpearls.entity.Iteraction">
             <view extends="_local">
@@ -231,6 +249,14 @@
                     </row>
                 </rows>
             </grid>
+            <hbox spacing="true" width="100%">
+                <lookupPickerField id="laborAgreementLookupPickerField"
+                                   dataContainer="iteractionListDc"
+                                   optionsContainer="laborAgreementDc"
+                                   width="100%"
+                                   caption="msg://msgLaborAgreement"
+                                   property="laborAgreement"/>
+            </hbox>
             <textArea id="commentField"
                       property="comment"
                       rows="3"

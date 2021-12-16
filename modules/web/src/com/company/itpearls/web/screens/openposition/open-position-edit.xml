@@ -175,25 +175,51 @@
                      margin="true,true,true,true"
                      spacing="true"
                      icon="USERS">
-                    <hbox id="hboxProject1"
-                          spacing="true"
-                          align="MIDDLE_LEFT"
-                          expand="spaceBox"
-                          width="100%">
-                        <hbox spacing="true" align="MIDDLE_LEFT">
-                            <checkBox id="openClosePositionCheckBox"
-                                      dataContainer="openPositionDc"
-                                      property="openClose"
-                                      caption="mainMsg://msgPositionClose"
-                                      width="50%"
-                                      align="BOTTOM_LEFT"/>
-                            <checkBox id="internalProjectCheckBox"
-                                      dataContainer="openPositionDc"
-                                      width="50%"
-                                      property="internalProject"
-                                      caption="msg://msgInternalProject"
-                                      align="BOTTOM_LEFT"/>
+                    <vbox spacing="true">
+                        <hbox id="hboxProject1"
+                              spacing="true"
+                              align="MIDDLE_LEFT"
+                              expand=""
+                              width="100%">
+                            <hbox spacing="true" align="MIDDLE_LEFT">
+                                <checkBox id="openClosePositionCheckBox"
+                                          dataContainer="openPositionDc"
+                                          property="openClose"
+                                          caption="mainMsg://msgPositionClose"
+                                          width="50%"
+                                          align="BOTTOM_LEFT"/>
+                                <checkBox id="internalProjectCheckBox"
+                                          dataContainer="openPositionDc"
+                                          width="50%"
+                                          property="internalProject"
+                                          caption="msg://msgInternalProject"
+                                          align="BOTTOM_LEFT"/>
+                            </hbox>
+                            <hbox id="spaceBox"/>
+                            <hbox id="commandFieldHBox"
+                                  spacing="true"
+                                  align="MIDDLE_RIGHT">
+                                <lookupField id="priorityField"
+                                             dataContainer="openPositionDc"
+                                             property="priority"
+                                             caption="msg://msgPriorityPosition"
+                                             required="true"
+                                             align="BOTTOM_LEFT"
+                                             width="100%">
+                                </lookupField>
+                            </hbox>
+                        </hbox>
+                        <textField id="vacansyNameField"
+                                   dataContainer="openPositionDc"
+                                   property="vacansyName"
+                                   caption="msg://msgVacansy"
+                                   stylename="text-field-title-form"
+                                   width="100%"
+                                   required="true"/>
+                        <hbox spacing="true"
+                              width="100%">
                             <radioButtonGroup id="commandOrPosition"
+                                              width="50%"
                                               orientation="horizontal"
                                               required="true"
                                               dataContainer="openPositionDc"
@@ -204,184 +230,163 @@
                             <lookupPickerField id="parentOpenPositionField"
                                                dataContainer="openPositionDc"
                                                property="parentOpenPosition"
+                                               width="100%"
                                                align="BOTTOM_LEFT"
                                                caption="msg://msgCommand"
                                                optionsContainer="openPositionParentDc"/>
                         </hbox>
-                        <hbox id="spaceBox"/>
-                        <hbox id="commandFieldHBox"
+                        <hbox id="hboxVacansy"
                               spacing="true"
-                              align="MIDDLE_RIGHT">
-                            <lookupField id="registrationForWorkField"
-                                         dataContainer="openPositionDc"
-                                         property="registrationForWork"
-                                         caption="msg://msgRegistrationForWork"
-                                         required="true"
-                                         align="BOTTOM_LEFT"
-                                         width="100%"/>
-                            <lookupField id="priorityField"
-                                         dataContainer="openPositionDc"
-                                         property="priority"
-                                         caption="msg://msgPriorityPosition"
-                                         required="true"
-                                         align="BOTTOM_LEFT"
-                                         width="100%">
-                            </lookupField>
-                        </hbox>
-
-                    </hbox>
-                    <textField id="vacansyNameField"
-                               dataContainer="openPositionDc"
-                               property="vacansyName"
-                               caption="msg://msgVacansy"
-                               stylename="text-field-title-form"
-                               width="100%"
-                               required="true"/>
-                    <hbox id="hboxVacansy"
-                          spacing="true"
-                          width="100%">
-                        <lookupPickerField id="positionTypeField"
-                                           optionsContainer="positionTypesDc"
-                                           dataContainer="openPositionDc"
-                                           property="positionType"
-                                           caption="msg://msgPositionType"
-                                           width="100%"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <hbox spacing="true"
                               width="100%">
-                            <lookupField id="remoteWorkField"
-                                         dataContainer="openPositionDc"
-                                         property="remoteWork"
-                                         required="true"
-                                         align="MIDDLE_LEFT"
-                                         caption="msg://msgRemoteWork"
-                                         width="100%">
-                            </lookupField>
-                            <textField id="remoteWorkCommentField"
-                                       dataContainer="openPositionDc"
-                                       property="remoteComment"
-                                       required="false"
-                                       caption="msg://msgRemoteWorkCommant"
-                                       align="MIDDLE_LEFT"
-                                       width="100%"/>
-                        </hbox>
-                    </hbox>
-                    <hbox id="hboxProject"
-                          spacing="true"
-                          width="100%">
-                        <lookupPickerField id="projectNameField"
-                                           optionsContainer="projectNamesDc"
-                                           dataContainer="openPositionDc"
-                                           property="projectName"
-                                           caption="msg://msgNamePosition"
-                                           width="100%"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="companyDepartamentField"
-                                           optionsContainer="companyDepartamentsDc"
-                                           caption="msg://msgDepartment"
-                                           width="100%"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                    </hbox>
-                    <hbox id="hboxCompany"
-                          spacing="true"
-                          width="100%">
-                        <lookupPickerField id="companyNameField"
-                                           optionsContainer="companyNamesDc"
-                                           caption="msg://msgCompanyName"
-                                           width="100%"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <hbox spacing="true"
-                              expand="cityOpenPositionField"
-                              width="100%">
-                            <lookupPickerField id="cityOpenPositionField"
+                            <lookupPickerField id="positionTypeField"
+                                               optionsContainer="positionTypesDc"
                                                dataContainer="openPositionDc"
-                                               optionsContainer="citiesDc"
-                                               property="cityPosition"
+                                               property="positionType"
+                                               caption="msg://msgPositionType"
                                                width="100%"
-                                               caption="mainMsg://msgCity"
-                                               align="BOTTOM_LEFT"
                                                required="true">
                                 <actions>
                                     <action id="lookup"
                                             type="picker_lookup"/>
                                 </actions>
                             </lookupPickerField>
-                            <button id="addCity"
-                                    caption="msg://msgAddCity"
-                                    width="AUTO"
-                                    enable="true"
-                                    align="BOTTOM_RIGHT"
-                                    description="msg://msgAddCityDescription"
-                                    invoke="addListCity"/>
+                            <hbox spacing="true"
+                                  width="100%">
+                                <lookupField id="remoteWorkField"
+                                             dataContainer="openPositionDc"
+                                             property="remoteWork"
+                                             required="true"
+                                             align="MIDDLE_LEFT"
+                                             caption="msg://msgRemoteWork"
+                                             width="100%">
+                                </lookupField>
+                                <textField id="remoteWorkCommentField"
+                                           dataContainer="openPositionDc"
+                                           property="remoteComment"
+                                           required="false"
+                                           caption="msg://msgRemoteWorkCommant"
+                                           align="MIDDLE_LEFT"
+                                           width="100%"/>
+                            </hbox>
                         </hbox>
-                    </hbox>
-                    <hbox align="TOP_RIGHT"
-                          spacing="true"
-                          width="50%"
-                          expand="citiesLabel">
-                        <label id="citiesLabel"
-                               stylename="h4"
-                               width="AUTO"
-                               align="MIDDLE_RIGHT"/>
-                    </hbox>
-                    <hbox align="TOP_RIGHT"
-                          spacing="true"
-                          width="100%">
-                        <textField id="numberPositionField"
-                                   dataContainer="openPositionDc"
-                                   property="numberPosition"
-                                   required="true"
-                                   align="BOTTOM_LEFT"
-                                   caption="msg://msgNumberOpenPosition"
-                                   width="100%"/>
-                        <checkBox id="more10NumberPositionField"
-                                  dataContainer="openPositionDc"
-                                  property="more10NumberPosition"
-                                  align="BOTTOM_LEFT"
-                                  caption="msg://msgMore10NumberPosition"
-                                  width="100%"/>
-                    </hbox>
-                    <hbox id="hboxSalary"
-                          spacing="true"
-                          width="100%">
-                        <textField id="openPositionFieldSalaryMin"
-                                   dataContainer="openPositionDc"
-                                   property="salaryMin"
-                                   caption="mainMsg://msgSalaryMin"
-                                   width="100%"
-                                   required="true"/>
-                        <textField id="openPositionFieldSalaryMax"
-                                   dataContainer="openPositionDc"
-                                   property="salaryMax"
-                                   caption="msg://msgSalaryMax"
-                                   width="100%"
-                                   required="true"/>
-                    </hbox>
-                    <checkBox id="salaryStrongLimitCheckBox"
-                              align="BOTTOM_RIGHT"
-                              dataContainer="openPositionDc"
-                              property="salaryFixLimit"
-                              caption="msg://msgSalaryStrongLimit"/>
+                        <hbox id="hboxProject"
+                              spacing="true"
+                              width="100%">
+                            <lookupPickerField id="projectNameField"
+                                               optionsContainer="projectNamesDc"
+                                               dataContainer="openPositionDc"
+                                               property="projectName"
+                                               caption="msg://msgNamePosition"
+                                               width="100%"
+                                               required="true">
+                                <actions>
+                                    <action id="lookup"
+                                            type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                            <lookupPickerField id="companyDepartamentField"
+                                               optionsContainer="companyDepartamentsDc"
+                                               caption="msg://msgDepartment"
+                                               width="100%"
+                                               required="true">
+                                <actions>
+                                    <action id="lookup"
+                                            type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                        </hbox>
+                        <hbox id="hboxCompany"
+                              spacing="true"
+                              width="100%">
+                            <lookupPickerField id="companyNameField"
+                                               optionsContainer="companyNamesDc"
+                                               caption="msg://msgCompanyName"
+                                               width="100%"
+                                               required="true">
+                                <actions>
+                                    <action id="lookup"
+                                            type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                            <hbox spacing="true"
+                                  expand="cityOpenPositionField"
+                                  width="100%">
+                                <lookupPickerField id="cityOpenPositionField"
+                                                   dataContainer="openPositionDc"
+                                                   optionsContainer="citiesDc"
+                                                   property="cityPosition"
+                                                   width="100%"
+                                                   caption="mainMsg://msgCity"
+                                                   align="BOTTOM_LEFT"
+                                                   required="true">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <button id="addCity"
+                                        caption="msg://msgAddCity"
+                                        width="AUTO"
+                                        enable="true"
+                                        align="BOTTOM_RIGHT"
+                                        description="msg://msgAddCityDescription"
+                                        invoke="addListCity"/>
+                            </hbox>
+                        </hbox>
+                        <hbox align="TOP_RIGHT"
+                              spacing="true"
+                              width="50%"
+                              expand="citiesLabel">
+                            <label id="citiesLabel"
+                                   stylename="h4"
+                                   width="AUTO"
+                                   align="MIDDLE_RIGHT"/>
+                        </hbox>
+                        <hbox align="TOP_RIGHT"
+                              spacing="true"
+                              width="100%">
+                            <textField id="numberPositionField"
+                                       dataContainer="openPositionDc"
+                                       property="numberPosition"
+                                       required="true"
+                                       align="BOTTOM_LEFT"
+                                       caption="msg://msgNumberOpenPosition"
+                                       width="100%"/>
+                            <checkBox id="more10NumberPositionField"
+                                      dataContainer="openPositionDc"
+                                      property="more10NumberPosition"
+                                      align="BOTTOM_LEFT"
+                                      caption="msg://msgMore10NumberPosition"
+                                      width="100%"/>
+                        </hbox>
+                        <hbox id="hboxSalary"
+                              spacing="true"
+                              width="100%">
+                            <textField id="openPositionFieldSalaryMin"
+                                       dataContainer="openPositionDc"
+                                       property="salaryMin"
+                                       caption="mainMsg://msgSalaryMin"
+                                       width="100%"
+                                       required="true"/>
+                            <textField id="openPositionFieldSalaryMax"
+                                       dataContainer="openPositionDc"
+                                       property="salaryMax"
+                                       caption="msg://msgSalaryMax"
+                                       width="100%"
+                                       required="true"/>
+
+                        </hbox>
+                        <hbox id="space2Box"
+                              width="100%"
+                              height="100%"
+                              spacing="true">
+                            <checkBox id="salaryStrongLimitCheckBox"
+                                      align="BOTTOM_RIGHT"
+                                      dataContainer="openPositionDc"
+                                      property="salaryFixLimit"
+                                      caption="msg://msgSalaryStrongLimit"/>
+                        </hbox>
+                    </vbox>
                 </tab>
                 <tab id="laborAgreementTab"
                      caption="msg://msgLaborAgreementTab"
@@ -389,7 +394,17 @@
                      spacing="true"
                      icon="CUBES">
                     <groupBox spacing="true"
+                              stylename="light"
+                              width="100%"
+                              height="100%"
                               expand="laborAgreementDataGrid">
+                        <lookupField id="registrationForWorkField"
+                                     dataContainer="openPositionDc"
+                                     property="registrationForWork"
+                                     caption="msg://msgRegistrationForWork"
+                                     required="true"
+                                     align="BOTTOM_LEFT"
+                                     width="AUTO"/>
                         <dataGrid id="laborAgreementDataGrid"
                                   width="100%"
                                   editorEnabled="true"
@@ -401,6 +416,7 @@
                             </actions>
                             <columns>
                                 <column id="perhaps"
+                                        maximumWidth="100px"
                                         minimumWidth="50px"
                                         property="perhaps"
                                         editable="true"/>
@@ -426,6 +442,7 @@
                      caption="msg://msgPayments"
                      margin="tue,true,true,true"
                      spacing="true"
+                     visible="false"
                      icon="BULK_EDIT_ACTION">
                     <groupBox id="groupBoxPaymentsResearcher"
                               orientation="horizontal"

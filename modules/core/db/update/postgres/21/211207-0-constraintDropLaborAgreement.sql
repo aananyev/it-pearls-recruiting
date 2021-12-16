@@ -1,1 +1,0 @@
-alter table itpearls_labor_ageement_type drop constraint FK_ITPEARLS_LABOR_AGEEMENT_TYPE_ON_LABOR_AGREEMENT ;

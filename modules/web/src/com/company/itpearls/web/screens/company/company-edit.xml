@@ -74,6 +74,16 @@
                  spacing="true"
                  expand="mainCompany"
                  id="tabConpanyDetails">
+                <hbox spacing="true">
+                    <checkBox id="ourLegalEnityCheckBox"
+                              dataContainer="companyDc"
+                              caption="msg://msgOurLegalEntity"
+                              property="ourLegalEntity"/>
+                    <checkBox id="checkBoxOurClient"
+                              caption="mainMsg://msgOurClient"
+                              dataContainer="companyDc"
+                              property="ourClient"/>
+                </hbox>
                 <hbox id="mainCompany"
                       expand="companyInfo"
                       height="100%"
@@ -84,10 +94,7 @@
                           spacing="true"
                           expand="addressOfCompanyField"
                           width="AUTO">
-                        <checkBox id="checkBoxOurClient"
-                                  caption="mainMsg://msgOurClient"
-                                  dataContainer="companyDc"
-                                  property="ourClient"/>
+
                         <lookupPickerField id="companyOwnershipField"
                                            optionsContainer="companyOwnershipsDc"
                                            dataContainer="companyDc"

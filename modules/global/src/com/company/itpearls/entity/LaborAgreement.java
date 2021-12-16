@@ -13,7 +13,7 @@ import java.util.List;
 
 @Table(name = "ITPEARLS_LABOR_AGREEMENT")
 @Entity(name = "itpearls_LaborAgreement")
-@NamePattern("%s %s|laborAgreementType,company")
+@NamePattern("%s|laborAgreementType")
 public class LaborAgreement extends StandardEntity {
     private static final long serialVersionUID = 2987525215308840854L;
 

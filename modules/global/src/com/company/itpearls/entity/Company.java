@@ -25,6 +25,9 @@ public class Company extends StandardEntity {
     @Column(name = "OUR_CLIENT")
     protected Boolean ourClient;
 
+    @Column(name = "OUR_LEGAL_ENTITY")
+    private Boolean ourLegalEntity;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_OWNERSHIP_ID")
@@ -77,6 +80,14 @@ public class Company extends StandardEntity {
     @Lob
     @Column(name = "WORKING_CONDITIONS")
     private String workingConditions;
+
+    public Boolean getOurLegalEntity() {
+        return ourLegalEntity;
+    }
+
+    public void setOurLegalEntity(Boolean ourLegalEntity) {
+        this.ourLegalEntity = ourLegalEntity;
+    }
 
     public String getWorkingConditions() {
         return workingConditions;

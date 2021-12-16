@@ -100,6 +100,7 @@ create table ITPEARLS_ITERACTION_LIST (
     ADD_DATE timestamp,
     ADD_STRING varchar(255),
     ADD_INTEGER integer,
+    LEGAL_ENTITY_ID uuid,
     RATING integer,
     --
     primary key (ID)
@@ -145,6 +146,7 @@ create table ITPEARLS_COMPANY (
     DELETED_BY varchar(50),
     --
     OUR_CLIENT boolean,
+    OUR_LEGAL_ENTITY boolean,
     COMPANY_OWNERSHIP_ID uuid,
     COMANY_NAME varchar(80) not null,
     COMPANY_SHORT_NAME varchar(80),
@@ -156,7 +158,6 @@ create table ITPEARLS_COMPANY (
     ADDRESS_OF_COMPANY text,
     COMPANY_DESCRIPTION text,
     WORKING_CONDITIONS text,
-    LABOR_AGREEMENT_ID uuid not null,
     --
     primary key (ID)
 )^

@@ -112,6 +112,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Logger log;
     @Inject
     private HBoxLayout mostPopularHbox;
+    @Inject
+    private CollectionLoader<LaborAgreement> laborAgreementDl;
+    @Inject
+    private LookupPickerField<LaborAgreement> laborAgreementLookupPickerField;
+    @Inject
+    private CollectionContainer<LaborAgreement> laborAgreementDc;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -803,6 +809,30 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
         ;
         setMostPopularIteraction();
+    }
+
+    @Subscribe
+    public void onAfterShow1(AfterShowEvent event) {
+        setLaborAgreement();
+
+    }
+
+    private void setLaborAgreement() {
+        if (vacancyFiels.getValue() != null) {
+            laborAgreementDl.setParameter("openPositions", vacancyFiels.getValue());
+            laborAgreementLookupPickerField.setEnabled(true);
+        } else {
+            laborAgreementDl.removeParameter("openPositions");
+            laborAgreementLookupPickerField.setEnabled(false);
+        }
+
+        laborAgreementDl.load();
+        laborAgreementLookupPickerField.setOptionsList(laborAgreementDc.getItems());
+    }
+
+    @Subscribe("vacancyFiels")
+    public void onVacancyFielsValueChange1(HasValue.ValueChangeEvent<OpenPosition> event) {
+        setLaborAgreement();
     }
 
     private void setMostPopularIteraction() {

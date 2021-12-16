@@ -1,4 +1,4 @@
-create table ITPEARLS_LABOR_AGREEMENT (
+create table ITPEARLS_LABOR_AGEEMENT_TYPE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -7,6 +7,9 @@ create table ITPEARLS_LABOR_AGREEMENT (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    --
+    NAME_AGREEMENT varchar(80) not null,
+    COMMENT_ text,
     --
     primary key (ID)
 );

@@ -4,6 +4,8 @@ import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
@@ -85,8 +87,22 @@ public class IteractionList extends StandardEntity {
     @Column(name = "ADD_INTEGER")
     protected Integer addInteger;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @OnDelete(DeletePolicy.CASCADE)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "LEGAL_ENTITY_ID")
+    private LaborAgreement laborAgreement;
+
     @Column(name = "RATING")
     protected Integer rating;
+
+    public LaborAgreement getLaborAgreement() {
+        return laborAgreement;
+    }
+
+    public void setLaborAgreement(LaborAgreement laborAgreement) {
+        this.laborAgreement = laborAgreement;
+    }
 
     public Integer getAddInteger() {
         return addInteger;

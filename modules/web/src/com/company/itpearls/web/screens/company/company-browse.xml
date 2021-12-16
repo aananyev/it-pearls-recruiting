@@ -40,6 +40,7 @@ order by e.comanyName]]>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="ourLegalEntity" align="CENTER" caption="msg://msgOurLegalEntity"/>
                 <column id="ourClient" align="CENTER" caption="mainMsg://msgOurClient"/>
                 <column id="comanyName" caption="mainMsg://msgLegalCompanyName"/>
                 <column id="companyShortName" caption="mainMsg://msgCompanyName"/>

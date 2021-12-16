@@ -8,5 +8,10 @@ create table ITPEARLS_LABOR_AGREEMENT (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    PERHAPS boolean,
+    COMPANY_ID uuid not null,
+    LABOR_AGREEMENT_TYPE_ID uuid not null,
+    COMMENT_ text,
+    --
     primary key (ID)
 );

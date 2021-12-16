@@ -1,3 +1,0 @@
-alter table ITPEARLS_LABOR_AGEEMENT_TYPE rename column labor_agreement_id to labor_agreement_id__u73252 ;
-alter table ITPEARLS_LABOR_AGEEMENT_TYPE alter column labor_agreement_id__u73252 drop not null ;
-drop index IDX_ITPEARLS_LABOR_AGEEMENT_TYPE_ON_LABOR_AGREEMENT ;
