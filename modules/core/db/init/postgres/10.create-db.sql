@@ -49,6 +49,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     SKILL_TREE_ID uuid,
     STATUS integer,
     FILE_IMAGE_FACE uuid,
+    WORK_STATUS integer,
     PRIORITY_CONTACT integer not null,
     --
     primary key (ID)
@@ -193,6 +194,7 @@ create table ITPEARLS_ITERACTION (
     --
     NUMBER_ varchar(255),
     MANDATORY_ITERACTION boolean,
+    OUTSTAFFING_SIGN boolean not null,
     ITERACTION_TREE_ID uuid,
     ITERATION_NAME varchar(80) not null,
     PIC varchar(80),
@@ -426,7 +428,7 @@ create table ITPEARLS_OPEN_POSITION (
     DELETED_BY varchar(50),
     --
     OPEN_CLOSE boolean,
-    VACANSY_NAME varchar(150) not null,
+    VACANSY_NAME varchar(250) not null,
     REMOTE_WORK integer not null,
     REGISTRATION_FOR_WORK integer,
     REMOTE_COMMENT varchar(40),
@@ -439,8 +441,8 @@ create table ITPEARLS_OPEN_POSITION (
     PROJECT_NAME_ID uuid not null,
     NUMBER_POSITION integer,
     MORE10_NUMBER_POSITION boolean,
-    WORK_EXPERIENCE integer,
-    COMMAND_EXPERIENCE integer,
+    WORK_EXPERIENCE integer not null,
+    COMMAND_EXPERIENCE integer not null,
     COMMENT_ text,
     COMMENT_EN text,
     SHORT_DESCRIPTION varchar(250),

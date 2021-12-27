@@ -67,7 +67,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     String QUERY_COUNT_ITERACTIONS = "select e.iteractionType, count(e.iteractionType) " +
             "from itpearls_IteractionList e " +
             "where e.dateIteraction between :startDate and :endDate and " +
-            "e.vacancy = :vacancy and " +
+            "(e.vacancy = :vacancy or " +
+            "(e.vacancy in (select f from itpearls_OpenPosition f where f.parentOpenPosition = :vacancy))) and " +
             "e.iteractionType.statistics = true " +
             "group by e.iteractionType";
 
@@ -1471,7 +1472,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }
             }
         } else {
-            return openPosition.getNumberPosition().toString() == null ? "" : openPosition.getNumberPosition().toString();
+            return openPosition.getNumberPosition() == null ? "" : openPosition.getNumberPosition().toString();
         }
     }
 }

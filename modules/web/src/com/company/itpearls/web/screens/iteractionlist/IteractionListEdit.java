@@ -105,6 +105,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Boolean askFlag2 = false;
     protected Boolean noSubscribe = false;
     private List<Iteraction> mostPopular = new ArrayList<>();
+    private Boolean afterCommitSign = true;
 
     @Inject
     private EmailGenerationService emailGenerationService;
@@ -456,23 +457,27 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if (iteractionTypeField.getValue() != null) {
-            if (iteractionTypeField.getValue().getNumber() != null) {
-                String s = iteractionTypeField.getValue().getNumber();
-                Integer i = Integer.parseInt(s);
+        if (afterCommitSign) {
+            if (iteractionTypeField.getValue() != null) {
+                if (iteractionTypeField.getValue().getNumber() != null) {
+                    String s = iteractionTypeField.getValue().getNumber();
+                    Integer i = Integer.parseInt(s);
 
-                if (candidateField.getValue() != null) {
-                    candidateField.getValue().setStatus(i);
+                    if (candidateField.getValue() != null) {
+                        candidateField.getValue().setStatus(i);
+                    }
                 }
             }
-        }
 
-        if (!afterCommitSendMessage) {
-            sendMessages();
-        }
+            if (!afterCommitSendMessage) {
+                sendMessages();
+            }
 
-        if (!afterCommitEmailToCandidateSended) {
-            sendMessagesToCandidate();
+            if (!afterCommitEmailToCandidateSended) {
+                sendMessagesToCandidate();
+            }
+
+            afterCommitSign = false;
         }
     }
 

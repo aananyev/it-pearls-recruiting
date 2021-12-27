@@ -33,7 +33,7 @@ public class OpenPosition extends StandardEntity {
     protected Boolean openClose = false;
 
     @NotNull
-    @Column(name = "VACANSY_NAME", nullable = false, length = 150)
+    @Column(name = "VACANSY_NAME", nullable = false, length = 250)
     protected String vacansyName;
 
     @NotNull
@@ -86,10 +86,10 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "MORE10_NUMBER_POSITION")
     private Boolean more10NumberPosition;
 
-    @Column(name = "WORK_EXPERIENCE")
+    @Column(name = "WORK_EXPERIENCE", nullable = false)
     protected Integer workExperience;
 
-    @Column(name = "COMMAND_EXPERIENCE")
+    @Column(name = "COMMAND_EXPERIENCE", nullable = false)
     protected Integer commandExperience;
 
     @Lob

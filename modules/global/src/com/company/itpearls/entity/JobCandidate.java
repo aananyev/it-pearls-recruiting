@@ -130,9 +130,20 @@ public class JobCandidate extends StandardEntity {
     @JoinColumn(name = "FILE_IMAGE_FACE")
     protected FileDescriptor fileImageFace;
 
+    @Column(name = "WORK_STATUS")
+    protected Integer workStatus;
+
     @NotNull
     @Column(name = "PRIORITY_CONTACT", nullable = false)
     private Integer priorityContact;
+
+    public void setWorkStatus(Integer workStatus) {
+        this.workStatus = workStatus;
+    }
+
+    public Integer getWorkStatus() {
+        return workStatus;
+    }
 
     public void setIteractionList(List<IteractionList> iteractionList) {
         this.iteractionList = iteractionList;

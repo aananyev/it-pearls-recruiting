@@ -22,6 +22,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "MANDATORY_ITERACTION")
     protected Boolean mandatoryIteraction;
 
+    @Column(name = "OUTSTAFFING_SIGN", nullable = false)
+    protected Boolean outstaffingSign;
+
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ITERACTION_TREE_ID")
@@ -339,7 +342,9 @@ public class Iteraction extends StandardEntity {
 
     public void setCalendarItemStyle( String calendarItemStyle ) { this.calendarItemStyle = calendarItemStyle; }
 
-    public String getCalendarItemStyle() { return calendarItemStyle; }
+    public String getCalendarItemStyle() {
+        return calendarItemStyle;
+    }
 
     public Integer getCheckTrace() {
         return checkTrace;
@@ -347,5 +352,13 @@ public class Iteraction extends StandardEntity {
 
     public void setCheckTrace(Integer checkTrace) {
         this.checkTrace = checkTrace;
+    }
+
+    public Boolean getOutstaffingSign() {
+        return outstaffingSign;
+    }
+
+    public void setOutstaffingSign(Boolean outstaffingSign) {
+        this.outstaffingSign = outstaffingSign;
     }
 }

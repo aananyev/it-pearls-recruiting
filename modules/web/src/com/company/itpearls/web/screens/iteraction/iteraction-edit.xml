@@ -78,6 +78,17 @@ order by e.number]]>
                     </vbox>
                 </groupBox>
             </tab>
+            <tab id="outstaffingTab"
+                 spacing="true"
+                 icon="CUBES"
+                 caption="msg://mshOutstaffingTab">
+                <vbox spacing="true">
+                    <checkBox id="outstaffingSign"
+                              dataContainer="iteractionDc"
+                              property="outstaffingSign"
+                              caption="msg://msgOutstaffingSign"/>
+                </vbox>
+            </tab>
             <tab caption="msg://Tab"
                  spacing="true"
                  id="tabIcons">

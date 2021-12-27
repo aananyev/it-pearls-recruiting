@@ -342,6 +342,7 @@
                     </hbox>
                 </vbox>
             </tab>
+
             <tab id="tabCandidate"
                  caption="msg://candidate"
                  margin="true,true,true,true"
@@ -578,6 +579,23 @@
                         </columns>
                     </dataGrid>
                 </hbox>
+            </tab>
+            <tab id="tabOutstaffing"
+                 caption="msg://msgOutstaffing"
+                 margin="true,true,true,true"
+                 icon="CUBES"
+                 expand="outstaffingMainVBox"
+                 spacing="true">
+                <vbox id="outstaffingMainVBox"
+                      height="100%"
+                      width="100%"
+                      spacing="true">
+                    <radioButtonGroup id="workStatusRadioButton"
+                                      width="AUTO"
+                                      caption="msg://msgWorkStatus"
+                                      dataContainer="jobCandidateDc"
+                                      property="workStatus"/>
+                </vbox>
             </tab>
             <tab id="tabIteraction"
                  caption="msg://candidateIteration"

@@ -72,8 +72,19 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), MANAGER));
 
         filterStagerField();
+        filterUoustaffing();
         addTableListeners();
 //        filterInternalProject();
+    }
+
+    private void filterUoustaffing() {
+        if (userSession.getUser().getGroup().getName().equals(MANAGER)) {
+            iteractionListsDl.setParameter("outStaffing", true);
+        } else {
+            iteractionListsDl.removeParameter("outStaffing");
+        }
+
+        iteractionListsDl.load();
     }
 
     private void filterStagerField() {

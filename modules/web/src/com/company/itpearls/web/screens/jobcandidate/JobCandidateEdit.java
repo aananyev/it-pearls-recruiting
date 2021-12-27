@@ -206,6 +206,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
     @Inject
     private InstanceContainer<JobCandidate> jobCandidateDc;
+    @Inject
+    private RadioButtonGroup<Integer> workStatusRadioButton;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -656,6 +658,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         // проверить в названии должности (не использовать)
         priorityCommenicationMethodRadioButtonInit();
+        workStatusRadioButtonInit();
 
         if (blockCandidateCheckBox.getValue() == null) {
             blockCandidateCheckBox.setValue(false);
@@ -673,6 +676,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // удалить листенер изменения, чтобы  не пугало сообщение о ненадйенности новых контактов в резюмехе
         jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
         });
+    }
+
+    private void workStatusRadioButtonInit() {
+        Map<String, Integer> workStatusMap = new LinkedHashMap<>();
+
+        workStatusMap.put("Неопределен", 0);
+        workStatusMap.put("Самозанятый", 1);
+        workStatusMap.put("Индивидуальный предприниматель", 2);
+        workStatusMap.put("Срочный трудовой договор", 3);
+        workStatusMap.put("Договор ГПХ", 4);
+        workStatusMap.put("В штат по ТК РФ", 5);
+
+        workStatusRadioButton.setOptionsMap(workStatusMap);
     }
 
     private void priorityCommenicationMethodRadioButtonInit() {
