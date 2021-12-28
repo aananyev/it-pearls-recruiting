@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        messagesPack="com.company.itpearls.web.screens" xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/openposition/open-position-browse.xml">
+    <data>
+        <collection>
+            <loader>
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+where e.registrationForWork = 0 or e.registrationForWork = 2
+                                      order by e.vacansyName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <groupBox>
+            <hbox>
+                <scrollBox scrollBars="horizontal" orientation="horizontal"/>
+            </hbox>
+        </groupBox>
+        <treeDataGrid height="100%"/>
+    </layout>
+</window>

@@ -22,9 +22,6 @@ public class Iteraction extends StandardEntity {
     @Column(name = "MANDATORY_ITERACTION")
     protected Boolean mandatoryIteraction;
 
-    @Column(name = "OUTSTAFFING_SIGN", nullable = false)
-    protected Boolean outstaffingSign;
-
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ITERACTION_TREE_ID")
@@ -97,6 +94,9 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "SIGN_SEND_TO_CLIENT")
     private Boolean signSendToClient;
+
+    @Column(name = "OUTSTAFFING_SIGN", nullable = false)
+    protected Boolean outstaffingSign = false;
 
     @Column(name = "NOTIFICATION_NEED_SEND")
     private Boolean notificationNeedSend;
