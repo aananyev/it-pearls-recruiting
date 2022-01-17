@@ -1089,8 +1089,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public void copyIteractionJobCandidate() {
         if (jobCandidateIteractionListTable.getSingleSelected() == null) {
-
-
             if (lastIteraction != null) {
                 IteractionList finalLastIteraction = lastIteraction;
 
@@ -1099,6 +1097,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .withInitializer(candidate -> {
                             candidate.setVacancy(finalLastIteraction.getVacancy());
                             candidate.setNumberIteraction(numBerIteractionForNewEntity());
+                            candidate.setLaborAgreement(finalLastIteraction.getLaborAgreement());
 
                             IteractionList iteractionList = dataContext.merge(candidate);
                             jobCandidateDc.getItem().getIteractionList().add(iteractionList);
@@ -1162,7 +1161,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .one().add(BigDecimal.ONE);
         }
     }
-
 
     @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "styleProvider")
     private String jobCandidateCandidateCvTableIconITPearlsCVFileStyleProvider(CandidateCV candidateCV) {

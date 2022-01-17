@@ -96,6 +96,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     static String RECRUITER = "Recruiter";
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
+    static String OUSTAFF_NAMAGER = "Outstaff Manager";
+
     private Boolean newProject;
     static Boolean myClient;
     private Boolean transferFlag = false;
@@ -116,9 +118,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private CollectionLoader<LaborAgreement> laborAgreementDl;
     @Inject
-    private LookupPickerField<LaborAgreement> laborAgreementLookupPickerField;
-    @Inject
     private CollectionContainer<LaborAgreement> laborAgreementDc;
+    @Inject
+    private LookupPickerField<LaborAgreement> laborAgreementLookupPickerField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -133,8 +135,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
         // запомним кандидата
         candidate = candidateField.getValue();
-        // предложить копирование если до этого было взаимодействие и узнать чей это был кандидат
-//        copyAndCheckCandidate();
     }
 
     private void changeField() {
@@ -823,16 +823,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setLaborAgreement() {
-        if (vacancyFiels.getValue() != null) {
-            laborAgreementDl.setParameter("openPositions", vacancyFiels.getValue());
-            laborAgreementLookupPickerField.setEnabled(true);
-        } else {
-            laborAgreementDl.removeParameter("openPositions");
-            laborAgreementLookupPickerField.setEnabled(false);
-        }
+        if (getRoleService.isUserRoles(userSession.getUser(), OUSTAFF_NAMAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+            laborAgreementLookupPickerField.setVisible(true);
 
-        laborAgreementDl.load();
-        laborAgreementLookupPickerField.setOptionsList(laborAgreementDc.getItems());
+            if (vacancyFiels.getValue() != null) {
+                laborAgreementDl.setParameter("openPositions", vacancyFiels.getValue());
+                laborAgreementLookupPickerField.setEnabled(true);
+            } else {
+                laborAgreementDl.removeParameter("openPositions");
+                laborAgreementLookupPickerField.setEnabled(false);
+            }
+
+            laborAgreementDl.load();
+            laborAgreementLookupPickerField.setOptionsList(laborAgreementDc.getItems());
+        } else {
+            laborAgreementLookupPickerField.setVisible(false);
+        }
     }
 
     @Subscribe("vacancyFiels")

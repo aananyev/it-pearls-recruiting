@@ -21,14 +21,24 @@
                         </property>
                     </property>
                 </property>
-                <property name="recrutier" view="_minimal"/>
-                <property name="laborAgreement" view="laborAgreement-view"/>
+                <property name="recrutier"
+                          view="_minimal"/>
+                <property name="laborAgreement"
+                          view="_minimal">
+                    <property name="company" view="_minimal"/>
+                    <property name="laborAgreementType" view="_minimal"/>
+                    <property name="openPositions" view="_minimal"/>
+                </property>
             </view>
             <loader id="iteractionListDl"/>
         </instance>
         <collection id="laborAgreementDc"
-                    class="com.company.itpearls.entity.LaborAgreement"
-                    view="laborAgreement-view">
+                    class="com.company.itpearls.entity.LaborAgreement">
+            <view extends="_local">
+                <property name="laborAgreementType" view="_minimal"/>
+                <property name="openPositions" view="_minimal"/>
+                <property name="company" view="_minimal"/>
+            </view>
             <loader id="laborAgreementDl">
                 <query>
                     <![CDATA[select e from itpearls_LaborAgreement e]]>
@@ -43,6 +53,7 @@
         <collection id="iteractionTypesDc"
                     class="com.company.itpearls.entity.Iteraction">
             <view extends="_local">
+                <property name="addType"/>
             </view>
             <loader id="iteractionTypesLc"
                     cacheable="true">
