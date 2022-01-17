@@ -15,8 +15,6 @@
               caption="mainMsg://menu_config.itpearls_LaborAgeementType.browse"/>
         <item screen="itpearls_LaborAgreement.browse"
               caption="mainMsg://menu_config.itpearls_LaborAgreement.browse"/>
-        <item screen="ext-itpearls_IteractionListOutstaff.browse"
-              caption="mainMsg://msgIteractionListOutstaff.browse"/>
     </menu>
     <menu id="application-hunting" insertBefore="application-hadbook" icon="PRODUCT_HUNT">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>

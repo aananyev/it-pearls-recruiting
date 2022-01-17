@@ -303,10 +303,13 @@
             <property name="signOurInterview"/>
             <property name="signClientInterview"/>
             <property name="signSendToClient"/>
+            <property name="outstaffingSign"/>
+            <property name="number"/>
         </property>
         <property name="recrutier" view="_local">
             <property name="group" view="_minimal"/>
         </property>
+        <property name="laborAgreement" view="_minimal"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">
@@ -443,6 +446,7 @@
     <view entity="itpearls_LaborAgreement" name="laborAgreement-view" extends="_local">
         <property name="laborAgreementType" view="_minimal"/>
         <property name="openPositions" view="_minimal"/>
+        <property name="company" view="company-view"/>
     </view>
     <view entity="itpearls_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
 </views>
