@@ -12,6 +12,10 @@
                 <property name="candidate" view="_minimal"/>
                 <property name="iteractionType" view="_minimal">
                     <property name="notificationNeedSend"/>
+                    <property name="addType"/>
+                    <property name="addFlag"/>
+                    <property name="addCaption"/>
+                    <property name="addField"/>
                 </property>
                 <property name="vacancy" view="_minimal">
                     <property name="projectName" view="_minimal">
@@ -155,127 +159,141 @@
                   spacing="true"
                   align="MIDDLE_CENTER"/>
         </groupBox>
-        <groupBox id="groupBoxIterationData">
-            <grid id="gridIterationData"
-                  spacing="true"
-                  width="100%">
-                <columns count="2"/>
-                <rows>
-                    <row id="rating">
-                        <label/>
-                        <lookupField id="ratingField"
-                                     required="true"
-                                     align="MIDDLE_RIGHT"
-                                     caption="msg://msgRating"
-                                     dataContainer="iteractionListDc"
-                                     property="rating"
-                                     description="msg://msgRatingDecription"
-                                     width="50%"/>
-                    </row>
-                    <row id="row">
-                        <lookupPickerField id="candidateField"
-                                           optionsContainer="candidatesDc"
-                                           rowspan="1"
-                                           colspan="1"
-                                           caption="msg://msgCandidate"
+        <tabSheet id="iteractionListTabSheeet"
+                  stylename="framed">
+            <tab id="iteractionListTab"
+                 caption="msg://msgIteractionList"
+                 icon="REORDER"
+                 spacing="true">
+                <groupBox id="groupBoxIterationData">
+                    <grid id="gridIterationData"
+                          spacing="true"
+                          width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row id="rating">
+                                <label/>
+                                <lookupField id="ratingField"
+                                             required="true"
+                                             align="MIDDLE_RIGHT"
+                                             caption="msg://msgRating"
+                                             dataContainer="iteractionListDc"
+                                             property="rating"
+                                             description="msg://msgRatingDecription"
+                                             width="50%"/>
+                            </row>
+                            <row id="row">
+                                <lookupPickerField id="candidateField"
+                                                   optionsContainer="candidatesDc"
+                                                   rowspan="1"
+                                                   colspan="1"
+                                                   caption="msg://msgCandidate"
+                                                   width="100%"
+                                                   dataContainer="iteractionListDc"
+                                                   property="candidate"
+                                                   required="true">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                        <action id="open"
+                                                type="picker_open"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <lookupPickerField id="vacancyFiels"
+                                                   caption="mainMsg://msgVacancy"
+                                                   dataContainer="iteractionListDc"
+                                                   optionsContainer="vacancyDc"
+                                                   property="vacancy" width="100%">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                        <action id="open"
+                                                type="picker_open"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                            <row>
+                                <hbox id="mostPopularIteractionHBox"/>
+                            </row>
+                            <row>
+                                <lookupPickerField id="iteractionTypeField"
+                                                   optionsContainer="iteractionTypesDc"
+                                                   caption="msg://msgIteractionType"
+                                                   width="100%"
+                                                   dataContainer="iteractionListDc"
+                                                   property="iteractionType"
+                                                   colspan="1">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <buttonsPanel id="buttonsPanelCallAction"
+                                              width="100%"
+                                              align="BOTTOM_CENTER">
+                                    <vbox>
+                                        <button id="buttonCallAction"
+                                                invoke="callActionEntity"
+                                                align="BOTTOM_CENTER"
+                                                width="100%"/>
+                                        <textField id="addString"
+                                                   dataContainer="iteractionListDc"
+                                                   property="addString"
+                                                   width="100%"/>
+                                        <dateField id="addDate" dataContainer="iteractionListDc"
+                                                   property="addDate"
+                                                   width="100%"/>
+                                        <textField id="addInteger"
+                                                   dataContainer="iteractionListDc"
+                                                   property="addInteger"
+                                                   width="100%"/>
+                                    </vbox>
+                                </buttonsPanel>
+                            </row>
+                            <row>
+                                <textField id="communicationMethodField"
                                            width="100%"
+                                           caption="msg://msgCommunicationMethod"
                                            dataContainer="iteractionListDc"
-                                           property="candidate"
-                                           required="true">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                                <action id="open"
-                                        type="picker_open"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="vacancyFiels"
-                                           caption="mainMsg://msgVacancy"
-                                           dataContainer="iteractionListDc"
-                                           optionsContainer="vacancyDc"
-                                           property="vacancy" width="100%">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                                <action id="open"
-                                        type="picker_open"/>
-                            </actions>
-                        </lookupPickerField>
-                    </row>
-                    <row>
-                        <hbox id="mostPopularIteractionHBox"/>
-                    </row>
-                    <row>
-                        <lookupPickerField id="iteractionTypeField"
-                                           optionsContainer="iteractionTypesDc"
-                                           caption="msg://msgIteractionType"
-                                           width="100%"
-                                           dataContainer="iteractionListDc"
-                                           property="iteractionType"
-                                           colspan="1">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <buttonsPanel id="buttonsPanelCallAction"
-                                      width="100%"
-                                      align="BOTTOM_CENTER">
-                            <vbox>
-                                <button id="buttonCallAction"
-                                        invoke="callActionEntity"
-                                        align="BOTTOM_CENTER"
-                                        width="100%"/>
-                                <textField id="addString"
-                                           dataContainer="iteractionListDc"
-                                           property="addString"
-                                           width="100%"/>
-                                <dateField id="addDate" dataContainer="iteractionListDc"
-                                           property="addDate"
-                                           width="100%"/>
-                                <textField id="addInteger"
-                                           dataContainer="iteractionListDc"
-                                           property="addInteger"
-                                           width="100%"/>
-                            </vbox>
-                        </buttonsPanel>
-                    </row>
-                    <row>
-                        <textField id="communicationMethodField"
-                                   width="100%"
-                                   caption="msg://msgCommunicationMethod"
-                                   dataContainer="iteractionListDc"
-                                   property="communicationMethod"/>
-                        <lookupPickerField id="recrutierField"
-                                           caption="msg://msgRecrutier"
-                                           width="100%"
-                                           dataContainer="iteractionListDc"
-                                           property="recrutier"
-                                           optionsContainer="usersDc">
-                            <actions>
-                                <action id="lookup"
-                                        type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                    </row>
-                </rows>
-            </grid>
-            <hbox spacing="true" width="100%">
-                <lookupPickerField id="laborAgreementLookupPickerField"
-                                   dataContainer="iteractionListDc"
-                                   optionsContainer="laborAgreementDc"
-                                   width="100%"
-                                   caption="msg://msgLaborAgreement"
-                                   property="laborAgreement"/>
-            </hbox>
-            <textArea id="commentField"
-                      property="comment"
-                      rows="3"
-                      width="100%"
-                      dataContainer="iteractionListDc"
-                      caption="msg://msgComment"
-                      height="150pt"/>
-        </groupBox>
+                                           property="communicationMethod"/>
+                                <lookupPickerField id="recrutierField"
+                                                   caption="msg://msgRecrutier"
+                                                   width="100%"
+                                                   dataContainer="iteractionListDc"
+                                                   property="recrutier"
+                                                   optionsContainer="usersDc">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                        </rows>
+                    </grid>
+
+                    <textArea id="commentField"
+                              property="comment"
+                              rows="3"
+                              width="100%"
+                              dataContainer="iteractionListDc"
+                              caption="msg://msgComment"
+                              height="150pt"/>
+                </groupBox>
+            </tab>
+            <tab id="outSteffingTab"
+                 icon="CUBES"
+                 spacing="true"
+                 caption="msg://msgOutstaffing">
+                <hbox spacing="true" width="100%">
+                    <lookupPickerField id="laborAgreementLookupPickerField"
+                                       dataContainer="iteractionListDc"
+                                       optionsContainer="laborAgreementDc"
+                                       width="100%"
+                                       caption="msg://msgLaborAgreement"
+                                       property="laborAgreement"/>
+                </hbox>
+            </tab>
+        </tabSheet>
         <form id="form"
               dataContainer="iteractionListDc"
               width="100%">

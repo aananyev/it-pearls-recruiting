@@ -39,23 +39,60 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="laborAgreementDc">
-            <column width="350px">
-                <checkBox id="perhapsCheckBox" property="perhaps"/>
-                <lookupPickerField id="companyField"
-                                   optionsContainer="companiesDc"
-                                   property="company"/>
-                <lookupPickerField id="laborAgreementTypeField"
-                                   optionsContainer="laborAgreementTypesDc"
-                                   property="laborAgreementType"/>
-                <richTextArea id="commentField"
-                              property="comment"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
-            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-            <button id="closeBtn" action="windowClose"/>
+    <layout expand="agreementMainVBox"
+            width="100%"
+            height="100%"
+            spacing="true">
+            <vbox id="agreementMainVBox"
+                  spacing="true"
+                  width="100%"
+                  expand="commentField"
+                  height="100%">
+                    <checkBox id="perhapsCheckBox"
+                              dataContainer="laborAgreementDc"
+                              property="perhaps"/>
+                    <hbox spacing="true"
+                          width="100%"
+                          expand="laborNammeTextField">
+                        <textField id="laborNammeTextField"
+                                   dataContainer="laborAgreementDc"
+                                   property="agreementName"
+                                   caption="msg://msgLaborAgreementName"
+                                   width="100%"/>
+                        <textField id="laborAgreementNumber"
+                                   dataContainer="laborAgreementDc"
+                                   property="agreementNumber"
+                                   caption="msg://msgLaborAgreementNumber"
+                                   width="AUTO"/>
+                        <dateField id="leborAgreementDateField"
+                                   dataContainer="laborAgreementDc"
+                                   property="agreementDate"
+                                   caption="msg://msgLaborAgreementDate"
+                                   width="AUTO"/>
+                    </hbox>
+                    <lookupPickerField id="companyField"
+                                       width="100%"
+                                       dataContainer="laborAgreementDc"
+                                       optionsContainer="companiesDc"
+                                       property="company"/>
+                    <lookupPickerField id="laborAgreementTypeField"
+                                       width="100%"
+                                       dataContainer="laborAgreementDc"
+                                       optionsContainer="laborAgreementTypesDc"
+                                       property="laborAgreementType"/>
+                    <richTextArea id="commentField"
+                                  width="100%"
+                                  height="100%"
+                                  dataContainer="laborAgreementDc"
+                                  property="comment"/>
+            </vbox>
+        <hbox id="editActions"
+              spacing="true"
+              align="BOTTOM_RIGHT">
+            <button id="commitAndCloseBtn"
+                    action="windowCommitAndClose"/>
+            <button id="closeBtn"
+                    action="windowClose"/>
         </hbox>
     </layout>
 </window>

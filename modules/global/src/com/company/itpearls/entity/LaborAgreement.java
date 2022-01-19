@@ -9,6 +9,7 @@ import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 @Table(name = "ITPEARLS_LABOR_AGREEMENT")
@@ -19,6 +20,16 @@ public class LaborAgreement extends StandardEntity {
 
     @Column(name = "PERHAPS")
     private Boolean perhaps;
+
+    @Column(name = "AGREEMENT_NAME")
+    private String agreementName;
+
+    @Column(name = "AGREEMENT_NUMBER", length = 48)
+    private String agreementNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "AGREEMENT_DATE")
+    private Date agreementDate;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @OnDelete(DeletePolicy.CASCADE)
@@ -43,6 +54,30 @@ public class LaborAgreement extends StandardEntity {
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
+
+    public Date getAgreementDate() {
+        return agreementDate;
+    }
+
+    public void setAgreementDate(Date agreementDate) {
+        this.agreementDate = agreementDate;
+    }
+
+    public String getAgreementNumber() {
+        return agreementNumber;
+    }
+
+    public void setAgreementNumber(String agreementNumber) {
+        this.agreementNumber = agreementNumber;
+    }
+
+    public String getAgreementName() {
+        return agreementName;
+    }
+
+    public void setAgreementName(String agreementName) {
+        this.agreementName = agreementName;
+    }
 
     public Boolean getPerhaps() {
         return perhaps;

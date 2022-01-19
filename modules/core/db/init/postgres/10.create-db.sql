@@ -695,6 +695,9 @@ create table ITPEARLS_LABOR_AGREEMENT (
     DELETED_BY varchar(50),
     --
     PERHAPS boolean,
+    AGREEMENT_NAME varchar(255),
+    AGREEMENT_NUMBER varchar(48),
+    AGREEMENT_DATE date,
     COMPANY_ID uuid not null,
     LABOR_AGREEMENT_TYPE_ID uuid not null,
     COMMENT_ text,
