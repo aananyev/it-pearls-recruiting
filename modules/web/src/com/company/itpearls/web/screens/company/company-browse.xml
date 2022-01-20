@@ -13,9 +13,14 @@
                     <![CDATA[select e from itpearls_Company e
 order by e.comanyName]]>
                     <condition>
-                        <c:jpql>
-                            <c:where>e.ourClient = :setOurClient</c:where>
-                        </c:jpql>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.ourClient = :setOurClient</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.ourLegalEntity = :setOurLegalEntity</c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
@@ -31,22 +36,40 @@ order by e.comanyName]]>
             <properties include=".*"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <groupTable id="companiesTable"
-                    width="100%"
-                    dataContainer="companiesDc">
+        <dataGrid id="companiesTable"
+                  width="100%"
+                  dataContainer="companiesDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="ourLegalEntity" align="CENTER" caption="msg://msgOurLegalEntity"/>
-                <column id="ourClient" align="CENTER" caption="mainMsg://msgOurClient"/>
-                <column id="comanyName" caption="mainMsg://msgLegalCompanyName"/>
-                <column id="companyShortName" caption="mainMsg://msgCompanyName"/>
-                <column id="countryOfCompany" caption="mainMsg://msgCountry"/>
-                <column id="regionOfCompany" caption="mainMsg://msgRegion"/>
-                <column id="cityOfCompany" caption="mainMsg://msgCity"/>
+                <column id="ourCompanyIconColumn"
+                        maximumWidth="100px"
+                        caption="msg://msgOurLegalEntity">
+                    <iconRenderer/>
+                </column>
+                <column id="ourClientIconColumn"
+                        maximumWidth="100px"
+                        caption="msg://msgOurClient">
+                    <iconRenderer/>
+                </column>
+                <column id="comanyName"
+                        property="comanyName"
+                        caption="mainMsg://msgLegalCompanyName"/>
+                <column id="companyShortName"
+                        property="companyShortName"
+                        caption="mainMsg://msgCompanyName"/>
+                <column id="countryOfCompany"
+                        property="countryOfCompany"
+                        caption="mainMsg://msgCountry"/>
+                <column id="regionOfCompany"
+                        property="regionOfCompany"
+                        caption="mainMsg://msgRegion"/>
+                <column id="cityOfCompany"
+                        property="cityOfCompany"
+                        caption="mainMsg://msgCity"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -55,8 +78,13 @@ order by e.comanyName]]>
                 <button id="editBtn" action="companiesTable.edit"/>
                 <button id="removeBtn" action="companiesTable.remove"/>
             </buttonsPanel>
-        </groupTable>
-        <checkBox id="checkBoxOnlyOurClient" caption="mainMsg://msgOnlyOurClient"/>
+        </dataGrid>
+        <hbox spacing="true">
+            <checkBox id="checkBoxOnlyLegalEntity"
+                      caption="msg://msgOnlyOurLegalEntity"/>
+            <checkBox id="checkBoxOnlyOurClient"
+                      caption="msg://msgOnlyOurClient"/>
+        </hbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
