@@ -94,7 +94,6 @@
                           spacing="true"
                           expand="addressOfCompanyField"
                           width="AUTO">
-
                         <lookupPickerField id="companyOwnershipField"
                                            optionsContainer="companyOwnershipsDc"
                                            dataContainer="companyDc"
