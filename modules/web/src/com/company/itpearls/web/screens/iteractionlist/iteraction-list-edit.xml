@@ -2,7 +2,6 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.iteractionlist"
         icon="REORDER">
     <data>
@@ -16,6 +15,7 @@
                     <property name="addFlag"/>
                     <property name="addCaption"/>
                     <property name="addField"/>
+                    <property name="callForm"/>
                 </property>
                 <property name="vacancy" view="_minimal">
                     <property name="projectName" view="_minimal">
@@ -163,6 +163,7 @@
                   stylename="framed">
             <tab id="iteractionListTab"
                  caption="msg://msgIteractionList"
+                 margin="true,true,true,true"
                  icon="REORDER"
                  spacing="true">
                 <groupBox id="groupBoxIterationData">
@@ -270,7 +271,6 @@
                             </row>
                         </rows>
                     </grid>
-
                     <textArea id="commentField"
                               property="comment"
                               rows="3"
@@ -283,23 +283,22 @@
             <tab id="outSteffingTab"
                  icon="CUBES"
                  spacing="true"
+                 expand="outstaffingVBox"
+                 margin="true,true,true,true"
                  caption="msg://msgOutstaffing">
-                <hbox spacing="true" width="100%">
+                <vbox id="outstaffingVBox"
+                      spacing="true"
+                      width="100%"
+                      height="100%">
                     <lookupPickerField id="laborAgreementLookupPickerField"
                                        dataContainer="iteractionListDc"
                                        optionsContainer="laborAgreementDc"
                                        width="100%"
                                        caption="msg://msgLaborAgreement"
                                        property="laborAgreement"/>
-                </hbox>
+                </vbox>
             </tab>
         </tabSheet>
-        <form id="form"
-              dataContainer="iteractionListDc"
-              width="100%">
-            <column width="250px">
-            </column>
-        </form>
         <hbox id="editActions"
               spacing="true"
               align="BOTTOM_RIGHT">

@@ -21,15 +21,31 @@ public class LaborAgreement extends StandardEntity {
     @Column(name = "PERHAPS")
     private Boolean perhaps;
 
-    @Column(name = "AGREEMENT_NAME")
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open"})
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "JOB_CANDIDATE_ID")
+    @NotNull
+    private JobCandidate jobCandidate;
+
+    @Column(name = "AGREEMENT_NAME", nullable = false)
+    @NotNull
     private String agreementName;
 
-    @Column(name = "AGREEMENT_NUMBER", length = 48)
+    @Column(name = "AGREEMENT_NUMBER", nullable = false, length = 48)
+    @NotNull
     private String agreementNumber;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "AGREEMENT_DATE")
+    @Column(name = "AGREEMENT_DATE", nullable = false)
+    @NotNull
     private Date agreementDate;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "AGREEMENT_END_DATE")
+    private Date agreementEndDate;
+
+    @Column(name = "PERPETUAL_AGREEMENT")
+    private Boolean perpetualAgreement;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @OnDelete(DeletePolicy.CASCADE)
@@ -54,6 +70,42 @@ public class LaborAgreement extends StandardEntity {
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
+
+    @Lob
+    @Column(name = "AGREEMENT_TEXT")
+    private String agreementText;
+
+    public String getAgreementText() {
+        return agreementText;
+    }
+
+    public void setAgreementText(String agreementText) {
+        this.agreementText = agreementText;
+    }
+
+    public Boolean getPerpetualAgreement() {
+        return perpetualAgreement;
+    }
+
+    public void setPerpetualAgreement(Boolean perpetualAgreement) {
+        this.perpetualAgreement = perpetualAgreement;
+    }
+
+    public Date getAgreementEndDate() {
+        return agreementEndDate;
+    }
+
+    public void setAgreementEndDate(Date agreementEndDate) {
+        this.agreementEndDate = agreementEndDate;
+    }
+
+    public JobCandidate getJobCandidate() {
+        return jobCandidate;
+    }
+
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
+    }
 
     public Date getAgreementDate() {
         return agreementDate;

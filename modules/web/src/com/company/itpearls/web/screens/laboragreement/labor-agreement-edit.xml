@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://laborAgreementEdit.caption"
-        focusComponent="form"
+        focusComponent="jobCandidateLookupPickerField"
         messagesPack="com.company.itpearls.web.screens.laboragreement">
     <data>
         <instance id="laborAgreementDc"
@@ -9,6 +9,15 @@
             <view extends="laborAgreement-view"/>
             <loader/>
         </instance>
+        <collection id="jobCandidateDc"
+                    class="com.company.itpearls.entity.JobCandidate"
+                    view="jobCandidate-view">
+            <loader id="jobCandidateDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
+                </query>
+            </loader>
+        </collection>
         <collection id="companiesDc"
                     class="com.company.itpearls.entity.Company"
                     view="company-view">
@@ -39,15 +48,24 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="agreementMainVBox"
+    <layout expand="laborAgreementTabSheet"
             width="100%"
             height="100%"
             spacing="true">
-            <vbox id="agreementMainVBox"
-                  spacing="true"
+        <tabSheet id="laborAgreementTabSheet"
                   width="100%"
-                  expand="commentField"
-                  height="100%">
+                  height="100%"
+                  stylename="framed">
+            <tab id="laborAgreementDetailsTab"
+                 spacing="true"
+                 margin="true,true,true,true"
+                 caption="msg://msgLaboorAgreementDetails"
+                 expand="agreementMainVBox">
+                <vbox id="agreementMainVBox"
+                      spacing="true"
+                      width="100%"
+                      expand="commentField"
+                      height="100%">
                     <checkBox id="perhapsCheckBox"
                               dataContainer="laborAgreementDc"
                               property="perhaps"/>
@@ -69,23 +87,53 @@
                                    property="agreementDate"
                                    caption="msg://msgLaborAgreementDate"
                                    width="AUTO"/>
+                        <checkBox id="parpetualAgreementCheckBox"
+                                  dataContainer="laborAgreementDc"
+                                  property="perpetualAgreement"
+                                  caption="msg://msgParpetualAgreement"
+                                  align="BOTTOM_LEFT"
+                                  width="AUTO"/>
+                        <dateField id="laborAgreementEndDateField"
+                                   dataContainer="laborAgreementDc"
+                                   property="agreementEndDate"
+                                   caption="msg://msgLaborEndDate"
+                                   width="AUTO"/>
                     </hbox>
+                    <lookupPickerField id="jobCandidateLookupPickerField"
+                                       width="100%"
+                                       dataContainer="laborAgreementDc"
+                                       optionsContainer="jobCandidateDc"
+                                       caption="msg://msgJobCandidate"
+                                       property="jobCandidate"/>
                     <lookupPickerField id="companyField"
                                        width="100%"
                                        dataContainer="laborAgreementDc"
                                        optionsContainer="companiesDc"
+                                       caption="msg://msgCompany"
                                        property="company"/>
                     <lookupPickerField id="laborAgreementTypeField"
                                        width="100%"
                                        dataContainer="laborAgreementDc"
                                        optionsContainer="laborAgreementTypesDc"
+                                       caption="msg://msgLaborAgreementType"
                                        property="laborAgreementType"/>
                     <richTextArea id="commentField"
                                   width="100%"
                                   height="100%"
                                   dataContainer="laborAgreementDc"
                                   property="comment"/>
-            </vbox>
+                </vbox>
+            </tab>
+            <tab id="agreementTextTab"
+                 spacing="true"
+                 margin="true,true,true,true"
+                 caption="msg://msgAgreementText"
+                 expand="agreementTextRichTextArea">
+                <richTextArea id="agreementTextRichTextArea"
+                              width="100%"
+                              height="100%"/>
+            </tab>
+        </tabSheet>
         <hbox id="editActions"
               spacing="true"
               align="BOTTOM_RIGHT">

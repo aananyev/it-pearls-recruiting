@@ -179,6 +179,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
     static String STAGER = "Стажер";
+    static String OUSTAFF_NAMAGER = "Outstaff Manager";
 
     String QUERY_GET_LAST_ITERACTION = "select e " +
             "from itpearls_IteractionList e " +
@@ -208,6 +209,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private InstanceContainer<JobCandidate> jobCandidateDc;
     @Inject
     private RadioButtonGroup<Integer> workStatusRadioButton;
+    @Inject
+    private VBoxLayout outstaffingMainVBox;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -1268,6 +1271,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
     }
 
+
+    private void setLaborAgreement() {
+        if (getRoleService.isUserRoles(userSession.getUser(), OUSTAFF_NAMAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+            outstaffingMainVBox.setVisible(true);
+        } else {
+            outstaffingMainVBox.setVisible(false);
+        }
+    }
+
     @Subscribe
     public void onBeforeShow2(BeforeShowEvent event) {
         setCandidateInTables();
@@ -1292,7 +1305,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             blockCandidateButton.setVisible(false);
         }
 
-
+        setLaborAgreement();
     }
 
     private void setBlockUnblockButton(boolean b) {

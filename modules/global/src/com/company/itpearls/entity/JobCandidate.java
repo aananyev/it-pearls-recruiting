@@ -101,6 +101,11 @@ public class JobCandidate extends StandardEntity {
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "jobCandidate")
+    private List<LaborAgreement> laborAgreement;
+
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "jobCandidate")
     protected List<SocialNetworkURLs> socialNetwork;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
@@ -136,6 +141,14 @@ public class JobCandidate extends StandardEntity {
     @NotNull
     @Column(name = "PRIORITY_CONTACT", nullable = false)
     private Integer priorityContact;
+
+    public List<LaborAgreement> getLaborAgreement() {
+        return laborAgreement;
+    }
+
+    public void setLaborAgreement(List<LaborAgreement> laborAgreement) {
+        this.laborAgreement = laborAgreement;
+    }
 
     public void setWorkStatus(Integer workStatus) {
         this.workStatus = workStatus;

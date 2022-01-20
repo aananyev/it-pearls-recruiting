@@ -695,12 +695,16 @@ create table ITPEARLS_LABOR_AGREEMENT (
     DELETED_BY varchar(50),
     --
     PERHAPS boolean,
-    AGREEMENT_NAME varchar(255),
-    AGREEMENT_NUMBER varchar(48),
-    AGREEMENT_DATE date,
+    JOB_CANDIDATE_ID uuid not null,
+    AGREEMENT_NAME varchar(255) not null,
+    AGREEMENT_NUMBER varchar(48) not null,
+    AGREEMENT_DATE date not null,
+    AGREEMENT_END_DATE date,
+    PERPETUAL_AGREEMENT boolean,
     COMPANY_ID uuid not null,
     LABOR_AGREEMENT_TYPE_ID uuid not null,
     COMMENT_ text,
+    AGREEMENT_TEXT text,
     --
     primary key (ID)
 )^

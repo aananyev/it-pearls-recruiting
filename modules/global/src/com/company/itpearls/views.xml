@@ -447,6 +447,7 @@
         <property name="laborAgreementType" view="_minimal"/>
         <property name="openPositions" view="_minimal"/>
         <property name="company" view="company-view"/>
+        <property name="jobCandidate" view="_minimal"/>
     </view>
     <view entity="itpearls_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
 </views>

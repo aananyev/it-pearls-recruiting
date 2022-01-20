@@ -33,12 +33,13 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="perhaps"/>
+                <column id="perhaps" width="40px"/>
                 <column id="agreementName"/>
                 <column id="agreementNumber"/>
-                <column id="agreementDate"/>
                 <column id="company"/>
                 <column id="laborAgreementType"/>
+                <column id="agreementDate"/>
+                <column id="agreementEndDate"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
