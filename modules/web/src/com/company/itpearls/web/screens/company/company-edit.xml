@@ -14,7 +14,9 @@
                     </property>
                 </property>
                 <property name="companyOwnership" view="_minimal"/>
-                <property name="companyDirector" view="_local"/>
+                <property name="companyDirector" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
                 <property name="countryOfCompany" view="_local"/>
                 <property name="departmentOfCompany" view="_local">
                     <property name="projectOfDepartment" view="_local"/>
@@ -166,6 +168,7 @@
                     <vbox align="TOP_RIGHT"
                           width="AUTO"
                           spacing="true"
+                          expand="dropZone"
                           height="100%">
                         <vbox id="dropZone"
                               spacing="true"
