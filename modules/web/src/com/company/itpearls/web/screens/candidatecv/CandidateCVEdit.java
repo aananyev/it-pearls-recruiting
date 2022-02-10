@@ -41,6 +41,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     private static final String NEED_LETTER_NOTIFICATION = "НЕОБХОДИМО ЗАПОЛНИТЬ ШАБЛОН В СОПРОВОДИТЕЛЬНОМ ПИСЬМЕ " +
             "ПО ТРЕБОВАНИЮ ЗАКАЗЧИКА";
+    private static final String WARNING_CAPTION = "ВНИМАНИЕ";
 
     @Inject
     private UserSession userSession;
@@ -106,19 +107,27 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Button showOriginalButon;
 
     @Subscribe
-    public void onInit(InitEvent event) {
-        candidateCVFieldOpenPosition.addValueChangeListener(e -> {
-            if (e.getValue().getNeedLetter() && e.getValue().getTemplateLetter() != null) {
-                if(!e.getValue().getTemplateLetter().equals("")) {
-                    notifications.create(Notifications.NotificationType.WARNING)
-                            .withDescription(NEED_LETTER_NOTIFICATION)
-                            .withType(Notifications.NotificationType.WARNING)
-                            .show();
+    public void onAfterShow2(AfterShowEvent event) {
 
-                    letterRichTextArea.setValue(letterRichTextArea.getValue()
-                            + "<hr>"
-                            + e.getValue().getTemplateLetter()
-                            + "<hr>");
+//    }
+
+//    @Subscribe
+//    public void onInit(InitEvent event) {
+        candidateCVFieldOpenPosition.addValueChangeListener(e -> {
+            if(e.getValue().getTemplateLetter() != null) {
+                if (e.getValue().getNeedLetter() && e.getValue().getTemplateLetter() != null) {
+                    if (!e.getValue().getTemplateLetter().equals("")) {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withDescription(NEED_LETTER_NOTIFICATION)
+                                .withCaption(WARNING_CAPTION)
+                                .withType(Notifications.NotificationType.WARNING)
+                                .show();
+
+                        letterRichTextArea.setValue(letterRichTextArea.getValue()
+                                + "<hr>"
+                                + e.getValue().getTemplateLetter()
+                                + "<hr>");
+                    }
                 }
             }
         });
