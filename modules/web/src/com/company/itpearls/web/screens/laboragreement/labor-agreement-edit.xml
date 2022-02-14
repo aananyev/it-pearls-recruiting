@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://laborAgreementEdit.caption"
         focusComponent="jobCandidateLookupPickerField"
         messagesPack="com.company.itpearls.web.screens.laboragreement">
@@ -9,6 +10,20 @@
             <view extends="laborAgreement-view"/>
             <loader/>
         </instance>
+        <collection id="additionalAgreementDc"
+                    class="com.company.itpearls.entity.LaborAgreement">
+            <view extends="laborAgreement-view"/>
+            <loader id="additionalAgreementDl">
+                <query>
+                    <![CDATA[select e from itpearls_LaborAgreement e order by e.agreementDate]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.additionalLaborAgreement = :additionalLaborAgreement</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="jobCandidateDc"
                     class="com.company.itpearls.entity.JobCandidate"
                     view="jobCandidate-view">
@@ -52,6 +67,13 @@
             width="100%"
             height="100%"
             spacing="true">
+        <radioButtonGroup id="employeeOrCustomerRadioButtonGroup"
+                          required="true"
+                          orientation="horizontal"
+                          dataContainer="laborAgreementDc"
+                          property="employeeOrCustomer"
+                          caption="msg://msgEmployeeOrCustomerCaption"
+                          description="msg://msgEmployeeOrCustomerDescription"/>
         <tabSheet id="laborAgreementTabSheet"
                   width="100%"
                   height="100%"
@@ -111,6 +133,22 @@
                                        optionsContainer="companiesDc"
                                        caption="msg://msgCompany"
                                        property="company"/>
+                    <lookupPickerField id="legalEntityEmployeeLookupPickerField"
+                                       width="100%"
+                                       visible="false"
+                                       dataContainer="laborAgreementDc"
+                                       optionsContainer="companiesDc"
+                                       property="legalEntityEmployee"
+                                       caption="msg://msgLegalEntityEmployeeCaption"
+                                       description="msg://msgLegalEntityEmployeeDescription"/>
+                    <lookupPickerField id="customerCompanyLookupPickerField"
+                                       width="100%"
+                                       visible="false"
+                                       dataContainer="laborAgreementDc"
+                                       optionsContainer="companiesDc"
+                                       property="customerCompany"
+                                       caption="msg://msgCustomerCompanyCaption"
+                                       description="msg://msgCustomerCompanyDescription"/>
                     <lookupPickerField id="laborAgreementTypeField"
                                        width="100%"
                                        dataContainer="laborAgreementDc"
@@ -121,6 +159,7 @@
                                   width="100%"
                                   height="100%"
                                   dataContainer="laborAgreementDc"
+                                  caption="msg://msgCommentCaption"
                                   property="comment"/>
                 </vbox>
             </tab>
@@ -132,6 +171,42 @@
                 <richTextArea id="agreementTextRichTextArea"
                               width="100%"
                               height="100%"/>
+            </tab>
+            <tab id="financeTab"
+                 spacing="true"
+                 margin="true,true,true,true"
+                 caption="msg://msgFinanceTab">
+                <textField id="rateTextField"
+                           dataContainer="laborAgreementDc"
+                           property="rate"
+                           caption="msg://msgRateCaption"
+                           description="msg://msgRateDescription"/>
+            </tab>
+            <tab id="AdditionalAgreementTab"
+                 spacing="true"
+                 margin="true,true,true,true"
+                 caption="msg://msgAdditionalAgreementCaption"
+                 expand="additionalAgreementDataGrid">
+                <dataGrid id="additionalAgreementDataGrid"
+                          width="100%"
+                          height="100%"
+                          dataContainer="additionalAgreementDc">
+                    <actions>
+                        <action id="create" type="create"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
+                    <columns>
+                        <column id="agreementDate" property="agreementDate"/>
+                        <column id="rate" property="rate"/>
+                    </columns>
+                    <rowsCount/>
+                    <buttonsPanel id="buttonsPanel"
+                                  alwaysVisible="true">
+                        <button id="editBtn" action="additionalAgreementDataGrid.edit"/>
+                        <button id="removeBtn" action="additionalAgreementDataGrid.remove"/>
+                    </buttonsPanel>
+                </dataGrid>
             </tab>
         </tabSheet>
         <hbox id="editActions"

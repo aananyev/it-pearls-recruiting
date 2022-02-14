@@ -137,6 +137,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         candidate = candidateField.getValue();
     }
 
+    @Subscribe
+    public void onAfterShow2(AfterShowEvent event) {
+        candidateField.addValueChangeListener(e -> {
+            copyAndCheckCandidate();
+        });
+    }
+
     private void changeField() {
         Integer _addType = 0;
         Boolean _addFlag = false;
@@ -1075,9 +1082,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         getScreenOptionsNoSubscribers(event);
         setRatingField();
 
-        candidateField.addValueChangeListener(e -> {
-            copyAndCheckCandidate();
-        });
     }
 
     private void setRatingField() {

@@ -1,0 +1,6 @@
+alter table ITPEARLS_LABOR_AGREEMENT add column LEGAL_ENTITY_EMPLOYEE_ID uuid ;
+alter table ITPEARLS_LABOR_AGREEMENT add column EMPLOYEE_OR_CUSTOMER boolean ^
+update ITPEARLS_LABOR_AGREEMENT set EMPLOYEE_OR_CUSTOMER = false where EMPLOYEE_OR_CUSTOMER is null ;
+alter table ITPEARLS_LABOR_AGREEMENT alter column EMPLOYEE_OR_CUSTOMER set not null ;
+alter table ITPEARLS_LABOR_AGREEMENT add column CONTRACTOR_COMPANY_ID uuid ;
+alter table ITPEARLS_LABOR_AGREEMENT alter column JOB_CANDIDATE_ID drop not null ;

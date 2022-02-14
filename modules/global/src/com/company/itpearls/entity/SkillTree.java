@@ -17,7 +17,6 @@ import java.util.List;
 @NamePattern("%s|skillName")
 @Table(name = "ITPEARLS_SKILL_TREE", indexes = {
         @Index(name = "IDX_ITPEARLS_SKILL_TREE", columnList = "SKILL_NAME"),
-        @Index(name = "IDX_ITPEARLS_SKILL_TREE_ID", columnList = ""),
         @Index(name = "IDX_ITPEARLS_SKILL_TREE_OPEN_POSITION_ID", columnList = "OPEN_POSITION_ID")
 })
 @Entity(name = "itpearls_SkillTree")

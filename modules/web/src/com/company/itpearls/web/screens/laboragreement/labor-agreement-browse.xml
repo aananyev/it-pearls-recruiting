@@ -10,7 +10,8 @@
             <view extends="laborAgreement-view"/>
             <loader id="laborAgreementsDl">
                 <query>
-                    <![CDATA[select e from itpearls_LaborAgreement e]]>
+                    <![CDATA[select e from itpearls_LaborAgreement e
+                    where e.additionalLaborAgreement is null]]>
                 </query>
             </loader>
         </collection>

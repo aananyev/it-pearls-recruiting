@@ -21,11 +21,30 @@ public class LaborAgreement extends StandardEntity {
     @Column(name = "PERHAPS")
     private Boolean perhaps;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open"})
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "JOB_CANDIDATE_ID")
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
+    @OnDelete(DeletePolicy.CASCADE)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADDITIONAL_LABOR_AGREEMENT_ID")
+    private LaborAgreement additionalLaborAgreement;
+
+    @Column(name = "EMPLOYEE_OR_CUSTOMER", nullable = false)
     @NotNull
+    private Integer employeeOrCustomer;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_CANDIDATE_ID")
     private JobCandidate jobCandidate;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "LEGAL_ENTITY_EMPLOYEE_ID")
+    private Company legalEntityEmployee;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CONTRACTOR_COMPANY_ID")
+    private Company customerCompany;
 
     @Column(name = "AGREEMENT_NAME", nullable = false)
     @NotNull
@@ -43,6 +62,10 @@ public class LaborAgreement extends StandardEntity {
     @Temporal(TemporalType.DATE)
     @Column(name = "AGREEMENT_END_DATE")
     private Date agreementEndDate;
+
+    @NotNull
+    @Column(name = "RATE", nullable = false)
+    private Integer rate;
 
     @Column(name = "PERPETUAL_AGREEMENT")
     private Boolean perpetualAgreement;
@@ -74,6 +97,46 @@ public class LaborAgreement extends StandardEntity {
     @Lob
     @Column(name = "AGREEMENT_TEXT")
     private String agreementText;
+
+    public LaborAgreement getAdditionalLaborAgreement() {
+        return additionalLaborAgreement;
+    }
+
+    public void setAdditionalLaborAgreement(LaborAgreement additionalLaborAgreement) {
+        this.additionalLaborAgreement = additionalLaborAgreement;
+    }
+
+    public Integer getRate() {
+        return rate;
+    }
+
+    public void setRate(Integer rate) {
+        this.rate = rate;
+    }
+
+    public void setEmployeeOrCustomer(Integer employeeOrCustomer) {
+        this.employeeOrCustomer = employeeOrCustomer;
+    }
+
+    public Integer getEmployeeOrCustomer() {
+        return employeeOrCustomer;
+    }
+
+    public Company getLegalEntityEmployee() {
+        return legalEntityEmployee;
+    }
+
+    public void setLegalEntityEmployee(Company legalEntityEmployee) {
+        this.legalEntityEmployee = legalEntityEmployee;
+    }
+
+    public Company getCustomerCompany() {
+        return customerCompany;
+    }
+
+    public void setCustomerCompany(Company customerCompany) {
+        this.customerCompany = customerCompany;
+    }
 
     public String getAgreementText() {
         return agreementText;

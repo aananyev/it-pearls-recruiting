@@ -1,0 +1,1 @@
+alter table ITPEARLS_LABOR_AGREEMENT drop column EMPLOYEE_OR_CUSTOMER__U34748 cascade ;
