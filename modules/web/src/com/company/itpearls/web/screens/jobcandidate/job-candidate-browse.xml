@@ -37,7 +37,7 @@
                 <property name="skillTree" view="_local"/>
                 <property name="socialNetwork" view="_minimal"/>
             </view>
-            <loader id="jobCandidatesDl">
+            <loader id="jobCandidatesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e
                              order by e.secondName, e.firstName]]>

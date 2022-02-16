@@ -76,7 +76,7 @@
         <collection id="personPositionsDc"
                     class="com.company.itpearls.entity.Position"
                     view="_base">
-            <loader id="personPositionsLc">
+            <loader id="personPositionsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Position e
                             where e.positionRuName not like '%(не использовать)%'
@@ -88,7 +88,7 @@
             <view extends="_local">
                 <property name="companyOwnership" view="_minimal"/>
             </view>
-            <loader id="currentCompaniesLc">
+            <loader id="currentCompaniesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
             </loader>
         </collection>
@@ -111,7 +111,7 @@
                     <property name="socialNetworkURL"/>
                 </property>
             </view>
-            <loader id="socialNetworkURLsesDl">
+            <loader id="socialNetworkURLsesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_SocialNetworkURLs e order by e.networkName]]>
                     <condition>
