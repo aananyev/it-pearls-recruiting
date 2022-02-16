@@ -526,6 +526,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Component findSuitableButton(JobCandidate entity) {
         if (dataManager.load(CandidateCV.class)
                 .query("select e from itpearls_CandidateCV e where e.candidate = :candidate")
+                .cacheable(true)
                 .parameter("candidate", entity)
                 .list().size() != 0) {
             Button suitableButton = uiComponents.create(Button.class);
@@ -765,6 +766,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         try {
             iteractionList = dataManager.load(IteractionList.class)
                     .query(QUERY_LAST_SALARY)
+                    .cacheable(true)
                     .view("iteractionList-view")
                     .parameter("iteractionName", iteractionName)
                     .parameter("candidate", jobCandidatesTable.getSingleSelected())
@@ -841,6 +843,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         List<IteractionList> listIteracion = dataManager.load(IteractionList.class)
                 .query(QUERY_GET_LASTRECRUTIER)
+                .cacheable(true)
                 .parameter("candidate", singleSelected)
                 .view("iteractionList-job-candidate")
                 .list();

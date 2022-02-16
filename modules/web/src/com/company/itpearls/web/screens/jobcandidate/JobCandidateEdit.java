@@ -218,6 +218,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
                 .query("select e from itpearls_JobCandidate e where e.firstName like :firstName and " +
                         "e.secondName like :secondName")
+                .cacheable(true)
                 .parameter("firstName", firstNameField.getValue())
                 .parameter("secondName", secondNameField.getValue())
                 .view("jobCandidate-view")
@@ -242,6 +243,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .query("select e.socialNetworkURL " +
                                 "from itpearls_SocialNetworkURLs e " +
                                 "where e.jobCandidate = :candidate")
+                        .cacheable(true)
                         .parameter("candidate", getEditedEntity())
                         .list();
 
@@ -398,9 +400,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         Iteraction iteraction = dataManager.load(Iteraction.class)
                 .query(queryNewCandidate)
+                .cacheable(true)
                 .one();
         OpenPosition openPosition = dataManager.load(OpenPosition.class)
                 .query(queryNewVacancy)
+                .cacheable(true)
                 .one();
 
         iteractionList.setIteractionType(iteraction);
@@ -774,6 +778,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .parameter("secondName", secondNameField.getValue())
                 .parameter("cityOfResidence", jobCityCandidateField.getValue())
                 .parameter("personPosition", personPositionField.getValue())
+                .cacheable(true)
                 .view("jobCandidate-view")
                 .list();
 
@@ -967,6 +972,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return dataManager.load(IteractionList.class)
                 .query(QUERY_GET_ITERCATION_LIST)
                 .parameter("candidate", editedEntity)
+                .cacheable(true)
                 .view("iteractionList-view")
                 .list();
     }
@@ -1079,6 +1085,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             lastIteraction = dataManager.load(IteractionList.class)
                     .query(QUERY_GET_LAST_ITERACTION)
                     .parameter("candidate", getEditedEntity())
+                    .cacheable(true)
                     .view("iteractionList-view")
                     .one();
         } catch (IllegalStateException e) {
@@ -1455,6 +1462,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .query(QUERY_GET_CANDIDATE_CV)
                         .parameter("candidate",
                                 jobCandidateCandidateCvTable.getSingleSelected().getCandidate())
+                        .cacheable(true)
                         .view("candidateCV-view")
                         .one();
             } catch (IllegalStateException e) {
