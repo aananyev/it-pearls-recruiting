@@ -550,6 +550,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (dataManager.load(CandidateCV.class)
                 .query("select e from itpearls_CandidateCV e where e.resumePosition = :resumePosition")
                 .parameter("resumePosition", entity.getPositionType())
+                .cacheable(true)
                 .list().size() != 0) {
 
             Button suitableButton = uiComponents.create(Button.class);
@@ -926,6 +927,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_URGENTLY_POSITIONS)
                 .parameter("priority", priority)
+                .cacheable(true)
                 .view("openPosition-view")
                 .list();
 
