@@ -738,6 +738,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         "where e.numberIteraction = :number")
                         .parameter("number", numberIteraction)
                         .view("iteractionList-view")
+                        .cacheable(true)
                         .one();
             } catch (IllegalStateException e) {
                 myClient = false;

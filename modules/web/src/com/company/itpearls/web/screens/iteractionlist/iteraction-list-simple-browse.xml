@@ -8,7 +8,7 @@
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="iteractionList-view"/>
-            <loader id="iteractionListsDl">
+            <loader id="iteractionListsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
                     <condition>

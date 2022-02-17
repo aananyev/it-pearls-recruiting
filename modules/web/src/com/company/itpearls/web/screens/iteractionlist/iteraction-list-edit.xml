@@ -43,7 +43,7 @@
                 <property name="openPositions" view="_minimal"/>
                 <property name="company" view="_minimal"/>
             </view>
-            <loader id="laborAgreementDl">
+            <loader id="laborAgreementDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_LaborAgreement e]]>
                     <condition>
@@ -111,7 +111,7 @@
         <collection id="usersDc"
                     class="com.haulmont.cuba.security.entity.User"
                     view="_local">
-            <loader id="usersDl">
+            <loader id="usersDl" cacheable="true">
                 <query>
                     <![CDATA[select e from sec$User e order by e.name]]>
                 </query>
