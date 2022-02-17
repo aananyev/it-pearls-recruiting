@@ -104,7 +104,7 @@
                 </query>
             </loader>
         </collection>
-<!--        <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs">
+        <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs">
             <view extends="_local">
                 <property name="jobCandidate" view="_minimal"/>
                 <property name="socialNetworkURL" view="_minimal">
@@ -121,7 +121,7 @@
                     </condition>
                 </query>
             </loader>
-        </collection> -->
+        </collection>
     </data>
     <dialogMode height="750"
                 width="1200"/>
