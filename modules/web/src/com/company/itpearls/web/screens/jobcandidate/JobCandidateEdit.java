@@ -171,8 +171,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Logger log;
     @Inject
     private TextField<String> telegramGroupField;
-    @Inject
-    private CollectionPropertyContainer<Position> positionsListDc;
+//    @Inject
+//    private CollectionPropertyContainer<Position> positionsListDc;
 
     static String RESEARCHER = "Researcher";
     static String RECRUITER = "Recruiter";
