@@ -626,15 +626,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    // загрузить таблицу взаимодействий
     @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
+    public void onAfterShow1(AfterShowEvent event) {
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             iteractionListFromCandidate = getIteractionListFromCandidate(getEditedEntity());
         }
+    }
 
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
+    // загрузить таблицу взаимодействий
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+
+/*        if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!getEditedEntity().getFullName().equals("")) {
                 if (getEditedEntity().getFullName() == null)
                     getEditedEntity().setFullName("");
@@ -646,7 +650,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             // заблокировать вкладки с резюме и итеракицями
 //            tabIteraction.setVisible(false);
 //            tabResume.setVisible(false);
-        }
+        } */
 
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {

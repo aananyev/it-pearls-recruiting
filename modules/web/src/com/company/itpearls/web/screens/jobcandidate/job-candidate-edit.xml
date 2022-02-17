@@ -98,7 +98,7 @@
                     <property name="regionCountry" view="_local"/>
                 </property>
             </view>
-            <loader id="citiesDl">
+            <loader id="citiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e order by e.cityRuName]]>
                 </query>
