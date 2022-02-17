@@ -70,8 +70,8 @@
                         property="iteractionList"/>
             <collection id="jobCandidateLaborAgreementDc"
                         property="laborAgreement"/>
-            <collection id="positionsListDc"
-                        property="positionList"/>
+<!--            <collection id="positionsListDc"
+                        property="positionList"/> -->
         </instance>
         <collection id="personPositionsDc"
                     class="com.company.itpearls.entity.Position"
@@ -104,7 +104,7 @@
                 </query>
             </loader>
         </collection>
-        <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs">
+<!--        <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs">
             <view extends="_local">
                 <property name="jobCandidate" view="_minimal"/>
                 <property name="socialNetworkURL" view="_minimal">
@@ -121,7 +121,7 @@
                     </condition>
                 </query>
             </loader>
-        </collection>
+        </collection> -->
     </data>
     <dialogMode height="750"
                 width="1200"/>
@@ -380,9 +380,14 @@
                                         lower(:searchString) escape '\'
                                     </query>
                                 </suggestionField>
-                                <lookupPickerField id="currentCompanyField" optionsContainer="currentCompaniesDc"
-                                                   dataContainer="jobCandidateDc" property="currentCompany" width="100%"
-                                                   caption="msg://msgCorrentCompany" required="true">
+                                <lookupPickerField id="currentCompanyField"
+                                                   optionsContainer="currentCompaniesDc"
+                                                   dataContainer="jobCandidateDc"
+                                                   property="currentCompany"
+                                                   width="100%"
+                                                   caption="msg://msgCorrentCompany"
+                                                   buffered="true"
+                                                   required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
@@ -414,6 +419,7 @@
                                                        dataContainer="jobCandidateDc"
                                                        property="personPosition"
                                                        width="100%"
+                                                       buffered="true"
                                                        align="BOTTOM_RIGHT"
                                                        caption="msg://msgPersonPosition"
                                                        required="true">
@@ -458,10 +464,14 @@
                                         lower(:searchString) escape '\'
                                     </query>
                                 </suggestionField>
-                                <lookupPickerField id="jobCityCandidateField" dataContainer="jobCandidateDc"
+                                <lookupPickerField id="jobCityCandidateField"
+                                                   dataContainer="jobCandidateDc"
                                                    width="100%"
-                                                   caption="msg://msgCityOfResidence" optionsContainer="citiesDc"
-                                                   property="cityOfResidence" required="true">
+                                                   caption="msg://msgCityOfResidence"
+                                                   optionsContainer="citiesDc"
+                                                   property="cityOfResidence"
+                                                   buffered="true"
+                                                   required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
