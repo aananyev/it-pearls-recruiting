@@ -17,6 +17,7 @@ import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -533,11 +534,66 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
     private void addSuggestField() {
-        BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(10, this) {
+        BackgroundTask<Integer, Void> task1 = new BackgroundTask<Integer, Void>(10, this) {
             @Override
             public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
                 addFirstNameSuggestField();
+
+                return null;
+            }
+
+            @Override
+            public void canceled() {
+                // Do something in UI thread if the task is canceled
+            }
+
+            @Override
+            public void done(Void result) {
+                // Do something in UI thread when the task is done
+            }
+
+            @Override
+            public void progress(List<Integer> changes) {
+                // Show current progress in UI thread
+            }
+        };
+
+        // Get task handler object and run the task
+        BackgroundTaskHandler taskHandler1 = backgroundWorker.handle(task1);
+        taskHandler1.execute();
+
+        BackgroundTask<Integer, Void> task2 = new BackgroundTask<Integer, Void>(10, this) {
+            @Override
+            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
                 addSecondNameSuggestField();
+
+                return null;
+            }
+
+            @Override
+            public void canceled() {
+                // Do something in UI thread if the task is canceled
+            }
+
+            @Override
+            public void done(Void result) {
+                // Do something in UI thread when the task is done
+            }
+
+            @Override
+            public void progress(List<Integer> changes) {
+                // Show current progress in UI thread
+            }
+        };
+
+
+        // Get task handler object and run the task
+        BackgroundTaskHandler taskHandler2 = backgroundWorker.handle(task2);
+        taskHandler2.execute();
+
+        BackgroundTask<Integer, Void> task3 = new BackgroundTask<Integer, Void>(10, this) {
+            @Override
+            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
                 addMiddleNameSuggestField();
 
                 return null;
@@ -558,6 +614,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 // Show current progress in UI thread
             }
         };
+
+
+        // Get task handler object and run the task
+        BackgroundTaskHandler taskHandler3 = backgroundWorker.handle(task3);
+        taskHandler3.execute();
     }
 
     @Subscribe
