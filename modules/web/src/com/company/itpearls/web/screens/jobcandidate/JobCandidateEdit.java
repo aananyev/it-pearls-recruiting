@@ -16,6 +16,9 @@ import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
@@ -171,6 +174,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Logger log;
     @Inject
     private TextField<String> telegramGroupField;
+    @Inject
+    protected BackgroundWorker backgroundWorker;
 //    @Inject
 //    private CollectionPropertyContainer<Position> positionsListDc;
 
@@ -522,12 +527,38 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         Boolean b = getEditedEntity().getBlockCandidate() == null ?
                 false : blockCandidateCheckBox.getValue();
-
         setBlockUnblockButton(b);
 
-        addFirstNameSuggestField();
-        addSecondNameSuggestField();
-        addMiddleNameSuggestField();
+        sddSuggestField();
+    }
+
+
+    private void sddSuggestField() {
+        BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(10, this) {
+            @Override
+            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
+                addFirstNameSuggestField();
+                addSecondNameSuggestField();
+                addMiddleNameSuggestField();
+
+                return null;
+            }
+
+            @Override
+            public void canceled() {
+                // Do something in UI thread if the task is canceled
+            }
+
+            @Override
+            public void done(Void result) {
+                // Do something in UI thread when the task is done
+            }
+
+            @Override
+            public void progress(List<Integer> changes) {
+                // Show current progress in UI thread
+            }
+        };
     }
 
     @Subscribe
