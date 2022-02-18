@@ -729,6 +729,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    private long time = 0;
+
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -770,6 +772,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (blockCandidateCheckBox.getValue() == null) {
             blockCandidateCheckBox.setValue(false);
         }
+
+        long ctime = System.currentTimeMillis();
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Время запуска экрана: " + (ctime - time) + "msec")
+                .show();
     }
 
     private void checkContactsCandidateListener() {
@@ -1037,6 +1044,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+
+        time = System.currentTimeMillis();
 
         addIconColumn();
         setCopyCVButton();
