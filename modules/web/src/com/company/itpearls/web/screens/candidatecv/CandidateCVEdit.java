@@ -114,19 +114,21 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 //    @Subscribe
 //    public void onInit(InitEvent event) {
         candidateCVFieldOpenPosition.addValueChangeListener(e -> {
-            if(e.getValue().getTemplateLetter() != null) {
-                if (e.getValue().getNeedLetter() && e.getValue().getTemplateLetter() != null) {
-                    if (!e.getValue().getTemplateLetter().equals("")) {
-                        notifications.create(Notifications.NotificationType.WARNING)
-                                .withDescription(NEED_LETTER_NOTIFICATION)
-                                .withCaption(WARNING_CAPTION)
-                                .withType(Notifications.NotificationType.WARNING)
-                                .show();
+            if (e.getValue().getNeedLetter() != null) {
+                if (e.getValue().getTemplateLetter() != null) {
+                    if (e.getValue().getNeedLetter() && e.getValue().getTemplateLetter() != null) {
+                        if (!e.getValue().getTemplateLetter().equals("")) {
+                            notifications.create(Notifications.NotificationType.WARNING)
+                                    .withDescription(NEED_LETTER_NOTIFICATION)
+                                    .withCaption(WARNING_CAPTION)
+                                    .withType(Notifications.NotificationType.WARNING)
+                                    .show();
 
-                        letterRichTextArea.setValue(letterRichTextArea.getValue()
-                                + "<hr>"
-                                + e.getValue().getTemplateLetter()
-                                + "<hr>");
+                            letterRichTextArea.setValue(letterRichTextArea.getValue()
+                                    + "<hr>"
+                                    + e.getValue().getTemplateLetter()
+                                    + "<hr>");
+                        }
                     }
                 }
             }

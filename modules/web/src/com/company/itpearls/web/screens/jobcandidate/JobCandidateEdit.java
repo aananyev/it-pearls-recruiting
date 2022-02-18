@@ -529,11 +529,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
 
-        sddSuggestField();
     }
 
 
-    private void sddSuggestField() {
+    private void addSuggestField() {
         BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(10, this) {
             @Override
             public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
@@ -672,6 +671,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        addSuggestField();
 
 /*        if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!getEditedEntity().getFullName().equals("")) {
