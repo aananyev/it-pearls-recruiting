@@ -524,6 +524,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 false : blockCandidateCheckBox.getValue();
 
         setBlockUnblockButton(b);
+
+        addFirstNameSuggestField();
+        addSecondNameSuggestField();
+        addMiddleNameSuggestField();
     }
 
     @Subscribe
@@ -1294,7 +1298,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onBeforeShow2(BeforeShowEvent event) {
-        setCandidateInTables();
+//        setCandidateInTables();
         trimTelegramName();
 
         setLinkButtonEmail();
@@ -1302,9 +1306,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLinkButtonTelegremGroup();
         setLinkButtonSkype();
 
-        addFirstNameSuggestField();
-        addSecondNameSuggestField();
-        addMiddleNameSuggestField();
+//        addFirstNameSuggestField();
+//        addSecondNameSuggestField();
+//        addMiddleNameSuggestField();
 
         lastIteraction = getLastIteraction();
 
