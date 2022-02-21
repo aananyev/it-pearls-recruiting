@@ -20,6 +20,22 @@
                    scaleMode="FILL"
                    dataContainer="openPositionsDc"
                    property="projectName.projectDepartment.companyName.fileCompanyLogo"/>
+            <hbox id="labelIndicatorsHBox"
+                  width="100%"
+                  height="AUTO">
+                <label id="needExeciseLabel"
+                       width="AUTO"
+                       height="AUTO"
+                       visible="false"
+                       stylename="label_button_red"
+                       value="msg://msgNeedExerciseLabel"/>
+                <label id="needLetterLabel"
+                       width="AUTO"
+                       height="AUTO"
+                       visible="false"
+                       stylename="label_button_red"
+                       value="msg://mshNeedLetterLabel"/>
+            </hbox>
             <grid id="projectCompanyFieldGroup"
                   spacing="false"
                   width="100%"

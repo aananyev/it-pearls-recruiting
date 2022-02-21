@@ -425,6 +425,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         OpenPositionDetailScreenFragment openPositionDetailScreenFragment =
                 fragments.create(this, OpenPositionDetailScreenFragment.class);
 
+        openPositionDetailScreenFragment.setOpenPosition(entity);
+
         GroupBoxLayout mainLayout = uiComponents.create(GroupBoxLayout.NAME);
         mainLayout.setWidth("100%");
 

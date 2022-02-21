@@ -194,8 +194,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Button openPositionProjectDescriptionButton;
     @Inject
-    private TabSheet tabSheetSocialNetworks;
-    @Inject
     private Button blockCandidateButton;
     @Named("tabSheetSocialNetworks.jobCandidateCard")
     private VBoxLayout jobCandidateCard;
@@ -286,7 +284,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         enableDisableContacts();
-
         setLabelTitle();
         setPositionsLabel();
         setCreatedUpdatedLabel();
@@ -425,10 +422,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false);
-
-    @Subscribe("tabIteraction")
-    public void onTabIteractionLayoutClick(LayoutClickNotifier.LayoutClickEvent event) {
-    }
 
     @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableVacancyDescriptionProvider(IteractionList iteractionList) {
