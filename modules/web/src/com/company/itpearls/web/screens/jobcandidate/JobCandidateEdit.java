@@ -558,9 +558,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         };
 
-        // Get task handler object and run the task
-        BackgroundTaskHandler taskHandler1 = backgroundWorker.handle(task1);
-        taskHandler1.execute();
 
         BackgroundTask<Integer, Void> task2 = new BackgroundTask<Integer, Void>(10, this) {
             @Override
@@ -587,9 +584,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         };
 
 
-        // Get task handler object and run the task
-        BackgroundTaskHandler taskHandler2 = backgroundWorker.handle(task2);
-        taskHandler2.execute();
 
         BackgroundTask<Integer, Void> task3 = new BackgroundTask<Integer, Void>(10, this) {
             @Override
@@ -615,7 +609,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         };
 
-
+        // Get task handler object and run the task
+        BackgroundTaskHandler taskHandler1 = backgroundWorker.handle(task1);
+        taskHandler1.execute();
+        // Get task handler object and run the task
+        BackgroundTaskHandler taskHandler2 = backgroundWorker.handle(task2);
+        taskHandler2.execute();
         // Get task handler object and run the task
         BackgroundTaskHandler taskHandler3 = backgroundWorker.handle(task3);
         taskHandler3.execute();
@@ -734,7 +733,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        addSuggestField();
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            addSuggestField();
+        }
 
 /*        if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!getEditedEntity().getFullName().equals("")) {

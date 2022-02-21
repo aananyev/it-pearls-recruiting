@@ -938,14 +938,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Collections.shuffle(openPositions);
 
         for (OpenPosition op : openPositions) {
-            String positionName = op.getPositionType().getPositionRuName();
+            if (op.getPositionType() != null) {
+                if (op.getPositionType().getPositionRuName() != null) {
+                    String positionName = op.getPositionType().getPositionRuName();
 
-            if (!opList.containsKey(positionName)) {
-                opList.put(positionName, op.getPriority());
-            } else {
-                if (opList.get(positionName) < op.getPriority()) {
-                    opList.remove(positionName);
-                    opList.put(positionName, op.getPriority());
+                    if (!opList.containsKey(positionName)) {
+                        opList.put(positionName, op.getPriority());
+                    } else {
+                        if (opList.get(positionName) < op.getPriority()) {
+                            opList.remove(positionName);
+                            opList.put(positionName, op.getPriority());
+                        }
+                    }
                 }
             }
         }
