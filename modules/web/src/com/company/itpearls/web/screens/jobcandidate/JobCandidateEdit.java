@@ -530,7 +530,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
 
+//        currentCompanyOptionsContainerInTask();
+
     }
+
+/*    private void currentCompanyOptionsContainerInTask() {
+        BackgroundTask<Integer, Void> currentCompanyTask = new BackgroundTask<Integer, Void>() {
+            @Override
+            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
+                Map<String, Company> map = new LinkedHashMap<>();
+
+                map.putAll(dataManager.loadList());
+
+                currentCompanyField.setOptionsList();
+                return null;
+            }
+        };
+    }*/
 
 
     private void addSuggestField() {
@@ -558,7 +574,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         };
 
-
         BackgroundTask<Integer, Void> task2 = new BackgroundTask<Integer, Void>(10, this) {
             @Override
             public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
@@ -582,8 +597,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 // Show current progress in UI thread
             }
         };
-
-
 
         BackgroundTask<Integer, Void> task3 = new BackgroundTask<Integer, Void>(10, this) {
             @Override

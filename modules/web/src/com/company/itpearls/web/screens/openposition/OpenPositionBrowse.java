@@ -966,17 +966,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             String opDescriptiom = "<b><u>Проекты:</u></b><br>";
 
             for (OpenPosition op1 : openPositions) {
-                if (op.getKey().equals(op1.getPositionType().getPositionRuName()) &&
-                        (!op1.getOpenClose() || op1.getOpenClose() == null)) {
-                    opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
+                if(op1.getPositionType() != null) {
+                    if (op1.getPositionType().getPositionRuName() != null) {
 
-                    if (notLowerRatingLookupField.getValue() != null) {
-                        if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue() &&
-                                !op1.getOpenClose()) {
-                            countOp = countOp + op1.getNumberPosition();
+                        if (op.getKey().equals(op1.getPositionType().getPositionRuName()) &&
+                                (!op1.getOpenClose() || op1.getOpenClose() == null)) {
+                            opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
+
+                            if (notLowerRatingLookupField.getValue() != null) {
+                                if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue() &&
+                                        !op1.getOpenClose()) {
+                                    countOp = countOp + op1.getNumberPosition();
+                                }
+                            } else if (!op1.getOpenClose()) {
+                                countOp = countOp + op1.getNumberPosition();
+                            }
                         }
-                    } else if (!op1.getOpenClose()) {
-                        countOp = countOp + op1.getNumberPosition();
                     }
                 }
             }
@@ -988,9 +993,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 OpenPosition opRet = null;
 
                 for (OpenPosition ops : openPositions) {
-                    if (ops.getPositionType().getPositionRuName().equals(op.getKey())) {
-                        opRet = ops;
-                        break;
+                    if(ops.getPositionType() != null) {
+                        if(ops.getPositionType().getPositionRuName() != null) {
+                            if (ops.getPositionType().getPositionRuName().equals(op.getKey())) {
+                                opRet = ops;
+                                break;
+                            }
+                        }
                     }
 
                 }
