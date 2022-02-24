@@ -3,7 +3,7 @@ package com.company.itpearls.web.screens.openposition;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
-import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
+// import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
@@ -426,6 +426,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 fragments.create(this, OpenPositionDetailScreenFragment.class);
 
         openPositionDetailScreenFragment.setOpenPosition(entity);
+        openPositionDetailScreenFragment.setLabels();
 
         GroupBoxLayout mainLayout = uiComponents.create(GroupBoxLayout.NAME);
         mainLayout.setWidth("100%");

@@ -30,8 +30,7 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
         return openPosition;
     }
 
-    @Subscribe
-    public void onAfterInit(AfterInitEvent event) {
+    public void setLabels() {
         if (openPosition != null) {
             if (openPosition.getNeedExercise() != null) {
                 if (openPosition.getNeedExercise()) {
