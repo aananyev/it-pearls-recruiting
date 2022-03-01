@@ -16,13 +16,9 @@ import java.util.List;
 
 @NamePattern("%s|vacansyName")
 @Table(name = "ITPEARLS_OPEN_POSITION", indexes = {
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_ID", columnList = "ID"),
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_CITY_POSITION_ID", columnList = "CITY_POSITION_ID"),
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_POSITION_TYPE_ID", columnList = "POSITION_TYPE_ID"),
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_OPEN_CLOSE", columnList = "OPEN_CLOSE"),
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PROJECT_NAME_ID", columnList = "PROJECT_NAME_ID"),
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PARENT_OPEN_POSITION_ID", columnList = "PARENT_OPEN_POSITION_ID"),
-        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PRIORITY", columnList = "PRIORITY")
+        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PRIORITY", columnList = "PRIORITY"),
+        @Index(name = "IDX_ITPEARLS_OPEN_POSITION_VACANSY_NAME", columnList = "VACANSY_NAME")
 })
 @Entity(name = "itpearls_OpenPosition")
 public class OpenPosition extends StandardEntity {

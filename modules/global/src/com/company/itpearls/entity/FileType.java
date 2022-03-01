@@ -9,9 +9,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 @NamePattern("%s|nameFileType")
-@Table(name = "ITPEARLS_FILE_TYPE", indexes = {
-        @Index(name = "IDX_ITPEARLS_FILE_TYPE_ID", columnList = "ID")
-})
+@Table(name = "ITPEARLS_FILE_TYPE")
 @Entity(name = "itpearls_FileType")
 public class FileType extends StandardEntity {
     private static final long serialVersionUID = 2484124663629059989L;

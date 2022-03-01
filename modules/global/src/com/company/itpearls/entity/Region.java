@@ -12,7 +12,6 @@ import java.util.List;
 
 @NamePattern("%s|regionRuName")
 @Table(name = "ITPEARLS_REGION", indexes = {
-        @Index(name = "IDX_ITPEARLS_REGION_COUNTRY_ID", columnList = "REGION_COUNTRY_ID"),
         @Index(name = "IDX_ITPEARLS_REGION", columnList = "ID")
 })
 @Entity(name = "itpearls_Region")

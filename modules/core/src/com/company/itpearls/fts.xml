@@ -91,5 +91,8 @@
         <entity class="com.company.itpearls.entity.LaborAgreement">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.PossibleNames">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

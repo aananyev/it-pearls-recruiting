@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|socialNetwork")
 @Table(name = "ITPEARLS_SOCIAL_NETWORK_TYPE", indexes = {
-        @Index(name = "IDX_ITPEARLS_SOCIAL_NETWORK_TYPE", columnList = "ID"),
         @Index(name = "IDX_ITPEARLS_SOCIAL_NETWORK_TYPE_SOCIAL_NETWORK", columnList = "SOCIAL_NETWORK")
 })
 @Entity(name = "itpearls_SocialNetworkType")

@@ -32,5 +32,6 @@
         <class>com.company.itpearls.entity.JobCandidatePositionLists</class>
         <class>com.company.itpearls.entity.LaborAgeementType</class>
         <class>com.company.itpearls.entity.LaborAgreement</class>
+        <class>com.company.itpearls.entity.PossibleNames</class>
     </persistence-unit>
 </persistence>

@@ -12,7 +12,6 @@ import java.util.List;
 
 @NamePattern("%s|countryRuName")
 @Table(name = "ITPEARLS_COUNTRY", indexes = {
-        @Index(name = "IDX_ITPEARLS_COUNTRY_ID", columnList = "ID"),
         @Index(name = "IDX_COUNTRY_COUNTRY_RU_NAME", columnList = "COUNTRY_RU_NAME")
 })
 @Entity(name = "itpearls_Country")
@@ -23,7 +22,7 @@ public class Country extends StandardEntity {
     @Column(name = "COUNTRY_RU_NAME", nullable = false, unique = true, length = 50)
     protected String countryRuName;
 
-    @Column(name = "COUNTRY_SHORT_NAME", unique = false, length = 2)
+    @Column(name = "COUNTRY_SHORT_NAME", length = 2)
     protected String countryShortName;
 
     @Column(name = "PHONE_CODE")

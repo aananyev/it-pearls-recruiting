@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 
 @NamePattern("%s / %s|positionRuName,positionEnName")
 @Table(name = "ITPEARLS_POSITION", indexes = {
-        @Index(name = "IDX_ITPEARLS_POSITION_ID", columnList = "ID"),
         @Index(name = "IDX_ITPEARLS_POSITION_RU_NAME", columnList = "POSITION_RU_NAME"),
         @Index(name = "IDX_ITPEARLS_POSITION_EN_NAME", columnList = "POSITION_EN_NAME")
 })
