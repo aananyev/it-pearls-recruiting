@@ -9,7 +9,10 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|iterationName")
-@Table(name = "ITPEARLS_ITERACTION")
+@Table(name = "ITPEARLS_ITERACTION", indexes = {
+        @Index(name = "IDX_ITPEARLS_ITERACTION_NAME", columnList = "ITERATION_NAME"),
+        @Index(name = "IDX_ITPEARLS_ITERACTION_NUMBER", columnList = "NUMBER_")
+})
 @Entity(name = "itpearls_Iteraction")
 public class Iteraction extends StandardEntity {
     private static final long serialVersionUID = -3287484760093673466L;

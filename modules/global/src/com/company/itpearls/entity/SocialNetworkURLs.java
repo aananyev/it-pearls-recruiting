@@ -10,7 +10,8 @@ import javax.persistence.*;
 
 @NamePattern("%s|networkName")
 @Table(name = "ITPEARLS_SOCIAL_NETWORK_UR_LS", indexes = {
-        @Index(name = "IDX_NETWORK_NAME", columnList = "NETWORK_NAME")
+        @Index(name = "IDX_NETWORK_NAME", columnList = "NETWORK_NAME"),
+        @Index(name = "IDX_ITPEARLS_SOCIAL_NETWORK_U_R_LS", columnList = "NETWORK_URLS")
 })
 @Entity(name = "itpearls_SocialNetworkURLs")
 public class SocialNetworkURLs extends StandardEntity {

@@ -12,7 +12,9 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
-@Table(name = "ITPEARLS_LABOR_AGREEMENT")
+@Table(name = "ITPEARLS_LABOR_AGREEMENT", indexes = {
+        @Index(name = "IDX_ITPEARLS_LABOR_AGREEMENT_NAME", columnList = "AGREEMENT_NAME")
+})
 @Entity(name = "itpearls_LaborAgreement")
 @NamePattern("%s|laborAgreementType")
 public class LaborAgreement extends StandardEntity {

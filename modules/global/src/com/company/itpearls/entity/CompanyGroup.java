@@ -5,11 +5,14 @@ import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|companyRuGroupName")
-@Table(name = "ITPEARLS_COMPANY_GROUP")
+@Table(name = "ITPEARLS_COMPANY_GROUP", indexes = {
+        @Index(name = "IDX_ITPEARLS_COMPANY_GROUP_RU_NAME", columnList = "COMPANY_RU_GROUP_NAME")
+})
 @Entity(name = "itpearls_CompanyGroup")
 public class CompanyGroup extends StandardEntity {
     private static final long serialVersionUID = -3791667942121253157L;

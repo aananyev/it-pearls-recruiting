@@ -3,13 +3,12 @@ package com.company.itpearls.entity;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@Table(name = "ITPEARLS_LABOR_AGEEMENT_TYPE")
+@Table(name = "ITPEARLS_LABOR_AGEEMENT_TYPE", indexes = {
+        @Index(name = "IDX_ITPEARLS_LABOR_AGEEMENT_TYPE_NAME", columnList = "NAME_AGREEMENT")
+})
 @Entity(name = "itpearls_LaborAgeementType")
 @NamePattern("%s|nameAgreement")
 public class LaborAgeementType extends StandardEntity {

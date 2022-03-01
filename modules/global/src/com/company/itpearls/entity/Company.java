@@ -15,7 +15,8 @@ import java.util.List;
 
 @NamePattern("%s %s|comanyName,companyShortName")
 @Table(name = "ITPEARLS_COMPANY", indexes = {
-        @Index(name = "IDX_COMPANY_NAME", columnList = "COMANY_NAME")
+        @Index(name = "IDX_COMPANY_NAME", columnList = "COMANY_NAME"),
+        @Index(name = "IDX_ITPEARLS_COMPANY_SHORT_NAME", columnList = "COMPANY_SHORT_NAME")
 })
 @Entity(name = "itpearls_Company")
 public class Company extends StandardEntity {
