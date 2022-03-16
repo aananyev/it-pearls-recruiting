@@ -7,6 +7,8 @@
     <menu id="application-hrmasters" insertAfter="application-calendars" icon="BALANCE_SCALE">
         <item screen="itpearls_OpenPositionMaster.browse"
               caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse" icon="icons/clear.png"/>
+        <item screen="itpearls_ExtUserBrowse"
+              caption="mainMsg://msgExtUserBrowse" icon="USER"/>
     </menu>
     <menu id="application-outstaffing" insertAfter="application-hrmasters" icon="CUBES">
         <item screen="itpearls_OpenPositionOutstaff.browse"

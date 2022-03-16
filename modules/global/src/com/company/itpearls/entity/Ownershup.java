@@ -10,10 +10,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|shortType")
-@Table(name = "ITPEARLS_OWNERSHUP", indexes = {
-        @Index(name = "IDX_ITPEARLS_OWNERSHUP_SHORT_TYPE", columnList = "SHORT_TYPE"),
-        @Index(name = "IDX_ITPEARLS_OWNERSHUP_LONG_TYPE", columnList = "LONG_TYPE")
-})
+@Table(name = "ITPEARLS_OWNERSHUP")
 @Entity(name = "itpearls_Ownershup")
 public class Ownershup extends StandardEntity {
     private static final long serialVersionUID = -6057344078066436306L;

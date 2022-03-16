@@ -233,7 +233,6 @@
                                                width="100%"
                                                align="BOTTOM_LEFT"
                                                caption="msg://msgCommand"
-                                               buffered="true"
                                                optionsContainer="openPositionParentDc"/>
                         </hbox>
                         <hbox id="hboxVacansy"
@@ -245,7 +244,6 @@
                                                property="positionType"
                                                caption="msg://msgPositionType"
                                                width="100%"
-                                               buffered="true"
                                                required="true">
                                 <actions>
                                     <action id="lookup"
@@ -290,7 +288,6 @@
                                                optionsContainer="companyDepartamentsDc"
                                                caption="msg://msgDepartment"
                                                width="100%"
-                                               buffered="true"
                                                required="true">
                                 <actions>
                                     <action id="lookup"
@@ -305,7 +302,6 @@
                                                optionsContainer="companyNamesDc"
                                                caption="msg://msgCompanyName"
                                                width="100%"
-                                               buffered="true"
                                                required="true">
                                 <actions>
                                     <action id="lookup"
@@ -320,7 +316,6 @@
                                                    optionsContainer="citiesDc"
                                                    property="cityPosition"
                                                    width="100%"
-                                                   buffered="true"
                                                    caption="mainMsg://msgCity"
                                                    align="BOTTOM_LEFT"
                                                    required="true">

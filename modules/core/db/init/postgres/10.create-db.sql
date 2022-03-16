@@ -194,7 +194,6 @@ create table ITPEARLS_ITERACTION (
     --
     NUMBER_ varchar(255),
     MANDATORY_ITERACTION boolean,
-    OUTSTAFFING_SIGN boolean not null,
     ITERACTION_TREE_ID uuid,
     ITERATION_NAME varchar(80) not null,
     PIC varchar(80),
@@ -218,6 +217,7 @@ create table ITPEARLS_ITERACTION (
     SIGN_OUR_INTERVIEW boolean,
     SIGN_CLIENT_INTERVIEW boolean,
     SIGN_SEND_TO_CLIENT boolean,
+    OUTSTAFFING_SIGN boolean not null,
     NOTIFICATION_NEED_SEND boolean,
     NOTIFICATION_TYPE integer,
     NOTIFICATION_PERIOD_TYPE integer,
@@ -721,3 +721,31 @@ create table ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK (
     primary key (OPEN_POSITION_ID, LABOR_AGREEMENT_ID)
 )^
 -- end ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK
+-- begin ITPEARLS_POSSIBLE_NAMES
+create table ITPEARLS_POSSIBLE_NAMES (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    POSITION_ID uuid not null,
+    POSSIBLE_EN_NAME_POSIION varchar(128) not null,
+    POSSIBLE_NAME varchar(128) not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_POSSIBLE_NAMES
+-- begin SEC_USER
+alter table SEC_USER add column SMTP_SERVER varchar(128) ^
+alter table SEC_USER add column SMTP_PORT integer ^
+alter table SEC_USER add column POP3_SERVER varchar(128) ^
+alter table SEC_USER add column POP3_PORT integer ^
+alter table SEC_USER add column IMAP_SERVER varchar(128) ^
+alter table SEC_USER add column IMAP_PORT integer ^
+alter table SEC_USER add column DTYPE varchar(31) ^
+update SEC_USER set DTYPE = 'itpearls_ExtUser' where DTYPE is null ^
+-- end SEC_USER

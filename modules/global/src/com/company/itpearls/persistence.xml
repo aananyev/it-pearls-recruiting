@@ -33,5 +33,6 @@
         <class>com.company.itpearls.entity.LaborAgeementType</class>
         <class>com.company.itpearls.entity.LaborAgreement</class>
         <class>com.company.itpearls.entity.PossibleNames</class>
+        <class>com.company.itpearls.entity.ExtUser</class>
     </persistence-unit>
 </persistence>

@@ -59,10 +59,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Dialogs dialogs;
     @Inject
     private Label<String> labelCV;
-    @Named("tabIteraction")
-    private VBoxLayout tabIteraction;
-    @Named("tabResume")
-    private VBoxLayout tabResume;
     @Inject
     private DateField<Date> birdhDateField;
     @Inject
@@ -160,8 +156,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private StarsAndOtherService starsAndOtherService;
     @Inject
-    private InstanceLoader<JobCandidate> jobCandidateDl;
-    @Inject
     private Screens screens;
     @Inject
     private Button scanContactsFromCVButton;
@@ -210,11 +204,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
     @Inject
-    private InstanceContainer<JobCandidate> jobCandidateDc;
-    @Inject
     private RadioButtonGroup<Integer> workStatusRadioButton;
     @Inject
     private VBoxLayout outstaffingMainVBox;
+    @Inject
+    private InstanceLoader<JobCandidate> jobCandidateDl;
+    @Inject
+    private InstanceContainer<JobCandidate> jobCandidateDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();

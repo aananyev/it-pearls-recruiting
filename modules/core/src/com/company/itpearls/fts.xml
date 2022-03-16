@@ -94,5 +94,8 @@
         <entity class="com.company.itpearls.entity.PossibleNames">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.ExtUser">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>
