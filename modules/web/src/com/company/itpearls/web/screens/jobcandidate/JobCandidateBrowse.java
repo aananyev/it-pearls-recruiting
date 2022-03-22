@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
@@ -9,6 +10,7 @@ import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -84,6 +86,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CollectionContainer<JobCandidate> jobCandidatesDc;
     @Inject
     private CheckBox withCVCheckBox;
+    @Inject
+    private InteractionService interactionService;
+    @Inject
+    private UserSessionSource userSessionSource;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -396,6 +402,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Component copyLastIteraction = createButtonCopyLastIteraction(entity);
         Component listIteraction = createListIteractionButton(entity);
         Component cvSimpleBrowseButton = createCvSimpleBrowse(entity);
+        Component popupButtonCopyLastInteraction = createPopupButtonCopyLastInteraction(entity);
 
         Label<String> cvLabelHeader = uiComponents.create(Label.NAME);
         cvLabelHeader.setHtmlEnabled(true);
@@ -418,6 +425,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         headerBox.add(newIteraction);
         headerBox.add(copyLastIteraction);
         headerBox.add(listIteraction);
+        headerBox.add(popupButtonCopyLastInteraction);
 
         headerBox.add(cvLabelHeader);
         headerBox.add(newResumeButton);
@@ -470,6 +478,73 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 }));
 
         return cvSimpleBrowseButton;
+    }
+
+    private Component createPopupButtonCopyLastInteraction(JobCandidate entity) {
+        PopupButton lastInteractionPopupButton = uiComponents.create(PopupButton.class);
+        lastInteractionPopupButton.setDescription("Копировать последнее взаимодействие с кандидатом");
+        lastInteractionPopupButton.setIconFromSet(CubaIcon.FILE_TEXT);
+
+        jobCandidatesTable.addSelectionListener(e -> {
+            if(jobCandidatesTable.getSingleSelected() == null) {
+                lastInteractionPopupButton.setEnabled(false);
+            } else {
+                lastInteractionPopupButton.setEnabled(true);
+            }
+        });
+
+        Integer MAX_POPULAR_INTERACLION = 5;
+        List<Iteraction> mostPopularInteraction = interactionService.getMostPolularIteraction(
+                userSessionSource.getUserSession().getUser(), MAX_POPULAR_INTERACLION);
+
+        if (mostPopularInteraction.size() != 0) {
+            Integer count = 1;
+            for (Iteraction iteraction : mostPopularInteraction) {
+                lastInteractionPopupButton.addAction(
+                        new BaseAction("setMostPopularInteractionPopupButton" + "-" + count++)
+                                .withCaption(iteraction.getIterationName())
+                                .withHandler(actionPerformedEvent -> setMostPopularInteractionPopupButton(iteraction)));
+            }
+            lastInteractionPopupButton.setEnabled(true);
+        } else {
+            lastInteractionPopupButton.setEnabled(false);
+        }
+
+        return lastInteractionPopupButton;
+    }
+
+    public void setMostPopularInteractionPopupButton(Iteraction iteraction) {
+        if (jobCandidatesTable.getSingleSelected() != null) {
+            screenBuilders.editor(IteractionList.class, this)
+                    .newEntity()
+                    .withInitializer(e -> {
+                        e.setCandidate(jobCandidatesTable.getSingleSelected());
+                        e.setIteractionType(iteraction);
+                        BigDecimal maxNumberIteraction = BigDecimal.ZERO;
+                        IteractionList lastIteraction = null;
+
+                        if (jobCandidatesTable.getSingleSelected() != null) {
+                            for (IteractionList list : jobCandidatesTable
+                                .getSingleSelected()
+                                .getIteractionList()) {
+                                if (maxNumberIteraction.compareTo(list.getNumberIteraction()) < 0) {
+                                    maxNumberIteraction = list.getNumberIteraction();
+                                    lastIteraction = list;
+                                }
+                            }
+
+                            if (lastIteraction != null) {
+                                e.setVacancy(lastIteraction.getVacancy());
+                                e.setNumberIteraction(dataManager.loadValue(
+                                        "select max(e.numberIteraction) " +
+                                                "from itpearls_IteractionList e", BigDecimal.class)
+                                        .one().add(BigDecimal.ONE));
+                            }
+                        }
+                    })
+                    .build()
+                    .show();
+        }
     }
 
     private Component createButtonCopyLastIteraction(JobCandidate entity) {
@@ -979,6 +1054,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withHandler(actionPerformedEvent -> {
                     jobCandidatesTable.setDetailsVisible(jobCandidatesTable.getSingleSelected(), true);
                 }));
+
 
         candidateImageColumnRenderer();
 
