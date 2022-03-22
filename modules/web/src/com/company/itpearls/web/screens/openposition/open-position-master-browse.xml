@@ -467,6 +467,11 @@
                                stylename="h3"/>
                     </hbox>
                 </vbox>
+                <textArea id="letterNotesTextArea"
+                          inputPrompt="msg://msgLetterNotes"
+                          icon="font-icon:STICKY_NOTE"
+                          width="100%"
+                          height="50%"/>
             </tab>
             <tab id="letterTab"
                  spacing="true"

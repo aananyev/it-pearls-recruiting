@@ -1,9 +1,13 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.entity.Company;
+
 public interface ResumeRecognitionService {
     String NAME = "itpearls_ResumeRecognitionService";
 
-    String languageDetection(String cvText);
-    String[] sentenceDetection(String cvText);
-    String[] tokenDetection(String cvText);
+    String parseFirstName(String cvTect);
+
+    String parseSecondName(String cvText);
+
+    String parseMiddleName(String cvText);
 }

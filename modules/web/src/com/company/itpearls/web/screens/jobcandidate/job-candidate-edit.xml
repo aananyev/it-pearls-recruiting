@@ -635,6 +635,10 @@
                     </actions>
                     <buttonsPanel>
                         <button action="jobCandidateIteractionListTable.create"/>
+                        <popupButton id="frequentInteractionPopupButton"
+                                     icon="FILE_TEXT"
+                                     enable="false"
+                                     caption="msg://msgAddPopularIteraction"/>
                         <button action="jobCandidateIteractionListTable.edit"/>
                         <button id="copyIteractionButton"
                                 caption="msg://msgCopy"

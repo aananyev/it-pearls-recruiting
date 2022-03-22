@@ -299,7 +299,7 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         tabCaption.put(3, "3. Выбрать специализацию");
         tabCaption.put(4, "4. Выбрать компанию раюотодателя");
         tabCaption.put(5, "5. Выбрать вакансию");
-        tabCaption.put(6, "6.");
+        tabCaption.put(6, "6. Детали собеседования");
         tabCaption.put(7, "7. Сопроводиетльное письмо");
 
         for (Accordion.Tab tab : mainAccordion.getTabs()) {

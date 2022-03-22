@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 // TODO сделать сортировку по номеру взаимодействия или дате в таблице IteractioNList.Borwse
 
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
@@ -16,6 +17,7 @@ import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -211,6 +213,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private InstanceLoader<JobCandidate> jobCandidateDl;
     @Inject
     private InstanceContainer<JobCandidate> jobCandidateDc;
+    @Inject
+    private PopupButton frequentInteractionPopupButton;
+    @Inject
+    private InteractionService interactionService;
+    @Inject
+    private UserSessionSource userSessionSource;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -284,6 +292,50 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setPositionsLabel();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
+        setFrequentInteractionPopupButton();
+    }
+
+    private void setFrequentInteractionPopupButton() {
+        Integer MAX_POPULAR_INTERACLION = 5;
+        List<Iteraction> mostPopularInteraction = interactionService.getMostPolularIteraction(
+                userSessionSource.getUserSession().getUser(), MAX_POPULAR_INTERACLION);
+
+        if (mostPopularInteraction.size() != 0) {
+            Integer count = 1;
+            for (Iteraction iteraction : mostPopularInteraction) {
+                frequentInteractionPopupButton.addAction(
+                        new BaseAction("setMostPopularInteractionPopupButton" + "-" + count++)
+                                .withCaption(iteraction.getIterationName())
+                                .withHandler(actionPerformedEvent -> setMostPopularInteractionPopupButton(iteraction)));
+            }
+            frequentInteractionPopupButton.setEnabled(true);
+        } else {
+            frequentInteractionPopupButton.setEnabled(false);
+        }
+    }
+
+    public void setMostPopularInteractionPopupButton(Iteraction iteraction) {
+        if (jobCandidateIteractionListTable.getSingleSelected() != null) {
+            screenBuilders.editor(IteractionList.class, this)
+                    .newEntity()
+                    .withInitializer(e -> {
+                        e.setCandidate(getEditedEntity());
+                        e.setIteractionType(iteraction);
+                        e.setVacancy(jobCandidateIteractionListTable.getSingleSelected().getVacancy());
+                    })
+                    .build()
+                    .show();
+        } else {
+            screenBuilders.editor(IteractionList.class, this)
+                    .newEntity()
+                    .withInitializer(e -> {
+                        e.setCandidate(getEditedEntity());
+                        e.setIteractionType(iteraction);
+                    })
+                    .build()
+                    .show();
+        }
+
     }
 
     private void setUnblock() {
@@ -735,7 +787,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if(PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             addSuggestField();
         }
 
