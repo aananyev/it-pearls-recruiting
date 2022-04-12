@@ -822,6 +822,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
         ;
         setMostPopularIteraction();
+
+        if(PersistenceHelper.isNew(getEditedEntity())) {
+            dateIteractionField.setEditable(true);
+        } else {
+            dateIteractionField.setEditable(false);
+        }
     }
 
     @Subscribe

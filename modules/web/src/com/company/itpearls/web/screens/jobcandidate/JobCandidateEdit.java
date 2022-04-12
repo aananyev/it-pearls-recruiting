@@ -1876,6 +1876,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 flag = true;
 
             } else {
+                /*
                 if (!StringUtils.equals(newEmail, oldEmail)) {
                     messageEmail = "Адрес электронной почты старый "
                             + emailField.getValue()
@@ -1884,7 +1885,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                     flag = true;
                 }
-            }
+            }*/
         }
 
         if (newPhone != null) {
@@ -1894,7 +1895,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                 flag = true;
             } else {
-                if (!StringUtils.equals(newPhone, oldPhone)) {
+                // убрать новая/старая
+                /* if (!StringUtils.equals(newPhone, oldPhone)) {
                     if (!newPhoneNew.equals(oldPhone)) {
                         messagePhone = "Телефон старый "
                                 + phoneField.getValue()
@@ -1903,7 +1905,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                         flag = true;
                     }
-                }
+                }*/
             }
         }
 
@@ -1914,14 +1916,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                 flag = true;
             } else {
-                if (!newCompany.equals(oldCompany)) {
-                    messageCompany = "Компания была "
+                /* if (!newCompany.equals(oldCompany)) {
+                    // убрать новая - старая
+                     messageCompany = "Компания была "
                             + currentCompanyField.getValue().getComanyName()
                             + ", в резюме отмечена "
                             + newCompany.getComanyName()
                             + " ";
-
                     flag = true;
+                    */
                 }
             }
         }
@@ -1951,7 +1954,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                     String messageSN = "";
 
                                     if (socialOld != null) {
-                                        if (!sFromCV.equals(socialOld)) {
+                                        // убрать новая - старая
+                                        /* if (!sFromCV.equals(socialOld)) {
                                             messageSN = "Ссылка на социальную сеть старая "
                                                     + socialOld
                                                     + " новая "
@@ -1963,7 +1967,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                             urls.add(sFromCV);
 
                                             messageSocial.put(hostSocialFromCandidate, urls);
-                                        }
+                                        } */
                                     } else {
                                         messageSN = "Добавить новую ссылку: " + sFromCV + "? ";
 

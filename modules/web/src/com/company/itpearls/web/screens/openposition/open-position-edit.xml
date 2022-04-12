@@ -12,7 +12,7 @@
                           fetch="JOIN"
                           view="_minimal"/>
                 <property name="positionType"
-                          view="_local"/>
+                          view="_minimal"/>
                 <property name="projectName"
                           view="project-view">
                     <property name="projectDepartment"

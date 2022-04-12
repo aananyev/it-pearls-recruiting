@@ -979,7 +979,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                     countOp = countOp + op1.getNumberPosition();
                                 }
                             } else if (!op1.getOpenClose()) {
-                                countOp = countOp + op1.getNumberPosition();
+                                if (op1.getNumberPosition() != null) {
+                                    countOp = countOp + op1.getNumberPosition();
+                                }
                             }
                         }
                     }

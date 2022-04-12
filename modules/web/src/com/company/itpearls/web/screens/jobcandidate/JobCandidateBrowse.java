@@ -227,7 +227,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 "<div class=\"" +
                         retStr
                         + "\">" +
-                        date
+                        (date != null ? date : "нет")
                         + "</div>"
                 ;
     }
