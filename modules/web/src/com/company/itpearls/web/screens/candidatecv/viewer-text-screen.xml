@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://viewerTextScreen.caption"
+        messagesPack="com.company.itpearls.web.screens.candidatecv">
+    <layout expand="textViewerRichTextArea"
+            height="600px"
+            width="1000px">
+        <richTextArea id="textViewerRichTextArea"
+                      editable="false"
+                      width="100%"
+                      height="100%"
+                      enable="false"/>
+    </layout>
+</window>

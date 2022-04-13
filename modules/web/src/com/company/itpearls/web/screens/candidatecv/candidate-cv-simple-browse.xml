@@ -72,6 +72,16 @@
                 <column property="datePost" id="datePost"/>
                 <column property="resumePosition" id="resumePosition"/>
                 <column property="toVacancy" id="toVacancy"/>
+                <column id="candidateOriginalCVColumn"
+                        width="120px"
+                        caption="msg://msgOriginalCV">
+                    <componentRenderer/>
+                </column>
+                <column id="candidateITPearlsCVColumn"
+                        width="120px"
+                        caption="msg://msgITPearlsCV">
+                    <componentRenderer/>
+                </column>
                 <column id="createdBy" property="createdBy"/>
             </columns>
             <rowsCount/>
@@ -84,6 +94,12 @@
                         caption="msg://msgCopyCV"
                         description="msg://msgCopyCV"
                         icon="COPY"/>
+                <button id="viewOriginalCVButton"
+                        enable="false"
+                        invoke="viewOriginalCVButton"
+                        caption="msg://msgViewOriginalCV"
+                        description="msg://msgViewOriginalCVButtonViewer"
+                        icon="VIEW_ACTION"/>
             </buttonsPanel>
         </dataGrid>
         <button action="lookupCancelAction"
