@@ -179,6 +179,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CheckBox needMemoCheckBox;
     @Inject
     private LookupField<Integer> registrationForWorkField;
+    @Inject
+    private DateField<Date> lastOpenVacancyDateField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -402,6 +404,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("openClosePositionCheckBox")
     public void onOpenClosePositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+
+        if (!openClosePositionCheckBox.getValue()) {
+            Date lastOpenDate = new Date();
+
+            lastOpenVacancyDateField.setValue(lastOpenDate);
+        } else {
+            lastOpenVacancyDateField.setValue(null);
+        }
 
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_SELECT_COMMAND)

@@ -19,10 +19,12 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import org.apache.commons.lang3.time.DateUtils;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
 
@@ -912,7 +914,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
     }
 
-
     private void removeUrgentlyLists() {
         for (Component component : urgentlyHBox.getComponents()) {
             urgentlyHBox.remove(component);
@@ -947,7 +948,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     } else {
                         if (opList.get(positionName) < op.getPriority()) {
                             opList.remove(positionName);
-                            opList.put(positionName, op.getPriority());
+                            if(positionName != null) {
+                                opList.put(positionName, op.getPriority());
+                            }
                         }
                     }
                 }
@@ -1365,6 +1368,33 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return style;
+    }
+
+    @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "columnGenerator")
+    private Object openPositionsTableLastOpenCloseColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yy");
+
+        return (event.getItem().getLastOpenDate() != null ?
+                simpleDateFormat.format(event.getItem().getLastOpenDate()) : "");
+    }
+
+    @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "styleProvider")
+    private String openPositionsTableLastOpenCloseColumnStyleProvider(OpenPosition openPosition) {
+        if (openPosition.getLastOpenDate() != null) {
+            Date date = new Date();
+
+            if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 1))) {
+                return "pic-center-medium-red";
+            } else {
+                if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 3))) {
+                    return "pic-center-medium-yellow";
+                } else {
+                    return "pic-center-medium-green";
+                }
+            }
+        } else {
+            return "pic-center-medium-gray";
+        }
     }
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "columnGenerator")

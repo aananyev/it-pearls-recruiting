@@ -154,6 +154,10 @@
                 width="1100px"/>
     <layout expand="tabSheetGroupBox"
             spacing="true">
+        <dateField id="lastOpenVacancyDateField"
+                   dataContainer="openPositionDc"
+                   property="lastOpenDate"
+                   visible="false"/>
         <groupBox spacing="true">
             <vbox>
                 <label id="labelOpenPosition"

@@ -99,6 +99,14 @@
                         width="70px"
                         minimumWidth="35px"
                         caption=""/>
+                <column id="lastOpenCloseColumn"
+                        sortable="true"
+                        caption="msg://msgLastOpenCloseColumn"
+                        resizable="true"
+                        maximumWidth="70px"
+                        minimumWidth="50px">
+                    <textRenderer/>
+                </column>
                 <column id="vacansyName"
                         property="vacansyName"
                         resizable="true"
@@ -181,6 +189,7 @@
                         caption="msg://msgStat">
                     <textRenderer/>
                 </column>
+
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"

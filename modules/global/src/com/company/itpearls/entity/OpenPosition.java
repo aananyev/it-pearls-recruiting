@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @NamePattern("%s|vacansyName")
@@ -27,6 +28,10 @@ public class OpenPosition extends StandardEntity {
     @NotNull
     @Column(name = "OPEN_CLOSE")
     protected Boolean openClose = false;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "LAST_OPEN_DATE")
+    private Date lastOpenDate;
 
     @NotNull
     @Column(name = "VACANSY_NAME", nullable = false, length = 250)
@@ -173,6 +178,14 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @Composition
     private List<LaborAgreement> laborAgreement;
+
+    public Date getLastOpenDate() {
+        return lastOpenDate;
+    }
+
+    public void setLastOpenDate(Date lastOpenDate) {
+        this.lastOpenDate = lastOpenDate;
+    }
 
     public List<LaborAgreement> getLaborAgreement() {
         return laborAgreement;

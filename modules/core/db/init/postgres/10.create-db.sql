@@ -428,6 +428,7 @@ create table ITPEARLS_OPEN_POSITION (
     DELETED_BY varchar(50),
     --
     OPEN_CLOSE boolean,
+    LAST_OPEN_DATE date,
     VACANSY_NAME varchar(250) not null,
     REMOTE_WORK integer not null,
     REGISTRATION_FOR_WORK integer,
