@@ -97,7 +97,6 @@ public class ExtMainScreen extends MainScreen {
                 "   where g.candidate = e.candidate) " +
                 "and e.iteractionType in " +
                 "(select f from itpearls_Iteraction f where f.notificationNeedSend = true)";
-//                "(select f from itpearls_Iteraction f  where f.notificationType = :notificationType) ";
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !

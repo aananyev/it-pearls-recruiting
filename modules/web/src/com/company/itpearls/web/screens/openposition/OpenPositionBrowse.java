@@ -546,7 +546,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
-
     private Component findSuitableButton(OpenPosition entity) {
 
         if (dataManager.load(CandidateCV.class)
@@ -589,7 +588,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retButton.addClickListener(e -> {
             entity.setOpenClose(!entity.getOpenClose());
-            dataManager.commit(entity);
 
             retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
             retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
@@ -597,10 +595,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (entity.getOpenClose() || entity.getOpenClose() == null) {
                 events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
                         entity.getVacansyName()));
+
+                entity.setLastOpenDate(null);
             } else {
                 events.publish(new UiNotificationEvent(this, "Открыта вакансия: " +
                         entity.getVacansyName()));
+                entity.setLastOpenDate(new Date());
             }
+
+            dataManager.commit(entity);
 
             if (!entity.getOpenClose()) {
                 entity.getProjectName().setProjectIsClosed(false);
@@ -1384,16 +1387,35 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             Date date = new Date();
 
             if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 1))) {
-                return "pic-center-medium-red";
+                return "pic-center-small-red";
             } else {
                 if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 3))) {
-                    return "pic-center-medium-yellow";
+                    return "pic-center-small-yellow";
                 } else {
-                    return "pic-center-medium-green";
+                    return "pic-center-small-green";
                 }
             }
         } else {
-            return "pic-center-medium-gray";
+            return "pic-center-small-gray";
+        }
+    }
+
+    @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "descriptionProvider")
+    private String openPositionsTableLastOpenCloseColumnDescriptionProvider(OpenPosition openPosition) {
+        if (openPosition.getLastOpenDate() != null) {
+            Date date = new Date();
+
+            if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 1))) {
+                return "Открыта недавно";
+            } else {
+                if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 3))) {
+                    return "Открыта более месяца назад";
+                } else {
+                    return "Открыта более 3-х месяцев назад";
+                }
+            }
+        } else {
+            return "Открыта очень давно";
         }
     }
 

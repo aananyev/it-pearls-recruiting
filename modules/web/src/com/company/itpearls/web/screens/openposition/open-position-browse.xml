@@ -104,7 +104,7 @@
                         caption="msg://msgLastOpenCloseColumn"
                         resizable="true"
                         maximumWidth="70px"
-                        minimumWidth="50px">
+                        minimumWidth="55px">
                     <textRenderer/>
                 </column>
                 <column id="vacansyName"
