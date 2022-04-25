@@ -1376,20 +1376,24 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "columnGenerator")
     private Object openPositionsTableLastOpenCloseColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yy");
+        Date lastDate = event.getItem().getLastOpenDate() != null
+                ? event.getItem().getLastOpenDate() : event.getItem().getCreateTs();
 
-        return (event.getItem().getLastOpenDate() != null ?
-                simpleDateFormat.format(event.getItem().getLastOpenDate()) : "");
+        return (lastDate != null?
+                simpleDateFormat.format(lastDate) : "");
     }
 
     @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "styleProvider")
     private String openPositionsTableLastOpenCloseColumnStyleProvider(OpenPosition openPosition) {
-        if (openPosition.getLastOpenDate() != null) {
+        Date lastDate = openPosition.getLastOpenDate() != null
+                ? openPosition.getLastOpenDate() : openPosition.getCreateTs();
+        if (lastDate != null) {
             Date date = new Date();
 
-            if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 1))) {
+            if (date.before(DateUtils.addMonths(lastDate, 1))) {
                 return "pic-center-small-red";
             } else {
-                if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 3))) {
+                if (date.before(DateUtils.addMonths(lastDate, 3))) {
                     return "pic-center-small-yellow";
                 } else {
                     return "pic-center-small-green";
