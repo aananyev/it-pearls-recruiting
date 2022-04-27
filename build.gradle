@@ -1,5 +1,5 @@
 buildscript {
-    ext.cubaVersion = '7.2.18'
+    ext.cubaVersion = '7.2.19'
     repositories {
         maven {
             url 'https://repo.cuba-platform.com/content/groups/work'
@@ -125,7 +125,7 @@ configure(coreModule) {
     }
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
-        host = 'localhost.it-pearls.ru'
+        host = 'localhost'
         dbName = 'itpearls'
         dbms = 'postgres'
         dbUser = 'cuba'
@@ -133,7 +133,7 @@ configure(coreModule) {
     }
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
-        host = 'localhost.it-pearls.ru'
+        host = 'localhost'
         dbName = 'itpearls'
         dbms = 'postgres'
         dbUser = 'cuba'
@@ -278,4 +278,11 @@ task buildWar(type: CubaWarBuilding) {
     includeContextXml = true
     singleWar = false
     coreContextXmlPath = 'modules/core/web/META-INF/war-context.xml'
+}
+task buildUberJar(type: CubaUberJarBuilding) {
+    coreJettyEnvPath = 'modules/core/web/META-INF/jetty-env.xml'
+    logbackConfigurationFile = 'etc/uber-jar-logback.xml'
+    singleJar = true
+    appProperties = ['cuba.automaticDatabaseUpdate': true,
+                     'cuba.dataSourceProvider'     : 'jndi']
 }

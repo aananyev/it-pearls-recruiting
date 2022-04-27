@@ -26,14 +26,24 @@
         <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
     </menu>
-    <menu id="application-project" insertAfter="application-hunting" icon="BUILDING">
+    <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
         <item screen="itpearls_Project.browse" icon="ARCHIVE"/>
         <item screen="itpearls_Person.browse" icon="USER"/>
         <item screen="itpearls_CompanyDepartament.browse" icon="GROUP"/>
         <item screen="itpearls_Company.browse" icon="BUILDING"/>
         <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
     </menu>
-    <menu id="application-researching" insertAfter="application-project" icon="BOLT">
+    <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-project">
+        <item bean="itpearls_RunReportBean" beanMethod="runReport"
+              caption="mainMsg://menu-config.itpearls_RunReportBean.runReport" icon="USER"/>
+        <item bean="itpearls_NumberInterviewsRecrutierRunReportBean" beanMethod="runReport"
+              caption="mainMsg://menu-config.itpearls_NumberInterviewsRecrutierRunReportBean.runReport"
+              icon="ARROW_RIGHT"/>
+        <item bean="itpearls_NumberInterviewsResearcherRunReportBean" beanMethod="runReport"
+              caption="mainMsg://menu-config.itpearls_NumberInterviewsResearcherRunReportBean.runReport"
+              icon="ARROW_RIGHT"/>
+    </menu>
+    <menu id="application-researching" icon="BOLT" insertAfter="application-project">
         <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>
         <item screen="itpearls_SubscribeCandidateAction.browse" icon="CLONE"/>
         <item screen="itpearls_RecrutiesGroupSubscribeTasks.browse"
@@ -50,7 +60,7 @@
         <item screen="itpearls_Ownershup.browse" icon="icons/wf-user-group-button.png"/>
         <item screen="itpearls_Position.browse" icon="OPENID"/>
         <item screen="itpearls_FileType.browse" icon="FILE_TEXT_O"/>
-        <item screen="itpearls_SomeFiles.browse" icon="COPY" description="mainMsg://default.description"/>
+        <item screen="itpearls_SomeFiles.browse" description="mainMsg://default.description" icon="COPY"/>
         <item screen="itpearls_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="FACEBOOK_OFFICIAL"/>
     </menu>

@@ -7,7 +7,7 @@
         <Arg>
             <New class="org.apache.commons.dbcp2.BasicDataSource">
                 <Set name="driverClassName">org.hsqldb.jdbc.JDBCDriver</Set>
-                <Set name="url">jdbc:hsqldb:hsql://192.168.1.10:9010/itpearls</Set>
+                <Set name="url">jdbc:hsqldb:hsql://localhost/db</Set>
                 <Set name="username">itpeals</Set>
                 <Set name="password">Vilpecul1971Albireo</Set>
                 <Set name="maxIdle">2</Set>

@@ -12,7 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.util.Date;
 
-@NamePattern("%s %s %s %s|firstName,middleName,secondName,birdhDate")
+@NamePattern("%s %s|firstName,secondName")
 @Table(name = "ITPEARLS_PERSON", indexes = {
         @Index(name = "IDX_ITPEARLS_PERSON_FIRST_NAME", columnList = "FIRST_NAME"),
         @Index(name = "IDX_ITPEARLS_PERSON_MIDDLE_NAME", columnList = "MIDDLE_NAME"),
