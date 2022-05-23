@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://openPositionNewsBrowse.caption"
+        focusComponent="openPositionNewsTable"
+        messagesPack="com.company.itpearls.web.screens.openpositionnews">
+    <data readOnly="true">
+        <collection id="openPositionNewsCollectionDc"
+                    class="com.company.itpearls.entity.OpenPositionNews">
+            <view extends="_local">
+                <property name="openPosition" view="_minimal">
+                    <property name="openClose"/>
+                    <property name="positionType" view="_minimal"/>
+                    <property name="projectName" view="_minimal"/>
+                </property>
+            </view>
+            <loader id="openPositionNewsCollectionDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPositionNews e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="openPositionNewsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="openPositionNewsTable"
+                dataLoader="openPositionNewsCollectionDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="openPositionNewsTable"
+                    width="100%"
+                    dataContainer="openPositionNewsCollectionDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="openPosition"/>
+                <column id="dateNews"/>
+                <column id="comment"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="openPositionNewsTable.create"/>
+                <button id="editBtn" action="openPositionNewsTable.edit"/>
+                <button id="removeBtn" action="openPositionNewsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

@@ -1089,11 +1089,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private void setSubcribersFilter() {
         if (checkBoxOnlyMySubscribe.getValue()) {
-//            openPositionsDl.setParameter("recrutier", userSession.getUser());
-//            openPositionsDl.setParameter("nowDate", new Date());
+            openPositionsDl.setParameter("recrutier", userSession.getUser());
+            openPositionsDl.setParameter("nowDate", new Date());
 
-            openPositionsDl.removeParameter("recrutier");
-            openPositionsDl.removeParameter("nowDate");
+//            openPositionsDl.removeParameter("recrutier");
+//            openPositionsDl.removeParameter("nowDate");
         } else {
             openPositionsDl.removeParameter("recrutier");
             openPositionsDl.removeParameter("nowDate");

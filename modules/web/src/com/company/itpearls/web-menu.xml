@@ -25,6 +25,8 @@
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>
         <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
+        <item screen="itpearls_OpenPositionNews.browse"
+              caption="mainMsg://menu_config.itpearls_OpenPositionNews.browse"/>
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
         <item screen="itpearls_Project.browse" icon="ARCHIVE"/>
@@ -32,6 +34,13 @@
         <item screen="itpearls_CompanyDepartament.browse" icon="GROUP"/>
         <item screen="itpearls_Company.browse" icon="BUILDING"/>
         <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
+    </menu>
+    <menu id="application-researching" icon="BOLT" insertAfter="application-project">
+        <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>
+        <item screen="itpearls_SubscribeCandidateAction.browse" icon="CLONE"/>
+        <item screen="itpearls_RecrutiesGroupSubscribeTasks.browse"
+              caption="mainMsg://menu_config.itpearls_RecrutiesGroupSubscribeTasks.browse"/>
+        <item screen="itpearls_GroupSubscribeScreen" caption="mainMsg://menu_config.itpearls_GroupSubscribeScreen"/>
     </menu>
     <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-project">
         <item bean="itpearls_RunReportBean" beanMethod="runReport"
@@ -42,13 +51,6 @@
         <item bean="itpearls_NumberInterviewsResearcherRunReportBean" beanMethod="runReport"
               caption="mainMsg://menu-config.itpearls_NumberInterviewsResearcherRunReportBean.runReport"
               icon="ARROW_RIGHT"/>
-    </menu>
-    <menu id="application-researching" icon="BOLT" insertAfter="application-project">
-        <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>
-        <item screen="itpearls_SubscribeCandidateAction.browse" icon="CLONE"/>
-        <item screen="itpearls_RecrutiesGroupSubscribeTasks.browse"
-              caption="mainMsg://menu_config.itpearls_RecrutiesGroupSubscribeTasks.browse"/>
-        <item screen="itpearls_GroupSubscribeScreen" caption="mainMsg://menu_config.itpearls_GroupSubscribeScreen"/>
     </menu>
     <menu id="application-hadbook" insertAfter="application-researching">
         <item screen="itpearls_Iteraction._tree.browse" icon="REFRESH_ACTION"/>

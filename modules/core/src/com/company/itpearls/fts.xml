@@ -97,5 +97,8 @@
         <entity class="com.company.itpearls.entity.ExtUser">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.OpenPositionNews">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

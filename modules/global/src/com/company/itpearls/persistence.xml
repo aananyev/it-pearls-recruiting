@@ -34,5 +34,6 @@
         <class>com.company.itpearls.entity.LaborAgreement</class>
         <class>com.company.itpearls.entity.PossibleNames</class>
         <class>com.company.itpearls.entity.ExtUser</class>
+        <class>com.company.itpearls.entity.OpenPositionNews</class>
     </persistence-unit>
 </persistence>
