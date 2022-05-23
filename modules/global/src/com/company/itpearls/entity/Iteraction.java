@@ -95,6 +95,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_SEND_TO_CLIENT")
     private Boolean signSendToClient;
 
+    @Column(name = "SIGN_PRIORITY_NEWS")
+    private Boolean signPriorityNews;
+
     @Column(name = "OUTSTAFFING_SIGN", nullable = false)
     protected Boolean outstaffingSign = false;
 
@@ -115,6 +118,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public Boolean getSignPriorityNews() {
+        return signPriorityNews;
+    }
+
+    public void setSignPriorityNews(Boolean signPriorityNews) {
+        this.signPriorityNews = signPriorityNews;
+    }
 
     public Boolean getStatistics() {
         return statistics;

@@ -79,9 +79,14 @@
                     <![CDATA[select e from itpearls_OpenPositionNews e
                     order by e.dateNews desc]]>
                     <condition>
+                        <and>
                         <c:jpql>
                             <c:where>e.openPosition = :openPosition</c:where>
                         </c:jpql>
+                        <c:jpql>
+                            <c:where>e.priorityNews = :priorityNews</c:where>
+                        </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
@@ -754,6 +759,7 @@
                     <vbox id="openPostitonNewsBrowseBox"
                           expand="openPostionNewsDataGrid"
                           width="100%"
+                          spacing="true"
                           height="100%">
                         <dataGrid id="openPostionNewsDataGrid"
                                   dataContainer="openPositionNewsDc"
@@ -776,8 +782,10 @@
                                         action="openPostionNewsDataGrid.remove"/>
                             </buttonsPanel>
                         </dataGrid>
+                        <checkBox id="priorityNewsCheckBox"
+                                  width="AUTO"
+                                  caption="msg://msgPriorityNewsCheckBox"/>
                     </vbox>
-
                 </tab>
             </tabSheet>
         </vbox>

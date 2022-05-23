@@ -608,12 +608,44 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     }
 
+    Boolean deleteTwiceEvent = true;
+
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if (commentField.getValue() == null)
             commentField.setValue("");
 
-        setSubscribe();
+        if (deleteTwiceEvent) {
+            setSubscribe();
+            setOpenPositionNewsAutomatedMessage(vacancyFiels.getValue(),
+                    iteractionTypeField.getValue().getIterationName(),
+                    candidateField.getValue().getFullName() + ":" + commentField.getValue(),
+                    dateIteractionField.getValue(),
+                    recrutierField.getValue(),
+                    iteractionTypeField.getValue().getSignPriorityNews());
+            deleteTwiceEvent = false;
+        }
+    }
+
+    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+                                                     String subject,
+                                                     String comment,
+                                                     Date date,
+                                                     User user,
+                                                     Boolean priority) {
+
+        OpenPositionNews openPositionNews = new OpenPositionNews();
+
+        openPositionNews.setOpenPosition(editedEntity);
+        openPositionNews.setAuthor(user);
+        openPositionNews.setDateNews(date);
+        openPositionNews.setSubject(subject);
+        openPositionNews.setComment(comment);
+        openPositionNews.setPriorityNews(priority != null ? priority : false);
+
+        CommitContext commitContext = new CommitContext();
+        commitContext.addInstanceToCommit(openPositionNews);
+        dataManager.commit(commitContext);
     }
 
     private void setSubscribe() {

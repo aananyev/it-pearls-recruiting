@@ -217,6 +217,7 @@ create table ITPEARLS_ITERACTION (
     SIGN_OUR_INTERVIEW boolean,
     SIGN_CLIENT_INTERVIEW boolean,
     SIGN_SEND_TO_CLIENT boolean,
+    SIGN_PRIORITY_NEWS boolean,
     OUTSTAFFING_SIGN boolean not null,
     NOTIFICATION_NEED_SEND boolean,
     NOTIFICATION_TYPE integer,
@@ -766,6 +767,7 @@ create table ITPEARLS_OPEN_POSITION_NEWS (
     DATE_NEWS timestamp not null,
     COMMENT_ text not null,
     AUTHOR_ID uuid not null,
+    PRIORITY_NEWS boolean,
     --
     primary key (ID)
 )^

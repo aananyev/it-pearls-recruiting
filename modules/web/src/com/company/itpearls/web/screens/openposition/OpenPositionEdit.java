@@ -530,11 +530,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         openPositionNews.setDateNews(date);
         openPositionNews.setSubject(subject);
         openPositionNews.setComment(comment);
+        openPositionNews.setPriorityNews(true);
 
         CommitContext commitContext = new CommitContext();
         commitContext.addInstanceToCommit(openPositionNews);
         dataManager.commit(commitContext);
     }
+
+    @Subscribe("priorityNewsCheckBox")
+    public void onPriorityNewsCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue()) {
+            openPositionNewsLc.setParameter("priorityNews", true);
+        } else {
+            openPositionNewsLc.removeParameter("priorityNews");
+        }
+
+        openPositionNewsLc.load();
+    }
+
+
 
     @Subscribe("openClosePositionCheckBox")
     public void onOpenClosePositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {

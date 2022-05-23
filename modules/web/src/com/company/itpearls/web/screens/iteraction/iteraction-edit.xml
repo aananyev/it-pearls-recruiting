@@ -75,6 +75,10 @@ order by e.number]]>
                                   dataContainer="iteractionDc"
                                   property="statistics"
                                   caption="msg://msgStatistics"/>
+                        <checkBox id="signPriorityNews"
+                                  caption="msg://msgPriorityNews"
+                                  dataContainer="iteractionDc"
+                                  property="signPriorityNews"/>
                     </vbox>
                 </groupBox>
             </tab>

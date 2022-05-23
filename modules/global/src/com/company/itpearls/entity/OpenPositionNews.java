@@ -43,6 +43,17 @@ public class OpenPositionNews extends StandardEntity {
     @JoinColumn(name = "AUTHOR_ID")
     private User author;
 
+    @Column(name = "PRIORITY_NEWS")
+    private Boolean priorityNews;
+
+    public Boolean getPriorityNews() {
+        return priorityNews;
+    }
+
+    public void setPriorityNews(Boolean priorityNews) {
+        this.priorityNews = priorityNews;
+    }
+
     public String getSubject() {
         return subject;
     }
