@@ -9,7 +9,9 @@ import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
+import com.haulmont.cuba.gui.builders.EditorBuilder;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
@@ -181,6 +183,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private LookupField<Integer> registrationForWorkField;
     @Inject
     private DateField<Date> lastOpenVacancyDateField;
+    @Inject
+    private CollectionLoader<OpenPositionNews> openPositionNewsLc;
+    @Inject
+    private CollectionContainer<OpenPositionNews> openPositionNewsDc;
+    @Inject
+    private DataGrid<OpenPositionNews> openPostionNewsDataGrid;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -201,6 +209,72 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         changeCityListsLabel();
         standartDescriptionDisable(event);
         whiIsThisGuyDisable(event);
+        setOpenPositionNews(event);
+    }
+
+    @Install(to = "openPostionNewsDataGrid", subject = "detailsGenerator")
+    private Component openPostionNewsDataGridDetailsGenerator(OpenPositionNews entity) {
+        VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
+        mainLayout.setWidth("100%");
+        mainLayout.setMargin(true);
+
+        HBoxLayout headerBox = uiComponents.create(HBoxLayout.NAME);
+        headerBox.setWidth("100%");
+
+        Label infoLabel = uiComponents.create(Label.NAME);
+        infoLabel.setHtmlEnabled(true);
+        infoLabel.setStyleName("h1");
+        infoLabel.setValue("News:");
+
+        Component closeButton = createCloseButton(entity);
+        headerBox.add(infoLabel);
+        headerBox.add(closeButton);
+        headerBox.expand(infoLabel);
+
+        Component content = getContent(entity);
+
+        mainLayout.add(headerBox);
+        mainLayout.add(content);
+        mainLayout.expand(content);
+
+        return mainLayout;
+    }
+
+    private Component getContent(OpenPositionNews entity) {
+        Label<String> content = uiComponents.create(Label.TYPE_STRING);
+        content.setHtmlEnabled(true);
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(entity.getDateNews())
+                .append("  ")
+                .append(entity.getAuthor().getName())
+                .append("<tr>")
+                .append("<tr>")
+                .append(entity.getComment());
+
+        content.setValue(sb.toString());
+        return content;
+    }
+
+    private Component createCloseButton(OpenPositionNews entity) {
+        Button closeButton = uiComponents.create(Button.class);
+        closeButton.setIcon("icons/close.png");
+        BaseAction closeAction = new BaseAction("closeAction")
+                .withHandler(actionPerformedEvent ->
+                        openPostionNewsDataGrid.setDetailsVisible(entity, false))
+                .withCaption("");
+        closeButton.setAction(closeAction);
+        return closeButton;
+    }
+
+    private void setOpenPositionNews(BeforeShowEvent event) {
+        if (getEditedEntity() != null) {
+            openPositionNewsLc.setParameter("openPosition", getEditedEntity());
+        } else {
+            openPositionNewsLc.removeParameter("openPosition");
+        }
+
+        openPositionNewsLc.load();
     }
 
     private void standartDescriptionDisable(BeforeShowEvent event) {
@@ -1218,8 +1292,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setGroupSubscribeButton();
         setGroupCommandRadioButtin();
         skillImageColumnRenderer();
+
+        setOpenPositionNewsDetailsGenerator();
     }
 
+    private void setOpenPositionNewsDetailsGenerator() {
+        openPostionNewsDataGrid.setItemClickAction(new BaseAction("itemClickAction")
+        .withHandler(actionPerformedEvent -> openPostionNewsDataGrid
+                .setDetailsVisible(openPostionNewsDataGrid.getSingleSelected(), true)));
+    }
 
     private void setGroupCommandRadioButtin() {
         Map<String, Integer> map = new LinkedHashMap<>();
@@ -1633,5 +1714,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     }
 
-
+    public void addOpenPositionNewsButton() {
+        screenBuilders.editor(OpenPositionNews.class, this)
+                .newEntity()
+                .withOpenMode(OpenMode.DIALOG)
+                .withInitializer(e -> {
+                    e.setOpenPosition(getEditedEntity());
+                })
+                .show();
+    }
 }

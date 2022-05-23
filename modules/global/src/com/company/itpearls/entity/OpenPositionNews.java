@@ -20,7 +20,6 @@ public class OpenPositionNews extends StandardEntity {
     @Column(name = "SUBJECT", nullable = false)
     private String subject;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open"})
     @NotNull
     @OnDelete(DeletePolicy.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

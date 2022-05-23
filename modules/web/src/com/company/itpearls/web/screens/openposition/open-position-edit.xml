@@ -69,6 +69,23 @@
                 </query>
             </loader>
         </collection>
+        <collection id="openPositionNewsDc"
+                    class="com.company.itpearls.entity.OpenPositionNews">
+            <view extends="_local">
+                <property name="author" view="_local"/>
+            </view>
+            <loader id="openPositionNewsLc">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPositionNews e
+                    order by e.dateNews desc]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.openPosition = :openPosition</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="projectNamesDc"
                     class="com.company.itpearls.entity.Project">
             <view extends="_local">
@@ -120,26 +137,26 @@
                 </query>
             </loader>
         </collection>
-<!--        <collection id="projectDc"
-                    class="com.company.itpearls.entity.Project"
-                    view="_local">
-            <loader id="companyOfDepatmentDl">
-                <query><![CDATA[select e
-                from itpearls_Project e
-                where e.endProjectDate is not null]]></query>
-            </loader>
-        </collection>
-        <collection id="cityOfCompanyDc"
-                    class="com.company.itpearls.entity.Company"
-                    view="_local">
-            <loader id="cityOfCompanyDl">
-                <query>
-                    <![CDATA[select e
-                    from itpearls_Company e
-                    order by e.comanyName]]>
-                </query>
-            </loader>
-        </collection> -->
+        <!--        <collection id="projectDc"
+                            class="com.company.itpearls.entity.Project"
+                            view="_local">
+                    <loader id="companyOfDepatmentDl">
+                        <query><![CDATA[select e
+                        from itpearls_Project e
+                        where e.endProjectDate is not null]]></query>
+                    </loader>
+                </collection>
+                <collection id="cityOfCompanyDc"
+                            class="com.company.itpearls.entity.Company"
+                            view="_local">
+                    <loader id="cityOfCompanyDl">
+                        <query>
+                            <![CDATA[select e
+                            from itpearls_Company e
+                            order by e.comanyName]]>
+                        </query>
+                    </loader>
+                </collection> -->
         <collection id="citiesDc"
                     class="com.company.itpearls.entity.City"
                     view="_local">
@@ -727,6 +744,40 @@
                                                 </buttonsPanel> -->
                         </treeDataGrid>
                     </vbox>
+                </tab>
+                <tab id="tabOpenPositionNews"
+                     caption="msg://msgOpenPositionNews"
+                     margin="true,true,true,true"
+                     spacing="true"
+                     expand="openPostitonNewsBrowseBox"
+                     icon="NEWSPAPER_O">
+                    <vbox id="openPostitonNewsBrowseBox"
+                          expand="openPostionNewsDataGrid"
+                          width="100%"
+                          height="100%">
+                        <dataGrid id="openPostionNewsDataGrid"
+                                  dataContainer="openPositionNewsDc"
+                                  width="100%"
+                                  height="100%">
+                            <actions>
+                                <action id="create" type="create"/>
+                                <action id="remove" type="remove"/>
+                            </actions>
+                            <columns>
+                                <column id="dateNews" property="dateNews" width="200px"/>
+                                <column id="subject" property="subject"/>
+                                <column id="author" property="author" width="250px"/>
+                            </columns>
+                            <buttonsPanel>
+                                <button id="addOpenPositionNewsButton"
+                                        caption="mainMsg://msgAdd"
+                                        invoke="addOpenPositionNewsButton"/>
+                                <button id="removeOpenPositionNewsButton"
+                                        action="openPostionNewsDataGrid.remove"/>
+                            </buttonsPanel>
+                        </dataGrid>
+                    </vbox>
+
                 </tab>
             </tabSheet>
         </vbox>
