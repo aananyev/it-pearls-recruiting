@@ -175,6 +175,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
     private OpenPosition beforeEdit = null;
     List<SkillTree> skillTrees;
+    protected Boolean openCloseStartStatus = false;
+    protected Boolean openCloseCurrentStatus;
+
     @Inject
     private Logger log;
     @Inject
@@ -210,6 +213,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         standartDescriptionDisable(event);
         whiIsThisGuyDisable(event);
         setOpenPositionNews(event);
+        setOpenCloseStart();
+    }
+
+    private void setOpenCloseStart() {
+        if (getEditedEntity().getOpenClose() != null) {
+            openCloseStartStatus = getEditedEntity().getOpenClose();
+            openCloseCurrentStatus = getEditedEntity().getOpenClose();
+        } else {
+            openCloseStartStatus = false;
+            openCloseCurrentStatus = false;
+        }
     }
 
     @Install(to = "openPostionNewsDataGrid", subject = "detailsGenerator")
@@ -476,16 +490,56 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    @Subscribe
+    public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
+        if (!openClosePositionCheckBox.getValue().equals(openCloseStartStatus)) {
+            if (!openClosePositionCheckBox.getValue()) {
+                Date lastOpenDate = new Date();
+
+                lastOpenVacancyDateField.setValue(lastOpenDate);
+
+                setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                        "Открылась вакансия",
+                        "Открыта вакансия",
+                        new Date(),
+                        userSession.getUser());
+            } else {
+                if (openClosePositionCheckBox.getValue()) {
+                    lastOpenVacancyDateField.setValue(null);
+
+                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            "Закрылась вакансия",
+                            "Закрыта вакансия",
+                            new Date(),
+                            userSession.getUser());
+                }
+            }
+        }
+    }
+
+    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+                                                     String subject,
+                                                     String comment,
+                                                     Date date,
+                                                     User user) {
+
+        OpenPositionNews openPositionNews = new OpenPositionNews();
+
+        openPositionNews.setOpenPosition(editedEntity);
+        openPositionNews.setAuthor(user);
+        openPositionNews.setDateNews(date);
+        openPositionNews.setSubject(subject);
+        openPositionNews.setComment(comment);
+
+        CommitContext commitContext = new CommitContext();
+        commitContext.addInstanceToCommit(openPositionNews);
+        dataManager.commit(commitContext);
+    }
+
     @Subscribe("openClosePositionCheckBox")
     public void onOpenClosePositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
 
-        if (!openClosePositionCheckBox.getValue()) {
-            Date lastOpenDate = new Date();
-
-            lastOpenVacancyDateField.setValue(lastOpenDate);
-        } else {
-            lastOpenVacancyDateField.setValue(null);
-        }
+        openCloseCurrentStatus = openClosePositionCheckBox.getValue();
 
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_SELECT_COMMAND)
