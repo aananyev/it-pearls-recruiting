@@ -765,7 +765,8 @@ create table ITPEARLS_OPEN_POSITION_NEWS (
     SUBJECT varchar(255) not null,
     OPEN_POSITION_ID uuid not null,
     DATE_NEWS timestamp not null,
-    COMMENT_ text not null,
+    COMMENT_ text,
+    CANDIDATES_ID uuid,
     AUTHOR_ID uuid not null,
     PRIORITY_NEWS boolean,
     --

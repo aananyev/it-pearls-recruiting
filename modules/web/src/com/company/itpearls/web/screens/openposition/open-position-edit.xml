@@ -73,6 +73,7 @@
                     class="com.company.itpearls.entity.OpenPositionNews">
             <view extends="_local">
                 <property name="author" view="_local"/>
+                <property name="candidates" view="_minimal"/>
             </view>
             <loader id="openPositionNewsLc">
                 <query>
@@ -772,6 +773,7 @@
                             <columns>
                                 <column id="dateNews" property="dateNews" width="200px"/>
                                 <column id="subject" property="subject"/>
+                                <column id="candidates" property="candidates"/>
                                 <column id="author" property="author" width="250px"/>
                             </columns>
                             <buttonsPanel>

@@ -621,6 +621,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     iteractionTypeField.getValue().getIterationName(),
                     candidateField.getValue().getFullName() + ":" + commentField.getValue(),
                     dateIteractionField.getValue(),
+                    candidateField.getValue(),
                     recrutierField.getValue(),
                     iteractionTypeField.getValue().getSignPriorityNews());
             deleteTwiceEvent = false;
@@ -631,6 +632,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                      String subject,
                                                      String comment,
                                                      Date date,
+                                                     JobCandidate jobCandidate,
                                                      User user,
                                                      Boolean priority) {
 
@@ -641,6 +643,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         openPositionNews.setDateNews(date);
         openPositionNews.setSubject(subject);
         openPositionNews.setComment(comment);
+        openPositionNews.setCandidates(jobCandidate);
         openPositionNews.setPriorityNews(priority != null ? priority : false);
 
         CommitContext commitContext = new CommitContext();

@@ -20,6 +20,7 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
+import sun.font.TrueTypeFont;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -203,6 +204,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // проверка на ноль
         booOpenClosePosition = booOpenClosePosition == null ? false : booOpenClosePosition;
         startPriorityStatus = priorityField.getValue();
+        onNeedExercise = needExerciseCheckBox.getValue();
+        startSalaryMinValue = openPositionFieldSalaryMin.getValue();
+        startSalaryMaxValue = openPositionFieldSalaryMax.getValue();
 
         setTopLabel();
         setInternalProject();
@@ -350,6 +354,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         workExperienceRadioButton.setOptionsMap(map);
     }
 
+    Boolean onNeedExercise;
+
     @Subscribe("needExerciseCheckBox")
     public void onNeedExerciseCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (needExerciseCheckBox.getValue() != null) {
@@ -358,6 +364,60 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         } else {
             exerciseRichTextArea.setRequired(false);
             exerciseRichTextArea.setEditable(false);
+        }
+
+        if (!onNeedExercise.equals(needExerciseCheckBox.getValue())) {
+            onNeedExercise = needExerciseCheckBox.getValue();
+
+            setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                    (needExerciseCheckBox.getValue().equals(Boolean.TRUE)
+                            ? "Необходимо выполнение тестового задания"
+                            : "Тестовое задание не нужно"),
+                    Jsoup.parse(exerciseRichTextArea.getValue()).text(),
+                    new Date(),
+                    userSession.getUser());
+        }
+    }
+
+    BigDecimal startSalaryMinValue;
+
+    @Subscribe("openPositionFieldSalaryMin")
+    public void onOpenPositionFieldSalaryMinValueChange1(HasValue.ValueChangeEvent<BigDecimal> event) {
+            if (!startSalaryMinValue.equals(openPositionFieldSalaryMin.getValue())) {
+
+                setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                        "Изменены зарплатные предложение (MIN): старое "
+                                + startSalaryMinValue
+                                + " на новое "
+                                + openPositionFieldSalaryMin.getValue(),
+                        "Изменены зарплатные предложение (MIN): старое "
+                                + startSalaryMinValue
+                                + " на новое "
+                                + openPositionFieldSalaryMin.getValue(),
+                        new Date(),
+                        userSession.getUser());
+                startSalaryMinValue = openPositionFieldSalaryMin.getValue();
+            }
+    }
+
+    BigDecimal startSalaryMaxValue;
+
+    @Subscribe("openPositionFieldSalaryMax")
+    public void onOpenPositionFieldSalaryMaxValueChange1(HasValue.ValueChangeEvent<BigDecimal> event) {
+        if (!startSalaryMaxValue.equals(openPositionFieldSalaryMax.getValue())) {
+
+            setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                    "Изменены зарплатные предложение (MAX): старое "
+                            + startSalaryMaxValue
+                            + " на новое "
+                            + openPositionFieldSalaryMax.getValue(),
+                    "Изменены зарплатные предложение (MAX): старое "
+                            + startSalaryMaxValue
+                            + " на новое "
+                            + openPositionFieldSalaryMax.getValue(),
+                    new Date(),
+                    userSession.getUser());
+            startSalaryMaxValue = openPositionFieldSalaryMin.getValue();
         }
     }
 
