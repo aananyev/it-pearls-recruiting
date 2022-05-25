@@ -1833,7 +1833,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     newPhone = phone;
                 }
 
-                newCompany = parseCVService.parseCompany(candidateCV.getTextCV());
+//                newCompany = parseCVService.parseCompany(candidateCV.getTextCV());
 
                 List<String> urls = parseCVService
                         .extractUrls(Jsoup.parse(candidateCV.getTextCV())
@@ -1864,7 +1864,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String newPhoneNew = parseCVService.normalizePhoneStr(newPhone);
         String oldEmail = emailField.getValue();
         String oldPhone = parseCVService.normalizePhoneStr(phoneField.getValue());
-        Company oldCompany = currentCompanyField.getValue();
+//        Company oldCompany = currentCompanyField.getValue();
 
         Boolean flag = false;
 
@@ -1909,14 +1909,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         }
 
-        if (newCompany != null) {
+/*        if (newCompany != null) {
             if (oldCompany == null && newCompany != null) {
                 messageCompany = "Добавить текущую компанию в карточку "
                         + newCompany.getComanyName() + "? ";
 
                 flag = true;
             } else {
-                /* if (!newCompany.equals(oldCompany)) {
+                 if (!newCompany.equals(oldCompany)) {
                     // убрать новая - старая
                      messageCompany = "Компания была "
                             + currentCompanyField.getValue().getComanyName()
@@ -1924,9 +1924,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             + newCompany.getComanyName()
                             + " ";
                     flag = true;
-                    */
                 }
-            }
+            } */
         }
 
         // Social
@@ -2012,12 +2011,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             }
 
-            if (newCompany != null) {
+/*            if (newCompany != null) {
                 if (!Objects.equals(newCompany, oldCompany)) {
                     dialog.withParameter(InputParameter.booleanParameter("newCompany")
                             .withCaption(messageCompany).withRequired(true));
                 }
-            }
+            } */
 
             if (messageSocial.size() > 0) {
                 for (Map.Entry<String, List<String>> entry : messageSocial.entrySet()) {
@@ -2030,7 +2029,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 if (closeEvent.closedWith(DialogOutcome.OK)) {
                     Boolean newEmailFlag = closeEvent.getValue("newEmail");
                     Boolean newPhoneFlag = closeEvent.getValue("newPhone");
-                    Boolean newCompanyFlag = closeEvent.getValue("newCompany");
+//                    Boolean newCompanyFlag = closeEvent.getValue("newCompany");
 
                     if (newEmailFlag != null) {
                         if (newEmailFlag) {
@@ -2044,11 +2043,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         }
                     }
 
-                    if (newCompanyFlag != null) {
+/*                    if (newCompanyFlag != null) {
                         if (newCompanyFlag) {
                             currentCompanyField.setValue(newCompany);
                         }
-                    }
+                    } */
 
                     HashMap<String, Boolean> getSocial = new HashMap<>();
                     if (messageSocial.size() > 0) {

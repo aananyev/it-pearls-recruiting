@@ -5,6 +5,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -18,6 +19,7 @@ import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jsoup.Jsoup;
@@ -578,6 +580,27 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+
+    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+                                                     String subject,
+                                                     String comment,
+                                                     Date date,
+                                                     User user) {
+
+        OpenPositionNews openPositionNews = new OpenPositionNews();
+
+        openPositionNews.setOpenPosition(editedEntity);
+        openPositionNews.setAuthor(user);
+        openPositionNews.setDateNews(date);
+        openPositionNews.setSubject(subject);
+        openPositionNews.setComment(comment);
+        openPositionNews.setPriorityNews(true);
+
+        CommitContext commitContext = new CommitContext();
+        commitContext.addInstanceToCommit(openPositionNews);
+        dataManager.commit(commitContext);
+    }
+
     private Component createOpenCloseButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
 
@@ -596,10 +619,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
                         entity.getVacansyName()));
 
+                setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+                        "Закрылась вакансия",
+                        "Закрыта вакансия",
+                        new Date(),
+                        userSession.getUser());
+
                 entity.setLastOpenDate(null);
             } else {
                 events.publish(new UiNotificationEvent(this, "Открыта вакансия: " +
                         entity.getVacansyName()));
+
+
+                setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+                        "Открылась вакансия",
+                        "Открыта вакансия",
+                        new Date(),
+                        userSession.getUser());
                 entity.setLastOpenDate(new Date());
             }
 
@@ -731,6 +767,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     }
 
+    Boolean flagPriority = true;
+
     private Component createPriorityField(OpenPosition entity) {
         LookupField retField = uiComponents.create(LookupField.NAME);
 
@@ -752,6 +790,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     "Изменен приоритет вакансии <b>"
                             + openPositionsTable.getSingleSelected().getVacansyName()
                             + "</b> на <b>" + result.get() + "</b>"));
+
+            if (flagPriority) {
+                setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+                        "Изменен приоритет вакансии на " + result.get(),
+                        "Закрыта вакансия",
+                        new Date(),
+                        userSession.getUser());
+            } else {
+                flagPriority = true;
+            }
 
             openPositionsDl.load();
         });
@@ -951,7 +999,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     } else {
                         if (opList.get(positionName) < op.getPriority()) {
                             opList.remove(positionName);
-                            if(positionName != null) {
+                            if (positionName != null) {
                                 opList.put(positionName, op.getPriority());
                             }
                         }
@@ -972,7 +1020,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             String opDescriptiom = "<b><u>Проекты:</u></b><br>";
 
             for (OpenPosition op1 : openPositions) {
-                if(op1.getPositionType() != null) {
+                if (op1.getPositionType() != null) {
                     if (op1.getPositionType().getPositionRuName() != null) {
 
                         if (op.getKey().equals(op1.getPositionType().getPositionRuName()) &&
@@ -1001,8 +1049,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 OpenPosition opRet = null;
 
                 for (OpenPosition ops : openPositions) {
-                    if(ops.getPositionType() != null) {
-                        if(ops.getPositionType().getPositionRuName() != null) {
+                    if (ops.getPositionType() != null) {
+                        if (ops.getPositionType().getPositionRuName() != null) {
                             if (ops.getPositionType().getPositionRuName().equals(op.getKey())) {
                                 opRet = ops;
                                 break;
@@ -1379,7 +1427,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Date lastDate = event.getItem().getLastOpenDate() != null
                 ? event.getItem().getLastOpenDate() : event.getItem().getCreateTs();
 
-        return (lastDate != null?
+        return (lastDate != null ?
                 simpleDateFormat.format(lastDate) : "");
     }
 

@@ -7,17 +7,15 @@
     <menu id="application-hrmasters" insertAfter="application-calendars" icon="BALANCE_SCALE">
         <item screen="itpearls_OpenPositionMaster.browse"
               caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse" icon="icons/clear.png"/>
-        <item screen="itpearls_ExtUserBrowse"
-              caption="mainMsg://msgExtUserBrowse" icon="USER"/>
     </menu>
     <menu id="application-outstaffing" insertAfter="application-hrmasters" icon="CUBES">
-        <item screen="itpearls_OpenPositionOutstaff.browse"
+        <item screen="itpearls_OpenPositionOutstaff.browse" icon="COMPASS"
               caption="mainMsg://msgOpenPositionOutstaff.browse"/>
-        <item screen="itpearls_LaborAgeementType.browse"
+        <item screen="itpearls_LaborAgeementType.browse" icon="TEXT_WIDTH"
               caption="mainMsg://menu_config.itpearls_LaborAgeementType.browse"/>
-        <item screen="itpearls_LaborAgreement.browse"
+        <item screen="itpearls_LaborAgreement.browse" icon="TEXT_HEIGHT"
               caption="mainMsg://menu_config.itpearls_LaborAgreement.browse"/>
-        <item screen="itpearls_OurCompany.browse"
+        <item screen="itpearls_OurCompany.browse" icon="BUILDING_O"
               caption="mainMsg://msgOurCompany"/>
     </menu>
     <menu id="application-hunting" insertBefore="application-hadbook" icon="PRODUCT_HUNT">
@@ -25,7 +23,7 @@
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>
         <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
-        <item screen="itpearls_OpenPositionNews.browse"
+        <item screen="itpearls_OpenPositionNews.browse" icon="NEWSPAPER_O"
               caption="mainMsg://menu_config.itpearls_OpenPositionNews.browse"/>
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
@@ -65,6 +63,7 @@
         <item screen="itpearls_SomeFiles.browse" description="mainMsg://default.description" icon="COPY"/>
         <item screen="itpearls_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="FACEBOOK_OFFICIAL"/>
+        <item screen="itpearls_ExtUserBrowse" caption="mainMsg://msgExtUserBrowse" icon="USER"/>
     </menu>
     <item screen="itpearls_CheckCandidate.browse" insertAfter="application-hadbook" openType="DIALOG"/>
 </menu-config>

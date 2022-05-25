@@ -202,6 +202,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         // проверка на ноль
         booOpenClosePosition = booOpenClosePosition == null ? false : booOpenClosePosition;
+        startPriorityStatus = priorityField.getValue();
 
         setTopLabel();
         setInternalProject();
@@ -846,6 +847,39 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return "alan@itpearls.ru";
     }
 
+    Boolean flagPriority = true;
+    Integer startPriorityStatus;
+
+    @Subscribe("priorityField")
+    public void onPriorityFieldValueChange(HasValue.ValueChangeEvent<Integer> event) {
+        if(priorityField.getValue() != null) {
+            if (startPriorityStatus != null) {
+                if (!startPriorityStatus.equals(priorityField.getValue())) {
+                    if (flagPriority) {
+                        int value = (int) priorityField.getValue();
+                        Optional<String> result = priorityMap.entrySet()
+                                .stream()
+                                .filter(entry -> value == entry.getValue())
+                                .map(Map.Entry::getKey)
+                                .findFirst();
+
+                        setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                                "Изменен приоритет вакансии на " + result.get(),
+                                "Закрыта вакансия",
+                                new Date(),
+                                userSession.getUser());
+
+                        flagPriority = false;
+                    } else {
+                        flagPriority = true;
+                    }
+                }
+            }
+        }
+    }
+
+    Map<String, Integer> priorityMap = new LinkedHashMap<>();
+
     private void setRadioButtons() {
         Map<String, Integer> rwMap = new LinkedHashMap<>();
 
@@ -854,8 +888,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         rwMap.put("Возможны оба варианта", 2);
 
         registrationForWorkField.setOptionsMap(rwMap);
-
-        Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
         priorityMap.put("Paused", 0);
         priorityMap.put("Low", 1);

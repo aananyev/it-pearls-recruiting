@@ -31,10 +31,14 @@ public class OpenPositionNews extends StandardEntity {
     @Column(name = "DATE_NEWS", nullable = false)
     private Date dateNews;
 
-    @NotNull
     @Lob
-    @Column(name = "COMMENT_", nullable = false)
+    @Column(name = "COMMENT_")
     private String comment;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CANDIDATES_ID")
+    private JobCandidate candidates;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
     @NotNull
@@ -45,6 +49,14 @@ public class OpenPositionNews extends StandardEntity {
 
     @Column(name = "PRIORITY_NEWS")
     private Boolean priorityNews;
+
+    public JobCandidate getCandidates() {
+        return candidates;
+    }
+
+    public void setCandidates(JobCandidate candidates) {
+        this.candidates = candidates;
+    }
 
     public Boolean getPriorityNews() {
         return priorityNews;
