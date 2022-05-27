@@ -189,7 +189,11 @@
                         caption="msg://msgStat">
                     <textRenderer/>
                 </column>
-
+                <column id="owner"
+                        resizable="true"
+                        width="120px">
+                    <textRenderer/>
+                </column>
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"

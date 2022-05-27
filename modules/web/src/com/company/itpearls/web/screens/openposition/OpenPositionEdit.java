@@ -193,6 +193,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CollectionContainer<OpenPositionNews> openPositionNewsDc;
     @Inject
     private DataGrid<OpenPositionNews> openPostionNewsDataGrid;
+    @Inject
+    private RichTextArea templateLetterRichTextArea;
+    @Inject
+    private TextField<User> ownerTextField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -203,10 +207,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         // проверка на ноль
         booOpenClosePosition = booOpenClosePosition == null ? false : booOpenClosePosition;
-        startPriorityStatus = priorityField.getValue();
-        onNeedExercise = needExerciseCheckBox.getValue();
-        startSalaryMinValue = openPositionFieldSalaryMin.getValue();
-        startSalaryMaxValue = openPositionFieldSalaryMax.getValue();
 
         setTopLabel();
         setInternalProject();
@@ -366,16 +366,22 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             exerciseRichTextArea.setEditable(false);
         }
 
-        if (!onNeedExercise.equals(needExerciseCheckBox.getValue())) {
-            onNeedExercise = needExerciseCheckBox.getValue();
+        if (onNeedExercise != null) {
+            if (needExerciseCheckBox.getValue() != null) {
+                if (!onNeedExercise.equals(needExerciseCheckBox.getValue())) {
+                    onNeedExercise = needExerciseCheckBox.getValue();
 
-            setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                    (needExerciseCheckBox.getValue().equals(Boolean.TRUE)
-                            ? "Необходимо выполнение тестового задания"
-                            : "Тестовое задание не нужно"),
-                    Jsoup.parse(exerciseRichTextArea.getValue()).text(),
-                    new Date(),
-                    userSession.getUser());
+                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            (needExerciseCheckBox.getValue().equals(Boolean.TRUE)
+                                    ? "Необходимо выполнение тестового задания"
+                                    : "Тестовое задание не нужно"),
+                            (exerciseRichTextArea.getValue() != null
+                                    ? Jsoup.parse(exerciseRichTextArea.getValue()).text()
+                                    : ""),
+                            new Date(),
+                            userSession.getUser());
+                }
+            }
         }
     }
 
@@ -383,43 +389,90 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("openPositionFieldSalaryMin")
     public void onOpenPositionFieldSalaryMinValueChange1(HasValue.ValueChangeEvent<BigDecimal> event) {
-            if (!startSalaryMinValue.equals(openPositionFieldSalaryMin.getValue())) {
+        if (openPositionFieldSalaryMin.getValue() != null) {
+            if (startSalaryMinValue != null) {
+                if (!startSalaryMinValue.equals(openPositionFieldSalaryMin.getValue())) {
 
-                setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                        "Изменены зарплатные предложение (MIN): старое "
-                                + startSalaryMinValue
-                                + " на новое "
-                                + openPositionFieldSalaryMin.getValue(),
-                        "Изменены зарплатные предложение (MIN): старое "
-                                + startSalaryMinValue
-                                + " на новое "
-                                + openPositionFieldSalaryMin.getValue(),
-                        new Date(),
-                        userSession.getUser());
-                startSalaryMinValue = openPositionFieldSalaryMin.getValue();
+                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            "Изменены зарплатные предложение (MIN): старое "
+                                    + startSalaryMinValue.toString().substring(0, startSalaryMinValue.toString().length() - 3)
+                                    + " на новое "
+                                    + openPositionFieldSalaryMin.getValue(),
+                            "Изменены зарплатные предложение (MIN): старое "
+                                    + startSalaryMinValue.toString().substring(0, startSalaryMinValue.toString().length() - 3)
+                                    + " на новое "
+                                    + openPositionFieldSalaryMin.getValue(),
+                            new Date(),
+                            userSession.getUser());
+                    startSalaryMinValue = openPositionFieldSalaryMin.getValue();
+                }
             }
+        }
     }
 
     BigDecimal startSalaryMaxValue;
 
     @Subscribe("openPositionFieldSalaryMax")
     public void onOpenPositionFieldSalaryMaxValueChange1(HasValue.ValueChangeEvent<BigDecimal> event) {
-        if (!startSalaryMaxValue.equals(openPositionFieldSalaryMax.getValue())) {
+        if (openPositionFieldSalaryMax.getValue() != null) {
+            if (startSalaryMaxValue != null) {
+                if (!startSalaryMaxValue.equals(openPositionFieldSalaryMax.getValue())) {
 
-            setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                    "Изменены зарплатные предложение (MAX): старое "
-                            + startSalaryMaxValue
-                            + " на новое "
-                            + openPositionFieldSalaryMax.getValue(),
-                    "Изменены зарплатные предложение (MAX): старое "
-                            + startSalaryMaxValue
-                            + " на новое "
-                            + openPositionFieldSalaryMax.getValue(),
-                    new Date(),
-                    userSession.getUser());
-            startSalaryMaxValue = openPositionFieldSalaryMin.getValue();
+                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            "Изменены зарплатные предложение (MAX): старое "
+                                    + startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                    + " на новое "
+                                    + openPositionFieldSalaryMax.getValue(),
+                            "Изменены зарплатные предложение (MAX): старое "
+                                    + startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                    + " на новое "
+                                    + openPositionFieldSalaryMax.getValue(),
+                            new Date(),
+                            userSession.getUser());
+                    startSalaryMaxValue = openPositionFieldSalaryMin.getValue();
+                }
+            }
         }
     }
+
+    String openPositionText;
+
+    @Subscribe("openPositionRichTextArea")
+    public void onOpenPositionRichTextAreaValueChange1(HasValue.ValueChangeEvent<String> event) {
+        if (openPositionRichTextArea.getValue() != null) {
+            if (openPositionText != null) {
+                if (!openPositionText.equals(Jsoup.parse(openPositionRichTextArea.getValue()).text())) {
+                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            "Изменено описание вакансии",
+                            Jsoup.parse(openPositionRichTextArea.getValue()).text(),
+                            new Date(),
+                            userSession.getUser());
+                    openPositionText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
+                }
+            }
+        }
+    }
+
+    String startLetterText;
+
+    @Subscribe("templateLetterRichTextArea")
+    public void onTemplateLetterRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (templateLetterRichTextArea.getValue() != null) {
+            if (startLetterText != null) {
+                if (!startLetterText.equals(Jsoup.parse(templateLetterRichTextArea.getValue()).text())) {
+
+                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            "Изменен шаблон сопроводительного письма",
+                            Jsoup.parse(templateLetterRichTextArea.getValue()).text(),
+                            new Date(),
+                            userSession.getUser());
+                    startLetterText = Jsoup.parse(templateLetterRichTextArea.getValue()).text();
+                }
+            }
+        }
+    }
+
+
 
     private void setDisableTwoField() {
     }
@@ -558,7 +611,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 Date lastOpenDate = new Date();
 
                 lastOpenVacancyDateField.setValue(lastOpenDate);
-
+                ownerTextField.setValue(userSession.getUser());
                 setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                         "Открылась вакансия",
                         "Открыта вакансия",
@@ -567,7 +620,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             } else {
                 if (openClosePositionCheckBox.getValue()) {
                     lastOpenVacancyDateField.setValue(null);
-
+                    ownerTextField.setValue(null);
                     setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             "Закрылась вакансия",
                             "Закрыта вакансия",
@@ -608,7 +661,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         openPositionNewsLc.load();
     }
-
 
 
     @Subscribe("openClosePositionCheckBox")
@@ -683,6 +735,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             openPositionRichTextArea.setValue(showKeyCompetition(openPositionRichTextArea.getValue()));
         }
+
+        startPriorityStatus = priorityField.getValue();
+        onNeedExercise = needExerciseCheckBox.getValue();
+        startSalaryMinValue = openPositionFieldSalaryMin.getValue();
+        startSalaryMaxValue = openPositionFieldSalaryMax.getValue();
+        openPositionText = openPositionRichTextArea.getValue() != null ? Jsoup.parse(openPositionRichTextArea.getValue()).text() : null;
+        startLetterText = templateLetterRichTextArea.getValue() != null ? Jsoup.parse(templateLetterRichTextArea.getValue()).text() : null;
     }
 
     private String showKeyCompetition(String value) {
@@ -912,7 +971,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("priorityField")
     public void onPriorityFieldValueChange(HasValue.ValueChangeEvent<Integer> event) {
-        if(priorityField.getValue() != null) {
+        if (priorityField.getValue() != null) {
             if (startPriorityStatus != null) {
                 if (!startPriorityStatus.equals(priorityField.getValue())) {
                     if (flagPriority) {
@@ -1458,8 +1517,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setOpenPositionNewsDetailsGenerator() {
         openPostionNewsDataGrid.setItemClickAction(new BaseAction("itemClickAction")
-        .withHandler(actionPerformedEvent -> openPostionNewsDataGrid
-                .setDetailsVisible(openPostionNewsDataGrid.getSingleSelected(), true)));
+                .withHandler(actionPerformedEvent -> openPostionNewsDataGrid
+                        .setDetailsVisible(openPostionNewsDataGrid.getSingleSelected(), true)));
     }
 
     private void setGroupCommandRadioButtin() {

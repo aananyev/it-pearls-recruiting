@@ -465,6 +465,7 @@ create table ITPEARLS_OPEN_POSITION (
     PARENT_OPEN_POSITION_ID uuid,
     NEED_MEMO_FOR_INTERVIEW boolean,
     MEMO_FOR_INTERVIEW text,
+    OWNER_ID uuid,
     --
     primary key (ID)
 )^

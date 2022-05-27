@@ -7,6 +7,7 @@ import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
+import com.haulmont.cuba.security.entity.User;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
@@ -178,6 +179,19 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @Composition
     private List<LaborAgreement> laborAgreement;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "OWNER_ID")
+    private User owner;
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 
     public Date getLastOpenDate() {
         return lastOpenDate;

@@ -791,7 +791,17 @@
                 </tab>
             </tabSheet>
         </vbox>
-        <vbox id="forExpand" spacing="false" align="BOTTOM_RIGHT">
+        <vbox id="forExpand" spacing="false" align="BOTTOM_RIGHT" expand="statusHBox">
+            <hbox id="statusHBox" width="100%">
+                <textField id="ownerTextField"
+                           width="AUTO"
+                           dataContainer="openPositionDc"
+                           property="owner"
+                           editable="false"
+                           stylename="borderless"
+                           align="BOTTOM_LEFT"
+                           enable="false"/>
+            </hbox>
             <hbox id="editActions"
                   spacing="true"
                   align="BOTTOM_RIGHT">

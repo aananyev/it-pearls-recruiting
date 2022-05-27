@@ -81,6 +81,7 @@
         </property>
         <property name="commandCandidate"/>
         <property name="cities" view="_local"/>
+        <property name="owner" view="_minimal"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" view="_local"/>
