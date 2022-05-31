@@ -614,7 +614,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if (commentField.getValue() == null)
             commentField.setValue("");
+    }
 
+    @Subscribe
+    public void onAfterCommitChanges1(AfterCommitChangesEvent event) {
         if (deleteTwiceEvent) {
             setSubscribe();
             setOpenPositionNewsAutomatedMessage(vacancyFiels.getValue(),
@@ -635,20 +638,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                      JobCandidate jobCandidate,
                                                      User user,
                                                      Boolean priority) {
+        try {
+            OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
 
-        OpenPositionNews openPositionNews = new OpenPositionNews();
+            openPositionNews.setOpenPosition(editedEntity);
+            openPositionNews.setAuthor(user);
+            openPositionNews.setDateNews(date);
+            openPositionNews.setSubject(subject);
+            openPositionNews.setComment(comment);
+            openPositionNews.setCandidates(jobCandidate);
+            openPositionNews.setPriorityNews(priority != null ? priority : false);
 
-        openPositionNews.setOpenPosition(editedEntity);
-        openPositionNews.setAuthor(user);
-        openPositionNews.setDateNews(date);
-        openPositionNews.setSubject(subject);
-        openPositionNews.setComment(comment);
-        openPositionNews.setCandidates(jobCandidate);
-        openPositionNews.setPriorityNews(priority != null ? priority : false);
-
-        CommitContext commitContext = new CommitContext();
-        commitContext.addInstanceToCommit(openPositionNews);
-        dataManager.commit(commitContext);
+            CommitContext commitContext = new CommitContext();
+            commitContext.addInstanceToCommit(openPositionNews);
+            dataManager.commit(commitContext);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setSubscribe() {
@@ -858,7 +864,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         ;
         setMostPopularIteraction();
 
-        if(PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             dateIteractionField.setEditable(true);
         } else {
             dateIteractionField.setEditable(false);

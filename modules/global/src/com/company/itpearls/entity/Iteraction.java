@@ -98,6 +98,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_PRIORITY_NEWS")
     private Boolean signPriorityNews;
 
+    @Column(name = "SIGN_VIEW_ONLY_MANAGER")
+    private Boolean signViewOnlyManager;
+
     @Column(name = "OUTSTAFFING_SIGN", nullable = false)
     protected Boolean outstaffingSign = false;
 
@@ -118,6 +121,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public Boolean getSignViewOnlyManager() {
+        return signViewOnlyManager;
+    }
+
+    public void setSignViewOnlyManager(Boolean signViewOnlyManager) {
+        this.signViewOnlyManager = signViewOnlyManager;
+    }
 
     public Boolean getSignPriorityNews() {
         return signPriorityNews;

@@ -218,6 +218,7 @@ create table ITPEARLS_ITERACTION (
     SIGN_CLIENT_INTERVIEW boolean,
     SIGN_SEND_TO_CLIENT boolean,
     SIGN_PRIORITY_NEWS boolean,
+    SIGN_VIEW_ONLY_MANAGER boolean,
     OUTSTAFFING_SIGN boolean not null,
     NOTIFICATION_NEED_SEND boolean,
     NOTIFICATION_TYPE integer,

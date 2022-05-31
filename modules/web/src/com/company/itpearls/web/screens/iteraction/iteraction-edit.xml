@@ -79,6 +79,10 @@ order by e.number]]>
                                   caption="msg://msgPriorityNews"
                                   dataContainer="iteractionDc"
                                   property="signPriorityNews"/>
+                        <checkBox id="signViewOnlyManagersCheckBox"
+                                  caption="msg://msgSignViewOnlyManagers"
+                                  dataContainer="iteractionDc"
+                                  property="signViewOnlyManager"/>
                     </vbox>
                 </groupBox>
             </tab>

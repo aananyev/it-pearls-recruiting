@@ -38,6 +38,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -570,9 +571,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         Boolean b = getEditedEntity().getBlockCandidate() == null ?
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
+        createStartInteraction();
 
 //        currentCompanyOptionsContainerInTask();
 
+    }
+
+    private void createStartInteraction() {
     }
 
 /*    private void currentCompanyOptionsContainerInTask() {
@@ -925,6 +930,58 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void addIteractionOfNewCandidate() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             // добавить сюда Iteraction "Новый кандиат"
+            IteractionList iteractionList = metadata.create(IteractionList.class);
+
+            iteractionList.setCandidate(getEditedEntity());
+            iteractionList.setDateIteraction(new Date());
+            iteractionList.setRecrutier(userSession.getUser());
+            iteractionList.setRecrutierName(userSession.getUser().getName());
+            iteractionList.setRating(4);
+
+            BigDecimal numberIteraction;
+
+            try {
+                numberIteraction = dataManager.loadValue("select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
+                        .one();
+            } catch (Exception e) {
+                numberIteraction = BigDecimal.ONE;
+            }
+
+            iteractionList.setNumberIteraction(numberIteraction);
+
+            Iteraction iteraction = null;
+            OpenPosition openPosition = null;
+
+            try {
+                iteraction = dataManager.load(Iteraction.class)
+                        .query("select e from itpearls_Iteraction e where e.iterationName like :iteractionName")
+                        .parameter("iteractionName", "Новый контакт")
+                        .one();
+            } catch (Exception e) {
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption("SQL ERROR")
+                        .withDescription("Нет взаимодействия \"Новый контакт\"")
+                        .show();
+            }
+
+            try {
+                openPosition = dataManager.load(OpenPosition.class)
+                        .query("select e from itpearls_OpenPosition e where e.vacansyName like :vacansyDefaultName")
+                        .parameter("vacansyDefaultName", "Default%")
+                        .one();
+            } catch (Exception e) {
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption("SQL ERROR")
+                        .withDescription("Нет вакансии \"по умолчанию\" Default")
+                        .show();
+            }
+
+            if (iteraction != null && openPosition != null) {
+                iteractionList.setIteractionType(iteraction);
+                iteractionList.setVacancy(openPosition);
+
+                jobCandidateIteractionDc.getMutableItems().add(dataContext.merge(iteractionList));
+            }
         }
     }
 
