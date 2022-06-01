@@ -14,7 +14,6 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
-import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -294,6 +293,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
         setFrequentInteractionPopupButton();
+        setupIteractionList();
+    }
+
+    private void setupIteractionList() {
+        jobCandidateIteractionListTable.addEditorPostCommitListener( event -> {
+        });
     }
 
     private void setFrequentInteractionPopupButton() {
@@ -337,16 +342,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .show();
         }
 
-    }
-
-    private void setUnblock() {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setBlockCandidate(false);
-        } else {
-            if (getEditedEntity().getBlockCandidate() == null) {
-                getEditedEntity().setBlockCandidate(false);
-            }
-        }
     }
 
     private void setCreatedUpdatedLabel() {
@@ -425,49 +420,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 commitContext.addInstanceToCommit(s);
             }
         }
-    }
-
-    private void createFirstIteraction(CommitContext commitContext) {
-        String newCandidate = "Новый контакт";
-
-        String queryNewCandidate = "select e from itpearls_Iteraction e "
-                + "where e.iterationName like \'"
-                + newCandidate
-                + "\'";
-
-        String queryNewVacancy = "select e from itpearls_OpenPosition e "
-                + "where e.vacansyName like \'"
-                + newCandidate
-                + "\'";
-
-        List<IteractionList> il = new ArrayList<>();
-        IteractionList iteractionList = new IteractionList();
-        iteractionList.setRating(3);
-        iteractionList.setCandidate(getEditedEntity());
-        if (lastIteraction != null) {
-            iteractionList.setNumberIteraction(lastIteraction
-                    .getNumberIteraction()
-                    .add(BigDecimal.ONE));
-        }
-
-        Iteraction iteraction = dataManager.load(Iteraction.class)
-                .query(queryNewCandidate)
-                .cacheable(true)
-                .one();
-        OpenPosition openPosition = dataManager.load(OpenPosition.class)
-                .query(queryNewVacancy)
-                .cacheable(true)
-                .one();
-
-        iteractionList.setIteractionType(iteraction);
-        iteractionList.setVacancy(openPosition);
-
-        commitContext.addInstanceToCommit(iteractionList);
-//        jobCandidateIteractionDc.getMutableItems().add(iteractionList);
-
-//        DataContext dc = socialNetworkURLsesDl.getDataContext();
-//        dc.setParent(dataContext);
-//        dataContext.merge(il);
     }
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false);
@@ -921,9 +873,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             event.preventCommit();
         }
-
-//        setUnblock();
-//        createFirstIteraction();
     }
 
 

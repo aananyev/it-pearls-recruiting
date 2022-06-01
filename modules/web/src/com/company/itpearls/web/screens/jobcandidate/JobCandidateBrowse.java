@@ -26,6 +26,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.io.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -90,6 +91,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private InteractionService interactionService;
     @Inject
     private UserSessionSource userSessionSource;
+    private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -346,8 +348,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return retStr;
     }
 
+    JobCanidateDetailScreenFragment jobCanidateDetailScreenFragmentOld = null;
+    Fragment oldFragment = null;
+
     @Install(to = "jobCandidatesTable", subject = "detailsGenerator")
-    private Component jobCandidatesTableDetailsGenerator(JobCandidate entity) {
+    private Component jobCandidatesTableDetailsGenerator(JobCandidate entity) throws IOException, ClassNotFoundException {
         VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
         mainLayout.setWidth("100%");
         mainLayout.setMargin(true);
@@ -454,6 +459,18 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         mainLayout.add(fragment);
         mainLayout.expand(fragment);
+
+/*        if (jobCandidatesTableDetailsGeneratorOpened != null) {
+            if (!jobCandidatesTableDetailsGeneratorOpened.equals(entity)) {
+                jobCanidateDetailScreenFragmentOld.getFragment().setVisible(false);
+                jobCandidatesTable.setDetailsVisible(jobCandidatesTableDetailsGeneratorOpened, false);
+                oldFragment.setVisible(false);
+            }
+        }
+
+        jobCandidatesTableDetailsGeneratorOpened = entity;
+        jobCanidateDetailScreenFragmentOld = jobCanidateDetailScreenFragment;
+        oldFragment = fragment; */
 
         return mainLayout;
     }

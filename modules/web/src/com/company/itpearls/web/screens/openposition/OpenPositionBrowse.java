@@ -13,6 +13,7 @@ import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.DataGridItems;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -472,9 +473,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         fragment.setWidth("100%");
 
         mainLayout.add(fragment);
+        
+        closeAllAnoterDetailsScreenFragments();
 
         return mainLayout;
     }
+// TODO закрыть все Details другие
+    private void closeAllAnoterDetailsScreenFragments() {
+        for (OpenPosition op : openPositionsTable.getItems().getItems(0,
+                openPositionsDc.getItems().size())) {
+            openPositionsTable.setDetailsVisible(op, false);
+        }
+    }
+
 
     private Component createViewDescriptionButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
@@ -624,18 +635,26 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         new Date(),
                         userSession.getUser());
 
+                entity.setOwner(null);
                 entity.setLastOpenDate(null);
+
+                openPositionsTable.setDetailsVisible(entity, false);
+                openPositionsDl.load();
             } else {
                 events.publish(new UiNotificationEvent(this, "Открыта вакансия: " +
                         entity.getVacansyName()));
-
 
                 setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                         "Открылась вакансия",
                         "Открыта вакансия",
                         new Date(),
                         userSession.getUser());
+
+                entity.setOwner(userSession.getUser());
                 entity.setLastOpenDate(new Date());
+
+                openPositionsTable.setDetailsVisible(entity, false);
+                openPositionsDl.load();
             }
 
             dataManager.commit(entity);
