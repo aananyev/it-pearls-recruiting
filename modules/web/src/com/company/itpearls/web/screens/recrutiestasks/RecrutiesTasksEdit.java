@@ -1,7 +1,9 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.OpenPositionNews;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.GetUserRoleService;
 import com.company.itpearls.service.SubscribeDateService;
@@ -79,6 +81,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private CollectionContainer<User> usersDc;
     @Inject
     private Events events;
+    @Inject
+    private Metadata metadata;
 
     @Subscribe("windowExtendAndCloseButton")
     public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
@@ -123,7 +127,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         allSubscribeCheckBoxSet();
     }
 
-    private String GROUP_RESEARCHING_NAME ="Ресерчинг";
+    private String GROUP_RESEARCHING_NAME = "Ресерчинг";
     private String GROUP_RECRUTING_NAME = "Рекрутинг";
     private String GROUP_MANAGEMENT_NAME = "Менеджмент";
     private String GROUP_ACCOUNTING_NAME = "Аккаунтинг";
@@ -150,8 +154,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         if (allSubscribeCheckBox.getValue()) {
             //подписать всех
 
-            for(User user : usersDc.getItems()) {
-                if(!user.equals(userSession.getUser())
+            for (User user : usersDc.getItems()) {
+                if (!user.equals(userSession.getUser())
                         && user.getActive()
                         && (user.getGroup().getName().equals(GROUP_RESEARCHING_NAME) ||
                         user.getGroup().getName().equals(GROUP_RECRUTING_NAME))) {
@@ -174,6 +178,57 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                             + openPositionField.getValue().getVacansyName()));
                 }
             }
+        }
+    }
+
+    Boolean deleteTwiceEvent = true;
+
+    @Subscribe
+    public void onAfterCommitChanges1(AfterCommitChangesEvent event) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+        if (deleteTwiceEvent) {
+            setOpenPositionNewsAutomatedMessage(openPositionField.getValue(),
+                    recrutiesTasksFieldUser.getValue().getName()
+                            + " подписался на вакансию c "
+                            + sdf.format(startDateField.getValue())
+                            + " по "
+                            + sdf.format(endDateField.getValue()),
+                    "",
+                    new Date(),
+                    null,
+                    recrutiesTasksFieldUser.getValue(),
+                    true);
+            deleteTwiceEvent = false;
+        }
+
+    }
+
+
+    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+                                                     String subject,
+                                                     String comment,
+                                                     Date date,
+                                                     JobCandidate jobCandidate,
+                                                     User user,
+                                                     Boolean priority) {
+
+        try {
+            OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
+
+            openPositionNews.setOpenPosition(editedEntity);
+            openPositionNews.setAuthor(user);
+            openPositionNews.setDateNews(date);
+            openPositionNews.setSubject(subject);
+            openPositionNews.setComment(comment);
+            openPositionNews.setCandidates(jobCandidate);
+            openPositionNews.setPriorityNews(priority != null ? priority : false);
+
+            CommitContext commitContext = new CommitContext();
+            commitContext.addInstanceToCommit(openPositionNews);
+            dataManager.commit(commitContext);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

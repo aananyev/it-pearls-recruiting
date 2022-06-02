@@ -622,7 +622,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             setSubscribe();
             setOpenPositionNewsAutomatedMessage(vacancyFiels.getValue(),
                     iteractionTypeField.getValue().getIterationName(),
-                    candidateField.getValue().getFullName() + ":" + commentField.getValue(),
+                    commentField.getValue(),
                     dateIteractionField.getValue(),
                     candidateField.getValue(),
                     recrutierField.getValue(),
