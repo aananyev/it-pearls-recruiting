@@ -197,6 +197,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private RichTextArea templateLetterRichTextArea;
     @Inject
     private TextField<User> ownerTextField;
+    private String startVacansyName = null;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -207,6 +208,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         // проверка на ноль
         booOpenClosePosition = booOpenClosePosition == null ? false : booOpenClosePosition;
+
 
         setTopLabel();
         setInternalProject();
@@ -629,6 +631,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 }
             }
         }
+
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            if (!vacansyNameField.getValue().equals(startVacansyName)) {
+                setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                        userSession.getUser().getName()
+                                + " изменил наименование вакансии",
+                        "Старое: " + startVacansyName
+                        + "<br>Новое: "
+                        + vacansyNameField.getValue(),
+                        new Date(),
+                        userSession.getUser());
+            }
+        }
     }
 
     private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
@@ -742,6 +757,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         startSalaryMaxValue = openPositionFieldSalaryMax.getValue();
         openPositionText = openPositionRichTextArea.getValue() != null ? Jsoup.parse(openPositionRichTextArea.getValue()).text() : null;
         startLetterText = templateLetterRichTextArea.getValue() != null ? Jsoup.parse(templateLetterRichTextArea.getValue()).text() : null;
+        startVacansyName = vacansyNameField.getValue();
     }
 
     private String showKeyCompetition(String value) {
