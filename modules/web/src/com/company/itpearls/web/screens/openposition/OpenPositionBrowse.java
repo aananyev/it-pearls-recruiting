@@ -626,8 +626,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
 
             if (entity.getOpenClose() || entity.getOpenClose() == null) {
-                events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
-                        entity.getVacansyName()));
+                events.publish(new UiNotificationEvent(this, "Закрыта вакансия: "
+                        + entity.getVacansyName()
+                        + "<br><svg align=\"right\" width=\"100%\"><i>"
+                        + userSession.getUser().getName()
+                        + "</i></svg>"));
 
                 setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                         "Закрылась вакансия",
@@ -641,8 +644,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 openPositionsTable.setDetailsVisible(entity, false);
                 openPositionsDl.load();
             } else {
-                events.publish(new UiNotificationEvent(this, "Открыта вакансия: " +
-                        entity.getVacansyName()));
+                events.publish(new UiNotificationEvent(this, "Открыта вакансия: "
+                        + entity.getVacansyName()
+                        + "<br><svg align=\"right\" width=\"100%\"><i>"
+                        + userSession.getUser().getName()
+                        + "</i></svg>"));
 
                 setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                         "Открылась вакансия",
@@ -807,7 +813,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             events.publish(new UiNotificationEvent(this,
                     "Изменен приоритет вакансии <b>"
                             + openPositionsTable.getSingleSelected().getVacansyName()
-                            + "</b> на <b>" + result.get() + "</b>"));
+                            + "</b> на <b>"
+                            + result.get()
+                            + "</b><br><svg align=\"right\" width=\"100%\"><i>"
+                            + userSession.getUser().getName()
+                            + "</i></svg>"));
 
             if (flagPriority) {
                 setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
