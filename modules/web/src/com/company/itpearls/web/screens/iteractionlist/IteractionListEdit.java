@@ -712,9 +712,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                         case 6: // всем
                                             events.publish(new UiNotificationEvent(this,
                                                     "<img src=\"VAADIN/themes/halo/" + iteractionTypeField.getValue().getPic() +
-                                                            "\"> <b>" +
-                                                            getEditedEntity().getCandidate().getFullName() + " : " +
-                                                            getEditedEntity().getIteractionType().getIterationName() + "</b>"));
+                                                            "\"> <b>"
+                                                            + getEditedEntity().getCandidate().getFullName()
+                                                            + " : "
+                                                            + getEditedEntity().getIteractionType().getIterationName()
+                                                            + "</b><br><svg width=\"100%\" align=\"right\"><i>"
+                                                            + userSession.getUser().getName()
+                                                            + "</i></svg>"));
                                             afterCommitSendMessage = true;
                                             break;
                                         default:
