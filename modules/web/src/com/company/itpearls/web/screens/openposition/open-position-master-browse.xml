@@ -4,7 +4,21 @@
         caption="msg://openPositionMasterBrowse.caption"
         focusComponent="openPositionsTable"
         messagesPack="com.company.itpearls.web.screens.openposition">
-    <data readOnly="true">
+    <data readOnly="false">
+        <collection id="interviewDc" class="com.company.itpearls.entity.Interview" view="interview-view">
+            <loader id="intervievDl">
+                <query><![CDATA[select e from itpearls_Interview e order by e.dateInterview]]></query>
+            </loader>
+            <collection id="openPositionDc"
+                        property="openPositions"/>
+        </collection>
+        <collection id="userDc"
+                    class="com.haulmont.cuba.security.entity.User"
+                    view="_minimal">
+            <loader id="userDl">
+                <query><![CDATA[select e from sec$User e where e.active = true order by e.name]]></query>
+            </loader>
+        </collection>
         <collection id="jobCandidateDc"
                     class="com.company.itpearls.entity.JobCandidate">
             <view extends="_local">
@@ -121,8 +135,10 @@
                     class="com.company.itpearls.entity.Project">
             <view extends="_minimal">
                 <property name="projectName"/>
-                <property name="projectDepartment" view="_minimal">
-                    <property name="companyName" view="_minimal"/>
+                <property name="projectDepartment"
+                          view="_minimal">
+                    <property name="companyName"
+                              view="_minimal"/>
                 </property>
             </view>
             <loader id="projectNameDl">
@@ -181,8 +197,10 @@
             <view extends="_minimal">
                 <property name="vacansyName"/>
                 <property name="projectName" view="_minimal">
-                    <property name="projectDepartment" view="_minimal">
-                        <property name="companyName" view="_minimal"/>
+                    <property name="projectDepartment"
+                              view="_minimal">
+                        <property name="companyName"
+                                  view="_minimal"/>
                     </property>
                 </property>
             </view>
@@ -241,26 +259,42 @@
                 <hbox id="titleHBox"
                       spacing="true"
                       height="100%"
-                      width="100%">
+                      width="AUTO">
                     <textField id="headerTextField"
+                               visible="false"
+                               width="AUTO"
+                               align="MIDDLE_LEFT"
                                caption="msg://msgHeaderOfWizard"
                                stylename="borderless"/>
                     <label id="jobCandidateLabel"
                            width="AUTO"
                            align="MIDDLE_LEFT"
                            stylename="large"/>
+                    <hbox align="MIDDLE_LEFT">
+                        <label id="bracketOpenLabel"
+                               value="("
+                               stylename="large"
+                               align="MIDDLE_LEFT"
+                               visible="false"/>
+                        <label id="selectPositionLabel"
+                               width="AUTO"
+                               align="MIDDLE_LEFT"
+                               stylename="large"/>
+                        <label id="bracketCloseLabel"
+                               value=")"
+                               stylename="large"
+                               align="MIDDLE_LEFT"
+                               visible="false"/>
+                    </hbox>
                     <label id="priorityLabel"
-                           width="100%"
-                           align="MIDDLE_RIGHT"/>
-                    <label id="selectPositionLabel"
                            width="AUTO"
-                           align="TOP_LEFT"
-                           stylename="large"/>
+                           stylename="large"
+                           align="MIDDLE_RIGHT"/>
                 </hbox>
                 <hbox id="buttonBoxHBox"
                       width="AUTO"
                       spacing="true"
-                      align="BOTTOM_LEFT">
+                      align="MIDDLE_LEFT">
                     <button id="clearButton"
                             align="BOTTOM_RIGHT"
                             width="AUTO"
@@ -277,12 +311,16 @@
               spacing="true">
             <hbox box.expandRatio="2" width="100%">
                 <hbox box.expandRatio="1">
-                    <label value="msg://msgMinSalary" stylename="large"/>
-                    <label id="minSalaryLabel" stylename="large"/>
+                    <label value="msg://msgMinSalary"
+                           stylename="large"/>
+                    <label id="minSalaryLabel"
+                           stylename="large"/>
                 </hbox>
                 <hbox box.expandRatio="1">
-                    <label value="msg://msgMaxSalary" stylename="large"/>
-                    <label id="maxSalaryLabel" stylename="large"/>
+                    <label value="msg://msgMaxSalary"
+                           stylename="large"/>
+                    <label id="maxSalaryLabel"
+                           stylename="large"/>
                 </hbox>
             </hbox>
             <hbox width="50%"
@@ -311,16 +349,20 @@
         <accordion id="mainAccordion">
             <tab id="selectJobCandidateTab"
                  spacing="true"
+                 margin="true"
                  caption="msg://msgSelectJobCandidate">
                 <lookupField id="jobCandidateField"
                              align="MIDDLE_CENTER"
                              width="50%"
+                             dataContainer="interviewDc"
+                             property="candidate"
                              optionsContainer="jobCandidateDc"
                              caption="msg://msgJobCandidate"
                              description="msg://msgSelectJobCandidateDesc"/>
             </tab>
             <tab id="selectPriorityTab"
                  spacing="true"
+                 margin="true"
                  caption="msg://msgSelectPriorityPosition">
                 <lookupField id="notLowerRatingLookupField"
                              align="MIDDLE_CENTER"
@@ -331,6 +373,7 @@
             <tab id="selectJobPositionTab"
                  spacing="true"
                  expand="mainHBox"
+                 margin="true"
                  caption="msg://msgSelectJobPosition">
                 <hbox id="mainHBox"
                       width="100%"
@@ -365,6 +408,7 @@
             <tab id="selectCompanyTab"
                  spacing="true"
                  expand="mainCompanyHBox"
+                 margin="true"
                  caption="msg://msgSelectCompany">
                 <hbox id="mainCompanyHBox"
                       width="100%"
@@ -393,6 +437,7 @@
             </tab>
             <tab id="selectVacansyTab"
                  spacing="true"
+                 margin="true"
                  caption="msg://msgSelectVacancy">
                 <vbox spacing="true"
                       width="100%"
@@ -458,40 +503,97 @@
             </tab>
             <tab id="tempSixLetterTab"
                  caption="msg://msgSixTempTab"
+                 margin="true"
+                 expand="interviewNotesVBox"
                  spacing="true">
-                <vbox spacing="true">
-                    <hbox spacing="true" width="AUTO" height="AUTO">
-                        <label value="msg://msgInterviewHeaderLabel"
-                               stylename="h3"/>
-                        <label id="interviewTabHeaderLabel"
-                               stylename="h3"/>
-                    </hbox>
-                </vbox>
-                <textArea id="letterNotesTextArea"
-                          inputPrompt="msg://msgLetterNotes"
-                          icon="font-icon:STICKY_NOTE"
+                <vbox id="interviewNotesVBox"
+                      width="100%"
+                      height="100%"
+                      expand="letterNotesVBox"
+                      spacing="true">
+
+                    <vbox id="letterNotesVBox"
                           width="100%"
-                          height="50%"/>
+                          height="100%"
+                          expand="letterNotesHBox"
+                          margin="50px,50px,50px,50px"
+                          spacing="true">
+                        <hbox id="letterNotesHBox"
+                              width="100%"
+                              height="100%"
+                              expand="letterNotesTextArea"
+                              spacing="true">
+                            <textArea id="letterNotesTextArea"
+                                      dataContainer="interviewDc"
+                                      property="note"
+                                      inputPrompt="msg://msgLetterNotes"
+                                      align="TOP_LEFT"
+                                      width="100%"
+                                      box.expandRatio="7"
+                                      height="100%"/>
+                            <richTextArea id="letterRequirementNotesRichTextArea"
+                                          editable="false"
+                                          box.expandRatio="3"
+                                          width="100%"
+                                          height="100%"/>
+                        </hbox>
+                        <hbox width="100%"
+                              height="AUTO"
+                              spacing="true">
+                            <textField id="salaryMinTextField"
+                                       width="100%"
+                                       dataContainer="interviewDc"
+                                       property="salaryMin"
+                                       datatype="int"
+                                       caption="msg://msgSalaryMin"/>
+                            <textField id="salaryMaxTextField"
+                                       width="100%"
+                                       dataContainer="interviewDc"
+                                       property="salaryMax"
+                                       datatype="int"
+                                       caption="msg://msgSalaryMax"/>
+                        </hbox>
+                        <hbox width="100%"
+                              height="AUTO"
+                              spacing="true">
+                            <lookupPickerField id="recrutierLookupPickerField"
+                                               width="100%"
+                                               dataContainer="interviewDc"
+                                               property="recrutier"
+                                               optionsContainer="userDc"
+                                               caption="msg://msgRecrutier"/>
+                            <lookupPickerField id="researcherLookupPickerField"
+                                               width="100%"
+                                               dataContainer="interviewDc"
+                                               property="researcher"
+                                               optionsContainer="userDc"
+                                               caption="msg://msgResearcher"/>
+                        </hbox>
+                    </vbox>
+                </vbox>
             </tab>
             <tab id="letterTab"
                  spacing="true"
+                 margin="true"
                  caption="msg://msgLetterTab"
-                 expand="letterTextRichTextArea">
-                <hbox id="labelInterviewBox"
+                 expand="letterTextHBox">
+                <hbox id="letterTextHBox"
                       width="100%"
-                      height="AUTO"
+                      height="100%"
+                      expand="letterTextRichTextArea"
                       spacing="true">
-                    <label id="candidateNameLabel"
-                           stylename="h3"/>
-                    <label id="vacansyNameLabel"
-                           stylename="h3"/>
+                    <richTextArea id="letterTextRichTextArea"
+                                  dataContainer="interviewDc"
+                                  property="letter"
+                                  box.expandRatio="7"
+                                  width="100%"
+                                  height="100%"/>
+                    <richTextArea id="letterRequirementRichTextArea"
+                                  editable="false"
+                                  box.expandRatio="3"
+                                  width="100%"
+                                  height="100%"/>
                 </hbox>
-                <htmlBox id="letterStructureHtmlBox"
-                         width="100%"
-                         height="100%"/>
-                <richTextArea id="letterTextRichTextArea"
-                              width="100%"
-                              height="100%"/>
             </tab>
         </accordion>
         <hbox id="lookupActions"
@@ -512,6 +614,10 @@
                     align="BOTTOM_RIGHT"
                     invoke="nextTab"
                     caption="mainMsg://msgNextButton"/>
+            <button id="saveButton"
+                    align="BOTTOM_RIGHT"
+                    invoke="saveLetter"
+                    caption="msg://msgSave"/>
         </hbox>
     </layout>
 </window>
