@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://interviewBrowse.caption"
+        focusComponent="interviewsTable"
+        messagesPack="com.company.itpearls.web.screens.interview">
+    <data readOnly="true">
+        <collection id="interviewsDc"
+                    class="com.company.itpearls.entity.Interview">
+            <view extends="_local">
+                <property name="candidate" view="_minimal"/>
+                <property name="candidateCV" view="_minimal"/>
+                <property name="openPositions" view="_minimal"/>
+                <property name="recrutier" view="_minimal"/>
+                <property name="researcher" view="_minimal"/>
+            </view>
+            <loader id="interviewsDl">
+                <query>
+                    <![CDATA[select e from itpearls_Interview e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="interviewsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="interviewsTable"
+                dataLoader="interviewsDl">
+            <properties include=".*"/>
+        </filter>
+        <dataGrid id="interviewsTable"
+                  width="100%"
+                  dataContainer="interviewsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column property="dateInterview" id="dateInterview"/>
+                <column property="candidate" id="candidate"/>
+                <column property="candidateCV" id="candidateCV"/>
+                <column property="letter" id="letter"/>
+                <column property="letterRequirements" id="letterRequirements"/>
+                <column property="note" id="note"/>
+                <column property="salaryMin" id="salaryMin"/>
+                <column property="salaryMax" id="salaryMax"/>
+                <column property="recrutier" id="recrutier"/>
+                <column property="researcher" id="researcher"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="interviewsTable.create"/>
+                <button id="editBtn" action="interviewsTable.edit"/>
+                <button id="removeBtn" action="interviewsTable.remove"/>
+            </buttonsPanel>
+        </dataGrid>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>
