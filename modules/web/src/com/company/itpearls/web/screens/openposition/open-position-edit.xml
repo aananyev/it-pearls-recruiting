@@ -37,6 +37,7 @@
                 <property name="laborAgreement"
                           view="laborAgreement-view"/>
                 <property name="comment"/>
+                <property name="signDraft"/>
             </view>
             <loader id="openPositionDl"/>
             <collection id="openPositionSkillsListsDc"
@@ -81,12 +82,12 @@
                     order by e.dateNews desc]]>
                     <condition>
                         <and>
-                        <c:jpql>
-                            <c:where>e.openPosition = :openPosition</c:where>
-                        </c:jpql>
-                        <c:jpql>
-                            <c:where>e.priorityNews = :priorityNews</c:where>
-                        </c:jpql>
+                            <c:jpql>
+                                <c:where>e.openPosition = :openPosition</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.priorityNews = :priorityNews</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -181,17 +182,23 @@
                    dataContainer="openPositionDc"
                    property="lastOpenDate"
                    visible="false"/>
-        <groupBox spacing="true">
-            <vbox>
-                <label id="labelOpenPosition"
-                       stylename="h2"/>
-                <label id="labelTopComissionRecrutier"
-                       stylename="h4"
-                       htmlEnabled="true"/>
-                <label id="labelTopComissionResearcher"
-                       stylename="h4"
-                       htmlEnabled="true"/>
-            </vbox>
+        <groupBox spacing="false">
+            <scrollBox scrollBars="horizontal"
+                       spacing="false">
+                <hbox spacing="true">
+                    <label id="signDraftLabel"
+                           value=""
+                           stylename="h2"/>
+                    <label id="labelOpenPosition"
+                           stylename="h2"/>
+                    <label id="labelTopComissionRecrutier"
+                           stylename="h4"
+                           htmlEnabled="true"/>
+                    <label id="labelTopComissionResearcher"
+                           stylename="h4"
+                           htmlEnabled="true"/>
+                </hbox>
+            </scrollBox>
         </groupBox>
         <vbox id="tabSheetGroupBox"
               expand="tabSheetOpenPosition">
@@ -209,6 +216,12 @@
                               expand=""
                               width="100%">
                             <hbox spacing="true" align="MIDDLE_LEFT">
+                                <checkBox id="signDraftCheckBox"
+                                          dataContainer="openPositionDc"
+                                          property="signDraft"
+                                          caption="msg://msgSignDraft"
+                                          width="50%"
+                                          align="BOTTOM_LEFT"/>
                                 <checkBox id="openClosePositionCheckBox"
                                           dataContainer="openPositionDc"
                                           property="openClose"
@@ -425,6 +438,7 @@
                               width="100%"
                               height="100%"
                               expand="laborAgreementDataGrid">
+                        <hbox spacing="true">
                         <lookupField id="registrationForWorkField"
                                      dataContainer="openPositionDc"
                                      property="registrationForWork"
@@ -432,6 +446,13 @@
                                      required="true"
                                      align="BOTTOM_LEFT"
                                      width="AUTO"/>
+                            <textField id="outstaffingCostTextField"
+                                       datatype="decimal"
+                                       dataContainer="openPositionDc"
+                                       property="outstaffingCost"
+                                       caption="msg://msgOutstaffingCost"
+                                       description="msg://msgOutstaffingCostDescription"/>
+                        </hbox>
                         <dataGrid id="laborAgreementDataGrid"
                                   width="100%"
                                   editorEnabled="true"

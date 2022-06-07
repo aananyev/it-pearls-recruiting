@@ -15,6 +15,12 @@
     font-weight: bold;
 }
 
+.h2-gray {
+    color: gray;
+    font-size: $v-font-size--h2;
+    font-weight: bold;
+}
+
 .open-position-lookup-field-black {
     color: green;
 }
@@ -752,6 +758,11 @@ rating_battery_yellow_3:before {
 
 .open-position-internal-project {
      color: brown;
+     font-weight: normal;
+}
+
+.open-position-draft {
+     color: grey;
      font-weight: normal;
 }
 

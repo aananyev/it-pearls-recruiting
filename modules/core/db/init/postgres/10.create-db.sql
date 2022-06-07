@@ -430,6 +430,7 @@ create table ITPEARLS_OPEN_POSITION (
     DELETED_BY varchar(50),
     --
     OPEN_CLOSE boolean,
+    SIGN_DRAFT boolean,
     LAST_OPEN_DATE date,
     VACANSY_NAME varchar(250) not null,
     REMOTE_WORK integer not null,
@@ -439,6 +440,7 @@ create table ITPEARLS_OPEN_POSITION (
     SALARY_MIN decimal(19, 2),
     SALARY_MAX decimal(19, 2),
     SALARY_FIX_LIMIT boolean,
+    OUTSTAFFING_COST decimal(19, 2),
     CITY_POSITION_ID uuid,
     POSITION_TYPE_ID uuid,
     PROJECT_NAME_ID uuid not null,

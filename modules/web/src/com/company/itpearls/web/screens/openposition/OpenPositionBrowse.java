@@ -13,7 +13,6 @@ import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.DataGridItems;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -64,6 +63,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String ROLE_ADMINISTRATOR = "Administrators";
     private Map<String, Integer> remoteWork = new LinkedHashMap<>();
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
+    private Map<String, Integer> mapWorkExperience = new LinkedHashMap<>();
 
     String QUERY_COUNT_ITERACTIONS = "select e.iteractionType, count(e.iteractionType) " +
             "from itpearls_IteractionList e " +
@@ -111,6 +111,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         initGroupSubscribeButton();
 
         setMapOfPriority();
+        setWorkExperienceMap();
     }
 
     private void initGroupSubscribeButton() {
@@ -134,6 +135,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String icon = null;
 
         switch ((int) object) {
+            case -1:
+                icon = "icons/traffic-lights_gray.png";
+                break;
             case 0: //"Paused"
                 icon = "icons/remove.png";
                 break;
@@ -473,12 +477,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         fragment.setWidth("100%");
 
         mainLayout.add(fragment);
-        
+
         closeAllAnoterDetailsScreenFragments();
 
         return mainLayout;
     }
-// TODO закрыть все Details другие
+
+    // TODO закрыть все Details другие
     private void closeAllAnoterDetailsScreenFragments() {
         for (OpenPosition op : openPositionsTable.getItems().getItems(0,
                 openPositionsDc.getItems().size())) {
@@ -842,6 +847,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             String icon = null;
 
             switch (g.hashCode()) {
+                case -1:
+                    icon = "icons/traffic-lights_gray.png";
+                    break;
                 case 0: //"Paused"
                     icon = "icons/remove.png";
                     break;
@@ -917,30 +925,34 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .parameter("currentDate", new Date())
                 .one();
 
-        if (openPosition.getInternalProject() != null) {
-            if (openPosition.getInternalProject()) {
-                if (s == 0) {
-                    returnStr = "open-position-internal-project";
+        if (openPosition.getSignDraft() == null ? true : !openPosition.getSignDraft()) {
+            if (openPosition.getInternalProject() != null) {
+                if (openPosition.getInternalProject()) {
+                    if (s == 0) {
+                        returnStr = "open-position-internal-project";
+                    } else {
+                        returnStr = "open-position-internal-project-job-recrutier";
+                    }
                 } else {
-                    returnStr = "open-position-internal-project-job-recrutier";
+                    if (s == 0)
+                        if ((openPosition.getCommandCandidate() != null ? openPosition.getCommandCandidate() : 2) != 1)
+                            returnStr = "open-position-empty-recrutier";
+                        else
+                            returnStr = "open-position-job-command";
+                    else
+                        returnStr = "open-position-job-recruitier";
                 }
             } else {
-                if (s == 0)
-                    if ((openPosition.getCommandCandidate() != null ? openPosition.getCommandCandidate() : 2) != 1)
+                if (openPosition.getCommandCandidate() != 1) {
+                    if (s == 0)
                         returnStr = "open-position-empty-recrutier";
                     else
-                        returnStr = "open-position-job-command";
-                else
-                    returnStr = "open-position-job-recruitier";
+                        returnStr = "open-position-job-recruitier";
+                } else
+                    returnStr = "open-position-job-command";
             }
         } else {
-            if (openPosition.getCommandCandidate() != 1) {
-                if (s == 0)
-                    returnStr = "open-position-empty-recrutier";
-                else
-                    returnStr = "open-position-job-recruitier";
-            } else
-                returnStr = "open-position-job-command";
+            return "open-position-draft";
         }
 
         if (openPosition.getOpenClose() != null) {
@@ -990,7 +1002,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe("notLowerRatingLookupField")
     public void onNotLowerRatingLookupFieldValueChange1(HasValue.ValueChangeEvent event) {
         removeUrgentlyLists();
-        setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
+
+        if (notLowerRatingLookupField.getValue() != null) {
+            if (((int) notLowerRatingLookupField.getValue()) != -1) {
+                setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
+            } else {
+                openPositionsDl.removeParameter("rating");
+                openPositionsDl.setParameter("signDraft", true);
+            }
+        } else {
+            openPositionsDl.removeParameter("rating");
+        }
+
+        openPositionsDl.load();
     }
 
     private void removeUrgentlyLists() {
@@ -1056,9 +1080,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
 
                             if (notLowerRatingLookupField.getValue() != null) {
-                                if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue() &&
-                                        !op1.getOpenClose()) {
-                                    countOp = countOp + op1.getNumberPosition();
+                                if ((int)notLowerRatingLookupField.getValue() >= 0) {
+                                    if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue() &&
+                                            !op1.getOpenClose()) {
+                                        countOp = countOp + op1.getNumberPosition();
+                                    }
                                 }
                             } else if (!op1.getOpenClose()) {
                                 if (op1.getNumberPosition() != null) {
@@ -1120,7 +1146,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setMapOfPriority() {
-
+        priorityMap.put("Draft", -1);
         priorityMap.put("Paused", 0);
         priorityMap.put("Low", 1);
         priorityMap.put("Normal", 2);
@@ -1243,8 +1269,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Integer priority = openPosition.getPriority();
 
         if (priority != null) {
-
             switch (priority) {
+                case -1:
+                    icon = "icons/traffic-lights_gray.png";
+                    break;
                 case 0: //"Paused"
                     icon = "icons/remove.png";
                     break;
@@ -1630,6 +1658,34 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return event.getItem().getOwner() != null
                 ? event.getItem().getOwner().getName()
                 : event.getItem().getCreatedBy();
+    }
+
+    @Subscribe("signDraftCheckBox")
+    public void onSignDraftCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        openPositionsDl.setParameter("signDraft", (event.getValue() != null ? event.getValue() : false));
+    }
+
+    @Install(to = "openPositionsTable.workExperience", subject = "columnGenerator")
+    private Object openPositionsTableWorkExperienceColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        Set<Map.Entry<String, Integer>> entrySet=mapWorkExperience.entrySet();
+        Integer desiredObject = event.getItem().getWorkExperience();
+
+        for (Map.Entry<String, Integer> pair : entrySet) {
+            if (desiredObject.equals(pair.getValue())) {
+                return pair.getKey();// нашли наше значение и возвращаем  ключ
+            }
+        }
+
+        return null;
+    }
+
+    private void setWorkExperienceMap() {
+        mapWorkExperience.put("Нет требований", 0);
+        mapWorkExperience.put("Без опыта", 1);
+        mapWorkExperience.put("1 год", 2);
+        mapWorkExperience.put("2 года", 3);
+        mapWorkExperience.put("3 года", 4);
+        mapWorkExperience.put("5 лет и более", 5);
     }
 }
 

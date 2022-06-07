@@ -30,6 +30,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "OPEN_CLOSE")
     protected Boolean openClose = false;
 
+    @Column(name = "SIGN_DRAFT")
+    private Boolean signDraft;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "LAST_OPEN_DATE")
     private Date lastOpenDate;
@@ -60,6 +63,9 @@ public class OpenPosition extends StandardEntity {
 
     @Column(name = "SALARY_FIX_LIMIT")
     protected Boolean salaryFixLimit;
+
+    @Column(name = "OUTSTAFFING_COST")
+    private BigDecimal outstaffingCost;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -184,6 +190,22 @@ public class OpenPosition extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
     private User owner;
+
+    public BigDecimal getOutstaffingCost() {
+        return outstaffingCost;
+    }
+
+    public void setOutstaffingCost(BigDecimal outstaffingCost) {
+        this.outstaffingCost = outstaffingCost;
+    }
+
+    public Boolean getSignDraft() {
+        return signDraft;
+    }
+
+    public void setSignDraft(Boolean signDraft) {
+        this.signDraft = signDraft;
+    }
 
     public User getOwner() {
         return owner;

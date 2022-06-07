@@ -198,6 +198,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private TextField<User> ownerTextField;
     private String startVacansyName = null;
+    @Inject
+    private CheckBox signDraftCheckBox;
+    @Inject
+    private Label<String> signDraftLabel;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -998,11 +1002,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                 .map(Map.Entry::getKey)
                                 .findFirst();
 
-                        setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                                "Изменен приоритет вакансии на " + result.get(),
-                                "Закрыта вакансия",
-                                new Date(),
-                                userSession.getUser());
+                        if(event.getValue() >= 0) {
+                            setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                                    "Изменен приоритет вакансии на " + result.get(),
+                                    "Закрыта вакансия",
+                                    new Date(),
+                                    userSession.getUser());
+                        }
 
                         flagPriority = false;
                     } else {
@@ -1024,6 +1030,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         registrationForWorkField.setOptionsMap(rwMap);
 
+        priorityMap.put("Draft", -1);
         priorityMap.put("Paused", 0);
         priorityMap.put("Low", 1);
         priorityMap.put("Normal", 2);
@@ -1639,6 +1646,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         String icon = null;
 
         switch (integer) {
+            case -1:
+                icon = "icons/traffic-lights_gray.png";
+                break;
             case 0: //"Paused"
                 icon = "icons/remove.png";
                 break;
@@ -1957,5 +1967,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     e.setOpenPosition(getEditedEntity());
                 })
                 .show();
+    }
+
+    @Subscribe("signDraftCheckBox")
+    public void onSignDraftCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue() != null) {
+            if (event.getValue()) {
+                signDraftLabel.setValue("(DRAFT)");
+                signDraftCheckBox.setStyleName("h2-gray");
+                priorityField.setValue(-1);
+            } else {
+                signDraftLabel.setValue("");
+                signDraftCheckBox.setStyleName("h2");
+                priorityField.setValue(null);
+            }
+        } else {
+            signDraftLabel.setValue("");
+            signDraftCheckBox.setStyleName("h2");
+            priorityField.setValue(null);
+        }
     }
 }

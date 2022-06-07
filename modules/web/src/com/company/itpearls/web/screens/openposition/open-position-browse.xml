@@ -18,6 +18,9 @@
                                 <c:where>e.openClose=:openClosePos</c:where>
                             </c:jpql>
                             <c:jpql>
+                                <c:where>e.signDraft = :signDraft</c:where>
+                            </c:jpql>
+                            <c:jpql>
                                 <c:where>e.priority > :paused</c:where>
                             </c:jpql>
                             <c:jpql>
@@ -128,6 +131,11 @@
                         width="120px">
                     <textRenderer/>
                 </column>
+                <column id="workExperience"
+                        width="65px"
+                        caption="msg://msgWorkExperience">
+                    <textRenderer/>
+                </column>
                 <column id="salaryMinMax"
                         resizable="true"
                         width="120px"
@@ -150,6 +158,7 @@
                     <iconRenderer/>
                 </column>
                 <column id="testExserice"
+                        collapsed="true"
                         sortable="false"
                         caption="msg://msgNeedExercise"
                         resizable="true"
@@ -167,6 +176,7 @@
                     <iconRenderer/>
                 </column>
                 <column id="queryQuestion"
+                        collapsed="true"
                         sortable="false"
                         caption="msg://msgQuestionQuery"
                         resizable="true"
@@ -175,6 +185,7 @@
                     <iconRenderer/>
                 </column>
                 <column id="memoForCandidateColumn"
+                        collapsed="true"
                         sortable="false"
                         caption="msg://msgMemoForCandidate"
                         resizable="true"
@@ -232,6 +243,10 @@
                       align="MIDDLE_LEFT"
                       description="msg://msgOnlyOpenedVacansy"
                       caption="msg://msgOnlyOpenedVacansy"/>
+            <checkBox id="signDraftCheckBox"
+                      align="MIDDLE_LEFT"
+                      description="msg://msgSignDraft"
+                      caption="msg://msgSignDraft"/>
             <checkBox id="checkBoxOnlyNotPaused"
                       align="MIDDLE_LEFT"
                       description="msg://msgOnlyNotPaused"
