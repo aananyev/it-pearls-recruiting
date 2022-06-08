@@ -35,5 +35,6 @@
         <class>com.company.itpearls.entity.PossibleNames</class>
         <class>com.company.itpearls.entity.ExtUser</class>
         <class>com.company.itpearls.entity.OpenPositionNews</class>
+        <class>com.company.itpearls.entity.Interview</class>
     </persistence-unit>
 </persistence>

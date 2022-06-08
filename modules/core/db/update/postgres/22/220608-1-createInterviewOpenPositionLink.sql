@@ -1,0 +1,5 @@
+create table ITPEARLS_INTERVIEW_OPEN_POSITION_LINK (
+    INTERVIEW_ID uuid,
+    OPEN_POSITION_ID uuid,
+    primary key (INTERVIEW_ID, OPEN_POSITION_ID)
+);

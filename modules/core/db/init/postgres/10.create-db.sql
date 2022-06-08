@@ -777,3 +777,35 @@ create table ITPEARLS_OPEN_POSITION_NEWS (
     primary key (ID)
 )^
 -- end ITPEARLS_OPEN_POSITION_NEWS
+-- begin ITPEARLS_INTERVIEW
+create table ITPEARLS_INTERVIEW (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    DATE_INTERVIEW timestamp not null,
+    CANDIDATE_ID uuid not null,
+    CANDIDATE_CV_ID uuid,
+    LETTER text,
+    LETTER_REQUIREMENTS text,
+    NOTE text,
+    SALARY_MIN integer,
+    SALARY_MAX integer,
+    RECRUTIER_ID uuid not null,
+    RESEARCHER_ID uuid,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_INTERVIEW
+-- begin ITPEARLS_INTERVIEW_OPEN_POSITION_LINK
+create table ITPEARLS_INTERVIEW_OPEN_POSITION_LINK (
+    INTERVIEW_ID uuid,
+    OPEN_POSITION_ID uuid,
+    primary key (INTERVIEW_ID, OPEN_POSITION_ID)
+)^
+-- end ITPEARLS_INTERVIEW_OPEN_POSITION_LINK

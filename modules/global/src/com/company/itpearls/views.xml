@@ -452,4 +452,16 @@
     </view>
     <view entity="itpearls_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
     <view entity="itpearls_ExtUser" name="extUser-view" extends="_local"/>
+    <view entity="itpearls_Interview" name="interview-view" extends="_minimal">
+        <property name="candidate" view="_minimal">
+            <property name="personPosition">
+                <property name="positionRuName"/>
+                <property name="positionEnName"/>
+            </property>
+        </property>
+        <property name="candidateCV" view="_minimal"/>
+        <property name="openPositions" view="_minimal"/>
+        <property name="recrutier" view="_minimal"/>
+        <property name="researcher" view="_minimal"/>
+    </view>
 </views>

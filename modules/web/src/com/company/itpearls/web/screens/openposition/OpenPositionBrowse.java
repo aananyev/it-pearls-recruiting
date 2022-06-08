@@ -1498,9 +1498,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 return "pic-center-small-red";
             } else {
                 if (date.before(DateUtils.addMonths(lastDate, 3))) {
-                    return "pic-center-small-yellow";
+                    return "pic-center-small-orange";
                 } else {
-                    return "pic-center-small-green";
+                    if (date.before(DateUtils.addMonths(lastDate, 6))) {
+                        return "pic-center-small-green";
+                    } else {
+                        return "pic-center-small-grey";
+
+                    }
                 }
             }
         } else {
@@ -1519,7 +1524,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 3))) {
                     return "Открыта более месяца назад";
                 } else {
-                    return "Открыта более 3-х месяцев назад";
+                    if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 6))) {
+                        return "Открыта более 3-х месяцев назад";
+                    } else {
+                        return "Открыта более 6-и месяцев назад";
+                    }
                 }
             }
         } else {

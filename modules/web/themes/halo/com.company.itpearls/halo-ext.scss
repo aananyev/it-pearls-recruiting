@@ -621,6 +621,14 @@ rating_battery_yellow_3:before {
     margin: 0 auto;
 }
 
+.pic-center-small-orange {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: small;
+    margin: 0 auto;
+}
+
 .pic-center-large-grey {
     color: grey;
     text-align: center;
@@ -629,8 +637,16 @@ rating_battery_yellow_3:before {
      margin: 0 auto;
 }
 
+.pic-center-medium-orange {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: medium;
+    margin: 0 auto;
+}
+
 .pic-center-medium-yellow {
-    color: grey;
+    color: yellow;
     text-align: center;
     text-color: yellow;
     font-size: medium;
@@ -638,7 +654,7 @@ rating_battery_yellow_3:before {
 }
 
 .pic-center-small-yellow {
-    color: grey;
+    color: yellow;
     text-align: center;
     text-color: yellow;
     font-size: small;
@@ -646,7 +662,7 @@ rating_battery_yellow_3:before {
 }
 
 .pic-center-medium-green {
-    color: grey;
+    color: green;
     text-align: center;
      text-color: green;
      font-size: medium;
@@ -654,7 +670,7 @@ rating_battery_yellow_3:before {
 }
 
 .pic-center-small-green {
-    color: grey;
+    color: green;
     text-align: center;
      text-color: green;
      font-size: small;
