@@ -2,8 +2,10 @@ package com.company.itpearls.core;
 
 import com.company.itpearls.entity.SkillTree;
 import com.haulmont.cuba.core.global.DataManager;
+import org.apache.fop.pdf.PDFDocument;
 import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.io.RandomAccessFile;
+import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.io.RandomAccessReadMemoryMappedFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -13,8 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +59,7 @@ public class PdfParserServiceBean implements PdfParserService {
 
     private boolean checkHiLevel(List<SkillTree> candidateSkills, SkillTree skillTree) {
         for (SkillTree a : candidateSkills) {
-            if(a.getSkillName().toLowerCase().equals(skillTree.getSkillName().toLowerCase())) {
+            if (a.getSkillName().toLowerCase().equals(skillTree.getSkillName().toLowerCase())) {
                 return false;
             }
         }
@@ -71,23 +72,36 @@ public class PdfParserServiceBean implements PdfParserService {
         String parsedText = "";
 
         if (fileName.contains("pdf")) {
+            RandomAccessRead rad = new RandomAccessReadMemoryMappedFile(fileName);
+            PDFParser parser = new PDFParser(rad);
 
-            PDFParser parser = new PDFParser(new RandomAccessFile(new File(fileName), "r"));
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            PDDocument pdDoc = parser.parse();
+            parsedText = pdfStripper.getText(pdDoc);
+
+            return parsedText;
+        } else {
+/*            PDFParser parser = new PDFParser(new RandomAccessFile(new File(fileName), "r"));
             parser.parse();
 
             COSDocument cosDoc = parser.getDocument();
             PDFTextStripper pdfStripper = new PDFTextStripper();
             PDDocument pdDoc = new PDDocument(cosDoc);
-            parsedText = pdfStripper.getText(pdDoc);
+            parsedText = pdfStripper.getText(pdDoc); */
+            return null;
         }
-
-        return parsedText;
     }
 
     @Override
     public File getImageFromPDF(File file) throws IOException {
         //Loading an existing PDF document
-        PDDocument document = PDDocument.load(file);
+
+        RandomAccessRead rad = new RandomAccessReadMemoryMappedFile(file);
+        File tempJpg;
+
+        PDFParser parser = new PDFParser(rad);
+        PDDocument document = parser.parse();
+//        PDDocument document = PDDocument.load(file);
 
         //Instantiating the PDFRenderer class
         PDFRenderer renderer = new PDFRenderer(document);
@@ -96,19 +110,23 @@ public class PdfParserServiceBean implements PdfParserService {
         BufferedImage image = renderer.renderImage(0);
 
         //Writing the image to a file
-        File tempJpg = File.createTempFile("img", ".jpg");
+        tempJpg = File.createTempFile("img", ".jpg");
 
-        ImageIO.write (image, "JPEG", tempJpg);
+        ImageIO.write(image, "JPEG", tempJpg);
 
         //Closing the document
         document.close();
+
         return tempJpg;
     }
 
     @Override
     public String getImageFromNamePDF(File file) throws IOException {
         //Loading an existing PDF document
-        PDDocument document = PDDocument.load(file);
+        RandomAccessRead rad = new RandomAccessReadMemoryMappedFile(file);
+        PDFParser parser = new PDFParser(rad);
+        PDDocument document = parser.parse();
+//        PDDocument document = PDDocument.load(file);
 
         //Instantiating the PDFRenderer class
         PDFRenderer renderer = new PDFRenderer(document);
@@ -119,7 +137,7 @@ public class PdfParserServiceBean implements PdfParserService {
         //Writing the image to a file
         File tempJpg = File.createTempFile("img", ".jpg");
 
-        ImageIO.write (image, "JPEG", tempJpg);
+        ImageIO.write(image, "JPEG", tempJpg);
 
         //Closing the document
         document.close();

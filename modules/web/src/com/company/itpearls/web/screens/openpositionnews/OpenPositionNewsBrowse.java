@@ -14,7 +14,6 @@ import javax.inject.Inject;
 @LookupComponent("openPositionNewsDataGrid")
 @LoadDataBeforeShow
 public class OpenPositionNewsBrowse extends StandardLookup<OpenPositionNews> {
-
     @Inject
     private DataGrid<OpenPositionNews> openPositionNewsDataGrid;
     @Inject
@@ -84,5 +83,15 @@ public class OpenPositionNewsBrowse extends StandardLookup<OpenPositionNews> {
                 .withCaption("");
         closeButton.setAction(closeAction);
         return closeButton;
+    }
+
+    @Install(to = "openPositionNewsDataGrid.openPosition", subject = "descriptionProvider")
+    private String openPositionNewsDataGridOpenPositionDescriptionProvider(OpenPositionNews openPositionNews) {
+        return openPositionNews.getOpenPosition().getVacansyName();
+    }
+
+    @Install(to = "openPositionNewsDataGrid.comment", subject = "descriptionProvider")
+    private String openPositionNewsDataGridCommentDescriptionProvider(OpenPositionNews openPositionNews) {
+        return openPositionNews.getComment();
     }
 }

@@ -8,14 +8,21 @@
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition"
                     view="openPosition-view">
-            <loader id="openPositionsDl" cacheable="true">
+            <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                                       order by e.vacansyName]]>
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e.openClose=:openClosePos</c:where>
+                                <c:where>e in
+                                    (select g.openPosition from itpearls_RecrutiesTasks g
+                                    where g.reacrutier = :subscriber
+                                    and current_date between g.startDate and g.endDate)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.openClose = :openClosePos</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.signDraft = :signDraft</c:where>
@@ -80,6 +87,8 @@
                         excludeProperties="comment,numberPosition,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <treeDataGrid id="openPositionsTable"
+                      descriptionAsHtml="true"
+                      captionAsHtml="true"
                       width="100%"
                       editorEnabled="false"
                       headerVisible="true"

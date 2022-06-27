@@ -375,25 +375,31 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.vacansyName", subject = "descriptionProvider")
     private String openPositionsTableVacansyNameDescriptionProvider(OpenPosition openPosition) {
-        Date curDate = new Date();
-        String QUERY = "select e.name from sec$User e, itpearls_RecrutiesTasks f " +
-                "where f.reacrutier = e and f.openPosition = :openPosition and f.endDate > :currentDate";
+        String QUERY_RECRUTIER_TASK = "select e " +
+                "from itpearls_RecrutiesTasks e " +
+                "where e.endDate > current_date";
+
         String returnData = "";
 
-        List<String> recritierList = dataManager.loadValue(QUERY, String.class)
-                .parameter("openPosition", openPosition)
-                .parameter("currentDate", curDate)
+        List<RecrutiesTasks> recrutiesTasks = dataManager.load(RecrutiesTasks.class)
+                .view("recrutiesTasks-view")
+                .query(QUERY_RECRUTIER_TASK)
                 .list();
 
         if (openPosition.getShortDescription() != null) {
-            returnData = returnData + "Кратко: " + openPosition.getShortDescription() + "\n";
+            returnData = returnData + "<b>Кратко: </b><i>" + openPosition.getShortDescription() + "</i><br><br>";
         }
 
-        if (recritierList.size() != 0) {
-            returnData = returnData + "В работе у: ";
+        if (recrutiesTasks.size() != 0) {
+            returnData = returnData + "<b>В работе у:</b><br>";
 
-            for (String a : recritierList) {
-                returnData = returnData + a + ",";
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+            for (RecrutiesTasks a : recrutiesTasks) {
+                returnData = returnData + a.getReacrutier().getName()
+                        + " до <i>"
+                        + sdf.format(a.getEndDate())
+                        + "</i><br>";
             }
 
             returnData = returnData.substring(0, returnData.length() - 1);
@@ -418,7 +424,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return openPosition.getProjectName().getProjectName() + "\n"
-                + "Владелец проекта: " + projectOwner + " \n" + a;
+                + "<b>Владелец проекта: </b><i>" + projectOwner + " \n" + a + "</i>";
     }
 
     @Inject
@@ -827,7 +833,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (flagPriority) {
                 setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                         "Изменен приоритет вакансии на " + result.get(),
-                        "Закрыта вакансия",
+                        "Изменен приоритет вакансии на " + result.get(),
                         new Date(),
                         userSession.getUser());
             } else {
@@ -1080,7 +1086,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
 
                             if (notLowerRatingLookupField.getValue() != null) {
-                                if ((int)notLowerRatingLookupField.getValue() >= 0) {
+                                if ((int) notLowerRatingLookupField.getValue() >= 0) {
                                     if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue() &&
                                             !op1.getOpenClose()) {
                                         countOp = countOp + op1.getNumberPosition();
@@ -1177,16 +1183,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         checkBoxOnlyNotPaused.setValue(true);
     }
 
-    private void setInternalProjectFilter() { /*
+    private void setInternalProjectFilter() {
         if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), ROLE_ADMINISTRATOR)) {
             openPositionsDl.removeParameter("internalProject");
+            openPositionsDl.removeParameter("subscriber");
         } else {
-            openPositionsDl.setParameter("internalProject", false);
-        } */
+            openPositionsDl.setParameter("internalProject", true);
+            openPositionsDl.setParameter("subscriber", userSession.getUser());
+        }
 
 //        openPositionsDl.setParameter("internalProject", false);
-//        openPositionsDl.load();
+        openPositionsDl.load();
     }
 
     private void setSubcribersFilter() {
@@ -1676,7 +1684,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.workExperience", subject = "columnGenerator")
     private Object openPositionsTableWorkExperienceColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        Set<Map.Entry<String, Integer>> entrySet=mapWorkExperience.entrySet();
+        Set<Map.Entry<String, Integer>> entrySet = mapWorkExperience.entrySet();
         Integer desiredObject = event.getItem().getWorkExperience();
 
         for (Map.Entry<String, Integer> pair : entrySet) {

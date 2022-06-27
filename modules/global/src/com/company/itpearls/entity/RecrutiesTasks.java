@@ -26,7 +26,7 @@ public class RecrutiesTasks extends StandardEntity {
     protected Date endDate;
 
     @NotNull
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "REACRUTIER_ID")
     protected User reacrutier;

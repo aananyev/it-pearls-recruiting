@@ -144,26 +144,6 @@
                 </query>
             </loader>
         </collection>
-        <!--        <collection id="projectDc"
-                            class="com.company.itpearls.entity.Project"
-                            view="_local">
-                    <loader id="companyOfDepatmentDl">
-                        <query><![CDATA[select e
-                        from itpearls_Project e
-                        where e.endProjectDate is not null]]></query>
-                    </loader>
-                </collection>
-                <collection id="cityOfCompanyDc"
-                            class="com.company.itpearls.entity.Company"
-                            view="_local">
-                    <loader id="cityOfCompanyDl">
-                        <query>
-                            <![CDATA[select e
-                            from itpearls_Company e
-                            order by e.comanyName]]>
-                        </query>
-                    </loader>
-                </collection> -->
         <collection id="citiesDc"
                     class="com.company.itpearls.entity.City"
                     view="_local">

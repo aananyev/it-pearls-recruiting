@@ -81,10 +81,11 @@ configure(globalModule) {
             runtime('javax.xml.bind:jaxb-api:2.3.1')
             runtime('org.glassfish.jaxb:jaxb-runtime:2.3.1')
         }
-        compile 'org.apache.pdfbox:pdfbox:2.0.23'
-        compile 'org.webjars.npm:domelementtype:2.2.0'
-        runtime 'org.apache.poi:poi:5.0.0'
-        compile 'com.ibm.icu:icu4j:69.1'
+        compile 'org.apache.pdfbox:pdfbox:3.0.0-RC1'
+        compile 'org.webjars.npm:domelementtype:2.3.0'
+        compile 'org.apache.poi:poi:5.2.2'
+        compile 'com.ibm.icu:icu4j:71.1'
+        compile 'org.apache.poi:poi-ooxml:5.2.2'
     }
 
     entitiesEnhancing {

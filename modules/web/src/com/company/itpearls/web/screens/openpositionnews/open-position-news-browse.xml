@@ -40,10 +40,23 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="openPosition" property="openPosition"/>
-                <column id="dateNews" property="dateNews"/>
-                <column id="comment" property="comment"/>
-                <column id="author" property="author"/>
+                <column id="dateNews"
+                        generatedType="java.util.Date"
+                        sort="DESCENDING"
+                        sortable="true"
+                        width="120px"
+                        property="dateNews"/>
+                <column id="openPosition"
+                        width="300px"
+                        maximumWidth="300px"
+                        property="openPosition"/>
+                <column id="comment"
+                        width="400px"
+                        maximumWidth="400px"
+                        property="comment"/>
+                <column id="author"
+                        width="200px"
+                        property="author"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

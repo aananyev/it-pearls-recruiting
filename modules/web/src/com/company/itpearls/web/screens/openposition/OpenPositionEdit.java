@@ -479,7 +479,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
 
-
     private void setDisableTwoField() {
     }
 
@@ -612,27 +611,42 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
-        if (!openClosePositionCheckBox.getValue().equals(openCloseStartStatus)) {
-            if (!openClosePositionCheckBox.getValue()) {
-                Date lastOpenDate = new Date();
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            if (!openClosePositionCheckBox.getValue().equals(openCloseStartStatus)) {
+                if (!openClosePositionCheckBox.getValue()) {
+                    Date lastOpenDate = new Date();
 
-                lastOpenVacancyDateField.setValue(lastOpenDate);
-                ownerTextField.setValue(userSession.getUser());
-                setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                        "Открылась вакансия",
-                        "Открыта вакансия",
-                        new Date(),
-                        userSession.getUser());
-            } else {
-                if (openClosePositionCheckBox.getValue()) {
-                    lastOpenVacancyDateField.setValue(null);
-                    ownerTextField.setValue(null);
+                    lastOpenVacancyDateField.setValue(lastOpenDate);
+                    ownerTextField.setValue(userSession.getUser());
                     setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                            "Закрылась вакансия",
-                            "Закрыта вакансия",
+                            "Открылась вакансия",
+                            "Открыта вакансия",
                             new Date(),
                             userSession.getUser());
+                } else {
+                    if (openClosePositionCheckBox.getValue()) {
+                        lastOpenVacancyDateField.setValue(null);
+                        ownerTextField.setValue(null);
+                        setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                                "Закрылась вакансия",
+                                "Закрыта вакансия",
+                                new Date(),
+                                userSession.getUser());
+                    }
                 }
+            } else {
+                setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                        "Открыта новая вакансия",
+                        vacansyNameField.getValue() + "\n"
+                                + positionTypeField.getValue().getPositionEnName() + " \\ "
+                                + positionTypeField.getValue().getPositionRuName() + "\n\n"
+                                + "Salary MIN: "
+                                + openPositionFieldSalaryMin.getValue() + "\n"
+                                + "Salary MAX: "
+                                + openPositionFieldSalaryMax.getValue() + "\n\n"
+                                + Jsoup.parse(shortDescriptionTextArea.getValue()).text(),
+                        new Date(),
+                        userSession.getUser());
             }
         }
 
@@ -642,8 +656,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                         userSession.getUser().getName()
                                 + " изменил наименование вакансии",
                         "Старое: " + startVacansyName
-                        + "<br>Новое: "
-                        + vacansyNameField.getValue(),
+                                + "<br>Новое: "
+                                + vacansyNameField.getValue(),
                         new Date(),
                         userSession.getUser());
             }
@@ -1002,7 +1016,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                 .map(Map.Entry::getKey)
                                 .findFirst();
 
-                        if(event.getValue() >= 0) {
+                        if (event.getValue() >= 0) {
                             setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                                     "Изменен приоритет вакансии на " + result.get(),
                                     "Закрыта вакансия",

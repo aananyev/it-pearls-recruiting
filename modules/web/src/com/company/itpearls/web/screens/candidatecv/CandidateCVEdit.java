@@ -14,12 +14,13 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.io.RandomAccessFile;
+import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.io.RandomAccessReadMemoryMappedFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.extractor.ExtractorFactory;
 import org.apache.poi.extractor.POITextExtractor;
-import org.apache.poi.ooxml.extractor.ExtractorFactory;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -373,19 +374,20 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             try {
                 try {
-                    PDFParser parser = new PDFParser(new RandomAccessFile(fileName, "r"));
-                    parser.parse();
+                    RandomAccessRead rad = new RandomAccessReadMemoryMappedFile(fileName);
+                    PDFParser parser = new PDFParser(rad);
+//                    parser.parse();
 
-                    COSDocument cosDoc = parser.getDocument();
+//                    COSDocument cosDoc = parser.getDocument();
                     PDFTextStripper pdfStripper = new PDFTextStripper();
-                    PDDocument pdDoc = new PDDocument(cosDoc);
+                    PDDocument pdDoc = parser.parse();
                     parsedText = pdfStripper.getText(pdDoc).replace("\n", "<br>");
                 } catch (NullPointerException e) {
                     notifications.create(Notifications.NotificationType.ERROR)
                             .withCaption("Ошибка загрузки файла " + fileName)
                             .show();
 
-                    log.error("Error", e);
+                    e.printStackTrace();
                 }
 
             } catch (IOException e) {
@@ -419,7 +421,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             try {
                 POITextExtractor extractor = ExtractorFactory.createExtractor(fileName);
                 parsedText = extractor.getText();
-            } catch (IOException | NoClassDefFoundError | XmlException | OpenXML4JException e) {
+            } catch (IOException | NoClassDefFoundError e) {
                 notifications.create()
                         .withType(Notifications.NotificationType.WARNING)
                         .withCaption("ВНИМАНИЕ!")
@@ -429,7 +431,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 e.printStackTrace();
             }
         }
-
 
         return parsedText.replace("\n", "<br>");
     }

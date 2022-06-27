@@ -71,10 +71,10 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     private Label<String> selectPositionLabel;
 
     JobCandidate jobCandidate = null;
-    @Inject
-    private Label<String> interviewTabHeaderLabel;
-    @Inject
-    private Label<String> candidateNameLabel;
+//    @Inject
+//    private Label<String> interviewTabHeaderLabel;
+//    @Inject
+//    private Label<String> candidateNameLabel;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -640,8 +640,11 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
                     + event.getValue().getPersonPosition().getPositionRuName()
                     + ")";
 
-            interviewTabHeaderLabel.setValue(jobCandidateLabel);
-            candidateNameLabel.setValue(jobCandidateLabel);
+//            interviewTabHeaderLabel.setValue(jobCandidateLabel);
+//            candidateNameLabel.setValue(jobCandidateLabel);
         }
+    }
+
+    public void saveLetter() {
     }
 }
