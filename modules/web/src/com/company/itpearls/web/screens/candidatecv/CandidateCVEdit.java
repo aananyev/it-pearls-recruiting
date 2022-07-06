@@ -5,6 +5,7 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.WebLoadService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -13,21 +14,19 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
-import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.io.RandomAccessReadMemoryMappedFile;
+import org.apache.pdfbox.io.SequenceRandomAccessRead;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.ExtractorFactory;
 import org.apache.poi.extractor.POITextExtractor;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.xmlbeans.XmlException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -43,6 +42,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private static final String NEED_LETTER_NOTIFICATION = "НЕОБХОДИМО ЗАПОЛНИТЬ ШАБЛОН В СОПРОВОДИТЕЛЬНОМ ПИСЬМЕ " +
             "ПО ТРЕБОВАНИЮ ЗАКАЗЧИКА";
     private static final String WARNING_CAPTION = "ВНИМАНИЕ";
+    private static final String EXTENSION_PDF = "pdf";
+    private static final String EXTENSION_DOC = "doc";
+    private static final String EXTENSION_DOCX = "docx";
 
     @Inject
     private UserSession userSession;
@@ -94,8 +96,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ParseCVService parseCVService;
     @Inject
     private Label<String> machRegexpFromCV;
-    @Inject
-    private Logger log;
 
     static String referer = "http://www.google.com";
     @Inject
@@ -106,6 +106,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Button convertToTextButton;
     @Inject
     private Button showOriginalButon;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private FileLoader fileLoader;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -154,14 +158,60 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
+    private UUID originalFileId;
+    private FileDescriptor originalFileCVDescriptor;
+
+    @Subscribe("fileOriginalCVField")
+    public void onFileOriginalCVFieldValueChange(HasValue.ValueChangeEvent<FileDescriptor> event) {
+        originalFileCVDescriptor = event.getValue();
+        originalFileId = event.getValue().getId();
+    }
+
+
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        File file = fileUploadingAPI.getFile(getEditedEntity().getOriginalFileCV().getId());
+        UUID uuidFile = originalFileId;
+        FileDescriptor fileDescriptor = originalFileCVDescriptor;
 
-        String textResume = "";
 
-        textResume = parsePdfCV(file);
-        candidateCVRichTextArea.setValue(textResume);
+        try {
+            InputStream inputStream = fileLoader.openStream(fileDescriptor);
+            String textResume = "";
+
+            if(fileDescriptor.getExtension().equals(EXTENSION_PDF)) {
+                textResume = parsePdfCV(inputStream);
+                if (textResume != null) {
+                    candidateCVRichTextArea.setValue(textResume);
+                }
+            } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
+
+                POITextExtractor extractor = ExtractorFactory.createExtractor(inputStream);
+                textResume = extractor.getText();
+
+                if (textResume != null) {
+                    candidateCVRichTextArea.setValue(textResume);
+                }
+            } else if (fileDescriptor.getExtension().equals(EXTENSION_DOCX)) {
+
+                XWPFDocument doc = new XWPFDocument(inputStream);
+                POITextExtractor extractor = new XWPFWordExtractor(doc);
+                textResume = extractor.getText();
+
+                if (textResume != null) {
+                    candidateCVRichTextArea.setValue(textResume);
+                }
+            }
+        } catch (FileStorageException | IOException e) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
+                    .show();
+
+            throw new RuntimeException(e);
+        }
+
+        /* File file = fileUploadingAPI.getFile(getEditedEntity().getOriginalFileCV().getId());
+        FileDescriptor a = getEditedEntity().getOriginalFileCV();
+        File b = getEditedEntity().getOr; */
     }
 
     @Subscribe("textFieldIOriginalCV")
@@ -212,7 +262,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
         });
 
-        if(!PersistenceHelper.isNew(getEditedEntity())) {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
             candidateCVRichTextArea.setEditable(false);
         }
 
@@ -222,7 +272,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        if(PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
         }
     }
@@ -232,7 +282,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             String htmlText = getEditedEntity().getTextCV();
             htmlText = parseCVService.colorHighlightingCompetencies(htmlText, "brown");
 
-            if(candidateCVFieldOpenPosition.getValue() != null) {
+            if (candidateCVFieldOpenPosition.getValue() != null) {
                 htmlText = parseCVService.colorHighlightingCompetencies(candidateCVFieldOpenPosition.getValue(),
                         htmlText, "brown", "red");
             } else {
@@ -345,7 +395,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         setTemplateLetter();
         setLetterRecommendation();
 
-        if(candidateCVRichTextArea.getValue() != null && !candidateCVRichTextArea.getValue().equals("")) {
+        if (candidateCVRichTextArea.getValue() != null && !candidateCVRichTextArea.getValue().equals("")) {
             setColorHighlightingCompetencies();
         }
     }
@@ -365,6 +415,25 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 .withType(Notifications.NotificationType.ERROR)
                 .withCaption("Ошибка загрузки файла в хранилище.")
                 .show();
+    }
+
+    private String parsePdfCV(InputStream inputStream) {
+        String parsedText = "";
+
+        try {
+            RandomAccessRead rad = new RandomAccessReadBuffer(inputStream);
+
+            PDFParser parser = new PDFParser(rad);
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            PDDocument pdDoc = parser.parse();
+            parsedText = pdfStripper.getText(pdDoc).replace("\n", "<br>");
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return null;
+        }
+
+        return parsedText;
     }
 
     private String parsePdfCV(File fileName) {
@@ -603,7 +672,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
 
-
     @Subscribe("candidateCVRichTextArea")
     public void onCandidateCVRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() == null || event.getValue().equals("")) {
@@ -616,7 +684,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     Boolean flagOriginal = false;
 
     public void showOriginalText() {
-        if(flagOriginal) {
+        if (flagOriginal) {
             showOriginalButon.setCaption("Оригинальное");
             flagOriginal = false;
 

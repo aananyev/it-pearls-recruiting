@@ -1030,12 +1030,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         if (((jobCandidate.getEmail() != null && jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null) ||
                 (jobCandidate.getEmail() != null && jobCandidate.getPhone() != null) ||
                 (jobCandidate.getEmail() != null && jobCandidate.getSkypeName() != null) ||
+                (jobCandidate.getEmail() != null && jobCandidate.getTelegramName() != null) ||
                 (jobCandidate.getPhone() != null && jobCandidate.getSkypeName() != null)) &&
                 jobCandidate.getBirdhDate() != null) {
             return 3;
         } else {
             if (jobCandidate.getPhone() != null ||
                     jobCandidate.getEmail() != null ||
+                    jobCandidate.getTelegramName() != null ||
                     jobCandidate.getSkypeName() != null) {
                 return 2;
             } else {
@@ -1043,6 +1045,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                         jobCandidate.getMiddleName() == null ||
                         jobCandidate.getCityOfResidence() == null ||
                         jobCandidate.getCurrentCompany() == null ||
+                        jobCandidate.getTelegramName() == null ||
                         jobCandidate.getPersonPosition() == null) {
                     return 0;
                 }

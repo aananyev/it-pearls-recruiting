@@ -18,6 +18,7 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.server.FontAwesome;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import sun.font.TrueTypeFont;
@@ -1543,7 +1544,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onInit(InitEvent event) {
-
         setRadioButtons();
         setGroupSubscribeButton();
         setGroupCommandRadioButtin();

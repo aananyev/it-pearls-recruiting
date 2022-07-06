@@ -58,6 +58,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private UiComponents uiComponents;
 
     private String ROLE_MANAGER = "Manager";
+    private String ROLE_RESEARCHER = "Ресерчер";
     private static final String MANAGEMENT_GROUP = "Менеджмент";
     private static final String HUNTING_GROUP = "Хантинг";
     private String ROLE_ADMINISTRATOR = "Administrators";
@@ -73,8 +74,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             "e.iteractionType.statistics = true " +
             "group by e.iteractionType";
 
-    @Inject
-    private UserSessionSource userSessionSource;
     @Inject
     private Button groupSubscribe;
     @Inject
@@ -377,26 +376,28 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableVacansyNameDescriptionProvider(OpenPosition openPosition) {
         String QUERY_RECRUTIER_TASK = "select e " +
                 "from itpearls_RecrutiesTasks e " +
-                "where e.endDate > current_date";
+                "where e.endDate > current_date " +
+                "and e.openPosition = :openPosition";
 
         String returnData = "";
 
         List<RecrutiesTasks> recrutiesTasks = dataManager.load(RecrutiesTasks.class)
                 .view("recrutiesTasks-view")
                 .query(QUERY_RECRUTIER_TASK)
+                .parameter("openPosition", openPosition)
                 .list();
 
         if (openPosition.getShortDescription() != null) {
-            returnData = returnData + "<b>Кратко: </b><i>" + openPosition.getShortDescription() + "</i><br><br>";
+            returnData = returnData + "\n<b>Кратко: </b><i>" + openPosition.getShortDescription() + "</i><br><br>";
         }
 
         if (recrutiesTasks.size() != 0) {
-            returnData = returnData + "<b>В работе у:</b><br>";
+            returnData = returnData + "\n<b>В работе у:</b><br>";
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
             for (RecrutiesTasks a : recrutiesTasks) {
-                returnData = returnData + a.getReacrutier().getName()
+                returnData = returnData + "\n" + a.getReacrutier().getName()
                         + " до <i>"
                         + sdf.format(a.getEndDate())
                         + "</i><br>";
@@ -1184,8 +1185,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setInternalProjectFilter() {
-        if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), ROLE_ADMINISTRATOR)) {
+        if (!getRoleService.isUserRoles(userSession.getUser(), ROLE_RESEARCHER)) {
+//        if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER) ||
+//        if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER) ||
+//                getRoleService.isUserRoles(userSession.getUser(), ROLE_ADMINISTRATOR)) {
             openPositionsDl.removeParameter("internalProject");
             openPositionsDl.removeParameter("subscriber");
         } else {
@@ -1702,7 +1705,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         mapWorkExperience.put("1 год", 2);
         mapWorkExperience.put("2 года", 3);
         mapWorkExperience.put("3 года", 4);
+        mapWorkExperience.put("4 года", 6);
         mapWorkExperience.put("5 лет и более", 5);
+    }
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        checkBoxOnlyMySubscribe.setValue(true);
     }
 }
 
