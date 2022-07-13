@@ -200,14 +200,10 @@
         <property name="fileCompanyLogo" view="_local"/>
         <property name="companyDirector" view="_local"/>
     </view>
-    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
+    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_minimal">
         <property name="candidate" view="_minimal">
             <property name="currentCompany" view="_minimal"/>
             <property name="cityOfResidence" view="_minimal"/>
-            <property name="jobHistory" view="_minimal"/>
-            <property name="candidateCv" view="_local">
-                <property name="fileCV" view="_local"/>
-            </property>
             <property name="fileImageFace" view="_minimal">
                 <property name="size"/>
             </property>
@@ -236,8 +232,8 @@
             <property name="fileDescriptor" view="_minimal"/>
             <property name="fileOwner" view="_minimal"/>
         </property>
-        <property name="skillTree" view="skillTree-view"/>
         <property name="fileImageFace" view="_local"/>
+        <property name="skillTree" view="_minimal"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">
@@ -394,7 +390,7 @@
     <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-view" extends="_local">
         <property name="reacrutier" view="_local"/>
         <property name="openPosition" view="_local">
-            <property name="vacansyName"/>
+            <property name="projectName" view="_minimal"/>
         </property>
         <property name="createdBy"/>
     </view>

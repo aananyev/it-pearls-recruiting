@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.recrutiestasks;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.components.CheckBox;
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -34,7 +35,7 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
     public void onInit(InitEvent event) {
 
         // если роль - ресерчер, то автоматически вставить себя
-        Collection<String> s = userSessionSource.getUserSession().getRoles();
+/*        Collection<String> s = userSessionSource.getUserSession().getRoles();
         // установить поле рекрутера
         if( s.contains( ROLE_RESEARCHER ) ) {
             // если ресерчер то ограничить просмотр других рекрутеров
@@ -47,6 +48,9 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
             recrutiesTasksesDl.removeParameter( "recrutier" );
         }
 
+        recrutiesTasksesDl.load(); */
+
+        recrutiesTasksesDl.setParameter("allRecruters", true);
         recrutiesTasksesDl.load();
 
         // перечеркнем просроченные позиции
@@ -66,6 +70,17 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
        checkBoxRemoveOld.setValue( true );
     }
 
+    @Subscribe("allReacrutersCheckBox")
+    public void onAllReacrutersCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (!event.getValue()) {
+            recrutiesTasksesDl.setParameter("allRecruters", true);
+        } else {
+            recrutiesTasksesDl.removeParameter("allRecruters");
+        }
+
+        recrutiesTasksesDl.load();
+    }
+
     @Subscribe("checkBoxRemoveOld")
     public void onCheckBoxRemoveOldValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if( checkBoxRemoveOld.getValue() ) {
@@ -77,5 +92,10 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         }
 
         recrutiesTasksesDl.load();
+    }
+
+    @Install(to = "recrutiesTasksesTable", subject = "iconProvider")
+    private String recrutiesTasksesTableIconProvider(RecrutiesTasks recrutiesTasks) {
+        return (!recrutiesTasks.getOpenPosition().getOpenClose() ? "icons/ok.png" : "icons/close.png");
     }
 }

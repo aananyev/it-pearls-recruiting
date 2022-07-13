@@ -58,7 +58,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private UiComponents uiComponents;
 
     private String ROLE_MANAGER = "Manager";
-    private String ROLE_RESEARCHER = "Ресерчер";
+    private String ROLE_RESEARCHER = "Researcher";
     private static final String MANAGEMENT_GROUP = "Менеджмент";
     private static final String HUNTING_GROUP = "Хантинг";
     private String ROLE_ADMINISTRATOR = "Administrators";
@@ -601,7 +601,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             return null;
         }
     }
-
 
     private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
                                                      String subject,
@@ -1186,30 +1185,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private void setInternalProjectFilter() {
         if (!getRoleService.isUserRoles(userSession.getUser(), ROLE_RESEARCHER)) {
-//        if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER) ||
-//        if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER) ||
-//                getRoleService.isUserRoles(userSession.getUser(), ROLE_ADMINISTRATOR)) {
-            openPositionsDl.removeParameter("internalProject");
             openPositionsDl.removeParameter("subscriber");
         } else {
-            openPositionsDl.setParameter("internalProject", true);
             openPositionsDl.setParameter("subscriber", userSession.getUser());
         }
 
-//        openPositionsDl.setParameter("internalProject", false);
         openPositionsDl.load();
     }
 
     private void setSubcribersFilter() {
         if (checkBoxOnlyMySubscribe.getValue()) {
-            openPositionsDl.setParameter("recrutier", userSession.getUser());
-            openPositionsDl.setParameter("nowDate", new Date());
-
-//            openPositionsDl.removeParameter("recrutier");
-//            openPositionsDl.removeParameter("nowDate");
+            openPositionsDl.setParameter("subscriber", userSession.getUser());
         } else {
-            openPositionsDl.removeParameter("recrutier");
-            openPositionsDl.removeParameter("nowDate");
+            openPositionsDl.removeParameter("subscriber");
         }
 
         openPositionsDl.load();

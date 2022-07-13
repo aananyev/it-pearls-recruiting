@@ -528,6 +528,7 @@ create table ITPEARLS_RECRUTIES_TASKS (
     OPEN_POSITION_ID uuid,
     SUBSCRIBE boolean,
     RECRUTIER_NAME varchar(80),
+    PLAN_FOR_PERIOD integer,
     --
     primary key (ID)
 )^

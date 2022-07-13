@@ -15,10 +15,10 @@
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e in
-                                    (select g.openPosition from itpearls_RecrutiesTasks g
-                                    where g.reacrutier = :subscriber
-                                    and current_date between g.startDate and g.endDate)
+                                <c:where>
+                                    e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and current_date between k.startDate and k.endDate))
                                 </c:where>
                             </c:jpql>
                             <c:jpql>

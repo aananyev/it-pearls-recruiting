@@ -34,27 +34,55 @@
     </data>
     <dialogMode height="400"
                 width="800"/>
-    <layout spacing="true"
+    <layout spacing="false"
+            height="100%"
+            expand="mainHBox"
             width="100%">
-        <hbox spacing="true" width="100%">
-            <dateField id="startDateField"
-                       caption="msg://msgStartDate"
+        <scrollBox scrollBars="horizontal" width="100%">
+            <label id="jobCandidateLabel"
+                   dataContainer="recrutiesTasksDc"
+                   property="openPosition"
+                   width="AUTO"
+                   height="AUTO"
+                   stylename="h4"/>
+        </scrollBox>
+        <hbox spacing="true">
+            <label value="План собеседований:"
+                   align="MIDDLE_LEFT"
+                   description="msg://msgPlanOfInterview"
+                   stylename="bold"/>
+            <textField id="plapForPeriodField"
                        dataContainer="recrutiesTasksDc"
+                       stylename="large"
+                       property="planForPeriod"/>
+        </hbox>
+        <label value="msg://msgStartDate" align="MIDDLE_LEFT"/>
+        <hbox spacing="true"
+              width="AUTO"
+              height="AUTO"
+              align="MIDDLE_LEFT">
+            <dateField id="startDateField"
+                       dataContainer="recrutiesTasksDc"
+                       align="MIDDLE_LEFT"
                        property="startDate"/>
+            <label value="msg://msgEndDate" align="MIDDLE_LEFT"/>
             <dateField id="endDateField"
-                       caption="msg://msgEndDate"
+                       align="MIDDLE_LEFT"
                        dataContainer="recrutiesTasksDc"
                        property="endDate"/>
         </hbox>
-        <hbox spacing="true"
+        <vbox id="mainHBox"
+              spacing="true"
               width="100%"
-              expand="recrutiesTasksFieldUser">
+              height="AUTO"
+              align="TOP_LEFT">
             <lookupPickerField id="recrutiesTasksFieldUser"
                                dataContainer="recrutiesTasksDc"
                                optionsContainer="usersDc"
                                caption="msg://msgRecrutier"
-                               align="BOTTOM_LEFT"
-                               width="50%"
+                               align="TOP_LEFT"
+                               width="100%"
+                               height="AUTO"
                                property="reacrutier">
                 <actions>
                     <action id="lookup"
@@ -65,35 +93,43 @@
             </lookupPickerField>
             <checkBox id="allSubscribeCheckBox"
                       caption="msg://msgAllSubscribe"
-                      align="BOTTOM_LEFT"
+                      align="TOP_LEFT"
+                      width="100%"
+                      height="AUTO"
                       description="msg://msgAllSubscribeDescription"/>
-        </hbox>
-        <lookupPickerField id="openPositionField"
-                           width="50%"
-                           caption="msg://msgOpenPosition"
-                           dataContainer="recrutiesTasksDc"
-                           optionsContainer="openPositionsDc"
-                           property="openPosition">
-            <actions>
-                <action id="lookup"
-                        type="picker_lookup"/>
-                <action id="open"
-                        type="picker_open"/>
-            </actions>
-        </lookupPickerField>
-        <checkBox id="recrutiesTasksSubscribeCheckBox"
-                  dataContainer="recrutiesTasksDc"
-                  property="subscribe"
-                  caption="msg://msgSubscribe"/>
+            <lookupPickerField id="openPositionField"
+                               align="TOP_LEFT"
+                               caption="msg://msgOpenPosition"
+                               dataContainer="recrutiesTasksDc"
+                               optionsContainer="openPositionsDc"
+                               width="100%"
+                               height="AUTO"
+                               property="openPosition">
+                <actions>
+                    <action id="lookup"
+                            type="picker_lookup"/>
+                    <action id="open"
+                            type="picker_open"/>
+                </actions>
+            </lookupPickerField>
+            <checkBox id="recrutiesTasksSubscribeCheckBox"
+                      dataContainer="recrutiesTasksDc"
+                      property="subscribe"
+                      align="TOP_LEFT"
+                      width="100%"
+                      height="AUTO"
+                      caption="msg://msgSubscribe"/>
+        </vbox>
         <hbox id="editActions"
               spacing="true"
+              width="AUTO"
               align="BOTTOM_RIGHT"
-              height="100%">
+              height="AUTO">
             <button id="windowExtendAndCloseButton"
                     caption="msg://msgExtend"/>
-            <button id="okButton"
-                    icon="OK"
-                    caption="msg://msgOK"/>
+            <button id="windowCommitAndCloseButton"
+                    action="windowCommitAndClose"
+                    align="BOTTOM_RIGHT"/>
             <button action="windowClose"/>
         </hbox>
     </layout>

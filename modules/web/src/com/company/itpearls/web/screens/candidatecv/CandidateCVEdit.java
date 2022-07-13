@@ -16,22 +16,25 @@ import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
-import org.apache.pdfbox.io.RandomAccessReadMemoryMappedFile;
-import org.apache.pdfbox.io.SequenceRandomAccessRead;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.poi.extractor.ExtractorFactory;
+import org.apache.poi.extractor.POIOLE2TextExtractor;
 import org.apache.poi.extractor.POITextExtractor;
+import org.apache.poi.ooxml.extractor.ExtractorFactory;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.xmlbeans.XmlException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.io.*;
 import java.util.*;
+
+import static org.apache.poi.extractor.OLE2ExtractorFactory.createExtractor;
 
 @UiController("itpearls_CandidateCV.edit")
 @UiDescriptor("candidate-cv-edit.xml")
@@ -172,25 +175,49 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
         UUID uuidFile = originalFileId;
         FileDescriptor fileDescriptor = originalFileCVDescriptor;
+        String textResume = "";
 
 
         try {
             InputStream inputStream = fileLoader.openStream(fileDescriptor);
-            String textResume = "";
 
             if(fileDescriptor.getExtension().equals(EXTENSION_PDF)) {
+
                 textResume = parsePdfCV(inputStream);
-                if (textResume != null) {
-                    candidateCVRichTextArea.setValue(textResume);
-                }
+
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
+                /*
 
-                POITextExtractor extractor = ExtractorFactory.createExtractor(inputStream);
-                textResume = extractor.getText();
+                POIFSFileSystem fileSystem = new POIFSFileSystem(inputStream);
+                ExtractorFactory.createExtractor(fileSystem);
+                POIOLE2TextExtractor oleTextExtractor =
+                        ExtractorFactory.createExtractor(fileSystem);
+                POITextExtractor[] embeddedExtractors =
+                        ExtractorFactory.getEmbededDocsTextExtractors(oleTextExtractor);
 
-                if (textResume != null) {
-                    candidateCVRichTextArea.setValue(textResume);
+                for (POITextExtractor textExtractor : embeddedExtractors) {
+                    if (textExtractor instanceof WordExtractor) {
+                        WordExtractor wordExtractor = (WordExtractor) textExtractor;
+                        String[] paragraphText = wordExtractor.getParagraphText();
+                        for (String paragraph : paragraphText) {
+                            textResume += paragraph;
+                        }
+                        // Display the document's header and footer text
+                        // System.out.println("Footer text: " + wordExtractor.getFooterText());
+                        // System.out.println("Header text: " + wordExtractor.getHeaderText());
+                    }
                 }
+
+                //    POITextExtractor extractor = createExtractor(inputStream);
+                //    textResume = extractor.getText();
+
+                 */
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withDescription("Функция загрузки ." + EXTENSION_DOC + " пока не реализована.")
+                        .withCaption(WARNING_CAPTION)
+                        .show();
+
+
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOCX)) {
 
                 XWPFDocument doc = new XWPFDocument(inputStream);
@@ -201,7 +228,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     candidateCVRichTextArea.setValue(textResume);
                 }
             }
-        } catch (FileStorageException | IOException e) {
+        } catch (FileStorageException | IOException  e) {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
                     .show();
@@ -209,6 +236,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             throw new RuntimeException(e);
         }
 
+        if (textResume != null) {
+            candidateCVRichTextArea.setValue(textResume);
+        }
         /* File file = fileUploadingAPI.getFile(getEditedEntity().getOriginalFileCV().getId());
         FileDescriptor a = getEditedEntity().getOriginalFileCV();
         File b = getEditedEntity().getOr; */
@@ -436,7 +466,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         return parsedText;
     }
 
-    private String parsePdfCV(File fileName) {
+/*    private String parsePdfCV(File fileName) {
         String parsedText = "";
 
         if (fileOriginalCVField.getFileName().endsWith(".pdf")) {
@@ -488,7 +518,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         } else if (fileOriginalCVField.getFileName().endsWith(".doc")) {
 
             try {
-                POITextExtractor extractor = ExtractorFactory.createExtractor(fileName);
+                POITextExtractor extractor = createExtractor(fileName);
                 parsedText = extractor.getText();
             } catch (IOException | NoClassDefFoundError e) {
                 notifications.create()
@@ -502,7 +532,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         return parsedText.replace("\n", "<br>");
-    }
+    } */
 
     @Install(to = "skillTreesTable.wikiPage", subject = "columnGenerator")
     private Object skillTreesTableWikiPageColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {

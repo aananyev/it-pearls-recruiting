@@ -41,6 +41,17 @@ public class RecrutiesTasks extends StandardEntity {
     @Column(name = "RECRUTIER_NAME", length = 80)
     protected String recrutierName;
 
+    @Column(name = "PLAN_FOR_PERIOD")
+    private Integer planForPeriod;
+
+    public Integer getPlanForPeriod() {
+        return planForPeriod;
+    }
+
+    public void setPlanForPeriod(Integer planForPeriod) {
+        this.planForPeriod = planForPeriod;
+    }
+
     public String getRecrutierName() {
         return recrutierName;
     }

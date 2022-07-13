@@ -10,7 +10,8 @@
                     view="recrutiesTasks-view">
             <loader id="recrutiesTasksesDl">
                 <query>
-                    <![CDATA[select e from itpearls_RecrutiesTasks e order by e.reacrutier.name, e.endDate desc]]>
+                    <![CDATA[select e
+                        from itpearls_RecrutiesTasks e]]>
                     <condition>
                         <and>
                             <c:jpql>
@@ -22,6 +23,9 @@
                                 <c:where>
                                     e.reacrutier = :recrutier
                                 </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.reacrutier.active = :allRecruters</c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -49,7 +53,7 @@
             </actions>
             <columns>
                 <group>
-                    <column id="reacrutier.name"/>
+                    <column id="reacrutier" sort="ASCENDING"/>
                 </group>
                 <column id="openPosition.vacansyName"/>
                 <column id="openPosition.projectName"/>
@@ -64,10 +68,17 @@
                 <button id="removeBtn" action="recrutiesTasksesTable.remove"/>
             </buttonsPanel>
         </groupTable>
-        <hbox id="lookupActions" spacing="true" visible="false">
+        <hbox id="lookupActions"
+              spacing="true"
+              visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>
-        <checkBox id="checkBoxRemoveOld" caption="msg://msgRemoveOld"/>
+        <hbox spacing="true">
+            <checkBox id="checkBoxRemoveOld"
+                      caption="msg://msgRemoveOld"/>
+            <checkBox id="allReacrutersCheckBox"
+                      caption="msg://msgAllRecters"/>
+        </hbox>
     </layout>
 </window>

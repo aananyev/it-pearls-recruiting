@@ -212,7 +212,7 @@
                                           dataContainer="openPositionDc"
                                           width="50%"
                                           property="internalProject"
-                                          caption="msg://msgInternalProject"
+                                          caption="msg://msgExclusiveVacancy"
                                           align="BOTTOM_LEFT"/>
                             </hbox>
                             <hbox id="spaceBox"/>
