@@ -1820,7 +1820,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public void scanContactsFromCVs() {
         String newPhone = null,
-                newEmail = null;
+               newEmail = null;
         Company newCompany = null;
 
         Set<String> newSocial = new HashSet<>();
@@ -1953,14 +1953,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         if (hostCandidateFromCV != null && hostSocialFromCandidate != null) {
                             if (hostCandidateFromCV.equals(hostSocialFromCandidate)) {
 
-                                flag = true;
 
                                 if (hostCandidateFromCV != null) {
                                     String messageSN = "";
 
                                     if (socialOld != null) {
                                         // убрать новая - старая
-                                        /* if (!sFromCV.equals(socialOld)) {
+                                        URI uriOld = new URI(socialOld);
+                                        String a = uriOld.getRawPath();
+                                        if (!sFromCV.equals(socialOld)) {
+                                            flag = true;
                                             messageSN = "Ссылка на социальную сеть старая "
                                                     + socialOld
                                                     + " новая "
@@ -1972,7 +1974,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                             urls.add(sFromCV);
 
                                             messageSocial.put(hostSocialFromCandidate, urls);
-                                        } */
+                                        }
                                     } else {
                                         messageSN = "Добавить новую ссылку: " + sFromCV + "? ";
 

@@ -127,6 +127,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         subscribeRadioButtonGroup.addValueChangeListener(e -> {
             buttonSubscribe.setEnabled(!((Boolean) subscribeRadioButtonGroup.getValue()));
+            suggestCandidateButton.setVisible(!((Boolean) subscribeRadioButtonGroup.getValue()));
 
             if ((Boolean) subscribeRadioButtonGroup.getValue()) {
                 openPositionsDl.setParameter("subscriber", userSession.getUser());
