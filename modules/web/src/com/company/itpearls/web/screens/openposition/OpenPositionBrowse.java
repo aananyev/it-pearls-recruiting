@@ -100,6 +100,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Button buttonSubscribe;
     @Inject
     private Button suggestCandidateButton;
+    @Inject
+    private RadioButtonGroup subscribeRadioButtonGroup;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -111,6 +113,32 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         setMapOfPriority();
         setWorkExperienceMap();
+    }
+
+    private void initCheckBoxOnlyOpenedPosition() {
+        Map<String, Boolean> onlyOpenedPositionMap = new LinkedHashMap<>();
+
+        onlyOpenedPositionMap.put("Подписка", true);
+        onlyOpenedPositionMap.put("Открытые вакансии", false);
+
+        subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
+
+        subscribeRadioButtonGroup.setValue(true);
+
+        subscribeRadioButtonGroup.addValueChangeListener(e -> {
+            buttonSubscribe.setEnabled(!((Boolean) subscribeRadioButtonGroup.getValue()));
+
+            if ((Boolean) subscribeRadioButtonGroup.getValue()) {
+                openPositionsDl.setParameter("subscriber", userSession.getUser());
+                openPositionsDl.removeParameter("notsubscriber");
+            } else {
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.setParameter("notsubscriber", userSession.getUser());
+            }
+
+            openPositionsDl.load();
+
+        });
     }
 
     private void initGroupSubscribeButton() {
@@ -985,6 +1013,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         clearUrgentFilter();
         setButtonsEnableDisable();
+
+        initCheckBoxOnlyOpenedPosition();
+
     }
 
     private void setButtonsEnableDisable() {
@@ -1196,8 +1227,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private void setSubcribersFilter() {
         if (checkBoxOnlyMySubscribe.getValue()) {
             openPositionsDl.setParameter("subscriber", userSession.getUser());
+            openPositionsDl.removeParameter("notsubscriber");
         } else {
             openPositionsDl.removeParameter("subscriber");
+            openPositionsDl.setParameter("notsubscriber", userSession.getUser());
         }
 
         openPositionsDl.load();

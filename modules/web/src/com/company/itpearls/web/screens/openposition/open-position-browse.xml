@@ -22,6 +22,13 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
+                                <c:where>
+                                    not (e in (select x.openPosition from itpearls_RecrutiesTasks x
+                                    where x.reacrutier = :notsubscriber
+                                    and current_date between x.startDate and x.endDate)))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
                                 <c:where>e.openClose = :openClosePos</c:where>
                             </c:jpql>
                             <c:jpql>
@@ -86,6 +93,10 @@
                         exclude="id|birdhDate|email|id|whatsupName|parentOpenPosition|needLetter|exercise|needExercise|needLetter|templateLetter|workExperience|useTaxNDFL|salaryMin|salaryMax|percentComissionOfCompany|percentSalaryOfResearcher|percentSalaryOfRecrutier|typeSalaryOfRecrutier|typeSalaryOfResearcher|paymentsType|typeCompanyComission|shortDescription|commandExperience"
                         excludeProperties="comment,numberPosition,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
+        <radioButtonGroup id="subscribeRadioButtonGroup"
+                          width="AUTO"
+                          align="MIDDLE_LEFT"
+                          orientation="horizontal"/>
         <treeDataGrid id="openPositionsTable"
                       descriptionAsHtml="true"
                       captionAsHtml="true"
@@ -224,10 +235,10 @@
                         action="openPositionsTable.edit"/>
                 <button id="removeBtn"
                         action="openPositionsTable.remove"/>
-                    <button id="buttonSubscribe"
-                            caption="msg://mshSubscibe"
-                            invoke="subscribePosition"
-                            icon="BELL"/>
+                <button id="buttonSubscribe"
+                        caption="msg://mshSubscibe"
+                        invoke="subscribePosition"
+                        icon="BELL"/>
                 <button id="groupSubscribe"
                         caption="msg://msgGroupSubscribe"
                         invoke="groupSubscribe"
@@ -246,28 +257,33 @@
         </treeDataGrid>
         <hbox spacing="true"
               align="MIDDLE_LEFT"
-              width="100%"
-              expand="notLowerRatingForm">
-            <checkBox id="checkBoxOnlyOpenedPosition"
-                      align="MIDDLE_LEFT"
-                      description="msg://msgOnlyOpenedVacansy"
-                      caption="msg://msgOnlyOpenedVacansy"/>
-            <checkBox id="signDraftCheckBox"
-                      align="MIDDLE_LEFT"
-                      description="msg://msgSignDraft"
-                      caption="msg://msgSignDraft"/>
-            <checkBox id="checkBoxOnlyNotPaused"
-                      align="MIDDLE_LEFT"
-                      description="msg://msgOnlyNotPaused"
-                      caption="msg://msgOnlyNotPaused"/>
-            <checkBox id="checkBoxOnlyMySubscribe"
-                      align="MIDDLE_LEFT"
-                      description="msg://msgOnlyMySubscribe"
-                      caption="msg://msgOnlyMySubscribe"/>
+              width="100%">
+            <hbox id="checkBoxsHBox"
+                  align="MIDDLE_LEFT"
+                  spacing="true"
+                  width="AUTO">
+                <checkBox id="checkBoxOnlyOpenedPosition"
+                          align="MIDDLE_LEFT"
+                          description="msg://msgOnlyOpenedVacansy"
+                          caption="msg://msgOnlyOpenedVacansy"/>
+                <checkBox id="signDraftCheckBox"
+                          align="MIDDLE_LEFT"
+                          description="msg://msgSignDraft"
+                          caption="msg://msgSignDraft"/>
+                <checkBox id="checkBoxOnlyNotPaused"
+                          align="MIDDLE_LEFT"
+                          description="msg://msgOnlyNotPaused"
+                          caption="msg://msgOnlyNotPaused"/>
+                <checkBox id="checkBoxOnlyMySubscribe"
+                          align="MIDDLE_LEFT"
+                          visible="false"
+                          description="msg://msgOnlyMySubscribe"
+                          caption="msg://msgOnlyMySubscribe"/>
+            </hbox>
             <hbox id="notLowerRatingForm"
                   align="MIDDLE_RIGHT"
                   spacing="true"
-                  width="100%">
+                  width="AUTO">
                 <lookupField id="notLowerRatingLookupField"
                              align="MIDDLE_RIGHT"
                              caption="msg://msgPriorityPosition"

@@ -270,7 +270,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
     @Subscribe
     public void onBeforeCommitChanges(AfterCommitChangesEvent event) {
-        if (isAllreadySubscribe()) {
+        if (!isAllreadySubscribe()) {
             if (!(openPositionField.getValue().getInternalProject()
                     && getRoleService.isUserRoles(userSession.getUser(), ROLE_RESEARCHER))) {
                 getEditedEntity().setRecrutierName(userSession.getUser().getName());
