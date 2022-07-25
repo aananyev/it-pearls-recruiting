@@ -612,7 +612,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
+//        if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!openClosePositionCheckBox.getValue().equals(openCloseStartStatus)) {
                 if (!openClosePositionCheckBox.getValue()) {
                     Date lastOpenDate = new Date();
@@ -649,7 +649,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                         new Date(),
                         userSession.getUser());
             }
-        }
+//        }
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!vacansyNameField.getValue().equals(startVacansyName)) {

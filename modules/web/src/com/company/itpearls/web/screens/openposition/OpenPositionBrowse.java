@@ -116,29 +116,41 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void initCheckBoxOnlyOpenedPosition() {
-        Map<String, Boolean> onlyOpenedPositionMap = new LinkedHashMap<>();
+        Map<String, Integer> onlyOpenedPositionMap = new LinkedHashMap<>();
 
-        onlyOpenedPositionMap.put("Подписка", true);
-        onlyOpenedPositionMap.put("Открытые вакансии", false);
+        if (!getRoleService.isUserRoles(userSession.getUser(), ROLE_RESEARCHER)) {
+            onlyOpenedPositionMap.put("Все вакансии", 2);
+        }
+
+        onlyOpenedPositionMap.put("Подписка", 1);
+        onlyOpenedPositionMap.put("Открытые вакансии", 0);
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
-        subscribeRadioButtonGroup.setValue(true);
+        subscribeRadioButtonGroup.setValue(1);
 
         subscribeRadioButtonGroup.addValueChangeListener(e -> {
-            buttonSubscribe.setEnabled(!((Boolean) subscribeRadioButtonGroup.getValue()));
-            suggestCandidateButton.setVisible(!((Boolean) subscribeRadioButtonGroup.getValue()));
+            buttonSubscribe.setEnabled(((Integer) subscribeRadioButtonGroup.getValue()) == 0);
+            suggestCandidateButton.setVisible(((Integer) subscribeRadioButtonGroup.getValue()) == 1);
 
-            if ((Boolean) subscribeRadioButtonGroup.getValue()) {
-                openPositionsDl.setParameter("subscriber", userSession.getUser());
-                openPositionsDl.removeParameter("notsubscriber");
-            } else {
-                openPositionsDl.removeParameter("subscriber");
-                openPositionsDl.setParameter("notsubscriber", userSession.getUser());
+            switch ((Integer) subscribeRadioButtonGroup.getValue()) {
+                case 1:
+                    openPositionsDl.setParameter("subscriber", userSession.getUser());
+                    openPositionsDl.removeParameter("notsubscriber");
+                    break;
+                case 0:
+                    openPositionsDl.removeParameter("subscriber");
+                    openPositionsDl.setParameter("notsubscriber", userSession.getUser());
+                    break;
+                case 2:
+                    openPositionsDl.removeParameter("subscriber");
+                    openPositionsDl.removeParameter("notsubscriber");
+                    break;
+                default:
+                    break;
             }
 
             openPositionsDl.load();
-
         });
     }
 
@@ -1339,6 +1351,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .withScreenId("itpearls_RecrutiesTasks.edit")
                 .withLaunchMode(OpenMode.DIALOG)
                 .build();
+
+        opScreen.addAfterCloseListener(e -> {
+            this.openPositionsDl.load();
+        });
 
         opScreen.show();
     }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/company/company-browse.xml"
+        messagesPack="com.company.itpearls.web.screens.company">
+    <data readOnly="true">
+        <collection id="companiesDc"
+                    class="com.company.itpearls.entity.Company"
+                    view="company-view">
+            <loader id="companiesDl">
+                <query>
+                    <![CDATA[select e from itpearls_Company e
+                                      where e.ourClient = true
+                                      order by e.comanyName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout/>
+</window>

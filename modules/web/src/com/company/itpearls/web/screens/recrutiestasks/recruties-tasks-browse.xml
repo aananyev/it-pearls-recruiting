@@ -53,10 +53,12 @@
             </actions>
             <columns>
                 <group>
-                    <column id="reacrutier" sort="ASCENDING"/>
+                    <column id="reacrutier"/>
                 </group>
                 <column id="openPosition.vacansyName"/>
                 <column id="openPosition.projectName"/>
+                <column id="planForPeriod"/>
+                <column id="factForPeriod"/>
                 <column id="startDate"/>
                 <column id="endDate"/>
             </columns>

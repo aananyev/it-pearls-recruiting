@@ -91,12 +91,6 @@
                             type="picker_open"/>
                 </actions>
             </lookupPickerField>
-            <checkBox id="allSubscribeCheckBox"
-                      caption="msg://msgAllSubscribe"
-                      align="TOP_LEFT"
-                      width="100%"
-                      height="AUTO"
-                      description="msg://msgAllSubscribeDescription"/>
             <lookupPickerField id="openPositionField"
                                align="TOP_LEFT"
                                caption="msg://msgOpenPosition"
@@ -126,6 +120,7 @@
               align="BOTTOM_RIGHT"
               height="AUTO">
             <button id="windowExtendAndCloseButton"
+                    visible="false"
                     caption="msg://msgExtend"/>
             <button id="windowCommitAndCloseButton"
                     action="windowCommitAndClose"

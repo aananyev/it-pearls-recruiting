@@ -5,10 +5,8 @@ import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.OpenPositionNews;
 import com.company.itpearls.service.GetRoleService;
-import com.company.itpearls.service.GetUserRoleService;
 import com.company.itpearls.service.SubscribeDateService;
 import com.haulmont.cuba.core.app.EmailService;
-import com.haulmont.cuba.core.config.ConfigStorageCommon;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
@@ -49,9 +47,6 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private InstanceContainer<RecrutiesTasks> recrutiesTasksDc;
     @Inject
     private DateField<Date> endDateField;
-
-    private OpenPosition openPosition = null;
-    private Boolean fromOpenPosition = false;
     @Inject
     private LookupPickerField<OpenPosition> openPositionField;
     @Inject
@@ -63,17 +58,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Inject
     private DataManager dataManager;
     @Inject
-    private SubscribeDateService subscribeDateService;
-    @Inject
     private GetRoleService getRoleService;
-
-    private String MANAGER = "Manager";
-    @Inject
-    private CheckBox allSubscribeCheckBox;
-    @Inject
-    private ConfigStorageCommon configStorageCommon;
-    @Inject
-    private GetUserRoleService getUserRoleService;
     @Inject
     private CollectionContainer<User> usersDc;
     @Inject
@@ -81,17 +66,17 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Inject
     private Metadata metadata;
 
+    private OpenPosition openPosition = null;
+    private Boolean fromOpenPosition = false;
+    private String MANAGER = "Manager";
     private String ROLE_MANAGER = "Manager";
     private String ROLE_RESEARCHER = "Researcher";
     private String startDateSunscribe = "";
     private String endDateSubscribe = "";
-
-    @Subscribe("windowExtendAndCloseButton")
-    public void onWindowExtendAndCloseButtonClick(Button.ClickEvent event) {
-        getEditedEntity().setEndDate(subscribeDateService.dateOfNextMonday());
-
-        commitChanges();
-    }
+    private String GROUP_RESEARCHING_NAME = "Ресерчинг";
+    private String GROUP_RECRUTING_NAME = "Рекрутинг";
+    private String GROUP_MANAGEMENT_NAME = "Менеджмент";
+    private String GROUP_ACCOUNTING_NAME = "Аккаунтинг";
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -125,8 +110,6 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
             endDateField.setValue(legacyDate);
         }
-
-        allSubscribeCheckBoxSet();
     }
 
     private boolean isAllreadySubscribe() {
@@ -155,64 +138,10 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
     }
 
-    private String GROUP_RESEARCHING_NAME = "Ресерчинг";
-    private String GROUP_RECRUTING_NAME = "Рекрутинг";
-    private String GROUP_MANAGEMENT_NAME = "Менеджмент";
-    private String GROUP_ACCOUNTING_NAME = "Аккаунтинг";
-
-    private void allSubscribeCheckBoxSet() {
-        if (userSession.getUser().getGroup().getName().equals(GROUP_ACCOUNTING_NAME) ||
-                userSession.getUser().getGroup().getName().equals(GROUP_MANAGEMENT_NAME)) {
-            allSubscribeCheckBox.setEnabled(true);
-
-            allSubscribeCheckBox.addValueChangeListener(e -> {
-                if (e.getValue() != null) {
-                    recrutiesTasksFieldUser.setEnabled(!e.getValue());
-                }
-            });
-        } else {
-            allSubscribeCheckBox.setEnabled(false);
-        }
-
-        allSubscribeCheckBox.setValue(false);
-    }
-
-    @Subscribe
-    public void onBeforeCommitChanges1(BeforeCommitChangesEvent event) {
-        if (allSubscribeCheckBox.getValue()) {
-            //подписать всех
-
-            for (User user : usersDc.getItems()) {
-                if (!user.equals(userSession.getUser())
-                        && user.getActive()
-                        && (user.getGroup().getName().equals(GROUP_RESEARCHING_NAME) ||
-                        user.getGroup().getName().equals(GROUP_RECRUTING_NAME))) {
-                    CommitContext commitContext = new CommitContext();
-
-                    RecrutiesTasks recrutiesTasks = new RecrutiesTasks();
-
-                    recrutiesTasks.setStartDate(startDateField.getValue());
-                    recrutiesTasks.setEndDate(endDateField.getValue());
-                    recrutiesTasks.setReacrutier(user);
-                    recrutiesTasks.setSubscribe(false);
-                    recrutiesTasks.setOpenPosition(openPositionField.getValue());
-
-                    commitContext.addInstanceToCommit(recrutiesTasks);
-                    dataManager.commit(commitContext);
-
-                    events.publish(new UiNotificationEvent(this, "Подписан рекрутер "
-                            + user.getName()
-                            + " на вакансию "
-                            + openPositionField.getValue().getVacansyName()));
-                }
-            }
-        }
-    }
-
     Boolean deleteTwiceEvent = true;
 
     @Subscribe
-    public void onAfterCommitChanges1(AfterCommitChangesEvent event) {
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         if (deleteTwiceEvent) {
@@ -229,7 +158,6 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                     true);
             deleteTwiceEvent = false;
         }
-
     }
 
 
@@ -260,70 +188,49 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         }
     }
 
-    @Subscribe
-    public void onBeforeClose(BeforeCloseEvent event) {
+
+    @Subscribe("windowCommitAndCloseButton")
+    public void onWindowCommitAndCloseButtonClick(Button.ClickEvent event) {
         if (!(openPositionField.getValue().getInternalProject()
                 && getRoleService.isUserRoles(userSession.getUser(), ROLE_RESEARCHER))) {
-            event.preventWindowClose();
-        }
-    }
+            getEditedEntity().setRecrutierName(userSession.getUser().getName());
 
-    @Subscribe
-    public void onBeforeCommitChanges(AfterCommitChangesEvent event) {
-        if (!isAllreadySubscribe()) {
-            if (!(openPositionField.getValue().getInternalProject()
-                    && getRoleService.isUserRoles(userSession.getUser(), ROLE_RESEARCHER))) {
-                getEditedEntity().setRecrutierName(userSession.getUser().getName());
+            // если были изменения, то послать оповещение по почте
+            sendMessage();
 
-                // если были изменения, то послать оповещение по почте
-                sendMessage();
-
-                // если не установлен флаг подписки, то установить его в false
-                if (recrutiesTasksSubscribeCheckBox.getValue() == null) {
-                    dialogs.createOptionDialog()
-                            .withCaption("Warning")
-                            .withMessage("Подписатся на изменение вакансии?")
-                            .withActions(
-                                    new DialogAction(DialogAction.Type.YES,
-                                            Action.Status.PRIMARY).withHandler(e -> {
-                                        this.recrutiesTasksSubscribeCheckBox.setValue(true);
-                                    }),
-                                    new DialogAction(DialogAction.Type.NO).withHandler(f -> {
-                                        this.recrutiesTasksSubscribeCheckBox.setValue(false);
-                                    })
-                            )
-                            .show();
-                }
-            } else {
-                notifications.create(Notifications.NotificationType.ERROR)
-                        .withCaption("ОШИБКА")
-                        .withDescription("Для подписки на эксклюзивную вакансию обратитесь к Team Lead")
-                        .withType(Notifications.NotificationType.ERROR)
+            // если не установлен флаг подписки, то установить его в false
+            if (recrutiesTasksSubscribeCheckBox.getValue() == null) {
+                dialogs.createOptionDialog()
+                        .withCaption("Warning")
+                        .withMessage("Подписатся на изменение вакансии?")
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES,
+                                        Action.Status.PRIMARY).withHandler(e -> {
+                                    this.recrutiesTasksSubscribeCheckBox.setValue(true);
+                                }),
+                                new DialogAction(DialogAction.Type.NO).withHandler(f -> {
+                                    this.recrutiesTasksSubscribeCheckBox.setValue(false);
+                                })
+                        )
                         .show();
             }
         } else {
-            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
-                    .withMessage("Вы уже подписаны на эту вакансию \nс "
-                            + startDateSunscribe
-                            + " по "
-                            + endDateSubscribe
-                            + "\nПродлить подписку на 1 неделю?")
-                    .withType(Dialogs.MessageType.WARNING)
-                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-
-                    }), new DialogAction(DialogAction.Type.NO))
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("ОШИБКА")
+                    .withDescription("Для подписки на эксклюзивную вакансию обратитесь к Team Lead")
+                    .withType(Notifications.NotificationType.ERROR)
                     .show();
         }
+
+//        close(StandardOutcome.COMMIT);
     }
 
     private static DateFormatSymbols ruDateFormatSymbols = new DateFormatSymbols() {
-
         @Override
         public String[] getMonths() {
             return new String[]{"января", "февраля", "марта", "апреля", "мая", "июня",
                     "июля", "августа", "сентября", "октября", "ноября", "декабря"};
         }
-
     };
 
     private Boolean checkSubscribePosition() {
@@ -344,15 +251,19 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         return countSubscrine > 0 ? true : false;
     }
 
-    @Subscribe
-    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withCaption("Подписка")
-                .withDescription(recrutiesTasksFieldUser.getValue().getName() +
-                        " подписан на позицию: \n" +
-                        openPositionField.getValue().getVacansyName())
-                .show();
+    Boolean notificationFlag = true;
 
+    @Subscribe
+    public void onBeforeClose(BeforeCloseEvent event) {
+        if (notificationFlag) {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Подписка")
+                    .withDescription(recrutiesTasksFieldUser.getValue().getName() +
+                            " подписан на позицию: \n" +
+                            openPositionField.getValue().getVacansyName())
+                    .show();
+            notificationFlag = false;
+        }
     }
 
     public void sendMessage() {
@@ -385,26 +296,4 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         this.openPosition = op;
         fromOpenPosition = true;
     }
-/*
-    @Subscribe("okButton")
-    private void onOkButtonClick(Button.ClickEvent event) {
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM YYYY",
-                ruDateFormatSymbols);
-
-        // проверить, а вдруг вы уже подписаны на эту вакансию?
-        if (checkSubscribePosition() && !getRoleService.isUserRoles(userSession.getUser(), MANAGER)) {
-            dialogs.createMessageDialog()
-                    .withCaption("Внимание")
-                    .withModal(true)
-                    .withMessage("Вы уже подписаны на вакансию " + openPositionField.getValue().getVacansyName() +
-                            "\n c " + dateFormat.format(startDateField.getValue()) +
-                            " по " + dateFormat.format(endDateField.getValue()))
-                    .show();
-
-            close(WINDOW_DISCARD_AND_CLOSE_ACTION);
-        } else {
-            closeWithCommit();
-        }
-    } */
 }
