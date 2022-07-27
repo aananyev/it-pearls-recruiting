@@ -1,21 +1,13 @@
 package com.company.itpearls.web.screens.skilltree;
 
-import com.company.itpearls.entity.JobCandidate;
-import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.core.global.MessageTools;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.SkillTree;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-
 import javax.inject.Inject;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 @UiController("itpearls_SkillTree.browse")
 @UiDescriptor("skill-tree-browse.xml")
@@ -23,18 +15,40 @@ import java.net.URL;
 @LoadDataBeforeShow
 public class SkillTreeBrowse extends StandardLookup<SkillTree> {
     @Inject
-    private TreeDataGrid<SkillTree> skillTreesTable;
+    private LookupField columnSelector;
     @Inject
-    private UiComponents uiComponents;
-/*    @Install(to = "skillTreesTable", subject = "itemDescriptionProvider")
-    private String skillTreesTableItemDescriptionProvider(SkillTree skillTree, String string) {
-        return skillTree.getComment() != null ? skillTree.getComment() : "";
-    }*/
+    private MessageTools messageTools;
+    @Inject
+    private GroupTable<SkillTree> skillTreesTable;
 
-    @Install(to = "skillTreesTable.skillName", subject = "descriptionProvider")
-    private String skillTreesTableSkillNameDescriptionProvider(SkillTree skillTree) {
-        return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).text() : "";
+    @Subscribe
+    protected void onInit(InitEvent event) {
+//        initColumnSelector();
     }
+
+/*    private void initColumnSelector() {
+        List<DataGrid.Column<SkillTree>> columns = skillTreesTable.getColumns();
+        Map<String, String> columnsMap = columns.stream()
+                .collect(Collectors.toMap(
+                        column -> {
+                            MetaPropertyPath propertyPath = column.getPropertyPath();
+                            return propertyPath != null
+                                    ? messageTools.getPropertyCaption(propertyPath.getMetaProperty())
+                                    : column.getId();
+                        },
+                        DataGrid.Column::getId,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new));
+        columnSelector.setOptionsMap(columnsMap);
+
+        columnSelector.setValue(columns.get(0).getId());
+    } */
+
+
+/*    @Install(to = "skillTreesTable.skillName", subject = "descriptionProvider")
+//    private String skillTreesTableSkillNameDescriptionProvider(SkillTree skillTree) {
+//        return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).text() : "";
+//    }
 
     @Install(to = "skillTreesTable.isComment", subject = "columnGenerator")
     private Object skillTreesTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
@@ -52,5 +66,5 @@ public class SkillTreeBrowse extends StandardLookup<SkillTree> {
         } else {
             return "pic-center-large-red";
         }
-    }
+    } */
 }

@@ -611,7 +611,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
-    public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+
+//    @Subscribe
+//    public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
 //        if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!openClosePositionCheckBox.getValue().equals(openCloseStartStatus)) {
                 if (!openClosePositionCheckBox.getValue()) {
@@ -645,7 +648,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                 + openPositionFieldSalaryMin.getValue() + "\n"
                                 + "Salary MAX: "
                                 + openPositionFieldSalaryMax.getValue() + "\n\n"
-                                + Jsoup.parse(shortDescriptionTextArea.getValue()).text(),
+                                + (shortDescriptionTextArea.getValue() != null ?
+                                Jsoup.parse(shortDescriptionTextArea.getValue()).text() : ""),
                         new Date(),
                         userSession.getUser());
             }

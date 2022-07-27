@@ -8,39 +8,60 @@
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate">
             <view extends="_minimal">
-                <property name="positionList" view="_minimal">
-                    <property name="positionList" view="_minimal"/>
+                <property name="positionList"
+                          view="_minimal">
+                    <property name="positionList"
+                              view="_minimal"/>
                 </property>
-                <property name="currentCompany" view="_minimal"/>
-                <property name="cityOfResidence" view="_minimal"/>
-                <property name="fileImageFace" view="_minimal">
+                <property name="currentCompany"
+                          view="_minimal"/>
+                <property name="cityOfResidence"
+                          view="_minimal"/>
+                <property name="fileImageFace"
+                          view="_minimal">
                     <property name="size"/>
                 </property>
-                <property name="iteractionList" view="_minimal">
-                    <property name="vacancy" view="_minimal">
-                        <property name="projectName" view="_minimal">
-                            <property name="openPosition" view="_minimal"/>
-                            <property name="projectOwner" view="_minimal"/>
-                            <property name="projectDepartment" view="_minimal"/>
+                <property name="iteractionList"
+                          view="_minimal">
+                    <property name="vacancy"
+                              view="_minimal">
+                        <property name="projectName"
+                                  view="_minimal">
+                            <property name="openPosition"
+                                      view="_minimal"/>
+                            <property name="projectOwner"
+                                      view="_minimal"/>
+                            <property name="projectDepartment"
+                                      view="_minimal"/>
                         </property>
                     </property>
-                    <property name="iteractionType" view="_minimal">
+                    <property name="iteractionType"
+                              view="_minimal">
                         <property name="signSendToClient"/>
                         <property name="signClientInterview"/>
                         <property name="signOurInterview"/>
                     </property>
-                    <property name="recrutier" view="_minimal"/>
+                    <property name="recrutier"
+                              view="_minimal"/>
                 </property>
-                <property name="socialNetwork" view="_minimal"/>
-                <property name="specialisation" view="_minimal"/>
+                <property name="socialNetwork"
+                          view="_minimal"/>
+                <property name="specialisation"
+                          view="_minimal"/>
                 <property name="blockCandidate"/>
-                <property name="laborAgreement" view="_minimal"/>
-                <property name="candidateCv" view="_minimal">
-                    <property name="resumePosition" view="_minimal"/>
-                    <property name="toVacancy" view="_minimal"/>
+                <property name="laborAgreement"
+                          view="_minimal"/>
+                <property name="candidateCv"
+                          view="_minimal">
+                    <property name="resumePosition"
+                              view="_minimal"/>
+                    <property name="toVacancy"
+                              view="_minimal"/>
                 </property>
             </view>
-            <loader id="jobCandidateDl" softDeletion="true" dynamicAttributes="true"/>
+            <loader id="jobCandidateDl"
+                    softDeletion="true"
+                    dynamicAttributes="true"/>
             <collection id="jobCandidateCandidateCvsDc"
                         property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc"
@@ -83,8 +104,10 @@
         </collection>
         <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs">
             <view extends="_local">
-                <property name="jobCandidate" view="_minimal"/>
-                <property name="socialNetworkURL" view="_minimal">
+                <property name="jobCandidate"
+                          view="_minimal"/>
+                <property name="socialNetworkURL"
+                          view="_minimal">
                     <property name="socialNetworkURL"/>
                 </property>
             </view>
@@ -102,7 +125,10 @@
     </data>
     <dialogMode height="750"
                 width="1200"/>
-    <layout expand="tabSheetSocialNetworks" spacing="true" width="100%" height="100%">
+    <layout expand="tabSheetSocialNetworks"
+            spacing="true"
+            width="100%"
+            height="100%">
         <groupBox spacing="true">
             <checkBox id="blockCandidateCheckBox"
                       dataContainer="jobCandidateDc"
@@ -131,12 +157,15 @@
                                dataContainer="jobCandidateDc"
                                property="personPosition"/>
                         <label stylename="h2" value="|"/>
-                        <label id="cityOfCandidate" stylename="h2"
+                        <label id="cityOfCandidate"
+                               stylename="h2"
                                align="MIDDLE_LEFT"
                                dataContainer="jobCandidateDc"
                                property="cityOfResidence"/>
                         <label stylename="h2" value="|"/>
-                        <label id="labelCV" align="MIDDLE_CENTER" stylename="h3"/>
+                        <label id="labelCV"
+                               align="MIDDLE_CENTER"
+                               stylename="h3"/>
                         <label stylename="h2" value="|"/>
                         <label id="labelQualityPercent"
                                align="MIDDLE_CENTER"

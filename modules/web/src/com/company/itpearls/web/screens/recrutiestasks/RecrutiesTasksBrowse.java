@@ -83,6 +83,8 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
 
     @Subscribe("checkBoxRemoveOld")
     public void onCheckBoxRemoveOldValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        recrutiesTasksesDl.removeParameter("allRecruters");
+
         if( checkBoxRemoveOld.getValue() ) {
             Date curDate = new Date();
 

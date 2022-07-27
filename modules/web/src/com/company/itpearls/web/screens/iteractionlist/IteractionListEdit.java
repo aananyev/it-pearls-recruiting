@@ -468,7 +468,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             if (iteractionTypeField.getValue() != null) {
                 if (iteractionTypeField.getValue().getNumber() != null) {
                     String s = iteractionTypeField.getValue().getNumber();
-                    Integer i = Integer.parseInt(s.contains(".") ? s.substring(0, s.indexOf(".") - 1) : s);
+
+                    Integer i = Integer.parseInt(s.contains(".") ? s.substring(0, s.indexOf(".")) : s);
 
                     if (candidateField.getValue() != null) {
                         candidateField.getValue().setStatus(i);

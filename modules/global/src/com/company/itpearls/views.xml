@@ -127,10 +127,8 @@
         <property name="socialNetwork" view="_local">
             <property name="socialNetworkURL" view="_local"/>
         </property>
-        <property name="candidateCv" view="_local">
-            <property name="candidate" view="_minimal"/>
-            <property name="resumePosition" view="_minimal"/>
-            <property name="toVacancy" view="_minimal"/>
+        <property name="candidateCv" view="_minimal">
+            <property name="textCV"/>
         </property>
         <property name="fileImageFace" view="_local"/>
         <property name="positionList" view="_local">
@@ -234,6 +232,7 @@
         </property>
         <property name="fileImageFace" view="_local"/>
         <property name="skillTree" view="_minimal"/>
+        <property name="textCV"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">

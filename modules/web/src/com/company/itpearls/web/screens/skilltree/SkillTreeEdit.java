@@ -50,8 +50,15 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
     }
 
     private void setLogo() {
-        String urlString = "https://" + getPicFromWiki().substring(2);
+        String urlString = "";
         URL url = null;
+
+
+        try {
+            urlString = "https://" + getPicFromWiki().substring(2);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
         try {
             url = new URL(urlString);
@@ -64,9 +71,15 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
 
     private String getPicFromWiki() {
         Document document = Jsoup.parse(skillCommentRichTextArea.getValue());
+        String imageUrl = "";
 
         Element element = document.select("img").first();
-        String imageUrl = element.attr("src");
+
+        try {
+            imageUrl = element.attr("src");
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
         return imageUrl;
     }
@@ -104,10 +117,14 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
 
     @Subscribe("wikiPateField")
     public void onWikiPateFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        if (event.getValue() == null || event.getValue() == "") {
-            parseWikiText.setEnabled(false);
+        if (event.getValue() != null) {
+            if (event.getValue().equals("")) {
+                parseWikiText.setEnabled(true);
+            } else {
+                parseWikiText.setEnabled(false);
+            }
         } else {
-            parseWikiText.setEnabled(true);
+            parseWikiText.setVisible(false);
         }
     }
 

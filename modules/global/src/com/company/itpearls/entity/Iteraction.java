@@ -8,7 +8,7 @@ import com.haulmont.cuba.core.entity.annotation.LookupType;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@NamePattern("%s|iterationName")
+@NamePattern("%s. %s|number,iterationName")
 @Table(name = "ITPEARLS_ITERACTION", indexes = {
         @Index(name = "IDX_ITPEARLS_ITERACTION_NUMBER", columnList = "NUMBER_")
 })

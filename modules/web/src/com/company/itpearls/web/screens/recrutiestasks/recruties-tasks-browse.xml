@@ -44,6 +44,9 @@
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="recrutiesTasksesTable"
+                    aggregatable="true"
+                    aggregationStyle="TOP"
+                    showTotalAggregation="true"
                     width="100%"
                     dataContainer="recrutiesTasksesDc">
             <actions>
@@ -80,6 +83,7 @@
             <checkBox id="checkBoxRemoveOld"
                       caption="msg://msgRemoveOld"/>
             <checkBox id="allReacrutersCheckBox"
+                      visible="false"
                       caption="msg://msgAllRecters"/>
         </hbox>
     </layout>
