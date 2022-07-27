@@ -1,14 +1,15 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
+import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.GroupTable;
-import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.core.global.ValueLoadContext;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.RecrutiesTasks;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 
 import javax.inject.Inject;
 import java.util.Collection;
@@ -30,6 +31,10 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
 
     private String ROLE_RESEARCHER = "Researcher";
     private String ROLE_MANAGER = "Manager";
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -54,20 +59,20 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         recrutiesTasksesDl.load();
 
         // перечеркнем просроченные позиции
-        recrutiesTasksesTable.setStyleProvider( ( recrutiesTask, property ) -> {
+        recrutiesTasksesTable.setStyleProvider((recrutiesTask, property) -> {
             Date curDate = new Date();
 
-            if( !recrutiesTask.getEndDate().after( curDate )) {
+            if (!recrutiesTask.getEndDate().after(curDate)) {
                 return "recrutier-tasks-gray";
             } else {
-                return  "recrutier-tasks-normal";
+                return "recrutier-tasks-normal";
             }
         });
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-       checkBoxRemoveOld.setValue( true );
+        checkBoxRemoveOld.setValue(true);
     }
 
     @Subscribe("allReacrutersCheckBox")
@@ -85,19 +90,72 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
     public void onCheckBoxRemoveOldValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         recrutiesTasksesDl.removeParameter("allRecruters");
 
-        if( checkBoxRemoveOld.getValue() ) {
+        if (checkBoxRemoveOld.getValue()) {
             Date curDate = new Date();
 
-            recrutiesTasksesDl.setParameter( "currentDate", curDate );
+            recrutiesTasksesDl.setParameter("currentDate", curDate);
         } else {
-            recrutiesTasksesDl.removeParameter( "currentDate" );
+            recrutiesTasksesDl.removeParameter("currentDate");
         }
 
         recrutiesTasksesDl.load();
     }
 
+    @Install(to = "recrutiesTasksesTable.factForPeriod", subject = "columnGenerator")
+    private Component recrutiesTasksesTableFactForPeriodColumnGenerator(RecrutiesTasks recrutiesTasks) {
+        Label label = uiComponents.create(Label.NAME);
+        String QUERY = "select e from itpearls_IteractionList e " +
+                "where e.dateIteraction between :startDate and :endDate " +
+                "and e.vacancy = :vacancy " +
+                "and e.iteractionType.signOurInterview = true";
+
+/*        ValueLoadContext valueLoadContext = ValueLoadContext.create()
+                .setQuery(ValueLoadContext.createQuery(QUERY)
+                        .setParameter("startDate", recrutiesTasks.getStartDate())
+                        .setParameter("endDate", recrutiesTasks.getEndDate())
+                        .setParameter("vacancy", recrutiesTasks.getOpenPosition()))
+                .addProperty("count"); */
+
+        Integer countOurInterview = dataManager.load(IteractionList.class)
+                .view("iteractionList-view")
+                .query(QUERY)
+                .parameter("startDate", recrutiesTasks.getStartDate())
+                .parameter("endDate", recrutiesTasks.getEndDate())
+                .parameter("vacancy", recrutiesTasks.getOpenPosition())
+                .list()
+                .size();
+
+        label.setValue(countOurInterview);
+        if (countOurInterview != 0) {
+            if (recrutiesTasks.getPlanForPeriod() != null) {
+                if (countOurInterview > recrutiesTasks.getPlanForPeriod()) {
+                    label.setStyleName("label_button_green");
+                } else {
+                    label.setStyleName("label_button_red");
+                }
+            } else {
+                label.setStyleName("label_button_green");
+            }
+        } else {
+            label.setStyleName("label_button_red");
+        }
+
+        return label;
+    }
+
+
     @Install(to = "recrutiesTasksesTable", subject = "iconProvider")
     private String recrutiesTasksesTableIconProvider(RecrutiesTasks recrutiesTasks) {
         return (!recrutiesTasks.getOpenPosition().getOpenClose() ? "icons/ok.png" : "icons/close.png");
     }
+
+    @Install(to = "recrutiesTasksesTable.group", subject = "columnGenerator")
+    private Component recrutiesTasksesTableGroupColumnGenerator(RecrutiesTasks recrutiesTasks) {
+        String group = recrutiesTasks.getReacrutier().getGroup().getName();
+        Label label = uiComponents.create(Label.NAME);
+        label.setValue(group);
+        return label;
+    }
+
+
 }

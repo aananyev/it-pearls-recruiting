@@ -386,12 +386,17 @@
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
     </view>
-    <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-view" extends="_local">
-        <property name="reacrutier" view="_local"/>
+    <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-view" extends="_minimal">
         <property name="openPosition" view="_local">
             <property name="projectName" view="_minimal"/>
         </property>
         <property name="createdBy"/>
+        <property name="reacrutier" view="_local">
+            <property name="group" view="_minimal"/>
+        </property>
+        <property name="planForPeriod"/>
+        <property name="startDate"/>
+        <property name="endDate"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
         <property name="projectName" view="_minimal">

@@ -40,7 +40,7 @@
         <filter id="filter"
                 applyTo="recrutiesTasksesTable"
                 dataLoader="recrutiesTasksesDl">
-            <properties include=".*"
+            <properties include="*"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="recrutiesTasksesTable"
@@ -58,12 +58,19 @@
                 <group>
                     <column id="reacrutier"/>
                 </group>
+                <column id="group" width="120px"
+                        caption="msg://msgUserGroup"/>
                 <column id="openPosition.vacansyName"/>
                 <column id="openPosition.projectName"/>
-                <column id="planForPeriod"/>
-                <column id="factForPeriod"/>
-                <column id="startDate"/>
-                <column id="endDate"/>
+                <column id="planForPeriod" width="65px"
+                        align="CENTER"/>
+                <column id="factForPeriod" width="65px"
+                        caption="msg://msgFactForPeriod"
+                        align="CENTER"/>
+                <column id="startDate" width="100px"
+                        align="CENTER"/>
+                <column id="endDate" width="100px"
+                        align="CENTER"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
