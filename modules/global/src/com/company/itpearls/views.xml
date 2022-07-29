@@ -397,6 +397,7 @@
         <property name="planForPeriod"/>
         <property name="startDate"/>
         <property name="endDate"/>
+        <property name="subscribe"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
         <property name="projectName" view="_minimal">

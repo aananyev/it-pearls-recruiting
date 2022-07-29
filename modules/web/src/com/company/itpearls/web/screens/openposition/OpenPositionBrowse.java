@@ -5,10 +5,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
-import com.haulmont.cuba.core.global.CommitContext;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Events;
-import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
@@ -21,6 +18,11 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.cuba.web.App;
+import com.haulmont.reports.entity.Report;
+import com.haulmont.reports.entity.ReportInputParameter;
+import com.haulmont.reports.gui.ReportGuiManager;
+import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jsoup.Jsoup;
 
@@ -102,6 +104,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Button suggestCandidateButton;
     @Inject
     private RadioButtonGroup subscribeRadioButtonGroup;
+    @Inject
+    private ReportGuiManager reportGuiManager;
+    @Inject
+    private Actions actions;
+    @Inject
+    private Button listBtn;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -113,6 +121,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         setMapOfPriority();
         setWorkExperienceMap();
+
+        Action listPrintFormAction = actions.create(ListPrintFormAction.class, "listPrintFormAction");
+        openPositionsTable.addAction(listPrintFormAction);
+        listBtn.setAction(listPrintFormAction);
     }
 
     private void initCheckBoxOnlyOpenedPosition() {
@@ -1033,12 +1045,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private void setButtonsEnableDisable() {
         buttonSubscribe.setEnabled(false);
+        listBtn.setEnabled(false);
 
         openPositionsTable.addSelectionListener(e -> {
             if (e.getSelected() == null) {
                 buttonSubscribe.setEnabled(false);
+                listBtn.setEnabled(false);
             } else {
                 buttonSubscribe.setEnabled(true);
+                listBtn.setEnabled(true);
             }
         });
     }
@@ -1750,6 +1765,24 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         checkBoxOnlyMySubscribe.setValue(true);
+    }
+
+    public void getMemoForCandidate() {
+        LoadContext<Report> loadContext = LoadContext.create(Report.class)
+                .setQuery(LoadContext
+                        .createQuery("select p from report$Report p where p.code = 'memoForCandidates'"))
+                .setView("report.edit");
+        Report report = dataManager.load(loadContext);
+
+//        List<ReportInputParameter> inputParameters = new ArrayList<>();
+//        ReportInputParameter reportInputParameter = new ReportInputParameter();
+//        reportInputParameter.setValue("openPosition", openPositionsTable.getSelected());
+//        inputParameters.add(reportInputParameter);
+        report.setValue("openPosition", openPositionsTable.getSingleSelected(), false);
+//        report.setInputParameters(inputParameters);
+
+        FrameOwner window = App.getInstance().getTopLevelWindow().getFrameOwner();
+        reportGuiManager.runReport(report, window);
     }
 }
 

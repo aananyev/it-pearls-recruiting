@@ -128,7 +128,7 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         label.setValue(countOurInterview);
         if (countOurInterview != 0) {
             if (recrutiesTasks.getPlanForPeriod() != null) {
-                if (countOurInterview > recrutiesTasks.getPlanForPeriod()) {
+                if (countOurInterview >= recrutiesTasks.getPlanForPeriod()) {
                     label.setStyleName("label_button_green");
                 } else {
                     label.setStyleName("label_button_red");
@@ -156,6 +156,4 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         label.setValue(group);
         return label;
     }
-
-
 }

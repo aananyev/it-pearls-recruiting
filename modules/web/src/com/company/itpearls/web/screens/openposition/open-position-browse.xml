@@ -114,6 +114,7 @@
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
                 <action id="excel" type="excel"/>
+                <action id="list" type="listPrintForm"/>
             </actions>
             <columns
                     exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
@@ -238,9 +239,11 @@
                 <button id="buttonSubscribe"
                         caption="msg://mshSubscibe"
                         invoke="subscribePosition"
+                        enable="false"
                         icon="BELL"/>
                 <button id="groupSubscribe"
                         caption="msg://msgGroupSubscribe"
+                        visible="false"
                         invoke="groupSubscribe"
                         icon="BELL_O"/>
                 <button id="buttonExcel"
@@ -253,6 +256,11 @@
                         icon="EYE"
                         enable="false"
                         invoke="suggestCandidateButton"/>
+                <button id="listBtn"
+                        icon="COMMENT_O"
+                        enable="false"
+                        caption="msg://msgGetMemoForCandidate"
+                        action="openPositionsTable.list"/>
             </buttonsPanel>
         </treeDataGrid>
         <hbox spacing="true"

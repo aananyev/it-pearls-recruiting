@@ -23,6 +23,7 @@
                 <property name="createdBy"/>
                 <property name="candidateCv" view="_minimal">
                     <property name="candidate" view="_minimal"/>
+                    <property name="textCV"/>
                 </property>
                 <property name="iteractionList" view="_minimal">
                     <property name="candidate" view="_minimal"/>

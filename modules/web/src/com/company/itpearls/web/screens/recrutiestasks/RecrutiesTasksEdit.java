@@ -15,6 +15,7 @@ import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.RecrutiesTasks;
+import com.haulmont.cuba.gui.util.OperationResult;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
@@ -254,15 +255,17 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     Boolean notificationFlag = true;
 
     @Subscribe
-    public void onBeforeClose(BeforeCloseEvent event) {
-        if (notificationFlag) {
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Подписка")
-                    .withDescription(recrutiesTasksFieldUser.getValue().getName() +
-                            " подписан на позицию: \n" +
-                            openPositionField.getValue().getVacansyName())
-                    .show();
-            notificationFlag = false;
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        if (getEditedEntity() != null) {
+            if (notificationFlag) {
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Подписка")
+                        .withDescription(recrutiesTasksFieldUser.getValue().getName() +
+                                " подписан на позицию: \n" +
+                                getEditedEntity().getOpenPosition().getVacansyName())
+                        .show();
+                notificationFlag = false;
+            }
         }
     }
 

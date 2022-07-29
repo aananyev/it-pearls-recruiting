@@ -41,6 +41,8 @@
         <item screen="itpearls_GroupSubscribeScreen" caption="mainMsg://menu_config.itpearls_GroupSubscribeScreen"/>
     </menu>
     <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-project">
+        <item bean="itpearls_MemoForCandidatesBean" beanMethod="runReport"
+              caption="mainMsg://msgMemoForCandidates" icon="COMMENT_O"/>
         <item bean="itpearls_RunReportBean" beanMethod="runReport"
               caption="mainMsg://menu-config.itpearls_RunReportBean.runReport" icon="USER"/>
         <item bean="itpearls_NumberInterviewsRecrutierRunReportBean" beanMethod="runReport"

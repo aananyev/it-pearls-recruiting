@@ -6,10 +6,9 @@
     <data readOnly="true">
         <collection id="iteractionsDc"
                     class="com.company.itpearls.entity.Iteraction"
-                    view="_local">
-            <loader id="iteractionsDl" cacheable="true">
-                <query><![CDATA[select e from itpearls_Iteraction e
-order by e.number]]></query>
+                    view="iteraction-view">
+            <loader id="iteractionsDl">
+                <query><![CDATA[select e from itpearls_Iteraction e]]></query>
             </loader>
         </collection>
     </data>
@@ -25,13 +24,20 @@ order by e.number]]></query>
         </filter>
         <groupTable id="iteractionsTable"
                     width="100%"
-                    dataContainer="iteractionsDc" caption="mainMsg://msgNumber">
+                    aggregatable="true"
+                    aggregationStyle="TOP"
+                    showTotalAggregation="true"
+                    dataContainer="iteractionsDc"
+                    caption="mainMsg://msgNumber">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <group>
+                    <column id="iteractionTree"/>
+                </group>
                 <column id="number" caption="mainMsg://msgNumber"/>
                 <column id="mandatoryIteraction" caption="msg://msgMandatoryItercation"/>
                 <column id="iterationName" caption="mainMsg://msgItercationType"/>

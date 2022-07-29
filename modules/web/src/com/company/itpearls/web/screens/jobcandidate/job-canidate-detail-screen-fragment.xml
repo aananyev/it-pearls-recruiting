@@ -3,6 +3,7 @@
     <data>
         <collection id="jobCandidatesDc"
                     class="com.company.itpearls.entity.JobCandidate"
+                    view="jobCandidate-view"
                     provided="true"/>
     </data>
     <layout width="100%"
