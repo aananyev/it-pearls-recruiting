@@ -139,10 +139,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
-        subscribeRadioButtonGroup.setValue(1);
+        if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP)) {
+            subscribeRadioButtonGroup.setValue(0);
+        } else {
+            subscribeRadioButtonGroup.setValue(1);
+        }
 
         subscribeRadioButtonGroup.addValueChangeListener(e -> {
-            buttonSubscribe.setEnabled(((Integer) subscribeRadioButtonGroup.getValue()) == 0);
+            listBtn.setEnabled(openPositionsTable.getSingleSelected() != null);
+            buttonSubscribe.setEnabled(openPositionsTable.getSingleSelected() != null);
+
+//            buttonSubscribe.setEnabled(((Integer) subscribeRadioButtonGroup.getValue()) == 0);
             suggestCandidateButton.setVisible(((Integer) subscribeRadioButtonGroup.getValue()) == 1);
 
             switch ((Integer) subscribeRadioButtonGroup.getValue()) {
