@@ -107,6 +107,7 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         String QUERY = "select e from itpearls_IteractionList e " +
                 "where e.dateIteraction between :startDate and :endDate " +
                 "and e.vacancy = :vacancy " +
+                "and e.recrutier = :recrutier " +
                 "and e.iteractionType.signOurInterview = true";
 
 /*        ValueLoadContext valueLoadContext = ValueLoadContext.create()
@@ -122,6 +123,7 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
                 .parameter("startDate", recrutiesTasks.getStartDate())
                 .parameter("endDate", recrutiesTasks.getEndDate())
                 .parameter("vacancy", recrutiesTasks.getOpenPosition())
+                .parameter("recrutier", recrutiesTasks.getReacrutier())
                 .list()
                 .size();
 

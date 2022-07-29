@@ -38,7 +38,8 @@
             height="100%"
             expand="mainHBox"
             width="100%">
-        <scrollBox scrollBars="horizontal" width="100%">
+        <scrollBox scrollBars="horizontal"
+                   width="100%">
             <label id="jobCandidateLabel"
                    dataContainer="recrutiesTasksDc"
                    property="openPosition"
@@ -56,7 +57,8 @@
                        stylename="large"
                        property="planForPeriod"/>
         </hbox>
-        <label value="msg://msgStartDate" align="MIDDLE_LEFT"/>
+        <label value="msg://msgStartDate"
+               align="MIDDLE_LEFT"/>
         <hbox spacing="true"
               width="AUTO"
               height="AUTO"
@@ -65,7 +67,8 @@
                        dataContainer="recrutiesTasksDc"
                        align="MIDDLE_LEFT"
                        property="startDate"/>
-            <label value="msg://msgEndDate" align="MIDDLE_LEFT"/>
+            <label value="msg://msgEndDate"
+                   align="MIDDLE_LEFT"/>
             <dateField id="endDateField"
                        align="MIDDLE_LEFT"
                        dataContainer="recrutiesTasksDc"
