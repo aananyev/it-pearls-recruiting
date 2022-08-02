@@ -16,6 +16,11 @@
                         <and>
                             <c:jpql>
                                 <c:where>
+                                    e.closed = :closed
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
                                     e.endDate > :currentDate
                                 </c:where>
                             </c:jpql>
@@ -83,9 +88,17 @@
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="recrutiesTasksesTable.create"/>
-                <button id="editBtn" action="recrutiesTasksesTable.edit"/>
-                <button id="removeBtn" action="recrutiesTasksesTable.remove"/>
+                <button id="createBtn"
+                        action="recrutiesTasksesTable.create"/>
+                <button id="editBtn"
+                        action="recrutiesTasksesTable.edit"/>
+                <button id="removeBtn"
+                        action="recrutiesTasksesTable.remove"/>
+                <button id="unsubscribeButton"
+                        enable="false"
+                        caption="msg://msgUnsubscribe"
+                        description="msg://msgUnsubscribeDesc"
+                        invoke="unsubscribeFromVacancy"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions"

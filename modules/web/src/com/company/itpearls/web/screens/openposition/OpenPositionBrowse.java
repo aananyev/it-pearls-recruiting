@@ -20,7 +20,6 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.App;
 import com.haulmont.reports.entity.Report;
-import com.haulmont.reports.entity.ReportInputParameter;
 import com.haulmont.reports.gui.ReportGuiManager;
 import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
 import org.apache.commons.lang3.time.DateUtils;
@@ -136,6 +135,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         onlyOpenedPositionMap.put("Подписка", 1);
         onlyOpenedPositionMap.put("Открытые вакансии", 0);
+        onlyOpenedPositionMap.put("Свободные", 3);
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
@@ -162,6 +162,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsDl.setParameter("notsubscriber", userSession.getUser());
                     break;
                 case 2:
+                    openPositionsDl.removeParameter("subscriber");
+                    openPositionsDl.removeParameter("notsubscriber");
+                    break;
+                case 3:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
                     break;
@@ -437,6 +441,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String QUERY_RECRUTIER_TASK = "select e " +
                 "from itpearls_RecrutiesTasks e " +
                 "where e.endDate > current_date " +
+                "and e.closed = false " +
                 "and e.openPosition = :openPosition";
 
         String returnData = "";
@@ -1568,10 +1573,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (date.before(DateUtils.addMonths(lastDate, 1))) {
                 return "pic-center-small-red";
             } else {
-                if (date.before(DateUtils.addMonths(lastDate, 3))) {
+                if (date.before(DateUtils.addMonths(lastDate, 2))) {
                     return "pic-center-small-orange";
                 } else {
-                    if (date.before(DateUtils.addMonths(lastDate, 6))) {
+                    if (date.before(DateUtils.addMonths(lastDate, 3))) {
                         return "pic-center-small-green";
                     } else {
                         return "pic-center-small-grey";
@@ -1590,20 +1595,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             Date date = new Date();
 
             if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 1))) {
-                return "Открыта недавно";
+                return "Открыта более месяца назад";
             } else {
-                if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 3))) {
-                    return "Открыта более месяца назад";
+                if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 2))) {
+                    return "Открыта более 2-х месяцев назад";
                 } else {
-                    if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 6))) {
+                    if (date.before(DateUtils.addMonths(openPosition.getLastOpenDate(), 3))) {
                         return "Открыта более 3-х месяцев назад";
                     } else {
-                        return "Открыта более 6-и месяцев назад";
+                        return "Открыта очень давно";
                     }
                 }
             }
         } else {
-            return "Открыта очень давно";
+            return "Открыта недавно";
         }
     }
 

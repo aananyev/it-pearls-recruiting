@@ -18,6 +18,7 @@
                                 <c:where>
                                     e in (select k.openPosition from itpearls_RecrutiesTasks k
                                     where k.reacrutier = :subscriber
+                                    and k.closed = false
                                     and current_date between k.startDate and k.endDate))
                                 </c:where>
                             </c:jpql>
@@ -25,6 +26,7 @@
                                 <c:where>
                                     not (e in (select x.openPosition from itpearls_RecrutiesTasks x
                                     where x.reacrutier = :notsubscriber
+                                    and x.closed = false
                                     and current_date between x.startDate and x.endDate)))
                                 </c:where>
                             </c:jpql>
@@ -42,7 +44,8 @@
                                     e in
                                     (select f.openPosition
                                     from itpearls_RecrutiesTasks f
-                                    where f.reacrutier = :recrutier and :nowDate between f.startDate and f.endDate)
+                                    where f.reacrutier = :recrutier and :nowDate between f.startDate and f.endDate
+                                    and f.closed = false)
                                 </c:where>
                             </c:jpql>
                             <c:jpql>

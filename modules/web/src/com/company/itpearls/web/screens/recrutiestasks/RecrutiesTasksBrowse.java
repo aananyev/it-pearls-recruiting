@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.company.itpearls.entity.IteractionList;
+import com.company.itpearls.entity.OpenPositionNews;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.core.global.ValueLoadContext;
@@ -14,6 +15,7 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @UiController("itpearls_RecrutiesTasks.browse")
 @UiDescriptor("recruties-tasks-browse.xml")
@@ -35,28 +37,11 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
     private UiComponents uiComponents;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private Button unsubscribeButton;
 
     @Subscribe
     public void onInit(InitEvent event) {
-
-        // если роль - ресерчер, то автоматически вставить себя
-/*        Collection<String> s = userSessionSource.getUserSession().getRoles();
-        // установить поле рекрутера
-        if( s.contains( ROLE_RESEARCHER ) ) {
-            // если ресерчер то ограничить просмотр других рекрутеров
-            if( !s.contains( ROLE_MANAGER ))
-                recrutiesTasksesDl.setParameter( "recrutier", userSessionSource.getUserSession().getUser() );
-            else
-                // менеджеру тоже всех показывать
-                recrutiesTasksesDl.removeParameter( "recrutier" );
-        } else {
-            recrutiesTasksesDl.removeParameter( "recrutier" );
-        }
-
-        recrutiesTasksesDl.load(); */
-
-        recrutiesTasksesDl.setParameter("allRecruters", true);
-        recrutiesTasksesDl.load();
 
         // перечеркнем просроченные позиции
         recrutiesTasksesTable.setStyleProvider((recrutiesTask, property) -> {
@@ -68,11 +53,29 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
                 return "recrutier-tasks-normal";
             }
         });
+
+        setButtonsRecrutiesTasksesTable();
+    }
+
+    private void setButtonsRecrutiesTasksesTable() {
+        recrutiesTasksesTable.addSelectionListener(e -> {
+            if (recrutiesTasksesTable.getSingleSelected() != null) {
+                unsubscribeButton.setEnabled(true);
+                unsubscribeButton.setCaption(recrutiesTasksesTable.getSingleSelected().getClosed() ? "Подписаться" : "Отписаться");
+            } else {
+                unsubscribeButton.setEnabled(false);
+                unsubscribeButton.setCaption("Отписаться");
+            }
+        });
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         checkBoxRemoveOld.setValue(true);
+
+        recrutiesTasksesDl.setParameter("allRecruters", true);
+        recrutiesTasksesDl.setParameter("closed", false);
+        recrutiesTasksesDl.load();
     }
 
     @Subscribe("allReacrutersCheckBox")
@@ -94,8 +97,10 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
             Date curDate = new Date();
 
             recrutiesTasksesDl.setParameter("currentDate", curDate);
+            recrutiesTasksesDl.setParameter("closed", false);
         } else {
             recrutiesTasksesDl.removeParameter("currentDate");
+            recrutiesTasksesDl.removeParameter("closed");
         }
 
         recrutiesTasksesDl.load();
@@ -110,24 +115,25 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
                 "and e.recrutier = :recrutier " +
                 "and e.iteractionType.signOurInterview = true";
 
-/*        ValueLoadContext valueLoadContext = ValueLoadContext.create()
-                .setQuery(ValueLoadContext.createQuery(QUERY)
-                        .setParameter("startDate", recrutiesTasks.getStartDate())
-                        .setParameter("endDate", recrutiesTasks.getEndDate())
-                        .setParameter("vacancy", recrutiesTasks.getOpenPosition()))
-                .addProperty("count"); */
-
-        Integer countOurInterview = dataManager.load(IteractionList.class)
+        List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
                 .view("iteractionList-view")
                 .query(QUERY)
                 .parameter("startDate", recrutiesTasks.getStartDate())
                 .parameter("endDate", recrutiesTasks.getEndDate())
                 .parameter("vacancy", recrutiesTasks.getOpenPosition())
                 .parameter("recrutier", recrutiesTasks.getReacrutier())
-                .list()
-                .size();
+                .list();
+
+        Integer countOurInterview = iteractionLists.size();
+
+        String countDdscription = "";
+        for (IteractionList e : iteractionLists) {
+            countDdscription = countDdscription + e.getCandidate().getFullName() + "\n";
+        }
 
         label.setValue(countOurInterview);
+        label.setDescription(countDdscription);
+
         if (countOurInterview != 0) {
             if (recrutiesTasks.getPlanForPeriod() != null) {
                 if (countOurInterview >= recrutiesTasks.getPlanForPeriod()) {
@@ -157,5 +163,24 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         Label label = uiComponents.create(Label.NAME);
         label.setValue(group);
         return label;
+    }
+
+    public void unsubscribeFromVacancy() {
+        RecrutiesTasks recrutiesTasks = recrutiesTasksesTable.getSingleSelected();
+        recrutiesTasks.setClosed(!recrutiesTasksesTable.getSingleSelected().getClosed());
+
+        unsubscribeButton.setCaption(recrutiesTasks.getClosed() ? "Подписаться" : "Отписаться");
+        dataManager.commit(recrutiesTasks);
+
+        OpenPositionNews openPositionNews = new OpenPositionNews();
+        openPositionNews.setPriorityNews(false);
+        openPositionNews.setOpenPosition(recrutiesTasks.getOpenPosition());
+        openPositionNews.setDateNews(new Date());
+        openPositionNews.setAuthor(userSessionSource.getUserSession().getUser());
+        openPositionNews.setSubject(recrutiesTasks.getReacrutier().getName()
+                + " отписан от вакансии");
+        dataManager.commit(openPositionNews);
+
+        recrutiesTasksesDl.load();
     }
 }

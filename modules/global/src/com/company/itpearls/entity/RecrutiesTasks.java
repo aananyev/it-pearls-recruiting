@@ -25,6 +25,10 @@ public class RecrutiesTasks extends StandardEntity {
     @Column(name = "END_DATE")
     protected Date endDate;
 
+    @Column(name = "CLOSED")
+    @NotNull
+    private Boolean closed;
+
     @NotNull
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -43,6 +47,14 @@ public class RecrutiesTasks extends StandardEntity {
 
     @Column(name = "PLAN_FOR_PERIOD")
     private Integer planForPeriod;
+
+    public Boolean getClosed() {
+        return closed;
+    }
+
+    public void setClosed(Boolean closed) {
+        this.closed = closed;
+    }
 
     public Integer getPlanForPeriod() {
         return planForPeriod;

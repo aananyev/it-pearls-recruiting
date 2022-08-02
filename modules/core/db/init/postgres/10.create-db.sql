@@ -524,6 +524,7 @@ create table ITPEARLS_RECRUTIES_TASKS (
     --
     START_DATE date not null,
     END_DATE date,
+    CLOSED boolean,
     REACRUTIER_ID uuid not null,
     OPEN_POSITION_ID uuid,
     SUBSCRIBE boolean,
