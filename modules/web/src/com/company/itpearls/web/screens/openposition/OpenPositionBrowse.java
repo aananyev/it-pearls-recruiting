@@ -136,6 +136,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         onlyOpenedPositionMap.put("Подписка", 1);
         onlyOpenedPositionMap.put("Открытые вакансии", 0);
         onlyOpenedPositionMap.put("Свободные", 3);
+        onlyOpenedPositionMap.put("Открытые за последние 3 дня", 4);
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
@@ -157,21 +158,31 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsDl.setParameter("subscriber", userSession.getUser());
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.removeParameter("freesubscriber");
+                    openPositionsDl.removeParameter("newOpenPosition");
                     break;
                 case 0:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.setParameter("notsubscriber", userSession.getUser());
                     openPositionsDl.removeParameter("freesubscriber");
+                    openPositionsDl.removeParameter("newOpenPosition");
                     break;
                 case 2:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.removeParameter("freesubscriber");
+                    openPositionsDl.removeParameter("newOpenPosition");
                     break;
                 case 3:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.setParameter("freesubscriber", false);
+                    openPositionsDl.removeParameter("newOpenPosition");
+                    break;
+                case 4:
+                    openPositionsDl.removeParameter("subscriber");
+                    openPositionsDl.removeParameter("notsubscriber");
+                    openPositionsDl.removeParameter("freesubscriber");
+                    openPositionsDl.setParameter("newOpenPosition", 3);
                     break;
                 default:
                     break;
@@ -1274,10 +1285,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             openPositionsDl.setParameter("subscriber", userSession.getUser());
             openPositionsDl.removeParameter("notsubscriber");
             openPositionsDl.removeParameter("freesubscriber");
+            openPositionsDl.removeParameter("newOpenPosition");
         } else {
             openPositionsDl.removeParameter("subscriber");
             openPositionsDl.setParameter("notsubscriber", userSession.getUser());
             openPositionsDl.removeParameter("freesubscriber");
+            openPositionsDl.removeParameter("newOpenPosition");
         }
 
         openPositionsDl.load();

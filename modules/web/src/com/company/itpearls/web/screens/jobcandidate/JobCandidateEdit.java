@@ -37,7 +37,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -150,11 +149,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> mobilePhoneField;
     @Inject
     private Label<String> candidateRatingLabel;
-
-    List<Position> setPos = new ArrayList<>();
-    List<IteractionList> iteractionListFromCandidate = new ArrayList();
-    IteractionList lastIteraction = null;
-
     @Inject
     private StarsAndOtherService starsAndOtherService;
     @Inject
@@ -173,8 +167,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> telegramGroupField;
     @Inject
     protected BackgroundWorker backgroundWorker;
-//    @Inject
-//    private CollectionPropertyContainer<Position> positionsListDc;
+
+    List<Position> setPos = new ArrayList<>();
+    List<IteractionList> iteractionListFromCandidate = new ArrayList();
+    IteractionList lastIteraction = null;
 
     static String RESEARCHER = "Researcher";
     static String RECRUITER = "Recruiter";
@@ -1113,13 +1109,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         msec = System.currentTimeMillis();
 
-        jobCandidateCandidateCvTable.addSelectionListener(e -> {
+        jobCandidateIteractionListTable.addSelectionListener(e -> {
             if (e.getSelected() == null) {
-                checkSkillFromJD.setEnabled(false);
-                scanContactsFromCVButton.setEnabled(false);
+                openPositionProjectDescriptionButton.setEnabled(false);
             } else {
-                checkSkillFromJD.setEnabled(true);
-                scanContactsFromCVButton.setEnabled(true);
+                openPositionProjectDescriptionButton.setEnabled(true);
             }
         });
 
