@@ -156,18 +156,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 case 1:
                     openPositionsDl.setParameter("subscriber", userSession.getUser());
                     openPositionsDl.removeParameter("notsubscriber");
+                    openPositionsDl.removeParameter("freesubscriber");
                     break;
                 case 0:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.setParameter("notsubscriber", userSession.getUser());
+                    openPositionsDl.removeParameter("freesubscriber");
                     break;
                 case 2:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
+                    openPositionsDl.removeParameter("freesubscriber");
                     break;
                 case 3:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
+                    openPositionsDl.setParameter("freesubscriber", false);
                     break;
                 default:
                     break;
@@ -991,6 +995,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Integer s = dataManager.loadValue("select count(e.reacrutier) " +
                 "from itpearls_RecrutiesTasks e " +
                 "where e.openPosition = :openPos and " +
+                "e.closed = false and " +
                 "e.endDate >= :currentDate", Integer.class)
                 .parameter("openPos", openPosition)
                 .parameter("currentDate", new Date())
@@ -1268,9 +1273,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (checkBoxOnlyMySubscribe.getValue()) {
             openPositionsDl.setParameter("subscriber", userSession.getUser());
             openPositionsDl.removeParameter("notsubscriber");
+            openPositionsDl.removeParameter("freesubscriber");
         } else {
             openPositionsDl.removeParameter("subscriber");
             openPositionsDl.setParameter("notsubscriber", userSession.getUser());
+            openPositionsDl.removeParameter("freesubscriber");
         }
 
         openPositionsDl.load();
@@ -1346,7 +1353,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     icon = "icons/traffic-lights_gray.png";
                     break;
                 case 0: //"Paused"
-                    icon = "icons/remove.png";
+                    icon = "icons/traffic-lights_gray.png";
                     break;
                 case 1: //"Low"
                     icon = "icons/traffic-lights_blue.png";

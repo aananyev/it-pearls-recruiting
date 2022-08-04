@@ -5,6 +5,7 @@ import com.company.itpearls.entity.OpenPositionNews;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.core.global.ValueLoadContext;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -39,6 +40,8 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
     private DataManager dataManager;
     @Inject
     private Button unsubscribeButton;
+    @Inject
+    private Dialogs dialogs;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -166,21 +169,32 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
     }
 
     public void unsubscribeFromVacancy() {
-        RecrutiesTasks recrutiesTasks = recrutiesTasksesTable.getSingleSelected();
-        recrutiesTasks.setClosed(!recrutiesTasksesTable.getSingleSelected().getClosed());
+        dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                .withType(Dialogs.MessageType.WARNING)
+                .withMessage("Отписаться от вакансии "
+                        + recrutiesTasksesTable.getSingleSelected().getOpenPosition().getVacansyName())
+                .withActions(
+                        new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                            RecrutiesTasks recrutiesTasks = recrutiesTasksesTable.getSingleSelected();
+                            recrutiesTasks.setClosed(!recrutiesTasksesTable.getSingleSelected().getClosed());
 
-        unsubscribeButton.setCaption(recrutiesTasks.getClosed() ? "Подписаться" : "Отписаться");
-        dataManager.commit(recrutiesTasks);
+                            unsubscribeButton.setCaption(recrutiesTasks.getClosed() ? "Подписаться" : "Отписаться");
+                            dataManager.commit(recrutiesTasks);
 
-        OpenPositionNews openPositionNews = new OpenPositionNews();
-        openPositionNews.setPriorityNews(false);
-        openPositionNews.setOpenPosition(recrutiesTasks.getOpenPosition());
-        openPositionNews.setDateNews(new Date());
-        openPositionNews.setAuthor(userSessionSource.getUserSession().getUser());
-        openPositionNews.setSubject(recrutiesTasks.getReacrutier().getName()
-                + " отписан от вакансии");
-        dataManager.commit(openPositionNews);
+                            OpenPositionNews openPositionNews = new OpenPositionNews();
+                            openPositionNews.setPriorityNews(false);
+                            openPositionNews.setOpenPosition(recrutiesTasks.getOpenPosition());
+                            openPositionNews.setDateNews(new Date());
+                            openPositionNews.setAuthor(userSessionSource.getUserSession().getUser());
+                            openPositionNews.setSubject(recrutiesTasks.getReacrutier().getName()
+                                    + " отписан от вакансии");
+                            dataManager.commit(openPositionNews);
 
-        recrutiesTasksesDl.load();
+                            recrutiesTasksesDl.load();
+                        }),
+                        new DialogAction(DialogAction.Type.NO)
+                )
+                .show();
+
     }
 }

@@ -16,6 +16,13 @@
                         <and>
                             <c:jpql>
                                 <c:where>
+                                    not e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.closed = :freesubscriber
+                                    and current_date between k.startDate and k.endDate))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
                                     e in (select k.openPosition from itpearls_RecrutiesTasks k
                                     where k.reacrutier = :subscriber
                                     and k.closed = false

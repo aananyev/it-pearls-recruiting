@@ -52,8 +52,7 @@
         <property name="standartDescription"/>
         <property name="whoIsThisGuy"/>
     </view>
-    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_minimal" systemProperties="true">
-        <property name="openClose"/>
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
         <property name="cityPosition" view="city-view"/>
         <property name="positionType" view="position-view"/>
         <property name="projectName" view="_local">
@@ -68,18 +67,9 @@
             </property>
         </property>
         <property name="skillsList" view="_local"/>
-        <property name="paymentsType"/>
-        <property name="typeCompanyComission"/>
-        <property name="typeSalaryOfResearcher"/>
-        <property name="typeSalaryOfRecrutier"/>
-        <property name="useTaxNDFL"/>
-        <property name="percentComissionOfCompany"/>
-        <property name="percentSalaryOfResearcher"/>
-        <property name="percentSalaryOfRecrutier"/>
         <property name="parentOpenPosition" view="_local">
             <property name="projectName" view="_local"/>
         </property>
-        <property name="commandCandidate"/>
         <property name="cities" view="_local"/>
         <property name="owner" view="_minimal"/>
     </view>
