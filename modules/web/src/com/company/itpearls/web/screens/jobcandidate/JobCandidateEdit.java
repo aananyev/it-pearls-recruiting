@@ -293,7 +293,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setupIteractionList() {
-        jobCandidateIteractionListTable.addEditorPostCommitListener( event -> {
+        jobCandidateIteractionListTable.addEditorPostCommitListener(event -> {
         });
     }
 
@@ -344,8 +344,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            String retStr = "Создано: " + getEditedEntity().getCreatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") "
-                    + "/ Изменено: " + getEditedEntity().getUpdatedBy() + " (" + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ";
+            String retStr = ("Создано: " + getEditedEntity().getCreatedBy()
+                    + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") ")
+                    + (getEditedEntity().getUpdatedBy() != null ?
+                    ("/ Изменено: " + getEditedEntity().getUpdatedBy() + " ("
+                            + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ") : "");
 
             createdUpdatedLabel.setValue(retStr);
         }
@@ -1814,7 +1817,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public void scanContactsFromCVs() {
         String newPhone = null,
-               newEmail = null;
+                newEmail = null;
         Company newCompany = null;
 
         Set<String> newSocial = new HashSet<>();
@@ -1886,16 +1889,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     flag = true;
                 }
             }*/
-        }
+            }
 
-        if (newPhone != null) {
-            if (oldPhone == null && newPhone != null) {
-                messagePhone = "Добавить телефон в карточку "
-                        + newPhoneNew + "? ";
+            if (newPhone != null) {
+                if (oldPhone == null && newPhone != null) {
+                    messagePhone = "Добавить телефон в карточку "
+                            + newPhoneNew + "? ";
 
-                flag = true;
-            } else {
-                // убрать новая/старая
+                    flag = true;
+                } else {
+                    // убрать новая/старая
                 /* if (!StringUtils.equals(newPhone, oldPhone)) {
                     if (!newPhoneNew.equals(oldPhone)) {
                         messagePhone = "Телефон старый "
@@ -1906,8 +1909,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         flag = true;
                     }
                 }*/
+                }
             }
-        }
 
 /*        if (newCompany != null) {
             if (oldCompany == null && newCompany != null) {

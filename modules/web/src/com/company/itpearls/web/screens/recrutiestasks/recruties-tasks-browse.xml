@@ -73,11 +73,13 @@
                 <column id="openPosition.projectName"/>
                 <column id="planForPeriod"
                         width="65px"
-                        align="CENTER"/>
+                        align="CENTER">
+                </column>
                 <column id="factForPeriod"
                         width="65px"
                         caption="msg://msgFactForPeriod"
-                        align="CENTER"/>
+                        align="CENTER">
+                </column>
                 <column id="startDate"
                         width="100px"
                         align="CENTER"/>

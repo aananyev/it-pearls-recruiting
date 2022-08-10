@@ -23,6 +23,7 @@ import com.haulmont.reports.entity.Report;
 import com.haulmont.reports.gui.ReportGuiManager;
 import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
 import org.apache.commons.lang3.time.DateUtils;
+import org.graalvm.compiler.lir.LIRInstruction;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -66,6 +67,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Map<String, Integer> remoteWork = new LinkedHashMap<>();
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
     private Map<String, Integer> mapWorkExperience = new LinkedHashMap<>();
+    private List<User> users = new ArrayList<>();
 
     String QUERY_COUNT_ITERACTIONS = "select e.iteractionType, count(e.iteractionType) " +
             "from itpearls_IteractionList e " +
@@ -124,6 +126,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Action listPrintFormAction = actions.create(ListPrintFormAction.class, "listPrintFormAction");
         openPositionsTable.addAction(listPrintFormAction);
         listBtn.setAction(listPrintFormAction);
+
+        String QUERY_USER = "select e from sec$User e where e.active = true";
+        users = dataManager.load(User.class)
+                .query(QUERY_USER)
+                .list();
+
     }
 
     private void initCheckBoxOnlyOpenedPosition() {
@@ -1758,11 +1766,47 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    @Install(to = "openPositionsTable.owner", subject = "descriptionProvider")
+    private String openPositionsTableOwnerDescriptionProvider(OpenPosition openPosition) {
+        if (openPosition.getOwner() != null) {
+            return (openPosition.getOwner().getName() != null ?
+                    openPosition.getOwner().getName() : openPosition.getCreatedBy());
+        } else {
+            return null;
+        }
+    }
+
     @Install(to = "openPositionsTable.owner", subject = "columnGenerator")
     private Object openPositionsTableOwnerColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        return event.getItem().getOwner() != null
+
+        return whoOwner(event);
+        /* return event.getItem().getOwner() != null
                 ? event.getItem().getOwner().getName()
-                : event.getItem().getCreatedBy();
+                : event.getItem().getCreatedBy(); */
+    }
+
+    private Object whoOwner(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        String userName = null;
+        String a, b, c, e;
+
+        if (event.getItem().getOwner() == null) {
+            for (User user : users) {
+                a = user.getLogin();
+                b = user.getName();
+                c = event.getItem().getCreatedBy();
+                userName = c.equals(a) ? b : null;
+
+                if (userName != null)
+                    break;
+
+//                userName = user.getLogin().equals(event.getItem().getCreatedBy()) ? user.getName() : null;
+            }
+        } else {
+            e = event.getItem().getOwner().getName();
+            userName = event.getItem().getOwner().getName();
+        }
+
+        return userName;
     }
 
     @Subscribe("signDraftCheckBox")

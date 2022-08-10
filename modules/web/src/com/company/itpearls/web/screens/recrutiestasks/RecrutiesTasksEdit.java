@@ -18,6 +18,7 @@ import com.company.itpearls.entity.RecrutiesTasks;
 import com.haulmont.cuba.gui.util.OperationResult;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.cuba.web.gui.components.WebAbstractResource;
 
 import javax.inject.Inject;
 import java.text.DateFormatSymbols;
@@ -83,6 +84,10 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     public void onBeforeShow(BeforeShowEvent event) {
         String role = "Researcher";
 
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setClosed(false);
+        }
+
         if (openPosition != null) {
             openPositionField.setValue(openPosition);
         }
@@ -144,20 +149,56 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        String QUERY = "select e from itpearls_RecrutiesTasks e " +
+                "where e.reacrutier = :reacrutier " +
+                "and e.openPosition = :openPosition " +
+                "and e.closed = false " +
+                "and not ((:startDate between e.startDate and e.endDate) " +
+                "or (:endDate between e.startDate and e.endDate) " +
+                "or (e.startDate > :startDate1 and e.endDate < :endDate1))";
+
+        List<RecrutiesTasks> recrutiesTasks = dataManager.load(RecrutiesTasks.class)
+                .query(QUERY)
+                .view("recrutiesTasks-view")
+                .parameter("reacrutier", recrutiesTasksFieldUser.getValue())
+                .parameter("openPosition", openPositionField.getValue())
+                .parameter("startDate", startDateField.getValue())
+                .parameter("startDate1", startDateField.getValue())
+                .parameter("endDate", endDateField.getValue())
+                .parameter("endDate1", endDateField.getValue())
+                .list();
 
         if (deleteTwiceEvent) {
-            setOpenPositionNewsAutomatedMessage(openPositionField.getValue(),
-                    recrutiesTasksFieldUser.getValue().getName()
-                            + " подписался на вакансию c "
-                            + sdf.format(startDateField.getValue())
-                            + " по "
-                            + sdf.format(endDateField.getValue()),
-                    "",
-                    new Date(),
-                    null,
-                    recrutiesTasksFieldUser.getValue(),
-                    true);
-            deleteTwiceEvent = false;
+            if (recrutiesTasks.size() != 0) {
+                setOpenPositionNewsAutomatedMessage(openPositionField.getValue(),
+                        recrutiesTasksFieldUser.getValue().getName()
+                                + " подписался на вакансию c "
+                                + sdf.format(startDateField.getValue())
+                                + " по "
+                                + sdf.format(endDateField.getValue()),
+                        "",
+                        new Date(),
+                        null,
+                        recrutiesTasksFieldUser.getValue(),
+                        true);
+                deleteTwiceEvent = false;
+            } else {
+                dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                        .withMessage("Выбранный Вами интервал подписики на вакансию \'"
+                                + openPositionField.getValue().getVacansyName()
+                                + "\' в интервале дат с "
+                                + sdf.format(startDateField.getValue())
+                                + "\' по "
+                                + sdf.format(endDateField.getValue())
+                                + " уже совпадает с одной из ваших подписок на эту вакансию. \n\nХотите продолжить ?")
+                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                                }),
+                                new DialogAction(DialogAction.Type.NO, Action.Status.NORMAL).withHandler(g -> {
+                                    event.preventCommit();
+                                }))
+                        .withCaption("ВНИМАНИЕ")
+                        .show();
+            }
         }
     }
 
@@ -186,6 +227,14 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
             dataManager.commit(commitContext);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        if( PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setClosed(
+                    getEditedEntity().getClosed() == null ? false : getEditedEntity().getClosed());
         }
     }
 

@@ -233,6 +233,7 @@
                         sortable="false"
                         caption="msg://msgQuestionQuery"
                         resizable="true"
+                        collapsible="true"
                         maximumWidth="65px"
                         minimumWidth="45px">
                     <iconRenderer/>

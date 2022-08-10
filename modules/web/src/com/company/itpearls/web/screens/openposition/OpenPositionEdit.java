@@ -922,6 +922,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (internalProjectCheckBox.getValue() == null)
             internalProjectCheckBox.setValue(false);
+
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setLastOpenDate(new Date());
+        }
     }
 
     private OpenPosition checkDublicateOpenPosition(BeforeCommitChangesEvent event) {

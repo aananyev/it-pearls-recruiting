@@ -727,7 +727,6 @@
                  caption="msg://msgResume"
                  margin="true,true,true,true"
                  icon="font-icon:FILE_TEXT"
-                 lazy="true"
                  expand="tabResumeVbox"
                  spacing="true">
                 <vbox id="tabResumeVbox"

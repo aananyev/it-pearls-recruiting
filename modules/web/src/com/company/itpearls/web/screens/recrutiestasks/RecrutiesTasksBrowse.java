@@ -14,6 +14,7 @@ import com.company.itpearls.entity.RecrutiesTasks;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -153,7 +154,6 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
 
         return label;
     }
-
 
     @Install(to = "recrutiesTasksesTable", subject = "iconProvider")
     private String recrutiesTasksesTableIconProvider(RecrutiesTasks recrutiesTasks) {
