@@ -134,6 +134,39 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     }
 
+    @Install(to = "subscribeRadioButtonGroup", subject = "optionDescriptionProvider")
+    private String subscribeRadioButtonGroupOptionDescriptionProvider(Object object) {
+        String retStr = "";
+
+        switch ((Integer) object) {
+            case 0:
+                retStr = "Я не подписан на эти вакании. Для работы с ними надо подписаться";
+                break;
+            case 1:
+                retStr = "Находится в работе у меня на определенный период времени";
+                break;
+            case 2:
+                retStr = "Все открытые вакансии";
+                break;
+            case 3:
+                retStr = "Не находится ни у кого в работе. Свободная вакансия";
+                break;
+            case 4:
+                retStr = "Новые вакансии окрытые за последние 3 дня";
+                break;
+            case 5:
+                retStr = "Новые вакансии окрытые за последнюю неделю. За 7 дней";
+                break;
+            case 6:
+                retStr = "Новые вакансии окрытые за последний месяц. За 30 дней";
+                break;
+            default:
+                break;
+        }
+
+        return retStr;
+    }
+
     private void initCheckBoxOnlyOpenedPosition() {
         Map<String, Integer> onlyOpenedPositionMap = new LinkedHashMap<>();
 
@@ -141,10 +174,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             onlyOpenedPositionMap.put("Все вакансии", 2);
         }
 
-        onlyOpenedPositionMap.put("Подписка", 1);
-        onlyOpenedPositionMap.put("Открытые вакансии", 0);
+        onlyOpenedPositionMap.put("В моей подписке", 1);
+        onlyOpenedPositionMap.put("Не в подписке", 0);
         onlyOpenedPositionMap.put("Свободные", 3);
         onlyOpenedPositionMap.put("Открытые за последние 3 дня", 4);
+        onlyOpenedPositionMap.put("Открытые за последнюю неделю", 5);
+        onlyOpenedPositionMap.put("Открытые за последний месяц", 6);
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
@@ -191,6 +226,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.removeParameter("freesubscriber");
                     openPositionsDl.setParameter("newOpenPosition", 3);
+                    break;
+                case 5:
+                    openPositionsDl.removeParameter("subscriber");
+                    openPositionsDl.removeParameter("notsubscriber");
+                    openPositionsDl.removeParameter("freesubscriber");
+                    openPositionsDl.setParameter("newOpenPosition", 7);
+                    break;
+                case 6:
+                    openPositionsDl.removeParameter("subscriber");
+                    openPositionsDl.removeParameter("notsubscriber");
+                    openPositionsDl.removeParameter("freesubscriber");
+                    openPositionsDl.setParameter("newOpenPosition", 30);
                     break;
                 default:
                     break;

@@ -2,11 +2,10 @@ package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.core.ParseCVService;
 import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.RichTextArea;
-import com.haulmont.cuba.gui.components.TabSheet;
-import com.haulmont.cuba.gui.components.VBoxLayout;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.vaadin.ui.JavaScript;
@@ -21,6 +20,7 @@ import java.awt.datatransfer.StringSelection;
 @UiController("itpearls_QuickViewOpenPositionDescription")
 @UiDescriptor("quick-view-open-position-description.xml")
 public class QuickViewOpenPositionDescription extends Screen {
+
     private String jobDescription = "";
     private String projectDescription = "";
     private String companyWorkConditions = "";
@@ -169,36 +169,55 @@ public class QuickViewOpenPositionDescription extends Screen {
                             .getValue()).replaceAll("\\<.*?\\>", "");
                     break;
                 case "jobDescriptionEngTab":
-                    strToCopy = textVacansyDescriptionEng + breakStr
-                            + parseCVService.br2nl(jobDescriptionEngRichTextArea
-                    .getValue()).replaceAll("\\<.*?\\>", "");
+                    if (jobDescriptionEngRichTextArea.getValue() != null) {
+                        strToCopy = textVacansyDescriptionEng + breakStr
+                                + parseCVService.br2nl(jobDescriptionEngRichTextArea
+                                .getValue()).replaceAll("\\<.*?\\>", "");
+                    }
+
                     break;
                 case "projectDescription":
-                    strToCopy = textProjectDescription + breakStr
-                            + parseCVService.br2nl(projectDescriptionRichTextArea
-                            .getValue()).replaceAll("\\<.*?\\>", "");
+                    if (projectDescriptionRichTextArea.getValue() != null) {
+                        strToCopy = textProjectDescription + breakStr
+                                + parseCVService.br2nl(projectDescriptionRichTextArea
+                                .getValue()).replaceAll("\\<.*?\\>", "");
+                    }
                     break;
                 case "workingConditionsTab":
-                    strToCopy = textCompanyWorkingConditions + breakStr
-                            + parseCVService.br2nl(companyWorkingConditionsRichTextArea
-                            .getValue()).replaceAll("\\<.*?\\>", "");
+                    if (companyWorkingConditionsRichTextArea != null) {
+                        strToCopy = textCompanyWorkingConditions + breakStr
+                                + parseCVService.br2nl(companyWorkingConditionsRichTextArea
+                                .getValue()).replaceAll("\\<.*?\\>", "");
+                    }
                     break;
                 case "companyDescriptionTab":
-                    strToCopy = textCompanyDescription + breakStr
-                            + parseCVService.br2nl(companyDescriptionRichTextArea
-                            .getValue()).replaceAll("\\<.*?\\>", "");
+                    if (companyDescriptionRichTextArea.getValue() != null) {
+                        strToCopy = textCompanyDescription + breakStr
+                                + parseCVService.br2nl(companyDescriptionRichTextArea
+                                .getValue()).replaceAll("\\<.*?\\>", "");
+                    }
+
+                    break;
                 default:
                     break;
             }
         }
 
-        StringSelection selec = new StringSelection(strToCopy.replaceAll("&nbsp", ""));
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        clipboard.setContents(selec, selec);
+        if (strToCopy != null) {
 
-        notifications.create(Notifications.NotificationType.WARNING)
-                .withCaption("Информация")
-                .withDescription("Скопировано в буфер обмена")
-                .show();
+            StringSelection selec = new StringSelection(strToCopy.replaceAll("&nbsp", ""));
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(selec, selec);
+
+            notifications.create(Notifications.NotificationType.SYSTEM)
+                    .withCaption("Информация")
+                    .withDescription("Скопировано в буфер обмена")
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.SYSTEM)
+                    .withCaption("Информация")
+                    .withDescription("Нечего копировать в буфер обмена")
+                    .show();
+        }
     }
 }

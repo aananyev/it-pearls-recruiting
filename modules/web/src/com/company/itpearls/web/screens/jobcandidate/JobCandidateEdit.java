@@ -348,7 +348,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") ")
                     + (getEditedEntity().getUpdatedBy() != null ?
                     ("/ Изменено: " + getEditedEntity().getUpdatedBy() + " ("
-                            + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ") : "");
+                            + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") " ): "");
 
             createdUpdatedLabel.setValue(retStr);
         }

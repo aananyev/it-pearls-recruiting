@@ -116,6 +116,15 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
             endDateField.setValue(legacyDate);
         }
+
+        setClosedIsNewEntity();
+    }
+
+    private void setClosedIsNewEntity() {
+        if( PersistenceHelper.isNew(getEditedEntity())) {
+            getEditedEntity().setClosed(
+                    getEditedEntity().getClosed() == null ? false : getEditedEntity().getClosed());
+        }
     }
 
     private boolean isAllreadySubscribe() {
@@ -229,15 +238,6 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
             e.printStackTrace();
         }
     }
-
-    @Subscribe
-    public void onInit(InitEvent event) {
-        if( PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setClosed(
-                    getEditedEntity().getClosed() == null ? false : getEditedEntity().getClosed());
-        }
-    }
-
 
     @Subscribe("windowCommitAndCloseButton")
     public void onWindowCommitAndCloseButtonClick(Button.ClickEvent event) {

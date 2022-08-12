@@ -108,12 +108,6 @@
             </property>
             <property name="recrutier" view="_minimal"/>
         </property>
-        <property name="specialisation" view="_local"/>
-        <property name="jobHistory" view="_local">
-            <property name="candidate" view="_local"/>
-            <property name="currentPosition" view="_local"/>
-            <property name="currentCompany" view="_local"/>
-        </property>
         <property name="socialNetwork" view="_local">
             <property name="socialNetworkURL" view="_local"/>
         </property>
