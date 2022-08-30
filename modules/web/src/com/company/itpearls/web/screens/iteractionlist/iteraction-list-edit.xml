@@ -24,6 +24,7 @@
                             <property name="companyName" view="_minimal"/>
                         </property>
                     </property>
+                    <property name="cities" view="_minimal"/>
                 </property>
                 <property name="recrutier"
                           view="_minimal"/>

@@ -54,6 +54,15 @@ public class QuickViewOpenPositionDescription extends Screen {
     @Named("jobDescriptionViewTab.companyDescriptionTab")
     private VBoxLayout companyDescriptionTab;
 
+    @Subscribe
+    public void onInit(InitEvent event) {
+        jobDescriptionViewTab.addSelectedTabChangeListener(e -> {
+            setDisableCopyToClipboardButton();
+        });
+    }
+
+
+
     public void setCompanyDescription(String companyDescription) {
         this.companyDescription = companyDescription;
     }
@@ -134,6 +143,36 @@ public class QuickViewOpenPositionDescription extends Screen {
         } else {
             companyDescriptionTab.setVisible(false);
         }
+    }
+
+    private Boolean setDisableCopyToClipboardButton() {
+        Boolean retBool = false;
+
+        if (copyAllToClipboardCheckBox.getValue() != true) {
+                switch (jobDescriptionViewTab.getSelectedTab().getName()) {
+                    case "jobDescriptionTab":
+                        retBool = jobDesxriptionRichTextArea.getValue() != null ? true : false;
+                        break;
+                    case "jobDescriptionEngTab":
+                        retBool = jobDescriptionEngRichTextArea.getValue() != null ? true : false;
+                        break;
+                    case "projectDescription":
+                        retBool = projectDescriptionRichTextArea.getValue() != null ? true : false;
+                        break;
+                    case "workingConditionsTab":
+                        retBool = companyWorkingConditionsRichTextArea.getValue() != null ? true : false;
+                        break;
+                    case "companyDescriptionTab":
+                        retBool = companyDescriptionRichTextArea.getValue() != null ? true : false;
+                        break;
+                    default:
+                        break;
+                }
+        } else {
+            retBool = true;
+        }
+
+        return retBool;
     }
 
     public void copyToClipboard() {

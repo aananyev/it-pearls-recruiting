@@ -180,11 +180,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         onlyOpenedPositionMap.put("Открытые за последние 3 дня", 4);
         onlyOpenedPositionMap.put("Открытые за последнюю неделю", 5);
         onlyOpenedPositionMap.put("Открытые за последний месяц", 6);
+        onlyOpenedPositionMap.put("На паузе", 7);
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
         if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP)) {
-            subscribeRadioButtonGroup.setValue(0);
+            subscribeRadioButtonGroup.setValue(3);
         } else {
             subscribeRadioButtonGroup.setValue(1);
         }
@@ -202,42 +203,64 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.removeParameter("freesubscriber");
                     openPositionsDl.removeParameter("newOpenPosition");
+                    openPositionsDl.removeParameter("priority");
+                    checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 0:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.setParameter("notsubscriber", userSession.getUser());
                     openPositionsDl.removeParameter("freesubscriber");
                     openPositionsDl.removeParameter("newOpenPosition");
+                    openPositionsDl.removeParameter("priority");
+                    checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 2:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.removeParameter("freesubscriber");
                     openPositionsDl.removeParameter("newOpenPosition");
+                    openPositionsDl.removeParameter("priority");
+                    checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 3:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.setParameter("freesubscriber", false);
                     openPositionsDl.removeParameter("newOpenPosition");
+                    openPositionsDl.removeParameter("priority");
+                    checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 4:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.removeParameter("freesubscriber");
                     openPositionsDl.setParameter("newOpenPosition", 3);
+                    openPositionsDl.removeParameter("priority");
+                    checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 5:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.removeParameter("freesubscriber");
                     openPositionsDl.setParameter("newOpenPosition", 7);
+                    openPositionsDl.removeParameter("priority");
+                    checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 6:
                     openPositionsDl.removeParameter("subscriber");
                     openPositionsDl.removeParameter("notsubscriber");
                     openPositionsDl.removeParameter("freesubscriber");
                     openPositionsDl.setParameter("newOpenPosition", 30);
+                    openPositionsDl.removeParameter("priority");
+                    checkBoxOnlyNotPaused.setValue(true);
+                    break;
+                case 7:
+                    openPositionsDl.removeParameter("subscriber");
+                    openPositionsDl.removeParameter("notsubscriber");
+                    openPositionsDl.removeParameter("freesubscriber");
+                    openPositionsDl.removeParameter("newOpenPosition");
+                    openPositionsDl.setParameter("priority", 0);
+                    checkBoxOnlyNotPaused.setValue(false);
                     break;
                 default:
                     break;
@@ -377,7 +400,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             returnIcon = "MINUS_CIRCLE";
 
         return CubaIcon.valueOf(returnIcon);
-
     }
 
     @Install(to = "openPositionsTable.testExserice", subject = "descriptionProvider")

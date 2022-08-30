@@ -15,6 +15,9 @@
                     <condition>
                         <and>
                             <c:jpql>
+                                <c:where>e.priority = :priority</c:where>
+                            </c:jpql>
+                            <c:jpql>
                                 <c:where>@between(e.lastOpenDate, now - :newOpenPosition, now + 1, day)</c:where>
                             </c:jpql>
                             <c:jpql>

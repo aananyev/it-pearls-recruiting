@@ -28,7 +28,9 @@
                         <property name="projectName"
                                   view="_minimal">
                             <property name="openPosition"
-                                      view="_minimal"/>
+                                      view="_minimal">
+                                <property name="comment"/>
+                            </property>
                             <property name="projectOwner"
                                       view="_minimal"/>
                             <property name="projectDepartment"
@@ -56,7 +58,9 @@
                     <property name="resumePosition"
                               view="_minimal"/>
                     <property name="toVacancy"
-                              view="_minimal"/>
+                              view="_minimal">
+                        <property name="comment"/>
+                    </property>
                 </property>
             </view>
             <loader id="jobCandidateDl"
