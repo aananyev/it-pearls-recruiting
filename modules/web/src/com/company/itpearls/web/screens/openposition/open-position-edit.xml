@@ -219,6 +219,7 @@
                                               width="50%"
                                               property="internalProject"
                                               caption="msg://msgExclusiveVacancy"
+                                              visible="false"
                                               align="BOTTOM_LEFT"/>
                                 </hbox>
                                 <hbox id="spaceBox"/>

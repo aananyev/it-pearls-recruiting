@@ -7,7 +7,9 @@
     <data readOnly="true">
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList">
-            <view extends="iteractionList-view"/>
+            <view extends="iteractionList-view">
+                <property name="rating"/>
+            </view>
             <loader id="iteractionListsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>

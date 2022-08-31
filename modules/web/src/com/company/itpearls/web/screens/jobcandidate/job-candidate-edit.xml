@@ -45,6 +45,9 @@
                     </property>
                     <property name="recrutier"
                               view="_minimal"/>
+                    <property name="addString"/>
+                    <property name="numberIteraction"/>
+                    <property name="dateIteraction"/>
                 </property>
                 <property name="socialNetwork"
                           view="_minimal"/>

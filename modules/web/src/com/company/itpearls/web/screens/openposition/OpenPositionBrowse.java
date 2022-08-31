@@ -174,18 +174,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             onlyOpenedPositionMap.put("Все вакансии", 2);
         }
 
-        onlyOpenedPositionMap.put("В моей подписке", 1);
+        onlyOpenedPositionMap.put("В подписке", 1);
         onlyOpenedPositionMap.put("Не в подписке", 0);
         onlyOpenedPositionMap.put("Свободные", 3);
-        onlyOpenedPositionMap.put("Открытые за последние 3 дня", 4);
-        onlyOpenedPositionMap.put("Открытые за последнюю неделю", 5);
-        onlyOpenedPositionMap.put("Открытые за последний месяц", 6);
+        onlyOpenedPositionMap.put("Открытые за 3 дня", 4);
+        onlyOpenedPositionMap.put("Открытые за неделю", 5);
+        onlyOpenedPositionMap.put("Открытые за месяц", 6);
         onlyOpenedPositionMap.put("На паузе", 7);
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
         if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP)) {
-            subscribeRadioButtonGroup.setValue(3);
+            subscribeRadioButtonGroup.setValue(2);
         } else {
             subscribeRadioButtonGroup.setValue(1);
         }

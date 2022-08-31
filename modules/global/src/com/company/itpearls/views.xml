@@ -119,6 +119,9 @@
             <property name="positionList" view="_minimal"/>
             <property name="jobCandidate" view="_minimal"/>
         </property>
+        <property name="fullName"/>
+        <property name="birdhDate"/>
+        <property name="blockCandidate"/>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="jobCandidate" view="_local">
@@ -237,21 +240,6 @@
         </property>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_minimal" systemProperties="true">
-        <property name="candidate" view="_minimal">
-            <property name="fullName"/>
-            <property name="candidateCv" view="_local">
-                <property name="originalFileCV" view="_minimal"/>
-                <property name="toVacancy" view="_minimal"/>
-            </property>
-            <property name="socialNetwork"/>
-            <property name="cityOfResidence"/>
-            <property name="email"/>
-            <property name="telegramName"/>
-            <property name="telegramGroup"/>
-            <property name="skypeName"/>
-            <property name="positionList"/>
-            <property name="fileImageFace" view="_local"/>
-        </property>
         <property name="vacancy" view="_local">
             <property name="positionType" view="_local">
             </property>
@@ -285,11 +273,24 @@
             <property name="signClientInterview"/>
             <property name="signSendToClient"/>
             <property name="outstaffingSign"/>
+            <property name="addField"/>
         </property>
         <property name="recrutier" view="_local">
             <property name="group" view="_minimal"/>
         </property>
-        <property name="laborAgreement" view="_minimal"/>
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="addDate"/>
+        <property name="addType"/>
+        <property name="addString"/>
+        <property name="laborAgreement" view="_minimal">
+            <property name="jobCandidate" view="_minimal"/>
+            <property name="company" view="_minimal"/>
+            <property name="openPositions" view="_minimal"/>
+        </property>
+        <property name="addInteger"/>
+        <property name="comment"/>
+        <property name="rating"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">
