@@ -211,6 +211,7 @@
                                     <checkBox id="openClosePositionCheckBox"
                                               dataContainer="openPositionDc"
                                               property="openClose"
+                                              visible="false"
                                               caption="mainMsg://msgPositionClose"
                                               width="50%"
                                               align="BOTTOM_LEFT"/>

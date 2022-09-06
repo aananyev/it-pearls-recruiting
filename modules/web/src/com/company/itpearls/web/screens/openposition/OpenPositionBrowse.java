@@ -220,7 +220,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsDl.removeParameter("freesubscriber");
                     openPositionsDl.removeParameter("newOpenPosition");
                     openPositionsDl.removeParameter("priority");
-                    checkBoxOnlyNotPaused.setValue(true);
+                    checkBoxOnlyNotPaused.setValue(false);
                     break;
                 case 3:
                     openPositionsDl.removeParameter("subscriber");
