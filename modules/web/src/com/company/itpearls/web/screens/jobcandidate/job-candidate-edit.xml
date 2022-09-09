@@ -27,9 +27,11 @@
                               view="_minimal">
                         <property name="projectName"
                                   view="_minimal">
+                            <property name="projectName"/>
                             <property name="openPosition"
                                       view="_minimal">
                                 <property name="comment"/>
+                                <property name="projectName"/>
                             </property>
                             <property name="projectOwner"
                                       view="_minimal"/>

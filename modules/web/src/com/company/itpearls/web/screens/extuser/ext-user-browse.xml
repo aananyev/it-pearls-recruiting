@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
         xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
-        caption="msg://extUserBrowse.caption"
-        messagesPack="com.company.itpearls.web.screens.extuser"
         extends="/com/haulmont/cuba/gui/app/security/user/browse/user-browse.xml">
     <layout>
         <groupTable id="usersTable">
             <columns>
-                <column ext:index="2" id="pop3Server"/>
-                <column ext:index="2" id="pop3Port"/>
+                <column ext:index="2" id="smtpServer"/>
             </columns>
         </groupTable>
     </layout>

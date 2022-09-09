@@ -133,6 +133,7 @@
                           align="MIDDLE_LEFT"
                           orientation="horizontal"/>
         <treeDataGrid id="openPositionsTable"
+                      contextHelpTextHtmlEnabled="true"
                       descriptionAsHtml="true"
                       captionAsHtml="true"
                       width="100%"

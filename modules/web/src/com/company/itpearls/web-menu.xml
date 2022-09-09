@@ -65,7 +65,6 @@
         <item screen="itpearls_SomeFiles.browse" description="mainMsg://default.description" icon="COPY"/>
         <item screen="itpearls_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="FACEBOOK_OFFICIAL"/>
-        <item screen="itpearls_ExtUserBrowse" caption="mainMsg://msgExtUserBrowse" icon="USER"/>
     </menu>
     <item screen="itpearls_CheckCandidate.browse" insertAfter="application-hadbook" openType="DIALOG"/>
 </menu-config>

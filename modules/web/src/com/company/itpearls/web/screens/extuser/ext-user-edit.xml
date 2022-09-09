@@ -1,0 +1,157 @@
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        datasource="userDs"
+        class="com.haulmont.cuba.gui.app.security.user.edit.UserEditor"
+        messagesPack="com.haulmont.cuba.gui.app.security.user.edit"
+        focusComponent="fieldGroupLeft">
+
+    <companions>
+        <web class="com.haulmont.cuba.web.app.ui.security.user.UserEditorCompanion"/>
+    </companions>
+
+    <dsContext>
+        <datasource id="userDs" class="com.haulmont.cuba.security.entity.User" view="user.edit">
+            <groupDatasource id="rolesDs" property="userRoles"/>
+            <collectionDatasource id="substitutionsDs" property="substitutions"/>
+        </datasource>
+    </dsContext>
+
+    <dialogMode height="theme://cuba.gui.dialogSize.height.xlarge"
+                width="theme://cuba.gui.dialogSize.width.xlarge"
+                resizable="true"/>
+    <layout expand="userSettingTabSheet" spacing="true">
+        <tabSheet id="userSettingTabSheet">
+            <tab id="userSettingTab" expand="split" caption="User Settings">
+                <groupBox id="propertiesBox">
+                    <grid id="propertiesGrid" width="100%" spacing="true">
+                        <columns>
+                            <column id="fieldGroupLeftColumn" flex="1"/>
+                            <column id="fieldGroupRightColumn" flex="3"/>
+                        </columns>
+                        <rows>
+                            <row id="propertiesRow">
+                                <fieldGroup id="fieldGroupLeft" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="login" required="true" requiredMessage="msg://loginMsg"/>
+                                        <field id="passw" custom="true" caption="msg://password"/>
+                                        <field id="confirmPassw" custom="true" caption="msg://confirmPassword"/>
+                                        <field id="firstName"/>
+                                        <field id="middleName"/>
+                                        <field id="lastName"/>
+                                        <field id="name"/>
+                                        <field id="email">
+                                            <validator
+                                                    class="com.haulmont.cuba.gui.components.validators.EmailValidator"
+                                                    message="msg://email.alert"/>
+                                        </field>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="fieldGroupRight" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="group" custom="true"/>
+                                        <field id="position"/>
+                                        <field id="language" custom="true"/>
+                                        <field id="timeZone" custom="true"/>
+                                        <field id="ipMask"/>
+                                        <field id="active"/>
+                                    </column>
+                                </fieldGroup>
+                            </row>
+                        </rows>
+                    </grid>
+                </groupBox>
+
+                <split id="split" orientation="horizontal" pos="50" width="100%">
+                    <vbox id="rolesPanel" expand="rolesTable" spacing="true" margin="false,true,false,false"
+                          height="100%" width="100%">
+                        <label value="msg://roles" stylename="h2"/>
+                        <buttonsPanel>
+                            <button id="rolesTableAddBtn"/>
+                            <button id="rolesTableEditBtn" action="rolesTable.edit"/>
+                            <button id="rolesTableRemoveBtn" action="rolesTable.remove"/>
+                        </buttonsPanel>
+                        <groupTable id="rolesTable" editable="false" multiselect="true" width="100%"
+                                    fixedGrouping="true">
+                            <actions>
+                                <action id="edit"/>
+                                <action id="remove"/>
+                            </actions>
+                            <columns>
+                                <column id="role.name" caption="msg://roleName"/>
+                                <column id="role.locName" caption="msg://localizedRoleName"/>
+                                <column id="role.locSecurityScope"/>
+                            </columns>
+                            <rows datasource="rolesDs"/>
+                        </groupTable>
+                    </vbox>
+
+                    <vbox id="substPanel" expand="substTable" spacing="true" margin="false,false,false,true"
+                          height="100%" width="100%">
+                        <label value="msg://substUsers" stylename="h2"/>
+                        <buttonsPanel>
+                            <button id="substTableAddBtn" action="substTable.add"/>
+                            <button id="substTableEditBtn" action="substTable.edit"/>
+                            <button id="substTableRemoveBtn" action="substTable.remove"/>
+                        </buttonsPanel>
+                        <table id="substTable" editable="false" multiselect="true" width="100%">
+                            <actions>
+                                <action id="add"/>
+                                <action id="edit"/>
+                                <action id="remove"/>
+                            </actions>
+                            <columns>
+                                <column id="substitutedUser.login" caption="msg://login"/>
+                                <column id="substitutedUser.name" caption="msg://name"/>
+                                <column id="startDate" caption="msg://startDate">
+                                    <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
+                                               type="DATE"/>
+                                </column>
+                                <column id="endDate" caption="msg://endDate">
+                                    <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
+                                               type="DATE"/>
+                                </column>
+                            </columns>
+                            <rows datasource="substitutionsDs"/>
+                        </table>
+                    </vbox>
+                </split>
+            </tab>
+            <tab id="emailSettingTab" caption="Email Settings">
+                <groupBox id="propertiesEmailBox">
+                    <grid id="propertiesEmailGrid" width="100%" spacing="true">
+                        <columns>
+                            <column id="fieldGroupLeftColumn" flex="1"/>
+                            <column id="fieldGroupRightColumn" flex="3"/>
+                        </columns>
+                        <rows>
+                            <row id="propertiesEmailRow">
+                                <fieldGroup id="emailFieldGroupLeft" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="smtpServer" caption="SMTP server"/>
+                                        <field id="pop3Server" caption="POP3 server"/>
+                                        <field id="imapServer" caption="IMAP server"/>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="emailFieldGroupRight" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="smtpPort" caption="SMTP port">
+                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </field>
+                                        <field id="pop3Port" caption="POP3 port">
+                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </field>
+                                        <field id="imapPort" caption="IMAP port">
+                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </field>
+                                    </column>
+                                </fieldGroup>
+                            </row>
+                        </rows>
+                    </grid>
+                </groupBox>
+            </tab>
+        </tabSheet>
+
+        <fragment id="windowActions" align="MIDDLE_RIGHT"
+                  screen="editWindowActions"/>
+    </layout>
+</window>

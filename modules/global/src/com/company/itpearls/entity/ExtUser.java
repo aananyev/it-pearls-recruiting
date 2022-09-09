@@ -5,7 +5,6 @@ import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Entity(name = "itpearls_ExtUser")
 @Extends(User.class)
