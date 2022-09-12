@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://emailerBrowse.caption"
+        focusComponent="emailersTable"
+        messagesPack="com.company.itpearls.web.screens.emailer">
+    <data readOnly="true">
+        <collection id="emailersDc"
+                    class="com.company.itpearls.entity.Emailer">
+            <view extends="_local">
+                <property name="fromEmail" view="_minimal">
+                    <property name="smtpServer"/>
+                    <property name="smtpPort"/>
+                    <property name="pop3Server"/>
+                    <property name="pop3Port"/>
+                    <property name="imapServer"/>
+                    <property name="imapPort"/>
+                    <property name="email"/>
+                    <property name="language"/>
+                    <property name="timeZone"/>
+                    <property name="active"/>
+                </property>
+            </view>
+            <loader id="emailersDl">
+                <query>
+                    <![CDATA[select e from itpearls_Emailer e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="emailersTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="emailersTable"
+                dataLoader="emailersDl">
+            <properties include=".*"/>
+        </filter>
+        <dataGrid id="emailersTable"
+                  width="100%"
+                  dataContainer="emailersDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+            </actions>
+            <columns>
+                <column property="fromEmail" id="fromEmail"/>
+                <column property="toEmail" id="toEmail"/>
+                <column property="draftEmail" id="draftEmail"/>
+                <column property="subjectEmail" id="subjectEmail"/>
+                <column property="bodyEmail" id="bodyEmail"/>
+                <column property="dateCreateEmail" id="dateCreateEmail"/>
+                <column property="dateSendEmail" id="dateSendEmail"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="emailersTable.create"/>
+                <button id="editBtn" action="emailersTable.edit"/>
+            </buttonsPanel>
+        </dataGrid>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

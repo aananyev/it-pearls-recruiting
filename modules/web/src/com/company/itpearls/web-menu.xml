@@ -25,6 +25,7 @@
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
         <item screen="itpearls_OpenPositionNews.browse" icon="NEWSPAPER_O"
               caption="mainMsg://menu_config.itpearls_OpenPositionNews.browse"/>
+        <item screen="itpearls_Emailer.browse" caption="mainMsg://menu_config.itpearls_Emailer.browse"/>
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
         <item screen="itpearls_Project.browse" icon="ARCHIVE"/>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://emailerEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.emailer">
+    <data>
+        <instance id="emailerDc"
+                  class="com.company.itpearls.entity.Emailer">
+            <view extends="_local">
+                <property name="fromEmail" view="_minimal">
+                    <property name="smtpServer"/>
+                    <property name="smtpPort"/>
+                    <property name="pop3Server"/>
+                    <property name="pop3Port"/>
+                    <property name="imapServer"/>
+                    <property name="imapPort"/>
+                    <property name="email"/>
+                    <property name="language"/>
+                    <property name="timeZone"/>
+                    <property name="active"/>
+                </property>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="jobCandidateDc"
+                    class="com.company.itpearls.entity.JobCandidate"
+                    view="_minimal"/>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="bodyEmailField" spacing="true">
+        <checkBox id="draftEmailField"
+                  caption="msg://msgDraftEmail"
+                  dataContainer="emailerDc"
+                  property="draftEmail"/>
+        <pickerField id="fromEmailField"
+                     dataContainer="emailerDc"
+                     width="100%"
+                     caption="msg://msgFromEmail"
+                     editable="false"
+                     property="fromEmail"/>
+        <lookupPickerField id="toEmailField"
+                           caption="msg://msgToEmail"
+                           dataContainer="emailerDc"
+                           width="100%"
+                           optionsContainer="jobCandidateDc"
+                           property="toEmail">
+            <actions>
+                <action id="lookup" type="picker_lookup"/>
+                <action id="clear" type="picker_clear"/>
+            </actions>
+        </lookupPickerField>
+        <textField id="subjectEmailField"
+                   caption="msg://msgSubject"
+                   width="100%"
+                   dataContainer="emailerDc"
+                   property="subjectEmail"/>
+        <textArea id="bodyEmailField"
+                  dataContainer="emailerDc"
+                  caption="msg://msgBodyMessage"
+                  width="100%"
+                  property="bodyEmail"/>
+        <hbox width="AUTO">
+            <dateField id="dateCreateEmailField"
+                       dataContainer="emailerDc"
+                       editable="false"
+                       width="AUTO"
+                       caption="msg://msgCreateDate"
+                       property="dateCreateEmail"/>
+            <dateField id="dateSendEmailField"
+                       width="AUTO"
+                       editable="false"
+                       caption="msg://msgSendDate"
+                       dataContainer="emailerDc"
+                       property="dateSendEmail"/>
+        </hbox>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

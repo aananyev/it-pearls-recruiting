@@ -103,5 +103,8 @@
         <entity class="com.company.itpearls.entity.Interview">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.Emailer">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>
