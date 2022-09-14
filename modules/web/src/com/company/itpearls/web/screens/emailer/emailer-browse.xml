@@ -20,6 +20,7 @@
                     <property name="timeZone"/>
                     <property name="active"/>
                 </property>
+                <property name="toEmail" view="_minimal"/>
             </view>
             <loader id="emailersDl">
                 <query>
@@ -45,13 +46,31 @@
                 <action id="edit" type="edit"/>
             </actions>
             <columns>
-                <column property="fromEmail" id="fromEmail"/>
-                <column property="toEmail" id="toEmail"/>
-                <column property="draftEmail" id="draftEmail"/>
-                <column property="subjectEmail" id="subjectEmail"/>
-                <column property="bodyEmail" id="bodyEmail"/>
-                <column property="dateCreateEmail" id="dateCreateEmail"/>
-                <column property="dateSendEmail" id="dateSendEmail"/>
+                <column property="draftEmail"
+                        id="draftEmail"
+                        width="85px"/>
+                <column property="fromEmail"
+                        id="fromEmail"
+                        width="250px"
+                        minimumWidth="170px"
+                        maximumWidth="250px"/>
+                <column property="toEmail"
+                        id="toEmail"
+                        width="250px"
+                        minimumWidth="170px"
+                        maximumWidth="250px"/>
+                <column property="subjectEmail"
+                        id="subjectEmail"
+                        width="495px"
+                        minimumWidth="250px"/>
+                <column property="dateCreateEmail"
+                        id="dateCreateEmail"
+                        width="140px"
+                        maximumWidth="140px"/>
+                <column property="dateSendEmail"
+                        id="dateSendEmail"
+                        width="140px"
+                        maximumWidth="140px"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

@@ -46,9 +46,16 @@ public class Emailer extends StandardEntity {
     private Date dateCreateEmail;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @NotNull
-    @Column(name = "DATE_SEND_EMAIL", nullable = false)
+    @Column(name = "DATE_SEND_EMAIL")
     private Date dateSendEmail;
+
+    public Date getDateSendEmail() {
+        return dateSendEmail;
+    }
+
+    public void setDateSendEmail(Date dateSendEmail) {
+        this.dateSendEmail = dateSendEmail;
+    }
 
     public Boolean getBodyHtml() {
         return bodyHtml;
@@ -72,14 +79,6 @@ public class Emailer extends StandardEntity {
 
     public ExtUser getFromEmail() {
         return fromEmail;
-    }
-
-    public Date getDateSendEmail() {
-        return dateSendEmail;
-    }
-
-    public void setDateSendEmail(Date dateSendEmail) {
-        this.dateSendEmail = dateSendEmail;
     }
 
     public Date getDateCreateEmail() {

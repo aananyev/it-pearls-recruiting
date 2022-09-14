@@ -17,17 +17,83 @@ public class ExtUser extends User {
     @Column(name = "SMTP_PORT")
     private Integer smtpPort;
 
+    @Column(name = "SMTP_PASSWORD_REQUIRED")
+    private Boolean smtpPasswordRequired;
+
+    @Column(name = "SMTP_PASSWORD", length = 128)
+    private String smtpPassword;
+
     @Column(name = "POP3_SERVER", length = 128)
     private String pop3Server;
 
     @Column(name = "POP3_PORT")
     private Integer pop3Port;
 
+    @Column(name = "POP3_PASSWORD_REQUIRED")
+    private Boolean pop3PasswordRequired;
+
+    @Column(name = "POP3PASSWORD", length = 128)
+    private String pop3Password;
+
     @Column(name = "IMAP_SERVER", length = 128)
     private String imapServer;
 
     @Column(name = "IMAP_PORT")
     private Integer imapPort;
+
+    @Column(name = "IMAP_PASSWORD_REQUIRED")
+    private Boolean imapPasswordRequired;
+
+    @Column(name = "IMAP_PASSWORD", length = 128)
+    private String imapPassword;
+
+    public Boolean getImapPasswordRequired() {
+        return imapPasswordRequired;
+    }
+
+    public void setImapPasswordRequired(Boolean imapPasswordRequired) {
+        this.imapPasswordRequired = imapPasswordRequired;
+    }
+
+    public Boolean getPop3PasswordRequired() {
+        return pop3PasswordRequired;
+    }
+
+    public void setPop3PasswordRequired(Boolean pop3PasswordRequired) {
+        this.pop3PasswordRequired = pop3PasswordRequired;
+    }
+
+    public Boolean getSmtpPasswordRequired() {
+        return smtpPasswordRequired;
+    }
+
+    public void setSmtpPasswordRequired(Boolean smtpPasswordRequired) {
+        this.smtpPasswordRequired = smtpPasswordRequired;
+    }
+
+    public String getImapPassword() {
+        return imapPassword;
+    }
+
+    public void setImapPassword(String imapPassword) {
+        this.imapPassword = imapPassword;
+    }
+
+    public String getPop3Password() {
+        return pop3Password;
+    }
+
+    public void setPop3Password(String pop3Password) {
+        this.pop3Password = pop3Password;
+    }
+
+    public String getSmtpPassword() {
+        return smtpPassword;
+    }
+
+    public void setSmtpPassword(String smtpPassword) {
+        this.smtpPassword = smtpPassword;
+    }
 
     public void setPop3Port(Integer pop3Port) {
         this.pop3Port = pop3Port;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://emailerEdit.caption"
-        focusComponent="form"
+        focusComponent="toEmailField"
         messagesPack="com.company.itpearls.web.screens.emailer">
     <data>
         <instance id="emailerDc"
@@ -19,12 +19,28 @@
                     <property name="timeZone"/>
                     <property name="active"/>
                 </property>
+                <property name="toEmail" view="_minimal">
+                    <property name="email"/>
+                </property>
             </view>
             <loader/>
         </instance>
         <collection id="jobCandidateDc"
-                    class="com.company.itpearls.entity.JobCandidate"
-                    view="_minimal"/>
+                    class="com.company.itpearls.entity.JobCandidate">
+            <view extends="_minimal">
+                <property name="fullName"/>
+                <property name="personPosition" view="_minimal">
+                    <property name="positionEnName"/>
+                    <property name="positionRuName"/>
+                </property>
+                <property name="email"/>
+            </view>
+            <loader id="jobCandidateDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -33,50 +49,74 @@
                   caption="msg://msgDraftEmail"
                   dataContainer="emailerDc"
                   property="draftEmail"/>
-        <pickerField id="fromEmailField"
-                     dataContainer="emailerDc"
-                     width="100%"
-                     caption="msg://msgFromEmail"
-                     editable="false"
-                     property="fromEmail"/>
-        <lookupPickerField id="toEmailField"
-                           caption="msg://msgToEmail"
-                           dataContainer="emailerDc"
-                           width="100%"
-                           optionsContainer="jobCandidateDc"
-                           property="toEmail">
-            <actions>
-                <action id="lookup" type="picker_lookup"/>
-                <action id="clear" type="picker_clear"/>
-            </actions>
-        </lookupPickerField>
+        <groupBox width="100%"
+                  caption="msg://msgFromTo"
+                  showAsPanel="true"
+                  collapsable="true">
+            <hbox spacing="true"
+                  width="100%"
+                  expand="fromEmailHBox">
+                <hbox id="fromEmailHBox"
+                      width="100%">
+                    <pickerField id="fromEmailField"
+                                 dataContainer="emailerDc"
+                                 width="100%"
+                                 caption="msg://msgFromEmail"
+                                 editable="false"
+                                 property="fromEmail"/>
+                </hbox>
+                <hbox width="AUTO"
+                      spacing="true">
+                    <dateField id="dateCreateEmailField"
+                               dataContainer="emailerDc"
+                               editable="false"
+                               width="AUTO"
+                               caption="msg://msgCreateDate"
+                               property="dateCreateEmail"/>
+                    <dateField id="dateSendEmailField"
+                               width="AUTO"
+                               editable="false"
+                               caption="msg://msgSendDate"
+                               dataContainer="emailerDc"
+                               property="dateSendEmail"/>
+                </hbox>
+            </hbox>
+            <lookupPickerField id="toEmailField"
+                               caption="msg://msgToEmail"
+                               dataContainer="emailerDc"
+                               width="100%"
+                               optionsContainer="jobCandidateDc"
+                               property="toEmail">
+                <actions>
+                    <action id="lookup" type="picker_lookup"/>
+                    <action id="clear" type="picker_clear"/>
+                </actions>
+            </lookupPickerField>
+        </groupBox>
         <textField id="subjectEmailField"
                    caption="msg://msgSubject"
                    width="100%"
                    dataContainer="emailerDc"
                    property="subjectEmail"/>
-        <textArea id="bodyEmailField"
+        <richTextArea id="bodyEmailField"
                   dataContainer="emailerDc"
                   caption="msg://msgBodyMessage"
                   width="100%"
                   property="bodyEmail"/>
-        <hbox width="AUTO">
-            <dateField id="dateCreateEmailField"
-                       dataContainer="emailerDc"
-                       editable="false"
-                       width="AUTO"
-                       caption="msg://msgCreateDate"
-                       property="dateCreateEmail"/>
-            <dateField id="dateSendEmailField"
-                       width="AUTO"
-                       editable="false"
-                       caption="msg://msgSendDate"
-                       dataContainer="emailerDc"
-                       property="dateSendEmail"/>
-        </hbox>
+
         <hbox id="editActions" spacing="true">
-            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-            <button id="closeBtn" action="windowClose"/>
+            <button id="sendAndCloseButton"
+                    caption="msg://msgSendAndClose"
+                    invoke="sendAndCloseButton"
+                    align="MIDDLE_LEFT"
+                    width="AUTO"
+                    icon="font-icon:SEND"/>
+            <button id="commitAndCloseBtn"
+                    align="MIDDLE_RIGHT"
+                    action="windowCommitAndClose"/>
+            <button id="closeBtn"
+                    align="MIDDLE_RIGHT"
+                    action="windowClose"/>
         </hbox>
     </layout>
 </window>

@@ -85,6 +85,7 @@ configure(globalModule) {
         compile 'org.webjars.npm:domelementtype:2.3.0'
         compile 'com.ibm.icu:icu4j:71.1'
         compile 'org.apache.poi:poi-ooxml-lite:5.2.2'
+        compile 'javax.mail:javax.mail-api:1.6.2'
     }
 
     entitiesEnhancing {

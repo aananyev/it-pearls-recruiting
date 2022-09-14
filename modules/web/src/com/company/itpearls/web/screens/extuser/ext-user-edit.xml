@@ -121,6 +121,8 @@
                         <columns>
                             <column id="fieldGroupLeftColumn" flex="1"/>
                             <column id="fieldGroupRightColumn" flex="3"/>
+                            <column id="fieldRequiredPasswordColumn" flex="1"/>
+                            <column id="fieldGroupPasswordCloumn" flex="3"/>
                         </columns>
                         <rows>
                             <row id="propertiesEmailRow">
@@ -141,6 +143,23 @@
                                         </field>
                                         <field id="imapPort" caption="IMAP port">
                                             <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </field>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="emailFieldPasswordRequired" datasource="userDs" width="AUTO">
+                                    <column width="30px">
+                                        <field id="smtpPasswordRequired"/>
+                                        <field id="pop3PasswordRequired"/>
+                                        <field id="imapPasswordRequired"/>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="emailFieldGroupPasswords" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="smtpPassword" caption="SMTP password">
+                                        </field>
+                                        <field id="pop3Password" caption="POP3 password">
+                                        </field>
+                                        <field id="imapPassword" caption="IMAP password">
                                         </field>
                                     </column>
                                 </fieldGroup>

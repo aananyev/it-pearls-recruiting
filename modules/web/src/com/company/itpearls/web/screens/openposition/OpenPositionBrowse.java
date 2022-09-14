@@ -582,7 +582,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return openPosition.getProjectName().getProjectName()
-                + "\n\nВладелец проекта: " + projectOwner + a + "";
+                + "\n\nВладелец проекта: " + projectOwner + "\n\n" + a;
     }
 
     @Inject

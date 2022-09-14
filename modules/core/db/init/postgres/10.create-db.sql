@@ -750,10 +750,16 @@ create table ITPEARLS_POSSIBLE_NAMES (
 -- begin SEC_USER
 alter table SEC_USER add column SMTP_SERVER varchar(128) ^
 alter table SEC_USER add column SMTP_PORT integer ^
+alter table SEC_USER add column SMTP_PASSWORD_REQUIRED boolean ^
+alter table SEC_USER add column SMTP_PASSWORD varchar(128) ^
 alter table SEC_USER add column POP3_SERVER varchar(128) ^
 alter table SEC_USER add column POP3_PORT integer ^
+alter table SEC_USER add column POP3_PASSWORD_REQUIRED boolean ^
+alter table SEC_USER add column POP3PASSWORD varchar(128) ^
 alter table SEC_USER add column IMAP_SERVER varchar(128) ^
 alter table SEC_USER add column IMAP_PORT integer ^
+alter table SEC_USER add column IMAP_PASSWORD_REQUIRED boolean ^
+alter table SEC_USER add column IMAP_PASSWORD varchar(128) ^
 alter table SEC_USER add column DTYPE varchar(31) ^
 update SEC_USER set DTYPE = 'itpearls_ExtUser' where DTYPE is null ^
 -- end SEC_USER
@@ -829,7 +835,7 @@ create table ITPEARLS_EMAILER (
     BODY_EMAIL text not null,
     BODY_HTML boolean,
     DATE_CREATE_EMAIL timestamp not null,
-    DATE_SEND_EMAIL timestamp not null,
+    DATE_SEND_EMAIL timestamp,
     --
     primary key (ID)
 )^
