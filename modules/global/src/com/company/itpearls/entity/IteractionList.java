@@ -91,6 +91,30 @@ public class IteractionList extends StandardEntity {
     @Column(name = "RATING")
     protected Integer rating;
 
+    @Column(name = "CURRENT_PRIORITY")
+    private Integer currentPriority;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CHAIN_INTERACTION_ID")
+    private IteractionList chainInteraction;
+
+    public IteractionList getChainInteraction() {
+        return chainInteraction;
+    }
+
+    public void setChainInteraction(IteractionList chainInteraction) {
+        this.chainInteraction = chainInteraction;
+    }
+
+    public Integer getCurrentPriority() {
+        return currentPriority;
+    }
+
+    public void setCurrentPriority(Integer currentPriority) {
+        this.currentPriority = currentPriority;
+    }
+
     public LaborAgreement getLaborAgreement() {
         return laborAgreement;
     }

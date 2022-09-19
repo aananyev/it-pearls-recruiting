@@ -11,6 +11,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Emailer;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.slf4j.Logger;
 
@@ -23,8 +24,6 @@ import java.util.Date;
 @EditedEntityContainer("emailerDc")
 @LoadDataBeforeShow
 public class EmailerEdit extends StandardEditor<Emailer> {
-    @Inject
-    private PickerField<ExtUser> fromEmailField;
     @Inject
     private UserSession userSession;
     @Inject
@@ -41,19 +40,6 @@ public class EmailerEdit extends StandardEditor<Emailer> {
     private EmailService emailService;
     @Inject
     private DateField<Date> dateSendEmailField;
-
-    private String cuba_email_fromAddress = "";
-    private String cuba_email_smtpHost = "";
-    private String cuba_email_smtpPort = "";
-    private String cuba_email_smtpUser = "";
-    private String cuba_email_smtpPassword = "";
-
-    private static String EMAIL_FROMADDRESS = "cuba.email.fromAddress";
-    private static String EMAIL_SMTPHOST = "cuba.email.smtpHost";
-    private static String EMAIL_SMTPPORT = "cuba.email.smtpPort";
-    private static String EMAIL_SMTPUSER = "cuba.email.smtpUser";
-    private static String EMAIL_SMTPPASSWORD = "cuba.email.smtpPassword";
-
     @Inject
     private Logger log;
     @Inject
@@ -62,15 +48,35 @@ public class EmailerEdit extends StandardEditor<Emailer> {
     private TextField<String> subjectEmailField;
     @Inject
     private RichTextArea bodyEmailField;
+    @Inject
+    private TextField<String> fromEmailTextAddressField;
+
+    private static String EMAIL_FROMADDRESS     = "cuba.email.fromAddress";
+    private static String EMAIL_SMTPHOST        = "cuba.email.smtpHost";
+    private static String EMAIL_SMTPPORT        = "cuba.email.smtpPort";
+    private static String EMAIL_SMTPUSER        = "cuba.email.smtpUser";
+    private static String EMAIL_SMTPPASSWORD    = "cuba.email.smtpPassword";
+
+    private String cuba_email_fromAddress   = "";
+    private String cuba_email_smtpHost      = "";
+    private String cuba_email_smtpPort      = "";
+    private String cuba_email_smtpUser      = "";
+    private String cuba_email_smtpPassword  = "";
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        fromEmailField.setValue((ExtUser) userSession.getUser());
 
         if (PersistenceHelper.isNew(getEditedEntity())) {
             draftEmailField.setValue(true);
             dateCreateEmailField.setValue(new Date());
         }
+
+        setSender((ExtUser) userSession.getUser());
+    }
+
+    protected void setSender(ExtUser user) {
+        String userEmail = System.getProperty(EMAIL_SMTPUSER);
+        fromEmailTextAddressField.setValue(userEmail);
     }
 
     @Install(to = "toEmailField", subject = "optionIconProvider")
@@ -108,12 +114,9 @@ public class EmailerEdit extends StandardEditor<Emailer> {
                         + toEmailField.getValue().getEmail()
                         + ") ?")
                 .withType(Dialogs.MessageType.CONFIRMATION)
-                .withActions(new DialogAction(DialogAction.Type.YES) {
-                                 @Override
-                                 public void actionPerform(Component component) {
-                                     sendByEmailDefault();
-                                 }
-                             },
+                .withActions(new DialogAction(DialogAction.Type.YES).withHandler(e -> {
+                            sendByEmailDefault();
+                        }),
                         new DialogAction(DialogAction.Type.NO)
                 ).show();
     }
@@ -128,8 +131,6 @@ public class EmailerEdit extends StandardEditor<Emailer> {
                 .setFrom(null)
                 .setTemplateParameters(Collections.singletonMap("newsItem", newsItem))
                 .build();
-
-        emailService.sendEmailAsync(emailInfo);
 
         try {
             emailService.sendEmail(emailInfo);

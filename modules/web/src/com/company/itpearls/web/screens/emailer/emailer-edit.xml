@@ -56,42 +56,48 @@
             <hbox spacing="true"
                   width="100%"
                   expand="fromEmailHBox">
-                <hbox id="fromEmailHBox"
+                <vbox id="fromEmailHBox"
                       width="100%">
                     <pickerField id="fromEmailField"
                                  dataContainer="emailerDc"
                                  width="100%"
                                  caption="msg://msgFromEmail"
                                  editable="false"
+                                 visible="false"
                                  property="fromEmail"/>
-                </hbox>
-                <hbox width="AUTO"
+                    <textField id="fromEmailTextAddressField"
+                               caption="msg://msgFromEmail"
+                               width="100%"
+                               editable="false"/>
+                    <lookupPickerField id="toEmailField"
+                                       caption="msg://msgToEmail"
+                                       dataContainer="emailerDc"
+                                       width="100%"
+                                       optionsContainer="jobCandidateDc"
+                                       property="toEmail">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="clear" type="picker_clear"/>
+                        </actions>
+                    </lookupPickerField>
+                </vbox>
+                <vbox width="AUTO"
                       spacing="true">
                     <dateField id="dateCreateEmailField"
                                dataContainer="emailerDc"
                                editable="false"
-                               width="AUTO"
+                               width="AUTO" enable="false"
                                caption="msg://msgCreateDate"
                                property="dateCreateEmail"/>
                     <dateField id="dateSendEmailField"
                                width="AUTO"
+                               enable="false"
                                editable="false"
                                caption="msg://msgSendDate"
                                dataContainer="emailerDc"
                                property="dateSendEmail"/>
-                </hbox>
+                </vbox>
             </hbox>
-            <lookupPickerField id="toEmailField"
-                               caption="msg://msgToEmail"
-                               dataContainer="emailerDc"
-                               width="100%"
-                               optionsContainer="jobCandidateDc"
-                               property="toEmail">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                    <action id="clear" type="picker_clear"/>
-                </actions>
-            </lookupPickerField>
         </groupBox>
         <textField id="subjectEmailField"
                    caption="msg://msgSubject"
@@ -99,10 +105,10 @@
                    dataContainer="emailerDc"
                    property="subjectEmail"/>
         <richTextArea id="bodyEmailField"
-                  dataContainer="emailerDc"
-                  caption="msg://msgBodyMessage"
-                  width="100%"
-                  property="bodyEmail"/>
+                      dataContainer="emailerDc"
+                      caption="msg://msgBodyMessage"
+                      width="100%"
+                      property="bodyEmail"/>
 
         <hbox id="editActions" spacing="true">
             <button id="sendAndCloseButton"

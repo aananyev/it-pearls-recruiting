@@ -127,7 +127,8 @@
         <groupBox spacing="true">
             <hbox spacing="true"
                   width="100%">
-                <hbox width="40%">
+                <hbox width="40%"
+                      height="AUTO">
                     <textField id="numberIteractionField"
                                dataContainer="iteractionListDc"
                                property="numberIteraction"
@@ -141,13 +142,56 @@
                                editable="false"
                                caption="msg://msgDate"/>
                 </hbox>
-                <hbox>
-                    <label id="companyLabel"
-                           align="MIDDLE_LEFT"
-                           htmlEnabled="true"/>
-                    <label id="ratingLabel"
-                           width="100%"
-                           align="MIDDLE_RIGHT"/>
+                <vbox width="AUTO"
+                      spacing="true"
+                      height="AUTO">
+                    <hbox width="AUTO"
+                          spacing="true"
+                          height="AUTO">
+                        <label stylename="h3"
+                               width="AUTO"
+                               height="AUTO"
+                               value="msg://msgCompanyDepartament"/>
+                        <label stylename="h3"
+                               width="AUTO"
+                               height="AUTO"
+                               value=": "/>
+                        <label id="companyLabel"
+                               width="AUTO"
+                               height="AUTO"
+                               align="MIDDLE_LEFT"
+                               htmlEnabled="true"/>
+                    </hbox>
+                    <hbox spacing="true"
+                          width="AUTO"
+                          height="AUTO">
+                        <label stylename="h3"
+                               width="AUTO"
+                               height="AUTO"
+                               value="msg://msgProject"/>
+                        <label stylename="h3"
+                               width="AUTO"
+                               height="AUTO"
+                               value=": "/>
+                        <label id="projectLabel"
+                               width="AUTO"
+                               height="AUTO"
+                               align="MIDDLE_LEFT"
+                               stylename="h3"/>
+                    </hbox>
+                </vbox>
+                <label id="ratingLabel"
+                       stylename="h1"
+                       width="AUTO"
+                       visible="false"
+                       height="AUTO"
+                       align="MIDDLE_RIGHT"/>
+                <hbox id="labelHBox"
+                      width="100%">
+                    <image id="ratingImage" scaleMode="FILL"
+                           width="50px"
+                           align="MIDDLE_RIGHT"
+                           height="50px"/>
                 </hbox>
             </hbox>
         </groupBox>
@@ -174,7 +218,32 @@
                         <columns count="2"/>
                         <rows>
                             <row id="rating">
-                                <label/>
+                                <vbox>
+                                    <hbox spacing="true">
+                                        <label value="msg://msgStatusOfVacansy"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                        <label id="statusOfVacansyLabel"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                    </hbox>
+                                    <hbox spacing="true">
+                                        <label value="msg://msgPriority"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                        <image id="trafficLighterImage"
+                                               width="AUTO"
+                                               align="MIDDLE_CENTER"
+                                               height="AUTO"/>
+                                        <label id="currentPriorityLabel"
+                                               stylename="h3"
+                                               align="MIDDLE_CENTER"
+                                               width="AUTO"/>
+                                    </hbox>
+                                </vbox>
                                 <lookupField id="ratingField"
                                              required="true"
                                              align="MIDDLE_RIGHT"

@@ -435,10 +435,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableDescriptionStyleProvider(OpenPosition openPosition) {
         String style = "";
 
-        if (!openPosition.getComment().startsWith("нет")) {
-            style = "open-position-pic-center-large-green";
-        } else {
-            style = "open-position-pic-center-large-red";
+        if (openPosition.getComment() != null) {
+            if (!openPosition.getComment().startsWith("нет")) {
+                style = "open-position-pic-center-large-green";
+            } else {
+                style = "open-position-pic-center-large-red";
+            }
         }
 
         return style;

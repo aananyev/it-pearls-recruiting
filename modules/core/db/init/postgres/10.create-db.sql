@@ -103,6 +103,8 @@ create table ITPEARLS_ITERACTION_LIST (
     ADD_INTEGER integer,
     LEGAL_ENTITY_ID uuid,
     RATING integer,
+    CURRENT_PRIORITY integer,
+    CHAIN_INTERACTION_ID uuid,
     --
     primary key (ID)
 )^

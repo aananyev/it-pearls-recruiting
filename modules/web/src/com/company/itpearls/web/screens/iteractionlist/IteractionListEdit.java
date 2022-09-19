@@ -7,11 +7,14 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
+import com.company.itpearls.web.widgets.Diagrams.ResearcherDiagramWidget;
 import com.haulmont.cuba.core.app.EmailService;
+import com.haulmont.cuba.core.app.ResourceService;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -121,6 +124,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private CollectionContainer<LaborAgreement> laborAgreementDc;
     @Inject
     private LookupPickerField<LaborAgreement> laborAgreementLookupPickerField;
+    @Inject
+    private Label<String> currentPriorityLabel;
+
+    private Map<String, Integer> priorityMap = new LinkedHashMap<>();
+    @Inject
+    private Image trafficLighterImage;
+    @Inject
+    private Label<String> statusOfVacansyLabel;
+    @Inject
+    private Resources resources;
+    @Inject
+    private ResourceService resourceService;
+    @Inject
+    private Label<String> projectLabel;
+    @Inject
+    private Image ratingImage;
+
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -267,20 +287,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null)
                     if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null)
                         if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName().getCompanyShortName() != null) {
-                            String labetText = "<h2><b>" +
+                            String labetText = "<h3><b>" +
                                     vacancyFiels.getValue()
                                             .getProjectName()
                                             .getProjectDepartment()
                                             .getCompanyName()
                                             .getCompanyShortName() +
-                                    "</b>: " +
+                                    "</b>/ " +
                                     vacancyFiels.getValue()
                                             .getProjectName()
                                             .getProjectDepartment()
                                             .getDepartamentRuName() +
-                                    "</h2>";
+                                    "</h3>";
 
                             companyLabel.setValue(labetText);
+
+                            projectLabel.setValue(event.getValue().getProjectName().getProjectName());
                         }
 
         if (!isClosedVacancy()) {
@@ -595,11 +617,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     retStr = retStr.replace(emailKeys.get("ОписаниеВакансии"), newsItem.getVacancy().getComment());
             if (newsItem.getVacancy().getPositionType() != null)
                 if (newsItem.getVacancy().getPositionType().getPositionEnName() != null)
-                    retStr = retStr.replace(emailKeys.get("Позиция"), newsItem.getVacancy().getPositionType().getPositionEnName());
+                    retStr = retStr.replace(emailKeys.get("Позиция"),
+                            newsItem.getVacancy().getPositionType().getPositionEnName());
             if (newsItem.getVacancy().getSalaryMin() != null)
-                retStr = retStr.replace(emailKeys.get("ЗарплатаМмин"), newsItem.getVacancy().getSalaryMin().toString());
+                retStr = retStr.replace(emailKeys.get("ЗарплатаМмин"),
+                        newsItem.getVacancy().getSalaryMin().toString());
             if (newsItem.getVacancy().getSalaryMax() != null)
-                retStr = retStr.replace(emailKeys.get("ЗарплатаМакс"), newsItem.getVacancy().getSalaryMax().toString());
+                retStr = retStr.replace(emailKeys.get("ЗарплатаМакс"),
+                        newsItem.getVacancy().getSalaryMax().toString());
 
         } catch (NullPointerException e) {
             log.error("Error", e);
@@ -615,6 +640,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if (commentField.getValue() == null)
             commentField.setValue("");
+
+        getEditedEntity().setCurrentPriority(vacancyFiels.getValue().getPriority());
     }
 
     @Subscribe
@@ -1134,6 +1161,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         getScreenOptionsNoSubscribers(event);
         setRatingField();
+        setPriorityMap();
 
     }
 
@@ -1196,56 +1224,116 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         return null;
     }
 
-/*    @Install(to = "ratingField", subject = "optionIconProvider")
-    private String ratingFieldOptionIconProvider(Object object) {
-        int a = ratingField.getValue() != null ? (int) ratingField.getValue() : 0;
-
-        switch (a) {
-            case 0:
-                return CubaIcon.ANGLE_DOUBLE_DOWN.source();
-            case 1:
-                return CubaIcon.ANGLE_DOWN.source();
-            case 2:
-                return CubaIcon.ANDROID.source();
-            case 3:
-                return CubaIcon.ANGLE_UP.source();
-            case 4:
-                return CubaIcon.ANGLE_DOUBLE_UP.source();
-            default:
-                return CubaIcon.ANDROID.source();
-        }
-    }*/
-
     @Install(to = "ratingField", subject = "optionStyleProvider")
     private String ratingFieldOptionStyleProvider(Object object) {
         int a = ratingField.getValue() != null ? (int) ratingField.getValue() : 0;
-
-/*        switch (a) {
-            case 0:
-//                return "pic-center-large-red";
-            case 1:
-//                return "pic-center-large-yellow";
-            case 2:
-//                return "pic-center-large-gray";
-            case 3:
-//                return "pic-center-large-blue";
-            case 4:
-                return "pic-center-large-green";
-            default:
-                return "pic-center-large-grey";
-        }*/
-
         return "rating_star_" + (a + 1);
     }
 
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if (event.getPrevValue() != null && event.getValue() != null) {
+/*        if (event.getPrevValue() != null && event.getValue() != null) {
             if (!event.getValue().equals(event.getPrevValue())) {
                 vacancyFieldValueChange(event);
             }
+        } */
+
+        vacancyFieldValueChange(event);
+        setPriorityLabel(event);
+        setStatusOfVacancyLabel(event);
+    }
+
+    private void setStatusOfVacancyLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
+        if (event.getValue() != null) {
+            if (event.getValue().getOpenClose()) {
+                statusOfVacansyLabel.setValue("ЗАКРЫТА");
+                statusOfVacansyLabel.setStyleName("h3-red");
+            } else {
+                statusOfVacansyLabel.setValue("ОТКРЫТА");
+                statusOfVacansyLabel.setStyleName("h3-green");
+            }
+        } else {
+            statusOfVacansyLabel.setValue("");
         }
+    }
+
+    private void setPriorityMap() {
+        priorityMap.put("Draft", -1);
+        priorityMap.put("Paused", 0);
+        priorityMap.put("Low", 1);
+        priorityMap.put("Normal", 2);
+        priorityMap.put("High", 3);
+        priorityMap.put("Critical", 4);
+    }
+
+    private void setPriorityLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
+        String priorityStr = "";
+
+        for (Map.Entry<String, Integer> pair : priorityMap.entrySet()) {
+            if (event.getValue().getPriority().equals(pair.getValue())) {
+                priorityStr = pair.getKey();
+                break;
+            }
+        }
+
+        String icon = "";
+
+        switch (event.getValue().getPriority()) {
+            case -1:
+                icon = "icons/traffic-lights_gray.png";
+                break;
+            case 0: //"Paused"
+                icon = "icons/remove.png";
+                break;
+            case 1: //"Low"
+                icon = "icons/traffic-lights_blue.png";
+                break;
+            case 2: //"Normal"
+                icon = "icons/traffic-lights_green.png";
+                break;
+            case 3: //"High"
+                icon = "icons/traffic-lights_yellow.png";
+                break;
+            case 4: //"Critical"
+                icon = "icons/traffic-lights_red.png";
+                break;
+        }
+
+        if (!priorityStr.equals("")) {
+            currentPriorityLabel.setValue(priorityStr);
+            trafficLighterImage.setSource(ThemeResource.class).setPath(icon);
+            ratingImage.setSource(ThemeResource.class).setPath(icon);;
+        }
+    }
+
+
+    @Install(to = "vacancyFiels", subject = "optionImageProvider")
+    private Resource vacancyFielsOptionImageProvider(OpenPosition openPosition) {
+        String icon = "";
+
+        switch (openPosition.getPriority()) {
+            case -1:
+                icon = "icons/traffic-lights_gray.png";
+                break;
+            case 0: //"Paused"
+                icon = "icons/remove.png";
+                break;
+            case 1: //"Low"
+                icon = "icons/traffic-lights_blue.png";
+                break;
+            case 2: //"Normal"
+                icon = "icons/traffic-lights_green.png";
+                break;
+            case 3: //"High"
+                icon = "icons/traffic-lights_yellow.png";
+                break;
+            case 4: //"Critical"
+                icon = "icons/traffic-lights_red.png";
+                break;
+        }
+
+        return (Resource) resources.getResource(icon);
     }
 
     @Install(to = "vacancyFiels", subject = "optionIconProvider")
@@ -1276,11 +1364,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     public void callActionEntity() {
-
         String calledClass = iteractionTypeField.getValue().getCallClass();
         // еслп установлено разрешение в Iteraction показать кнопку и установить на ней надпсит
-        if (iteractionTypeField.getValue() != null)
-            if (iteractionTypeField.getValue().getCallForm() != null)
+        if (iteractionTypeField.getValue() != null) {
+            if (iteractionTypeField.getValue().getCallForm() != null) {
                 if (!iteractionTypeField.getValue().getCallForm()) {
                 } else {
                     // Это лишнее - тут надо вызов формы сиска резюме или других документов
@@ -1309,6 +1396,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         }
                     }
                 }
+            }
+        }
     }
 
 
@@ -1324,7 +1413,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .withInitializer(e -> {
                     e.setCandidate(this.getEditedEntity().getCandidate());
                     e.setVacancy(this.getEditedEntity().getVacancy());
-//                    e.setCompanyDepartment(this.getEditedEntity().getCompanyDepartment());
                 })
                 .build()
                 .show();
