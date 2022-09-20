@@ -62,8 +62,11 @@
             <columns>
                 <column id="icon" width="48px"
                         resizable="false"
+                        collapsible="false"
                         caption=""/>
                 <column property="numberIteraction"
+                        collapsed="true"
+                        collapsible="true"
                         id="numberIteraction"/>
                 <column id="rating"
                         caption="msg://msgRating"
@@ -90,6 +93,11 @@
                         maximumWidth="250px"
                         minimumWidth="200px"
                         id="vacancy"/>
+                <column id="currentOpenCloseColumn"
+                        caption="msg://msgCurrentOpenClose"
+                        maximumWidth="85px">
+                    <iconRenderer/>
+                </column>
                 <column property="vacancy.projectName.projectOwner"
                         maximumWidth="280px"
                         minimumWidth="150px"

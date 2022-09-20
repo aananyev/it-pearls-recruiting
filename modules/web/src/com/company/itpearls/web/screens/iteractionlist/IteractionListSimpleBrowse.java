@@ -67,12 +67,12 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     private void setCandidateLabel(BeforeShowEvent event) {
         if (jobCandidate != null) {
             candidateLabel.setValue(jobCandidate.getFullName());
-            if(jobCandidate.getPersonPosition() != null) {
+            if (jobCandidate.getPersonPosition() != null) {
                 if (jobCandidate.getPersonPosition().getPositionRuName() != null) {
                     candidatePositionLabel.setValue(jobCandidate.getPersonPosition().getPositionRuName());
                 }
 
-                if(jobCandidate.getPersonPosition().getPositionEnName() != null) {
+                if (jobCandidate.getPersonPosition().getPositionEnName() != null) {
                     candidatePositionEnLabel.setValue(jobCandidate.getPersonPosition().getPositionEnName());
                 }
             }
@@ -83,12 +83,12 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
         copyLastIteractionButton.setEnabled(false);
 
         iteractionListsTable.addSelectionListener(e -> {
-            if(e.getSelected() == null) {
+            if (e.getSelected() == null) {
                 copyLastIteractionButton.setEnabled(false);
             } else {
                 copyLastIteractionButton.setEnabled(true);
 
-                if(iteractionListsTable.getSingleSelected() != null) {
+                if (iteractionListsTable.getSingleSelected() != null) {
                     if (iteractionListsTable.getSingleSelected().getRating() != null) {
                         recrutierLabel.setValue(iteractionListsTable
                                 .getSingleSelected()
@@ -98,7 +98,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                     }
                 }
 
-                if(iteractionListsTable.getSingleSelected().getVacancy() != null) {
+                if (iteractionListsTable.getSingleSelected().getVacancy() != null) {
                     vacancyNameLabel.setValue(iteractionListsTable
                             .getSingleSelected()
                             .getVacancy()
@@ -198,7 +198,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 .newEntity()
                 .withScreenClass(IteractionListEdit.class)
                 .withInitializer(iteractionList1 -> {
-                    if(iteractionListsTable.getSingleSelected() != null) {
+                    if (iteractionListsTable.getSingleSelected() != null) {
                         iteractionList1.setCandidate(iteractionListsTable.getSingleSelected().getCandidate());
                         iteractionList1.setVacancy(iteractionListsTable.getSingleSelected().getVacancy());
                         iteractionList1.setNumberIteraction(dataManager.loadValue(
@@ -219,21 +219,61 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     @Install(to = "iteractionListsTable.commentColumn", subject = "columnGenerator")
     private Icons.Icon iteractionListsTableCommentColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
         return (event.getItem().getComment() == null || event.getItem().getComment().equals("")) ?
-                CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+                CubaIcon.FILE : CubaIcon.FILE_TEXT;
     }
 
     @Install(to = "iteractionListsTable.commentColumn", subject = "styleProvider")
     private String iteractionListsTableCommentColumnStyleProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null && !iteractionList.getComment().equals("")? "pic-center-large-green" : "pic-center-large-red";
+        return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ? "pic-center-large-green" : "pic-center-large-red";
     }
 
     @Install(to = "iteractionListsTable.commentColumn", subject = "descriptionProvider")
     private String iteractionListsTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
-        if(iteractionList.getComment() != null) {
+        if (iteractionList.getComment() != null) {
             return !iteractionList.getComment().equals("") ?
                     iteractionList.getComment() : null;
         } else {
             return null;
         }
     }
+
+    @Install(to = "iteractionListsTable.currentOpenCloseColumn", subject = "columnGenerator")
+    private Icons.Icon iteractionListsTableCurrentOpenCloseColumnColumnGenerator(
+            DataGrid.ColumnGeneratorEvent<IteractionList> columnGeneratorEvent) {
+
+        if (columnGeneratorEvent.getItem().getCurrentOpenClose() != null) {
+            return columnGeneratorEvent.getItem().getCurrentOpenClose()
+                    ? CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+        } else {
+            return columnGeneratorEvent.getItem().getVacancy().getOpenClose() ?
+                    CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+        }
+    }
+
+    @Install(to = "iteractionListsTable.currentOpenCloseColumn", subject = "styleProvider")
+    private String iteractionListsTableCurrentOpenCloseColumnStyleProvider(
+            IteractionList iteractionList) {
+
+        if (iteractionList.getCurrentOpenClose() != null) {
+            return iteractionList.getCurrentOpenClose()
+                    ? "pic-center-large-green" : "pic-center-large-red";
+        } else {
+            return iteractionList.getVacancy().getOpenClose() ?
+                    "pic-center-large-red" : "pic-center-large-green";
+        }
+    }
+
+    @Install(to = "iteractionListsTable.currentOpenCloseColumn", subject = "descriptionProvider")
+    private String iteractionListsTableCurrentOpenCloseColumnDescriptionProvider(IteractionList iteractionList) {
+
+            if (iteractionList.getCurrentOpenClose() != null) {
+                return iteractionList.getCurrentOpenClose()
+                        ? "Открыта на момент создания взаимодействия" : "Закрыта на момент создания взаимодействия";
+            } else {
+                return iteractionList.getVacancy().getOpenClose() ?
+                        "Закрыта на текущий момент" : "Открыта на текущий момент";
+            }
+    }
+
+
 }
