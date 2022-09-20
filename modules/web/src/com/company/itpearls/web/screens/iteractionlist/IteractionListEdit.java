@@ -638,10 +638,48 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        beforeCommitFlag = true;
+
         if (commentField.getValue() == null)
             commentField.setValue("");
 
         getEditedEntity().setCurrentPriority(vacancyFiels.getValue().getPriority());
+        getEditedEntity().setCurrentOpenClose(vacancyFiels.getValue().getOpenClose());
+
+        setChainInteraction(event);
+    }
+
+    Boolean setChainFlag = false;
+
+    private void setChainInteraction(BeforeCommitChangesEvent event) {
+        if (!setChainFlag) {
+            String QUERY_CHAIN = "select e from itpearls_IteractionList e " +
+                    "where e.vacancy = :vacancy " +
+                    "and e.candidate = :candidate";
+
+            List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
+                    .query(QUERY_CHAIN)
+                    .parameter("vacancy", vacancyFiels.getValue())
+                    .parameter("candidate", candidateField.getValue())
+                    .view("iteractionList-view")
+                    .list();
+
+            if (iteractionLists.size() > 0) {
+                IteractionList lastInteraction = iteractionLists.get(0);
+
+                for (IteractionList iL : iteractionLists) {
+                    if (iL.getDateIteraction().after(lastInteraction.getDateIteraction())) {
+                        lastInteraction = iL;
+                    }
+                }
+
+                getEditedEntity().setChainInteraction(lastInteraction);
+            } else {
+                getEditedEntity().setChainInteraction(null);
+            }
+
+            setChainFlag = true;
+        }
     }
 
     @Subscribe
@@ -1230,6 +1268,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         return "rating_star_" + (a + 1);
     }
 
+    Boolean beforeCommitFlag = false;
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
@@ -1239,9 +1278,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         } */
 
-        vacancyFieldValueChange(event);
-        setPriorityLabel(event);
-        setStatusOfVacancyLabel(event);
+        if (!beforeCommitFlag) {
+            vacancyFieldValueChange(event);
+            setPriorityLabel(event);
+            setStatusOfVacancyLabel(event);
+        }
     }
 
     private void setStatusOfVacancyLabel(HasValue.ValueChangeEvent<OpenPosition> event) {

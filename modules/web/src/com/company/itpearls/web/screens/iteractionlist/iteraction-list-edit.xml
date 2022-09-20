@@ -32,7 +32,9 @@
                           view="_minimal">
                     <property name="company" view="_minimal"/>
                     <property name="laborAgreementType" view="_minimal"/>
-                    <property name="openPositions" view="_minimal"/>
+                    <property name="openPositions" view="_minimal">
+                        <property name="projectName" view="_minimal"/>
+                    </property>
                 </property>
             </view>
             <loader id="iteractionListDl"/>
@@ -92,6 +94,7 @@
                     <property name="projectDepartment" view="_local">
                         <property name="companyName" view="_local"/>
                     </property>
+                    <property name="projectName"/>
                 </property>
             </view>
             <loader id="openPositionsDl"

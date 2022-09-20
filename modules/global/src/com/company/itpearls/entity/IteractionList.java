@@ -94,10 +94,21 @@ public class IteractionList extends StandardEntity {
     @Column(name = "CURRENT_PRIORITY")
     private Integer currentPriority;
 
+    @Column(name = "CURRENT_OPEN_CLOSE")
+    private Boolean currentOpenClose;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CHAIN_INTERACTION_ID")
     private IteractionList chainInteraction;
+
+    public Boolean getCurrentOpenClose() {
+        return currentOpenClose;
+    }
+
+    public void setCurrentOpenClose(Boolean currentOpenClose) {
+        this.currentOpenClose = currentOpenClose;
+    }
 
     public IteractionList getChainInteraction() {
         return chainInteraction;

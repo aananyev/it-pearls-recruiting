@@ -31,7 +31,7 @@
                             <property name="openPosition"
                                       view="_minimal">
                                 <property name="comment"/>
-                                <property name="projectName"/>
+                                <property name="projectName" view="_minimal"/>
                             </property>
                             <property name="projectOwner"
                                       view="_minimal"/>
