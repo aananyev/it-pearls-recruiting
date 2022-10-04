@@ -22,6 +22,18 @@
 }
 
 
+.h1-red {
+    color: red;
+    font-size: $v-font-size--h1;
+    font-weight: bold;
+}
+
+.h1-gray {
+    color: gray;
+    font-size: $v-font-size--h1;
+    font-weight: bold;
+}
+
 .h3-red {
     color: red;
     font-size: $v-font-size--h3;
@@ -712,6 +724,14 @@ rating_battery_yellow_3:before {
 
 .open-position-pic-center {
     text-align: center;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-gray {
+    color: green;
+    text-align: center;
+    text-color: green;
+    font-size: large;
     margin: 0 auto;
 }
 

@@ -23,7 +23,6 @@ import com.haulmont.reports.entity.Report;
 import com.haulmont.reports.gui.ReportGuiManager;
 import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
 import org.apache.commons.lang3.time.DateUtils;
-import org.graalvm.compiler.lir.LIRInstruction;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -31,6 +30,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicReference;
 
 @UiController("itpearls_OpenPosition.browse")
 @UiDescriptor("open-position-browse.xml")
@@ -68,6 +68,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
     private Map<String, Integer> mapWorkExperience = new LinkedHashMap<>();
     private List<User> users = new ArrayList<>();
+    private static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
+
+    public final static int PRIOPITY_DRAFT = -1;
+    public final static int PRIORITY_PAUSED = 0;
+    public final static int PRIORITY_LOW = 1;
+    public final static int PRIORITY_NORMAL = 2;
+    public final static int PRIORITY_HIGH = 3;
+    public final static int PRIORITY_CRITICAL = 4;
 
     String QUERY_COUNT_ITERACTIONS = "select e.iteractionType, count(e.iteractionType) " +
             "from itpearls_IteractionList e " +
@@ -90,8 +98,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private GroupBoxLayout urgentlyPositons;
     @Inject
-    private Filter filter;
-    @Inject
     private HBoxLayout urgentlyHBox;
     @Inject
     private LookupField remoteWorkLookupField;
@@ -111,6 +117,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Actions actions;
     @Inject
     private Button listBtn;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private Button openCloseButton;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -140,7 +150,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         switch ((Integer) object) {
             case 0:
-                retStr = "Я не подписан на эти вакании. Для работы с ними надо подписаться";
+                retStr = "Я не подписан на эти вакансии. Для работы с ними надо подписаться";
                 break;
             case 1:
                 retStr = "Находится в работе у меня на определенный период времени";
@@ -291,22 +301,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String icon = null;
 
         switch ((int) object) {
-            case -1:
+            case PRIOPITY_DRAFT:
                 icon = "icons/traffic-lights_gray.png";
                 break;
-            case 0: //"Paused"
+            case PRIORITY_PAUSED: //"Paused"
                 icon = "icons/remove.png";
                 break;
-            case 1: //"Low"
+            case PRIORITY_LOW: //"Low"
                 icon = "icons/traffic-lights_blue.png";
                 break;
-            case 2: //"Normal"
+            case PRIORITY_NORMAL: //"Normal"
                 icon = "icons/traffic-lights_green.png";
                 break;
-            case 3: //"High"
+            case PRIORITY_HIGH: //"High"
                 icon = "icons/traffic-lights_yellow.png";
                 break;
-            case 4: //"Critical"
+            case PRIORITY_CRITICAL: //"Critical"
                 icon = "icons/traffic-lights_red.png";
                 break;
         }
@@ -329,7 +339,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 returnIcon = "font-icon:QUESTION_CIRCLE";
                 break;
             default:
-                returnIcon = "fint-icon:QUESTION_CIRCLE";
+                returnIcon = "font-icon:QUESTION_CIRCLE";
                 break;
         }
 
@@ -790,6 +800,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
 
         retButton.addClickListener(e -> {
+            openCloseButtonClickListener(entity, retButton);
+        });
+
+        return retButton;
+    }
+
+    private void openCloseButtonClickListener(OpenPosition entity, Button retButton) {
+        if (!openCloseChildVacancy(entity)) {
             entity.setOpenClose(!entity.getOpenClose());
 
             retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
@@ -813,6 +831,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
                 openPositionsTable.setDetailsVisible(entity, false);
                 openPositionsDl.load();
+
             } else {
                 events.publish(new UiNotificationEvent(this, "Открыта вакансия: "
                         + entity.getVacansyName()
@@ -828,6 +847,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
                 entity.setOwner(userSession.getUser());
                 entity.setLastOpenDate(new Date());
+                entity.setPriority(PRIORITY_NORMAL);
+
+                if (entity.getParentOpenPosition().getOpenClose()) {
+                    entity.getParentOpenPosition().setOpenClose(false);
+                    setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected().getParentOpenPosition(),
+                            "Открыта дочерней вакансией "
+                                    + openPositionsTable.getSingleSelected().getVacansyName(),
+                            "Открыта ввиду открытия дочерней вакансии "
+                                    + openPositionsTable.getSingleSelected().getVacansyName(),
+                    new Date(),
+                    userSession.getUser());
+                }
 
                 openPositionsTable.setDetailsVisible(entity, false);
                 openPositionsDl.load();
@@ -840,9 +871,46 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
 
             openPositionsDl.load();
-        });
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withDescription("Невозможно закрыть вакансию верхнего уровня без закрытия вакансий входящих в ее группу")
+                    .withCaption("ВНИМАНИЕ")
+                    .show();
+        }
+    }
 
-        return retButton;
+    private Boolean openCloseChildVacancy(OpenPosition event) {
+        List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
+                .query(QUERY_SELECT_COMMAND)
+                .parameter("parentOpenPosition", event)
+                .list();
+
+        String magPos = "";
+        AtomicReference<Boolean> flagDialog = new AtomicReference<>(false);
+
+        if (openPositions.size() != 0) {
+            for (OpenPosition a : openPositions) {
+                magPos = magPos + "<li><i>" + a.getVacansyName() + "</i></li>";
+            }
+
+            dialogs.createOptionDialog()
+                    .withType(Dialogs.MessageType.WARNING)
+                    .withContentMode(ContentMode.HTML)
+                    .withCaption("ВНИМАНИЕ")
+                    .withMessage((event.getOpenClose() ? "Открыть" : "Закрыть") +
+                            " вакансии группы?<br><ul>" + magPos + "</ul>")
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        for (OpenPosition a : openPositions) {
+                            a.setOpenClose(event.getOpenClose());
+                        }
+
+                        flagDialog.set(true);
+                    }), new DialogAction(DialogAction.Type.NO))
+                    .show();
+
+        }
+
+        return flagDialog.get();
     }
 
     @Install(to = "openPositionsTable.salaryMinMax", subject = "columnGenerator")
@@ -1012,22 +1080,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             String icon = null;
 
             switch (g.hashCode()) {
-                case -1:
+                case PRIOPITY_DRAFT:
                     icon = "icons/traffic-lights_gray.png";
                     break;
-                case 0: //"Paused"
+                case PRIORITY_PAUSED: //"Paused"
                     icon = "icons/remove.png";
                     break;
-                case 1: //"Low"
+                case PRIORITY_LOW: //"Low"
                     icon = "icons/traffic-lights_blue.png";
                     break;
-                case 2: //"Normal"
+                case PRIORITY_NORMAL: //"Normal"
                     icon = "icons/traffic-lights_green.png";
                     break;
-                case 3: //"High"
+                case PRIORITY_HIGH: //"High"
                     icon = "icons/traffic-lights_yellow.png";
                     break;
-                case 4: //"Critical"
+                case PRIORITY_CRITICAL: //"Critical"
                     icon = "icons/traffic-lights_red.png";
                     break;
             }
@@ -1153,14 +1221,31 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private void setButtonsEnableDisable() {
         buttonSubscribe.setEnabled(false);
         listBtn.setEnabled(false);
-
+        openCloseButton.setEnabled(false);
         openPositionsTable.addSelectionListener(e -> {
             if (e.getSelected() == null) {
                 buttonSubscribe.setEnabled(false);
                 listBtn.setEnabled(false);
-            } else {
-                buttonSubscribe.setEnabled(true);
-                listBtn.setEnabled(true);
+
+                openCloseButton.setEnabled(false);
+                openCloseButton.setIconFromSet(CubaIcon.CLOSE);
+                openCloseButton.setCaption("Открыть / Закрыть");
+            }
+        });
+
+        openPositionsTable.addItemClickListener(e -> {
+            buttonSubscribe.setEnabled(true);
+            listBtn.setEnabled(true);
+            if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER)) {
+                if (e.getItem().getOpenClose()) {
+                    openCloseButton.setEnabled(true);
+                    openCloseButton.setIconFromSet(CubaIcon.YES);
+                    openCloseButton.setCaption("Открыть");
+                } else {
+                    openCloseButton.setEnabled(true);
+                    openCloseButton.setIconFromSet(CubaIcon.CLOSE);
+                    openCloseButton.setCaption("Закрыть");
+                }
             }
         });
     }
@@ -1176,7 +1261,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         removeUrgentlyLists();
 
         if (notLowerRatingLookupField.getValue() != null) {
-            if (((int) notLowerRatingLookupField.getValue()) != -1) {
+            if (((int) notLowerRatingLookupField.getValue()) != PRIOPITY_DRAFT) {
                 setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
             } else {
                 openPositionsDl.removeParameter("rating");
@@ -1318,12 +1403,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setMapOfPriority() {
-        priorityMap.put("Draft", -1);
-        priorityMap.put("Paused", 0);
-        priorityMap.put("Low", 1);
-        priorityMap.put("Normal", 2);
-        priorityMap.put("High", 3);
-        priorityMap.put("Critical", 4);
+        priorityMap.put("Draft", PRIOPITY_DRAFT);
+        priorityMap.put("Paused", PRIORITY_PAUSED);
+        priorityMap.put("Low", PRIORITY_LOW);
+        priorityMap.put("Normal", PRIORITY_NORMAL);
+        priorityMap.put("High", PRIORITY_HIGH);
+        priorityMap.put("Critical", PRIORITY_CRITICAL);
     }
 
     private void setStatusNotLower() {
@@ -1396,12 +1481,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     public void onCheckBoxOnlyOpenedPositionValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (checkBoxOnlyOpenedPosition.getValue()) {
             openPositionsDl.setParameter("openClosePos", false);
-//            openPositionsTable.getColumn("openClose").setCollapsed(true);
-//            openPositionsTable.getColumn("openClose").setVisible(false);
         } else {
             openPositionsDl.removeParameter("openClosePos");
-//            openPositionsTable.getColumn("openClose").setCollapsed(false);
-//            openPositionsTable.getColumn("openClose").setVisible(true);
         }
 
         openPositionsDl.load();
@@ -1441,22 +1522,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (priority != null) {
             switch (priority) {
-                case -1:
+                case PRIOPITY_DRAFT:
                     icon = "icons/traffic-lights_gray.png";
                     break;
-                case 0: //"Paused"
+                case PRIORITY_PAUSED: //"Paused"
                     icon = "icons/traffic-lights_gray.png";
                     break;
-                case 1: //"Low"
+                case PRIORITY_LOW: //"Low"
                     icon = "icons/traffic-lights_blue.png";
                     break;
-                case 2: //"Normal"
+                case PRIORITY_NORMAL: //"Normal"
                     icon = "icons/traffic-lights_green.png";
                     break;
-                case 3: //"High"
+                case PRIORITY_HIGH: //"High"
                     icon = "icons/traffic-lights_yellow.png";
                     break;
-                case 4: //"Critical"
+                case PRIORITY_CRITICAL: //"Critical"
                     icon = "icons/traffic-lights_red.png";
                     break;
             }
@@ -1921,16 +2002,34 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .setView("report.edit");
         Report report = dataManager.load(loadContext);
 
-//        List<ReportInputParameter> inputParameters = new ArrayList<>();
-//        ReportInputParameter reportInputParameter = new ReportInputParameter();
-//        reportInputParameter.setValue("openPosition", openPositionsTable.getSelected());
-//        inputParameters.add(reportInputParameter);
         report.setValue("openPosition", openPositionsTable.getSingleSelected(), false);
-//        report.setInputParameters(inputParameters);
 
         FrameOwner window = App.getInstance().getTopLevelWindow().getFrameOwner();
         reportGuiManager.runReport(report, window);
     }
+
+    @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
+    private Icons.Icon openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
+        String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+
+        return CubaIcon.valueOf(dataManager.load(OpenPosition.class)
+                .query(QUERY)
+                .parameter("parentOpenPosition", columnGeneratorEvent.getItem())
+                .list().size() > 0 ? "FOLDER" : "FILE");
+
+    }
+
+    @Install(to = "openPositionsTable.folder", subject = "styleProvider")
+    private String openPositionsTableFolderStyleProvider(OpenPosition openPosition) {
+        return "open-position-pic-center-large-gray";
+    }
+
+    public void openCloseButtonInvoke() {
+        if (openPositionsTable.getSingleSelected() != null) {
+            openCloseButtonClickListener(openPositionsTable.getSingleSelected(), openCloseButton);
+        }
+    }
+
 }
 
 

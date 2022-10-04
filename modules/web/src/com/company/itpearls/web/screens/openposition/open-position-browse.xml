@@ -154,6 +154,12 @@
             </actions>
             <columns
                     exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
+                <column id="folder"
+                        resizable="false"
+                        width="40px"
+                        caption="msg://msgFolder">
+                    <iconRenderer/>
+                </column>
                 <column id="icon"
                         resizable="true"
                         width="70px"
@@ -273,6 +279,11 @@
                         action="openPositionsTable.edit"/>
                 <button id="removeBtn"
                         action="openPositionsTable.remove"/>
+                <button id="openCloseButton"
+                        caption="msg://msgOpenClose"
+                        enable="false"
+                        invoke="openCloseButtonInvoke"
+                        icon="CLOSE"/>
                 <button id="buttonSubscribe"
                         caption="msg://mshSubscibe"
                         invoke="subscribePosition"

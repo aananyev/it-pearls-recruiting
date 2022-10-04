@@ -243,10 +243,10 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
         if (columnGeneratorEvent.getItem().getCurrentOpenClose() != null) {
             return columnGeneratorEvent.getItem().getCurrentOpenClose()
-                    ? CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+                    ? CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
         } else {
             return columnGeneratorEvent.getItem().getVacancy().getOpenClose() ?
-                    CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+                    CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
         }
     }
 
@@ -256,7 +256,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
         if (iteractionList.getCurrentOpenClose() != null) {
             return iteractionList.getCurrentOpenClose()
-                    ? "pic-center-large-green" : "pic-center-large-red";
+                    ? "pic-center-large-red" : "pic-center-large-green";
         } else {
             return iteractionList.getVacancy().getOpenClose() ?
                     "pic-center-large-red" : "pic-center-large-green";
@@ -268,7 +268,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
             if (iteractionList.getCurrentOpenClose() != null) {
                 return iteractionList.getCurrentOpenClose()
-                        ? "Открыта на момент создания взаимодействия" : "Закрыта на момент создания взаимодействия";
+                        ? "Закрыта на момент создания взаимодействия" : "Открыта на момент создания взаимодействия";
             } else {
                 return iteractionList.getVacancy().getOpenClose() ?
                         "Закрыта на текущий момент" : "Открыта на текущий момент";

@@ -26,6 +26,7 @@
                 <property name="vacancy" view="_minimal">
                     <property name="projectName" view="_minimal"/>
                 </property>
+                <property name="comment"/>
             </view>
             <loader id="iteractionListsDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>

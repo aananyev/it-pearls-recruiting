@@ -612,48 +612,43 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        if (!openClosePositionCheckBox.getValue().equals(openCloseStartStatus)) {
+            if (!openClosePositionCheckBox.getValue()) {
+                Date lastOpenDate = new Date();
 
-//    @Subscribe
-//    public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
-//        if (!PersistenceHelper.isNew(getEditedEntity())) {
-            if (!openClosePositionCheckBox.getValue().equals(openCloseStartStatus)) {
-                if (!openClosePositionCheckBox.getValue()) {
-                    Date lastOpenDate = new Date();
-
-                    lastOpenVacancyDateField.setValue(lastOpenDate);
-                    ownerTextField.setValue(userSession.getUser());
-                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                            "Открылась вакансия",
-                            "Открыта вакансия",
-                            new Date(),
-                            userSession.getUser());
-                } else {
-                    if (openClosePositionCheckBox.getValue()) {
-                        lastOpenVacancyDateField.setValue(null);
-                        ownerTextField.setValue(null);
-                        setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                                "Закрылась вакансия",
-                                "Закрыта вакансия",
-                                new Date(),
-                                userSession.getUser());
-                    }
-                }
-            } else {
+                lastOpenVacancyDateField.setValue(lastOpenDate);
+                ownerTextField.setValue(userSession.getUser());
                 setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                        "Открыта новая вакансия",
-                        vacansyNameField.getValue() + "\n"
-                                + positionTypeField.getValue().getPositionEnName() + " \\ "
-                                + positionTypeField.getValue().getPositionRuName() + "\n\n"
-                                + "Salary MIN: "
-                                + openPositionFieldSalaryMin.getValue() + "\n"
-                                + "Salary MAX: "
-                                + openPositionFieldSalaryMax.getValue() + "\n\n"
-                                + (shortDescriptionTextArea.getValue() != null ?
-                                Jsoup.parse(shortDescriptionTextArea.getValue()).text() : ""),
+                        "Открылась вакансия",
+                        "Открыта вакансия",
                         new Date(),
                         userSession.getUser());
+            } else {
+                if (openClosePositionCheckBox.getValue()) {
+                    lastOpenVacancyDateField.setValue(null);
+                    ownerTextField.setValue(null);
+                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            "Закрылась вакансия",
+                            "Закрыта вакансия",
+                            new Date(),
+                            userSession.getUser());
+                }
             }
-//        }
+        } else {
+            setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                    "Открыта новая вакансия",
+                    vacansyNameField.getValue() + "\n"
+                            + positionTypeField.getValue().getPositionEnName() + " \\ "
+                            + positionTypeField.getValue().getPositionRuName() + "\n\n"
+                            + "Salary MIN: "
+                            + openPositionFieldSalaryMin.getValue() + "\n"
+                            + "Salary MAX: "
+                            + openPositionFieldSalaryMax.getValue() + "\n\n"
+                            + (shortDescriptionTextArea.getValue() != null ?
+                            Jsoup.parse(shortDescriptionTextArea.getValue()).text() : ""),
+                    new Date(),
+                    userSession.getUser());
+        }
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!vacansyNameField.getValue().equals(startVacansyName)) {
@@ -703,9 +698,46 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("openClosePositionCheckBox")
     public void onOpenClosePositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-
         openCloseCurrentStatus = openClosePositionCheckBox.getValue();
 
+        disableEnableFields(event);
+
+        if (!event.getValue()) {
+            if (getEditedEntity().getProjectName() != null) {
+                getEditedEntity().getProjectName().setProjectIsClosed(false);
+            }
+        }
+    }
+
+    private void disableEnableFields(HasValue.ValueChangeEvent<Boolean> event) {
+        if (getEditedEntity().getOpenClose()) {
+            cityOpenPositionField.setEditable(false);
+            companyDepartamentField.setEditable(false);
+            companyNameField.setEditable(false);
+            numberPositionField.setEditable(false);
+            positionTypeField.setEditable(false);
+            projectNameField.setEditable(false);
+            vacansyNameField.setEditable(false);
+            companyDepartamentField.setEditable(false);
+        } else {
+            cityOpenPositionField.setEditable(true);
+            companyDepartamentField.setEditable(true);
+            companyNameField.setEditable(true);
+            numberPositionField.setEditable(true);
+            positionTypeField.setEditable(true);
+            projectNameField.setEditable(true);
+            vacansyNameField.setEditable(true);
+            companyDepartamentField.setEditable(true);
+        }
+    }
+
+    @Subscribe
+    public void onAfterCommitChanges1(AfterCommitChangesEvent event) {
+        openCloseChildVacancy(event);
+
+    }
+
+    private void openCloseChildVacancy(AfterCommitChangesEvent event) {
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_SELECT_COMMAND)
                 .parameter("parentOpenPosition", getEditedEntity())
@@ -731,33 +763,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     }), new DialogAction(DialogAction.Type.NO))
                     .show();
 
-        }
-
-        if (getEditedEntity().getOpenClose()) {
-            cityOpenPositionField.setEditable(false);
-            companyDepartamentField.setEditable(false);
-            companyNameField.setEditable(false);
-            numberPositionField.setEditable(false);
-            positionTypeField.setEditable(false);
-            projectNameField.setEditable(false);
-            vacansyNameField.setEditable(false);
-            companyDepartamentField.setEditable(false);
-        } else {
-            cityOpenPositionField.setEditable(true);
-            companyDepartamentField.setEditable(true);
-            companyNameField.setEditable(true);
-            numberPositionField.setEditable(true);
-            positionTypeField.setEditable(true);
-            projectNameField.setEditable(true);
-            vacansyNameField.setEditable(true);
-            companyDepartamentField.setEditable(true);
-
-        }
-
-        if (!event.getValue()) {
-            if (getEditedEntity().getProjectName() != null) {
-                getEditedEntity().getProjectName().setProjectIsClosed(false);
-            }
         }
     }
 
