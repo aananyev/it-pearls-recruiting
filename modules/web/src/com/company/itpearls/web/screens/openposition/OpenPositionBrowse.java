@@ -70,7 +70,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private List<User> users = new ArrayList<>();
     private static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
 
-    public final static int PRIOPITY_DRAFT = -1;
+    public final static int PRIORITY_DRAFT = -1;
     public final static int PRIORITY_PAUSED = 0;
     public final static int PRIORITY_LOW = 1;
     public final static int PRIORITY_NORMAL = 2;
@@ -301,7 +301,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String icon = null;
 
         switch ((int) object) {
-            case PRIOPITY_DRAFT:
+            case PRIORITY_DRAFT:
                 icon = "icons/traffic-lights_gray.png";
                 break;
             case PRIORITY_PAUSED: //"Paused"
@@ -1080,7 +1080,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             String icon = null;
 
             switch (g.hashCode()) {
-                case PRIOPITY_DRAFT:
+                case PRIORITY_DRAFT:
                     icon = "icons/traffic-lights_gray.png";
                     break;
                 case PRIORITY_PAUSED: //"Paused"
@@ -1261,7 +1261,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         removeUrgentlyLists();
 
         if (notLowerRatingLookupField.getValue() != null) {
-            if (((int) notLowerRatingLookupField.getValue()) != PRIOPITY_DRAFT) {
+            if (((int) notLowerRatingLookupField.getValue()) != PRIORITY_DRAFT) {
                 setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
             } else {
                 openPositionsDl.removeParameter("rating");
@@ -1403,7 +1403,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setMapOfPriority() {
-        priorityMap.put("Draft", PRIOPITY_DRAFT);
+        priorityMap.put("Draft", PRIORITY_DRAFT);
         priorityMap.put("Paused", PRIORITY_PAUSED);
         priorityMap.put("Low", PRIORITY_LOW);
         priorityMap.put("Normal", PRIORITY_NORMAL);
@@ -1522,7 +1522,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (priority != null) {
             switch (priority) {
-                case PRIOPITY_DRAFT:
+                case PRIORITY_DRAFT:
                     icon = "icons/traffic-lights_gray.png";
                     break;
                 case PRIORITY_PAUSED: //"Paused"
@@ -2011,17 +2011,129 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
     private Icons.Icon openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+        String retStr = "";
 
-        return CubaIcon.valueOf(dataManager.load(OpenPosition.class)
+        if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
                 .parameter("parentOpenPosition", columnGeneratorEvent.getItem())
-                .list().size() > 0 ? "FOLDER" : "FILE");
+                .list().size() > 0) {
+            retStr = "FOLDER";
+        } else {
+            switch (columnGeneratorEvent.getItem().getPriority()) {
+                case PRIORITY_DRAFT:
+                    retStr = "REFRESH_ACTION";
+                    break;
+                case PRIORITY_PAUSED:
+                    retStr = "PAUSE_CIRCLE";
+                    break;
+                case PRIORITY_LOW:
+                    retStr = "ARROW_CIRCLE_DOWN";
+                    break;
+                case PRIORITY_NORMAL:
+                    retStr = "LOOKUP_OK";
+                    break;
+                case PRIORITY_HIGH:
+                    retStr = "ARROW_CIRCLE_UP";
+                    break;
+                case PRIORITY_CRITICAL:
+                    retStr = "EXCLAMATION_CIRCLE";
+                    break;
+                default:
+                    retStr = "LOOKUP_OK";
+                    break;
+            }
+        }
 
+        return CubaIcon.valueOf(retStr);
+
+    }
+
+    @Install(to = "openPositionsTable.folder", subject = "descriptionProvider")
+    private String openPositionsTableFolderDescriptionProvider(OpenPosition openPosition) {
+        String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+        String retStr = "";
+
+        if (dataManager.load(OpenPosition.class)
+                .query(QUERY)
+                .parameter("parentOpenPosition", openPosition)
+                .list().size() > 0) {
+            retStr = null;
+        } else {
+            switch (openPosition.getPriority()) {
+                case PRIORITY_DRAFT:
+                    retStr = "DRAFT PRIORITY";
+                    break;
+                case PRIORITY_PAUSED:
+                    retStr = "PAUSED PRIORITY";
+                    break;
+                case PRIORITY_LOW:
+                    retStr = "LOW PRIORITY";
+                    break;
+                case PRIORITY_NORMAL:
+                    retStr = "NORMAL PRIORITY";
+                    break;
+                case PRIORITY_HIGH:
+                    retStr = "HIGH PRIORITY";
+                    break;
+                case PRIORITY_CRITICAL:
+                    retStr = "CRITICAL PRIORITY";
+                    break;
+                default:
+                    retStr = "NOT DEFINED";
+                    break;
+            }
+        }
+
+        return retStr;
     }
 
     @Install(to = "openPositionsTable.folder", subject = "styleProvider")
     private String openPositionsTableFolderStyleProvider(OpenPosition openPosition) {
-        return "open-position-pic-center-large-gray";
+        String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+        String retStr = "";
+
+        if (dataManager.load(OpenPosition.class)
+                .query(QUERY)
+                .parameter("parentOpenPosition", openPosition)
+                .list().size() > 0) {
+            retStr = "open-position-pic-center-large-gray";
+        } else {
+            switch (openPosition.getPriority()) {
+                case PRIORITY_DRAFT:
+                    retStr = "open-position-pic-center-large-gray";
+                    break;
+                case PRIORITY_PAUSED:
+                    retStr = "open-position-pic-center-large-gray";
+                    break;
+                case PRIORITY_LOW:
+                    retStr = "open-position-pic-center-large-blue";
+                    break;
+                case PRIORITY_NORMAL:
+                    retStr = "open-position-pic-center-large-green";
+                    break;
+                case PRIORITY_HIGH:
+                    retStr = "open-position-pic-center-large-orange";
+                    break;
+                case PRIORITY_CRITICAL:
+                    retStr = "open-position-pic-center-large-red";
+                    break;
+                default:
+                    retStr = "open-position-pic-center-large-gray";
+                    break;
+            }
+        }
+
+        return retStr; /*
+                dataManager.load(OpenPosition.class)
+                .query(QUERY)
+                .parameter("parentOpenPosition", openPosition)
+                .list().size() > 0
+                ? "open-position-pic-center-large-gray" :
+                switch(openPosition.getPriority()) {
+                    case PRIOPITY_DRAFT: "open-position-pic-center-large-gray";
+                    default: "open-position-pic-center-large-gray";
+                }
+        );*/
     }
 
     public void openCloseButtonInvoke() {

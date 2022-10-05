@@ -6,8 +6,26 @@
         messagesPack="com.company.itpearls.web.screens.openposition" icon="COMPASS">
     <data readOnly="true">
         <collection id="openPositionsDc"
-                    class="com.company.itpearls.entity.OpenPosition"
-                    view="openPosition-view">
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local">
+                <property name="projectName" view="_local">
+                    <property name="projectOwner" view="_minimal"/>
+                    <property name="projectDepartment" view="_minimal">
+                        <property name="companyName" view="_minimal">
+                            <property name="fileCompanyLogo" view="_minimal"/>
+                        </property>
+                    </property>
+                </property>
+                <property name="parentOpenPosition" view="_local"/>
+                <property name="positionType" view="_minimal">
+                    <property name="standartDescription"/>
+                </property>
+                <property name="cityPosition" view="_minimal"/>
+                <property name="cities" view="_minimal"/>
+                <property name="owner" view="_minimal"/>
+                <property name="createdBy"/>
+                <property name="createTs"/>
+            </view>
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
@@ -155,8 +173,8 @@
             <columns
                     exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
                 <column id="folder"
-                        resizable="false"
-                        width="40px"
+                        resizable="true"
+                        width="100px"
                         caption="msg://msgFolder">
                     <iconRenderer/>
                 </column>

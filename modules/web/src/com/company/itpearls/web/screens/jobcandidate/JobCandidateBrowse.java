@@ -11,6 +11,7 @@ import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrows
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.core.global.View;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -864,6 +865,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .parameter("candidate", jobCandidatesTable.getSingleSelected())
                     .one();
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
 

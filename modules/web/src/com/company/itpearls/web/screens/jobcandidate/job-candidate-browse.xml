@@ -35,6 +35,9 @@
                     <property name="candidate"
                               view="_minimal"/>
                     <property name="textCV"/>
+                    <property name="toVacancy" view="_minimal">
+                        <property name="comment"/>
+                    </property>
                 </property>
                 <property name="iteractionList"
                           view="_minimal">
@@ -49,7 +52,12 @@
                         <property name="signSendToClient"/>
                     </property>
                     <property name="vacancy"
-                              view="_minimal"/>
+                              view="_minimal">
+                        <property name="projectName" view="_minimal">
+                            <property name="projectDepartment"
+                                      view="_minimal"/>
+                        </property>
+                    </property>
                     <property name="addString"/>
                     <property name="dateIteraction"/>
                     <property name="rating"/>
@@ -59,7 +67,7 @@
                 <property name="socialNetwork"
                           view="_minimal"/>
             </view>
-            <loader id="jobCandidatesDl" cacheable="true">
+            <loader id="jobCandidatesDl">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e
                              order by e.secondName, e.firstName]]>

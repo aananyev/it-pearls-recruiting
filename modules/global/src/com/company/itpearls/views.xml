@@ -92,6 +92,8 @@
         <property name="memoForInterview"/>
         <property name="more10NumberPosition"/>
         <property name="workExperience"/>
+        <property name="needLetter"/>
+        <property name="commentEn"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_minimal">
         <property name="currentCompany" view="_local"/>
@@ -210,29 +212,17 @@
         <property name="fileCompanyLogo" view="_local"/>
         <property name="companyDirector" view="_local"/>
     </view>
-    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_minimal">
-        <property name="candidate" view="_minimal">
-            <property name="currentCompany" view="_minimal"/>
-            <property name="cityOfResidence" view="_minimal"/>
-            <property name="fileImageFace" view="_minimal">
-                <property name="size"/>
-            </property>
-        </property>
-        <property name="resumePosition" view="_minimal"/>
-        <property name="toVacancy" view="_minimal"/>
-        <property name="owner" view="_minimal">
-            <property name="firstName"/>
-            <property name="lastName"/>
+    <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
+        <property name="resumePosition" view="_local"/>
+        <property name="toVacancy" view="_local"/>
+        <property name="owner" view="_local">
         </property>
         <property name="lintToCloudFile"/>
         <property name="fileCV" view="_local">
             <property name="createTs"/>
             <property name="createdBy"/>
         </property>
-        <property name="originalFileCV" view="_minimal">
-            <property name="size"/>
-            <property name="createTs"/>
-            <property name="createdBy"/>
+        <property name="originalFileCV" view="_local">
         </property>
         <property name="createTs"/>
         <property name="createdBy"/>
@@ -243,8 +233,8 @@
             <property name="fileOwner" view="_minimal"/>
         </property>
         <property name="fileImageFace" view="_local"/>
-        <property name="skillTree" view="_minimal"/>
-        <property name="textCV"/>
+        <property name="skillTree" view="_local"/>
+        <property name="candidate" view="_local"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">
