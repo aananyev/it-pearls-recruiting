@@ -10,9 +10,13 @@
             <view extends="_local">
                 <property name="projectName" view="_local">
                     <property name="projectOwner" view="_minimal"/>
+                    <property name="projectName"/>
                     <property name="projectDepartment" view="_minimal">
                         <property name="companyName" view="_minimal">
                             <property name="fileCompanyLogo" view="_minimal"/>
+                            <property name="departmentOfCompany" view="_minimal">
+                                <property name="templateLetter"/>
+                            </property>
                         </property>
                     </property>
                 </property>
@@ -174,7 +178,7 @@
             <columns
                     exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
                 <column id="folder"
-                        resizable="true"
+                        resizable="false"
                         width="100px"
                         caption="msg://msgFolder">
                     <iconRenderer/>

@@ -2013,7 +2013,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
     private Icons.Icon openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
-        String retStr = "";
+        String retStr = "QUESTION_CIRCLE";
 
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
@@ -2021,28 +2021,32 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .list().size() > 0) {
             retStr = "FOLDER";
         } else {
-            switch (columnGeneratorEvent.getItem().getPriority()) {
-                case PRIORITY_DRAFT:
-                    retStr = "REFRESH_ACTION";
-                    break;
-                case PRIORITY_PAUSED:
-                    retStr = "PAUSE_CIRCLE";
-                    break;
-                case PRIORITY_LOW:
-                    retStr = "ARROW_CIRCLE_DOWN";
-                    break;
-                case PRIORITY_NORMAL:
-                    retStr = "LOOKUP_OK";
-                    break;
-                case PRIORITY_HIGH:
-                    retStr = "ARROW_CIRCLE_UP";
-                    break;
-                case PRIORITY_CRITICAL:
-                    retStr = "EXCLAMATION_CIRCLE";
-                    break;
-                default:
-                    retStr = "LOOKUP_OK";
-                    break;
+            if (columnGeneratorEvent.getItem() != null) {
+                if (columnGeneratorEvent.getItem().getPriority() != null) {
+                    switch (columnGeneratorEvent.getItem().getPriority()) {
+                        case PRIORITY_DRAFT:
+                            retStr = "REFRESH_ACTION";
+                            break;
+                        case PRIORITY_PAUSED:
+                            retStr = "PAUSE_CIRCLE";
+                            break;
+                        case PRIORITY_LOW:
+                            retStr = "ARROW_CIRCLE_DOWN";
+                            break;
+                        case PRIORITY_NORMAL:
+                            retStr = "LOOKUP_OK";
+                            break;
+                        case PRIORITY_HIGH:
+                            retStr = "ARROW_CIRCLE_UP";
+                            break;
+                        case PRIORITY_CRITICAL:
+                            retStr = "EXCLAMATION_CIRCLE";
+                            break;
+                        default:
+                            retStr = "LOOKUP_OK";
+                            break;
+                    }
+                }
             }
         }
 
@@ -2061,28 +2065,32 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .list().size() > 0) {
             retStr = null;
         } else {
-            switch (openPosition.getPriority()) {
-                case PRIORITY_DRAFT:
-                    retStr = "DRAFT PRIORITY";
-                    break;
-                case PRIORITY_PAUSED:
-                    retStr = "PAUSED PRIORITY";
-                    break;
-                case PRIORITY_LOW:
-                    retStr = "LOW PRIORITY";
-                    break;
-                case PRIORITY_NORMAL:
-                    retStr = "NORMAL PRIORITY";
-                    break;
-                case PRIORITY_HIGH:
-                    retStr = "HIGH PRIORITY";
-                    break;
-                case PRIORITY_CRITICAL:
-                    retStr = "CRITICAL PRIORITY";
-                    break;
-                default:
-                    retStr = "NOT DEFINED";
-                    break;
+            if (openPosition.getPriority() != null) {
+                switch (openPosition.getPriority()) {
+                    case PRIORITY_DRAFT:
+                        retStr = "DRAFT PRIORITY";
+                        break;
+                    case PRIORITY_PAUSED:
+                        retStr = "PAUSED PRIORITY";
+                        break;
+                    case PRIORITY_LOW:
+                        retStr = "LOW PRIORITY";
+                        break;
+                    case PRIORITY_NORMAL:
+                        retStr = "NORMAL PRIORITY";
+                        break;
+                    case PRIORITY_HIGH:
+                        retStr = "HIGH PRIORITY";
+                        break;
+                    case PRIORITY_CRITICAL:
+                        retStr = "CRITICAL PRIORITY";
+                        break;
+                    default:
+                        retStr = "NOT DEFINED";
+                        break;
+                }
+            } else {
+                retStr = "NOT DEFINED";
             }
         }
 
@@ -2100,28 +2108,32 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .list().size() > 0) {
             retStr = "open-position-pic-center-large-gray";
         } else {
-            switch (openPosition.getPriority()) {
-                case PRIORITY_DRAFT:
-                    retStr = "open-position-pic-center-large-gray";
-                    break;
-                case PRIORITY_PAUSED:
-                    retStr = "open-position-pic-center-large-gray";
-                    break;
-                case PRIORITY_LOW:
-                    retStr = "open-position-pic-center-large-blue";
-                    break;
-                case PRIORITY_NORMAL:
-                    retStr = "open-position-pic-center-large-green";
-                    break;
-                case PRIORITY_HIGH:
-                    retStr = "open-position-pic-center-large-orange";
-                    break;
-                case PRIORITY_CRITICAL:
-                    retStr = "open-position-pic-center-large-red";
-                    break;
-                default:
-                    retStr = "open-position-pic-center-large-gray";
-                    break;
+            if (openPosition.getPriority() != null) {
+                switch (openPosition.getPriority()) {
+                    case PRIORITY_DRAFT:
+                        retStr = "open-position-pic-center-large-gray";
+                        break;
+                    case PRIORITY_PAUSED:
+                        retStr = "open-position-pic-center-large-gray";
+                        break;
+                    case PRIORITY_LOW:
+                        retStr = "open-position-pic-center-large-blue";
+                        break;
+                    case PRIORITY_NORMAL:
+                        retStr = "open-position-pic-center-large-green";
+                        break;
+                    case PRIORITY_HIGH:
+                        retStr = "open-position-pic-center-large-orange";
+                        break;
+                    case PRIORITY_CRITICAL:
+                        retStr = "open-position-pic-center-large-red";
+                        break;
+                    default:
+                        retStr = "open-position-pic-center-large-gray";
+                        break;
+                }
+            } else {
+                retStr = "open-position-pic-center-large-yellow";
             }
         }
 

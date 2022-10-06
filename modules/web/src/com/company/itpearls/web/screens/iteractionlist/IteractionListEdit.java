@@ -355,6 +355,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                         this.vacancyFiels.setValue(null);
                                         vacancyFiels.focus();
 
+                                        ratingImage.setValueSource(null);
+                                        trafficLighterImage.setValueSource(null);
+                                        currentPriorityLabel.setValue(null);
+
                                     }),
                                     new DialogAction(DialogAction.Type.NO))
                             .show();
@@ -1312,33 +1316,41 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         String priorityStr = "";
 
         for (Map.Entry<String, Integer> pair : priorityMap.entrySet()) {
-            if (event.getValue().getPriority().equals(pair.getValue())) {
-                priorityStr = pair.getKey();
+            if (event.getValue() != null && pair.getValue() != null) {
+                if (event.getValue().getPriority().equals(pair.getValue())) {
+                    priorityStr = pair.getKey();
+                    break;
+                }
+            } else {
                 break;
             }
         }
 
         String icon = "";
 
-        switch (event.getValue().getPriority()) {
-            case -1:
-                icon = "icons/traffic-lights_gray.png";
-                break;
-            case 0: //"Paused"
-                icon = "icons/remove.png";
-                break;
-            case 1: //"Low"
-                icon = "icons/traffic-lights_blue.png";
-                break;
-            case 2: //"Normal"
-                icon = "icons/traffic-lights_green.png";
-                break;
-            case 3: //"High"
-                icon = "icons/traffic-lights_yellow.png";
-                break;
-            case 4: //"Critical"
-                icon = "icons/traffic-lights_red.png";
-                break;
+        if (event.getValue() != null) {
+            switch (event.getValue().getPriority()) {
+                case -1:
+                    icon = "icons/traffic-lights_gray.png";
+                    break;
+                case 0: //"Paused"
+                    icon = "icons/remove.png";
+                    break;
+                case 1: //"Low"
+                    icon = "icons/traffic-lights_blue.png";
+                    break;
+                case 2: //"Normal"
+                    icon = "icons/traffic-lights_green.png";
+                    break;
+                case 3: //"High"
+                    icon = "icons/traffic-lights_yellow.png";
+                    break;
+                case 4: //"Critical"
+                    icon = "icons/traffic-lights_red.png";
+                    break;
+            }
+        } else {
+            icon = null;
         }
 
         if (!priorityStr.equals("")) {
