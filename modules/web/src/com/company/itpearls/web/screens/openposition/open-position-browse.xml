@@ -25,6 +25,7 @@
                 <property name="owner" view="_minimal"/>
                 <property name="createdBy"/>
                 <property name="createTs"/>
+                <property name="templateLetter"/>
             </view>
             <loader id="openPositionsDl">
                 <query>

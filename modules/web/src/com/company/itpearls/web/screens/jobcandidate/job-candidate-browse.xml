@@ -53,6 +53,7 @@
                     </property>
                     <property name="vacancy"
                               view="_minimal">
+                        <property name="comment"/>
                         <property name="projectName" view="_minimal">
                             <property name="projectDepartment"
                                       view="_minimal"/>

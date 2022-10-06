@@ -849,15 +849,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 entity.setLastOpenDate(new Date());
                 entity.setPriority(PRIORITY_NORMAL);
 
-                if (entity.getParentOpenPosition().getOpenClose()) {
-                    entity.getParentOpenPosition().setOpenClose(false);
-                    setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected().getParentOpenPosition(),
-                            "Открыта дочерней вакансией "
-                                    + openPositionsTable.getSingleSelected().getVacansyName(),
-                            "Открыта ввиду открытия дочерней вакансии "
-                                    + openPositionsTable.getSingleSelected().getVacansyName(),
-                    new Date(),
-                    userSession.getUser());
+                if (entity.getParentOpenPosition() != null) {
+                    if (entity.getParentOpenPosition().getOpenClose()) {
+                        entity.getParentOpenPosition().setOpenClose(false);
+                        setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected().getParentOpenPosition(),
+                                "Открыта дочерней вакансией "
+                                        + openPositionsTable.getSingleSelected().getVacansyName(),
+                                "Открыта ввиду открытия дочерней вакансии "
+                                        + openPositionsTable.getSingleSelected().getVacansyName(),
+                                new Date(),
+                                userSession.getUser());
+                    }
                 }
 
                 openPositionsTable.setDetailsVisible(entity, false);

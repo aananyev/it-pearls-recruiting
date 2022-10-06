@@ -22,7 +22,10 @@
                     <property name="size"/>
                 </property>
                 <property name="iteractionList"
-                          view="iteractionList-view"/>
+                          view="iteractionList-view">
+                    <property name="chainInteraction"
+                              view="_minimal"/>
+                </property>
                 <property name="socialNetwork"
                           view="_minimal"/>
                 <property name="specialisation"
