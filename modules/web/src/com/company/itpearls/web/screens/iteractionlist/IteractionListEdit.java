@@ -6,6 +6,8 @@ import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
+import com.company.itpearls.web.StandartPriorityVacancy;
+import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
 import com.company.itpearls.web.widgets.Diagrams.ResearcherDiagramWidget;
 import com.haulmont.cuba.core.app.EmailService;
@@ -61,8 +63,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private LookupPickerField<User> recrutierField;
     @Inject
-    private LookupPickerField<JobCandidate> candidateField;
-    @Inject
     private EmailService emailService;
     @Inject
     private ScreenBuilders screenBuilders;
@@ -95,11 +95,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private StarsAndOtherService starsAndOtherService;
 
-    static String RESEARCHER = "Researcher";
+/*    static String RESEARCHER = "Researcher";
     static String RECRUITER = "Recruiter";
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
-    static String OUSTAFF_NAMAGER = "Outstaff Manager";
+    static String OUSTAFF_NAMAGER = "Outstaff Manager"; */
 
     private Boolean newProject;
     static Boolean myClient;
@@ -140,7 +140,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> projectLabel;
     @Inject
     private Image ratingImage;
-
+    @Inject
+    private LookupPickerField<JobCandidate> candidateField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -952,8 +953,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setLaborAgreement() {
-        if (getRoleService.isUserRoles(userSession.getUser(), OUSTAFF_NAMAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.OUSTAFF_NAMAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
             laborAgreementLookupPickerField.setVisible(true);
 
             if (vacancyFiels.getValue() != null) {
@@ -1304,12 +1305,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setPriorityMap() {
-        priorityMap.put("Draft", -1);
-        priorityMap.put("Paused", 0);
-        priorityMap.put("Low", 1);
-        priorityMap.put("Normal", 2);
-        priorityMap.put("High", 3);
-        priorityMap.put("Critical", 4);
+        priorityMap.put(StandartPriorityVacancy.DRAFT_STR,
+                StandartPriorityVacancy.DRAFT_INT);
+        priorityMap.put(StandartPriorityVacancy.PAUSED_STR,
+                StandartPriorityVacancy.PAUSED_INT);
+        priorityMap.put(StandartPriorityVacancy.LOW_STR,
+                StandartPriorityVacancy.LOW_INT);
+        priorityMap.put(StandartPriorityVacancy.NORMAL_STR,
+                StandartPriorityVacancy.NORMAL_INT);
+        priorityMap.put(StandartPriorityVacancy.HIGH_STR,
+                StandartPriorityVacancy.HIGH_INT);
+        priorityMap.put(StandartPriorityVacancy.CRITICAL_STR,
+                StandartPriorityVacancy.CRITICAL_INT);
     }
 
     private void setPriorityLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
@@ -1331,22 +1338,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (event.getValue() != null) {
             switch (event.getValue().getPriority()) {
                 case -1:
-                    icon = "icons/traffic-lights_gray.png";
+                    icon = StandartPriorityVacancy.DRAFT_ICON;
                     break;
                 case 0: //"Paused"
-                    icon = "icons/remove.png";
+                    icon = StandartPriorityVacancy.PAUSED_ICON;
                     break;
                 case 1: //"Low"
-                    icon = "icons/traffic-lights_blue.png";
+                    icon = StandartPriorityVacancy.LOW_ICON;
                     break;
                 case 2: //"Normal"
-                    icon = "icons/traffic-lights_green.png";
+                    icon = StandartPriorityVacancy.NORMAL_ICON;
                     break;
                 case 3: //"High"
-                    icon = "icons/traffic-lights_yellow.png";
+                    icon = StandartPriorityVacancy.HIGH_ICON;
                     break;
                 case 4: //"Critical"
-                    icon = "icons/traffic-lights_red.png";
+                    icon = StandartPriorityVacancy.CRITICAL_ICON;
                     break;
             }
         } else {
@@ -1367,22 +1374,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         switch (openPosition.getPriority()) {
             case -1:
-                icon = "icons/traffic-lights_gray.png";
+                icon = StandartPriorityVacancy.DRAFT_ICON;
                 break;
             case 0: //"Paused"
-                icon = "icons/remove.png";
+                icon = StandartPriorityVacancy.PAUSED_ICON;
                 break;
             case 1: //"Low"
-                icon = "icons/traffic-lights_blue.png";
+                icon = StandartPriorityVacancy.LOW_ICON;
                 break;
             case 2: //"Normal"
-                icon = "icons/traffic-lights_green.png";
+                icon = StandartPriorityVacancy.NORMAL_ICON;
                 break;
             case 3: //"High"
-                icon = "icons/traffic-lights_yellow.png";
+                icon = StandartPriorityVacancy.HIGH_ICON;
                 break;
             case 4: //"Critical"
-                icon = "icons/traffic-lights_red.png";
+                icon = StandartPriorityVacancy.CRITICAL_ICON;
                 break;
         }
 
