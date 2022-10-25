@@ -103,7 +103,10 @@
         <entity class="com.company.itpearls.entity.Interview">
             <include re=".*"/>
         </entity>
-        <entity class="com.company.itpearls.entity.Emailer">
+        <entity class="com.company.itpearls.entity.InternalEmailer">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.ExtSettingsWindow">
             <include re=".*"/>
         </entity>
     </entities>

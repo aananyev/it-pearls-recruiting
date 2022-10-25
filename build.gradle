@@ -277,8 +277,8 @@ task buildWar(type: CubaWarBuilding) {
                      'cuba.dataSourceProvider'     : 'jndi']
     logbackConfigurationFile = 'etc/war-logback.xml'
     includeContextXml = true
-    singleWar = false
     coreContextXmlPath = 'modules/core/web/META-INF/war-context.xml'
+    singleWar = false
 }
 task buildUberJar(type: CubaUberJarBuilding) {
     coreJettyEnvPath = 'modules/core/web/META-INF/jetty-env.xml'

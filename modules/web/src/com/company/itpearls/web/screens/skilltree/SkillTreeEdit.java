@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.skilltree;
 
+import com.company.itpearls.web.StandartPrioritySkills;
+import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -13,6 +15,8 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @UiController("itpearls_SkillTree.edit")
 @UiDescriptor("skill-tree-edit.xml")
@@ -34,6 +38,10 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
     static String referer = "http://www.google.com";
     @Inject
     private TextField<String> skillNameField;
+    @Inject
+    private CheckBox notParsingCheckBox;
+    @Inject
+    private LookupField<Integer> skillPriorityField;
 
     public void parseWikiToDescription() throws IOException {
         Document doc = Jsoup.connect(wikiPateField.getValue())
@@ -101,6 +109,90 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
                         .show();
             }
         });
+
+        setOptionsSkillPriorityField();
+    }
+
+    private void setOptionsSkillPriorityField() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+
+        map.put(StandartPrioritySkills.NOT_USED_SKILLS_STR,
+                StandartPrioritySkills.NOT_USED_SKILLS_INT);
+        map.put(StandartPrioritySkills.DEFAULT_STR,
+                StandartPrioritySkills.DEFAULT_INT);
+        map.put(StandartPrioritySkills.SUBJECT_AREA_STR,
+                StandartPrioritySkills.SUBJECT_AREA_INT);
+        map.put(StandartPrioritySkills.FRAMEWORKS_STR,
+                StandartPrioritySkills.FRAMEWORKS_INT);
+        map.put(StandartPrioritySkills.METHODOLOGY_STR,
+                StandartPrioritySkills.METHODOLORY_INT);
+        map.put(StandartPrioritySkills.PROGRAMMING_LANGUAGE_STR,
+                StandartPrioritySkills.PROGRAMMING_LANGUAGE_INT);
+
+        skillPriorityField.setOptionsMap(map);
+    }
+
+    @Install(to = "skillPriorityField", subject = "optionCaptionProvider")
+    private String skillPriorityFieldOptionCaptionProvider(Integer integer) {
+        String retStr = "";
+
+        switch (integer) {
+            case -1:
+                retStr = StandartPrioritySkills.NOT_USED_SKILLS_STYLE;
+                break;
+            case 0:
+                retStr = StandartPrioritySkills.DEFAULT_STYLE;
+                break;
+            case 1:
+                retStr = StandartPrioritySkills.SUBJECT_AREA_STYLE;
+                break;
+            case 2:
+                retStr = StandartPrioritySkills.FRAMEWORKS_STYLE;
+                break;
+            case 3:
+                retStr = StandartPrioritySkills.METHODOLORY_STYLE;
+                break;
+            case 4:
+                retStr = StandartPrioritySkills.PROGRAMMING_LANGUAGE_STYLE;
+                break;
+            default:
+                retStr = StandartPrioritySkills.NOT_USED_SKILLS_STYLE;
+                break;
+        }
+
+        return retStr;
+    }
+
+
+    @Install(to = "skillPriorityField", subject = "optionStyleProvider")
+    private String skillPriorityFieldOptionStyleProvider(Integer integer) {
+        String retStr = "";
+
+        switch (integer) {
+            case -1:
+                retStr = StandartPrioritySkills.NOT_USED_SKILLS_STYLE;
+                break;
+            case 0:
+                retStr = StandartPrioritySkills.DEFAULT_STYLE;
+                break;
+            case 1:
+                retStr = StandartPrioritySkills.SUBJECT_AREA_STYLE;
+                break;
+            case 2:
+                retStr = StandartPrioritySkills.FRAMEWORKS_STYLE;
+                break;
+            case 3:
+                retStr = StandartPrioritySkills.METHODOLORY_STYLE;
+                break;
+            case 4:
+                retStr = StandartPrioritySkills.PROGRAMMING_LANGUAGE_STYLE;
+                break;
+            default:
+                retStr = StandartPrioritySkills.NOT_USED_SKILLS_STYLE;
+                break;
+        }
+
+        return retStr;
     }
 
     @Subscribe("fileImageSkillUpload")
@@ -134,5 +226,13 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
                 skillCommentRichTextArea.getValue() != null) {
             setLogo();
         }
+    }
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            notParsingCheckBox.setValue(false);
+        }
+
     }
 }

@@ -36,6 +36,6 @@
         <class>com.company.itpearls.entity.ExtUser</class>
         <class>com.company.itpearls.entity.OpenPositionNews</class>
         <class>com.company.itpearls.entity.Interview</class>
-        <class>com.company.itpearls.entity.Emailer</class>
+        <class>com.company.itpearls.entity.InternalEmailer</class>
     </persistence-unit>
 </persistence>

@@ -9,11 +9,18 @@
                   class="com.company.itpearls.entity.IteractionList">
             <view extends="_local">
                 <property name="chainInteraction"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="candidate"
-                          view="_minimal"/>
+                          view="_local">
+                    <property name="fullName"/>
+                    <property name="firstName"/>
+                    <property name="secondName"/>
+                    <property name="middleName"/>
+                    <property name="personPosition"
+                              view="_local"/>
+                </property>
                 <property name="iteractionType"
-                          view="_minimal">
+                          view="_local">
                     <property name="notificationNeedSend"/>
                     <property name="addType"/>
                     <property name="addFlag"/>
@@ -22,47 +29,54 @@
                     <property name="callForm"/>
                 </property>
                 <property name="vacancy"
-                          view="_minimal">
+                          view="_local">
                     <property name="projectName"
-                              view="_minimal">
+                              view="_local">
                         <property name="projectTree"
-                                  view="_minimal"/>
+                                  view="_local"/>
                         <property name="projectName"/>
                         <property name="projectOwner"
-                                  view="_minimal"/>
+                                  view="_local"/>
                         <property name="projectDepartment"
-                                  view="_minimal">
+                                  view="_local">
                             <property name="companyName"
-                                      view="_minimal"/>
+                                      view="_local"/>
                         </property>
                     </property>
                     <property name="cities"
-                              view="_minimal"/>
+                              view="_local"/>
+                    <property name="openClose"/>
+                    <property name="priority"/>
+                    <property name="outstaffingCost"/>
                 </property>
                 <property name="recrutier"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="laborAgreement"
-                          view="_minimal">
+                          view="_local">
                     <property name="company"
-                              view="_minimal"/>
+                              view="_local"/>
                     <property name="laborAgreementType"
-                              view="_minimal"/>
+                              view="_local"/>
                     <property name="openPositions"
-                              view="_minimal">
+                              view="_local">
                         <property name="projectName"
-                                  view="_minimal"/>
+                                  view="_local"/>
                     </property>
                     <property name="comment"/>
                 </property>
+                <property name="currentOpenClose"/>
             </view>
             <loader id="iteractionListDl"/>
         </instance>
         <collection id="laborAgreementDc"
                     class="com.company.itpearls.entity.LaborAgreement">
             <view extends="_local">
-                <property name="laborAgreementType" view="_minimal"/>
-                <property name="openPositions" view="_minimal"/>
-                <property name="company" view="_minimal"/>
+                <property name="laborAgreementType"
+                          view="_local"/>
+                <property name="openPositions"
+                          view="_local"/>
+                <property name="company"
+                          view="_local"/>
             </view>
             <loader id="laborAgreementDl" cacheable="true">
                 <query>
@@ -263,6 +277,22 @@
                                                stylename="h3"
                                                align="MIDDLE_CENTER"
                                                width="AUTO"/>
+                                    </hbox>
+                                    <hbox id="outstaffingCostHBox"
+                                          spacing="true"
+                                          visible="false">
+                                        <label value="msg://msgOutstaffCost"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                        <label dataContainer="iteractionListDc"
+                                               stylename="h3"
+                                               align="MIDDLE_CENTER"
+                                               property="vacancy.outstaffingCost"/>
+                                        <label value="msg://msgRubPerHour"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
                                     </hbox>
                                 </vbox>
                                 <lookupField id="ratingField"

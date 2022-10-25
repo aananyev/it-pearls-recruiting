@@ -5,8 +5,9 @@
         messagesPack="com.company.itpearls.web.screens.candidatecv" icon="FILE_WORD_O">
     <data>
         <collection id="openPositionsDc"
-                    class="com.company.itpearls.entity.OpenPosition"
-                    view="openPosition-view">
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local">
+            </view>
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName]]>
@@ -15,27 +16,47 @@
         </collection>
         <instance id="candidateCVDc"
                   class="com.company.itpearls.entity.CandidateCV">
-            <view extends="_minimal">
-                <property name="candidate" view="_minimal">
+            <view extends="_local">
+                <property name="candidate"
+                          view="_local">
                     <property name="fullName"/>
+                    <property name="personPosition"
+                              view="_local"/>
                 </property>
-                <property name="resumePosition" view="_minimal"/>
-                <property name="fileCV" view="_minimal"/>
-                <property name="toVacancy" view="_minimal"/>
-                <property name="fileImageFace" view="_minimal"/>
-                <property name="originalFileCV" view="_minimal"/>
-                <property name="skillTree" view="_minimal"/>
-                <property name="someFiles" view="_minimal">
-                    <property name="fileType" view="_minimal"/>
+                <property name="resumePosition"
+                          view="_local"/>
+                <property name="fileCV"
+                          view="_local"/>
+                <property name="toVacancy"
+                          view="_local">
+                    <property name="comment"/>
+                    <property name="projectName" view="_local">
+                        <property name="projectName"/>
+                        <property name="projectDepartment" view="_local"/>
+                    </property>
+                </property>
+                <property name="fileImageFace"
+                          view="_local"/>
+                <property name="originalFileCV"
+                          view="_local"/>
+                <property name="skillTree"
+                          view="_local"/>
+                <property name="someFiles"
+                          view="_local">
+                    <property name="fileType"
+                              view="_local"/>
                     <property name="fileComment"/>
-                    <property name="fileDescriptor" view="_minimal">
+                    <property name="fileDescriptor"
+                              view="_local">
                         <property name="size"/>
                     </property>
                     <property name="fileDescription"/>
-                    <property name="fileOwner" view="_minimal"/>
+                    <property name="fileOwner"
+                              view="_local"/>
                 </property>
                 <property name="letter"/>
-                <property name="owner" view="_minimal"/>
+                <property name="owner"
+                          view="_local"/>
                 <property name="linkOriginalCv"/>
                 <property name="linkItPearlsCV"/>
                 <property name="textCV"/>
@@ -43,24 +64,36 @@
                 <property name="commentLetter"/>
             </view>
             <loader/>
-            <collection id="someFilesesDc" property="someFiles"/>
-            <collection id="skillTreesDc" property="skillTree"/>
+            <collection id="someFilesesDc"
+                        property="someFiles"/>
+            <collection id="skillTreesDc"
+                        property="skillTree"/>
         </instance>
-        <collection id="candidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
-            <loader id="candidatesLc">
+        <collection id="candidatesDc"
+                    class="com.company.itpearls.entity.JobCandidate">
+            <view extends="_local">
+                <property name="fullName"/>
+                <property name="personPosition"
+                          view="_local"/>
+            </view>
+            <loader id="candidatesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
                 </query>
             </loader>
         </collection>
-        <collection id="resumePositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
+        <collection id="resumePositionsDc"
+                    class="com.company.itpearls.entity.Position"
+                    view="_local">
             <loader id="resumePositionsLc">
                 <query>
                     <![CDATA[select e from itpearls_Position e where e.positionRuName not like '%(не использовать)%' order by e.positionRuName]]>
                 </query>
             </loader>
         </collection>
-        <collection id="usersDc" class="com.haulmont.cuba.security.entity.User" view="_local">
+        <collection id="usersDc"
+                    class="com.haulmont.cuba.security.entity.User"
+                    view="_local">
             <loader id="usersDl">
                 <query>
                     <![CDATA[select e from sec$User e order by e.name]]>
@@ -71,7 +104,10 @@
     <dialogMode height="800"
                 modal="true"
                 width="1200"/>
-    <layout expand="tabSheet" spacing="true" height="100%" width="100%">
+    <layout expand="tabSheet"
+            spacing="true"
+            height="100%"
+            width="100%">
         <groupBox spacing="true" expand="candidateLabel">
             <hbox id="candidateLabel"
                   spacing="true"
@@ -130,9 +166,10 @@
                               stylename="light">
                             <vbox spacing="true">
                                 <lookupPickerField id="candidateField"
-                                                   optionsContainer="candidatesDc"
+                                                   inputPrompt="msg://msgCandidateField"
                                                    dataContainer="candidateCVDc"
                                                    property="candidate"
+                                                   optionsContainer="candidatesDc"
                                                    caption="msg://msgCandidate"
                                                    height="50%"
                                                    width="70%">
@@ -160,7 +197,10 @@
                                                    caption="mainMsg://msgVacancy"
                                                    width="70%">
                                     <actions>
-                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                        <action id="open"
+                                                type="picker_open"/>
                                     </actions>
                                 </lookupPickerField>
                             </vbox>

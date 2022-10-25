@@ -65,6 +65,28 @@ public class SkillTree extends StandardEntity {
     @Length(message = "{msg://itpearls_SkillTree.styleHighlighting.validation.Length}", max = 64)
     private String styleHighlighting;
 
+    @Column(name = "NOT_PARSING")
+    private Boolean notParsing;
+
+    @Column(name = "PRIORITY_SKILL")
+    private Integer prioritySkill;
+
+    public Integer getPrioritySkill() {
+        return prioritySkill;
+    }
+
+    public void setPrioritySkill(Integer prioritySkill) {
+        this.prioritySkill = prioritySkill;
+    }
+
+    public Boolean getNotParsing() {
+        return notParsing;
+    }
+
+    public void setNotParsing(Boolean notParsing) {
+        this.notParsing = notParsing;
+    }
+
     public void setSkillTree(SkillTree skillTree) {
         this.skillTree = skillTree;
     }

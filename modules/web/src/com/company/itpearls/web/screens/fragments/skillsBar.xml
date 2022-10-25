@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
     <layout>
-
+        <groupBox id="skillsGroupBox"
+                  width="100%"
+                  collapsable="true"
+                  collapsed="false"
+                  height="AUTO"
+                  caption="msg://msgSkills"
+                  stylename="light">
+            <flowBox id="skillsFlowBox" spacing="true"
+                     width="AUTO"
+                     height="AUTO"/>
+        </groupBox>
     </layout>
 </fragment>

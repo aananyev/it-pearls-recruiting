@@ -62,8 +62,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private LookupPickerField<OpenPosition> candidateCVFieldOpenPosition;
     @Inject
-    private LookupPickerField<JobCandidate> candidateField;
-    @Inject
     private Dialogs dialogs;
     @Inject
     private RichTextArea letterRichTextArea;
@@ -110,17 +108,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private Button showOriginalButon;
     @Inject
-    private Metadata metadata;
-    @Inject
     private FileLoader fileLoader;
+    @Inject
+    private LookupPickerField<JobCandidate> candidateField;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
-
-//    }
-
-//    @Subscribe
-//    public void onInit(InitEvent event) {
         candidateCVFieldOpenPosition.addValueChangeListener(e -> {
             if (e.getValue().getNeedLetter() != null) {
                 if (e.getValue().getTemplateLetter() != null) {
@@ -620,7 +613,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    @Install(to = "candidateField", subject = "optionImageProvider")
+/*    @Install(to = "candidateField", subject = "optionImageProvider")
     private Resource candidateFieldOptionImageProvider(JobCandidate jobCandidate) {
 
         if (jobCandidate.getFileImageFace() != null) {
@@ -632,7 +625,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         return null;
-    }
+    }*/
 
     public void rescanCV() {
         rescanResume();

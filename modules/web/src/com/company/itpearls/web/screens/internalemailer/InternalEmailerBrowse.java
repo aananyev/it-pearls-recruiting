@@ -1,15 +1,11 @@
-package com.company.itpearls.web.screens.emailer;
+package com.company.itpearls.web.screens.internalemailer;
 
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.Emailer;
-
-import javax.inject.Inject;
+import com.company.itpearls.entity.InternalEmailer;
 
 @UiController("itpearls_Emailer.browse")
-@UiDescriptor("emailer-browse.xml")
+@UiDescriptor("internal-emailer-browse.xml")
 @LookupComponent("emailersTable")
 @LoadDataBeforeShow
-public class EmailerBrowse extends StandardLookup<Emailer> {
+public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 }

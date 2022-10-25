@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.openposition;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
@@ -651,8 +652,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         Fragment fragment = openPositionDetailScreenFragment.getFragment();
         fragment.setWidth("100%");
-
         mainLayout.add(fragment);
+
+
+        Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
+        if (skillBoxFragment.generateSkillLabels(
+                openPositionsTable.getSingleSelected().getCommentEn() != null ?
+                        openPositionsTable.getSingleSelected().getCommentEn() :
+                        openPositionsTable.getSingleSelected().getComment())) {
+            mainLayout.add(skillBoxFragment.getFragment());
+        }
 
         closeAllAnoterDetailsScreenFragments();
 
@@ -920,7 +929,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String retStr = "";
 
         try {
-            retStr = getSalaryString(event.getItem());
+            retStr = getSalaryString(event.getItem()) +
+                    (event.getItem().getSalaryComment() != null ? " \ud83d\udcc3" : "");
         } catch (NullPointerException e) {
             retStr = "";
         }
@@ -991,7 +1001,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (openPosition.getSalaryFixLimit() != null) {
             if (openPosition.getSalaryFixLimit()) {
-                retStr = "Фиксированное запрлатное предложение\n";
+                retStr = "Фиксированное запрлатное предложение.\n";
             }
         }
 
@@ -1001,7 +1011,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             retStr = "";
         }
 
-        return retStr;
+        return retStr
+                + (openPosition.getSalaryComment() != null ? "\n\n" + openPosition.getSalaryComment() : "");
     }
 
     @Install(to = "openPositionsTable.salaryMinMax", subject = "styleProvider")
@@ -2154,6 +2165,53 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (openPositionsTable.getSingleSelected() != null) {
             openCloseButtonClickListener(openPositionsTable.getSingleSelected(), openCloseButton);
         }
+    }
+
+    @Install(to = "openPositionsTable.lastCVSend", subject = "columnGenerator")
+    private Object openPositionsTableLastCVSendColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
+        Label labelRet = uiComponents.create(Label.NAME);
+        String QUERY = "select e " +
+                "from itpearls_IteractionList e " +
+                "where e.vacancy = :vacancy " +
+                "and e.iteractionType.signSendToClient = true " +
+                "and e.vacancy.lastOpenDate < e.dateIteraction";
+        Integer countCVsend = dataManager.load(IteractionList.class)
+                .query(QUERY)
+                .view("iteractionList-view")
+                .parameter("vacancy", columnGeneratorEvent.getItem())
+                .list().size();
+
+        labelRet.setValue(countCVsend);
+        labelRet.setWidthFull();
+        labelRet.setHeightFull();
+        labelRet.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        switch (countCVsend) {
+            case 0:
+            case 1:
+            case 2:
+                labelRet.setStyleName("label_table_blue");
+                break;
+            case 3:
+            case 4:
+                labelRet.setStyleName("label_table_green");
+                break;
+            case 5:
+            case 6:
+                labelRet.setStyleName("label_table_orange");
+                break;
+            case 7:
+            case 8:
+            case 9:
+                labelRet.setStyleName("label_table_red");
+                break;
+            case 10:
+            default:
+                labelRet.setStyleName("label_table_gray");
+                break;
+        }
+
+        return labelRet;
     }
 
 }

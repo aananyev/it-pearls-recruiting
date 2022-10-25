@@ -31,7 +31,10 @@
     <!--Application components-->
     <context-param>
         <param-name>appComponents</param-name>
-        <param-value>com.haulmont.cuba com.haulmont.fts com.haulmont.reports com.haulmont.addon.globalevents com.haulmont.charts com.haulmont.bpm com.haulmont.addon.emailtemplates de.diedavids.cuba.dataimport com.haulmont.addon.dashboard</param-value>
+        <param-value>com.haulmont.cuba com.haulmont.fts com.haulmont.reports com.haulmont.addon.globalevents
+            com.haulmont.charts com.haulmont.bpm com.haulmont.addon.emailtemplates de.diedavids.cuba.dataimport
+            com.haulmont.addon.dashboard com.haulmont.addon.helium
+        </param-value>
     </context-param>
 
     <!-- Servlet context listeners that load the application blocks -->

@@ -221,11 +221,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setDisableTwoField();
         setWorkExperienceRadioButton();
         setCommandExperienceRadioButton();
+        setCommentToVacancy();
         changeCityListsLabel();
         standartDescriptionDisable(event);
         whiIsThisGuyDisable(event);
         setOpenPositionNews(event);
         setOpenCloseStart();
+    }
+
+    private void setCommentToVacancy() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            String defComment = "<i>" +
+                    "<!-- НЕ ДЛЯ КАНДИДАТА:<br><br>" +
+                    "-->" +
+                    "</i>";
+
+            openPositionRichTextArea.setValue(defComment);
+        }
     }
 
     private void setOpenCloseStart() {

@@ -9,7 +9,7 @@
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local">
                 <property name="projectName" view="_local">
-                    <property name="projectOwner" view="_minimal"/>
+                    <property name="projectOwner" view="_local"/>
                     <property name="projectName"/>
                     <property name="projectDepartment" view="_minimal">
                         <property name="companyName" view="_minimal">
@@ -30,6 +30,7 @@
                 <property name="createdBy"/>
                 <property name="createTs"/>
                 <property name="templateLetter"/>
+                <property name="candidates" view="_minimal"/>
             </view>
             <loader id="openPositionsDl">
                 <query>
@@ -185,6 +186,8 @@
                 </column>
                 <column id="icon"
                         resizable="true"
+                        collapsible="true"
+                        collapsed="true"
                         width="70px"
                         minimumWidth="35px"
                         caption=""/>
@@ -279,6 +282,15 @@
                         maximumWidth="65px"
                         minimumWidth="45px">
                     <iconRenderer/>
+                </column>
+                <column id="lastCVSend"
+                        resizable="true"
+                        collapsed="false"
+                        collapsible="true"
+                        maximumWidth="65px"
+                        minimumWidth="45px"
+                        caption="msg://mshLastCVSend">
+                    <componentRenderer/>
                 </column>
                 <column id="idStatistics"
                         resizable="true"

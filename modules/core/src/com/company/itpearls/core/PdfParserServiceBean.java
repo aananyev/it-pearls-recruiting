@@ -29,9 +29,15 @@ public class PdfParserServiceBean implements PdfParserService {
 
     @Override
     public List<SkillTree> parseSkillTree(String inputText) {
+        String QUERY_SKILL_TREE =
+                "select e " +
+                        "from itpearls_SkillTree e " +
+                        "where e.notParsing = false";
+
         List<SkillTree> candidateSkills = new ArrayList<>();
 
         List<SkillTree> competitions = dataManager.load(SkillTree.class)
+                .query(QUERY_SKILL_TREE)
                 .view("skillTree-view")
                 .list();
 
@@ -59,8 +65,11 @@ public class PdfParserServiceBean implements PdfParserService {
 
     private boolean checkHiLevel(List<SkillTree> candidateSkills, SkillTree skillTree) {
         for (SkillTree a : candidateSkills) {
-            if (a.getSkillName().toLowerCase().equals(skillTree.getSkillName().toLowerCase())) {
-                return false;
+            if (skillTree.getNotParsing() == false) {
+                if (a.getSkillName().toLowerCase().equals(
+                        skillTree.getSkillName().toLowerCase())) {
+                    return false;
+                }
             }
         }
 

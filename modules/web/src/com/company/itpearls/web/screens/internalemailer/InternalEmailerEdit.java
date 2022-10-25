@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.emailer;
+package com.company.itpearls.web.screens.internalemailer;
 
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.JobCandidate;
@@ -9,21 +9,27 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.Emailer;
-import com.haulmont.cuba.security.entity.User;
+import com.company.itpearls.entity.InternalEmailer;
 import com.haulmont.cuba.security.global.UserSession;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @UiController("itpearls_Emailer.edit")
-@UiDescriptor("emailer-edit.xml")
+@UiDescriptor("internal-emailer-edit.xml")
 @EditedEntityContainer("emailerDc")
 @LoadDataBeforeShow
-public class EmailerEdit extends StandardEditor<Emailer> {
+public class InternalEmailerEdit extends StandardEditor<InternalEmailer> {
     @Inject
     private UserSession userSession;
     @Inject
@@ -34,8 +40,6 @@ public class EmailerEdit extends StandardEditor<Emailer> {
     private Button sendAndCloseButton;
     @Inject
     private Dialogs dialogs;
-    @Inject
-    private LookupPickerField<JobCandidate> toEmailField;
     @Inject
     private EmailService emailService;
     @Inject
@@ -51,17 +55,31 @@ public class EmailerEdit extends StandardEditor<Emailer> {
     @Inject
     private TextField<String> fromEmailTextAddressField;
 
-    private static String EMAIL_FROMADDRESS     = "cuba.email.fromAddress";
-    private static String EMAIL_SMTPHOST        = "cuba.email.smtpHost";
-    private static String EMAIL_SMTPPORT        = "cuba.email.smtpPort";
-    private static String EMAIL_SMTPUSER        = "cuba.email.smtpUser";
-    private static String EMAIL_SMTPPASSWORD    = "cuba.email.smtpPassword";
+    private static String EMAIL_FROMADDRESS = "cuba.email.fromAddress";
+    private static String EMAIL_SMTPHOST = "cuba.email.smtpHost";
+    private static String EMAIL_SMTPPORT = "cuba.email.smtpPort";
+    private static String EMAIL_SMTPUSER = "cuba.email.smtpUser";
+    private static String EMAIL_SMTPPASSWORD = "cuba.email.smtpPassword";
 
-    private String cuba_email_fromAddress   = "";
-    private String cuba_email_smtpHost      = "";
-    private String cuba_email_smtpPort      = "";
-    private String cuba_email_smtpUser      = "";
-    private String cuba_email_smtpPassword  = "";
+    private String cuba_email_fromAddress = "";
+    private String cuba_email_smtpHost = "";
+    private String cuba_email_smtpPort = "";
+    private String cuba_email_smtpUser = "";
+    private String cuba_email_smtpPassword = "";
+    @Inject
+    private PickerField<ExtUser> fromEmailField;
+    @Inject
+    private SuggestionPickerField<JobCandidate> toEmailField;
+    @Inject
+    private CollectionLoader<JobCandidate> jobCandidateDl;
+    @Inject
+    private CollectionContainer<JobCandidate> jobCandidateDc;
+    @Inject
+    private MetadataTools metadataTools;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private InstanceContainer<InternalEmailer> emailerDc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -76,7 +94,10 @@ public class EmailerEdit extends StandardEditor<Emailer> {
 
     protected void setSender(ExtUser user) {
         String userEmail = System.getProperty(EMAIL_SMTPUSER);
-        fromEmailTextAddressField.setValue(userEmail);
+        fromEmailTextAddressField.setValue(user.getName() + " \"" + user.getEmail() + "\"");
+        fromEmailTextAddressField.setDescription("SMTP server: " + user.getSmtpServer() + ":" + user.getSmtpPort() + "\n" +
+                "POP3 server: " + user.getPop3Server() + ":" + user.getPop3Port() + "\n" +
+                "IMAP server% " + user.getImapServer() + ":" + user.getImapPort());
     }
 
     @Install(to = "toEmailField", subject = "optionIconProvider")
@@ -100,7 +121,8 @@ public class EmailerEdit extends StandardEditor<Emailer> {
         }
     }
 
-    public void sendAndCloseButton() {
+    public void sendAndCloseButtonInvoke() {
+        fromEmailField.setValue((ExtUser) userSession.getUser());
         sendEmail();
         close(StandardOutcome.CLOSE);
     }
@@ -121,8 +143,22 @@ public class EmailerEdit extends StandardEditor<Emailer> {
                 ).show();
     }
 
+    @Subscribe
+    public void onInit(InitEvent event) {
+        InternalEmailer internalEmailer = metadata.create(InternalEmailer.class);
+        emailerDc.setItem(internalEmailer);
+        jobCandidateDl.load();
+
+        List<JobCandidate> jobCandidateList = new ArrayList<>(jobCandidateDc.getItems());
+        toEmailField.setSearchExecutor((searchString, searchParams) ->
+                jobCandidateList.stream()
+                        .filter(jobCandidate ->
+                                StringUtils.containsIgnoreCase(metadataTools.getInstanceName(jobCandidate), searchString))
+                        .collect(Collectors.toList()));
+    }
+
     private void sendByEmailDefault() {
-        Emailer newsItem = getEditedEntity();
+        InternalEmailer newsItem = getEditedEntity();
 
         EmailInfo emailInfo = EmailInfoBuilder.create()
                 .setAddresses(toEmailField.getValue().getEmail())

@@ -41,14 +41,20 @@
             </actions>
             <columns>
                 <group>
-                    <column id="skillTree"/>
+                    <column id="skillTree" width="250px"/>
                 </group>
                 <column id="skillName"
+                        width="450px"
                         caption="mainMsg://msgSkill"/>
                 <column id="specialisation"
+                        width="250px"
                         caption="msg://msgSpecialisation"/>
                 <column id="wikiPage"
+                        width="250px"
                         caption="msg://msgWikiPage"/>
+                <column id="prioritySkill"
+                        width="100px"
+                        caption="msg://msgPrioritySkill"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

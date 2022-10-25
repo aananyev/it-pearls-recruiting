@@ -52,7 +52,7 @@
         <property name="standartDescription"/>
         <property name="whoIsThisGuy"/>
     </view>
-    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_minimal" systemProperties="true">
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
         <property name="cityPosition" view="city-view"/>
         <property name="positionType" view="position-view"/>
         <property name="projectName" view="_local">
@@ -71,29 +71,7 @@
             <property name="projectName" view="_local"/>
         </property>
         <property name="cities" view="_local"/>
-        <property name="owner" view="_minimal"/>
-        <property name="priority"/>
-        <property name="openClose"/>
-        <property name="numberPosition"/>
-        <property name="signDraft"/>
-        <property name="internalProject"/>
-        <property name="commandCandidate"/>
-        <property name="shortDescription"/>
-        <property name="remoteWork"/>
-        <property name="remoteComment"/>
-        <property name="needExercise"/>
-        <property name="exercise"/>
-        <property name="comment"/>
-        <property name="salaryMin"/>
-        <property name="salaryMax"/>
-        <property name="salaryFixLimit"/>
-        <property name="templateLetter"/>
-        <property name="lastOpenDate"/>
-        <property name="memoForInterview"/>
-        <property name="more10NumberPosition"/>
-        <property name="workExperience"/>
-        <property name="needLetter"/>
-        <property name="commentEn"/>
+        <property name="owner" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_minimal">
         <property name="currentCompany" view="_local"/>
@@ -107,7 +85,7 @@
         <property name="positionList" view="_minimal">
         </property>
     </view>
-    <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_minimal" systemProperties="true">
+    <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true">
         <property name="currentCompany" view="_local">
             <property name="companyOwnership" view="_minimal"/>
             <property name="cityOfCompany" view="_minimal"/>
@@ -119,10 +97,9 @@
             <property name="candidate" view="_local">
                 <property name="personPosition" view="_local"/>
             </property>
-            <property name="vacancy" view="_minimal">
-                <property name="projectName" view="_minimal">
-                    <property name="projectOwner" view="_minimal"/>
-                </property>
+            <property name="vacancy" view="_local">
+                <property name="projectName" view="_local"/>
+                <property name="candidates" view="_local"/>
             </property>
             <property name="iteractionType" view="_minimal">
                 <property name="pic"/>
@@ -135,20 +112,16 @@
         <property name="socialNetwork" view="_local">
             <property name="socialNetworkURL" view="_local"/>
         </property>
-        <property name="candidateCv" view="_minimal">
-            <property name="textCV"/>
-            <property name="toVacancy" view="_minimal">
-                <property name="projectName" view="_minimal"/>
-                <property name="positionType" view="_minimal"/>
-            </property>
-            <property name="resumePosition" view="_minimal"/>
+        <property name="candidateCv" view="_local">
+            <property name="candidate" view="_local"/>
         </property>
         <property name="fileImageFace" view="_local"/>
         <property name="positionList" view="_local">
             <property name="positionList" view="_minimal"/>
             <property name="jobCandidate" view="_minimal"/>
         </property>
-        <property name="skillTree" view="_minimal"/>
+        <property name="skillTree" view="_local"/>
+        <property name="personPosition" view="_minimal"/>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="jobCandidate" view="_local">
@@ -163,6 +136,7 @@
     <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
         <property name="skillTree" view="_local">
             <property name="skillTree" view="_local"/>
+            <property name="fileImageLogo" view="_minimal"/>
         </property>
         <property name="openPosition" view="_local"/>
         <property name="candidates" view="_local">
@@ -214,27 +188,27 @@
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="resumePosition" view="_local"/>
-        <property name="toVacancy" view="_local"/>
+        <property name="toVacancy" view="_local">
+        </property>
         <property name="owner" view="_local">
         </property>
         <property name="lintToCloudFile"/>
         <property name="fileCV" view="_local">
-            <property name="createTs"/>
-            <property name="createdBy"/>
         </property>
         <property name="originalFileCV" view="_local">
         </property>
         <property name="createTs"/>
         <property name="createdBy"/>
         <property name="someFiles" view="_local">
-            <property name="fileType" view="_minimal"/>
-            <property name="candidateCV" view="_minimal"/>
-            <property name="fileDescriptor" view="_minimal"/>
-            <property name="fileOwner" view="_minimal"/>
         </property>
         <property name="fileImageFace" view="_local"/>
-        <property name="skillTree" view="_local"/>
-        <property name="candidate" view="_local"/>
+        <property name="skillTree" view="_local">
+        </property>
+        <property name="updateTs"/>
+        <property name="updatedBy"/>
+        <property name="candidate" view="_local">
+            <property name="personPosition" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">
@@ -268,6 +242,8 @@
                 <property name="projectTree" view="_minimal"/>
             </property>
             <property name="cities" view="_minimal"/>
+            <property name="cityPosition" view="_minimal"/>
+            <property name="parentOpenPosition" view="_local"/>
         </property>
         <property name="iteractionType" view="_minimal">
             <property name="pic"/>
@@ -302,6 +278,7 @@
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
         </property>
+        <property name="chainInteraction" view="_minimal"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">
@@ -461,5 +438,9 @@
         <property name="openPositions" view="_minimal"/>
         <property name="recrutier" view="_minimal"/>
         <property name="researcher" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Emailer" name="internalEmailer-view" extends="_local">
+        <property name="fromEmail" view="_minimal"/>
+        <property name="toEmail" view="_minimal"/>
     </view>
 </views>

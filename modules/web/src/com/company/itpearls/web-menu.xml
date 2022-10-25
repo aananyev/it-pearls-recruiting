@@ -8,44 +8,6 @@
         <item screen="itpearls_WeekInterviewCalendar"
               icon="CALENDAR"/>
     </menu>
-    <menu id="application-hrmasters"
-          insertAfter="application-calendars"
-          icon="BALANCE_SCALE">
-        <item screen="itpearls_OpenPositionMaster.browse"
-              caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse"
-              icon="icons/clear.png"/>
-    </menu>
-    <menu id="application-outstaffing"
-          insertAfter="application-hrmasters"
-          icon="CUBES">
-        <item screen="itpearls_OpenPositionOutstaff.browse"
-              icon="COMPASS"
-              caption="mainMsg://msgOpenPositionOutstaff.browse"/>
-        <item screen="itpearls_LaborAgeementType.browse"
-              icon="TEXT_WIDTH"
-              caption="mainMsg://menu_config.itpearls_LaborAgeementType.browse"/>
-        <item screen="itpearls_LaborAgreement.browse"
-              icon="TEXT_HEIGHT"
-              caption="mainMsg://menu_config.itpearls_LaborAgreement.browse"/>
-        <item screen="itpearls_OurCompany.browse"
-              icon="BUILDING_O"
-              caption="mainMsg://msgOurCompany"/>
-    </menu>
-    <menu id="application-hunting"
-          insertBefore="application-hadbook"
-          icon="PRODUCT_HUNT">
-        <item screen="itpearls_OpenPosition.browse"
-              icon="COMPASS"/>
-        <item screen="itpearls_JobCandidate.browse"
-              icon="USER"/>
-        <item screen="itpearls_CandidateCV.browse"
-              icon="FILE_WORD_O"/>
-        <item screen="itpearls_IteractionList.browse"
-              icon="REORDER"/>
-        <item screen="itpearls_OpenPositionNews.browse"
-              icon="NEWSPAPER_O"
-              caption="mainMsg://menu_config.itpearls_OpenPositionNews.browse"/>
-    </menu>
     <menu id="application-sending-messages"
           insertBefore="application-hrmasters"
           icon="font-icon:SEND">
@@ -53,80 +15,60 @@
               caption="mainMsg://menu_config.itpearls_Emailer.browse"
               icon="font-icon:MAIL_FORWARD"/>
     </menu>
-    <menu id="application-project"
-          icon="BUILDING"
-          insertAfter="application-hunting">
-        <item screen="itpearls_Project.browse"
-              icon="ARCHIVE"/>
-        <item screen="itpearls_Person.browse"
-              icon="USER"/>
-        <item screen="itpearls_CompanyDepartament.browse"
-              icon="GROUP"/>
-        <item screen="itpearls_Company.browse"
-              icon="BUILDING"/>
-        <item screen="itpearls_CompanyGroup.browse"
-              icon="BUILDING_O"/>
+    <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
+        <item screen="itpearls_OpenPositionMaster.browse"
+              caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse" icon="icons/clear.png"/>
     </menu>
-    <menu id="application-researching"
-          icon="BOLT"
-          insertAfter="application-project">
-        <item screen="itpearls_RecrutiesTasks.browse"
-              icon="CLONE"/>
-        <item screen="itpearls_SubscribeCandidateAction.browse"
-              icon="CLONE"/>
-        <item screen="itpearls_RecrutiesGroupSubscribeTasks.browse"
-              caption="mainMsg://menu_config.itpearls_RecrutiesGroupSubscribeTasks.browse"/>
-        <item screen="itpearls_GroupSubscribeScreen"
-              caption="mainMsg://menu_config.itpearls_GroupSubscribeScreen"/>
+    <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
+        <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
+              icon="COMPASS"/>
+        <item screen="itpearls_LaborAgeementType.browse"
+              caption="mainMsg://menu_config.itpearls_LaborAgeementType.browse" icon="TEXT_WIDTH"/>
+        <item screen="itpearls_LaborAgreement.browse" caption="mainMsg://menu_config.itpearls_LaborAgreement.browse"
+              icon="TEXT_HEIGHT"/>
+        <item screen="itpearls_OurCompany.browse" caption="mainMsg://msgOurCompany" icon="BUILDING_O"/>
     </menu>
-    <menu id="application-reports"
-          icon="FILE_TEXT"
-          insertAfter="application-project">
-        <item bean="itpearls_MemoForCandidatesBean"
-              beanMethod="runReport"
-              caption="mainMsg://msgMemoForCandidates"
+    <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
+        <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
+        <item screen="itpearls_JobCandidate.browse" icon="USER"/>
+        <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
+        <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
+    </menu>
+    <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
+        <item screen="itpearls_Project.browse" icon="ARCHIVE"/>
+        <item screen="itpearls_Person.browse" icon="USER"/>
+        <item screen="itpearls_CompanyDepartament.browse" icon="GROUP"/>
+        <item screen="itpearls_Company.browse" icon="BUILDING"/>
+        <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
+    </menu>
+    <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-project">
+        <item bean="itpearls_MemoForCandidatesBean" beanMethod="runReport" caption="mainMsg://msgMemoForCandidates"
               icon="COMMENT_O"/>
-        <item bean="itpearls_RunReportBean"
-              beanMethod="runReport"
-              caption="mainMsg://menu-config.itpearls_RunReportBean.runReport"
-              icon="USER"/>
-        <item bean="itpearls_NumberInterviewsRecrutierRunReportBean"
-              beanMethod="runReport"
+        <item bean="itpearls_RunReportBean" beanMethod="runReport"
+              caption="mainMsg://menu-config.itpearls_RunReportBean.runReport" icon="USER"/>
+        <item bean="itpearls_NumberInterviewsRecrutierRunReportBean" beanMethod="runReport"
               caption="mainMsg://menu-config.itpearls_NumberInterviewsRecrutierRunReportBean.runReport"
               icon="ARROW_RIGHT"/>
-        <item bean="itpearls_NumberInterviewsResearcherRunReportBean"
-              beanMethod="runReport"
+        <item bean="itpearls_NumberInterviewsResearcherRunReportBean" beanMethod="runReport"
               caption="mainMsg://menu-config.itpearls_NumberInterviewsResearcherRunReportBean.runReport"
               icon="ARROW_RIGHT"/>
     </menu>
-    <menu id="application-hadbook"
-          insertAfter="application-researching">
-        <item screen="itpearls_Iteraction._tree.browse"
-              icon="REFRESH_ACTION"/>
-        <item screen="itpearls_Specialisation.browse"
-              icon="BULLSEYE"/>
-        <item screen="itpearls_SkillTree.browse"
-              icon="CODE_FORK"/>
-        <item screen="itpearls_Country.browse"
-              icon="SUPPORT"/>
-        <item screen="itpearls_City.browse"
-              icon="BANK"/>
-        <item screen="itpearls_Region.browse"
-              icon="TENCENT_WEIBO"/>
-        <item screen="itpearls_Ownershup.browse"
-              icon="icons/wf-user-group-button.png"/>
-        <item screen="itpearls_Position.browse"
-              icon="OPENID"/>
-        <item screen="itpearls_FileType.browse"
-              icon="FILE_TEXT_O"/>
-        <item screen="itpearls_SomeFiles.browse"
-              description="mainMsg://default.description"
-              icon="COPY"/>
-        <item screen="itpearls_SocialNetworkType.browse"
-              description="mainMsg://default.description"
+    <menu id="application-researching" icon="BOLT" insertAfter="application-project">
+        <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>
+        <item screen="itpearls_SubscribeCandidateAction.browse" icon="CLONE"/>
+    </menu>
+    <menu id="application-hadbook" icon="BOOK" insertAfter="application-researching">
+        <item screen="itpearls_Iteraction._tree.browse" icon="REFRESH_ACTION"/>
+        <item screen="itpearls_Specialisation.browse" icon="BULLSEYE"/>
+        <item screen="itpearls_SkillTree.browse" icon="CODE_FORK"/>
+        <item screen="itpearls_Country.browse" icon="SUPPORT"/>
+        <item screen="itpearls_City.browse" icon="BANK"/>
+        <item screen="itpearls_Region.browse" icon="TENCENT_WEIBO"/>
+        <item screen="itpearls_Ownershup.browse" icon="icons/wf-user-group-button.png"/>
+        <item screen="itpearls_Position.browse" icon="OPENID"/>
+        <item screen="itpearls_FileType.browse" icon="FILE_TEXT_O"/>
+        <item screen="itpearls_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="FACEBOOK_OFFICIAL"/>
     </menu>
-    <item screen="itpearls_CheckCandidate.browse"
-          insertAfter="application-hadbook"
-          openType="DIALOG"/>
+    <item screen="itpearls_CheckCandidate.browse" icon="CHECK" insertAfter="application-hadbook" openType="DIALOG"/>
 </menu-config>

@@ -11,52 +11,54 @@
                   systemProperties="true">
                 <property name="fullName"/>
                 <property name="fileImageFace"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="positionList"
-                          view="_minimal">
+                          view="_local">
                     <property name="positionList"
-                              view="_minimal"/>
+                              view="_local"/>
                 </property>
                 <property name="cityOfResidence"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="personPosition"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="currentCompany"
                           view="_local">
                     <property name="companyOwnership"
-                              view="_minimal"/>
+                              view="_local"/>
                     <property name="cityOfCompany"
-                              view="_minimal"/>
+                              view="_local"/>
                 </property>
                 <property name="status"/>
                 <property name="createdBy"/>
                 <property name="candidateCv"
-                          view="_minimal">
+                          view="_local">
                     <property name="candidate"
-                              view="_minimal"/>
+                              view="_local"/>
                     <property name="textCV"/>
-                    <property name="toVacancy" view="_minimal">
+                    <property name="toVacancy"
+                              view="_local">
                         <property name="comment"/>
                     </property>
                 </property>
                 <property name="iteractionList"
-                          view="_minimal">
+                          view="_local">
                     <property name="candidate"
-                              view="_minimal"/>
+                              view="_local"/>
                     <property name="recrutier"
-                              view="_minimal"/>
+                              view="_local"/>
                     <property name="iteractionType"
-                              view="_minimal">
+                              view="_local">
                         <property name="signOurInterview"/>
                         <property name="signClientInterview"/>
                         <property name="signSendToClient"/>
                     </property>
                     <property name="vacancy"
-                              view="_minimal">
+                              view="_local">
                         <property name="comment"/>
-                        <property name="projectName" view="_minimal">
+                        <property name="projectName" view="_local">
                             <property name="projectDepartment"
-                                      view="_minimal"/>
+                                      view="_local"/>
+                            <property name="projectName"/>
                         </property>
                     </property>
                     <property name="addString"/>
@@ -66,7 +68,7 @@
                 <property name="skillTree"
                           view="_local"/>
                 <property name="socialNetwork"
-                          view="_minimal"/>
+                          view="_local"/>
             </view>
             <loader id="jobCandidatesDl">
                 <query>

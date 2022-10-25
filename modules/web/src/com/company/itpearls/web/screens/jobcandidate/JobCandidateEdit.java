@@ -7,9 +7,11 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.itpearls.web.screens.openposition.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
+import com.google.gson.GsonBuilder;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
@@ -215,6 +217,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private InteractionService interactionService;
     @Inject
     private UserSessionSource userSessionSource;
+    @Inject
+    private Fragments fragments;
+    @Inject
+    private HBoxLayout skillBox;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -290,6 +296,34 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setRatingLabel(getEditedEntity());
         setFrequentInteractionPopupButton();
         setupIteractionList();
+        setupSkillBox();
+    }
+
+    private void setupSkillBox() {
+        Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
+        if (skillBoxFragment.generateSkillLabels(getLastCVText(getEditedEntity()))) {
+            skillBox.add(skillBoxFragment.getFragment());
+        }
+    }
+
+    private String getLastCVText(JobCandidate singleSelected) {
+        if (singleSelected != null) {
+            if (singleSelected.getCandidateCv().size() != 0) {
+                CandidateCV lastCV = singleSelected.getCandidateCv().get(0);
+
+                for (CandidateCV candidateCV : singleSelected.getCandidateCv()) {
+                    if (lastCV.getDatePost().before((candidateCV.getDatePost()))) {
+                        lastCV = candidateCV;
+                    }
+                }
+
+                return lastCV.getTextCV();
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     private void setupIteractionList() {

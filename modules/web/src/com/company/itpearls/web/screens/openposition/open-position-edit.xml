@@ -166,7 +166,10 @@
                    dataContainer="openPositionDc"
                    property="lastOpenDate"
                    visible="false"/>
-        <groupBox spacing="false">
+        <groupBox spacing="false"
+                  collapsable="true"
+                  collapsed="false"
+                  caption="msg://msgTitle">
             <scrollBox scrollBars="horizontal"
                        spacing="false">
                 <hbox spacing="true">
@@ -205,6 +208,7 @@
                                        stylename="text-field-title-form"
                                        width="100%"
                                        required="true"/>
+                            <hbox/>
                             <hbox id="hboxProject1"
                                   spacing="true"
                                   align="MIDDLE_LEFT"

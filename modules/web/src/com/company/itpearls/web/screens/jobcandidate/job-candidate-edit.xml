@@ -7,39 +7,51 @@
     <data>
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_minimal">
+            <view extends="_local">
                 <property name="positionList"
-                          view="_minimal">
+                          view="_local">
                     <property name="positionList"
-                              view="_minimal"/>
+                              view="_local"/>
                 </property>
                 <property name="currentCompany"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="cityOfResidence"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="fileImageFace"
-                          view="_minimal">
+                          view="_local">
                     <property name="size"/>
                 </property>
                 <property name="iteractionList"
                           view="iteractionList-view">
                     <property name="chainInteraction"
-                              view="_minimal"/>
+                              view="_local"/>
+                    <property name="vacancy" view="_local">
+                        <property name="projectName" view="_local">
+                            <property name="projectName"/>
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
+                        </property>
+                    </property>
                 </property>
                 <property name="socialNetwork"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="specialisation"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="blockCandidate"/>
                 <property name="laborAgreement"
-                          view="_minimal"/>
+                          view="_local"/>
                 <property name="candidateCv"
-                          view="_minimal">
+                          view="_local">
                     <property name="resumePosition"
-                              view="_minimal"/>
+                              view="_local"/>
                     <property name="toVacancy"
-                              view="_minimal">
+                              view="_local">
                         <property name="comment"/>
+                        <property name="projectName"
+                                  view="_local">
+                            <property name="projectName"/>
+                        </property>
                     </property>
                 </property>
             </view>
@@ -333,6 +345,9 @@
                                     height="AUTO"/>
                         </vbox>
                     </hbox>
+                    <hbox id="skillBox"
+                          width="100%"
+                          height="AUTO"/>
                 </vbox>
             </tab>
             <tab id="tabCandidate"

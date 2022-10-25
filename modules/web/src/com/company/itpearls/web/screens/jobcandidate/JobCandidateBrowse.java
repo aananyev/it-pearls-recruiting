@@ -1,11 +1,14 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.core.InteractionService;
+import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.StandartPrioritySkills;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
+import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -93,6 +96,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private UserSessionSource userSessionSource;
     private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
+    @Inject
+    private PdfParserService pdfParserService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -367,6 +372,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         headerBox.setWidth("100%");
         headerBox.setHeight("100%");
 
+        FlowBoxLayout footerBox = uiComponents.create(FlowBoxLayout.NAME);
+        footerBox.setWidthAuto();
+        footerBox.setHeight("100%");
+        footerBox.setSpacing(false);
+
         HBoxLayout header2Box = uiComponents.create(HBoxLayout.NAME);
         header2Box.setWidth("100%");
         header2Box.setHeight("100%");
@@ -457,23 +467,36 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Fragment fragment = jobCanidateDetailScreenFragment.getFragment();
         fragment.setWidth("100%");
         fragment.setAlignment(Component.Alignment.BOTTOM_LEFT);
-
         mainLayout.add(fragment);
-        mainLayout.expand(fragment);
 
-/*        if (jobCandidatesTableDetailsGeneratorOpened != null) {
-            if (!jobCandidatesTableDetailsGeneratorOpened.equals(entity)) {
-                jobCanidateDetailScreenFragmentOld.getFragment().setVisible(false);
-                jobCandidatesTable.setDetailsVisible(jobCandidatesTableDetailsGeneratorOpened, false);
-                oldFragment.setVisible(false);
-            }
+        Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
+        if (skillBoxFragment.generateSkillLabels(getLastCVText(jobCandidatesTable.getSingleSelected()))) {
+            mainLayout.add(skillBoxFragment.getFragment());
         }
 
-        jobCandidatesTableDetailsGeneratorOpened = entity;
-        jobCanidateDetailScreenFragmentOld = jobCanidateDetailScreenFragment;
-        oldFragment = fragment; */
+        mainLayout.expand(fragment);
 
         return mainLayout;
+    }
+
+    private String getLastCVText(JobCandidate singleSelected) {
+        if (singleSelected != null) {
+            if (singleSelected.getCandidateCv().size() != 0) {
+                CandidateCV lastCV = singleSelected.getCandidateCv().get(0);
+
+                for (CandidateCV candidateCV : singleSelected.getCandidateCv()) {
+                    if (lastCV.getDatePost().before((candidateCV.getDatePost()))) {
+                        lastCV = candidateCV;
+                    }
+                }
+
+                return lastCV.getTextCV();
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     private Component createCvSimpleBrowse(JobCandidate entity) {
@@ -684,12 +707,25 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             lastCV = a;
                         }
 
-                        screenBuilders.editor(CandidateCV.class, this)
+                        Screen screenCV = screenBuilders.editor(CandidateCV.class, this)
                                 .withScreenClass(CandidateCVEdit.class)
                                 .editEntity(lastCV)
+                                .withLaunchMode(OpenMode.NEW_TAB)
                                 .withContainer(candidateCVDc)
-                                .build()
-                                .show();
+                                .build();
+
+                        try {
+                            screenCV.show();
+                        } catch (NullPointerException e) {
+                            notifications.create(Notifications.NotificationType.ERROR)
+                                    .withCaption("ОШИБКА")
+                                    .withDescription("Не могу открыть форму резюме для редактирования.\n" +
+                                            "Зайдите в карточку кандидата " +
+                                            "и продолжите редактирование резюме во вкладке \"Резюме кандидата\"")
+                                    .show();
+
+                            e.printStackTrace();
+                        }
 
                     } else {
                         dialogs.createOptionDialog()

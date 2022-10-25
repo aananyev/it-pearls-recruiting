@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Table(name = "ITPEARLS_EMAILER")
 @Entity(name = "itpearls_Emailer")
-public class Emailer extends StandardEntity {
+public class InternalEmailer extends StandardEntity {
     private static final long serialVersionUID = 1989669444636246337L;
 
     @Column(name = "DRAFT_EMAIL")

@@ -135,13 +135,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private Resources resources;
     @Inject
-    private ResourceService resourceService;
-    @Inject
     private Label<String> projectLabel;
     @Inject
     private Image ratingImage;
     @Inject
     private LookupPickerField<JobCandidate> candidateField;
+    @Inject
+    private HBoxLayout outstaffingCostHBox;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -1363,7 +1363,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (!priorityStr.equals("")) {
             currentPriorityLabel.setValue(priorityStr);
             trafficLighterImage.setSource(ThemeResource.class).setPath(icon);
-            ratingImage.setSource(ThemeResource.class).setPath(icon);;
+            ratingImage.setSource(ThemeResource.class).setPath(icon);
+            ;
         }
     }
 
@@ -1530,5 +1531,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     public void setParentCandidate(JobCandidate candidate) {
         this.parentCandidate = candidate;
+    }
+
+    @Subscribe("vacancyFiels")
+    public void onVacancyFielsValueChange2(HasValue.ValueChangeEvent<OpenPosition> event) {
+        outstaffingCostHBox.setVisible(event.getValue().getOutstaffingCost() != null);
     }
 }

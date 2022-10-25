@@ -368,6 +368,8 @@ create table ITPEARLS_SKILL_TREE (
     WIKI_PAGE varchar(250),
     FILE_IMAGE_LOGO uuid,
     STYLE_HIGHLIGHTING varchar(128),
+    NOT_PARSING boolean,
+    PRIORITY_SKILL integer,
     --
     primary key (ID)
 )^
@@ -443,6 +445,7 @@ create table ITPEARLS_OPEN_POSITION (
     SALARY_MIN decimal(19, 2),
     SALARY_MAX decimal(19, 2),
     SALARY_FIX_LIMIT boolean,
+    SALARY_COMMENT varchar(255),
     OUTSTAFFING_COST decimal(19, 2),
     CITY_POSITION_ID uuid,
     POSITION_TYPE_ID uuid,

@@ -62,11 +62,29 @@ order by e.skillName]]>
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <textField id="skillNameField" caption="mainMsg://msgSkill"
-                               dataContainer="skillTreeDc"
-                               property="skillName"
-                               align="TOP_LEFT"
-                               width="50%"/>
+                    <hbox spacing="true"
+                          width="100%"
+                          expand="skillNameField"
+                          align="TOP_LEFT">
+                        <textField id="skillNameField"
+                                   caption="mainMsg://msgSkill"
+                                   dataContainer="skillTreeDc"
+                                   property="skillName"
+                                   align="BOTTOM_LEFT"
+                                   width="100%"/>
+                        <lookupField id="skillPriorityField"
+                                     caption="msg://msgPrioritySkill"
+                                     width="AUTO"
+                                     dataContainer="skillTreeDc"
+                                     property="prioritySkill"/>
+                        <checkBox id="notParsingCheckBox"
+                                  dataContainer="skillTreesDc"
+                                  property="notParsing"
+                                  caption="msg://msgNotParsing"
+                                  description="msg://msgNotParsingDesc"
+                                  align="BOTTOM_LEFT"
+                                  width="AUTO"/>
+                    </hbox>
                     <hbox spacing="true"
                           width="100%"
                           expand="wikiPateField">
@@ -115,9 +133,9 @@ order by e.skillName]]>
                 </vbox>
             </hbox>
             <groupBox id="areaBox"
-                  width="100%"
-                  height="100%"
-                  align="TOP_LEFT">
+                      width="100%"
+                      height="100%"
+                      align="TOP_LEFT">
                 <richTextArea id="skillCommentRichTextArea"
                               dataContainer="skillTreeDc"
                               align="TOP_LEFT"

@@ -76,6 +76,7 @@
                                    property="salaryMin"
                                    align="BOTTOM_LEFT"
                                    dataContainer="openPositionsDc"/>
+                            <label id="salaryComment1"/>
                         </hbox>
                         <hbox spacing="true">
                             <label value="msg://msgShortDescription"
@@ -102,6 +103,7 @@
                                    align="BOTTOM_LEFT"
                                    property="salaryMax"
                                    dataContainer="openPositionsDc"/>
+                            <label id="salaryComment2"/>
                         </hbox>
                         <hbox rowspan="5">
                             <textArea id="shortDescriptionTextArea"

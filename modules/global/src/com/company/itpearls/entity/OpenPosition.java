@@ -64,6 +64,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "SALARY_FIX_LIMIT")
     protected Boolean salaryFixLimit;
 
+    @Column(name = "SALARY_COMMENT")
+    private String salaryComment;
+
     @Column(name = "OUTSTAFFING_COST")
     private BigDecimal outstaffingCost;
 
@@ -190,6 +193,14 @@ public class OpenPosition extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
     private User owner;
+
+    public String getSalaryComment() {
+        return salaryComment;
+    }
+
+    public void setSalaryComment(String salaryComment) {
+        this.salaryComment = salaryComment;
+    }
 
     public BigDecimal getOutstaffingCost() {
         return outstaffingCost;

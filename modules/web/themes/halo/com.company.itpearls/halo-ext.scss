@@ -342,6 +342,11 @@ rating_battery_yellow_3:before {
     box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
 }
 
+.rating_gray_6 {
+    @include rating_round(gray);
+/*    color: blue;
+    box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
+}
 
 .statistic_label_candidate_blue {
     @include rating_statistic_label(blue);
@@ -471,6 +476,73 @@ rating_battery_yellow_3:before {
     color: #fff; /* Цвет текста */
     padding: 5px; /* Поля вокруг текста */
     border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+
+.label_button_yellow {
+    background: yellow; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+
+.label_button_brown {
+    background: brown; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+
+.label_table_red {
+        color: red; /* Цвет текста */
+        padding: 5px; /* Поля вокруг текста */
+        border-radius: 5px;
+        text-weight: bold;
+        margin: 0px 10px 0px 0px;
+}
+
+.label_table_brown {
+    color: brown; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_table_gray {
+    color: gray; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_table_orange {
+    color: orange; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_table_blue {
+    color: blue; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_table_green {
+    color: green; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
     margin: 0px 10px 0px 0px;
 }
 
