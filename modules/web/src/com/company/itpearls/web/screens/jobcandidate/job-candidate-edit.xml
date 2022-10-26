@@ -67,6 +67,29 @@
             <collection id="jobCandidateLaborAgreementDc"
                         property="laborAgreement"/>
         </instance>
+        <keyValueCollection id="lastProjectDc">
+            <loader id="lastProjectDl">
+                <query>
+                    <![CDATA[select e.vacancy, max(e.dateIteraction)
+                    from itpearls_IteractionList e
+                    group by e.vacancy
+                    order by max(e.dateIteraction) desc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.candidate = :candidate</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+            <properties>
+                <property name="vacancy"
+                          class="com.company.itpearls.entity.OpenPosition"/>
+                <property datatype="date"
+                          name="max"/>
+            </properties>
+        </keyValueCollection>
         <collection id="personPositionsDc"
                     class="com.company.itpearls.entity.Position"
                     view="_base">
@@ -212,8 +235,12 @@
                  caption="msg://msgJobCard"
                  margin="true,true,true,true"
                  spacing="true"
+                 expand="jobCandidateCardVBox"
                  icon="ID_CARD">
-                <vbox>
+                <vbox id="jobCandidateCardVBox"
+                      expand="lastProjects"
+                      width="100%"
+                      height="100%">
                     <hbox id="cardBox"
                           spacing="true"
                           width="100%"
@@ -348,6 +375,31 @@
                     <hbox id="skillBox"
                           width="100%"
                           height="AUTO"/>
+                    <groupBox id="lastProjects"
+                              caption="msg://msgCandidateProjects"
+                              collapsable="true"
+                              width="100%"
+                              expand="lastProjectTable"
+                              height="100%">
+                        <table id="lastProjectTable"
+                               width="100%"
+                               height="100%"
+                               dataContainer="lastProjectDc">
+                            <columns>
+                                <column id="vacancy"
+                                        caption="msg://msgVacancy"/>
+                                <column id="max"
+                                        caption="msg://msgDate"/>
+                                <column id="researcher"
+                                        caption="msg://msgResearcher"
+                                        generator="whoIsResearcherGeneratorColumn"/>
+                                <column id="recruter"
+                                        caption="msg://msgRecruter"
+                                        generator="whoIsRecruterGeneratorColumn"/>
+                            </columns>
+                            <rowsCount/>
+                        </table>
+                    </groupBox>
                 </vbox>
             </tab>
             <tab id="tabCandidate"

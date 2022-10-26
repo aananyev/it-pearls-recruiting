@@ -86,6 +86,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "NEED_SEND_MEMO")
     private Boolean needSendMemo;
 
+    @Column(name = "SIGN_OUR_INTERVIEW_ASSIGNED")
+    private Boolean signOurInterviewAssigned;
+
     @Column(name = "SIGN_OUR_INTERVIEW")
     private Boolean signOurInterview;
 
@@ -121,6 +124,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public Boolean getSignOurInterviewAssigned() {
+        return signOurInterviewAssigned;
+    }
+
+    public void setSignOurInterviewAssigned(Boolean signOurInterviewAssigned) {
+        this.signOurInterviewAssigned = signOurInterviewAssigned;
+    }
 
     public Boolean getSignViewOnlyManager() {
         return signViewOnlyManager;

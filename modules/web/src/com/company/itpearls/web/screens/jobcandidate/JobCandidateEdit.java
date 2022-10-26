@@ -12,6 +12,7 @@ import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.itpearls.web.screens.openposition.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.google.gson.GsonBuilder;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
@@ -221,6 +222,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Fragments fragments;
     @Inject
     private HBoxLayout skillBox;
+    @Inject
+    private KeyValueCollectionLoader lastProjectDl;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -300,9 +303,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setupSkillBox() {
-        Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
-        if (skillBoxFragment.generateSkillLabels(getLastCVText(getEditedEntity()))) {
-            skillBox.add(skillBoxFragment.getFragment());
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
+            if (skillBoxFragment.generateSkillLabels(getLastCVText(getEditedEntity()))) {
+                skillBox.add(skillBoxFragment.getFragment());
+            }
         }
     }
 
@@ -382,7 +387,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") ")
                     + (getEditedEntity().getUpdatedBy() != null ?
                     ("/ Изменено: " + getEditedEntity().getUpdatedBy() + " ("
-                            + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") " ): "");
+                            + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ") : "");
 
             createdUpdatedLabel.setValue(retStr);
         }
@@ -1514,6 +1519,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         setLaborAgreement();
+        setLastProjectTable();
+    }
+
+    private void setLastProjectTable() {
+        lastProjectDl.setParameter("candidate", getEditedEntity());
+        lastProjectDl.load();
     }
 
     private void setBlockUnblockButton(boolean b) {
@@ -2409,5 +2420,47 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         OpenPositionMasterBrowse openPositionMasterBrowse = screens.create(OpenPositionMasterBrowse.class);
         openPositionMasterBrowse.setJobCandidate(getEditedEntity());
         openPositionMasterBrowse.show();
+    }
+
+    public Component whoIsResearcherGeneratorColumn(Entity entity) {
+        Label retLabel = uiComponents.create(Label.NAME);
+
+        for (IteractionList iteractionList : jobCandidateIteractionDc.getMutableItems()) {
+            OpenPosition op = entity.getValue("vacancy");
+
+            if (op != null) {
+                if (iteractionList.getIteractionType().getSignOurInterviewAssigned() != null) {
+                    if (iteractionList.getVacancy() != null) {
+                        if (iteractionList.getVacancy().equals(op) &&
+                                iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
+                            retLabel.setValue(iteractionList.getRecrutier().getName());
+                        }
+                    }
+                }
+            }
+        }
+
+        return retLabel;
+    }
+
+    public Component whoIsRecruterGeneratorColumn(Entity entity) {
+        Label retLabel = uiComponents.create(Label.NAME);
+
+        for (IteractionList iteractionList : jobCandidateIteractionDc.getMutableItems()) {
+            OpenPosition op = entity.getValue("vacancy");
+
+            if (op != null) {
+                if (iteractionList.getIteractionType().getSignOurInterview() != null) {
+                    if (iteractionList.getVacancy() != null) {
+                        if (iteractionList.getVacancy().equals(op) &&
+                                iteractionList.getIteractionType().getSignOurInterview()) {
+                            retLabel.setValue(iteractionList.getRecrutier().getName());
+                        }
+                    }
+                }
+            }
+        }
+
+        return retLabel;
     }
 }

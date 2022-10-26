@@ -4,7 +4,6 @@
         <groupBox id="skillsGroupBox"
                   width="100%"
                   collapsable="true"
-                  collapsed="false"
                   height="AUTO"
                   caption="msg://msgSkills"
                   stylename="light">
