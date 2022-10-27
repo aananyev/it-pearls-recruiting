@@ -42,7 +42,7 @@
                 <property name="laborAgreement"
                           view="_local"/>
                 <property name="candidateCv"
-                          view="_local">
+                          view="candidateCV-view">
                     <property name="resumePosition"
                               view="_local"/>
                     <property name="toVacancy"
@@ -53,6 +53,8 @@
                             <property name="projectName"/>
                         </property>
                     </property>
+                    <property name="candidate"
+                              view="jobCandidate-view"/>
                 </property>
             </view>
             <loader id="jobCandidateDl"
@@ -72,6 +74,7 @@
                 <query>
                     <![CDATA[select e.vacancy, max(e.dateIteraction)
                     from itpearls_IteractionList e
+                    where not e.vacancy.vacansyName like 'Default'
                     group by e.vacancy
                     order by max(e.dateIteraction) desc]]>
                     <condition>
@@ -249,7 +252,9 @@
                                   width="AUTO"
                                   spacing="true"
                                   stylename="light"
+                                  collapsable="false"
                                   align="TOP_LEFT"
+                                  caption="msg://msgContactsOfCandidate"
                                   height="100%">
                             <hbox spacing="false">
                                 <label id="jobTitleTitle"
@@ -379,6 +384,7 @@
                               caption="msg://msgCandidateProjects"
                               collapsable="true"
                               width="100%"
+                              stylename="light"
                               expand="lastProjectTable"
                               height="100%">
                         <table id="lastProjectTable"
@@ -386,16 +392,32 @@
                                height="100%"
                                dataContainer="lastProjectDc">
                             <columns>
+                                <column id="number"
+                                        width="30px"
+                                        caption="№"
+                                        generator="lastIteractionCount"/>
                                 <column id="vacancy"
+                                        width="600px"
                                         caption="msg://msgVacancy"/>
                                 <column id="max"
+                                        width="100px"
                                         caption="msg://msgDate"/>
+                                <column id="lastInteraction"
+                                        width="250px"
+                                        caption="msg://msgLastInteraction"
+                                        generator="lastInteractionGeneratorColumn"/>
                                 <column id="researcher"
+                                        width="150px"
                                         caption="msg://msgResearcher"
                                         generator="whoIsResearcherGeneratorColumn"/>
                                 <column id="recruter"
+                                        width="150px"
                                         caption="msg://msgRecruter"
                                         generator="whoIsRecruterGeneratorColumn"/>
+                                <column id="idViewIteractionsButton"
+                                        width="100px"
+                                        caption="msg://msgInteractionsView"
+                                        generator="addInteractionsViewButton"/>
                             </columns>
                             <rowsCount/>
                         </table>

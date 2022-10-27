@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="jobCandidatesDc"
                     class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_local"
+            <view extends="jobCandidate-view"
                   systemProperties="true">
                 <property name="fullName"/>
                 <property name="fileImageFace"
@@ -41,7 +41,7 @@
                     </property>
                 </property>
                 <property name="iteractionList"
-                          view="_local">
+                          view="iteractionList-view">
                     <property name="candidate"
                               view="_local"/>
                     <property name="recrutier"
@@ -57,7 +57,9 @@
                         <property name="comment"/>
                         <property name="projectName" view="_local">
                             <property name="projectDepartment"
-                                      view="_local"/>
+                                      view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
                             <property name="projectName"/>
                         </property>
                     </property>

@@ -112,8 +112,7 @@
         <property name="socialNetwork" view="_local">
             <property name="socialNetworkURL" view="_local"/>
         </property>
-        <property name="candidateCv" view="_local">
-            <property name="candidate" view="_local"/>
+        <property name="candidateCv" view="candidateCV-view">
         </property>
         <property name="fileImageFace" view="_local"/>
         <property name="positionList" view="_local">
@@ -189,6 +188,16 @@
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="resumePosition" view="_local"/>
         <property name="toVacancy" view="_local">
+            <property name="projectName" view="_local">
+                <property name="projectTree" view="_local"/>
+                <property name="projectDepartment" view="_local">
+                    <property name="companyName" view="_local"/>
+                </property>
+                <property name="projectOwner" view="_local"/>
+            </property>
+            <property name="cityPosition" view="_local"/>
+            <property name="positionType" view="_local"/>
+            <property name="cities" view="_local"/>
         </property>
         <property name="owner" view="_local">
         </property>
@@ -200,14 +209,16 @@
         <property name="createTs"/>
         <property name="createdBy"/>
         <property name="someFiles" view="_local">
+            <property name="fileDescriptor" view="_local"/>
         </property>
         <property name="fileImageFace" view="_local"/>
         <property name="skillTree" view="_local">
+            <property name="skillTree" view="_local"/>
         </property>
         <property name="updateTs"/>
         <property name="updatedBy"/>
         <property name="candidate" view="_local">
-            <property name="personPosition" view="_minimal"/>
+            <property name="personPosition" view="_local"/>
         </property>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">

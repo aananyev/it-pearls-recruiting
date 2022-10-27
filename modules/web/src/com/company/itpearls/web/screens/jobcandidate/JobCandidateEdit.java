@@ -224,6 +224,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private HBoxLayout skillBox;
     @Inject
     private KeyValueCollectionLoader lastProjectDl;
+    private Integer lastIteractionCount = 1;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -853,6 +854,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         workStatusMap.put("В штат по ТК РФ", 5);
 
         workStatusRadioButton.setOptionsMap(workStatusMap);
+
+        lastIteractionCount = 1;
     }
 
     private void priorityCommenicationMethodRadioButtonInit() {
@@ -2462,5 +2465,40 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return retLabel;
+    }
+
+    public Component lastInteractionGeneratorColumn(Entity entity) {
+        Label retLabel = uiComponents.create(Label.NAME);
+        OpenPosition openPosition = entity.getValue("vacancy");
+
+        if (jobCandidateIteractionDc.getMutableItems().size() != 0) {
+            IteractionList lastInteraction = jobCandidateIteractionDc.getMutableItems().get(0);
+
+            for (IteractionList iteractionList : jobCandidateIteractionDc.getMutableItems()) {
+                if (openPosition.equals(iteractionList.getVacancy())) {
+                    if (lastInteraction.getDateIteraction().before(iteractionList.getDateIteraction())) {
+                        lastInteraction = iteractionList;
+                    }
+                }
+            }
+        }
+
+        retLabel.setValue(lastIteraction.getIteractionType().getIterationName());
+
+        return retLabel;
+    }
+
+    public Component lastIteractionCount(Entity entity) {
+        Label retLabel = uiComponents.create(Label.NAME);
+        retLabel.setValue(lastIteractionCount++);
+
+        return retLabel;
+    }
+
+    public Component addInteractionsViewButton(Entity entity) {
+        Button retButton = uiComponents.create(Button.NAME);
+        retButton.setCaption("Просмотр");
+
+        return retButton;
     }
 }
