@@ -21,10 +21,7 @@ import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataComponents;
-import com.haulmont.cuba.gui.model.DataContext;
+import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -87,8 +84,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private StarsAndOtherService starsAndOtherService;
     @Inject
     private LookupField ratingFieldNotLower;
-    @Inject
-    private CollectionContainer<JobCandidate> jobCandidatesDc;
     @Inject
     private CheckBox withCVCheckBox;
     @Inject

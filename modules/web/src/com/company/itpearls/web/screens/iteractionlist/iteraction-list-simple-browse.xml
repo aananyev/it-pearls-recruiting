@@ -9,6 +9,12 @@
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="iteractionList-view">
                 <property name="rating"/>
+                <property name="vacancy" view="_minimal">
+                    <property name="projectName" view="_minimal">
+                        <property name="projectDepartment" view="_minimal"/>
+                        <property name="projectOwner" view="_minimal"/>
+                    </property>
+                </property>
             </view>
             <loader id="iteractionListsDl" cacheable="true">
                 <query>

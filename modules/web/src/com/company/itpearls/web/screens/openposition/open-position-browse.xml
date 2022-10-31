@@ -11,6 +11,9 @@
                 <property name="projectName" view="_minimal">
                     <property name="projectOwner" view="_minimal"/>
                     <property name="projectDepartment" view="_minimal">
+                        <property name="companyName" view="_minimal">
+                            <property name="fileCompanyLogo" view="_minimal"/>
+                        </property>
                         <property name="templateLetter"/>
                     </property>
                     <property name="templateLetter"/>

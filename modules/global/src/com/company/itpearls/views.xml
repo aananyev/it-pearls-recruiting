@@ -56,7 +56,7 @@
         <property name="parentOpenPosition" view="_minimal">
         </property>
         <property name="cities" view="_minimal"/>
-        <property name="owner" view="_minimal"/>
+        <property name="owner" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_minimal">
         <property name="currentCompany" view="_local"/>
@@ -73,14 +73,27 @@
     <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true">
         <property name="laborAgreement" view="_minimal"/>
         <property name="socialNetwork" view="_minimal"/>
-        <property name="candidateCv" view="_minimal"/>
+        <property name="candidateCv" view="_local">
+            <property name="candidate" view="_minimal"/>
+            <property name="resumePosition" view="_minimal"/>
+            <property name="toVacancy" view="_minimal"/>
+            <property name="owner" view="_minimal"/>
+            <property name="fileCV" view="_minimal"/>
+            <property name="someFiles" view="_minimal"/>
+            <property name="fileImageFace" view="_minimal"/>
+        </property>
         <property name="skillTree" view="_minimal"/>
         <property name="fileImageFace" view="_minimal"/>
         <property name="personPosition" view="_minimal"/>
-        <property name="positionList" view="_minimal"/>
+        <property name="positionList" view="_minimal">
+            <property name="positionList" view="_minimal"/>
+        </property>
         <property name="currentCompany" view="_minimal"/>
         <property name="cityOfResidence" view="_minimal"/>
-        <property name="iteractionList" view="_minimal"/>
+        <property name="iteractionList" view="_minimal">
+            <property name="vacancy" view="_local">
+            </property>
+        </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
         <property name="socialNetworkURL" view="_minimal">
@@ -123,6 +136,7 @@
             <property name="regionCountry" view="_minimal"/>
             <property name="regionOfCity" view="_minimal"/>
         </property>
+        <property name="openPosition" view="_minimal"/>
     </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" view="_minimal"/>
@@ -171,7 +185,7 @@
         </property>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
-        <property name="vacancy" view="_minimal">
+        <property name="vacancy" view="_local">
         </property>
         <property name="iteractionType" view="_minimal">
             <property name="pic"/>
@@ -196,6 +210,7 @@
             <property name="addField"/>
         </property>
         <property name="recrutier" view="_minimal">
+            <property name="group" view="_minimal"/>
         </property>
         <property name="laborAgreement" view="_minimal">
             <property name="company" view="_minimal"/>

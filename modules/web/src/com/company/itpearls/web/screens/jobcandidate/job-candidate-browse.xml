@@ -12,6 +12,11 @@
                 <property name="iteractionList" view="_minimal">
                     <property name="recrutier" view="_minimal"/>
                     <property name="iteractionType" view="_minimal"/>
+                    <property name="vacancy" view="_minimal">
+                        <property name="projectName" view="_minimal">
+                            <property name="projectDepartment" view="_minimal"/>
+                        </property>
+                    </property>
                 </property>
                 <property name="positionList" view="_minimal">
                     <property name="positionList" view="_minimal"/>

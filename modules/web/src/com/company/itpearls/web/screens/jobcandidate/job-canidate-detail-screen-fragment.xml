@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
     <data>
-        <collection id="jobCandidatesDc"
-                    class="com.company.itpearls.entity.JobCandidate"
-                    view="jobCandidate-view"
-                    provided="true"/>
+        <instance id="jobCandidatesDc"
+                  class="com.company.itpearls.entity.JobCandidate"
+                  provided="true">
+            <view extends="jobCandidate-view"/>
+        </instance>
     </data>
     <layout width="100%"
             spacing="false"

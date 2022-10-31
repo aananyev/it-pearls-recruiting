@@ -7,6 +7,9 @@
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
+                <property name="projectName" view="_minimal">
+                    <property name="projectDepartment" view="_minimal"/>
+                </property>
             </view>
             <loader id="openPositionsDl">
                 <query>
@@ -17,6 +20,7 @@
         <instance id="candidateCVDc"
                   class="com.company.itpearls.entity.CandidateCV">
             <view extends="candidateCV-view">
+                <property name="candidate" view="_minimal"/>
             </view>
             <loader/>
             <collection id="someFilesesDc"

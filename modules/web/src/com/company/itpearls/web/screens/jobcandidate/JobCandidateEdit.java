@@ -62,16 +62,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Dialogs dialogs;
     @Inject
     private Label<String> labelCV;
-    @Inject
-    private DateField<Date> birdhDateField;
-    @Inject
-    private LookupPickerField<Company> currentCompanyField;
+
     @Inject
     private TextField<String> emailField;
-    @Inject
-    private LookupPickerField<City> jobCityCandidateField;
-    @Inject
-    private LookupPickerField<Position> personPositionField;
+
     @Inject
     private TextField<String> phoneField;
     @Inject
@@ -120,14 +114,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LinkButton telegrammLinkButton;
     @Inject
     private WebBrowserTools webBrowserTools;
-    @Inject
+
     private SuggestionField<String> firstNameField;
-    @Inject
     private SuggestionField<String> secondNameField;
-    @Inject
     private SuggestionField<String> middleNameField;
-    @Inject
     private Label<String> positionsLabel;
+    private LookupPickerField<Company> currentCompanyField;
+    private LookupPickerField<Position> personPositionField;
+    private LookupPickerField<City> jobCityCandidateField;
+    private DateField<Date> birdhDateField;
+
     @Inject
     private PdfParserService pdfParserService;
     @Inject
@@ -184,8 +180,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private VBoxLayout jobCandidateCard;
     @Named("tabSheetSocialNetworks.tabContactInfo")
     private VBoxLayout tabContactInfo;
-    @Named("tabSheetSocialNetworks.tabCandidate")
-    private VBoxLayout tabCandidate;
+    //    @Named("tabSheetSocialNetworks.tabCandidate")
+//    private VBoxLayout tabCandidate;
     @Inject
     private Label<String> iteractionListLabelCandidate;
     @Inject
@@ -218,6 +214,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private boolean cvTabInitialized = false;
     private boolean interationTabInitialized = false;
     private Button copyIteractionButton;
+    private boolean candidateInitialized = false;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -444,66 +441,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false);
 
-/*    @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "descriptionProvider")
-    private String jobCandidateIteractionListTableVacancyDescriptionProvider(IteractionList iteractionList) {
-        String retStr = "";
-
-        if (iteractionList.getVacancy() != null) {
-            if (iteractionList.getVacancy().getVacansyName() != null) {
-                retStr = iteractionList.getVacancy().getVacansyName();
-            }
-        }
-
-        return Jsoup.parse(retStr).text();
-    }
-
-    @Install(to = "jobCandidateIteractionListTable.projectName", subject = "descriptionProvider")
-    private String jobCandidateIteractionListTableProjectNameDescriptionProvider(IteractionList iteractionList) {
-        String retStr = "";
-
-        try {
-            retStr = "Ответственный за проект: ";
-
-            if (iteractionList.getVacancy() != null) {
-                if (iteractionList.getVacancy().getProjectName() != null) {
-                    if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
-                        if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
-                            retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
-                        }
-                    }
-                }
-            }
-
-            if (iteractionList.getVacancy() != null) {
-                if (iteractionList.getVacancy().getProjectName() != null) {
-                    if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
-                        if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
-                            retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
-                        }
-                    }
-                }
-            }
-        } catch (IllegalStateException | NullPointerException e) {
-            log.error("Error", e);
-        }
-
-        return Jsoup.parse(retStr).text();
-    } */
-
-    @Subscribe("firstNameField")
-    public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        setLabelFullName(setFullName(getEditedEntity().getFirstName(), null, null));
-    }
-
-    @Subscribe("middleNameField")
-    public void onMiddleNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        setLabelFullName(setFullName(null, getEditedEntity().getMiddleName(), null));
-    }
-
-    @Subscribe("secondNameField")
-    public void onSecondNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        setLabelFullName(setFullName(null, null, getEditedEntity().getSecondName()));
-    }
 
     private String setFullName(String firstName, String middleName, String secondName) {
         String fullName = "", localFirstName = "", localMiddleName = "", localSecondName = "";
@@ -535,37 +472,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         setPercentLabel();
+
         msec = System.currentTimeMillis() - msec;
 
         System.out.println(msec);
-        checkNotUsePosition();
 
         Boolean b = getEditedEntity().getBlockCandidate() == null ?
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
         createStartInteraction();
-
-//        currentCompanyOptionsContainerInTask();
-
     }
 
     private void createStartInteraction() {
     }
-
-/*    private void currentCompanyOptionsContainerInTask() {
-        BackgroundTask<Integer, Void> currentCompanyTask = new BackgroundTask<Integer, Void>() {
-            @Override
-            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
-                Map<String, Company> map = new LinkedHashMap<>();
-
-                map.putAll(dataManager.loadList());
-
-                currentCompanyField.setOptionsList();
-                return null;
-            }
-        };
-    }*/
-
 
     private void addSuggestField() {
         BackgroundTask<Integer, Void> task1 = new BackgroundTask<Integer, Void>(10, this) {
@@ -659,12 +578,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setPercentLabel() {
-        // вычислить процент заполнения карточки кандидата
-        Integer qualityPercent = setQualityPercent() * 100 / 14;
+        if (candidateInitialized) {
+            // вычислить процент заполнения карточки кандидата
+            Integer qualityPercent = setQualityPercent() * 100 / 14;
 
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
-            labelQualityPercent.setValue("Процент заполнения карточки: " + qualityPercent.toString()
-                    + "%");
+            if (!PersistenceHelper.isNew(getEditedEntity())) {
+                labelQualityPercent.setValue("Процент заполнения карточки: " + qualityPercent.toString()
+                        + "%");
+            }
         }
     }
 
@@ -777,10 +698,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onBeforeShow(BeforeShowEvent event) {
         time = System.currentTimeMillis();
 
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            addSuggestField();
-        }
-
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
@@ -807,13 +724,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setSocialNetworkTable();
         enableDisableContacts();
         setLabelTitle();
-        setPositionsLabel();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
-//        setFrequentInteractionPopupButton();
         setupSkillBox();
-        ;
-        setCountTimeStamp();//15
+        setCountTimeStamp();
 
         trimTelegramName();
 
@@ -827,7 +741,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
             blockCandidateButton.setVisible(true);
-//            jobCandidateIteractionListTable.setEnabled(true);
         } else {
             blockCandidateButton.setVisible(false);
         }
@@ -880,20 +793,33 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void checkNotUsePosition() {
-        if (personPositionField.getValue() != null) {
-            if (personPositionField.getValue().getPositionRuName().contains("не использовать")) {
-                personPositionField.setValue(null);
+        if (personPositionField != null) {
+            if (personPositionField.getValue() != null) {
+                if (personPositionField.getValue().getPositionRuName().contains("не использовать")) {
+                    personPositionField.setValue(null);
+                }
             }
         }
     }
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        secondNameField.setValue(replaceE_E(secondNameField.getValue()));
-        firstNameField.setValue(replaceE_E(firstNameField.getValue()));
+        if (!candidateInitialized) {
+            initTabCandidate();
+        }
 
-        if (middleNameField.getValue() != null)
-            middleNameField.setValue(replaceE_E(middleNameField.getValue()));
+        if (secondNameField != null) {
+            secondNameField.setValue(replaceE_E(secondNameField.getValue()));
+        }
+
+        if (firstNameField != null) {
+            firstNameField.setValue(replaceE_E(firstNameField.getValue()));
+        }
+
+        if (middleNameField != null) {
+            if (middleNameField.getValue() != null)
+                middleNameField.setValue(replaceE_E(middleNameField.getValue()));
+        }
 
         trimTelegramName();
         addIteractionOfNewCandidate();
@@ -982,25 +908,32 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private JobCandidate checkDublicateCandidate() {
-        String queryStr = "select e from itpearls_JobCandidate e " +
-                "where e.firstName = :firstName and " +
-                "e.secondName = :secondName and " +
-                "e.cityOfResidence = :cityOfResidence and " +
-                "e.personPosition = :personPosition";
-        List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
-                .query(queryStr)
-                .parameter("firstName", firstNameField.getValue())
-                .parameter("secondName", secondNameField.getValue())
-                .parameter("cityOfResidence", jobCityCandidateField.getValue())
-                .parameter("personPosition", personPositionField.getValue())
-                .cacheable(true)
-                .view("jobCandidate-view")
-                .list();
+        if (firstNameField != null &&
+                secondNameField != null &&
+                jobCityCandidateField != null &&
+                personPositionField != null) {
+            String queryStr = "select e from itpearls_JobCandidate e " +
+                    "where e.firstName = :firstName and " +
+                    "e.secondName = :secondName and " +
+                    "e.cityOfResidence = :cityOfResidence and " +
+                    "e.personPosition = :personPosition";
+            List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
+                    .query(queryStr)
+                    .parameter("firstName", firstNameField.getValue())
+                    .parameter("secondName", secondNameField.getValue())
+                    .parameter("cityOfResidence", jobCityCandidateField.getValue())
+                    .parameter("personPosition", personPositionField.getValue())
+                    .cacheable(true)
+                    .view("jobCandidate-view")
+                    .list();
 
-        if (jobCandidates.size() == 0) {
-            return null;
+            if (jobCandidates.size() == 0) {
+                return null;
+            } else {
+                return jobCandidates.get(0);
+            }
         } else {
-            return jobCandidates.get(0);
+            return null;
         }
     }
 
@@ -1154,24 +1087,97 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onInit(InitEvent event) {
 
         time = System.currentTimeMillis();
-
-//        addIconColumn();
-//        setCopyCVButton();
-
         msec = System.currentTimeMillis();
-
 
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             if ("tabResume".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
                 initTabResume();
             }
-        });
 
-        tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             if ("tabIteraction".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
                 initTabInteractions();
             }
+
+            if ("tabCandidate".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
+                initTabCandidate();
+            }
         });
+    }
+
+    private void initTabCandidate() {
+        if (!candidateInitialized) {
+            if (currentCompanyField == null) {
+                currentCompanyField = (LookupPickerField<Company>) getWindow()
+                        .getComponent("currentCompanyField");
+            }
+
+            if (personPositionField == null) {
+                personPositionField = (LookupPickerField<Position>) getWindow()
+                        .getComponent("personPositionField");
+            }
+
+            if (jobCityCandidateField == null) {
+                jobCityCandidateField = (LookupPickerField<City>) getWindow()
+                        .getComponent("jobCityCandidateField");
+            }
+
+            if (birdhDateField == null) {
+                birdhDateField = (DateField<Date>) getWindow().getComponent("birdhDateField");
+            }
+
+            if (secondNameField == null) {
+                secondNameField = (SuggestionField<String>) getWindow().getComponent("secondNameField");
+                if (secondNameField != null) {
+                    secondNameField.setEnterActionHandler(searchString -> {
+                        secondNameField.setValue(searchString);
+                    });
+
+                    secondNameField.addValueChangeListener(stringValueChangeEvent -> {
+                        setLabelFullName(setFullName(null, null, getEditedEntity().getSecondName()));
+                    });
+                }
+            }
+
+            if (firstNameField == null) {
+                firstNameField = (SuggestionField<String>) getWindow().getComponent("firstNameField");
+                if (firstNameField != null) {
+                    firstNameField.setEnterActionHandler(searchString -> {
+                        firstNameField.setValue(searchString);
+                    });
+
+                    firstNameField.addValueChangeListener(stringValueChangeEvent -> {
+                        setLabelFullName(setFullName(getEditedEntity().getFirstName(), null, null));
+                    });
+                }
+            }
+
+            if (middleNameField == null) {
+                middleNameField = (SuggestionField<String>) getWindow().getComponent("middleNameField");
+                if (middleNameField != null) {
+                    middleNameField.setEnterActionHandler(searchString -> {
+                        middleNameField.setValue(searchString);
+                    });
+
+                    middleNameField.addValueChangeListener(stringValueChangeEvent -> {
+                        setLabelFullName(setFullName(null, getEditedEntity().getMiddleName(), null));
+                    });
+                }
+            }
+
+            if (positionsLabel == null) {
+                positionsLabel = (Label<String>) getWindow().getComponent("positionsLabel");
+                if (positionsLabel != null) {
+                    setPositionsLabel();
+                }
+            }
+
+            addSuggestField();
+            checkNotUsePosition();
+
+            if (firstNameField != null && secondNameField != null) {
+                candidateInitialized = true;
+            }
+        }
     }
 
     private void initTabInteractions() {
@@ -1472,21 +1478,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     }
 
-    @Install(to = "secondNameField", subject = "enterActionHandler")
-    private void secondNameFieldEnterActionHandler(String searchString) {
-        secondNameField.setValue(searchString);
-    }
-
-    @Install(to = "firstNameField", subject = "enterActionHandler")
-    private void firstNameFieldEnterActionHandler(String searchString) {
-        firstNameField.setValue(searchString);
-    }
-
-    @Install(to = "middleNameField", subject = "enterActionHandler")
-    private void middleNameFieldEnterActionHandler(String searchString) {
-        middleNameField.setValue(searchString);
-    }
-
     private void addSecondNameSuggestField() {
         String queryString = "select distinct e.secondName " +
                 "from itpearls_JobCandidate e " +
@@ -1529,25 +1520,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 })
                 .build()
                 .show();
-
-//        jobCandidateIteractionListDataGridDl.load();
     }
-
-/*    @Install(to = "jobCandidateCandidateCvTable.letter", subject = "descriptionProvider")
-    private String jobCandidateCandidateCvTableLetterDescriptionProvider(CandidateCV candidateCV) {
-        String returnData = candidateCV.getLetter() != null ? Jsoup.parse(candidateCV.getLetter()).text() : "";
-        return returnData;
-    } */
-
-/*    @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "descriptionProvider")
-    private String jobCandidateCandidateCvTableIconOriginalCVFileDescriptionProvider(CandidateCV candidateCV) {
-        return candidateCV.getLinkOriginalCv();
-    } */
-
-/*    @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "descriptionProvider")
-    private String jobCandidateCandidateCvTableIconITPearlsCVFileDescriptionProvider(CandidateCV candidateCV) {
-        return candidateCV.getLinkItPearlsCV();
-    } */
 
     private IteractionList getLastIteraction() {
         try {
@@ -1641,29 +1614,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-/*    @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "styleProvider")
-    private String jobCandidateCandidateCvTableIconITPearlsCVFileStyleProvider(CandidateCV candidateCV) {
-        String style = "";
-
-        if (candidateCV.getLinkItPearlsCV() != null) {
-            style = "pic-center-large-green";
-        } else {
-            style = "pic-center-large-red";
-        }
-
-        return style;
-    } */
-
-/*    @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "styleProvider")
-    private String jobCandidateCandidateCvTableIconOriginalCVFileStyleProvider(CandidateCV candidateCV) {
-        return candidateCV.getLinkOriginalCv() != null ? "pic-center-large-green" : "pic-center-large-red";
-    }
-
-    @Install(to = "jobCandidateCandidateCvTable.letter", subject = "styleProvider")
-    private String jobCandidateCandidateCvTableLetterStyleProvider(CandidateCV candidateCV) {
-        return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
-    } */
-
     private String getIcon(IteractionList item) {
         if (item.getIteractionType() != null) {
             if (item.getIteractionType().getPic() != null) {
@@ -1692,14 +1642,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         iconColumn.setRenderer(jobCandidateIteractionListTable.createRenderer(DataGrid.ImageRenderer.class));
     }
 
-/*    @Install(to = "jobCandidateCandidateCvTable.letter", subject = "columnGenerator")
-    private Icons.Icon jobCandidateCandidateCvTableLetterColumnGenerator
-            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        return event.getItem().getLetter() != null ?
-                CubaIcon.valueOf("FILE_TEXT") :
-                CubaIcon.valueOf("FILE");
-    } */
-
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
         try {
@@ -1711,42 +1653,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             e.printStackTrace();
         }
     }
-
-/*    @Install(to = "jobCandidateCandidateCvTable.iconOriginalCVFile", subject = "columnGenerator")
-    private Icons.Icon jobCandidateCandidateCvTableIconOriginalCVFileColumnGenerator
-            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        return event.getItem().getLinkOriginalCv() != null ?
-                CubaIcon.valueOf("FILE_TEXT") :
-                CubaIcon.valueOf("FILE");
-    }
-
-    @Install(to = "jobCandidateCandidateCvTable.iconITPearlsCVFile", subject = "columnGenerator")
-    private Icons.Icon jobCandidateCandidateCvTableiconITPearlsCVFileColumnGenerator
-            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        return event.getItem().getLinkItPearlsCV() != null ?
-                CubaIcon.valueOf("FILE_TEXT") :
-                CubaIcon.valueOf("FILE");
-    }
-
-    @Install(to = "jobCandidateIteractionListTable.iteractionType", subject = "descriptionProvider")
-    private String jobCandidateIteractionListTableIteractionTypeDescriptionProvider(IteractionList iteractionList) {
-        String add = "";
-
-        if (iteractionList.getAddDate() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy H:m");
-            add = dateFormat.format(iteractionList.getAddDate());
-        }
-
-        if (iteractionList.getAddString() != null)
-            add = iteractionList.getAddString();
-
-        if (iteractionList.getAddInteger() != null)
-            add = iteractionList.getAddInteger().toString();
-
-
-        return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
-    } */
-
 
     private void setLaborAgreement() {
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.OUSTAFF_NAMAGER) ||
@@ -1766,7 +1672,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         blockCandidateCheckBox.setValue(b);
         blockCandidateButton.setCaption(b ? BLOCK_CANDIDATE_OFF : BLOCK_CANDIDATE_ON);
         blockCandidateButton.setIcon(b ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
-//        jobCandidateIteractionListTable.setEnabled(!b);
         iteractionListLabelCandidate.setStyleName(b ? "h2-red" : "h2");
     }
 
@@ -1803,7 +1708,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             retStr = retStr.substring(1);
             webBrowserTools.showWebPage("http://t.me/" + retStr.substring(1, retStr.length() - 1), null);
         }
-
     }
 
     @Subscribe("skypeLinkButton")
@@ -1816,11 +1720,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (getEditedEntity().getEmail() != null) {
             emailLinkButton.setCaption(getEditedEntity().getEmail());
         }
-    }
-
-    private void setCandidateInTables() {
-//        jobCandidateIteractionListDataGridDl.setParameter("candidate", getEditedEntity());
-//        jobCandidateIteractionListDataGridDl.load();
     }
 
     public void addPositionList() {
@@ -1885,6 +1784,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
         }
+
         if (!outStr.equals("")) {
             positionsLabel.setValue(outStr);
             positionsLabel.setDescription(description);
@@ -1931,7 +1831,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .withMessage("Создать резюме?")
                             .withActions(
                                     new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-//                                    addIteractionJobCandidate();
                                     }),
                                     new DialogAction(DialogAction.Type.NO)
                             )
@@ -2041,12 +1940,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return null;
     }
 
-    /* @Subscribe("jobCandidateIteractionListTable")
-    public void onJobCandidateIteractionListTableEditorClose(DataGrid.EditorCloseEvent event) {
-        setRatingLabel(getEditedEntity());
-    } */
-
-
     private void setRatingLabel(JobCandidate editedEntity) {
 
         Integer sumRating = 0,
@@ -2063,7 +1956,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             float avgRating = (float) sumRating / (float) countRating;
             BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
 
-//            candidateRatingLabel.setValue(String.valueOf(avgRatiog.setScale(1)));
             candidateRatingLabel.setValue(String.valueOf(avgRatiog.intValue()));
 
             switch ((int) Integer.valueOf(avgRatiog.intValue())) {
@@ -2091,11 +1983,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-/*    @Install(to = "jobCandidateIteractionListTable.rating", subject = "columnGenerator")
-    private String jobCandidateIteractionListTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
-    } */
-
     public void scanContactsFromCVs() {
         String newPhone = null,
                 newEmail = null;
@@ -2116,8 +2003,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 if (phone != null) {
                     newPhone = phone;
                 }
-
-//                newCompany = parseCVService.parseCompany(candidateCV.getTextCV());
 
                 List<String> urls = parseCVService
                         .extractUrls(Jsoup.parse(candidateCV.getTextCV())
@@ -2148,7 +2033,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String newPhoneNew = parseCVService.normalizePhoneStr(newPhone);
         String oldEmail = emailField.getValue();
         String oldPhone = parseCVService.normalizePhoneStr(phoneField.getValue());
-//        Company oldCompany = currentCompanyField.getValue();
 
         Boolean flag = false;
 
@@ -2160,16 +2044,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 flag = true;
 
             } else {
-                /*
-                if (!StringUtils.equals(newEmail, oldEmail)) {
-                    messageEmail = "Адрес электронной почты старый "
-                            + emailField.getValue()
-                            + " новый "
-                            + newEmail + " ";
-
-                    flag = true;
-                }
-            }*/
             }
 
             if (newPhone != null) {
@@ -2179,37 +2053,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                     flag = true;
                 } else {
-                    // убрать новая/старая
-                /* if (!StringUtils.equals(newPhone, oldPhone)) {
-                    if (!newPhoneNew.equals(oldPhone)) {
-                        messagePhone = "Телефон старый "
-                                + phoneField.getValue()
-                                + " новый "
-                                + newPhoneNew + " ";
 
-                        flag = true;
-                    }
-                }*/
                 }
             }
-
-/*        if (newCompany != null) {
-            if (oldCompany == null && newCompany != null) {
-                messageCompany = "Добавить текущую компанию в карточку "
-                        + newCompany.getComanyName() + "? ";
-
-                flag = true;
-            } else {
-                 if (!newCompany.equals(oldCompany)) {
-                    // убрать новая - старая
-                     messageCompany = "Компания была "
-                            + currentCompanyField.getValue().getComanyName()
-                            + ", в резюме отмечена "
-                            + newCompany.getComanyName()
-                            + " ";
-                    flag = true;
-                }
-            } */
         }
 
         // Social
@@ -2272,7 +2118,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             }
         }
-        // -- Social
 
         if (flag) {
             Dialogs.InputDialogBuilder dialog = dialogs.createInputDialog(this)
@@ -2297,13 +2142,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             }
 
-/*            if (newCompany != null) {
-                if (!Objects.equals(newCompany, oldCompany)) {
-                    dialog.withParameter(InputParameter.booleanParameter("newCompany")
-                            .withCaption(messageCompany).withRequired(true));
-                }
-            } */
-
             if (messageSocial.size() > 0) {
                 for (Map.Entry<String, List<String>> entry : messageSocial.entrySet()) {
                     dialog.withParameter(InputParameter.booleanParameter(entry.getKey())
@@ -2315,7 +2153,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 if (closeEvent.closedWith(DialogOutcome.OK)) {
                     Boolean newEmailFlag = closeEvent.getValue("newEmail");
                     Boolean newPhoneFlag = closeEvent.getValue("newPhone");
-//                    Boolean newCompanyFlag = closeEvent.getValue("newCompany");
 
                     if (newEmailFlag != null) {
                         if (newEmailFlag) {
@@ -2328,12 +2165,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             phoneField.setValue(newPhoneNew);
                         }
                     }
-
-/*                    if (newCompanyFlag != null) {
-                        if (newCompanyFlag) {
-                            currentCompanyField.setValue(newCompany);
-                        }
-                    } */
 
                     HashMap<String, Boolean> getSocial = new HashMap<>();
                     if (messageSocial.size() > 0) {
@@ -2513,62 +2344,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return link;
     }
 
-/*    @Install(to = "jobCandidateCandidateCvTable.candidateITPearlsCVColumn", subject = "columnGenerator")
-    private Component jobCandidateCandidateCvTableCandidateITPearlsCVColumnColumnGenerator
-            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        Link link = uiComponents.create(Link.NAME);
-
-        if (event.getItem().getLinkItPearlsCV() != null) {
-            String url = event.getItem().getLinkItPearlsCV();
-
-            link.setUrl(url);
-            link.setCaption("CV IT Pearls");
-            link.setTarget("_blank");
-            link.setWidthAuto();
-            link.setVisible(true);
-        } else {
-            link.setVisible(false);
-        }
-
-        return link;
-    }
-
-    @Install(to = "jobCandidateCandidateCvTable.candidateOriginalCVColumn", subject = "columnGenerator")
-    private Component jobCandidateCandidateCvTableCandidateOriginalCVColumnColumnGenerator
-            (DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        Link link = uiComponents.create(Link.NAME);
-
-        if (event.getItem().getLinkOriginalCv() != null) {
-            String url = event.getItem().getLinkOriginalCv();
-
-            link.setUrl(url);
-            link.setCaption("Оригинальное CV");
-            link.setTarget("_blank");
-            link.setWidthAuto();
-            link.setVisible(true);
-        } else {
-            link.setVisible(false);
-        }
-
-        return link;
-    }
-
-    @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "descriptionProvider")
-    private String jobCandidateIteractionListTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ? Jsoup.parse(iteractionList.getComment()).text() : null;
-    }
-
-    @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "columnGenerator")
-    private Icons.Icon jobCandidateIteractionListTableCommentColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return event.getItem().getComment() != null && !event.getItem().getComment().equals("") ? CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
-    }
-
-    @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "styleProvider")
-    private String jobCandidateIteractionListTableCommentColumnStyleProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ? "pic-center-large-green" : "pic-center-large-red";
-    } */
-
-
     public void openPositionDescription() {
         QuickViewOpenPositionDescription quickViewOpenPositionDescription = screens.create(QuickViewOpenPositionDescription.class);
         quickViewOpenPositionDescription.setJobDescription(jobCandidateIteractionListTable.getSingleSelected() != null ?
@@ -2638,10 +2413,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void blockUnblockCandidate(Boolean checkBlockCanidate) {
-//        blockCandidateCheckBox.setValue(getEditedEntity().getBlockCandidate() == null
-//                ? false
-//                : getEditedEntity().getBlockCandidate());
-//        getEditedEntity().setBlockCandidate(!(getEditedEntity().getBlockCandidate() == null ? false : getEditedEntity().getBlockCandidate()));
         checkBlockCanidate = !checkBlockCanidate;
 
         blockCandidateCheckBox.setValue(checkBlockCanidate == null ? false : checkBlockCanidate);
