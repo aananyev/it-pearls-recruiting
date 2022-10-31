@@ -6,9 +6,7 @@
     <data>
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local">
-                <property name="projectName"
-                          view="project-view"/>
+            <view extends="openPosition-view">
             </view>
             <loader id="openPositionsDl">
                 <query>
@@ -19,51 +17,6 @@
         <instance id="candidateCVDc"
                   class="com.company.itpearls.entity.CandidateCV">
             <view extends="candidateCV-view">
-                <property name="candidate"
-                          view="_local">
-                    <property name="fullName"/>
-                    <property name="personPosition"
-                              view="_local"/>
-                </property>
-                <property name="resumePosition"
-                          view="_local"/>
-                <property name="fileCV"
-                          view="_local"/>
-                <property name="toVacancy"
-                          view="_local">
-                    <property name="comment"/>
-                    <property name="projectName" view="_local">
-                        <property name="projectName"/>
-                        <property name="projectDepartment" view="_local"/>
-                    </property>
-                </property>
-                <property name="fileImageFace"
-                          view="_local"/>
-                <property name="originalFileCV"
-                          view="_local"/>
-                <property name="skillTree"
-                          view="_local"/>
-                <property name="someFiles"
-                          view="_local">
-                    <property name="fileType"
-                              view="_local"/>
-                    <property name="fileComment"/>
-                    <property name="fileDescriptor"
-                              view="_local">
-                        <property name="size"/>
-                    </property>
-                    <property name="fileDescription"/>
-                    <property name="fileOwner"
-                              view="_local"/>
-                </property>
-                <property name="letter"/>
-                <property name="owner"
-                          view="_local"/>
-                <property name="linkOriginalCv"/>
-                <property name="linkItPearlsCV"/>
-                <property name="textCV"/>
-                <property name="datePost"/>
-                <property name="commentLetter"/>
             </view>
             <loader/>
             <collection id="someFilesesDc"

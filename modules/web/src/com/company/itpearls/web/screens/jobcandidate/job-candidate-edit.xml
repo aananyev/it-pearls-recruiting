@@ -7,54 +7,19 @@
     <data>
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_local">
-                <property name="positionList"
-                          view="_local">
-                    <property name="positionList"
-                              view="_local"/>
-                </property>
-                <property name="currentCompany"
-                          view="_local"/>
-                <property name="cityOfResidence"
-                          view="_local"/>
-                <property name="fileImageFace"
-                          view="_local">
-                    <property name="size"/>
-                </property>
-                <property name="iteractionList"
-                          view="iteractionList-view">
-                    <property name="chainInteraction"
-                              view="_local"/>
-                    <property name="vacancy" view="_local">
-                        <property name="projectName" view="_local">
-                            <property name="projectName"/>
-                            <property name="projectDepartment" view="_local">
-                                <property name="companyName" view="_local"/>
-                            </property>
+            <view extends="jobCandidate-view">
+                <property name="iteractionList" view="_minimal">
+                    <property name="iteractionType" view="_minimal"/>
+                    <property name="vacancy" view="_minimal">
+                        <property name="projectName" view="_minimal">
+                            <property name="projectDepartment" view="_minimal"/>
                         </property>
                     </property>
+                    <property name="recrutier" view="_minimal"/>
                 </property>
-                <property name="socialNetwork"
-                          view="_local"/>
-                <property name="specialisation"
-                          view="_local"/>
-                <property name="blockCandidate"/>
-                <property name="laborAgreement"
-                          view="_local"/>
-                <property name="candidateCv"
-                          view="candidateCV-view">
-                    <property name="resumePosition"
-                              view="_local"/>
-                    <property name="toVacancy"
-                              view="_local">
-                        <property name="comment"/>
-                        <property name="projectName"
-                                  view="_local">
-                            <property name="projectName"/>
-                        </property>
-                    </property>
-                    <property name="candidate"
-                              view="jobCandidate-view"/>
+                <property name="candidateCv" view="_local">
+                    <property name="resumePosition" view="_minimal"/>
+                    <property name="toVacancy" view="_minimal"/>
                 </property>
             </view>
             <loader id="jobCandidateDl"
@@ -94,8 +59,8 @@
             </properties>
         </keyValueCollection>
         <collection id="personPositionsDc"
-                    class="com.company.itpearls.entity.Position"
-                    view="_base">
+                    class="com.company.itpearls.entity.Position">
+            <view extends="position-view"/>
             <loader id="personPositionsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Position e
@@ -104,35 +69,24 @@
                 </query>
             </loader>
         </collection>
-        <collection id="currentCompaniesDc" class="com.company.itpearls.entity.Company">
-            <view extends="_local">
-                <property name="companyOwnership" view="_minimal"/>
-            </view>
+        <collection id="currentCompaniesDc"
+                    class="com.company.itpearls.entity.Company">
+            <view extends="company-view"/>
             <loader id="currentCompaniesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City">
-            <view extends="_local">
-                <property name="cityRegion" view="_local">
-                    <property name="regionCountry" view="_local"/>
-                </property>
-            </view>
+            <view extends="city-view"/>
             <loader id="citiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e order by e.cityRuName]]>
                 </query>
             </loader>
         </collection>
-        <collection id="socialNetworkURLsesDc" class="com.company.itpearls.entity.SocialNetworkURLs">
-            <view extends="_local">
-                <property name="jobCandidate"
-                          view="_minimal"/>
-                <property name="socialNetworkURL"
-                          view="_minimal">
-                    <property name="socialNetworkURL"/>
-                </property>
-            </view>
+        <collection id="socialNetworkURLsesDc"
+                    class="com.company.itpearls.entity.SocialNetworkURLs">
+            <view extends="socialNetworkURLs-view"/>
             <loader id="socialNetworkURLsesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_SocialNetworkURLs e order by e.networkName]]>
@@ -801,6 +755,7 @@
                  margin="true,true,true,true"
                  icon="font-icon:FILE_TEXT"
                  expand="tabResumeVbox"
+                 lazy="true"
                  spacing="true">
                 <vbox id="tabResumeVbox"
                       spacing="true"
@@ -809,8 +764,7 @@
                     <button id="checkSkillFromJD"
                             caption="msg://msgCheckSkills"
                             align="BOTTOM_LEFT"
-                            enable="false"
-                            invoke="checkSkillFromJD"/>
+                            enable="false"/>
                     <dataGrid id="jobCandidateCandidateCvTable"
                               width="100%"
                               dataContainer="jobCandidateCandidateCvsDc">
@@ -820,7 +774,8 @@
                                     property="datePost"
                                     caption="msg://msgDatePost"/>
                             <column id="resumePosition"
-                                    property="resumePosition" caption="msg://msgToPosition"/>
+                                    property="resumePosition"
+                                    caption="msg://msgToPosition"/>
                             <column id="toVacancy"
                                     property="toVacancy"
                                     maximumWidth="500px"
@@ -828,47 +783,47 @@
                             <column id="iconOriginalCVFile"
                                     width="100px"
                                     caption="msg://msgOriginalCV">
-                                <iconRenderer/>
-                            </column>
+
+                            </column> <!--                                <iconRenderer/> -->
                             <column id="iconITPearlsCVFile"
                                     width="100px"
                                     caption="msg://msgITPearlsCV">
-                                <iconRenderer/>
-                            </column>
+                            </column> <!--                                <iconRenderer/> -->
                             <column id="letter"
                                     width="100px"
                                     caption="msg://msgCoverLetter">
-                                <iconRenderer/>
-                            </column>
+                            </column><!--                                <iconRenderer/> -->
                             <column id="candidateOriginalCVColumn"
                                     width="120px"
                                     caption="msg://msgOriginalCV">
-                                <componentRenderer/>
-                            </column>
+                            </column><!--                                <componentRenderer/> -->
                             <column id="candidateITPearlsCVColumn"
                                     width="120px"
                                     caption="msg://msgITPearlsCV">
-                                <componentRenderer/>
-                            </column>
+                            </column><!--                                <componentRenderer/> -->
                             <column id="createdBy"
                                     property="createdBy"
                                     width="100px"
                                     caption="msg://msgCreatedBy"/>
                         </columns>
                         <actions>
-                            <action type="create" id="create"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
+                            <action type="create"
+                                    id="create"/>
+                            <action id="edit"
+                                    type="edit"/>
+                            <action id="remove"
+                                    type="remove"/>
                         </actions>
                         <buttonsPanel>
                             <button id="addButtonCV"
                                     action="jobCandidateCandidateCvTable.create"/>
                             <button id="copyCVButton"
                                     caption="msg://msgCopy"
-                                    icon="COPY"
-                                    invoke="copyCVJobCandidate"/>
-                            <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
-                            <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
+                                    icon="COPY"/>
+                            <button id="editButtonCV"
+                                    action="jobCandidateCandidateCvTable.edit"/>
+                            <button id="removeButtonCV"
+                                    action="jobCandidateCandidateCvTable.remove"/>
                             <button id="scanContactsFromCVButton"
                                     caption="msg://msgScan"
                                     enable="false"

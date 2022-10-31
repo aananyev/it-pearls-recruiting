@@ -7,30 +7,11 @@
     <data readOnly="true">
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local">
-                <property name="projectName" view="_local">
-                    <property name="projectOwner" view="_local"/>
-                    <property name="projectName"/>
-                    <property name="projectDepartment" view="_local">
-                        <property name="companyName" view="_local">
-                            <property name="fileCompanyLogo" view="_local"/>
-                            <property name="departmentOfCompany" view="_local">
-                                <property name="templateLetter"/>
-                            </property>
-                        </property>
-                    </property>
+            <view extends="openPosition-view">
+                <property name="projectName" view="_minimal">
+                    <property name="projectOwner" view="_minimal"/>
+                    <property name="projectDepartment" view="_minimal"/>
                 </property>
-                <property name="parentOpenPosition" view="_local"/>
-                <property name="positionType" view="_local">
-                    <property name="standartDescription"/>
-                </property>
-                <property name="cityPosition" view="_local"/>
-                <property name="cities" view="_local"/>
-                <property name="owner" view="_local"/>
-                <property name="createdBy"/>
-                <property name="createTs"/>
-                <property name="templateLetter"/>
-                <property name="candidates" view="_local"/>
             </view>
             <loader id="openPositionsDl">
                 <query>

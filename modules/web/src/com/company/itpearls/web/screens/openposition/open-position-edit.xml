@@ -7,37 +7,15 @@
     <data>
         <instance id="openPositionDc"
                   class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local">
-                <property name="cityPosition"
-                          fetch="JOIN"
-                          view="_minimal"/>
-                <property name="positionType"
-                          view="_minimal"/>
-                <property name="projectName"
-                          view="project-view">
-                    <property name="projectDepartment"
-                              view="_local">
-                        <property name="companyName"
-                                  view="_local">
-                            <property name="cityOfCompany"
-                                      view="_local"/>
-                        </property>
-                    </property>
+            <view extends="openPosition-view">
+                <property name="laborAgreement" view="_minimal"/>
+                <property name="projectName" view="_minimal">
+                    <property name="projectIsClosed"/>
+                    <property name="projectDepartment" view="_minimal"/>
                 </property>
-                <property name="commandCandidate"/>
-                <property name="parentOpenPosition"
-                          view="_local">
+                <property name="positionType" view="_minimal">
+                    <property name="standartDescription"/>
                 </property>
-                <property name="cities"
-                          view="_local"/>
-                <property name="skillsList"
-                          view="skillTree-view">
-                    <property name="skillTree" view="skillTree-view"/>
-                </property>
-                <property name="laborAgreement"
-                          view="laborAgreement-view"/>
-                <property name="comment"/>
-                <property name="signDraft"/>
             </view>
             <loader id="openPositionDl"/>
             <collection id="openPositionSkillsListsDc"
@@ -47,13 +25,7 @@
         </instance>
         <collection id="openPositionParentDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local">
-                <property name="parentOpenPosition"
-                          view="_local"/>
-                <property name="projectName"
-                          view="_local"/>
-                <property name="positionType"
-                          view="_minimal"/>
+            <view extends="openPosition-view">
             </view>
             <loader id="openPositionParentDl">
                 <query>
@@ -65,7 +37,7 @@
         </collection>
         <collection id="positionTypesDc"
                     class="com.company.itpearls.entity.Position"
-                    view="_local">
+                    view="position-view">
             <loader id="positionTypesLc">
                 <query>
                     <![CDATA[select e from itpearls_Position e
@@ -76,9 +48,7 @@
         </collection>
         <collection id="openPositionNewsDc"
                     class="com.company.itpearls.entity.OpenPositionNews">
-            <view extends="_local">
-                <property name="author" view="_local"/>
-                <property name="candidates" view="_minimal"/>
+            <view extends="openPositionNews-view">
             </view>
             <loader id="openPositionNewsLc">
                 <query>
@@ -99,8 +69,7 @@
         </collection>
         <collection id="projectNamesDc"
                     class="com.company.itpearls.entity.Project">
-            <view extends="_local">
-                <property name="projectDepartment" view="_local"/>
+            <view extends="project-view">
             </view>
             <loader id="projectNamesLc">
                 <query>
@@ -120,7 +89,7 @@
         </collection>
         <collection id="companyNamesDc"
                     class="com.company.itpearls.entity.Company">
-            <view extends="_local"/>
+            <view extends="company-view"/>
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
                         order by e.comanyName]]></query>
@@ -128,7 +97,7 @@
         </collection>
         <collection id="companyDepartamentsDc"
                     class="com.company.itpearls.entity.CompanyDepartament">
-            <view extends="_local">
+            <view extends="companyDepartament-view">
                 <property name="companyName" view="_local">
                     <property name="cityOfCompany" view="_local"/>
                 </property>
@@ -150,7 +119,7 @@
         </collection>
         <collection id="citiesDc"
                     class="com.company.itpearls.entity.City"
-                    view="_local">
+                    view="city-view">
             <loader id="citiesDl">
                 <query><![CDATA[select e
                 from itpearls_City e

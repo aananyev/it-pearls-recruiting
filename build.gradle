@@ -2,12 +2,12 @@ buildscript {
     ext.cubaVersion = '7.2.19'
     repositories {
         maven {
-            url 'https://repo.cuba-platform.com/content/groups/work'
+            url 'https://nexus.cuba-platform.cn/repository/cuba/'
 
-            credentials {
-                username(rootProject.hasProperty('repoUser') ? rootProject['repoUser'] : 'cuba')
-                password(rootProject.hasProperty('repoPass') ? rootProject['repoPass'] : 'cuba123')
-            }
+        }
+
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
         }
 
 

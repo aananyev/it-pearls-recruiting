@@ -7,14 +7,10 @@
     <data readOnly="true">
         <collection id="candidateCVsDc"
                     class="com.company.itpearls.entity.CandidateCV">
-            <view extends="_local">
+            <view extends="candidateCV-view">
                 <property name="candidate" view="_minimal">
                     <property name="fullName"/>
                 </property>
-                <property name="toVacancy" view="_minimal"/>
-                <property name="resumePosition" view="_minimal"/>
-                <property name="owner" view="_minimal"/>
-                <property name="originalFileCV" view="_minimal"/>
             </view>
             <loader id="candidateCVsDl">
                 <query>
