@@ -7,11 +7,11 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.itpearls.web.screens.openposition.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
-import com.google.gson.GsonBuilder;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -25,7 +25,6 @@ import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -98,8 +97,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
     @Inject
-    private DataGrid<IteractionList> jobCandidateIteractionListTable;
-    @Inject
     private Label<String> personPositionTitle;
     @Inject
     private Label<String> emailTitle;
@@ -150,6 +147,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Screens screens;
 
+    private DataGrid<IteractionList> jobCandidateIteractionListTable;
+    private Button openPositionProjectDescriptionButton;
+    private PopupButton frequentInteractionPopupButton;
+
     private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
     private Button copyCVButton;
     private long msec = 0;
@@ -173,19 +174,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
     IteractionList lastIteraction = null;
 
-    static String RESEARCHER = "Researcher";
-    static String RECRUITER = "Recruiter";
-    static String MANAGER = "Manager";
-    static String ADMINISTRATOR = "Administrators";
-    static String STAGER = "Стажер";
-    static String OUSTAFF_NAMAGER = "Outstaff Manager";
-
     String QUERY_GET_LAST_ITERACTION = "select e " +
             "from itpearls_IteractionList e " +
             "where e.candidate = :candidate and " +
             "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
-    @Inject
-    private Button openPositionProjectDescriptionButton;
     @Inject
     private Button blockCandidateButton;
     @Named("tabSheetSocialNetworks.jobCandidateCard")
@@ -211,8 +203,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private InstanceContainer<JobCandidate> jobCandidateDc;
     @Inject
-    private PopupButton frequentInteractionPopupButton;
-    @Inject
     private InteractionService interactionService;
     @Inject
     private UserSessionSource userSessionSource;
@@ -225,7 +215,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Integer lastIteractionCount = 1;
     @Inject
     private TabSheet tabSheetSocialNetworks;
-    private boolean cvTabItitialized = false;
+    private boolean cvTabInitialized = false;
+    private boolean interationTabInitialized = false;
+    private Button copyIteractionButton;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -324,11 +316,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         } else {
             return null;
         }
-    }
-
-    private void setupIteractionList() {
-        jobCandidateIteractionListTable.addEditorPostCommitListener(event -> {
-        });
     }
 
     private void setFrequentInteractionPopupButton() {
@@ -457,7 +444,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private AtomicReference<Boolean> returnE = new AtomicReference<>(false);
 
-    @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "descriptionProvider")
+/*    @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableVacancyDescriptionProvider(IteractionList iteractionList) {
         String retStr = "";
 
@@ -501,7 +488,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return Jsoup.parse(retStr).text();
-    }
+    } */
 
     @Subscribe("firstNameField")
     public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -823,8 +810,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setPositionsLabel();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
-        setFrequentInteractionPopupButton();
-        setupIteractionList();
+//        setFrequentInteractionPopupButton();
         setupSkillBox();
         ;
         setCountTimeStamp();//15
@@ -838,10 +824,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         lastIteraction = getLastIteraction();
 
-        if (getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
             blockCandidateButton.setVisible(true);
-            jobCandidateIteractionListTable.setEnabled(true);
+//            jobCandidateIteractionListTable.setEnabled(true);
         } else {
             blockCandidateButton.setVisible(false);
         }
@@ -1169,40 +1155,168 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         time = System.currentTimeMillis();
 
-        addIconColumn();
-        setCopyCVButton();
+//        addIconColumn();
+//        setCopyCVButton();
 
         msec = System.currentTimeMillis();
 
-        jobCandidateIteractionListTable.addSelectionListener(e -> {
-            if (e.getSelected() == null) {
-                openPositionProjectDescriptionButton.setEnabled(false);
-            } else {
-                openPositionProjectDescriptionButton.setEnabled(true);
-            }
-        });
-
-        jobCandidateIteractionListTable.addSelectionListener(e -> {
-            if (e.getSelected() == null) {
-                openPositionProjectDescriptionButton.setEnabled(false);
-            } else {
-                openPositionProjectDescriptionButton.setEnabled(true);
-            }
-        });
-
-        jobCandidateIteractionListTable.addEditorPostCommitListener(e -> {
-//            jobCandidateDl.load();
-        });
 
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             if ("tabResume".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
                 initTabResume();
             }
         });
+
+        tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
+            if ("tabIteraction".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
+                initTabInteractions();
+            }
+        });
+    }
+
+    private void initTabInteractions() {
+        if (!interationTabInitialized) {
+            if (jobCandidateIteractionListTable == null) {
+                jobCandidateIteractionListTable = (DataGrid) getWindow()
+                        .getComponent("jobCandidateIteractionListTable");
+
+                addIconColumn();
+
+                jobCandidateIteractionListTable.setEnabled(
+                        !(getEditedEntity().getBlockCandidate() == null ?
+                                false : blockCandidateCheckBox.getValue()));
+
+                if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
+                        getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR))
+                    jobCandidateIteractionListTable.setEnabled(true);
+
+                jobCandidateIteractionListTable.getColumn("vacancy").setDescriptionProvider(iteractionList -> {
+                    String retStr = "";
+
+                    if (iteractionList.getVacancy() != null) {
+                        if (iteractionList.getVacancy().getVacansyName() != null) {
+                            retStr = iteractionList.getVacancy().getVacansyName();
+                        }
+                    }
+
+                    return Jsoup.parse(retStr).text();
+                });
+
+                jobCandidateIteractionListTable.getColumn("projectName").setDescriptionProvider(iteractionList -> {
+                    String retStr = "";
+
+                    try {
+                        retStr = "Ответственный за проект: ";
+
+                        if (iteractionList.getVacancy() != null) {
+                            if (iteractionList.getVacancy().getProjectName() != null) {
+                                if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
+                                    if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
+                                        retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
+                                    }
+                                }
+                            }
+                        }
+
+                        if (iteractionList.getVacancy() != null) {
+                            if (iteractionList.getVacancy().getProjectName() != null) {
+                                if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
+                                    if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
+                                        retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (IllegalStateException | NullPointerException e) {
+                        log.error("Error", e);
+                    }
+
+                    return Jsoup.parse(retStr).text();
+                });
+
+
+                jobCandidateIteractionListTable.getColumn("rating").setColumnGenerator(event -> {
+                    return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
+                });
+
+                jobCandidateIteractionListTable.addEditorCloseListener(event -> {
+                    setRatingLabel(getEditedEntity());
+                });
+
+                jobCandidateIteractionListTable.getColumn("iteractionType")
+                        .setDescriptionProvider(iteractionList -> {
+                            String add = "";
+
+                            if (iteractionList.getAddDate() != null) {
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy H:m");
+                                add = dateFormat.format(iteractionList.getAddDate());
+                            }
+
+                            if (iteractionList.getAddString() != null)
+                                add = iteractionList.getAddString();
+
+                            if (iteractionList.getAddInteger() != null)
+                                add = iteractionList.getAddInteger().toString();
+
+
+                            return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
+                        });
+
+                jobCandidateIteractionListTable.addSelectionListener(e -> {
+                    if (e.getSelected() == null) {
+                        openPositionProjectDescriptionButton.setEnabled(false);
+                    } else {
+                        openPositionProjectDescriptionButton.setEnabled(true);
+                    }
+                });
+
+                jobCandidateIteractionListTable.addSelectionListener(e -> {
+                    if (e.getSelected() == null) {
+                        openPositionProjectDescriptionButton.setEnabled(false);
+                    } else {
+                        openPositionProjectDescriptionButton.setEnabled(true);
+                    }
+                });
+
+                jobCandidateIteractionListTable.getColumn("commentColumn").setDescriptionProvider(iteractionList -> {
+                    return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ?
+                            Jsoup.parse(iteractionList.getComment()).text() : null;
+                });
+
+                jobCandidateIteractionListTable.getColumn("commentColumn").setColumnGenerator(event -> {
+                    return event.getItem().getComment() != null && !event.getItem().getComment().equals("") ?
+                            CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+                });
+
+                jobCandidateIteractionListTable.getColumn("commentColumn").setStyleProvider(iteractionList -> {
+                    return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ?
+                            "pic-center-large-green" : "pic-center-large-red";
+                });
+            }
+
+            if (copyIteractionButton == null) {
+                copyIteractionButton = (Button) getWindow().getComponent("copyIteractionButton");
+                copyIteractionButton.addClickListener(event -> copyIteractionJobCandidate());
+            }
+
+            if (openPositionProjectDescriptionButton == null) {
+                openPositionProjectDescriptionButton = (Button) getWindow()
+                        .getComponent("openPositionProjectDescriptionButton");
+                openPositionProjectDescriptionButton.addClickListener(event -> openPositionDescription());
+            }
+
+            if (frequentInteractionPopupButton == null) {
+                frequentInteractionPopupButton = (PopupButton) getWindow()
+                        .getComponent("frequentInteractionPopupButton");
+                setFrequentInteractionPopupButton();
+            }
+
+            interationTabInitialized = true;
+        }
     }
 
     private void initTabResume() {
-        if (!cvTabItitialized) {
+        if (!cvTabInitialized) {
             if (scanContactsFromCVButton == null) {
                 scanContactsFromCVButton = (Button) getWindow().getComponent("scanContactsFromCVButton");
                 scanContactsFromCVButton.addClickListener(e -> scanContactsFromCVs());
@@ -1211,6 +1325,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (copyCVButton == null) {
                 copyCVButton = (Button) getWindow().getComponent("copyCVButton");
                 copyCVButton.addClickListener(e -> copyCVJobCandidate());
+                setCopyCVButton();
             }
 
             if (checkSkillFromJD == null) {
@@ -1280,62 +1395,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
                 });
 
-                /*
-                jobCandidateCandidateCvTable.addGeneratedColumn("candidateITPearlsCVColumn",
-                        new DataGrid.ColumnGenerator<CandidateCV, Link>() {
-                            @Override
-                            public Link getValue(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-
-                                Link link = uiComponents.create(Link.NAME);
-
-                                if (event.getItem().getLinkItPearlsCV() != null) {
-                                    String url = event.getItem().getLinkItPearlsCV();
-
-                                    link.setUrl(url);
-                                    link.setCaption("CV IT Pearls");
-                                    link.setTarget("_blank");
-                                    link.setWidthAuto();
-                                    link.setVisible(true);
-                                } else {
-                                    link.setVisible(false);
-                                }
-
-                                return link;
-                            }
-
-                            @Override
-                            public Class<Link> getType() {
-                                return Link.class;
-                            }
-                        });
-
-                jobCandidateCandidateCvTable.addGeneratedColumn("candidateOriginalCVColumn",
-                        new DataGrid.ColumnGenerator<CandidateCV, Link>() {
-                            @Override
-                            public Link getValue(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-                                Link link = uiComponents.create(Link.NAME);
-
-                                if (event.getItem().getLinkOriginalCv() != null) {
-                                    String url = event.getItem().getLinkOriginalCv();
-
-                                    link.setUrl(url);
-                                    link.setCaption("Оригинальное CV");
-                                    link.setTarget("_blank");
-                                    link.setWidthAuto();
-                                    link.setVisible(true);
-                                } else {
-                                    link.setVisible(false);
-                                }
-
-                                return link;
-                            }
-
-                            @Override
-                            public Class<Link> getType() {
-                                return Link.class;
-                            }
-                        }); */
-
                 jobCandidateCandidateCvTable.getColumn("candidateITPearlsCVColumn").setColumnGenerator(event -> {
                     Link link = uiComponents.create(Link.NAME);
 
@@ -1377,7 +1436,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return;
         }
 
-        cvTabItitialized = true;
+        cvTabInitialized = true;
     }
 
     private List<IteractionList> getIteractionListFromCandidate(JobCandidate editedEntity) {
@@ -1667,7 +1726,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return event.getItem().getLinkItPearlsCV() != null ?
                 CubaIcon.valueOf("FILE_TEXT") :
                 CubaIcon.valueOf("FILE");
-    } */
+    }
 
     @Install(to = "jobCandidateIteractionListTable.iteractionType", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableIteractionTypeDescriptionProvider(IteractionList iteractionList) {
@@ -1686,12 +1745,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
         return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
-    }
+    } */
 
 
     private void setLaborAgreement() {
-        if (getRoleService.isUserRoles(userSession.getUser(), OUSTAFF_NAMAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.OUSTAFF_NAMAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
             outstaffingMainVBox.setVisible(true);
         } else {
             outstaffingMainVBox.setVisible(false);
@@ -1707,7 +1766,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         blockCandidateCheckBox.setValue(b);
         blockCandidateButton.setCaption(b ? BLOCK_CANDIDATE_OFF : BLOCK_CANDIDATE_ON);
         blockCandidateButton.setIcon(b ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
-        jobCandidateIteractionListTable.setEnabled(!b);
+//        jobCandidateIteractionListTable.setEnabled(!b);
         iteractionListLabelCandidate.setStyleName(b ? "h2-red" : "h2");
     }
 
@@ -1982,10 +2041,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return null;
     }
 
-    @Subscribe("jobCandidateIteractionListTable")
+    /* @Subscribe("jobCandidateIteractionListTable")
     public void onJobCandidateIteractionListTableEditorClose(DataGrid.EditorCloseEvent event) {
         setRatingLabel(getEditedEntity());
-    }
+    } */
 
 
     private void setRatingLabel(JobCandidate editedEntity) {
@@ -2032,10 +2091,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Install(to = "jobCandidateIteractionListTable.rating", subject = "columnGenerator")
+/*    @Install(to = "jobCandidateIteractionListTable.rating", subject = "columnGenerator")
     private String jobCandidateIteractionListTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
         return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
-    }
+    } */
 
     public void scanContactsFromCVs() {
         String newPhone = null,
@@ -2492,7 +2551,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return link;
-    } */
+    }
 
     @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
@@ -2507,7 +2566,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Install(to = "jobCandidateIteractionListTable.commentColumn", subject = "styleProvider")
     private String jobCandidateIteractionListTableCommentColumnStyleProvider(IteractionList iteractionList) {
         return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ? "pic-center-large-green" : "pic-center-large-red";
-    }
+    } */
 
 
     public void openPositionDescription() {

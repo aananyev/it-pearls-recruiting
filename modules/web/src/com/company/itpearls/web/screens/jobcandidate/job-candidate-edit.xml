@@ -678,6 +678,7 @@
                  margin="true,true,true,true"
                  expand="jobCandidateIteractionListTable"
                  icon="LIST"
+                 lazy="true"
                  spacing="true">
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionDc"
@@ -701,13 +702,11 @@
                         <button action="jobCandidateIteractionListTable.edit"/>
                         <button id="copyIteractionButton"
                                 caption="msg://msgCopy"
-                                icon="COPY"
-                                invoke="copyIteractionJobCandidate"/>
+                                icon="COPY"/>
                         <button action="jobCandidateIteractionListTable.remove"/>
                         <button id="openPositionProjectDescriptionButton"
                                 enable="false"
-                                caption="msg://msgOpenPositionDescription"
-                                invoke="openPositionDescription"/>
+                                caption="msg://msgOpenPositionDescription"/>
                     </buttonsPanel>
                     <columns>
                         <column id="icon"
