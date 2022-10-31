@@ -34,8 +34,6 @@ import javax.inject.Inject;
 import java.io.*;
 import java.util.*;
 
-import static org.apache.poi.extractor.OLE2ExtractorFactory.createExtractor;
-
 @UiController("itpearls_CandidateCV.edit")
 @UiDescriptor("candidate-cv-edit.xml")
 @EditedEntityContainer("candidateCVDc")

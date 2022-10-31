@@ -43,14 +43,13 @@
         <property name="fileImageFace" view="_minimal"/>
         <property name="cityOfResidence" view="_minimal"/>
     </view>
-    <view entity="itpearls_Position" name="position-view" extends="_minimal">
-        <property name="positionEnName"/>
-        <property name="standartDescription"/>
-        <property name="whoIsThisGuy"/>
+    <view entity="itpearls_Position" name="position-view" extends="_local">
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
         <property name="cityPosition" view="_minimal"/>
-        <property name="positionType" view="_minimal"/>
+        <property name="positionType" view="_minimal">
+            <property name="standartDescription"/>
+        </property>
         <property name="projectName" view="_minimal">
         </property>
         <property name="skillsList" view="_minimal"/>
@@ -223,6 +222,8 @@
         <property name="candidates" view="_local">
             <property name="reacrutier" view="_minimal"/>
             <property name="openPosition" view="_minimal"/>
+        </property>
+        <property name="positionType" view="_local">
         </property>
     </view>
     <view entity="itpearls_Setup" name="setup-view" extends="_local"/>

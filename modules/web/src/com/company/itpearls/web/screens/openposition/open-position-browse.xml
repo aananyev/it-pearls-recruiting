@@ -10,8 +10,13 @@
             <view extends="openPosition-view">
                 <property name="projectName" view="_minimal">
                     <property name="projectOwner" view="_minimal"/>
-                    <property name="projectDepartment" view="_minimal"/>
+                    <property name="projectDepartment" view="_minimal">
+                        <property name="templateLetter"/>
+                    </property>
+                    <property name="templateLetter"/>
+                    <property name="projectDescription"/>
                 </property>
+                <property name="templateLetter"/>
             </view>
             <loader id="openPositionsDl">
                 <query>

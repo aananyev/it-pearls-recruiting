@@ -8,18 +8,21 @@
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate">
             <view extends="jobCandidate-view">
-                <property name="iteractionList" view="_minimal">
-                    <property name="iteractionType" view="_minimal"/>
+                <property name="iteractionList" view="_local">
                     <property name="vacancy" view="_minimal">
                         <property name="projectName" view="_minimal">
                             <property name="projectDepartment" view="_minimal"/>
                         </property>
                     </property>
+                    <property name="iteractionType" view="_minimal"/>
                     <property name="recrutier" view="_minimal"/>
                 </property>
                 <property name="candidateCv" view="_local">
                     <property name="resumePosition" view="_minimal"/>
                     <property name="toVacancy" view="_minimal"/>
+                    <property name="someFiles" view="_minimal">
+                        <property name="fileType" view="_minimal"/>
+                    </property>
                 </property>
             </view>
             <loader id="jobCandidateDl"
@@ -783,23 +786,27 @@
                             <column id="iconOriginalCVFile"
                                     width="100px"
                                     caption="msg://msgOriginalCV">
-
+                                <iconRenderer/>
                             </column> <!--                                <iconRenderer/> -->
                             <column id="iconITPearlsCVFile"
                                     width="100px"
                                     caption="msg://msgITPearlsCV">
+                                <iconRenderer/>
                             </column> <!--                                <iconRenderer/> -->
                             <column id="letter"
                                     width="100px"
                                     caption="msg://msgCoverLetter">
+                                <iconRenderer/>
                             </column><!--                                <iconRenderer/> -->
                             <column id="candidateOriginalCVColumn"
                                     width="120px"
                                     caption="msg://msgOriginalCV">
+                                <componentRenderer/>
                             </column><!--                                <componentRenderer/> -->
                             <column id="candidateITPearlsCVColumn"
                                     width="120px"
                                     caption="msg://msgITPearlsCV">
+                                <componentRenderer/>
                             </column><!--                                <componentRenderer/> -->
                             <column id="createdBy"
                                     property="createdBy"

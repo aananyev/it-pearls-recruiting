@@ -133,19 +133,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> positionsLabel;
     @Inject
     private PdfParserService pdfParserService;
-
-    private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
     @Inject
     private CollectionPropertyContainer<CandidateCV> jobCandidateCandidateCvsDc;
-
-    private Button copyCVButton;
-    private long msec = 0;
     @Inject
     private Notifications notifications;
     @Inject
     private Label<String> createdUpdatedLabel;
-
-    private Button checkSkillFromJD;
     @Inject
     private LinkButton telegrammGroupLinkButton;
     @Inject
@@ -157,7 +150,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Screens screens;
 
+    private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
+    private Button copyCVButton;
+    private long msec = 0;
     private Button scanContactsFromCVButton;
+    private Button checkSkillFromJD;
+
     @Inject
     private ParseCVService parseCVService;
     @Inject
@@ -1197,17 +1195,27 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
 
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
-            if ("detailsTab".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
+            if ("tabResume".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
                 initTabResume();
             }
         });
     }
 
     private void initTabResume() {
-        if (cvTabItitialized) {
+        if (!cvTabItitialized) {
             if (scanContactsFromCVButton == null) {
                 scanContactsFromCVButton = (Button) getWindow().getComponent("scanContactsFromCVButton");
                 scanContactsFromCVButton.addClickListener(e -> scanContactsFromCVs());
+            }
+
+            if (copyCVButton == null) {
+                copyCVButton = (Button) getWindow().getComponent("copyCVButton");
+                copyCVButton.addClickListener(e -> copyCVJobCandidate());
+            }
+
+            if (checkSkillFromJD == null) {
+                checkSkillFromJD = (Button) getWindow().getComponent("checkSkillFromJD");
+                checkSkillFromJD.addClickListener(e -> checkSkillFromJD());
             }
 
             if (jobCandidateCandidateCvTable == null) {
@@ -1221,38 +1229,38 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     }
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("letter").setDescriptionProvider(candidateCV -> {
+                jobCandidateCandidateCvTable.getColumn("letter").setDescriptionProvider(candidateCV -> {
                     String returnData = candidateCV.getLetter() != null ? Jsoup.parse(candidateCV.getLetter()).text() : "";
                     return returnData;
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("iconOriginalCVFile").setDescriptionProvider(candidateCV -> {
+                jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setDescriptionProvider(candidateCV -> {
                     return candidateCV.getLinkOriginalCv();
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("iconOriginalCVFile").setColumnGenerator(event -> {
+                jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setColumnGenerator(event -> {
                     return event.getItem().getLinkOriginalCv() != null ?
                             CubaIcon.valueOf("FILE_TEXT") :
                             CubaIcon.valueOf("FILE");
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("iconITPearlsCVFile").setColumnGenerator(event -> {
+                jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setColumnGenerator(event -> {
                     return event.getItem().getLinkItPearlsCV() != null ?
                             CubaIcon.valueOf("FILE_TEXT") :
                             CubaIcon.valueOf("FILE");
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("letter").setColumnGenerator(event -> {
+                jobCandidateCandidateCvTable.getColumn("letter").setColumnGenerator(event -> {
                     return event.getItem().getLetter() != null ?
                             CubaIcon.valueOf("FILE_TEXT") :
                             CubaIcon.valueOf("FILE");
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("iconITPearlsCVFile").setDescriptionProvider(candidateCV -> {
+                jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setDescriptionProvider(candidateCV -> {
                     return candidateCV.getLinkItPearlsCV();
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("iconITPearlsCVFile").setStyleProvider(candidateCV -> {
+                jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setStyleProvider(candidateCV -> {
                     String style = "";
 
                     if (candidateCV.getLinkItPearlsCV() != null) {
@@ -1264,14 +1272,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     return style;
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("iconOriginalCVFile").setStyleProvider(candidateCV -> {
+                jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setStyleProvider(candidateCV -> {
                     return (candidateCV.getLinkOriginalCv() != null ? "pic-center-large-green" : "pic-center-large-red");
                 });
 
-                jobCandidateCandidateCvTable.getColumnNN("letter").setStyleProvider(candidateCV -> {
+                jobCandidateCandidateCvTable.getColumn("letter").setStyleProvider(candidateCV -> {
                     return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
                 });
 
+                /*
                 jobCandidateCandidateCvTable.addGeneratedColumn("candidateITPearlsCVColumn",
                         new DataGrid.ColumnGenerator<CandidateCV, Link>() {
                             @Override
@@ -1325,9 +1334,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             public Class<Link> getType() {
                                 return Link.class;
                             }
-                        });
+                        }); */
 
-                 /* jobCandidateCandidateCvTable.getColumn("candidateITPearlsCVColumn").setColumnGenerator(event -> {
+                jobCandidateCandidateCvTable.getColumn("candidateITPearlsCVColumn").setColumnGenerator(event -> {
                     Link link = uiComponents.create(Link.NAME);
 
                     if (event.getItem().getLinkItPearlsCV() != null) {
@@ -1361,15 +1370,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     }
 
                     return link;
-                }); */
-
-                copyCVButton.addClickListener(e -> {
-                    copyCVJobCandidate();
                 });
 
-                checkSkillFromJD.addClickListener(e -> {
-                    checkSkillFromJD();
-                });
             }
 
             return;

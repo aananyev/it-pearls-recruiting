@@ -1,13 +1,13 @@
 buildscript {
-    ext.cubaVersion = '7.3-SNAPSHOT'
+    ext.cubaVersion = '7.2.19'
     repositories {
         maven {
-            url 'https://repo.cuba-platform.com/content/groups/work'
+            url 'https://nexus.cuba-platform.cn/repository/cuba/'
 
-            credentials {
-                username(rootProject.hasProperty('repoUser') ? rootProject['repoUser'] : 'cuba')
-                password(rootProject.hasProperty('repoPass') ? rootProject['repoPass'] : 'cuba123')
-            }
+        }
+
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
         }
 
 
@@ -42,15 +42,16 @@ cuba {
 
 dependencies {
     appComponent("com.haulmont.cuba:cuba-global:$cubaVersion")
+    appComponent("com.haulmont.fts:fts-global:$cubaVersion")
+    appComponent("com.haulmont.reports:reports-global:$cubaVersion")
+    appComponent("com.haulmont.reports:reports-global:$cubaVersion")
     appComponent('com.haulmont.addon.globalevents:cubaglevt-global:0.6.1')
+    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
+    appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
     appComponent('com.haulmont.addon.emailtemplates:yet-global:1.4.2')
     appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.14.1')
     appComponent('com.haulmont.addon.dashboard:dashboard-global:3.2.3')
     appComponent('com.haulmont.addon.helium:helium-global:0.4.0')
-    appComponent("com.haulmont.fts:fts-global:$cubaVersion")
-    appComponent("com.haulmont.reports:reports-global:$cubaVersion")
-    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
-    appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
 }
 
 def postgres = 'org.postgresql:postgresql:42.2.9'
@@ -81,9 +82,10 @@ configure(globalModule) {
             runtime('org.glassfish.jaxb:jaxb-runtime:2.3.1')
         }
         compile 'org.apache.pdfbox:pdfbox:3.0.0-RC1'
-        compile 'org.webjars.npm:domelementtype:2.2.0'
-        compile 'org.apache.poi:poi:5.2.3'
-        compile 'com.ibm.icu:icu4j:69.1'
+        compile 'org.webjars.npm:domelementtype:2.3.0'
+        compile 'com.ibm.icu:icu4j:71.1'
+        compile 'org.apache.poi:poi-ooxml-lite:5.2.2'
+        compile 'javax.mail:javax.mail-api:1.6.2'
     }
 
     entitiesEnhancing {
@@ -275,6 +277,13 @@ task buildWar(type: CubaWarBuilding) {
                      'cuba.dataSourceProvider'     : 'jndi']
     logbackConfigurationFile = 'etc/war-logback.xml'
     includeContextXml = true
-    singleWar = false
     coreContextXmlPath = 'modules/core/web/META-INF/war-context.xml'
+    singleWar = false
+}
+task buildUberJar(type: CubaUberJarBuilding) {
+    coreJettyEnvPath = 'modules/core/web/META-INF/jetty-env.xml'
+    logbackConfigurationFile = 'etc/uber-jar-logback.xml'
+    singleJar = true
+    appProperties = ['cuba.automaticDatabaseUpdate': true,
+                     'cuba.dataSourceProvider'     : 'jndi']
 }
