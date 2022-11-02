@@ -142,6 +142,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private LookupPickerField<JobCandidate> candidateField;
     @Inject
     private HBoxLayout outstaffingCostHBox;
+    @Inject
+    private CollectionContainer<JobCandidate> candidatesDc;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -1189,6 +1191,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+
+
         // изначально предполагаем, что это продолжение проекта
         newProject = false;
         // вся сортировка в поле IteractionType

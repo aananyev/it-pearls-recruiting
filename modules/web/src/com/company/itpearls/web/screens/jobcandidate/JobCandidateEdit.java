@@ -8,7 +8,9 @@ import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.itpearls.web.screens.openposition.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
@@ -63,19 +65,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Label<String> labelCV;
 
-    @Inject
     private TextField<String> emailField;
-
-    @Inject
     private TextField<String> phoneField;
-    @Inject
     private TextField<String> skypeNameField;
-    @Inject
     private TextField<String> telegramNameField;
-    @Inject
     private TextField<String> whatsupNameField;
-    @Inject
     private TextField<String> wiberNameField;
+    private DataGrid socialNetworkTable;
+
     @Inject
     private Label<String> labelQualityPercent;
     @Inject
@@ -124,6 +121,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LookupPickerField<City> jobCityCandidateField;
     private DateField<Date> birdhDateField;
 
+    private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
+    private TextField<String> telegramGroupField;
+    private TextField<String> mobilePhoneField;
+
     @Inject
     private PdfParserService pdfParserService;
     @Inject
@@ -134,8 +135,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> createdUpdatedLabel;
     @Inject
     private LinkButton telegrammGroupLinkButton;
-    @Inject
-    private TextField<String> mobilePhoneField;
     @Inject
     private Label<String> candidateRatingLabel;
     @Inject
@@ -158,11 +157,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private UiComponents uiComponents;
     @Inject
-    private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
-    @Inject
     private Logger log;
-    @Inject
-    private TextField<String> telegramGroupField;
     @Inject
     protected BackgroundWorker backgroundWorker;
 
@@ -176,11 +171,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
     @Inject
     private Button blockCandidateButton;
-    @Named("tabSheetSocialNetworks.jobCandidateCard")
-    private VBoxLayout jobCandidateCard;
-    @Named("tabSheetSocialNetworks.tabContactInfo")
-    private VBoxLayout tabContactInfo;
-    //    @Named("tabSheetSocialNetworks.tabCandidate")
+    //    @Named("tabSheetSocialNetworks.jobCandidateCard")
+//    private VBoxLayout jobCandidateCard;
+//    @Named("tabSheetSocialNetworks.tabContactInfo")
+//    private VBoxLayout tabContactInfo;
+//    @Named("tabSheetSocialNetworks.tabCandidate")
 //    private VBoxLayout tabCandidate;
     @Inject
     private Label<String> iteractionListLabelCandidate;
@@ -215,6 +210,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private boolean interationTabInitialized = false;
     private Button copyIteractionButton;
     private boolean candidateInitialized = false;
+    private boolean tabContactInfoInitialized = false;
+    @Inject
+    private Table lastProjectTable;
+    @Inject
+    private KeyValueCollectionContainer lastProjectDc;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -589,7 +589,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Subscribe("emailField")
+/*    @Subscribe("emailField")
     public void onEmailFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         enableDisableContacts();
     }
@@ -637,7 +637,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe("tabSheetSocialNetworks")
     public void onTabSheetSocialNetworksSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
         enableDisableContacts();
-    }
+    } */
 
     protected void enableDisableContacts() {
         Boolean flag = true;
@@ -711,10 +711,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setStatus(0);
         }
-        enableDisableContacts();
+//        enableDisableContacts();
 
         // проверить в названии должности (не использовать)
-        priorityCommenicationMethodRadioButtonInit();
+//        priorityCommenicationMethodRadioButtonInit();
         workStatusRadioButtonInit();
 
         if (blockCandidateCheckBox.getValue() == null) {
@@ -722,14 +722,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         setSocialNetworkTable();
-        enableDisableContacts();
+//        enableDisableContacts();
         setLabelTitle();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
         setupSkillBox();
         setCountTimeStamp();
 
-        trimTelegramName();
+//        trimTelegramName();
 
         setLinkButtonEmail();
         setLinkButtonTelegrem();
@@ -938,10 +938,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void trimTelegramName() {
-        if (telegramNameField.getValue() != null) {
-            telegramNameField.setValue(telegramNameField.getValue().trim().charAt(0) == '@' ?
-                    telegramNameField.getValue().trim().substring(1) :
-                    telegramNameField.getValue().trim());
+        if (telegramNameField != null) {
+            if (telegramNameField.getValue() != null) {
+                telegramNameField.setValue(telegramNameField.getValue().trim().charAt(0) == '@' ?
+                        telegramNameField.getValue().trim().substring(1) :
+                        telegramNameField.getValue().trim());
+            }
         }
     }
 
@@ -1101,7 +1103,110 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if ("tabCandidate".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
                 initTabCandidate();
             }
+
+            if ("tabContactInfo".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
+                initTabContactInfo();
+            }
         });
+    }
+
+    private void initTabContactInfo() {
+        if (!tabContactInfoInitialized) {
+            if (emailField == null) {
+                emailField = (TextField) getWindow().getComponent("emailField");
+                emailField.addTextChangeListener(e -> enableDisableContacts());
+            }
+
+            if (phoneField == null) {
+                phoneField = (TextField) getWindow().getComponent("phoneField");
+                phoneField.addTextChangeListener(e -> enableDisableContacts());
+            }
+
+            if (skypeNameField == null) {
+                skypeNameField = (TextField) getWindow().getComponent("skypeNameField");
+                skypeNameField.addTextChangeListener(e -> enableDisableContacts());
+            }
+
+            if (telegramNameField == null) {
+                telegramNameField = (TextField) getWindow().getComponent("telegramNameField");
+                telegramNameField.addTextChangeListener(e -> enableDisableContacts());
+            }
+
+            if (whatsupNameField == null) {
+                whatsupNameField = (TextField) getWindow().getComponent("whatsupNameField");
+                whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
+            }
+
+            if (wiberNameField == null) {
+                wiberNameField = (TextField) getWindow().getComponent("wiberNameField");
+                wiberNameField.addTextChangeListener(e -> enableDisableContacts());
+            }
+
+            if (priorityCommunicationMethodRadioButton == null) {
+                priorityCommunicationMethodRadioButton = (RadioButtonGroup) getWindow()
+                        .getComponent("priorityCommunicationMethodRadioButton");
+                priorityCommenicationMethodRadioButtonInit();
+            }
+
+            if (telegramGroupField == null) {
+                telegramGroupField = (TextField) getWindow().getComponent("telegramGroupField");
+                telegramGroupField.addTextChangeListener(e -> enableDisableContacts());
+            }
+
+            if (mobilePhoneField == null) {
+                mobilePhoneField = (TextField) getWindow().getComponent("mobilePhoneField");
+                mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
+            }
+
+            if (socialNetworkTable == null) {
+                socialNetworkTable = (DataGrid) getWindow()
+                        .getComponent("socialNetworkTable");
+                socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
+                socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
+                socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
+                
+/*                socialNetworkTable.getColumn("linkToWeb").setColumnGenerator(event -> {
+                    Link link = uiComponents.create(Link.NAME);
+                    if (!PersistenceHelper.isNew(getEditedEntity())) {
+                        if (event.getItem().getNetworkURLS() != null) {
+                            String urlS = "";
+                            if (!event.getItem().getNetworkURLS().contains("http")) {
+                                URI uri = null;
+                                URL url = null;
+
+                                try {
+                                    uri = new URI("https", event.getItem().getNetworkURLS(), null, null);
+                                    url = uri.toURL();
+                                } catch (URISyntaxException | MalformedURLException e) {
+                                    log.error("Error", e);
+                                }
+
+                                if (url != null) {
+                                    urlS = url.toString();
+                                } else {
+                                    urlS = "";
+                                }
+                            }
+
+                            link.setUrl(urlS);
+                            link.setCaption("Перейти");
+                            link.setTarget("_blank");
+                            link.setWidthAuto();
+                            link.setVisible(true);
+                        } else {
+                            link.setVisible(false);
+                        }
+                    } else {
+                        link.setVisible(false);
+                    }
+
+                    return link;
+                });*/
+            }
+
+            trimTelegramName();
+            enableDisableContacts();
+        }
     }
 
     private void initTabCandidate() {
@@ -2303,7 +2408,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Install(to = "socialNetworkTable.linkToWeb", subject = "columnGenerator")
+/*    @Install(to = "socialNetworkTable.linkToWeb", subject = "columnGenerator")
     private Component socialNetworkTableLinkToWebColumnGenerator
             (DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
         Link link = uiComponents.create(Link.NAME);
@@ -2342,7 +2447,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return link;
-    }
+    } */
 
     public void openPositionDescription() {
         QuickViewOpenPositionDescription quickViewOpenPositionDescription = screens.create(QuickViewOpenPositionDescription.class);
@@ -2474,20 +2579,39 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public Component lastInteractionGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
         OpenPosition openPosition = entity.getValue("vacancy");
+        IteractionList lastInteraction = null;
 
         if (jobCandidateIteractionDc.getMutableItems().size() != 0) {
-            IteractionList lastInteraction = jobCandidateIteractionDc.getMutableItems().get(0);
-
-            for (IteractionList iteractionList : jobCandidateIteractionDc.getMutableItems()) {
-                if (openPosition.equals(iteractionList.getVacancy())) {
-                    if (lastInteraction.getDateIteraction().before(iteractionList.getDateIteraction())) {
-                        lastInteraction = iteractionList;
+            for (int i = 0; i < jobCandidateIteractionDc.getMutableItems().size(); i++) {
+                if (lastInteraction != null) {
+                    if (openPosition.equals(jobCandidateIteractionDc
+                            .getMutableItems()
+                            .get(i)
+                            .getVacancy())) {
+                        if (lastInteraction.getDateIteraction().before(jobCandidateIteractionDc
+                                .getMutableItems()
+                                .get(i)
+                                .getDateIteraction())) {
+                            lastInteraction = jobCandidateIteractionDc
+                                    .getMutableItems()
+                                    .get(i);
+                        }
+                    }
+                } else {
+                    if (openPosition.equals(jobCandidateIteractionDc
+                            .getMutableItems()
+                            .get(i)
+                            .getVacancy())) {
+                        lastInteraction = jobCandidateIteractionDc
+                                .getMutableItems()
+                                .get(i);
                     }
                 }
             }
         }
 
-        retLabel.setValue(lastIteraction.getIteractionType().getIterationName());
+        StringBuffer retStr = new StringBuffer(lastInteraction.getIteractionType().getIterationName());
+        retLabel.setValue(retStr);
 
         return retLabel;
     }
@@ -2502,6 +2626,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public Component addInteractionsViewButton(Entity entity) {
         Button retButton = uiComponents.create(Button.NAME);
         retButton.setCaption("Просмотр");
+
+        retButton.setAction(new BaseAction("listIteraction")
+                .withHandler(actionPerformedEvent -> {
+                    IteractionListSimpleBrowse iteractionListSimpleBrowse =
+                            screens.create(IteractionListSimpleBrowse.class);
+
+                    iteractionListSimpleBrowse.setSelectedCandidate(getEditedEntity());
+                    iteractionListSimpleBrowse.setJobCandidate(getEditedEntity());
+
+                    OpenPosition openPosition = lastProjectDc.getItem(lastProjectTable
+                            .getSingleSelected()).getValue("vacancy");
+
+                    iteractionListSimpleBrowse.setOpenPosition(openPosition);
+
+                    screens.show(iteractionListSimpleBrowse);
+
+                }));
 
         return retButton;
     }

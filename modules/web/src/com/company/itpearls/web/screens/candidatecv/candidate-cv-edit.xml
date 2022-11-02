@@ -11,7 +11,8 @@
                     <property name="projectDepartment" view="_minimal"/>
                 </property>
             </view>
-            <loader id="openPositionsDl">
+            <loader id="openPositionsDl"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName]]>
                 </query>
@@ -21,6 +22,12 @@
                   class="com.company.itpearls.entity.CandidateCV">
             <view extends="candidateCV-view">
                 <property name="candidate" view="_minimal"/>
+                <property name="someFiles" view="_minimal">
+                    <property name="fileType" view="_minimal"/>
+                    <property name="candidateCV" view="_minimal"/>
+                    <property name="fileDescriptor" view="_minimal"/>
+                    <property name="fileOwner" view="_minimal"/>
+                </property>
             </view>
             <loader/>
             <collection id="someFilesesDc"
@@ -35,7 +42,8 @@
                 <property name="personPosition"
                           view="_local"/>
             </view>
-            <loader id="candidatesLc" cacheable="true">
+            <loader id="candidatesLc"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
                 </query>
@@ -44,7 +52,8 @@
         <collection id="resumePositionsDc"
                     class="com.company.itpearls.entity.Position"
                     view="_local">
-            <loader id="resumePositionsLc">
+            <loader id="resumePositionsLc"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Position e where e.positionRuName not like '%(не использовать)%' order by e.positionRuName]]>
                 </query>
@@ -53,7 +62,8 @@
         <collection id="usersDc"
                     class="com.haulmont.cuba.security.entity.User"
                     view="_local">
-            <loader id="usersDl">
+            <loader id="usersDl"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from sec$User e order by e.name]]>
                 </query>

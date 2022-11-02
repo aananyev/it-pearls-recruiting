@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
@@ -49,6 +50,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     private Label<String> candidatePositionLabel;
     @Inject
     private Label<String> candidatePositionEnLabel;
+    private String openPositionStr;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -213,6 +215,21 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 .build()
                 .show();
 
+        iteractionListsDl.load();
+    }
+
+
+    private OpenPosition openPosition;
+
+    public void setOpenPosition(OpenPosition openPosition) {
+        this.openPosition = openPosition;
+        iteractionListsDl.setParameter("vacancy", this.openPosition);
+        iteractionListsDl.load();
+    }
+
+    public void setOpenPosition(String openPosition) {
+        this.openPositionStr = openPosition;
+        iteractionListsDl.setParameter("vacancyStr", openPosition);
         iteractionListsDl.load();
     }
 

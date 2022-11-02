@@ -78,7 +78,8 @@
                 <property name="company"
                           view="_local"/>
             </view>
-            <loader id="laborAgreementDl" cacheable="true">
+            <loader id="laborAgreementDl"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_LaborAgreement e]]>
                     <condition>
@@ -147,7 +148,8 @@
         <collection id="usersDc"
                     class="com.haulmont.cuba.security.entity.User"
                     view="_local">
-            <loader id="usersDl" cacheable="true">
+            <loader id="usersDl"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from sec$User e order by e.name]]>
                 </query>
@@ -157,9 +159,12 @@
     <dialogMode height="650"
                 modal="true"
                 width="1000"/>
-    <layout expand="editActions"
+    <layout expand="iteractionListTabSheeet"
             spacing="true">
-        <groupBox spacing="true">
+        <groupBox spacing="true"
+                  collapsable="true"
+                  stylename="light"
+                  caption="msg://msgHeaderIteraction">
             <hbox spacing="true"
                   width="100%">
                 <hbox width="40%"
@@ -240,16 +245,18 @@
                   align="MIDDLE_CENTER"/>
         </groupBox>
         <tabSheet id="iteractionListTabSheeet"
+                  width="100%"
+                  height="100%"
                   stylename="framed">
             <tab id="iteractionListTab"
                  caption="msg://msgIteractionList"
                  margin="true,true,true,true"
                  icon="REORDER"
+                 expand="commentField"
                  spacing="true">
-                <groupBox id="groupBoxIterationData">
-                    <grid id="gridIterationData"
-                          spacing="true"
-                          width="100%">
+                <grid id="gridIterationData"
+                      spacing="true"
+                      width="100%">
                         <columns count="2"/>
                         <rows>
                             <row id="rating">
@@ -399,7 +406,6 @@
                               dataContainer="iteractionListDc"
                               caption="msg://msgComment"
                               height="150pt"/>
-                </groupBox>
             </tab>
             <tab id="outSteffingTab"
                  icon="CUBES"

@@ -20,9 +20,17 @@
                 <query>
                     <![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
                     <condition>
-                        <c:jpql>
-                            <c:where>e.candidate = :candidate</c:where>
-                        </c:jpql>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.candidate = :candidate</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.vacancy = :vacancy</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.vacancy.vacansyName like :vacancyStr</c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>

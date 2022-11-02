@@ -26,6 +26,7 @@
                         <property name="fileType" view="_minimal"/>
                     </property>
                 </property>
+                <property name="socialNetwork" view="_local"/>
             </view>
             <loader id="jobCandidateDl"
                     softDeletion="true"
@@ -111,7 +112,10 @@
             spacing="true"
             width="100%"
             height="100%">
-        <groupBox spacing="true">
+        <groupBox caption="msg://msgOptions"
+                  collapsable="true"
+                  spacing="true"
+                  stylename="light">
             <checkBox id="blockCandidateCheckBox"
                       dataContainer="jobCandidateDc"
                       property="blockCandidate"
@@ -529,16 +533,16 @@
                  margin="true,true,true,true"
                  expand="socialNetworkTableHbox"
                  icon="font-icon:USER"
+                 lazy="true"
                  spacing="true">
                 <hbox id="contactInfoGroupBox"
                       width="100%"
                       height="AUTO"
                       spacing="true">
-                    <vbox spacing="true"
+                    <vbox spacing="false"
                           width="100%"
                           height="100%"
                           margin="true,true,true,true"
-                          stylename="card"
                           box.expandRatio="12">
                         <grid id="contactInfoGrid"
                               spacing="true"
@@ -595,12 +599,11 @@
                             </rows>
                         </grid>
                     </vbox>
-                    <vbox spacing="true"
+                    <vbox spacing="false"
                           width="100%"
                           height="100%"
                           expand="priorityCommunicationMethodRadioButton"
                           margin="true,true,true,true"
-                          stylename="card"
                           box.expandRatio="2">
                         <radioButtonGroup id="priorityCommunicationMethodRadioButton"
                                           caption="msg://msgPriorityCommunicationMethod"
@@ -633,8 +636,7 @@
                             <column id="linkToWeb"
                                     caption="msg://msgLinkURL"
                                     maximumWidth="150px">
-                                <componentRenderer/>
-                            </column>
+                            </column> <!-- <componentRenderer/> -->
                         </columns>
                     </dataGrid>
                 </hbox>
