@@ -2618,7 +2618,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public Component lastIteractionCount(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
-        retLabel.setValue(lastIteractionCount++);
+        int lastIteractionCount = 0;
+
+        for (int i = 0; i < lastProjectDc.getItems().size(); i++) {
+            if (entity.equals(lastProjectDc.getItems().get(i))) {
+                lastIteractionCount = i;
+                break;
+            }
+        }
+
+        retLabel.setValue(++lastIteractionCount);
 
         return retLabel;
     }
