@@ -30,6 +30,7 @@
                 </property>
                 <property name="vacancy"
                           view="_local">
+                    <property name="owner" view="_minimal"/>
                     <property name="projectName"
                               view="_local">
                         <property name="projectTree"
@@ -98,7 +99,10 @@
             <loader id="iteractionTypesLc"
                     cacheable="true">
                 <query>
-                    <![CDATA[select e from itpearls_Iteraction e order by e.iterationName]]>
+                    <![CDATA[select e from itpearls_Iteraction e
+                    where e.iteractionTree is not null
+                    order by e.iterationName
+                        ]]>
                     <condition>
                         <c:jpql>
                             <c:where>

@@ -33,6 +33,8 @@
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>
         <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
+        <item screen="itpearls_RotatingCandidate.browse"
+              caption="mainMsg://menu_config.itpearls_RotatingCandidate.browse"/>
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
         <item screen="itpearls_Project.browse" icon="ARCHIVE"/>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://rotatingCandidateBrowse.caption"
+        focusComponent="jobCandidatesTable"
+        messagesPack="com.company.itpearls.web.screens.rotatingcandidates">
+    <data readOnly="true">
+        <collection id="jobCandidatesDc"
+                    class="com.company.itpearls.entity.JobCandidate">
+            <view extends="jobCandidate-view">
+                <property name="iteractionList" view="_local">
+                    <property name="iteractionType" view="_local"/>
+                    <property name="vacancy" view="_local"/>
+                </property>
+            </view>
+            <loader id="jobCandidatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e
+                        where e.iteractionList in
+                            (select f
+                            from itpearls_IteractionList f
+                            where f.iteractionType.signEndCase = false and
+                                (@between(f.dateIteraction, now-1, now, month)))
+                        order by e.fullName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.iteractionList in
+                                (select g from itpearls_IteractionList g where g.recrutier = :recrutier)</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="openPositionDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="openPosition-view">
+            </view>
+            <loader id="openPositionDl" cacheable="true">
+                <query><![CDATA[select o from itpearls_OpenPosition o
+                where o in
+                    (select f.vacancy
+                    from itpearls_IteractionList f
+                    where f.iteractionType.signEndCase = false and
+                    (@between(f.dateIteraction, now-1, now, month)))
+                    order by o.vacansyName
+                ]]></query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="jobCandidatesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="jobCandidatesTable"
+                dataLoader="jobCandidatesDl">
+            <properties include=".*"/>
+        </filter>
+        <dataGrid id="jobCandidatesTable"
+                  width="AUTO"
+                  dataContainer="openPositionDc">
+            <actions>
+            </actions>
+            <columns>
+                <column id="candidate">
+                    <htmlRenderer nullRepresentation="null"/>
+                </column>
+                <column property="vacansyName" id="vacansyName"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+            </buttonsPanel>
+        </dataGrid>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+        <groupBox caption="msg://msgOptions"
+                  collapsable="true"
+                  width="100%"
+                  height="AUTO"
+                  stylename="light">
+            <radioButtonGroup id="recruterRadioButtonsGroup"
+                              orientation="horizontal"
+                              width="AUTO"/>
+        </groupBox>
+    </layout>
+</window>

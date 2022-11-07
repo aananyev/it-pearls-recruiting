@@ -50,13 +50,16 @@
         <property name="positionType" view="_minimal">
             <property name="standartDescription"/>
         </property>
-        <property name="projectName" view="_minimal">
-        </property>
         <property name="skillsList" view="_minimal"/>
         <property name="parentOpenPosition" view="_minimal">
         </property>
         <property name="cities" view="_minimal"/>
         <property name="owner" view="_local"/>
+        <property name="projectName" view="_local">
+            <property name="projectDepartment" view="_local">
+                <property name="companyName" view="_local"/>
+            </property>
+        </property>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_minimal">
         <property name="currentCompany" view="_local"/>
@@ -91,8 +94,6 @@
         <property name="currentCompany" view="_minimal"/>
         <property name="cityOfResidence" view="_minimal"/>
         <property name="iteractionList" view="_minimal">
-            <property name="vacancy" view="_local">
-            </property>
         </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
@@ -340,6 +341,11 @@
     <view entity="itpearls_JobCandidate" name="jobCandidate-view-iteraction-list" extends="_minimal">
         <property name="candidateCv" view="_local"/>
         <property name="fullName"/>
+        <property name="iteractionList" view="_minimal">
+            <property name="vacancy" view="_minimal">
+                <property name="projectName" view="_minimal"/>
+            </property>
+        </property>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view-iteraction-list" extends="_local">
         <property name="projectName" view="_minimal">

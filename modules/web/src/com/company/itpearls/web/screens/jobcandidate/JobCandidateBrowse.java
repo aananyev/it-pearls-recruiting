@@ -192,7 +192,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         String retStr = "";
         Boolean checkBlockCandidate = event.getItem().getBlockCandidate() == null ? false : event.getItem().getBlockCandidate();
 
-        if( checkBlockCandidate != null) {
+        if (checkBlockCandidate != null) {
             if (checkBlockCandidate != true) {
                 if (iteractionList != null) {
                     Calendar calendar = Calendar.getInstance();
@@ -300,7 +300,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 if (maxIteraction == null)
                     maxIteraction = iteractionList;
 
-                if(iteractionList.getNumberIteraction() != null) {
+                if (iteractionList.getNumberIteraction() != null) {
                     if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
                         maxIteraction = iteractionList;
                     }
@@ -476,16 +476,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private String getLastCVText(JobCandidate singleSelected) {
         if (singleSelected != null) {
-            if (singleSelected.getCandidateCv().size() != 0) {
-                CandidateCV lastCV = singleSelected.getCandidateCv().get(0);
+            if (singleSelected.getCandidateCv() != null) {
+                if (singleSelected.getCandidateCv().size() != 0) {
+                    CandidateCV lastCV = singleSelected.getCandidateCv().get(0);
 
-                for (CandidateCV candidateCV : singleSelected.getCandidateCv()) {
-                    if (lastCV.getDatePost().before((candidateCV.getDatePost()))) {
-                        lastCV = candidateCV;
+                    for (CandidateCV candidateCV : singleSelected.getCandidateCv()) {
+                        if (lastCV.getDatePost().before((candidateCV.getDatePost()))) {
+                            lastCV = candidateCV;
+                        }
                     }
-                }
 
-                return lastCV.getTextCV();
+                    return lastCV.getTextCV();
+                } else {
+                    return null;
+                }
             } else {
                 return null;
             }
@@ -522,7 +526,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         lastInteractionPopupButton.setIconFromSet(CubaIcon.FILE_TEXT);
 
         jobCandidatesTable.addSelectionListener(e -> {
-            if(jobCandidatesTable.getSingleSelected() == null) {
+            if (jobCandidatesTable.getSingleSelected() == null) {
                 lastInteractionPopupButton.setEnabled(false);
             } else {
                 lastInteractionPopupButton.setEnabled(true);
@@ -561,8 +565,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
                         if (jobCandidatesTable.getSingleSelected() != null) {
                             for (IteractionList list : jobCandidatesTable
-                                .getSingleSelected()
-                                .getIteractionList()) {
+                                    .getSingleSelected()
+                                    .getIteractionList()) {
                                 if (maxNumberIteraction.compareTo(list.getNumberIteraction()) < 0) {
                                     maxNumberIteraction = list.getNumberIteraction();
                                     lastIteraction = list;
@@ -1136,7 +1140,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 Calendar calendar1 = Calendar.getInstance();
 
                 if (calendar.after(calendar1)) {
-                    if(iteractionList.getRecrutier() != null) {
+                    if (iteractionList.getRecrutier() != null) {
                         if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
                             retStr = "button_table_red";
                         } else {

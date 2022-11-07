@@ -50,7 +50,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     STATUS integer,
     FILE_IMAGE_FACE uuid,
     WORK_STATUS integer,
-    PRIORITY_CONTACT integer not null,
+    PRIORITY_CONTACT integer,
     --
     primary key (ID)
 )^
@@ -224,6 +224,7 @@ create table ITPEARLS_ITERACTION (
     SIGN_PRIORITY_NEWS boolean,
     SIGN_VIEW_ONLY_MANAGER boolean,
     OUTSTAFFING_SIGN boolean not null,
+    SIGN_END_CASE boolean,
     NOTIFICATION_NEED_SEND boolean,
     NOTIFICATION_TYPE integer,
     NOTIFICATION_PERIOD_TYPE integer,

@@ -66,6 +66,9 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     @Inject
     private TextField<Integer> dayBeforeAfterTextField;
     @Inject
+    private CheckBox signEndCaseCheckBox;
+
+    @Inject
     private RadioButtonGroup<Integer> whenSendMessageRadioButton;
 
     private Map<String, Integer> mapAddType = new LinkedHashMap<>();
@@ -75,6 +78,57 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private Map<String, Integer> mapWhenSendMessage = new LinkedHashMap<>();
     @Inject
     private HBoxLayout notificationSetupHBox;
+    @Inject
+    private CheckBox signOurInterviewAssignedCheckBox;
+    @Inject
+    private CheckBox signOurInterviewCheckBox;
+    @Inject
+    private CheckBox signClientInterviewCheckBox;
+    @Inject
+    private CheckBox signSentToClientCheckBox;
+    @Inject
+    private CheckBox statisticsCheckBox;
+    @Inject
+    private CheckBox signPriorityNews;
+    @Inject
+    private CheckBox signViewOnlyManagersCheckBox;
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        if (signEndCaseCheckBox.getValue() == null) {
+            signEndCaseCheckBox.setValue(false);
+        }
+
+        if (signOurInterviewAssignedCheckBox.getValue() == null) {
+            signOurInterviewAssignedCheckBox.setValue(false);
+        }
+
+        if (signOurInterviewCheckBox.getValue() == null) {
+            signOurInterviewCheckBox.setValue(false);
+        }
+
+        if (signClientInterviewCheckBox.getValue() == null) {
+            signClientInterviewCheckBox.setValue(false);
+        }
+
+        if (signSentToClientCheckBox.getValue() == null) {
+            signSentToClientCheckBox.setValue(false);
+        }
+
+        if (statisticsCheckBox.getValue() == null) {
+            statisticsCheckBox.setValue(false);
+        }
+
+        if (signPriorityNews.getValue() == null) {
+            signPriorityNews.setValue(false);
+        }
+
+        if (signViewOnlyManagersCheckBox.getValue() == null) {
+            signViewOnlyManagersCheckBox.setValue(false);
+        }
+
+
+    }
 
     @Subscribe("checkBoxCalendar")
     public void onCheckBoxCalendarValueChange(HasValue.ValueChangeEvent<Boolean> event) {

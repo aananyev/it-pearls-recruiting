@@ -107,6 +107,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "OUTSTAFFING_SIGN", nullable = false)
     protected Boolean outstaffingSign = false;
 
+    @Column(name = "SIGN_END_CASE")
+    private Boolean signEndCase;
+
     @Column(name = "NOTIFICATION_NEED_SEND")
     private Boolean notificationNeedSend;
 
@@ -124,6 +127,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public Boolean getSignEndCase() {
+        return signEndCase;
+    }
+
+    public void setSignEndCase(Boolean signEndCase) {
+        this.signEndCase = signEndCase;
+    }
 
     public Boolean getSignOurInterviewAssigned() {
         return signOurInterviewAssigned;

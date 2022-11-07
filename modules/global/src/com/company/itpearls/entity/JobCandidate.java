@@ -136,8 +136,7 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "WORK_STATUS")
     protected Integer workStatus;
 
-    @NotNull
-    @Column(name = "PRIORITY_CONTACT", nullable = false)
+    @Column(name = "PRIORITY_CONTACT")
     private Integer priorityContact;
 
     public List<LaborAgreement> getLaborAgreement() {

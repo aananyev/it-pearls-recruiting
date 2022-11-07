@@ -106,6 +106,10 @@ order by e.number]]>
                                   caption="msg://msgSignViewOnlyManagers"
                                   dataContainer="iteractionDc"
                                   property="signViewOnlyManager"/>
+                        <checkBox id="signEndCaseCheckBox"
+                                  caption="msg://mshSignEndCase"
+                                  dataContainer="iteractionDc"
+                                  property="signEndCase"/>
                     </vbox>
                 </groupBox>
             </tab>
