@@ -8,6 +8,7 @@ import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
@@ -34,25 +35,44 @@ import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-@UiController("itpearls_JobCandidate.edit")
+@UiController("itpearls_JobCandidateOld.edit")
 @UiDescriptor("job-candidate-edit.xml")
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
-public class JobCandidateEdit extends StandardEditor<JobCandidate> {
+public class JobCandidateEditOld extends StandardEditor<JobCandidate> {
+    private static final String MANAGER_GROUP = "Менеджмент";
+    private static final String RECRUTIER_GROUP = "Хантинг";
+    private static final String RESEARCHER_GROUP = "Ресерчинг";
+
+    String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
+    String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
+
     @Inject
     private DataManager dataManager;
     @Inject
     private Dialogs dialogs;
     @Inject
     private Label<String> labelCV;
+
+    private TextField<String> emailField;
+    private TextField<String> phoneField;
+    private TextField<String> skypeNameField;
+    private TextField<String> telegramNameField;
+    private TextField<String> whatsupNameField;
+    private TextField<String> wiberNameField;
+    private DataGrid socialNetworkTable;
+
     @Inject
     private Label<String> labelQualityPercent;
     @Inject
@@ -65,8 +85,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionPropertyContainer<SocialNetworkURLs> jobCandidateSocialNetworksDc;
     @Inject
     private DataContext dataContext;
-    //    @Inject
-//    private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
+    @Inject
+    private CollectionLoader<SocialNetworkURLs> socialNetworkURLsesDl;
     @Inject
     private Label<String> personPositionTitle;
     @Inject
@@ -91,6 +111,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LinkButton telegrammLinkButton;
     @Inject
     private WebBrowserTools webBrowserTools;
+
+    private SuggestionField<String> firstNameField;
+    private SuggestionField<String> secondNameField;
+    private SuggestionField<String> middleNameField;
+    private Label<String> positionsLabel;
+    private LookupPickerField<Company> currentCompanyField;
+    private LookupPickerField<Position> personPositionField;
+    private LookupPickerField<City> jobCityCandidateField;
+    private DateField<Date> birdhDateField;
+
+    private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
+    private TextField<String> telegramGroupField;
+    private TextField<String> mobilePhoneField;
+
     @Inject
     private PdfParserService pdfParserService;
     @Inject
@@ -107,6 +141,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private StarsAndOtherService starsAndOtherService;
     @Inject
     private Screens screens;
+
+    private DataGrid<IteractionList> jobCandidateIteractionListTable;
+    private Button openPositionProjectDescriptionButton;
+    private PopupButton frequentInteractionPopupButton;
+
+    private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
+    private Button copyCVButton;
+    private long msec = 0;
+    private Button scanContactsFromCVButton;
+    private Button checkSkillFromJD;
+
     @Inject
     private ParseCVService parseCVService;
     @Inject
@@ -115,42 +160,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Logger log;
     @Inject
     protected BackgroundWorker backgroundWorker;
-
-    private SuggestionField<String> firstNameField;
-    private SuggestionField<String> secondNameField;
-    private SuggestionField<String> middleNameField;
-    private Label<String> positionsLabel;
-    private LookupPickerField<Company> currentCompanyField;
-    private LookupPickerField<Position> personPositionField;
-    private LookupPickerField<City> jobCityCandidateField;
-    private DateField<Date> birdhDateField;
-
-    private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
-    private TextField<String> telegramGroupField;
-    private TextField<String> mobilePhoneField;
-
-    private DataGrid<IteractionList> jobCandidateIteractionListTable;
-    private Button openPositionProjectDescriptionButton;
-    private PopupButton frequentInteractionPopupButton;
-
-    private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
-    private Button copyCVButton;
-    private Button scanContactsFromCVButton;
-    private Button checkSkillFromJD;
-
-    private TextField<String> emailField;
-    private TextField<String> phoneField;
-    private TextField<String> skypeNameField;
-    private TextField<String> telegramNameField;
-    private TextField<String> whatsupNameField;
-    private TextField<String> wiberNameField;
-    private DataGrid<SocialNetworkURLs> socialNetworkTable;
-    private static final String MANAGER_GROUP = "Менеджмент";
-    private static final String RECRUTIER_GROUP = "Хантинг";
-    private static final String RESEARCHER_GROUP = "Ресерчинг";
-
-    private String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
-    private String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
 
     List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
@@ -210,10 +219,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
         // вдруг такой кандидат уже есть
-        if (firstNameField == null || secondNameField == null) {
-            initTabCandidate();
-        }
-
         List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
                 .query("select e from itpearls_JobCandidate e where e.firstName like :firstName and " +
                         "e.secondName like :secondName")
@@ -227,7 +232,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setSocialNetworkTable() {
-/*       List<SocialNetworkType> socialNetworkType = dataManager.load(SocialNetworkType.class)
+        List<SocialNetworkType> socialNetworkType = dataManager.load(SocialNetworkType.class)
                 .list();
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
@@ -275,15 +280,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             dataContext.merge(sn);
 
             blockCandidateCheckBox.setValue(false);
-        } */
+        }
     }
 
     private void setupSkillBox() {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
+            setCountTimeStamp();
             if (skillBoxFragment.generateSkillLabels(getLastCVText(getEditedEntity()))) {
                 skillBox.add(skillBoxFragment.getFragment());
             }
+            ;
+            setCountTimeStamp();
         }
     }
 
@@ -308,49 +316,46 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setFrequentInteractionPopupButton() {
-        if (frequentInteractionPopupButton != null) {
-            Integer MAX_POPULAR_INTERACLION = 5;
-            List<Iteraction> mostPopularInteraction = interactionService.getMostPolularIteraction(
-                    userSessionSource.getUserSession().getUser(), MAX_POPULAR_INTERACLION);
+        Integer MAX_POPULAR_INTERACLION = 5;
+        List<Iteraction> mostPopularInteraction = interactionService.getMostPolularIteraction(
+                userSessionSource.getUserSession().getUser(), MAX_POPULAR_INTERACLION);
 
-            if (mostPopularInteraction.size() != 0) {
-                Integer count = 1;
-                for (Iteraction iteraction : mostPopularInteraction) {
-                    frequentInteractionPopupButton.addAction(
-                            new BaseAction("setMostPopularInteractionPopupButton" + "-" + count++)
-                                    .withCaption(iteraction.getIterationName())
-                                    .withHandler(actionPerformedEvent -> setMostPopularInteractionPopupButton(iteraction)));
-                }
-                frequentInteractionPopupButton.setEnabled(true);
-            } else {
-                frequentInteractionPopupButton.setEnabled(false);
+        if (mostPopularInteraction.size() != 0) {
+            Integer count = 1;
+            for (Iteraction iteraction : mostPopularInteraction) {
+                frequentInteractionPopupButton.addAction(
+                        new BaseAction("setMostPopularInteractionPopupButton" + "-" + count++)
+                                .withCaption(iteraction.getIterationName())
+                                .withHandler(actionPerformedEvent -> setMostPopularInteractionPopupButton(iteraction)));
             }
+            frequentInteractionPopupButton.setEnabled(true);
+        } else {
+            frequentInteractionPopupButton.setEnabled(false);
         }
     }
 
     public void setMostPopularInteractionPopupButton(Iteraction iteraction) {
-        if (jobCandidateIteractionListTable != null) {
-            if (jobCandidateIteractionListTable.getSingleSelected() != null) {
-                screenBuilders.editor(IteractionList.class, this)
-                        .newEntity()
-                        .withInitializer(e -> {
-                            e.setCandidate(getEditedEntity());
-                            e.setIteractionType(iteraction);
-                            e.setVacancy(jobCandidateIteractionListTable.getSingleSelected().getVacancy());
-                        })
-                        .build()
-                        .show();
-            } else {
-                screenBuilders.editor(IteractionList.class, this)
-                        .newEntity()
-                        .withInitializer(e -> {
-                            e.setCandidate(getEditedEntity());
-                            e.setIteractionType(iteraction);
-                        })
-                        .build()
-                        .show();
-            }
+        if (jobCandidateIteractionListTable.getSingleSelected() != null) {
+            screenBuilders.editor(IteractionList.class, this)
+                    .newEntity()
+                    .withInitializer(e -> {
+                        e.setCandidate(getEditedEntity());
+                        e.setIteractionType(iteraction);
+                        e.setVacancy(jobCandidateIteractionListTable.getSingleSelected().getVacancy());
+                    })
+                    .build()
+                    .show();
+        } else {
+            screenBuilders.editor(IteractionList.class, this)
+                    .newEntity()
+                    .withInitializer(e -> {
+                        e.setCandidate(getEditedEntity());
+                        e.setIteractionType(iteraction);
+                    })
+                    .build()
+                    .show();
         }
+
     }
 
     private void setCreatedUpdatedLabel() {
@@ -383,17 +388,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     protected boolean isRequiredAddresField() {
         Boolean isEmptySN = false;
 
-        if (tabContactInfoInitialized) {
-
-            isEmptySN = ((emailField.getRawValue().equals("")) &&
-                    (skypeNameField.getRawValue().equals("")) &&
-                    (telegramNameField.getRawValue().equals("")) &&
-                    (wiberNameField.getRawValue().equals("")) &&
-                    (whatsupNameField.getRawValue().equals("")) &&
-                    (mobilePhoneField.getRawValue().equals("")) &&
-                    (telegramGroupField.getRawValue().equals("")) &&
-                    (phoneField.getRawValue().equals("")));
-        }
+        isEmptySN = ((emailField.getRawValue().equals("")) &&
+                (skypeNameField.getRawValue().equals("")) &&
+                (telegramNameField.getRawValue().equals("")) &&
+                (wiberNameField.getRawValue().equals("")) &&
+                (whatsupNameField.getRawValue().equals("")) &&
+                (mobilePhoneField.getRawValue().equals("")) &&
+                (telegramGroupField.getRawValue().equals("")) &&
+                (phoneField.getRawValue().equals("")));
 
         return isEmptySN;
     }
@@ -442,24 +444,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
     private String setFullName(String firstName, String middleName, String secondName) {
-        if (!candidateInitialized) {
-            initTabCandidate();
-        }
-
         String fullName = "", localFirstName = "", localMiddleName = "", localSecondName = "";
 
-        if (firstNameField.getValue() != null)
-            localFirstName = firstNameField.getValue();
+        if (getEditedEntity().getFirstName() != null)
+            localFirstName = getEditedEntity().getFirstName();
         else if (firstName != null)
             localFirstName = firstName;
 
-        if (secondNameField.getValue() != null)
-            localSecondName = secondNameField.getValue();
+        if (getEditedEntity().getSecondName() != null)
+            localSecondName = getEditedEntity().getSecondName();
         else if (secondName != null)
             localSecondName = secondName;
 
-        if (middleNameField.getValue() != null)
-            localMiddleName = middleNameField.getValue();
+        if (getEditedEntity().getMiddleName() != null)
+            localMiddleName = getEditedEntity().getMiddleName();
         else if (middleName != null)
             localMiddleName = middleName;
 
@@ -476,9 +474,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onAfterShow(AfterShowEvent event) {
         setPercentLabel();
 
+        msec = System.currentTimeMillis() - msec;
+
+        System.out.println(msec);
+
         Boolean b = getEditedEntity().getBlockCandidate() == null ?
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
+        createStartInteraction();
+    }
+
+    private void createStartInteraction() {
     }
 
     private void addSuggestField() {
@@ -584,38 +590,86 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    protected void enableDisableContacts() {
-        if (tabContactInfoInitialized) {
-            Boolean flag = true;
+/*    @Subscribe("emailField")
+    public void onEmailFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
 
-            for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
-                if (s.getNetworkURLS() != null) {
-                    if (!s.getNetworkURLS().equals("")) {
-                        flag = false;
-                        break;
-                    }
+    @Subscribe("skypeNameField")
+    public void onSkypeNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("phoneField")
+    public void onPhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("mobilePhoneField")
+    public void onMobilePhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("socialNetworkTable")
+    public void onSocialNetworkTableEditorPostCommit(DataGrid.EditorPostCommitEvent event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("socialNetworkTable")
+    public void onSocialNetworkTableEditorClose(DataGrid.EditorCloseEvent event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("telegramNameField")
+    public void onTelegramNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("whatsupNameField")
+    public void onWhatsupNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("wiberNameField")
+    public void onWiberNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        enableDisableContacts();
+    }
+
+    @Subscribe("tabSheetSocialNetworks")
+    public void onTabSheetSocialNetworksSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
+        enableDisableContacts();
+    } */
+
+    protected void enableDisableContacts() {
+        Boolean flag = true;
+
+        for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
+            if (s.getNetworkURLS() != null) {
+                if (!s.getNetworkURLS().equals("")) {
+                    flag = false;
+                    break;
                 }
             }
+        }
 
-            skypeNameField.setRequired(true);
-            phoneField.setRequired(true);
-            mobilePhoneField.setRequired(true);
-            emailField.setRequired(true);
-            telegramNameField.setRequired(true);
-            whatsupNameField.setRequired(true);
-            wiberNameField.setRequired(true);
-            telegramGroupField.setRequired(true);
+        skypeNameField.setRequired(true);
+        phoneField.setRequired(true);
+        mobilePhoneField.setRequired(true);
+        emailField.setRequired(true);
+        telegramNameField.setRequired(true);
+        whatsupNameField.setRequired(true);
+        wiberNameField.setRequired(true);
+        telegramGroupField.setRequired(true);
 
-            if (!isRequiredAddresField() || !flag) {
-                skypeNameField.setRequired(false);
-                phoneField.setRequired(false);
-                mobilePhoneField.setRequired(false);
-                emailField.setRequired(false);
-                telegramNameField.setRequired(false);
-                whatsupNameField.setRequired(false);
-                wiberNameField.setRequired(false);
-                telegramGroupField.setRequired(false);
-            }
+        if (!isRequiredAddresField() || !flag) {
+            skypeNameField.setRequired(false);
+            phoneField.setRequired(false);
+            mobilePhoneField.setRequired(false);
+            emailField.setRequired(false);
+            telegramNameField.setRequired(false);
+            whatsupNameField.setRequired(false);
+            wiberNameField.setRequired(false);
+            telegramGroupField.setRequired(false);
         }
     }
 
@@ -627,9 +681,24 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    private long time = 0, ctime;
+    private Integer countTimeStamp = 0;
+
+    private void setCountTimeStamp() {
+        ctime = System.currentTimeMillis();
+        String retStr = "Время запуска " + countTimeStamp++ + ": " + (ctime - time) + " msec";
+
+        log.info(retStr);
+        System.err.println(retStr);
+
+        time = ctime;
+    }
+
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        time = System.currentTimeMillis();
+
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
@@ -659,6 +728,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
         setupSkillBox();
+        setCountTimeStamp();
+
+//        trimTelegramName();
 
         setLinkButtonEmail();
         setLinkButtonTelegrem();
@@ -758,18 +830,32 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
 
+
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        initTabCandidate();
-        initTabContactInfo();
-        initTabResume();
-        initTabInteractions();
+        if (!candidateInitialized) {
+            initTabCandidate();
+        }
+
+        if (!tabContactInfoInitialized) {
+            initTabContactInfo();
+        }
+
+        if (!cvTabInitialized) {
+            initTabResume();
+        }
+
+        if (!interationTabInitialized) {
+            initTabInteractions();
+        }
 
         replaceE_yo();
         setFullNameCandidate();
 
         trimTelegramName();
-        addIteractionOfNewCandidate();
+//        addIteractionOfNewCandidate();
+
+
     }
 
     private void replaceE_yo() {
@@ -922,28 +1008,28 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (secondNameField.getValue() != null)        // 6
                 qPercent = ++qPercent;
 
-            if (jobCityCandidateField.getValue() != null)  // 7
+            if (jobCityCandidateField.getValue() != null)  // 8
                 qPercent = ++qPercent;
 
-            if (personPositionField.getValue() != null)    // 8
+            if (personPositionField.getValue() != null)    // 9
                 qPercent = ++qPercent;
 
-            if (phoneField.getValue() != null)             // 9
+            if (phoneField.getValue() != null)             // 10
                 qPercent = ++qPercent;
 
-            if (mobilePhoneField.getValue() != null)       // 10
+            if (mobilePhoneField.getValue() != null)             // 10
                 qPercent = ++qPercent;
 
-            if (skypeNameField.getValue() != null)         // 11
+            if (skypeNameField.getValue() != null)         // 12
                 qPercent = ++qPercent;
 
-            if (telegramNameField.getValue() != null)      // 12
+            if (telegramNameField.getValue() != null)      // 13
                 qPercent = ++qPercent;
 
-            if (whatsupNameField.getValue() != null)       // 13
+            if (whatsupNameField.getValue() != null)       // 14
                 qPercent = ++qPercent;
 
-            if (wiberNameField.getValue() != null)         // 14
+            if (wiberNameField.getValue() != null)         // 15
                 qPercent = ++qPercent;
         }
 
@@ -953,6 +1039,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe(id = "jobCandidateDc", target = Target.DATA_CONTAINER)
     private void onJobCandidateDcItemChange(InstanceContainer.ItemChangeEvent<JobCandidate> event) {
         setFullNameCandidate();
+    }
+
+    @Subscribe
+    public void onBeforeClose(BeforeCloseEvent event) {
+//        setFullNameCandidate();
     }
 
     private void setFullNameCandidate() {
@@ -991,7 +1082,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             new DialogAction(DialogAction.Type.NO)
                                     .withHandler(f -> {
                                         closeWithDiscard();
-                                    }))
+                                    })
+                    )
                     .show();
         } else {
             screenBuilders.editor(SubscribeCandidateAction.class, this)
@@ -1008,8 +1100,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    long startSec = System.currentTimeMillis();
+    ;
+
+    private void printSec() {
+        startSec = System.currentTimeMillis() - startSec;
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withDescription("Время выполнения: " + startSec)
+                .show();
+        startSec = System.currentTimeMillis();
+    }
+
     @Subscribe
     public void onInit(InitEvent event) {
+
+        time = System.currentTimeMillis();
+        msec = System.currentTimeMillis();
+
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             if ("tabResume".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
                 initTabResume();
@@ -1032,32 +1139,32 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void initTabContactInfo() {
         if (!tabContactInfoInitialized) {
             if (emailField == null) {
-                emailField = (TextField<String>) getWindow().getComponent("emailField");
+                emailField = (TextField) getWindow().getComponent("emailField");
                 emailField.addTextChangeListener(e -> enableDisableContacts());
             }
 
             if (phoneField == null) {
-                phoneField = (TextField<String>) getWindow().getComponent("phoneField");
+                phoneField = (TextField) getWindow().getComponent("phoneField");
                 phoneField.addTextChangeListener(e -> enableDisableContacts());
             }
 
             if (skypeNameField == null) {
-                skypeNameField = (TextField<String>) getWindow().getComponent("skypeNameField");
+                skypeNameField = (TextField) getWindow().getComponent("skypeNameField");
                 skypeNameField.addTextChangeListener(e -> enableDisableContacts());
             }
 
             if (telegramNameField == null) {
-                telegramNameField = (TextField<String>) getWindow().getComponent("telegramNameField");
+                telegramNameField = (TextField) getWindow().getComponent("telegramNameField");
                 telegramNameField.addTextChangeListener(e -> enableDisableContacts());
             }
 
             if (whatsupNameField == null) {
-                whatsupNameField = (TextField<String>) getWindow().getComponent("whatsupNameField");
+                whatsupNameField = (TextField) getWindow().getComponent("whatsupNameField");
                 whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
             }
 
             if (wiberNameField == null) {
-                wiberNameField = (TextField<String>) getWindow().getComponent("wiberNameField");
+                wiberNameField = (TextField) getWindow().getComponent("wiberNameField");
                 wiberNameField.addTextChangeListener(e -> enableDisableContacts());
             }
 
@@ -1068,17 +1175,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
             if (telegramGroupField == null) {
-                telegramGroupField = (TextField<String>) getWindow().getComponent("telegramGroupField");
+                telegramGroupField = (TextField) getWindow().getComponent("telegramGroupField");
                 telegramGroupField.addTextChangeListener(e -> enableDisableContacts());
             }
 
             if (mobilePhoneField == null) {
-                mobilePhoneField = (TextField<String>) getWindow().getComponent("mobilePhoneField");
+                mobilePhoneField = (TextField) getWindow().getComponent("mobilePhoneField");
                 mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
             }
 
             if (socialNetworkTable == null) {
-                socialNetworkTable = (DataGrid<SocialNetworkURLs>) getWindow()
+                socialNetworkTable = (DataGrid) getWindow()
                         .getComponent("socialNetworkTable");
                 socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
                 socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
@@ -1122,8 +1229,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     return link;
                 });*/
             }
-
-            tabContactInfoInitialized = true;
 
             trimTelegramName();
             enableDisableContacts();
@@ -1209,7 +1314,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void initTabInteractions() {
         if (!interationTabInitialized) {
             if (jobCandidateIteractionListTable == null) {
-                jobCandidateIteractionListTable = (DataGrid<IteractionList>) getWindow()
+                jobCandidateIteractionListTable = (DataGrid) getWindow()
                         .getComponent("jobCandidateIteractionListTable");
 
                 addIconColumn();
@@ -1366,7 +1471,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
             if (jobCandidateCandidateCvTable == null) {
-                jobCandidateCandidateCvTable = (DataGrid<CandidateCV>) getWindow().getComponent("jobCandidateCandidateCvTable");
+                jobCandidateCandidateCvTable = (DataGrid) getWindow().getComponent("jobCandidateCandidateCvTable");
 
                 jobCandidateCandidateCvTable.addItemClickListener(e -> {
                     if (e.getItem() != null) {
@@ -1501,6 +1606,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 middleName.stream()
                         .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
                         .collect(Collectors.toList()));
+
     }
 
     private void addSecondNameSuggestField() {
@@ -2056,19 +2162,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         HashMap<String, List<String>> messageSocial = new HashMap<>();
 
         String newPhoneNew = parseCVService.normalizePhoneStr(newPhone);
-        String oldEmail = null;
-        if (emailField == null) {
-            initTabContactInfo();
-        }
-
-        oldEmail = emailField.getValue();
-
-        String oldPhone = null;
-        if (phoneField == null) {
-            initTabContactInfo();
-        }
-
-        parseCVService.normalizePhoneStr(phoneField.getValue());
+        String oldEmail = emailField.getValue();
+        String oldPhone = parseCVService.normalizePhoneStr(phoneField.getValue());
 
         Boolean flag = false;
 
@@ -2164,7 +2259,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             if (newEmail != null) {
                 if (!StringUtils.equals(newEmail, oldEmail)) {
-                    if (!newEmail.equals(emailField != null ? emailField.getValue() : null)) {
+                    if (!newEmail.equals(emailField.getValue())) {
                         dialog.withParameter(InputParameter.booleanParameter("newEmail")
                                 .withCaption(messageEmail).withRequired(true));
                     }
@@ -2192,23 +2287,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                     if (newEmailFlag != null) {
                         if (newEmailFlag) {
-                            if (emailField != null) {
-                                emailField.setValue(newEmail);
-                            } else {
-                                initTabContactInfo();
-                                emailField.setValue(newEmail);
-                            }
+                            emailField.setValue(newEmail);
                         }
                     }
 
                     if (newPhoneFlag != null) {
                         if (newPhoneFlag) {
-                            if (phoneField != null) {
-                                phoneField.setValue(newPhoneNew);
-                            } else {
-                                initTabContactInfo();
-                                phoneField.setValue(newPhoneNew);
-                            }
+                            phoneField.setValue(newPhoneNew);
                         }
                     }
 

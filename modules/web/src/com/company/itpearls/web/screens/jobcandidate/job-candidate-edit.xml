@@ -7,55 +7,47 @@
     <data>
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate">
-            <view extends="jobCandidate-view">
-                <property name="iteractionList"
-                          view="_local">
-                    <property name="vacancy"
-                              view="_local">
-                        <property name="projectName"
-                                  view="_local">
-                            <property name="projectName"/>
-                            <property name="projectDepartment"
-                                      view="_local">
-                                <property name="departamentRuName"/>
-                                <property name="companyName" view="_local">
-                                    <property name="comanyName"/>
-                                </property>
-                            </property>
+            <view extends="_local">
+                <property name="candidateCv" view="_local">
+                    <property name="candidate" view="_local"/>
+                    <property name="resumePosition" view="_local"/>
+                    <property name="toVacancy" view="_local">
+                        <property name="positionType" view="_local"/>
+                    </property>
+                    <property name="someFiles" view="_local">
+                        <property name="fileOwner" view="_local"/>
+                        <property name="fileDescriptor" view="_local"/>
+                        <property name="fileType" view="_local"/>
+                    </property>
+                </property>
+                <property name="iteractionList" view="_local">
+                    <property name="candidate" view="_local"/>
+                    <property name="vacancy" view="_local">
+                        <property name="positionType" view="_local"/>
+                        <property name="projectName" view="_local">
+                            <property name="projectDepartment" view="_local"/>
                         </property>
-                        <property name="positionType"
-                                  view="_minimal"/>
-                        <property name="owner"
-                                  view="_local"/>
                     </property>
-                    <property name="iteractionType"
-                              view="_minimal"/>
-                    <property name="recrutier"
-                              view="_minimal"/>
+                    <property name="iteractionType" view="_local"/>
+                    <property name="recrutier" view="_local"/>
                 </property>
-                <property name="candidateCv"
-                          view="_local">
-                    <property name="candidate"
-                              view="_minimal"/>
-                    <property name="resumePosition"
-                              view="_minimal"/>
-                    <property name="toVacancy"
-                              view="_minimal">
-                        <property name="positionType"
-                                  view="_minimal"/>
-                    </property>
-                    <property name="someFiles"
-                              view="_minimal">
-                        <property name="fileType"
-                                  view="_minimal"/>
-                    </property>
+                <property name="socialNetwork" view="_local">
+                    <property name="socialNetworkURL" view="_local"/>
                 </property>
-                <property name="socialNetwork"
-                          view="_local"/>
+                <property name="laborAgreement" view="_local">
+
+                </property>
+                <property name="cityOfResidence" view="_local"/>
+                <property name="currentCompany" view="_local"/>
+                <property name="fileImageFace" view="_local"/>
+                <property name="positionList" view="_local">
+                    <property name="positionList" view="_local"/>
+                </property>
+                <property name="personPosition" view="_local"/>
             </view>
             <loader id="jobCandidateDl"
                     softDeletion="true"
-                    dynamicAttributes="true"/>
+                    dynamicAttributes="false"/>
             <collection id="jobCandidateCandidateCvsDc"
                         property="candidateCv"/>
             <collection id="jobCandidateSocialNetworksDc"
@@ -116,20 +108,20 @@
                 </query>
             </loader>
         </collection>
-        <collection id="socialNetworkURLsesDc"
-                    class="com.company.itpearls.entity.SocialNetworkURLs">
-            <view extends="socialNetworkURLs-view"/>
-            <loader id="socialNetworkURLsesDl" cacheable="true">
-                <query>
-                    <![CDATA[select e from itpearls_SocialNetworkURLs e order by e.networkName]]>
-                    <condition>
-                        <c:jpql>
-                            <c:where>e.jobCandidate = :candidate</c:where>
-                        </c:jpql>
-                    </condition>
-                </query>
-            </loader>
-        </collection>
+        <!--        <collection id="socialNetworkURLsesDc"
+                            class="com.company.itpearls.entity.SocialNetworkURLs">
+                    <view extends="socialNetworkURLs-view"/>
+                    <loader id="socialNetworkURLsesDl" cacheable="true">
+                        <query>
+                            <![CDATA[select e from itpearls_SocialNetworkURLs e order by e.networkName]]>
+                            <condition>
+                                <c:jpql>
+                                    <c:where>e.jobCandidate = :candidate</c:where>
+                                </c:jpql>
+                            </condition>
+                        </query>
+                    </loader>
+                </collection> -->
     </data>
     <dialogMode height="750"
                 width="1200"/>
