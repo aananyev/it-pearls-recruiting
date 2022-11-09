@@ -45,15 +45,15 @@
     </view>
     <view entity="itpearls_Position" name="position-view" extends="_local">
     </view>
-    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true">
-        <property name="cityPosition" view="_minimal"/>
-        <property name="positionType" view="_minimal">
-            <property name="standartDescription"/>
+    <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true"
+          overwrite="true">
+        <property name="cityPosition" view="_local"/>
+        <property name="positionType" view="_local">
         </property>
-        <property name="skillsList" view="_minimal"/>
-        <property name="parentOpenPosition" view="_minimal">
+        <property name="skillsList" view="_local"/>
+        <property name="parentOpenPosition" view="_local">
         </property>
-        <property name="cities" view="_minimal"/>
+        <property name="cities" view="_local"/>
         <property name="owner" view="_local"/>
         <property name="projectName" view="_local">
             <property name="projectDepartment" view="_local">
@@ -73,7 +73,8 @@
         <property name="positionList" view="_minimal">
         </property>
     </view>
-    <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true">
+    <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true"
+          overwrite="true">
         <property name="laborAgreement" view="_minimal"/>
         <property name="socialNetwork" view="_minimal"/>
         <property name="candidateCv" view="_local">
@@ -93,7 +94,11 @@
         </property>
         <property name="currentCompany" view="_minimal"/>
         <property name="cityOfResidence" view="_minimal"/>
-        <property name="iteractionList" view="_minimal">
+        <property name="iteractionList" view="_local">
+            <property name="vacancy" view="_local">
+                <property name="owner" view="_local"/>
+            </property>
+            <property name="candidate" view="_local"/>
         </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
@@ -152,6 +157,7 @@
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="resumePosition" view="_minimal"/>
         <property name="toVacancy" view="_minimal">
+            <property name="positionType" view="_local"/>
         </property>
         <property name="owner" view="_minimal">
         </property>
@@ -187,6 +193,8 @@
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
         <property name="vacancy" view="_local">
+            <property name="positionType" view="_local"/>
+            <property name="projectName" view="_local"/>
         </property>
         <property name="iteractionType" view="_minimal">
             <property name="pic"/>

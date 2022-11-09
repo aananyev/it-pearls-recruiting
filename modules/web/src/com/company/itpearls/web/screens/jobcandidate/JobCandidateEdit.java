@@ -802,7 +802,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             BigDecimal numberIteraction;
 
             try {
-                numberIteraction = dataManager.loadValue("select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
+                numberIteraction = dataManager
+                        .loadValue("select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
                         .one();
             } catch (Exception e) {
                 numberIteraction = BigDecimal.ONE;
@@ -816,6 +817,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             try {
                 iteraction = dataManager.load(Iteraction.class)
                         .query("select e from itpearls_Iteraction e where e.iterationName like :iteractionName")
+                        .view("iteraction-view")
                         .parameter("iteractionName", "Новый контакт")
                         .one();
             } catch (Exception e) {
@@ -828,6 +830,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             try {
                 openPosition = dataManager.load(OpenPosition.class)
                         .query("select e from itpearls_OpenPosition e where e.vacansyName like :vacansyDefaultName")
+                        .view("openPosition-view")
                         .parameter("vacansyDefaultName", "Default%")
                         .one();
             } catch (Exception e) {
@@ -865,7 +868,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .parameter("cityOfResidence", jobCityCandidateField.getValue())
                     .parameter("personPosition", personPositionField.getValue())
                     .parameter("uuid", getEditedEntity().getId())
-                    .cacheable(true)
                     .view("jobCandidate-view")
                     .list();
 

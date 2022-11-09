@@ -23,6 +23,7 @@
                 <property name="iteractionList" view="_local">
                     <property name="candidate" view="_local"/>
                     <property name="vacancy" view="_local">
+                        <property name="owner" view="_local"/>
                         <property name="positionType" view="_local"/>
                         <property name="projectName" view="_local">
                             <property name="projectDepartment" view="_local"/>
@@ -413,6 +414,7 @@
                  caption="msg://candidate"
                  margin="true,true,true,true"
                  icon="BOMB"
+                 lazy="true"
                  spacing="true">
                 <hbox id="cardCandidateBox"
                       spacing="true"
@@ -553,6 +555,7 @@
                  margin="true,true,true,true"
                  expand="socialNetworkTableHbox"
                  icon="font-icon:USER"
+                 lazy="true"
                  spacing="true">
                 <hbox id="contactInfoGroupBox"
                       width="100%"
@@ -627,7 +630,7 @@
                         <radioButtonGroup id="priorityCommunicationMethodRadioButton"
                                           caption="msg://msgPriorityCommunicationMethod"
                                           width="100%"
-                                          required="false"
+                                          required="true"
                                           dataContainer="jobCandidateDc"
                                           property="priorityContact"
                                           height="100%"/>
@@ -703,6 +706,7 @@
                  margin="true,true,true,true"
                  expand="jobCandidateIteractionListTable"
                  icon="LIST"
+                 lazy="true"
                  spacing="true">
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionDc"
@@ -774,6 +778,7 @@
                  margin="true,true,true,true"
                  icon="font-icon:FILE_TEXT"
                  expand="tabResumeVbox"
+                 lazy="true"
                  spacing="true">
                 <vbox id="tabResumeVbox"
                       spacing="true"
@@ -796,7 +801,7 @@
                                     caption="msg://msgToPosition"/>
                             <column id="toVacancy"
                                     property="toVacancy"
-                                    maximumWidth="500px"
+                                    maximumWidth="400px"
                                     caption="msg://msgToVacansy"/>
                             <column id="iconOriginalCVFile"
                                     width="100px"
