@@ -108,7 +108,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private FileLoader fileLoader;
     @Inject
-    private LookupPickerField<JobCandidate> candidateField;
+    private SuggestionPickerField candidateField;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {

@@ -312,22 +312,45 @@
                                              width="50%"/>
                             </row>
                             <row id="row">
-                                <lookupPickerField id="candidateField"
-                                                   optionsContainer="candidatesDc"
-                                                   rowspan="1"
-                                                   colspan="1"
-                                                   caption="msg://msgCandidate"
-                                                   width="100%"
-                                                   dataContainer="iteractionListDc"
-                                                   property="candidate"
-                                                   required="true">
+                                <suggestionPickerField id="candidateField"
+                                                       inputPrompt="mainMsg://msgStartInput"
+                                                       minSearchStringLength="3"
+                                                       rowspan="1"
+                                                       colspan="1"
+                                                       caption="msg://msgCandidate"
+                                                       width="100%"
+                                                       required="true"
+                                                       dataContainer="iteractionListDc"
+                                                       property="candidate">
                                     <actions>
-                                        <action id="lookup"
-                                                type="picker_lookup"/>
-                                        <action id="open"
-                                                type="picker_open"/>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open"/>
                                     </actions>
-                                </lookupPickerField>
+                                    <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        select e
+                                        from itpearls_JobCandidate e
+                                        where lower(e.fullName) like lower(:searchString) escape '\'
+                                        order by e.fullName
+                                    </query>
+                                </suggestionPickerField>
+                                <!--                                <lookupPickerField id="candidateField"
+                                                                                   optionsContainer="candidatesDc"
+                                                                                   rowspan="1"
+                                                                                   colspan="1"
+                                                                                   caption="msg://msgCandidate"
+                                                                                   width="100%"
+                                                                                   dataContainer="iteractionListDc"
+                                                                                   property="candidate"
+                                                                                   required="true">
+                                                                    <actions>
+                                                                        <action id="lookup"
+                                                                                type="picker_lookup"/>
+                                                                        <action id="open"
+                                                                                type="picker_open"/>
+                                                                    </actions>
+                                                                </lookupPickerField> -->
                                 <lookupPickerField id="vacancyFiels"
                                                    caption="mainMsg://msgVacancy"
                                                    dataContainer="iteractionListDc"

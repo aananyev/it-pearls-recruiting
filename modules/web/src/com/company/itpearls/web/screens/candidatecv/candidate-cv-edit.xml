@@ -134,19 +134,42 @@
                               spacing="true"
                               stylename="light">
                             <vbox spacing="true">
-                                <lookupPickerField id="candidateField"
-                                                   inputPrompt="msg://msgCandidateField"
-                                                   dataContainer="candidateCVDc"
-                                                   property="candidate"
-                                                   optionsContainer="candidatesDc"
-                                                   caption="msg://msgCandidate"
-                                                   height="50%"
-                                                   width="70%">
+                                <suggestionPickerField id="candidateField"
+                                                       inputPrompt="mainMsg://msgStartInput"
+                                                       minSearchStringLength="3"
+                                                       rowspan="1"
+                                                       colspan="1"
+                                                       caption="msg://msgCandidate"
+                                                       width="70%"
+                                                       required="true"
+                                                       dataContainer="candidateCVDc"
+                                                       property="candidate">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                         <action id="open" type="picker_open"/>
                                     </actions>
-                                </lookupPickerField>
+                                    <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        select e
+                                        from itpearls_JobCandidate e
+                                        where lower(e.fullName) like lower(:searchString) escape '\'
+                                        order by e.fullName
+                                    </query>
+                                </suggestionPickerField>
+                                <!--                                <lookupPickerField id="candidateField"
+                                                                                   inputPrompt="msg://msgCandidateField"
+                                                                                   dataContainer="candidateCVDc"
+                                                                                   property="candidate"
+                                                                                   optionsContainer="candidatesDc"
+                                                                                   caption="msg://msgCandidate"
+                                                                                   height="50%"
+                                                                                   width="70%">
+                                                                    <actions>
+                                                                        <action id="lookup" type="picker_lookup"/>
+                                                                        <action id="open" type="picker_open"/>
+                                                                    </actions>
+                                                                </lookupPickerField> -->
                                 <lookupPickerField id="resumePositionField"
                                                    optionsContainer="resumePositionsDc"
                                                    dataContainer="candidateCVDc"

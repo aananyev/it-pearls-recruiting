@@ -139,11 +139,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private Image ratingImage;
     @Inject
-    private LookupPickerField<JobCandidate> candidateField;
-    @Inject
     private HBoxLayout outstaffingCostHBox;
     @Inject
     private CollectionContainer<JobCandidate> candidatesDc;
+    @Inject
+    private SuggestionPickerField<JobCandidate> candidateField;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -1258,7 +1258,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         });
     }
 
-    @Install(to = "candidateField", subject = "optionImageProvider")
+/*    @Install(to = "candidateField", subject = "optionImageProvider")
     private Resource candidateFieldOptionImageProvider(JobCandidate jobCandidate) {
         if (jobCandidate.getFileImageFace() != null) {
             Image image = uiComponents.create(Image.NAME);
@@ -1269,7 +1269,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         return null;
-    }
+    } */
 
     @Install(to = "ratingField", subject = "optionStyleProvider")
     private String ratingFieldOptionStyleProvider(Object object) {
