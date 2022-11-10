@@ -35,8 +35,10 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -115,35 +117,55 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Logger log;
     @Inject
     protected BackgroundWorker backgroundWorker;
-
+    @Inject
     private SuggestionField<String> firstNameField;
+    @Inject
     private SuggestionField<String> secondNameField;
+    @Inject
     private SuggestionField<String> middleNameField;
+    @Inject
     private Label<String> positionsLabel;
+    @Inject
     private LookupPickerField<Company> currentCompanyField;
+    @Inject
     private LookupPickerField<Position> personPositionField;
+    @Inject
     private LookupPickerField<City> jobCityCandidateField;
+    @Inject
     private DateField<Date> birdhDateField;
-
+    @Inject
     private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
+    @Inject
     private TextField<String> telegramGroupField;
+    @Inject
     private TextField<String> mobilePhoneField;
-
+    @Inject
     private DataGrid<IteractionList> jobCandidateIteractionListTable;
+    @Inject
     private Button openPositionProjectDescriptionButton;
+    @Inject
     private PopupButton frequentInteractionPopupButton;
-
+    @Inject
     private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
+    @Inject
     private Button copyCVButton;
+    @Inject
     private Button scanContactsFromCVButton;
+    @Inject
     private Button checkSkillFromJD;
-
+    @Inject
     private TextField<String> emailField;
+    @Inject
     private TextField<String> phoneField;
+    @Inject
     private TextField<String> skypeNameField;
+    @Inject
     private TextField<String> telegramNameField;
+    @Inject
     private TextField<String> whatsupNameField;
+    @Inject
     private TextField<String> wiberNameField;
+    @Inject
     private DataGrid<SocialNetworkURLs> socialNetworkTable;
     private static final String MANAGER_GROUP = "Менеджмент";
     private static final String RECRUTIER_GROUP = "Хантинг";
@@ -206,14 +228,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Table lastProjectTable;
     @Inject
     private KeyValueCollectionContainer lastProjectDc;
+    private boolean initSocialNetworkURLs = false;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
         // вдруг такой кандидат уже есть
-        if (firstNameField == null || secondNameField == null) {
-            initTabCandidate();
-        }
-
         List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
                 .query("select e from itpearls_JobCandidate e where e.firstName like :firstName and " +
                         "e.secondName like :secondName")
@@ -442,10 +461,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
     private String setFullName(String firstName, String middleName, String secondName) {
-        if (!candidateInitialized) {
-            initTabCandidate();
-        }
-
         String fullName = "", localFirstName = "", localMiddleName = "", localSecondName = "";
 
         if (firstNameField.getValue() != null)
@@ -585,37 +600,35 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     protected void enableDisableContacts() {
-        if (tabContactInfoInitialized) {
-            Boolean flag = true;
+        Boolean flag = true;
 
-            for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
-                if (s.getNetworkURLS() != null) {
-                    if (!s.getNetworkURLS().equals("")) {
-                        flag = false;
-                        break;
-                    }
+        for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
+            if (s.getNetworkURLS() != null) {
+                if (!s.getNetworkURLS().equals("")) {
+                    flag = false;
+                    break;
                 }
             }
+        }
 
-            skypeNameField.setRequired(true);
-            phoneField.setRequired(true);
-            mobilePhoneField.setRequired(true);
-            emailField.setRequired(true);
-            telegramNameField.setRequired(true);
-            whatsupNameField.setRequired(true);
-            wiberNameField.setRequired(true);
-            telegramGroupField.setRequired(true);
+/*        skypeNameField.setRequired(true);
+        phoneField.setRequired(true);
+        mobilePhoneField.setRequired(true);
+        emailField.setRequired(true);
+        telegramNameField.setRequired(true);
+        whatsupNameField.setRequired(true);
+        wiberNameField.setRequired(true);
+        telegramGroupField.setRequired(true); */
 
-            if (!isRequiredAddresField() || !flag) {
-                skypeNameField.setRequired(false);
-                phoneField.setRequired(false);
-                mobilePhoneField.setRequired(false);
-                emailField.setRequired(false);
-                telegramNameField.setRequired(false);
-                whatsupNameField.setRequired(false);
-                wiberNameField.setRequired(false);
-                telegramGroupField.setRequired(false);
-            }
+        if (!isRequiredAddresField() || !flag) {
+            skypeNameField.setRequired(false);
+            phoneField.setRequired(false);
+            mobilePhoneField.setRequired(false);
+            emailField.setRequired(false);
+            telegramNameField.setRequired(false);
+            whatsupNameField.setRequired(false);
+            wiberNameField.setRequired(false);
+            telegramGroupField.setRequired(false);
         }
     }
 
@@ -654,7 +667,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         setSocialNetworkTable();
-//        enableDisableContacts();
+        enableDisableContacts();
         setLabelTitle();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
@@ -760,10 +773,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        initTabCandidate();
-        initTabContactInfo();
-        initTabResume();
-        initTabInteractions();
 
         replaceE_yo();
         setFullNameCandidate();
@@ -1013,21 +1022,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onInit(InitEvent event) {
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
-            if ("tabResume".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
-                initTabResume();
-            }
-
-            if ("tabIteraction".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
-                initTabInteractions();
-            }
-
-            if ("tabCandidate".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
-                initTabCandidate();
-            }
-
-            if ("tabContactInfo".equals(selectedTabChangeEvent.getSelectedTab().getName())) {
-                initTabContactInfo();
-            }
+            initTabResume();
+            initTabInteractions();
+            initTabCandidate();
+            initTabContactInfo();
         });
     }
 
@@ -1035,100 +1033,125 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (!tabContactInfoInitialized) {
             if (emailField == null) {
                 emailField = (TextField<String>) getWindow().getComponent("emailField");
-                emailField.addTextChangeListener(e -> enableDisableContacts());
             }
+            emailField.addTextChangeListener(e -> enableDisableContacts());
 
             if (phoneField == null) {
                 phoneField = (TextField<String>) getWindow().getComponent("phoneField");
-                phoneField.addTextChangeListener(e -> enableDisableContacts());
             }
+            phoneField.addTextChangeListener(e -> enableDisableContacts());
 
             if (skypeNameField == null) {
                 skypeNameField = (TextField<String>) getWindow().getComponent("skypeNameField");
-                skypeNameField.addTextChangeListener(e -> enableDisableContacts());
             }
+            skypeNameField.addTextChangeListener(e -> enableDisableContacts());
 
             if (telegramNameField == null) {
                 telegramNameField = (TextField<String>) getWindow().getComponent("telegramNameField");
-                telegramNameField.addTextChangeListener(e -> enableDisableContacts());
             }
+            telegramNameField.addTextChangeListener(e -> enableDisableContacts());
 
             if (whatsupNameField == null) {
                 whatsupNameField = (TextField<String>) getWindow().getComponent("whatsupNameField");
-                whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
             }
+            whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
 
             if (wiberNameField == null) {
                 wiberNameField = (TextField<String>) getWindow().getComponent("wiberNameField");
-                wiberNameField.addTextChangeListener(e -> enableDisableContacts());
             }
+            wiberNameField.addTextChangeListener(e -> enableDisableContacts());
 
             if (priorityCommunicationMethodRadioButton == null) {
                 priorityCommunicationMethodRadioButton = (RadioButtonGroup) getWindow()
                         .getComponent("priorityCommunicationMethodRadioButton");
-                priorityCommenicationMethodRadioButtonInit();
             }
+            priorityCommenicationMethodRadioButtonInit();
 
             if (telegramGroupField == null) {
                 telegramGroupField = (TextField<String>) getWindow().getComponent("telegramGroupField");
-                telegramGroupField.addTextChangeListener(e -> enableDisableContacts());
             }
+            telegramGroupField.addTextChangeListener(e -> enableDisableContacts());
 
             if (mobilePhoneField == null) {
                 mobilePhoneField = (TextField<String>) getWindow().getComponent("mobilePhoneField");
-                mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
             }
+            mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
+
 
             if (socialNetworkTable == null) {
                 socialNetworkTable = (DataGrid<SocialNetworkURLs>) getWindow()
                         .getComponent("socialNetworkTable");
-                socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
-                socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
-                socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
+            }
 
-/*                socialNetworkTable.getColumn("linkToWeb").setColumnGenerator(event -> {
-                    Link link = uiComponents.create(Link.NAME);
-                    if (!PersistenceHelper.isNew(getEditedEntity())) {
-                        if (event.getItem().getNetworkURLS() != null) {
-                            String urlS = "";
-                            if (!event.getItem().getNetworkURLS().contains("http")) {
-                                URI uri = null;
-                                URL url = null;
+            socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
+            socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
+            socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
 
-                                try {
-                                    uri = new URI("https", event.getItem().getNetworkURLS(), null, null);
-                                    url = uri.toURL();
-                                } catch (URISyntaxException | MalformedURLException e) {
-                                    log.error("Error", e);
-                                }
+            socialNetworkTable.getColumn("linkToWeb").setColumnGenerator(event -> {
+                Link link = uiComponents.create(Link.NAME);
+                if (!PersistenceHelper.isNew(getEditedEntity())) {
+                    if (event.getItem().getNetworkURLS() != null) {
+                        String urlS = "";
+                        if (!event.getItem().getNetworkURLS().contains("http")) {
+                            URI uri = null;
+                            URL url = null;
 
-                                if (url != null) {
-                                    urlS = url.toString();
-                                } else {
-                                    urlS = "";
-                                }
+                            try {
+                                uri = new URI("https", event.getItem().getNetworkURLS(), null, null);
+                                url = uri.toURL();
+                            } catch (URISyntaxException | MalformedURLException e) {
+                                log.error("Error", e);
                             }
 
-                            link.setUrl(urlS);
-                            link.setCaption("Перейти");
-                            link.setTarget("_blank");
-                            link.setWidthAuto();
-                            link.setVisible(true);
-                        } else {
-                            link.setVisible(false);
+                            if (url != null) {
+                                urlS = url.toString();
+                            } else {
+                                urlS = "";
+                            }
                         }
+
+                        link.setUrl(urlS);
+                        link.setCaption("Перейти");
+                        link.setTarget("_blank");
+                        link.setWidthAuto();
+                        link.setVisible(true);
                     } else {
                         link.setVisible(false);
                     }
+                } else {
+                    link.setVisible(false);
+                }
 
-                    return link;
-                });*/
-            }
-
-            tabContactInfoInitialized = true;
+                return link;
+            });
 
             trimTelegramName();
             enableDisableContacts();
+            initSocialNeiworkTable();
+        }
+
+        tabContactInfoInitialized = true;
+    }
+
+    private void initSocialNeiworkTable() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            if (!initSocialNetworkURLs) {
+                List<SocialNetworkURLs> socialNetworkURLs = new ArrayList<>();
+                List<SocialNetworkType> socialNetworkTypes = dataManager.load(SocialNetworkType.class)
+                        .view("socialNetworkType-view")
+                        .list();
+
+                int endCount = socialNetworkTypes.size();
+                for (int i = 0; i < endCount; i++) {
+                    SocialNetworkURLs sn = metadata.create(SocialNetworkURLs.class);
+                    sn.setSocialNetworkURL(socialNetworkTypes.get(i));
+                    jobCandidateSocialNetworksDc.getMutableItems().add(sn);
+                }
+
+                dataContext.merge(jobCandidateSocialNetworksDc.getMutableItems());
+
+                initSocialNetworkURLs = false;
+            }
         }
     }
 
@@ -1155,48 +1178,48 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             if (secondNameField == null) {
                 secondNameField = (SuggestionField<String>) getWindow().getComponent("secondNameField");
-                if (secondNameField != null) {
-                    secondNameField.setEnterActionHandler(searchString -> {
-                        secondNameField.setValue(searchString);
-                    });
+            }
+            if (secondNameField != null) {
+                secondNameField.setEnterActionHandler(searchString -> {
+                    secondNameField.setValue(searchString);
+                });
 
-                    secondNameField.addValueChangeListener(stringValueChangeEvent -> {
-                        setLabelFullName(setFullName(null, null, getEditedEntity().getSecondName()));
-                    });
-                }
+                secondNameField.addValueChangeListener(stringValueChangeEvent -> {
+                    setLabelFullName(setFullName(null, null, getEditedEntity().getSecondName()));
+                });
             }
 
             if (firstNameField == null) {
                 firstNameField = (SuggestionField<String>) getWindow().getComponent("firstNameField");
-                if (firstNameField != null) {
-                    firstNameField.setEnterActionHandler(searchString -> {
-                        firstNameField.setValue(searchString);
-                    });
+            }
+            if (firstNameField != null) {
+                firstNameField.setEnterActionHandler(searchString -> {
+                    firstNameField.setValue(searchString);
+                });
 
-                    firstNameField.addValueChangeListener(stringValueChangeEvent -> {
-                        setLabelFullName(setFullName(getEditedEntity().getFirstName(), null, null));
-                    });
-                }
+                firstNameField.addValueChangeListener(stringValueChangeEvent -> {
+                    setLabelFullName(setFullName(getEditedEntity().getFirstName(), null, null));
+                });
             }
 
             if (middleNameField == null) {
                 middleNameField = (SuggestionField<String>) getWindow().getComponent("middleNameField");
-                if (middleNameField != null) {
-                    middleNameField.setEnterActionHandler(searchString -> {
-                        middleNameField.setValue(searchString);
-                    });
+            }
+            if (middleNameField != null) {
+                middleNameField.setEnterActionHandler(searchString -> {
+                    middleNameField.setValue(searchString);
+                });
 
-                    middleNameField.addValueChangeListener(stringValueChangeEvent -> {
-                        setLabelFullName(setFullName(null, getEditedEntity().getMiddleName(), null));
-                    });
-                }
+                middleNameField.addValueChangeListener(stringValueChangeEvent -> {
+                    setLabelFullName(setFullName(null, getEditedEntity().getMiddleName(), null));
+                });
             }
 
             if (positionsLabel == null) {
                 positionsLabel = (Label<String>) getWindow().getComponent("positionsLabel");
-                if (positionsLabel != null) {
-                    setPositionsLabel();
-                }
+            }
+            if (positionsLabel != null) {
+                setPositionsLabel();
             }
 
             addSuggestField();
@@ -1213,28 +1236,29 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (jobCandidateIteractionListTable == null) {
                 jobCandidateIteractionListTable = (DataGrid<IteractionList>) getWindow()
                         .getComponent("jobCandidateIteractionListTable");
+            }
 
-                addIconColumn();
+            addIconColumn();
 
-                jobCandidateIteractionListTable.setEnabled(
-                        !(getEditedEntity().getBlockCandidate() == null ?
-                                false : blockCandidateCheckBox.getValue()));
+            jobCandidateIteractionListTable.setEnabled(
+                    !(getEditedEntity().getBlockCandidate() == null ?
+                            false : blockCandidateCheckBox.getValue()));
 
-                if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
-                        getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR))
-                    jobCandidateIteractionListTable.setEnabled(true);
+            if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
+                    getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR))
+                jobCandidateIteractionListTable.setEnabled(true);
 
-                jobCandidateIteractionListTable.getColumn("vacancy").setDescriptionProvider(iteractionList -> {
-                    String retStr = "";
+            jobCandidateIteractionListTable.getColumn("vacancy").setDescriptionProvider(iteractionList -> {
+                String retStr = "";
 
-                    if (iteractionList.getVacancy() != null) {
-                        if (iteractionList.getVacancy().getVacansyName() != null) {
-                            retStr = iteractionList.getVacancy().getVacansyName();
-                        }
+                if (iteractionList.getVacancy() != null) {
+                    if (iteractionList.getVacancy().getVacansyName() != null) {
+                        retStr = iteractionList.getVacancy().getVacansyName();
                     }
+                }
 
-                    return Jsoup.parse(retStr).text();
-                });
+                return Jsoup.parse(retStr).text();
+            });
 
 /*                jobCandidateIteractionListTable.getColumn("projectName").setDescriptionProvider(iteractionList -> {
                     String retStr = "";
@@ -1269,81 +1293,80 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }); */
 
 
-                jobCandidateIteractionListTable.getColumn("rating").setColumnGenerator(event -> {
-                    return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
-                });
+            jobCandidateIteractionListTable.getColumn("rating").setColumnGenerator(event -> {
+                return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
+            });
 
-                jobCandidateIteractionListTable.addEditorCloseListener(event -> {
-                    setRatingLabel(getEditedEntity());
-                });
+            jobCandidateIteractionListTable.addEditorCloseListener(event -> {
+                setRatingLabel(getEditedEntity());
+            });
 
-                jobCandidateIteractionListTable.getColumn("iteractionType")
-                        .setDescriptionProvider(iteractionList -> {
-                            String add = "";
+            jobCandidateIteractionListTable.getColumn("iteractionType")
+                    .setDescriptionProvider(iteractionList -> {
+                        String add = "";
 
-                            if (iteractionList.getAddDate() != null) {
-                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy H:m");
-                                add = dateFormat.format(iteractionList.getAddDate());
-                            }
+                        if (iteractionList.getAddDate() != null) {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy H:m");
+                            add = dateFormat.format(iteractionList.getAddDate());
+                        }
 
-                            if (iteractionList.getAddString() != null)
-                                add = iteractionList.getAddString();
+                        if (iteractionList.getAddString() != null)
+                            add = iteractionList.getAddString();
 
-                            if (iteractionList.getAddInteger() != null)
-                                add = iteractionList.getAddInteger().toString();
+                        if (iteractionList.getAddInteger() != null)
+                            add = iteractionList.getAddInteger().toString();
 
 
-                            return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
-                        });
+                        return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
+                    });
 
-                jobCandidateIteractionListTable.addSelectionListener(e -> {
-                    if (e.getSelected() == null) {
-                        openPositionProjectDescriptionButton.setEnabled(false);
-                    } else {
-                        openPositionProjectDescriptionButton.setEnabled(true);
-                    }
-                });
+            jobCandidateIteractionListTable.addSelectionListener(e -> {
+                if (e.getSelected() == null) {
+                    openPositionProjectDescriptionButton.setEnabled(false);
+                } else {
+                    openPositionProjectDescriptionButton.setEnabled(true);
+                }
+            });
 
-                jobCandidateIteractionListTable.addSelectionListener(e -> {
-                    if (e.getSelected() == null) {
-                        openPositionProjectDescriptionButton.setEnabled(false);
-                    } else {
-                        openPositionProjectDescriptionButton.setEnabled(true);
-                    }
-                });
+            jobCandidateIteractionListTable.addSelectionListener(e -> {
+                if (e.getSelected() == null) {
+                    openPositionProjectDescriptionButton.setEnabled(false);
+                } else {
+                    openPositionProjectDescriptionButton.setEnabled(true);
+                }
+            });
 
-                jobCandidateIteractionListTable.getColumn("commentColumn").setDescriptionProvider(iteractionList -> {
-                    return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ?
-                            Jsoup.parse(iteractionList.getComment()).text() : null;
-                });
+            jobCandidateIteractionListTable.getColumn("commentColumn").setDescriptionProvider(iteractionList -> {
+                return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ?
+                        Jsoup.parse(iteractionList.getComment()).text() : null;
+            });
 
-                jobCandidateIteractionListTable.getColumn("commentColumn").setColumnGenerator(event -> {
-                    return event.getItem().getComment() != null && !event.getItem().getComment().equals("") ?
-                            CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
-                });
+            jobCandidateIteractionListTable.getColumn("commentColumn").setColumnGenerator(event -> {
+                return event.getItem().getComment() != null && !event.getItem().getComment().equals("") ?
+                        CubaIcon.PLUS_CIRCLE : CubaIcon.MINUS_CIRCLE;
+            });
 
-                jobCandidateIteractionListTable.getColumn("commentColumn").setStyleProvider(iteractionList -> {
-                    return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ?
-                            "pic-center-large-green" : "pic-center-large-red";
-                });
-            }
+            jobCandidateIteractionListTable.getColumn("commentColumn").setStyleProvider(iteractionList -> {
+                return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ?
+                        "pic-center-large-green" : "pic-center-large-red";
+            });
 
             if (copyIteractionButton == null) {
                 copyIteractionButton = (Button) getWindow().getComponent("copyIteractionButton");
-                copyIteractionButton.addClickListener(event -> copyIteractionJobCandidate());
             }
+            copyIteractionButton.addClickListener(event -> copyIteractionJobCandidate());
 
             if (openPositionProjectDescriptionButton == null) {
                 openPositionProjectDescriptionButton = (Button) getWindow()
                         .getComponent("openPositionProjectDescriptionButton");
-                openPositionProjectDescriptionButton.addClickListener(event -> openPositionDescription());
             }
+            openPositionProjectDescriptionButton.addClickListener(event -> openPositionDescription());
 
             if (frequentInteractionPopupButton == null) {
                 frequentInteractionPopupButton = (PopupButton) getWindow()
                         .getComponent("frequentInteractionPopupButton");
-                setFrequentInteractionPopupButton();
             }
+            setFrequentInteractionPopupButton();
 
             interationTabInitialized = true;
         }
@@ -1352,122 +1375,121 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void initTabResume() {
         if (!cvTabInitialized) {
             if (scanContactsFromCVButton == null) {
-                scanContactsFromCVButton = (Button) getWindow().getComponent("scanContactsFromCVButton");
-                scanContactsFromCVButton.addClickListener(e -> scanContactsFromCVs());
+                scanContactsFromCVButton = (Button) getWindow()
+                        .getComponent("scanContactsFromCVButton");
             }
+            scanContactsFromCVButton.addClickListener(e -> scanContactsFromCVs());
 
             if (copyCVButton == null) {
                 copyCVButton = (Button) getWindow().getComponent("copyCVButton");
-                copyCVButton.addClickListener(e -> copyCVJobCandidate());
-                setCopyCVButton();
             }
+            copyCVButton.addClickListener(e -> copyCVJobCandidate());
+            setCopyCVButton();
 
             if (checkSkillFromJD == null) {
                 checkSkillFromJD = (Button) getWindow().getComponent("checkSkillFromJD");
-                checkSkillFromJD.addClickListener(e -> checkSkillFromJD());
             }
+            checkSkillFromJD.addClickListener(e -> checkSkillFromJD());
 
             if (jobCandidateCandidateCvTable == null) {
-                jobCandidateCandidateCvTable = (DataGrid<CandidateCV>) getWindow().getComponent("jobCandidateCandidateCvTable");
-
-                jobCandidateCandidateCvTable.addItemClickListener(e -> {
-                    if (e.getItem() != null) {
-                        copyCVButton.setEnabled(true);
-                    } else {
-                        copyCVButton.setEnabled(false);
-                    }
-                });
-
-                jobCandidateCandidateCvTable.getColumn("letter").setDescriptionProvider(candidateCV -> {
-                    String returnData = candidateCV.getLetter() != null ? Jsoup.parse(candidateCV.getLetter()).text() : "";
-                    return returnData;
-                });
-
-                jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setDescriptionProvider(candidateCV -> {
-                    return candidateCV.getLinkOriginalCv();
-                });
-
-                jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setColumnGenerator(event -> {
-                    return event.getItem().getLinkOriginalCv() != null ?
-                            CubaIcon.valueOf("FILE_TEXT") :
-                            CubaIcon.valueOf("FILE");
-                });
-
-                jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setColumnGenerator(event -> {
-                    return event.getItem().getLinkItPearlsCV() != null ?
-                            CubaIcon.valueOf("FILE_TEXT") :
-                            CubaIcon.valueOf("FILE");
-                });
-
-                jobCandidateCandidateCvTable.getColumn("letter").setColumnGenerator(event -> {
-                    return event.getItem().getLetter() != null ?
-                            CubaIcon.valueOf("FILE_TEXT") :
-                            CubaIcon.valueOf("FILE");
-                });
-
-                jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setDescriptionProvider(candidateCV -> {
-                    return candidateCV.getLinkItPearlsCV();
-                });
-
-                jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setStyleProvider(candidateCV -> {
-                    String style = "";
-
-                    if (candidateCV.getLinkItPearlsCV() != null) {
-                        style = "pic-center-large-green";
-                    } else {
-                        style = "pic-center-large-red";
-                    }
-
-                    return style;
-                });
-
-                jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setStyleProvider(candidateCV -> {
-                    return (candidateCV.getLinkOriginalCv() != null ? "pic-center-large-green" : "pic-center-large-red");
-                });
-
-                jobCandidateCandidateCvTable.getColumn("letter").setStyleProvider(candidateCV -> {
-                    return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
-                });
-
-                jobCandidateCandidateCvTable.getColumn("candidateITPearlsCVColumn").setColumnGenerator(event -> {
-                    Link link = uiComponents.create(Link.NAME);
-
-                    if (event.getItem().getLinkItPearlsCV() != null) {
-                        String url = event.getItem().getLinkItPearlsCV();
-
-                        link.setUrl(url);
-                        link.setCaption("CV IT Pearls");
-                        link.setTarget("_blank");
-                        link.setWidthAuto();
-                        link.setVisible(true);
-                    } else {
-                        link.setVisible(false);
-                    }
-
-                    return link;
-                });
-
-                jobCandidateCandidateCvTable.getColumn("candidateOriginalCVColumn").setColumnGenerator(event -> {
-                    Link link = uiComponents.create(Link.NAME);
-
-                    if (event.getItem().getLinkOriginalCv() != null) {
-                        String url = event.getItem().getLinkOriginalCv();
-
-                        link.setUrl(url);
-                        link.setCaption("Оригинальное CV");
-                        link.setTarget("_blank");
-                        link.setWidthAuto();
-                        link.setVisible(true);
-                    } else {
-                        link.setVisible(false);
-                    }
-
-                    return link;
-                });
-
+                jobCandidateCandidateCvTable = (DataGrid<CandidateCV>) getWindow()
+                        .getComponent("jobCandidateCandidateCvTable");
             }
 
-            return;
+            jobCandidateCandidateCvTable.addItemClickListener(e -> {
+                if (e.getItem() != null) {
+                    copyCVButton.setEnabled(true);
+                } else {
+                    copyCVButton.setEnabled(false);
+                }
+            });
+
+            jobCandidateCandidateCvTable.getColumn("letter").setDescriptionProvider(candidateCV -> {
+                String returnData = candidateCV.getLetter() != null ? Jsoup.parse(candidateCV.getLetter()).text() : "";
+                return returnData;
+            });
+
+            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setDescriptionProvider(candidateCV -> {
+                return candidateCV.getLinkOriginalCv();
+            });
+
+            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setColumnGenerator(event -> {
+                return event.getItem().getLinkOriginalCv() != null ?
+                        CubaIcon.valueOf("FILE_TEXT") :
+                        CubaIcon.valueOf("FILE");
+            });
+
+            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setColumnGenerator(event -> {
+                return event.getItem().getLinkItPearlsCV() != null ?
+                        CubaIcon.valueOf("FILE_TEXT") :
+                        CubaIcon.valueOf("FILE");
+            });
+
+            jobCandidateCandidateCvTable.getColumn("letter").setColumnGenerator(event -> {
+                return event.getItem().getLetter() != null ?
+                        CubaIcon.valueOf("FILE_TEXT") :
+                        CubaIcon.valueOf("FILE");
+            });
+
+            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setDescriptionProvider(candidateCV -> {
+                return candidateCV.getLinkItPearlsCV();
+            });
+
+            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setStyleProvider(candidateCV -> {
+                String style = "";
+
+                if (candidateCV.getLinkItPearlsCV() != null) {
+                    style = "pic-center-large-green";
+                } else {
+                    style = "pic-center-large-red";
+                }
+
+                return style;
+            });
+
+            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setStyleProvider(candidateCV -> {
+                return (candidateCV.getLinkOriginalCv() != null ? "pic-center-large-green" : "pic-center-large-red");
+            });
+
+            jobCandidateCandidateCvTable.getColumn("letter").setStyleProvider(candidateCV -> {
+                return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
+            });
+
+            jobCandidateCandidateCvTable.getColumn("candidateITPearlsCVColumn").setColumnGenerator(event -> {
+                Link link = uiComponents.create(Link.NAME);
+
+                if (event.getItem().getLinkItPearlsCV() != null) {
+                    String url = event.getItem().getLinkItPearlsCV();
+
+                    link.setUrl(url);
+                    link.setCaption("CV IT Pearls");
+                    link.setTarget("_blank");
+                    link.setWidthAuto();
+                    link.setVisible(true);
+                } else {
+                    link.setVisible(false);
+                }
+
+                return link;
+            });
+
+            jobCandidateCandidateCvTable.getColumn("candidateOriginalCVColumn").setColumnGenerator(event -> {
+                Link link = uiComponents.create(Link.NAME);
+
+                if (event.getItem().getLinkOriginalCv() != null) {
+                    String url = event.getItem().getLinkOriginalCv();
+
+                    link.setUrl(url);
+                    link.setCaption("Оригинальное CV");
+                    link.setTarget("_blank");
+                    link.setWidthAuto();
+                    link.setVisible(true);
+                } else {
+                    link.setVisible(false);
+                }
+
+                return link;
+            });
         }
 
         cvTabInitialized = true;
@@ -2351,7 +2373,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-/*    @Install(to = "socialNetworkTable.linkToWeb", subject = "columnGenerator")
+    @Install(to = "socialNetworkTable.linkToWeb", subject = "columnGenerator")
     private Component socialNetworkTableLinkToWebColumnGenerator
             (DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
         Link link = uiComponents.create(Link.NAME);
@@ -2390,7 +2412,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return link;
-    } */
+    }
 
     public void openPositionDescription() {
         QuickViewOpenPositionDescription quickViewOpenPositionDescription = screens.create(QuickViewOpenPositionDescription.class);

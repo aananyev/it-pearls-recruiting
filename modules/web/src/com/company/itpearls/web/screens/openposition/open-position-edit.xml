@@ -221,8 +221,9 @@
                                                       width="AUTO"
                                                       align="BOTTOM_LEFT"/>
                                         </hbox>
-                                        <hbox spacing="false"
-                                              width="50%"
+                                        <hbox spacing="true"
+                                              width="100%"
+                                              expand="commentPriority"
                                               height="AUTO">
                                             <lookupField id="priorityField"
                                                          dataContainer="openPositionDc"
@@ -231,6 +232,11 @@
                                                          required="true"
                                                          align="BOTTOM_LEFT"
                                                          width="AUTO"/>
+                                            <textField id="commentPriority"
+                                                       dataContainer="openPositionDc"
+                                                       property="priorityComment"
+                                                       align="BOTTOM_LEFT"
+                                                       width="100%"/>
                                         </hbox>
                                     </hbox>
                                 </groupBox>

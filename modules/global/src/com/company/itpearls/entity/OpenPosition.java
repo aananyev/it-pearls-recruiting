@@ -132,6 +132,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "PRIORITY")
     protected Integer priority;
 
+    @Column(name = "PRIORITY_COMMENT")
+    private String priorityComment;
+
     @Composition
     @OnDelete(DeletePolicy.DENY)
     @OneToMany(mappedBy = "openPosition")
@@ -193,6 +196,14 @@ public class OpenPosition extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
     private User owner;
+
+    public String getPriorityComment() {
+        return priorityComment;
+    }
+
+    public void setPriorityComment(String priorityComment) {
+        this.priorityComment = priorityComment;
+    }
 
     public String getSalaryComment() {
         return salaryComment;

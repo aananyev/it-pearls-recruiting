@@ -31,7 +31,9 @@
                         <property name="projectDepartment"
                                   view="_local">
                             <property name="companyName"
-                                      view="_local"/>
+                                      view="_local">
+                                <property name="fileCompanyLogo" view="_local"/>
+                            </property>
                         </property>
                     </property>
                     <property name="cities"

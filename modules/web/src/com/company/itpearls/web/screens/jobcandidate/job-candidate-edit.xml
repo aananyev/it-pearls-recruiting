@@ -414,7 +414,6 @@
                  caption="msg://candidate"
                  margin="true,true,true,true"
                  icon="BOMB"
-                 lazy="true"
                  spacing="true">
                 <hbox id="cardCandidateBox"
                       spacing="true"
@@ -555,7 +554,6 @@
                  margin="true,true,true,true"
                  expand="socialNetworkTableHbox"
                  icon="font-icon:USER"
-                 lazy="true"
                  spacing="true">
                 <hbox id="contactInfoGroupBox"
                       width="100%"
@@ -577,21 +575,26 @@
                                                dataContainer="jobCandidateDc"
                                                property="email"
                                                width="100%"
-                                               caption="msg://msgEmail" required="true"/>
+                                               caption="msg://msgEmail"
+                                               required="true"/>
                                     <textField id="telegramNameField"
                                                dataContainer="jobCandidateDc"
                                                property="telegramName"
-                                               width="100%" caption="msg://msgTelegramAccount"/>
+                                               required="true"
+                                               width="100%"
+                                               caption="msg://msgTelegramAccount"/>
                                 </row>
                                 <row>
                                     <textField id="phoneField"
                                                dataContainer="jobCandidateDc"
                                                property="phone"
                                                width="100%"
-                                               caption="msg://msgPhone" required="true"/>
+                                               caption="msg://msgPhone"
+                                               required="true"/>
                                     <textField id="telegramGroupField"
                                                dataContainer="jobCandidateDc"
                                                property="telegramGroup"
+                                               required="true"
                                                width="100%" caption="msg://msgTelegramGrouep"/>
                                 </row>
                                 <row>
@@ -599,10 +602,12 @@
                                                dataContainer="jobCandidateDc"
                                                property="mobilePhone"
                                                width="100%"
-                                               caption="msg://msgMobilePhone" required="true"/>
+                                               caption="msg://msgMobilePhone"
+                                               required="true"/>
                                     <textField id="wiberNameField"
                                                dataContainer="jobCandidateDc"
                                                property="wiberName"
+                                               required="true"
                                                width="100%"
                                                caption="msg://msgViberAccount"/>
                                 </row>
@@ -611,11 +616,13 @@
                                                dataContainer="jobCandidateDc"
                                                property="skypeName"
                                                width="100%"
-                                               caption="msg://msgSkypeAccaunt" required="true"/>
+                                               caption="msg://msgSkypeAccaunt"
+                                               required="true"/>
                                     <textField id="whatsupNameField"
                                                dataContainer="jobCandidateDc"
                                                property="whatsupName"
                                                width="100%"
+                                               required="true"
                                                caption="msg://msgWhatsAppAccount"/>
                                 </row>
                             </rows>
@@ -651,13 +658,15 @@
                             <column id="networkName"
                                     editable="false"
                                     property="socialNetworkURL.socialNetwork"
-                                    maximumWidth="300px"/>
+                                    maximumWidth="200px"/>
                             <column id="networkURLS"
                                     editable="true"
+                                    maximumWidth="300px"
                                     property="networkURLS"/>
                             <column id="linkToWeb"
                                     caption="msg://msgLinkURL"
                                     maximumWidth="150px">
+                                <componentRenderer/>
                             </column> <!-- <componentRenderer/> -->
                         </columns>
                     </dataGrid>
@@ -706,7 +715,6 @@
                  margin="true,true,true,true"
                  expand="jobCandidateIteractionListTable"
                  icon="LIST"
-                 lazy="true"
                  spacing="true">
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionDc"
@@ -778,7 +786,6 @@
                  margin="true,true,true,true"
                  icon="font-icon:FILE_TEXT"
                  expand="tabResumeVbox"
-                 lazy="true"
                  spacing="true">
                 <vbox id="tabResumeVbox"
                       spacing="true"

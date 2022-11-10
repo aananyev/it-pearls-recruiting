@@ -464,6 +464,7 @@ create table ITPEARLS_OPEN_POSITION (
     EXERCISE text,
     NEED_EXERCISE boolean,
     PRIORITY integer,
+    PRIORITY_COMMENT varchar(255),
     PAYMENTS_TYPE integer,
     TYPE_COMPANY_COMISSION integer,
     TYPE_SALARY_OF_RESEARCHER integer,

@@ -2105,6 +2105,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
         }
 
+        if (openPosition.getPriorityComment() != null)
+            retStr += "\n\nКомментарий: " + openPosition.getPriorityComment();
+
         return retStr;
     }
 
