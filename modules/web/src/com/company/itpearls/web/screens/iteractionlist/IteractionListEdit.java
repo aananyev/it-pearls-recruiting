@@ -16,7 +16,6 @@ import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;

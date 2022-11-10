@@ -242,7 +242,11 @@
         <property name="recrutier" view="_minimal"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
-        <property name="projectName" view="_minimal"/>
+        <property name="projectName" view="_local">
+            <property name="projectDepartment" view="_local">
+                <property name="companyName" view="_local"/>
+            </property>
+        </property>
         <property name="candidates" view="_local">
             <property name="reacrutier" view="_minimal"/>
             <property name="openPosition" view="_minimal"/>
@@ -343,8 +347,8 @@
     <view entity="itpearls_FileType" name="fileType-view" extends="_local"/>
     <view entity="itpearls_SocialNetworkType" name="socialNetworkType-view" extends="_local"/>
     <view entity="itpearls_SubscribeCandidateAction" name="subscribeCandidateAction-view" extends="_local">
-        <property name="candidate" view="_minimal"/>
-        <property name="subscriber" view="_minimal"/>
+        <property name="candidate" view="_local"/>
+        <property name="subscriber" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view-iteraction-list" extends="_minimal">
         <property name="candidateCv" view="_local"/>
@@ -395,7 +399,13 @@
         <property name="toEmail" view="_minimal"/>
     </view>
     <view entity="itpearls_OpenPositionNews" name="openPositionNews-view" extends="_local">
-        <property name="openPosition" view="_minimal"/>
+        <property name="openPosition" view="_minimal">
+            <property name="projectName" view="_local">
+                <property name="projectDepartment" view="_local">
+                    <property name="companyName" view="_local"/>
+                </property>
+            </property>
+        </property>
         <property name="candidates" view="_minimal"/>
         <property name="author" view="_minimal"/>
     </view>

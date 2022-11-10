@@ -67,6 +67,8 @@
                           view="_local">
                     <property name="owner"
                               view="_local"/>
+                    <property name="projectName"
+                              view="_local"/>
                 </property>
                 <property name="company"
                           view="_local"/>
@@ -332,6 +334,8 @@
                                         select e
                                         from itpearls_JobCandidate e
                                         where lower(e.fullName) like lower(:searchString) escape '\'
+                                        and e.middleName not like '(не использовать)'
+                                        and e.blockCandidate is not true
                                         order by e.fullName
                                     </query>
                                 </suggestionPickerField>

@@ -9,6 +9,8 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
@@ -248,5 +250,43 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         IteractionListSimpleBrowse iteractionListSimpleBrowse = screens.create(IteractionListSimpleBrowse.class);
         iteractionListSimpleBrowse.setSelectedCandidate(iteractionListsTable.getSingleSelected().getCandidate());
         screens.show(iteractionListSimpleBrowse);
+    }
+
+    @Install(to = "iteractionListsTable.currentOpenCloseColumn", subject = "columnGenerator")
+    private Icons.Icon iteractionListsTableCurrentOpenCloseColumnColumnGenerator(
+            DataGrid.ColumnGeneratorEvent<IteractionList> columnGeneratorEvent) {
+
+        if (columnGeneratorEvent.getItem().getCurrentOpenClose() != null) {
+            return columnGeneratorEvent.getItem().getCurrentOpenClose()
+                    ? CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+        } else {
+            return columnGeneratorEvent.getItem().getVacancy().getOpenClose() ?
+                    CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+        }
+    }
+
+    @Install(to = "iteractionListsTable.currentOpenCloseColumn", subject = "styleProvider")
+    private String iteractionListsTableCurrentOpenCloseColumnStyleProvider(
+            IteractionList iteractionList) {
+
+        if (iteractionList.getCurrentOpenClose() != null) {
+            return iteractionList.getCurrentOpenClose()
+                    ? "pic-center-large-red" : "pic-center-large-green";
+        } else {
+            return iteractionList.getVacancy().getOpenClose() ?
+                    "pic-center-large-red" : "pic-center-large-green";
+        }
+    }
+
+    @Install(to = "iteractionListsTable.currentOpenCloseColumn", subject = "descriptionProvider")
+    private String iteractionListsTableCurrentOpenCloseColumnDescriptionProvider(IteractionList iteractionList) {
+
+        if (iteractionList.getCurrentOpenClose() != null) {
+            return iteractionList.getCurrentOpenClose()
+                    ? "Закрыта на момент создания взаимодействия" : "Открыта на момент создания взаимодействия";
+        } else {
+            return iteractionList.getVacancy().getOpenClose() ?
+                    "Закрыта на текущий момент" : "Открыта на текущий момент";
+        }
     }
 }

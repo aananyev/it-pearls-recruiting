@@ -26,6 +26,7 @@ import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -198,10 +199,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CheckBox blockCandidateCheckBox;
     @Inject
     private CollectionPropertyContainer<IteractionList> jobCandidateIteractionDc;
-    @Inject
-    private RadioButtonGroup<Integer> workStatusRadioButton;
-    @Inject
-    private VBoxLayout outstaffingMainVBox;
     @Inject
     private InstanceLoader<JobCandidate> jobCandidateDl;
     @Inject
@@ -660,11 +657,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         // проверить в названии должности (не использовать)
 //        priorityCommenicationMethodRadioButtonInit();
-        workStatusRadioButtonInit();
+/*        workStatusRadioButtonInit();
 
         if (blockCandidateCheckBox.getValue() == null) {
             blockCandidateCheckBox.setValue(false);
-        }
+        } */
 
         setSocialNetworkTable();
         enableDisableContacts();
@@ -687,7 +684,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             blockCandidateButton.setVisible(false);
         }
 
-        setLaborAgreement();
+//        setLaborAgreement();
         setLastProjectTable();
     }
 
@@ -704,7 +701,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
     }
 
-    private void workStatusRadioButtonInit() {
+/*    private void workStatusRadioButtonInit() {
         Map<String, Integer> workStatusMap = new LinkedHashMap<>();
 
         workStatusMap.put("Неопределен", 0);
@@ -717,7 +714,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         workStatusRadioButton.setOptionsMap(workStatusMap);
 
         lastIteractionCount = 1;
-    }
+    } */
 
     private void priorityCommenicationMethodRadioButtonInit() {
         Map<String, Integer> priorityMap = new LinkedHashMap<>();
@@ -1703,14 +1700,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    private void setLaborAgreement() {
+/*    private void setLaborAgreement() {
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.OUSTAFF_NAMAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
             outstaffingMainVBox.setVisible(true);
         } else {
             outstaffingMainVBox.setVisible(false);
         }
-    }
+    } */
 
     private void setLastProjectTable() {
         lastProjectDl.setParameter("candidate", getEditedEntity());
@@ -2619,5 +2616,44 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }));
 
         return retButton;
+    }
+
+
+    @Install(to = "jobCandidateIteractionListTable.currentOpenCloseColumn", subject = "columnGenerator")
+    private Icons.Icon jobCandidateIteractionListTableCurrentOpenCloseColumnColumnGenerator(
+            DataGrid.ColumnGeneratorEvent<IteractionList> columnGeneratorEvent) {
+
+        if (columnGeneratorEvent.getItem().getCurrentOpenClose() != null) {
+            return columnGeneratorEvent.getItem().getCurrentOpenClose()
+                    ? CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+        } else {
+            return columnGeneratorEvent.getItem().getVacancy().getOpenClose() ?
+                    CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+        }
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.currentOpenCloseColumn", subject = "styleProvider")
+    private String jobCandidateIteractionListTableCurrentOpenCloseColumnStyleProvider(
+            IteractionList iteractionList) {
+
+        if (iteractionList.getCurrentOpenClose() != null) {
+            return iteractionList.getCurrentOpenClose()
+                    ? "pic-center-large-red" : "pic-center-large-green";
+        } else {
+            return iteractionList.getVacancy().getOpenClose() ?
+                    "pic-center-large-red" : "pic-center-large-green";
+        }
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.currentOpenCloseColumn", subject = "descriptionProvider")
+    private String jobCandidateIteractionListTableCurrentOpenCloseColumnDescriptionProvider(IteractionList iteractionList) {
+
+        if (iteractionList.getCurrentOpenClose() != null) {
+            return iteractionList.getCurrentOpenClose()
+                    ? "Закрыта на момент создания взаимодействия" : "Открыта на момент создания взаимодействия";
+        } else {
+            return iteractionList.getVacancy().getOpenClose() ?
+                    "Закрыта на текущий момент" : "Открыта на текущий момент";
+        }
     }
 }

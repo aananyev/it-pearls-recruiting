@@ -104,6 +104,11 @@
                         property="vacancy"
                         caption="mainMsg://msgVacancy"
                         width="250px"/>
+                <column id="currentOpenCloseColumn"
+                        caption="mainMsg://msgCurrentOpenClose"
+                        maximumWidth="85px">
+                    <iconRenderer/>
+                </column>
                 <column id="recrutier"
                         property="recrutier"
                         caption="msg://msgRecrutier"/>

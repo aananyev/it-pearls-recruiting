@@ -153,7 +153,9 @@
                                            searchStringFormat="%$searchString%">
                                         select e
                                         from itpearls_JobCandidate e
-                                        where lower(e.fullName) like lower(:searchString) escape '\'
+                                        where lower(e.fullName) like lower(:searchString) escape '\' and
+                                        and e.middleName not like '(не использовать)'
+                                        and e.blockCandidate is not true
                                         order by e.fullName
                                     </query>
                                 </suggestionPickerField>

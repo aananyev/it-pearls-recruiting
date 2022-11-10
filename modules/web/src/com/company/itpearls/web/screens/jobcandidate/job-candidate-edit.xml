@@ -109,20 +109,6 @@
                 </query>
             </loader>
         </collection>
-        <!--        <collection id="socialNetworkURLsesDc"
-                            class="com.company.itpearls.entity.SocialNetworkURLs">
-                    <view extends="socialNetworkURLs-view"/>
-                    <loader id="socialNetworkURLsesDl" cacheable="true">
-                        <query>
-                            <![CDATA[select e from itpearls_SocialNetworkURLs e order by e.networkName]]>
-                            <condition>
-                                <c:jpql>
-                                    <c:where>e.jobCandidate = :candidate</c:where>
-                                </c:jpql>
-                            </condition>
-                        </query>
-                    </loader>
-                </collection> -->
     </data>
     <dialogMode height="750"
                 width="1200"/>
@@ -235,7 +221,6 @@
                           width="100%"
                           expand="cardTextBox">
                         <groupBox id="cardTextBox"
-                                  width="AUTO"
                                   spacing="true"
                                   stylename="light"
                                   collapsable="false"
@@ -344,7 +329,6 @@
                                    property="fileImageFace"
                                    width="100%"
                                    align="TOP_RIGHT"
-                                   height="100%"
                                    stylename="widget-border"
                                    scaleMode="FILL"/>
                             <upload id="fileImageFaceUpload"
@@ -371,11 +355,9 @@
                               collapsable="true"
                               width="100%"
                               stylename="light"
-                              expand="lastProjectTable"
-                              height="100%">
+                              expand="lastProjectTable">
                         <table id="lastProjectTable"
                                width="100%"
-                               height="100%"
                                dataContainer="lastProjectDc">
                             <columns>
                                 <column id="number"
@@ -421,8 +403,7 @@
                       expand="tabCabdidateGrid">
                     <grid id="tabCabdidateGrid"
                           height="100%"
-                          spacing="true"
-                          width="100%">
+                          spacing="true">
                         <columns count="2"/>
                         <rows>
                             <row>
@@ -482,7 +463,6 @@
                                                        optionsContainer="personPositionsDc"
                                                        dataContainer="jobCandidateDc"
                                                        property="personPosition"
-                                                       width="100%"
                                                        align="BOTTOM_RIGHT"
                                                        caption="msg://msgPersonPosition"
                                                        required="true">
@@ -507,7 +487,6 @@
                                       expand="positionsLabel">
                                     <label id="positionsLabel"
                                            stylename="h4"
-                                           width="AUTO"
                                            align="TOP_RIGHT"/>
                                 </hbox>
                             </row>
@@ -639,8 +618,7 @@
                                           width="100%"
                                           required="true"
                                           dataContainer="jobCandidateDc"
-                                          property="priorityContact"
-                                          height="100%"/>
+                                          property="priorityContact"/>
                     </vbox>
                 </hbox>
                 <hbox id="socialNetworkTableHbox"
@@ -651,7 +629,6 @@
                       expand="socialNetworkTable">
                     <dataGrid id="socialNetworkTable"
                               height="100%"
-                              width="100%"
                               editorEnabled="true"
                               dataContainer="jobCandidateSocialNetworksDc">
                         <columns>
@@ -672,6 +649,7 @@
                     </dataGrid>
                 </hbox>
             </tab>
+            <!--
             <tab id="tabOutstaffing"
                  caption="msg://msgOutstaffing"
                  margin="true,true,true,true"
@@ -710,6 +688,7 @@
                     </dataGrid>
                 </vbox>
             </tab>
+            -->
             <tab id="tabIteraction"
                  caption="msg://candidateIteration"
                  margin="true,true,true,true"
@@ -760,6 +739,11 @@
                         <column id="vacancy"
                                 maximumWidth="300px"
                                 property="vacancy"/>
+                        <column id="currentOpenCloseColumn"
+                                caption="mainMsg://msgCurrentOpenClose"
+                                maximumWidth="85px">
+                            <iconRenderer/>
+                        </column>
                         <column id="iteractionType"
                                 maximumWidth="250px"
                                 property="iteractionType"/>
