@@ -82,6 +82,27 @@
                           name="max"/>
             </properties>
         </keyValueCollection>
+        <collection id="suggestOpenPositionDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local"/>
+            <loader id="suggestOpenPositionDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                    where e.openClose = false or e.openClose is null
+                    order by e.vacansyName]]>
+                    <condition>
+                        <or>
+                            <c:jpql>
+                                <c:where>e.positionType = :positionType</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.positionType in :positionTypes</c:where>
+                            </c:jpql>
+                        </or>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="personPositionsDc"
                     class="com.company.itpearls.entity.Position">
             <view extends="position-view">
@@ -355,40 +376,72 @@
                               collapsable="true"
                               width="100%"
                               stylename="light"
-                              expand="lastProjectTable">
-                        <table id="lastProjectTable"
-                               width="100%"
-                               dataContainer="lastProjectDc">
-                            <columns>
-                                <column id="number"
-                                        width="30px"
-                                        caption="№"
-                                        generator="lastIteractionCount"/>
-                                <column id="vacancy"
-                                        width="600px"
-                                        caption="msg://msgVacancy"/>
-                                <column id="max"
-                                        width="100px"
-                                        caption="msg://msgDate"/>
-                                <column id="lastInteraction"
-                                        width="250px"
-                                        caption="msg://msgLastInteraction"
-                                        generator="lastInteractionGeneratorColumn"/>
-                                <column id="researcher"
-                                        width="150px"
-                                        caption="msg://msgResearcher"
-                                        generator="whoIsResearcherGeneratorColumn"/>
-                                <column id="recruter"
-                                        width="150px"
-                                        caption="msg://msgRecruter"
-                                        generator="whoIsRecruterGeneratorColumn"/>
-                                <column id="idViewIteractionsButton"
-                                        width="100px"
-                                        caption="msg://msgInteractionsView"
-                                        generator="addInteractionsViewButton"/>
-                            </columns>
-                            <rowsCount/>
-                        </table>
+                              expand="dictionatysTavlesHBox">
+                        <grid id="dictionatysTavlesHBox"
+                              spacing="true"
+                              width="100%"
+                              height="100%">
+                            <columns count="6"/>
+                            <rows>
+                                <row>
+                                    <table id="lastProjectTable"
+                                           width="100%"
+                                           height="100%"
+                                           stylename="no-horizontal-lines"
+                                           editable="false"
+                                           contextMenuEnabled="false"
+                                           colspan="4"
+                                           dataContainer="lastProjectDc">
+                                        <columns>
+                                            <column id="number"
+                                                    width="30px"
+                                                    caption="№"
+                                                    generator="lastIteractionCount"/>
+                                            <column id="vacancy"
+                                                    width="300px"
+                                                    maxTextLength="40"
+                                                    caption="msg://msgVacancy"/>
+                                            <column id="max"
+                                                    width="70px"
+                                                    caption="msg://msgDate"/>
+                                            <column id="lastInteraction"
+                                                    width="200px"
+                                                    maxTextLength="40"
+                                                    caption="msg://msgLastInteraction"
+                                                    generator="lastInteractionGeneratorColumn"/>
+                                            <column id="researcher"
+                                                    width="100px"
+                                                    caption="msg://msgResearcher"
+                                                    generator="whoIsResearcherGeneratorColumn"/>
+                                            <column id="recruter"
+                                                    width="100px"
+                                                    caption="msg://msgRecruter"
+                                                    generator="whoIsRecruterGeneratorColumn"/>
+                                            <column id="idViewIteractionsButton"
+                                                    width="100px"
+                                                    caption="msg://msgInteractionsView"
+                                                    generator="addInteractionsViewButton"/>
+                                        </columns>
+                                    </table>
+                                    <table id="suggestVacancyTable"
+                                           contextMenuEnabled="false"
+                                           width="100%"
+                                           colspan="2"
+                                           height="100%"
+                                           editable="false"
+                                           stylename="no-horizontal-lines"
+                                           dataContainer="suggestOpenPositionDc">
+                                        <columns>
+                                            <column id="vacansyName"
+                                                    captionAsHtml="true"
+                                                    maxTextLength="60"
+                                                    caption="msg://msgSuggestVacansies"/>
+                                        </columns>
+                                        <rows/>
+                                    </table>
+                                </row>
+                            </rows>
+                        </grid>
                     </groupBox>
                 </vbox>
             </tab>

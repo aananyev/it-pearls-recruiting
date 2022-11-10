@@ -20,8 +20,6 @@ public class ItpearlsTestContainer extends TestContainer {
                 "de.diedavids.cuba.dataimport",
                 "com.haulmont.addon.dashboard",
                 "com.haulmont.addon.helium",
-                "com.haulmont.fts",
-                "com.haulmont.bpm",
                 "com.haulmont.reports",
                 "com.haulmont.charts");
         appPropertiesFiles = Arrays.asList(

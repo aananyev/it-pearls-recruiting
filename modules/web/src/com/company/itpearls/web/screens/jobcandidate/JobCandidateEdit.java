@@ -226,6 +226,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private KeyValueCollectionContainer lastProjectDc;
     private boolean initSocialNetworkURLs = false;
+    @Inject
+    private CollectionLoader<OpenPosition> suggestOpenPositionDl;
+    @Inject
+    private Table<OpenPosition> suggestVacancyTable;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -675,6 +679,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLinkButtonTelegremGroup();
         setLinkButtonSkype();
 
+        setSuggestOpenPositionTable();
+        setLastProjectOfCandidate();
+
         lastIteraction = getLastIteraction();
 
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
@@ -686,6 +693,30 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 //        setLaborAgreement();
         setLastProjectTable();
+    }
+
+    private void setSuggestOpenPositionTable() {
+        List<Position> positions = new ArrayList<>();
+
+        for (JobCandidatePositionLists positionLists : getEditedEntity().getPositionList()) {
+            positions.add(positionLists.getPositionList());
+        }
+
+        suggestOpenPositionDl.setParameter("positionType", getEditedEntity().getPersonPosition());
+        if (positions.size() > 0) {
+            suggestOpenPositionDl.setParameter("positionTypes", positions);
+        }
+        suggestOpenPositionDl.load();
+
+        suggestVacancyTable.addStyleName("borderless");
+        suggestVacancyTable.addStyleName("no-horizontal-lines");
+        suggestVacancyTable.addStyleName("no-vertical-lines");
+    }
+
+    private void setLastProjectOfCandidate() {
+        lastProjectTable.addStyleName("borderless");
+        lastProjectTable.addStyleName("no-horizontal-lines");
+        lastProjectTable.addStyleName("no-vertical-lines");
     }
 
     private void checkContactsCandidateListener() {
@@ -2655,5 +2686,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return iteractionList.getVacancy().getOpenClose() ?
                     "Закрыта на текущий момент" : "Открыта на текущий момент";
         }
+    }
+
+    @Install(to = "suggestVacancyTable", subject = "itemDescriptionProvider")
+    private String suggestVacancyTableItemDescriptionProvider(OpenPosition openPosition, String string) {
+        String retStr = "<b>Вакансия:</b><br><br>";
+
+        retStr += "<i>" + openPosition.getVacansyName() + "</i><br>"
+                + "<i>Проект: </i>" + openPosition.getProjectName().getProjectName()
+                + "<br><i>Ответственный за проект у заказчика:</i>"
+                + openPosition.getProjectName().getProjectOwner().getSecondName()
+                + openPosition.getProjectName().getProjectOwner().getSecondName()
+                + "<br><i>Ответственный за проект на нашей стороне: </i>"
+                + openPosition.getOwner().getName()
+                + "<br><i>Дата открытия вакансии: "
+                + openPosition.getLastOpenDate()
+                + "<br><br><i>Описание вакансии: </i><br>" + openPosition.getComment();
+
+        return retStr;
     }
 }

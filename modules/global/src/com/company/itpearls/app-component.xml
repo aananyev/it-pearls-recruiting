@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <app-component xmlns="http://schemas.haulmont.com/cuba/app-component.xsd"
-               dependsOn="com.haulmont.addon.emailtemplates, com.haulmont.addon.globalevents, com.haulmont.reports, com.haulmont.charts, com.haulmont.cuba, com.haulmont.addon.dashboard, com.haulmont.fts, com.haulmont.addon.helium, de.diedavids.cuba.dataimport, com.haulmont.bpm">
+               dependsOn="com.haulmont.addon.emailtemplates, com.haulmont.addon.globalevents, com.haulmont.reports, com.haulmont.charts, com.haulmont.cuba, com.haulmont.addon.dashboard, com.haulmont.addon.helium, de.diedavids.cuba.dataimport">
 
     <module name="global" blocks="*">
         <artifact name="app-global" appJar="true"/>
