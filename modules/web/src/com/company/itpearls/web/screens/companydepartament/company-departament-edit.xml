@@ -9,25 +9,39 @@
             <view extends="_local">
                 <property name="projectOfDepartment" view="_local"/>
                 <property name="companyName" view="_local"/>
-                <property name="departamentDirector" view="_local"/>
-                <property name="departamentHrDirector" view="_local"/>
+                <property name="departamentDirector" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
+                <property name="departamentHrDirector" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
             </view>
             <loader/>
             <collection id="companyDepartamentProjectOfDepartmentsDc" property="projectOfDepartment"/>
         </instance>
-        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_minimal">
+        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_local">
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
                 where e.comanyName not like '%(не использовать)'
                 order by e.comanyName]]></query>
             </loader>
         </collection>
-        <collection id="departamentHrDirectorsDc" class="com.company.itpearls.entity.Person" view="_minimal">
+        <collection id="departamentHrDirectorsDc"
+                    class="com.company.itpearls.entity.Person">
+            <view extends="_local">
+                <property name="personPosition"
+                          view="_local"/>
+            </view>
             <loader id="departamentHrDirectorsLc">
                 <query><![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
-        <collection id="departamentDirectorsDc" class="com.company.itpearls.entity.Person" view="_minimal">
+        <collection id="departamentDirectorsDc"
+                    class="com.company.itpearls.entity.Person">
+            <view extends="_local">
+                <property name="personPosition"
+                          view="_local"/>
+            </view>
             <loader id="departamentDirectorsLc">
                 <query><![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]></query>
             </loader>

@@ -85,7 +85,8 @@
         <collection id="suggestOpenPositionDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local"/>
-            <loader id="suggestOpenPositionDl">
+            <loader id="suggestOpenPositionDl"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                     where e.openClose = false or e.openClose is null
@@ -432,6 +433,9 @@
                                            stylename="no-horizontal-lines"
                                            dataContainer="suggestOpenPositionDc">
                                         <columns>
+                                            <column id="notSendedIconColumn"
+                                                    caption="msg://msgStatus"
+                                                    width="20px"/>
                                             <column id="vacansyName"
                                                     captionAsHtml="true"
                                                     maxTextLength="60"

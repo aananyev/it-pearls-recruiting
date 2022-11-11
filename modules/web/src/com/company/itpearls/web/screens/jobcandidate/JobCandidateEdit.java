@@ -2705,4 +2705,48 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         return retStr;
     }
+
+    @Install(to = "suggestVacancyTable.notSendedIconColumn", subject = "columnGenerator")
+    private Component suggestVacancyTableNotSendedIconColumnColumnGenerator(OpenPosition openPosition) {
+        String retStr = "font-icon:CHECK";
+        String retStyle = "h2-green";
+        String retDescriplion = "<b>Можно начинать процесс с кандидатом.</b><br> Кандидату не предлагали эту вакансию.";
+
+        Label retIcon = uiComponents.create(Label.class);
+
+        for (IteractionList list : jobCandidateIteractionDc.getItems()) {
+            if (openPosition.equals(list.getVacancy())) {
+                if (list.getIteractionType() != null) {
+                    if (list.getIteractionType().getSignSendToClient() != null ?
+                            list.getIteractionType().getSignSendToClient() != null : false) {
+                        if (list.getIteractionType().getSignSendToClient()) {
+                            retStr = "font-icon:REFRESH";
+                            retStyle = "h2-blue";
+                            retDescriplion = "<b>Можно послать еще раз.</b><br> Резюме отправлено клиенту, но не было ответа";
+                            break;
+                        }
+                    }
+
+                    if (list.getIteractionType().getSignEndCase() != null ?
+                            list.getIteractionType().getSignEndCase() : false) {
+                        retStr = "font-icon:CLOSE";
+                        retStyle = "h2-red";
+                        retDescriplion = "<b>Слать резюме не рекомендуется.</b><br> Процесс с заказчиком закончен.";
+                        break;
+                    }
+
+                    retStr = "font-icon:QUESTION";
+                    retStyle = "h2-orange";
+                    retDescriplion = "<b>Можно выслать заказчику.</b><br> Процесс с кандидатом начат, но резюме не отослали.";
+                }
+            }
+        }
+
+        retIcon.setIcon(retStr);
+        retIcon.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retIcon.setStyleName(retStyle);
+        retIcon.setDescriptionAsHtml(true);
+        retIcon.setDescription(retDescriplion);
+        return retIcon;
+    }
 }
