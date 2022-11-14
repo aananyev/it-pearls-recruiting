@@ -1353,12 +1353,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                 if ((int) notLowerRatingLookupField.getValue() >= 0) {
                                     if (op1.getPriority() >= (int) notLowerRatingLookupField.getValue() &&
                                             !op1.getOpenClose()) {
-                                        countOp = countOp + op1.getNumberPosition();
+                                        if (op1.getNumberPosition() != null) {
+                                            countOp += op1.getNumberPosition();
+                                        }
                                     }
                                 }
                             } else if (!op1.getOpenClose()) {
                                 if (op1.getNumberPosition() != null) {
-                                    countOp = countOp + op1.getNumberPosition();
+                                    if (op1.getNumberPosition() != null) {
+                                        countOp += op1.getNumberPosition();
+                                    }
                                 }
                             }
                         }

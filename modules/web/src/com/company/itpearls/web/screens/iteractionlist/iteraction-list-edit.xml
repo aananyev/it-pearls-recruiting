@@ -154,7 +154,7 @@
             <loader id="usersDl"
                     cacheable="true">
                 <query>
-                    <![CDATA[select e from sec$User e order by e.name]]>
+                    <![CDATA[select e from sec$User e order by e.active, e.name]]>
                 </query>
             </loader>
         </collection>

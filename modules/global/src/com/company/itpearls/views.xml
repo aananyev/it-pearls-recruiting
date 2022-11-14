@@ -20,12 +20,11 @@
                 </property>
             </property>
         </property>
-        <property name="departamentHrDirector" view="_minimal"/>
-        <property name="departamentDirector" view="_minimal"/>
+        <property name="departamentHrDirector" view="_local"/>
+        <property name="departamentDirector" view="_local"/>
         <property name="projectOfDepartment" view="_local">
-            <property name="projectDepartment" view="_minimal"/>
+            <property name="projectDepartment" view="_local"/>
         </property>
-        <property name="templateLetter"/>
     </view>
     <view entity="itpearls_Project" name="project-view" extends="_local">
         <property name="projectDepartment" view="_minimal">
@@ -61,7 +60,7 @@
             </property>
         </property>
     </view>
-    <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_minimal">
+    <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" view="_local"/>
         <property name="cityOfResidence" view="_minimal"/>
         <property name="iteractionList" view="_minimal">
@@ -69,14 +68,13 @@
             <property name="addDate"/>
             <property name="addString"/>
         </property>
-        <property name="fullName"/>
-        <property name="positionList" view="_minimal">
-        </property>
+        <property name="positionList" view="_minimal"/>
+        <property name="personPosition" view="_local"/>
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true"
           overwrite="true">
-        <property name="laborAgreement" view="_minimal"/>
-        <property name="socialNetwork" view="_minimal"/>
+        <property name="laborAgreement" view="_local"/>
+        <property name="socialNetwork" view="_local"/>
         <property name="candidateCv" view="_local">
             <property name="candidate" view="_minimal"/>
             <property name="resumePosition" view="_minimal"/>
@@ -86,19 +84,21 @@
             <property name="someFiles" view="_minimal"/>
             <property name="fileImageFace" view="_minimal"/>
         </property>
-        <property name="skillTree" view="_minimal"/>
-        <property name="fileImageFace" view="_minimal"/>
-        <property name="personPosition" view="_minimal"/>
-        <property name="positionList" view="_minimal">
-            <property name="positionList" view="_minimal"/>
+        <property name="skillTree" view="_local"/>
+        <property name="fileImageFace" view="_local"/>
+        <property name="personPosition" view="_local"/>
+        <property name="positionList" view="_local">
+            <property name="positionList" view="_local"/>
         </property>
-        <property name="currentCompany" view="_minimal"/>
-        <property name="cityOfResidence" view="_minimal"/>
+        <property name="currentCompany" view="_local"/>
+        <property name="cityOfResidence" view="_local"/>
         <property name="iteractionList" view="_local">
             <property name="vacancy" view="_local">
                 <property name="owner" view="_local"/>
             </property>
-            <property name="candidate" view="_local"/>
+            <property name="candidate" view="_local">
+                <property name="personPosition" view="_local"/>
+            </property>
         </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
@@ -196,50 +196,28 @@
             <property name="positionType" view="_local"/>
             <property name="projectName" view="_local"/>
         </property>
-        <property name="iteractionType" view="_minimal">
-            <property name="pic"/>
-            <property name="addCaption"/>
-            <property name="addType"/>
-            <property name="addFlag"/>
-            <property name="callButtonText"/>
-            <property name="callForm"/>
-            <property name="setDateTime"/>
-            <property name="calendarItem"/>
-            <property name="calendarItemStyle"/>
-            <property name="calendarItemDescription"/>
-            <property name="notificationPeriodType"/>
-            <property name="notificationBeforeAfterDay"/>
-            <property name="notificationWhenSend"/>
-            <property name="notificationType"/>
-            <property name="notificationNeedSend"/>
-            <property name="signOurInterview"/>
-            <property name="signClientInterview"/>
-            <property name="signSendToClient"/>
-            <property name="outstaffingSign"/>
-            <property name="addField"/>
+        <property name="iteractionType" view="_local">
         </property>
-        <property name="recrutier" view="_minimal">
-            <property name="group" view="_minimal"/>
+        <property name="recrutier" view="_local">
         </property>
         <property name="laborAgreement" view="_minimal">
             <property name="company" view="_minimal"/>
             <property name="openPositions" view="_minimal"/>
         </property>
-        <property name="candidate" view="_minimal">
-            <property name="fullName"/>
+        <property name="candidate" view="_local">
+            <property name="personPosition" view="_local"/>
         </property>
-        <property name="chainInteraction" view="_minimal"/>
+        <property name="chainInteraction" view="_local"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">
         <property name="candidate" view="_local">
-            <property name="personPosition" view="position-view"/>
+            <property name="personPosition" view="_local"/>
         </property>
-        <property name="vacancy" view="_minimal">
-            <property name="openClose"/>
+        <property name="vacancy" view="_local">
         </property>
         <property name="iteractionType" view="_local"/>
-        <property name="recrutier" view="_minimal"/>
+        <property name="recrutier" view="_local"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
         <property name="projectName" view="_local">
@@ -257,19 +235,16 @@
     <view entity="itpearls_Setup" name="setup-view" extends="_local"/>
     <view entity="itpearls_IteractionList" name="iteractionList-job-candidate" extends="_local">
         <property name="candidate" view="_local">
-            <property name="fullName"/>
             <property name="personPosition" view="_local"/>
         </property>
         <property name="vacancy" view="_local">
             <property name="positionType" view="_local"/>
         </property>
-        <property name="iteractionType" view="iteraction-view"/>
+        <property name="iteractionType" view="_local"/>
         <property name="recrutier" view="_minimal">
             <property name="group" view="_minimal">
-                <property name="name"/>
             </property>
         </property>
-        <property name="dateIteraction"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_base">
         <property name="iteractionTree" view="_minimal">
@@ -369,7 +344,6 @@
     <view entity="itpearls_ItearctionRequirements" name="itearctionRequirements-view" extends="_local">
         <property name="iteraction" view="_local"/>
         <property name="iteractionRequirement" view="_local"/>
-        <property name="requirement"/>
     </view>
     <view entity="sec$User" name="user-view" extends="_local">
         <property name="group" view="_minimal"/>

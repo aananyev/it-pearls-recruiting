@@ -168,12 +168,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> wiberNameField;
     @Inject
     private DataGrid<SocialNetworkURLs> socialNetworkTable;
-    private static final String MANAGER_GROUP = "Менеджмент";
-    private static final String RECRUTIER_GROUP = "Хантинг";
-    private static final String RESEARCHER_GROUP = "Ресерчинг";
 
-    private String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
-    private String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
+    private static final String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
+    private static final String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
 
     List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
@@ -213,7 +210,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private HBoxLayout skillBox;
     @Inject
     private KeyValueCollectionLoader lastProjectDl;
-    private Integer lastIteractionCount = 1;
     @Inject
     private TabSheet tabSheetSocialNetworks;
     private boolean cvTabInitialized = false;
@@ -329,12 +325,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void setFrequentInteractionPopupButton() {
         if (frequentInteractionPopupButton != null) {
-            Integer MAX_POPULAR_INTERACLION = 5;
+            int MAX_POPULAR_INTERACLION = 5;
             List<Iteraction> mostPopularInteraction = interactionService.getMostPolularIteraction(
                     userSessionSource.getUserSession().getUser(), MAX_POPULAR_INTERACLION);
 
             if (mostPopularInteraction.size() != 0) {
-                Integer count = 1;
+                int count = 1;
                 for (Iteraction iteraction : mostPopularInteraction) {
                     frequentInteractionPopupButton.addAction(
                             new BaseAction("setMostPopularInteractionPopupButton" + "-" + count++)
@@ -698,19 +694,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void setSuggestOpenPositionTable() {
         List<Position> positions = new ArrayList<>();
 
-        for (JobCandidatePositionLists positionLists : getEditedEntity().getPositionList()) {
-            positions.add(positionLists.getPositionList());
-        }
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            if (getEditedEntity().getPositionList() != null) {
+                for (JobCandidatePositionLists positionLists : getEditedEntity().getPositionList()) {
+                    positions.add(positionLists.getPositionList());
+                }
 
-        suggestOpenPositionDl.setParameter("positionType", getEditedEntity().getPersonPosition());
-        if (positions.size() > 0) {
-            suggestOpenPositionDl.setParameter("positionTypes", positions);
-        }
-        suggestOpenPositionDl.load();
+                suggestOpenPositionDl.setParameter("positionType", getEditedEntity().getPersonPosition());
+                if (positions.size() > 0) {
+                    suggestOpenPositionDl.setParameter("positionTypes", positions);
+                }
+                suggestOpenPositionDl.load();
+            }
 
-        suggestVacancyTable.addStyleName("borderless");
-        suggestVacancyTable.addStyleName("no-horizontal-lines");
-        suggestVacancyTable.addStyleName("no-vertical-lines");
+            suggestVacancyTable.addStyleName("borderless");
+            suggestVacancyTable.addStyleName("no-horizontal-lines");
+            suggestVacancyTable.addStyleName("no-vertical-lines");
+        }
     }
 
     private void setLastProjectOfCandidate() {
@@ -1524,14 +1524,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private List<IteractionList> getIteractionListFromCandidate(JobCandidate editedEntity) {
-        String QUERY_GET_ITERCATION_LIST = "select e from itpearls_IteractionList e where e.candidate = :candidate";
+/*        String QUERY_GET_ITERCATION_LIST = "select e from itpearls_IteractionList e where e.candidate = :candidate";
 
         return dataManager.load(IteractionList.class)
                 .query(QUERY_GET_ITERCATION_LIST)
                 .parameter("candidate", editedEntity)
                 .cacheable(true)
                 .view("iteractionList-view")
-                .list();
+                .list(); */
+        return getEditedEntity().getIteractionList();
     }
 
     private void setCopyCVButton() {

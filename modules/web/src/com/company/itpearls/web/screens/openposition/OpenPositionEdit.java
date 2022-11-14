@@ -203,6 +203,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CheckBox signDraftCheckBox;
     @Inject
     private Label<String> signDraftLabel;
+    @Inject
+    private Metadata metadata;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -682,7 +684,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                                      Date date,
                                                      User user) {
 
-        OpenPositionNews openPositionNews = new OpenPositionNews();
+        OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
 
         openPositionNews.setOpenPosition(editedEntity);
         openPositionNews.setAuthor(user);

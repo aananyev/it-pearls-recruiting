@@ -380,8 +380,7 @@
                               expand="dictionatysTavlesHBox">
                         <grid id="dictionatysTavlesHBox"
                               spacing="true"
-                              width="100%"
-                              height="100%">
+                              width="100%">
                             <columns count="6"/>
                             <rows>
                                 <row>
@@ -686,6 +685,7 @@
                       expand="socialNetworkTable">
                     <dataGrid id="socialNetworkTable"
                               height="100%"
+                              width="100%"
                               editorEnabled="true"
                               dataContainer="jobCandidateSocialNetworksDc">
                         <columns>

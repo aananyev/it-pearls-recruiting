@@ -1540,4 +1540,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onVacancyFielsValueChange2(HasValue.ValueChangeEvent<OpenPosition> event) {
         outstaffingCostHBox.setVisible(event.getValue().getOutstaffingCost() != null);
     }
+
+    @Install(to = "recrutierField", subject = "optionIconProvider")
+    private String recrutierFieldOptionIconProvider(User user) {
+        return user.getActive() ? CubaIcon.PLUS_CIRCLE.source() : CubaIcon.MINUS_CIRCLE.source();
+    }
 }
