@@ -2750,4 +2750,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retIcon.setDescription(retDescriplion);
         return retIcon;
     }
+
+    @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "descriptionProvider")
+    private String jobCandidateCandidateCvTableToVacancyDescriptionProvider(CandidateCV candidateCV) {
+        return "" + candidateCV.getToVacancy().getVacansyName()
+                + (candidateCV.getToVacancy().getLastOpenDate() != null ? "\n"
+                + "\nОткрыта: \n" + candidateCV.getToVacancy().getLastOpenDate() : "");
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.resumePosition", subject = "descriptionProvider")
+    private String jobCandidateCandidateCvTableResumePositionDescriptionProvider(CandidateCV candidateCV) {
+        return candidateCV.getResumePosition().getPositionRuName()
+                + " / "
+                + candidateCV.getResumePosition().getPositionEnName();
+    }
 }

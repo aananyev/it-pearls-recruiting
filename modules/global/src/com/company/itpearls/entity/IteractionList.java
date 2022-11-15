@@ -26,8 +26,7 @@ public class IteractionList extends StandardEntity {
     protected BigDecimal numberIteraction;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ITERACTION_TYPE_ID")
     protected Iteraction iteractionType;
 

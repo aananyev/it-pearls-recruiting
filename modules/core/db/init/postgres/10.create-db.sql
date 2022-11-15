@@ -89,7 +89,7 @@ create table ITPEARLS_ITERACTION_LIST (
     DELETED_BY varchar(50),
     --
     NUMBER_ITERACTION decimal(19, 2),
-    ITERACTION_TYPE_ID uuid not null,
+    ITERACTION_TYPE_ID uuid,
     DATE_ITERACTION timestamp,
     CANDIDATE_ID uuid not null,
     VACANCY_ID uuid,

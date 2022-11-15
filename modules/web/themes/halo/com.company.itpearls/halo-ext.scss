@@ -680,6 +680,13 @@ rating_battery_yellow_3:before {
         padding: 5px;
 }
 
+.candidate-card-rotating {
+        font-size: medium;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        padding: 10px;
+}
+
 .pic-center {
     text-align: center;
     margin: 0 auto;

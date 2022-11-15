@@ -376,6 +376,7 @@
                                                    optionsContainer="iteractionTypesDc"
                                                    caption="msg://msgIteractionType"
                                                    width="100%"
+                                                   required="true"
                                                    dataContainer="iteractionListDc"
                                                    property="iteractionType"
                                                    colspan="1">

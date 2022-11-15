@@ -13,6 +13,11 @@
                     <property name="resumePosition" view="_local"/>
                     <property name="toVacancy" view="_local">
                         <property name="positionType" view="_local"/>
+                        <property name="projectName" view="_local">
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
+                        </property>
                     </property>
                     <property name="someFiles" view="_local">
                         <property name="fileOwner" view="_local"/>
@@ -838,6 +843,8 @@
                             enable="false"/>
                     <dataGrid id="jobCandidateCandidateCvTable"
                               width="100%"
+                              descriptionAsHtml="true"
+                              captionAsHtml="true"
                               dataContainer="jobCandidateCandidateCvsDc">
                         <columns>
                             <column id="datePost"

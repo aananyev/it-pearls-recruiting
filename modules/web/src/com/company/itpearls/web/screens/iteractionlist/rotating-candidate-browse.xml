@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://rotatingCandidateBrowse.caption"
+        focusComponent="labelndidatesScrollBox"
+        messagesPack="com.company.itpearls.web.screens.rotatingcandidates">
+    <data readOnly="true">
+        <collection id="iteractionListsDc"
+                    class="com.company.itpearls.entity.IteractionList">
+            <view extends="_local">
+                <property name="candidate" view="_local">
+                    <property name="candidateCv" view="_local"/>
+                    <property name="personPosition" view="_local"/>
+                    <property name="positionList" view="_local"/>
+                    <property name="fileImageFace" view="_base"/>
+                    <property name="iteractionList" view="_local">
+                        <property name="vacancy" view="_local"/>
+                        <property name="iteractionType" view="_local"/>
+                    </property>
+                </property>
+                <property name="iteractionType" view="_local"/>
+                <property name="recrutier" view="_local"/>
+                <property name="vacancy" view="_local">
+                    <property name="projectName" view="_local"/>
+                </property>
+            </view>
+            <loader id="iteractionListsDl" cacheable="true">
+                <query><![CDATA[select e
+                    from itpearls_IteractionList e
+                    order by e.candidate.fullName ]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.createdBy like :recrutier
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>@between(e.dateIteraction, now - :daysBetween, now, day)</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.iteractionType.signEndCase = :endCase</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="userDc"
+                    class="com.haulmont.cuba.security.entity.User"
+                    view="_local">
+            <loader id="userDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from sec$User e order by e.name]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.active = :active</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <keyValueCollection id="lastProjectDc">
+            <loader id="lastProjectDl">
+                <query>
+                    <![CDATA[select e.vacancy, max(e.dateIteraction)
+                    from itpearls_IteractionList e
+                    where not e.vacancy.vacansyName like 'Default'
+                    group by e.vacancy
+                    order by max(e.dateIteraction) desc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.candidate = :candidate</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+            <properties>
+                <property name="vacancy"
+                          class="com.company.itpearls.entity.OpenPosition"/>
+                <property datatype="date"
+                          name="max"/>
+            </properties>
+        </keyValueCollection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="mainHBox"
+            spacing="true">
+        <groupBox caption="msg://msgInterval"
+                  collapsable="true"
+                  width="100%"
+                  height="AUTO"
+                  stylename="light">
+            <hbox spacing="true">
+                <radioButtonGroup id="openOrCloseCaseRadioButtonsGroup"
+                                  orientation="horizontal"
+                                  description="msg://msgOpenOrClose"
+                                  caption="msg://msgOpenOrClose"
+                                  width="AUTO"/>
+                <radioButtonGroup id="daysIntervalRadioButtonsGroup"
+                                  orientation="horizontal"
+                                  description="msg://msgDateInterval"
+                                  caption="msg://msgDateInterval"
+                                  width="AUTO"/>
+            </hbox>
+        </groupBox>
+        <groupBox caption="msg://msgOptions"
+                  collapsable="true"
+                  width="100%"
+                  height="AUTO"
+                  stylename="light">
+            <hbox spacing="true">
+                <radioButtonGroup id="recruterRadioButtonsGroup"
+                                  orientation="horizontal"
+                                  width="AUTO"/>
+                <lookupPickerField id="recruterLookupPickerField"
+                                   width="AUTO"
+                                   enable="false"
+                                   optionsContainer="userDc"/>
+            </hbox>
+        </groupBox>
+        <label id="candidateCountLabel" stylename="small"/>
+        <hbox id="mainHBox"
+              spacing="true"
+              height="100%"
+              expand="labelndidatesScrollBox"
+              width="100%">
+            <scrollBox id="labelndidatesScrollBox"
+                       orientation="vertical"
+                       width="AUTO"
+                       height="100%"
+                       spacing="true"/>
+            <vbox id="candidateCardVBox"
+                  spacing="true"
+                  visible="false"
+                  height="100%"
+                  align="TOP_LEFT"
+                  expand="lastProjectTable"
+                  margin="true,true,true,true"
+                  stylename="candidate-card-rotating"
+                  width="AUTO">
+                <hbox spacing="true">
+                    <image id="candidatePic"
+                           width="100%"
+                           align="TOP_RIGHT"
+                           stylename="widget-border"
+                           scaleMode="FILL"/>
+                    <vbox spacing="true">
+                        <label id="candidateNameLabel"
+                               stylename="h3"/>
+                        <label id="candidatePersonPositionLabel"
+                               stylename="h4"/>
+                    </vbox>
+                </hbox>
+                <table id="lastProjectTable"
+                       width="AUTO"
+                       height="AUTO"
+                       stylename="no-horizontal-lines"
+                       editable="false"
+                       contextMenuEnabled="false"
+                       dataContainer="lastProjectDc">
+                    <columns>
+                        <column id="number"
+                                width="30px"
+                                caption="№"
+                                generator="lastIteractionCount"/>
+                        <column id="vacancy"
+                                width="300px"
+                                maxTextLength="40"
+                                caption="msg://msgVacancy"/>
+                        <column id="max"
+                                width="70px"
+                                caption="msg://msgDate"/>
+                        <!--                        <column id="lastInteraction"
+                                                        width="200px"
+                                                        maxTextLength="40"
+                                                        caption="msg://msgLastInteraction"
+                                                        generator="lastInteractionGeneratorColumn"/>
+                                                <column id="researcher"
+                                                        width="100px"
+                                                        caption="msg://msgResearcher"
+                                                        generator="whoIsResearcherGeneratorColumn"/>
+                                                <column id="recruter"
+                                                        width="100px"
+                                                        caption="msg://msgRecruter"
+                                                        generator="whoIsRecruterGeneratorColumn"/> -->
+                        <column id="idViewIteractionsButton"
+                                width="100px"
+                                caption="msg://msgInteractionsView"
+                                generator="addInteractionsViewButton"/>
+                    </columns>
+                    <rowsCount/>
+                </table>
+            </vbox>
+        </hbox>
+
+    </layout>
+</window>
