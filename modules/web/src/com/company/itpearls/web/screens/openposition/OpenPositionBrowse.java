@@ -439,7 +439,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.description", subject = "descriptionProvider")
     private String openPositionsTableDescriptionDescriptionProvider(OpenPosition openPosition) {
-        return Jsoup.parse(openPosition.getComment()).text();
+        String retStr = null;
+
+        if (openPosition.getComment() != null) {
+            retStr = Jsoup.parse(openPosition.getComment()).text();
+        }
+
+        return retStr != null ? retStr : "";
     }
 
     @Install(to = "openPositionsTable.description", subject = "styleProvider")

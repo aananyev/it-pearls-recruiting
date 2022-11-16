@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://rotatingCandidateBrowse.caption"
-        focusComponent="labelndidatesScrollBox"
+        focusComponent="jobCandidateTable"
         messagesPack="com.company.itpearls.web.screens.rotatingcandidates">
     <data readOnly="true">
         <collection id="iteractionListsDc"
@@ -14,6 +14,7 @@
                     <property name="positionList" view="_local"/>
                     <property name="fileImageFace" view="_base"/>
                     <property name="iteractionList" view="_local">
+                        <property name="recrutier" view="_local"/>
                         <property name="vacancy" view="_local"/>
                         <property name="iteractionType" view="_local"/>
                     </property>
@@ -123,79 +124,181 @@
             </hbox>
         </groupBox>
         <label id="candidateCountLabel" stylename="small"/>
-        <hbox id="mainHBox"
+        <grid id="mainHBox"
               spacing="true"
-              height="100%"
-              expand="labelndidatesScrollBox"
               width="100%">
-            <scrollBox id="labelndidatesScrollBox"
-                       orientation="vertical"
-                       width="AUTO"
-                       height="100%"
-                       spacing="true"/>
-            <vbox id="candidateCardVBox"
-                  spacing="true"
-                  visible="false"
-                  height="100%"
-                  align="TOP_LEFT"
-                  expand="lastProjectTable"
-                  margin="true,true,true,true"
-                  stylename="candidate-card-rotating"
-                  width="AUTO">
-                <hbox spacing="true">
-                    <image id="candidatePic"
-                           width="100%"
-                           align="TOP_RIGHT"
-                           stylename="widget-border"
-                           scaleMode="FILL"/>
-                    <vbox spacing="true">
-                        <label id="candidateNameLabel"
-                               stylename="h3"/>
-                        <label id="candidatePersonPositionLabel"
-                               stylename="h4"/>
-                    </vbox>
-                </hbox>
-                <table id="lastProjectTable"
-                       width="AUTO"
-                       height="AUTO"
-                       stylename="no-horizontal-lines"
-                       editable="false"
-                       contextMenuEnabled="false"
-                       dataContainer="lastProjectDc">
-                    <columns>
-                        <column id="number"
-                                width="30px"
-                                caption="№"
-                                generator="lastIteractionCount"/>
-                        <column id="vacancy"
-                                width="300px"
-                                maxTextLength="40"
-                                caption="msg://msgVacancy"/>
-                        <column id="max"
-                                width="70px"
-                                caption="msg://msgDate"/>
-                        <!--                        <column id="lastInteraction"
-                                                        width="200px"
-                                                        maxTextLength="40"
-                                                        caption="msg://msgLastInteraction"
-                                                        generator="lastInteractionGeneratorColumn"/>
-                                                <column id="researcher"
-                                                        width="100px"
-                                                        caption="msg://msgResearcher"
-                                                        generator="whoIsResearcherGeneratorColumn"/>
-                                                <column id="recruter"
-                                                        width="100px"
-                                                        caption="msg://msgRecruter"
-                                                        generator="whoIsRecruterGeneratorColumn"/> -->
-                        <column id="idViewIteractionsButton"
-                                width="100px"
-                                caption="msg://msgInteractionsView"
-                                generator="addInteractionsViewButton"/>
-                    </columns>
-                    <rowsCount/>
-                </table>
-            </vbox>
-        </hbox>
+            <columns count="10"/>
+            <rows>
+                <row>
+                    <!--                    <scrollBox id="labelndidatesScrollBox"
+                                                   orientation="vertical"
+                                                   width="AUTO" colspan="1"
+                                                   height="100%"
+                                                   spacing="true"/> -->
+                    <dataGrid id="jobCandidateTable"
+                              width="100%"
+                              colspan="3"
+                              contextMenuEnabled="false"
+                              height="100%"
+                              headerVisible="false"
+                              bodyRowHeight="60px"
+                              dataContainer="iteractionListsDc">
+                        <columns>
+                            <column id="candidatePhoto" caption="" width="100px">
+                                <componentRenderer/>
+                            </column>
+                            <column id="candidateCard">
+                                <htmlRenderer nullRepresentation="null"/>
+                            </column>
+                            <column id="candidate"
+                                    collapsed="true"
+                                    collapsible="true"
+                                    property="candidate"
+                                    width="300px"
+                                    sortable="true"
+                                    sort="ASCENDING"/>
+                        </columns>
+                    </dataGrid>
 
+                    <vbox id="candidateCardVBox"
+                          spacing="true"
+                          visible="false"
+                          colspan="7"
+                          height="100%"
+                          align="TOP_LEFT"
+                          expand="lastProjectGroupBox"
+                          margin="true,true,true,true"
+                          stylename="candidate-card-rotating"
+                          width="100%">
+                        <hbox spacing="true">
+                            <image id="candidatePic"
+                                   width="150px"
+                                   height="150px"
+                                   align="TOP_RIGHT"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <vbox spacing="true">
+                                <label id="candidateNameLabel"
+                                       stylename="h3"/>
+                                <label id="candidatePersonPositionLabel"
+                                       stylename="h4"/>
+                            </vbox>
+                        </hbox>
+                        <hbox id="candidateCardButtonsHBox"
+                              width="100%"
+                              height="AUTO"
+                              spacing="true">
+                            <grid width="100%"
+                                  spacing="true">
+                                <columns count="3"/>
+                                <rows>
+                                    <row>
+                                        <button id="candidateCardButton"
+                                                height="AUTO"
+                                                width="100%"
+                                                colspan="1"
+                                                icon="font-icon:USER"
+                                                invoke="candidateCardButton"
+                                                caption="msg://msgCandidateCard"/>
+                                        <button id="candidateCVSimpleBrowseButton"
+                                                height="AUTO"
+                                                width="100%"
+                                                icon="FILE_WORD_O"
+                                                colspan="1"
+                                                invoke="candidateCVSimpleBrowseButton"
+                                                caption="msg://msgCandidateCVs"/>
+                                        <button id="candidateInteractionsButton"
+                                                height="AUTO"
+                                                width="100%"
+                                                colspan="1"
+                                                icon="REORDER"
+                                                invoke="candidateInteractionsButton"
+                                                caption="msg://msgCandidateInteractions"/>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </hbox>
+                        <groupBox id="lastProjectGroupBox"
+                                  icon="REORDER"
+                                  caption="msg://msgInteractions"
+                                  collapsable="true"
+                                  width="100%"
+                                  height="AUTO"
+                                  stylename="light">
+                            <table id="lastProjectTable"
+                                   width="100%"
+                                   height="AUTO"
+                                   stylename="no-horizontal-lines"
+                                   editable="false"
+                                   contextMenuEnabled="false"
+                                   dataContainer="lastProjectDc">
+                                <columns>
+                                    <column id="number"
+                                            width="30px"
+                                            caption="№"
+                                            generator="lastIteractionCount"/>
+                                    <column id="vacancy"
+                                            width="300px"
+                                            maxTextLength="40"
+                                            caption="msg://msgVacancy"/>
+                                    <column id="max"
+                                            width="70px"
+                                            caption="msg://msgDate"/>
+                                    <column id="lastInteraction"
+                                            width="200px"
+                                            maxTextLength="40"
+                                            caption="msg://msgLastInteraction"
+                                            generator="lastInteractionGeneratorColumn"/>
+                                    <column id="researcher"
+                                            width="100px"
+                                            caption="msg://msgResearcher"
+                                            generator="whoIsResearcherGeneratorColumn"/>
+                                    <column id="recruter"
+                                            width="100px"
+                                            caption="msg://msgRecruter"
+                                            generator="whoIsRecruterGeneratorColumn"/>
+                                    <column id="idViewIteractionsButton"
+                                            width="100px"
+                                            caption="msg://msgInteractionsView"
+                                            generator="addInteractionsViewButton"/>
+                                </columns>
+                                <rowsCount/>
+                            </table>
+                        </groupBox>
+                        <groupBox id="candidateCVGroupBox"
+                                  icon="REORDER"
+                                  caption="msg://msgCandidateCVs"
+                                  collapsable="true"
+                                  width="100%"
+                                  height="AUTO"
+                                  stylename="light">
+                            <!--                    <table id="candidatesCVTable"
+                                                       width="AUTO"
+                                                       height="AUTO"
+                                                       stylename="no-horizontal-lines"
+                                                       editable="false"
+                                                       contextMenuEnabled="false">
+                                                    <columns>
+                                                        <column id="number"
+                                                                width="30px"
+                                                                caption="№"
+                                                                generator="countCVCandidate"/>
+                                                        <column id="dateCV"
+                                                                width="70px"
+                                                                caption="msg://msgDate"
+                                                                generator="dateCVCandidate"/>
+                                                        <column id="vacancy"
+                                                                width="300px"
+                                                                maxTextLength="40"
+                                                                generator="vacancyCVCandidate"
+                                                                caption="msg://msgVacancy"/>
+                                                    </columns>
+                                                    <rowsCount/>
+                                                </table> -->
+                        </groupBox>
+                    </vbox>
+                </row>
+            </rows>
+        </grid>
     </layout>
 </window>

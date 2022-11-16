@@ -677,6 +677,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         setSuggestOpenPositionTable();
         setLastProjectOfCandidate();
+        setCandidatePicImage();
 
         lastIteraction = getLastIteraction();
 
@@ -689,6 +690,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 //        setLaborAgreement();
         setLastProjectTable();
+    }
+
+    private void setCandidatePicImage() {
+        if (getEditedEntity().getFileImageFace() == null) {
+            String address = "https://st3.depositphotos.com/11953928/35822/v/450/depositphotos_358227294-stock-illustration-teen-with-laptop-computer-home.jpg";
+
+            URL url = null;
+
+            try {
+                url = new URL(address);
+            } catch (MalformedURLException g) {
+                g.printStackTrace();
+            }
+
+            candidatePic.setSource(UrlResource.class).setUrl(url);
+        }
     }
 
     private void setSuggestOpenPositionTable() {
@@ -2572,6 +2589,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public Component lastInteractionGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
         OpenPosition openPosition = entity.getValue("vacancy");
         IteractionList lastInteraction = null;
 
