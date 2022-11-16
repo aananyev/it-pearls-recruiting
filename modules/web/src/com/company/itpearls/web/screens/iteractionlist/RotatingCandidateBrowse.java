@@ -210,18 +210,9 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         candidatesCVTable.addStyleName("no-vertical-lines");
     }
 
-    private CollectionContainer<IteractionList> iteractionListNewDc;
 
     private void setCandidateEntityLabels() {
-/*        for (Component c : labelndidatesScrollBox.getComponents()) {
-            labelndidatesScrollBox.remove(c);
-        } */
-
-/*        if (iteractionListNewDc != null) {
-            for (int i = 0; i < iteractionListNewDc.getItems().size(); i++) {
-                iteractionListNewDc.getItems().remove(i);
-            }
-        } */
+        CollectionContainer<IteractionList> iteractionListNewDc;
 
         List<IteractionList> setList = new ArrayList<>();
         // Долбанный алгоритм получения уникальной последовательности списка кандидатов
@@ -231,8 +222,10 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             for (int j = 0; j < iteractionListsDc.getItems().size(); j++) {
                 if (i != j) {
                     if (il1.getCandidate().equals(iteractionListsDc.getItems().get(j).getCandidate())) {
-                        if (i > j)
+                        if (i > j) {
+                            flag = false;
                             break;
+                        }
 
                         setList.add(il1);
                         flag = false;
@@ -249,27 +242,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         iteractionListNewDc = dataComponents.createCollectionContainer(IteractionList.class);
         iteractionListNewDc.setItems(setList);
         jobCandidateTable.setItems(new ContainerDataGridItems<>(iteractionListNewDc));
-
-        for (IteractionList iteractionList : setList) {
-            Button candidateButton = uiComponents.create(Button.NAME);
-
-            candidateButton.setCaption(
-                    "<b>"
-                            + iteractionList.getCandidate().getFullName()
-                            + "</b><br><i>"
-                            + iteractionList.getCandidate().getPersonPosition().getPositionRuName()
-                            + " / "
-                            + iteractionList.getCandidate().getPersonPosition().getPositionEnName()
-                            + "</i>");
-            candidateButton.setStyleName("label_button_green");
-            candidateButton.setCaptionAsHtml(true);
-            candidateButton.setWidthFull();
-            candidateButton.setHeightAuto();
-            candidateButton.addClickListener(e -> {
-                setCandidateCard(iteractionList);
-            });
-//            labelndidatesScrollBox.add(candidateButton);
-        }
 
         candidateCountLabel.setValue("Кандидатов: "
                 + String.valueOf(setList.size()));
@@ -341,26 +313,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                         + "</i>";
         return retStr;
     }
-
-/*    @Install(to = "jobCandidateTable.candidateCard", subject = "columnGenerator")
-    private Component jobCandidateTableCandidateCardColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        VBoxLayout retBox = uiComponents.create(VBoxLayout.NAME);
-        Label nameLabel = uiComponents.create(Label.NAME);
-        Label positionLabel = uiComponents.create(Label.NAME);
-
-        nameLabel.setValue(event.getItem().getCandidate().getFullName());
-        positionLabel.setValue(event.getItem().getCandidate().getPersonPosition().getPositionRuName()
-                + " / "
-                + event.getItem().getCandidate().getPersonPosition().getPositionEnName());
-
-        nameLabel.setStyleName("h3");
-        positionLabel.setStyleName("h4");
-
-        retBox.add(nameLabel);
-        retBox.add(positionLabel);
-
-        return retBox;
-    } */
 
     @Subscribe("jobCandidateTable")
     public void onJobCandidateTableSelection1(DataGrid.SelectionEvent<IteractionList> event) {
