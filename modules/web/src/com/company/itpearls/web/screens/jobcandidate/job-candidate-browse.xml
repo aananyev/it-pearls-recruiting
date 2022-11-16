@@ -9,17 +9,19 @@
                     class="com.company.itpearls.entity.JobCandidate">
             <view extends="jobCandidate-view"
                   systemProperties="true">
-                <property name="iteractionList" view="_minimal">
-                    <property name="recrutier" view="_minimal"/>
-                    <property name="iteractionType" view="_minimal"/>
-                    <property name="vacancy" view="_minimal">
-                        <property name="projectName" view="_minimal">
-                            <property name="projectDepartment" view="_minimal"/>
+                <property name="iteractionList" view="_local">
+                    <property name="recrutier" view="_local">
+                        <property name="group" view="_local"/>
+                    </property>
+                    <property name="iteractionType" view="_local"/>
+                    <property name="vacancy" view="_local">
+                        <property name="projectName" view="_local">
+                            <property name="projectDepartment" view="_local"/>
                         </property>
                     </property>
                 </property>
-                <property name="positionList" view="_minimal">
-                    <property name="positionList" view="_minimal"/>
+                <property name="positionList" view="_local">
+                    <property name="positionList" view="_local"/>
                 </property>
             </view>
             <loader id="jobCandidatesDl">

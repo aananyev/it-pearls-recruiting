@@ -4,7 +4,13 @@
         <instance id="jobCandidatesDc"
                   class="com.company.itpearls.entity.JobCandidate"
                   provided="true">
-            <view extends="jobCandidate-view"/>
+            <view extends="_local">
+                <property name="iteractionList" view="_local">
+                    <property name="recrutier" view="_local">
+                        <property name="group" view="_local"/>
+                    </property>
+                </property>
+            </view>
         </instance>
     </data>
     <layout width="100%"

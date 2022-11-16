@@ -99,6 +99,9 @@
             <property name="candidate" view="_local">
                 <property name="personPosition" view="_local"/>
             </property>
+            <property name="recrutier" view="_local">
+                <property name="group" view="_local"/>
+            </property>
         </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
@@ -199,6 +202,7 @@
         <property name="iteractionType" view="_local">
         </property>
         <property name="recrutier" view="_local">
+            <property name="group" view="_local"/>
         </property>
         <property name="laborAgreement" view="_minimal">
             <property name="company" view="_minimal"/>

@@ -6,19 +6,18 @@ import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
+import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.Fragments;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.TableItems;
-import com.haulmont.cuba.gui.components.data.ValueSource;
 import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
 import com.haulmont.cuba.gui.components.data.table.ContainerTableItems;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
-import com.haulmont.cuba.gui.export.FileDataProvider;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -62,8 +61,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private GetRoleService getRoleService;
     @Inject
     private CollectionLoader<User> userDl;
-    //    @Inject
-//    private ScrollBoxLayout labelndidatesScrollBox;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -97,9 +94,16 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private DataComponents dataComponents;
 
-    private CollectionContainer<CandidateCV> candidateCVDc;
     @Inject
     private DataGrid<IteractionList> jobCandidateTable;
+    @Inject
+    private Fragments fragments;
+    @Inject
+    private HBoxLayout skillBox;
+    @Inject
+    private Table<CandidateCV> candidatesCVTable;
+    @Inject
+    private CollectionLoader<CandidateCV> candidateCVDl;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -200,16 +204,10 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidateTable.addStyleName("borderless");
         jobCandidateTable.addStyleName("no-horizontal-lines");
         jobCandidateTable.addStyleName("no-vertical-lines");
-    }
 
-    private void createCollectionContainerCandidateCVTable() {
-        candidateCVDc = dataComponents.createCollectionContainer(CandidateCV.class);
-
-        if (selectedJobCandidate != null) {
-            for (CandidateCV candidateCV : selectedJobCandidate.getCandidateCv()) {
-            }
-        }
-
+        candidatesCVTable.addStyleName("borderless");
+        candidatesCVTable.addStyleName("no-horizontal-lines");
+        candidatesCVTable.addStyleName("no-vertical-lines");
     }
 
     private CollectionContainer<IteractionList> iteractionListNewDc;
@@ -382,6 +380,9 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         lastProjectDl.setParameter("candidate", iteractionList.getCandidate());
         lastProjectDl.load();
 
+        candidateCVDl.setParameter("candidate", iteractionList.getCandidate());
+        candidateCVDl.load();
+
         try {
             FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
                     .setFileDescriptor(selectedJobCandidate.getFileImageFace());
@@ -402,6 +403,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
             candidatePic.setSource(UrlResource.class).setUrl(url);
         }
+
+        setupSkillBox();
 
         lastProjectTable.addStyleName("borderless");
         lastProjectTable.addStyleName("no-horizontal-lines");
@@ -543,6 +546,40 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         return retLabel;
     }
 
+    private Skillsbar skillBoxFragment = null;
+
+    private void setupSkillBox() {
+        if (skillBoxFragment != null) {
+            skillBox.remove(skillBoxFragment.getFragment());
+        }
+        if (!PersistenceHelper.isNew(selectedJobCandidate)) {
+            skillBoxFragment = fragments.create(this, Skillsbar.class);
+            if (skillBoxFragment.generateSkillLabels(getLastCVText(selectedJobCandidate))) {
+                skillBox.add(skillBoxFragment.getFragment());
+            }
+        }
+    }
+
+    private String getLastCVText(JobCandidate singleSelected) {
+        if (singleSelected != null) {
+            if (singleSelected.getCandidateCv().size() != 0) {
+                CandidateCV lastCV = singleSelected.getCandidateCv().get(0);
+
+                for (CandidateCV candidateCV : singleSelected.getCandidateCv()) {
+                    if (lastCV.getDatePost().before((candidateCV.getDatePost()))) {
+                        lastCV = candidateCV;
+                    }
+                }
+
+                return lastCV.getTextCV();
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     public Component whoIsRecruterGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
 
@@ -614,17 +651,35 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
     public Component countCVCandidate(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
-        int counter = 0;
 
-        for (int i = 0; i < selectedJobCandidate.getCandidateCv().size(); i++) {
-            if (entity.equals(selectedJobCandidate.getCandidateCv().get(i))) {
-                counter = i;
-                break;
+        if (selectedJobCandidate != null) {
+            int counter = 0;
+
+            for (int i = 0; i < selectedJobCandidate.getCandidateCv().size(); i++) {
+                if (entity.equals(selectedJobCandidate.getCandidateCv().get(i))) {
+                    counter = i;
+                    break;
+                }
             }
+
+            retLabel.setValue(++counter);
         }
 
-        retLabel.setValue(++counter);
-
         return retLabel;
+    }
+
+    public Component addViewCVButton(Entity entity) {
+        Button retButton = uiComponents.create(Button.NAME);
+        retButton.setCaption("Просмотр");
+
+        retButton.setAction(new BaseAction("viewCV")
+                .withHandler(actionPerformedEvent -> {
+                    screenBuilders.editor(CandidateCV.class, this)
+                            .editEntity(candidatesCVTable.getSingleSelected())
+                            .withOpenMode(OpenMode.NEW_TAB)
+                            .show();
+                }));
+
+        return retButton;
     }
 }
