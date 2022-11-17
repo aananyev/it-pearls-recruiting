@@ -75,6 +75,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private UserSession userSession;
     @Inject
     private HBoxLayout statisticsHLabelBox;
+    @Inject
+    private Image candidateFaceDefaultImage;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -175,8 +177,10 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
         if (candidateFaceImage.getValueSource().getValue() == null) {
             candidateFaceImage.setVisible(false);
+            candidateFaceDefaultImage.setVisible(true);
         } else {
             candidateFaceImage.setVisible(true);
+            candidateFaceDefaultImage.setVisible(false);
         }
     }
 

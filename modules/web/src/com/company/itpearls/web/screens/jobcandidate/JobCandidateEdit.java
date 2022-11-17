@@ -226,6 +226,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<OpenPosition> suggestOpenPositionDl;
     @Inject
     private Table<OpenPosition> suggestVacancyTable;
+    @Inject
+    private Image candidateDefaultPic;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -694,18 +696,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void setCandidatePicImage() {
         if (getEditedEntity().getFileImageFace() == null) {
-            String address = "https://st3.depositphotos.com/11953928/35822/v/450/depositphotos_358227294-stock-illustration-teen-with-laptop-computer-home.jpg";
-
-            URL url = null;
-
-            try {
-                url = new URL(address);
-            } catch (MalformedURLException g) {
-                g.printStackTrace();
-            }
-
-            candidatePic.setSource(UrlResource.class).setUrl(url);
+            candidateDefaultPic.setVisible(true);
+            candidatePic.setVisible(false);
+        } else {
+            candidateDefaultPic.setVisible(false);
+            candidatePic.setVisible(true);
         }
+    }
+
+    @Subscribe("candidatePic")
+    public void onCandidatePicSourceChange(ResourceView.SourceChangeEvent event) {
+        setCandidatePicImage();
     }
 
     private void setSuggestOpenPositionTable() {

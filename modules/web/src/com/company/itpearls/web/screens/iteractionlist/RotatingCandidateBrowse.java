@@ -262,8 +262,9 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                         new ContainerValueSource<>(event.getContainer(), "candidate.fileImageFace"));
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
-                String address = "https://st3.depositphotos.com/11953928/35822/v/450/depositphotos_358227294-stock-illustration-teen-with-laptop-computer-home.jpg";
+//                String address = "https://st3.depositphotos.com/11953928/35822/v/450/depositphotos_358227294-stock-illustration-teen-with-laptop-computer-home.jpg";
 
+                String address = "icons/no-programmer.jpg";
                 URL url = null;
 
                 try {
@@ -272,7 +273,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                     g.printStackTrace();
                 }
 
-                retImage.setSource(UrlResource.class).setUrl(url);
+//                retImage.setSource(UrlResource.class).setUrl(url);
+                retImage.setSource(ThemeResource.class).setPath(address);
             }
         } else {
             String address = "https://st3.depositphotos.com/11953928/35822/v/450/depositphotos_358227294-stock-illustration-teen-with-laptop-computer-home.jpg";

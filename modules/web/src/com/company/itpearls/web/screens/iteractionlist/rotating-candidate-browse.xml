@@ -67,7 +67,7 @@
                 <property name="resumePosition" view="_local"/>
                 <property name="toVacancy" view="_local"/>
             </view>
-            <loader id="candidateCVDl">
+            <loader id="candidateCVDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e]]>
                     <condition>
@@ -114,34 +114,55 @@
                   width="100%"
                   height="AUTO"
                   stylename="light">
-            <hbox spacing="true">
-                <radioButtonGroup id="openOrCloseCaseRadioButtonsGroup"
-                                  orientation="horizontal"
-                                  description="msg://msgOpenOrClose"
-                                  caption="msg://msgOpenOrClose"
-                                  width="AUTO"/>
-                <radioButtonGroup id="daysIntervalRadioButtonsGroup"
-                                  orientation="horizontal"
-                                  description="msg://msgDateInterval"
-                                  caption="msg://msgDateInterval"
-                                  width="AUTO"/>
+            <hbox>
+                <hbox spacing="true"
+                      stylename="v-panel-caption"
+                      margin="true,true,true,true">
+                    <radioButtonGroup id="openOrCloseCaseRadioButtonsGroup"
+                                      orientation="horizontal"
+                                      description="msg://msgOpenOrClose"
+                                      caption="msg://msgOpenOrClose"
+                                      width="AUTO"/>
+                </hbox>
+                <hbox spacing="true"
+                      stylename="v-panel-caption"
+                      margin="true,true,true,true">
+                    <radioButtonGroup id="daysIntervalRadioButtonsGroup"
+                                      orientation="horizontal"
+                                      description="msg://msgDateInterval"
+                                      caption="msg://msgDateInterval"
+                                      width="AUTO"/>
+                </hbox>
+                <hbox spacing="true"
+                      stylename="v-panel-caption"
+                      margin="true,true,true,true">
+                    <radioButtonGroup id="recruterRadioButtonsGroup"
+                                      caption="msg://msgRecruter"
+                                      orientation="horizontal"
+                                      width="AUTO"/>
+                    <lookupPickerField id="recruterLookupPickerField"
+                                       width="AUTO"
+                                       align="BOTTOM_LEFT"
+                                       enable="false"
+                                       optionsContainer="userDc"/>
+                </hbox>
             </hbox>
         </groupBox>
-        <groupBox caption="msg://msgOptions"
-                  collapsable="true"
-                  width="100%"
-                  height="AUTO"
-                  stylename="light">
-            <hbox spacing="true">
-                <radioButtonGroup id="recruterRadioButtonsGroup"
-                                  orientation="horizontal"
-                                  width="AUTO"/>
-                <lookupPickerField id="recruterLookupPickerField"
-                                   width="AUTO"
-                                   enable="false"
-                                   optionsContainer="userDc"/>
-            </hbox>
-        </groupBox>
+        <!--        <groupBox caption="msg://msgOptions"
+                          collapsable="true"
+                          width="100%"
+                          height="AUTO"
+                          stylename="light">
+                    <hbox spacing="true">
+                        <radioButtonGroup id="recruterRadioButtonsGroup"
+                                          orientation="horizontal"
+                                          width="AUTO"/>
+                        <lookupPickerField id="recruterLookupPickerField"
+                                           width="AUTO"
+                                           enable="false"
+                                           optionsContainer="userDc"/>
+                    </hbox>
+                </groupBox> -->
         <label id="candidateCountLabel" stylename="small"/>
         <grid id="mainHBox"
               spacing="true"

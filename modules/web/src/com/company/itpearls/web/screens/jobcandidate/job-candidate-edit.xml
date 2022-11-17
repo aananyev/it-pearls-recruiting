@@ -349,15 +349,26 @@
                               width="200px"
                               height="266px"
                               align="BOTTOM_RIGHT"
-                              expand="candidatePic"
+                              expand="picVBox"
                               stylename="dropzone-container">
-                            <image id="candidatePic"
-                                   dataContainer="jobCandidateDc"
-                                   property="fileImageFace"
-                                   width="100%"
-                                   align="TOP_RIGHT"
-                                   stylename="widget-border"
-                                   scaleMode="FILL"/>
+                            <vbox id="picVBox">
+                                <image id="candidatePic"
+                                       dataContainer="jobCandidateDc"
+                                       property="fileImageFace"
+                                       width="100%"
+                                       visible="true"
+                                       align="TOP_RIGHT"
+                                       stylename="widget-border"
+                                       scaleMode="FILL"/>
+                                <image id="candidateDefaultPic"
+                                       width="100%"
+                                       visible="false"
+                                       align="TOP_RIGHT"
+                                       stylename="widget-border"
+                                       scaleMode="FILL">
+                                    <theme path="icons/no-programmer.jpeg"/>
+                                </image>
+                            </vbox>
                             <upload id="fileImageFaceUpload"
                                     fileStoragePutMode="IMMEDIATE"
                                     dataContainer="jobCandidateDc"
