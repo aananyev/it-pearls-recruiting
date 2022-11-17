@@ -249,19 +249,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidateTable.candidatePhoto", subject = "columnGenerator")
     private Component jobCandidateTableCandidatePhotoColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        /*
-                    if (customer.getAvatar() != null) {
-                Image avatarImage = uiComponents.create(Image.class);
-                avatarImage.setScaleMode(ScaleMode.SCALE_DOWN);
-                avatarImage.setAlignment(Alignment.MIDDLE_CENTER);
-                avatarImage.setWidth("100%");
-                avatarImage.setHeight("30px");
-
-                avatarImage.setValueSource(new ContainerValueSource<>(table.getInstanceContainer(customer), "avatar"));
-                return avatarImage;
-            }
-            return null;
-        */
 
         Image retImage = uiComponents.create(Image.NAME);
         retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
@@ -633,5 +620,10 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 }));
 
         return retButton;
+    }
+
+    @Install(to = "lastProjectTable", subject = "styleProvider")
+    protected String lastProjectTableStyleProvider(IteractionList iteractionList, String property) {
+        return null;
     }
 }

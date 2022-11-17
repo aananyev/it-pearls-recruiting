@@ -228,89 +228,97 @@
                               spacing="true">
                         </hbox>
                         <vbox id="tableBoxVBox">
-                            <groupBox id="lastProjectGroupBox"
-                                      icon="REORDER"
-                                      caption="msg://msgInteractions"
-                                      collapsable="true"
+                            <tabSheet id="tablesTabSheet"
                                       width="100%"
-                                      stylename="light">
-                                <table id="lastProjectTable"
-                                       width="100%"
-                                       height="AUTO"
-                                       stylename="no-horizontal-lines"
-                                       editable="false"
-                                       contextMenuEnabled="false"
-                                       dataContainer="lastProjectDc">
-                                    <columns>
-                                        <column id="number"
-                                                width="30px"
-                                                caption="№"
-                                                generator="lastIteractionCount"/>
-                                        <column id="vacancy"
-                                                width="350px"
-                                                maxTextLength="40"
-                                                caption="msg://msgVacancy"/>
-                                        <column id="lastInteraction"
-                                                width="180"
-                                                maxTextLength="40"
-                                                caption="msg://msgLastInteraction"
-                                                generator="lastInteractionGeneratorColumn"/>
-                                        <column id="researcher"
-                                                width="100px"
-                                                caption="msg://msgResearcher"
-                                                generator="whoIsResearcherGeneratorColumn"/>
-                                        <column id="recruter"
-                                                width="100px"
-                                                caption="msg://msgRecruter"
-                                                generator="whoIsRecruterGeneratorColumn"/>
-                                        <column id="max"
-                                                width="70px"
-                                                caption="msg://msgDate"/>
-                                        <column id="idViewIteractionsButton"
-                                                width="100px"
-                                                caption="msg://msgInteractionsView"
-                                                generator="addInteractionsViewButton"/>
-                                    </columns>
-                                </table>
-                            </groupBox>
-                            <groupBox id="candidateCVGroupBox"
-                                      icon="REORDER"
-                                      caption="msg://msgCandidateCVs"
-                                      collapsable="true"
-                                      width="100%"
-                                      stylename="light">
-                                <table id="candidatesCVTable"
-                                       width="100%"
-                                       height="AUTO"
-                                       stylename="no-horizontal-lines"
-                                       editable="false"
-                                       dataContainer="candidateCVDc"
-                                       contextMenuEnabled="false">
-                                    <columns>
-                                        <column id="number"
-                                                width="30px"
-                                                caption="№"
-                                                generator="countCVCandidate"/>
-                                        <column id="toVacancy"
-                                                width="480px"
-                                                maxTextLength="40"
-                                                caption="msg://msgVacancy"/>
-                                        <column id="resumePosition"
-                                                width="250px"
-                                                caption="msg://msgPosition"/>
-                                        <column id="datePost"
-                                                width="70px"
-                                                caption="msg://msgDate"/>
-                                        <column id="viewCVButton"
-                                                width="100px"
-                                                caption="msg://msgViewCV"
-                                                generator="addViewCVButton"/>
-                                    </columns>
-                                </table>
-                            </groupBox>
-                            <hbox id="skillBox"
-                                  width="100%"
-                                  height="AUTO"/>
+                                      stylename="padded-tabbar"
+                                      height="100%">
+                                <tab id="lastProjectTab"
+                                     icon="REORDER"
+                                     caption="msg://msgInteractions"
+                                     margin="true,true,true,true">
+
+                                    <table id="lastProjectTable"
+                                           width="100%"
+                                           height="AUTO"
+                                           stylename="no-horizontal-lines"
+                                           editable="false"
+                                           contextMenuEnabled="false"
+                                           dataContainer="lastProjectDc">
+                                        <columns>
+                                            <column id="number"
+                                                    width="30px"
+                                                    caption="№"
+                                                    generator="lastIteractionCount"/>
+                                            <column id="vacancy"
+                                                    width="350px"
+                                                    maxTextLength="40"
+                                                    caption="msg://msgVacancy"/>
+                                            <column id="lastInteraction"
+                                                    width="180"
+                                                    maxTextLength="40"
+                                                    caption="msg://msgLastInteraction"
+                                                    generator="lastInteractionGeneratorColumn"/>
+                                            <column id="researcher"
+                                                    width="100px"
+                                                    caption="msg://msgResearcher"
+                                                    generator="whoIsResearcherGeneratorColumn"/>
+                                            <column id="recruter"
+                                                    width="100px"
+                                                    caption="msg://msgRecruter"
+                                                    generator="whoIsRecruterGeneratorColumn"/>
+                                            <column id="max"
+                                                    width="70px"
+                                                    caption="msg://msgDate"/>
+                                            <column id="idViewIteractionsButton"
+                                                    width="100px"
+                                                    caption="msg://msgInteractionsView"
+                                                    generator="addInteractionsViewButton"/>
+                                        </columns>
+                                    </table>
+                                </tab>
+                                <tab id="candidateCVTab"
+                                     margin="true,true,true,true"
+                                     caption="msg://msgCandidateCVs"
+                                     icon="FILE_WORD_O">
+
+                                    <table id="candidatesCVTable"
+                                           width="100%"
+                                           height="AUTO"
+                                           stylename="no-horizontal-lines"
+                                           editable="false"
+                                           dataContainer="candidateCVDc"
+                                           contextMenuEnabled="false">
+                                        <columns>
+                                            <column id="number"
+                                                    width="30px"
+                                                    caption="№"
+                                                    generator="countCVCandidate"/>
+                                            <column id="toVacancy"
+                                                    width="480px"
+                                                    maxTextLength="40"
+                                                    caption="msg://msgVacancy"/>
+                                            <column id="resumePosition"
+                                                    width="250px"
+                                                    caption="msg://msgPosition"/>
+                                            <column id="datePost"
+                                                    width="70px"
+                                                    caption="msg://msgDate"/>
+                                            <column id="viewCVButton"
+                                                    width="100px"
+                                                    caption="msg://msgViewCV"
+                                                    generator="addViewCVButton"/>
+                                        </columns>
+                                    </table>
+                                </tab>
+                                <tab id="skillBoxTab"
+                                     margin="true,true,true,true"
+                                     caption="msg://msgSkills"
+                                     icon="font-icon:USER">
+                                    <hbox id="skillBox"
+                                          width="100%"
+                                          height="100%"/>
+                                </tab>
+                            </tabSheet>
                         </vbox>
                     </vbox>
                 </row>
