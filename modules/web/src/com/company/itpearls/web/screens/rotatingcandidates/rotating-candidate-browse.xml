@@ -9,6 +9,7 @@
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="_local">
                 <property name="candidate" view="_local">
+                    <property name="cityOfResidence" view="_local"/>
                     <property name="candidateCv" view="_local"/>
                     <property name="personPosition" view="_local"/>
                     <property name="positionList" view="_local"/>
@@ -37,10 +38,15 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>@between(e.dateIteraction, now - :daysBetween, now, day)</c:where>
+                                <c:where>
+                                    e in (select g from itpearls_IteractionList g
+                                    where e.candidate.id = g.candidate.id
+                                    and e.vacancy.id = g.vacancy.id
+                                    and g.iteractionType.signEndCase = :endCase)
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.iteractionType.signEndCase = :endCase</c:where>
+                                <c:where>@between(e.dateIteraction, now - :daysBetween, now, day)</c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -116,6 +122,7 @@
                   stylename="light">
             <hbox>
                 <hbox spacing="true"
+                      width="100%"
                       stylename="v-panel-caption"
                       margin="true,true,true,true">
                     <radioButtonGroup id="openOrCloseCaseRadioButtonsGroup"
@@ -148,21 +155,6 @@
                 </hbox>
             </hbox>
         </groupBox>
-        <!--        <groupBox caption="msg://msgOptions"
-                          collapsable="true"
-                          width="100%"
-                          height="AUTO"
-                          stylename="light">
-                    <hbox spacing="true">
-                        <radioButtonGroup id="recruterRadioButtonsGroup"
-                                          orientation="horizontal"
-                                          width="AUTO"/>
-                        <lookupPickerField id="recruterLookupPickerField"
-                                           width="AUTO"
-                                           enable="false"
-                                           optionsContainer="userDc"/>
-                    </hbox>
-                </groupBox> -->
         <label id="candidateCountLabel" stylename="small"/>
         <grid id="mainHBox"
               spacing="true"
@@ -215,10 +207,59 @@
                                    scaleMode="FILL"/>
                             <vbox id="contactInfoVBox"
                                   spacing="true">
-                                <label id="candidateNameLabel"
-                                       stylename="h3"/>
+                                <hbox spacing="true">
+                                    <label id="candidateNameLabel"
+                                           stylename="h3"/>
+                                    <label id="candidateCityLocationLabel"
+                                           stylename="h3"/>
+                                </hbox>
                                 <label id="candidatePersonPositionLabel"
                                        stylename="h4"/>
+                                <grid>
+                                    <columns count="2"/>
+                                    <rows>
+                                        <row>
+                                            <label id="emailLabel"
+                                                   icon="font-icon:ADDRESS_CARD"
+                                                   value="Email: "
+                                                   align="MIDDLE_RIGHT"
+                                                   visible="true"/>
+                                            <linkButton id="emailLinkButton"
+                                                        align="MIDDLE_LEFT"
+                                                        visible="true"/>
+                                        </row>
+                                        <row>
+                                            <label id="phoneLabel"
+                                                   icon="font-icon:PHONE"
+                                                   value="Phone: "
+                                                   align="MIDDLE_RIGHT"
+                                                   visible="true"/>
+                                            <linkButton id="phoneLinkButton"
+                                                        align="MIDDLE_LEFT"
+                                                        visible="true"/>
+                                        </row>
+                                        <row>
+                                            <label id="telegramLabel"
+                                                   icon="font-icon:TELEGRAM"
+                                                   align="MIDDLE_RIGHT"
+                                                   value="Telegram: "
+                                                   visible="true"/>
+                                            <linkButton id="telegramLinkButton"
+                                                        align="MIDDLE_LEFT"
+                                                        visible="true"/>
+                                        </row>
+                                        <row>
+                                            <label id="skypeLabel"
+                                                   icon="font-icon:SKYPE"
+                                                   align="MIDDLE_RIGHT"
+                                                   value="Skype: "
+                                                   visible="true"/>
+                                            <linkButton id="skypeLinkButton"
+                                                        align="MIDDLE_LEFT"
+                                                        visible="true"/>
+                                        </row>
+                                    </rows>
+                                </grid>
                             </vbox>
                             <vbox spacing="true"
                                   width="AUTO"
@@ -270,6 +311,10 @@
                                                     width="30px"
                                                     caption="№"
                                                     generator="lastIteractionCount"/>
+                                            <column id="status"
+                                                    width="30px"
+                                                    caption="msg://msgStatus"
+                                                    generator="statusInteractions"/>
                                             <column id="vacancy"
                                                     width="350px"
                                                     maxTextLength="40"

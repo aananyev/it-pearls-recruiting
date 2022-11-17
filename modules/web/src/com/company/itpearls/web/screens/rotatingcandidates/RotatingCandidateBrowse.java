@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.iteractionlist;
+package com.company.itpearls.web.screens.rotatingcandidates;
 
 import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.IteractionList;
@@ -7,16 +7,13 @@ import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.Fragments;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
-import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
-import com.haulmont.cuba.gui.components.data.table.ContainerTableItems;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
@@ -104,6 +101,26 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private Table<CandidateCV> candidatesCVTable;
     @Inject
     private CollectionLoader<CandidateCV> candidateCVDl;
+    @Inject
+    private Label<String> candidateCityLocationLabel;
+    @Inject
+    private WebBrowserTools webBrowserTools;
+    @Inject
+    private LinkButton emailLinkButton;
+    @Inject
+    private Label<String> emailLabel;
+    @Inject
+    private LinkButton phoneLinkButton;
+    @Inject
+    private Label<String> phoneLabel;
+    @Inject
+    private LinkButton telegramLinkButton;
+    @Inject
+    private Label<String> telegramLabel;
+    @Inject
+    private LinkButton skypeLinkButton;
+    @Inject
+    private Label<String> skypeLabel;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -208,8 +225,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         candidatesCVTable.addStyleName("borderless");
         candidatesCVTable.addStyleName("no-horizontal-lines");
         candidatesCVTable.addStyleName("no-vertical-lines");
-    }
 
+    }
 
     private void setCandidateEntityLabels() {
         CollectionContainer<IteractionList> iteractionListNewDc;
@@ -318,6 +335,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 + " / "
                 + iteractionList.getCandidate().getPersonPosition().getPositionEnName());
 
+        candidateCityLocationLabel.setValue("(" + selectedJobCandidate.getCityOfResidence().getCityRuName() + ")");
+
         lastProjectDl.setParameter("candidate", iteractionList.getCandidate());
         lastProjectDl.load();
 
@@ -350,6 +369,86 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         lastProjectTable.addStyleName("borderless");
         lastProjectTable.addStyleName("no-horizontal-lines");
         lastProjectTable.addStyleName("no-vertical-lines");
+
+        setLinkButtonEmail();
+        setLinkButtonPhone();
+        setLinkButtonTelegram();
+        setLinkButtonSkype();
+    }
+
+    @Subscribe("emailLinkButton")
+    public void onEmailLinkButtonClick(Button.ClickEvent event) {
+        webBrowserTools.showWebPage("mailto:" + event.getButton().getCaption(), null);
+    }
+
+    @Subscribe("telegramLinkButton")
+    public void onTelegramLinkButtonClick(Button.ClickEvent event) {
+        String retStr = event.getButton().getCaption();
+
+        if (retStr.charAt(0) != '@') {
+            webBrowserTools.showWebPage("http://t.me/" + retStr, null);
+        } else {
+            retStr = retStr.substring(1);
+            webBrowserTools.showWebPage("http://t.me/" + retStr.substring(1, retStr.length() - 1), null);
+        }
+    }
+
+
+    private void setLinkButtonEmail() {
+        if (selectedJobCandidate != null) {
+            if (selectedJobCandidate.getEmail() != null) {
+                emailLinkButton.setCaption(selectedJobCandidate.getEmail());
+                emailLabel.setVisible(true);
+                emailLinkButton.setVisible(true);
+            } else {
+                emailLabel.setVisible(false);
+                emailLinkButton.setVisible(false);
+            }
+        }
+    }
+
+    private void setLinkButtonPhone() {
+        if (selectedJobCandidate != null) {
+            if (selectedJobCandidate.getPhone() != null) {
+                phoneLinkButton.setCaption(selectedJobCandidate.getPhone());
+                phoneLabel.setVisible(true);
+                phoneLinkButton.setVisible(true);
+            } else {
+                phoneLabel.setVisible(false);
+                phoneLinkButton.setVisible(false);
+            }
+        }
+    }
+
+    private void setLinkButtonTelegram() {
+        if (selectedJobCandidate != null) {
+            if (selectedJobCandidate.getTelegramName() != null) {
+                telegramLinkButton.setCaption(selectedJobCandidate.getTelegramName());
+                telegramLabel.setVisible(true);
+                telegramLinkButton.setVisible(true);
+            } else {
+                telegramLabel.setVisible(false);
+                telegramLabel.setVisible(false);
+            }
+        }
+    }
+
+    private void setLinkButtonSkype() {
+        if (selectedJobCandidate != null) {
+            if (selectedJobCandidate.getSkypeName() != null) {
+                skypeLinkButton.setCaption(selectedJobCandidate.getSkypeName());
+                skypeLabel.setVisible(true);
+                skypeLinkButton.setVisible(true);
+            } else {
+                skypeLabel.setVisible(false);
+                skypeLabel.setVisible(false);
+            }
+        }
+    }
+
+    @Subscribe("skypeLinkButton")
+    public void onSkypeLinkButtonClick(Button.ClickEvent event) {
+        webBrowserTools.showWebPage("skype:" + event.getButton().getCaption() + "?chat", null);
     }
 
     @Subscribe("recruterLookupPickerField")
@@ -421,32 +520,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         if (selectedJobCandidate != null) {
             OpenPosition openPosition = entity.getValue("vacancy");
-            IteractionList lastInteraction = null;
-
-            if (selectedJobCandidate.getIteractionList().size() != 0) {
-                for (int i = 0; i < selectedJobCandidate.getIteractionList().size(); i++) {
-                    if (lastInteraction != null) {
-                        if (openPosition.equals(selectedJobCandidate.getIteractionList()
-                                .get(i)
-                                .getVacancy())) {
-                            if (lastInteraction.getDateIteraction().before(selectedJobCandidate
-                                    .getIteractionList()
-                                    .get(i)
-                                    .getDateIteraction())) {
-                                lastInteraction = selectedJobCandidate.getIteractionList()
-                                        .get(i);
-                            }
-                        }
-                    } else {
-                        if (openPosition.equals(selectedJobCandidate.getIteractionList()
-                                .get(i)
-                                .getVacancy())) {
-                            lastInteraction = selectedJobCandidate.getIteractionList()
-                                    .get(i);
-                        }
-                    }
-                }
-            }
+            IteractionList lastInteraction = getLastInteraction(selectedJobCandidate, openPosition);
 
             if (lastInteraction != null) {
                 if (lastInteraction.getIteractionType() != null) {
@@ -456,11 +530,40 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                     }
                 }
             }
-
-//            retLabel.setValue(retStr);
         }
 
         return retLabel;
+    }
+
+    private IteractionList getLastInteraction(JobCandidate candidate, OpenPosition openPosition) {
+        IteractionList lastInteraction = null;
+
+        if (candidate.getIteractionList().size() != 0) {
+            for (int i = 0; i < candidate.getIteractionList().size(); i++) {
+                if (lastInteraction != null) {
+                    if (openPosition.equals(candidate.getIteractionList()
+                            .get(i)
+                            .getVacancy())) {
+                        if (lastInteraction.getDateIteraction().before(candidate
+                                .getIteractionList()
+                                .get(i)
+                                .getDateIteraction())) {
+                            lastInteraction = candidate.getIteractionList()
+                                    .get(i);
+                        }
+                    }
+                } else {
+                    if (openPosition.equals(candidate.getIteractionList()
+                            .get(i)
+                            .getVacancy())) {
+                        lastInteraction = candidate.getIteractionList()
+                                .get(i);
+                    }
+                }
+            }
+        }
+
+        return lastInteraction;
     }
 
     public Component whoIsResearcherGeneratorColumn(Entity entity) {
@@ -627,5 +730,29 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     @Install(to = "lastProjectTable", subject = "styleProvider")
     protected String lastProjectTableStyleProvider(IteractionList iteractionList, String property) {
         return null;
+    }
+
+    public Component statusInteractions(Entity entity) {
+        Label retLabel = uiComponents.create(Label.NAME);
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
+        if (selectedJobCandidate != null) {
+            OpenPosition openPosition = entity.getValue("vacancy");
+            IteractionList lastInteraction = getLastInteraction(selectedJobCandidate, openPosition);
+
+            if (lastInteraction != null) {
+                if (lastInteraction.getIteractionType() != null) {
+                    if (lastInteraction.getIteractionType().getSignEndCase()) {
+                        retLabel.setIcon(CubaIcon.CLOSE.source());
+                        retLabel.setStyleName("open-position-pic-center-large-red");
+                    } else {
+                        retLabel.setIcon(CubaIcon.YES.source());
+                        retLabel.setStyleName("open-position-pic-center-large-green");
+                    }
+                }
+            }
+        }
+
+        return retLabel;
     }
 }

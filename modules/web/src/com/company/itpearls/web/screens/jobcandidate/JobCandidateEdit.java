@@ -1809,7 +1809,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe("skypeLinkButton")
     public void onSkypeLinkButtonClick(Button.ClickEvent event) {
         webBrowserTools.showWebPage("skype:" + event.getButton().getCaption() + "?chat", null);
-
     }
 
     private void setLinkButtonEmail() {
