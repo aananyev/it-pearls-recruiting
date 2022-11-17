@@ -86,6 +86,28 @@
                 </query>
             </loader>
         </collection>
+        <collection id="suggestOpenPositionDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local"/>
+            <loader id="suggestOpenPositionDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                    where e.openClose = false or e.openClose is null
+                    order by e.vacansyName]]>
+                    <condition>
+                        <or>
+                            <c:jpql>
+                                <c:where>e.positionType = :positionType</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.positionType in :positionTypes</c:where>
+                            </c:jpql>
+                        </or>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <keyValueCollection id="lastProjectDc">
             <loader id="lastProjectDl">
                 <query>
@@ -316,11 +338,11 @@
                                                     caption="msg://msgStatus"
                                                     generator="statusInteractions"/>
                                             <column id="vacancy"
-                                                    width="350px"
+                                                    width="330px"
                                                     maxTextLength="40"
                                                     caption="msg://msgVacancy"/>
                                             <column id="lastInteraction"
-                                                    width="180"
+                                                    width="170"
                                                     maxTextLength="40"
                                                     caption="msg://msgLastInteraction"
                                                     generator="lastInteractionGeneratorColumn"/>
@@ -340,6 +362,33 @@
                                                     caption="msg://msgInteractionsView"
                                                     generator="addInteractionsViewButton"/>
                                         </columns>
+                                    </table>
+                                </tab>
+                                <tab id="suggestVacancyTab"
+                                     margin="true,true,true,true"
+                                     icon="RECYCLE"
+                                     caption="msg://msgSuggestVacancy">
+                                    <table id="suggestVacancyTable"
+                                           contextMenuEnabled="false"
+                                           width="100%"
+                                           colspan="2"
+                                           height="100%"
+                                           editable="false"
+                                           stylename="no-horizontal-lines"
+                                           dataContainer="suggestOpenPositionDc">
+                                        <columns>
+                                            <column id="notSendedIconColumn"
+                                                    caption="msg://msgStatus"
+                                                    width="40px"/>
+                                            <column id="vacansyName"
+                                                    captionAsHtml="true"
+                                                    width="760px"
+                                                    caption="msg://msgSuggestVacansies"/>
+                                            <column id="lastOpenDate"
+                                                    width="120px"
+                                                    caption="msg://msgLastOpenDate"/>
+                                        </columns>
+                                        <rows/>
                                     </table>
                                 </tab>
                                 <tab id="candidateCVTab"

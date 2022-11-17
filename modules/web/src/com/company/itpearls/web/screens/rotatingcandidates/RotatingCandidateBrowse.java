@@ -1,8 +1,6 @@
 package com.company.itpearls.web.screens.rotatingcandidates;
 
-import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.IteractionList;
-import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
@@ -18,7 +16,6 @@ import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
@@ -121,6 +118,10 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private LinkButton skypeLinkButton;
     @Inject
     private Label<String> skypeLabel;
+    @Inject
+    private Table<OpenPosition> suggestVacancyTable;
+    @Inject
+    private CollectionLoader<OpenPosition> suggestOpenPositionDl;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -225,6 +226,10 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         candidatesCVTable.addStyleName("borderless");
         candidatesCVTable.addStyleName("no-horizontal-lines");
         candidatesCVTable.addStyleName("no-vertical-lines");
+
+        suggestVacancyTable.addStyleName("borderless");
+        suggestVacancyTable.addStyleName("no-horizontal-lines");
+        suggestVacancyTable.addStyleName("no-vertical-lines");
 
     }
 
@@ -374,6 +379,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         setLinkButtonPhone();
         setLinkButtonTelegram();
         setLinkButtonSkype();
+        setSuggestOpenPositionTable();
     }
 
     @Subscribe("emailLinkButton")
@@ -527,6 +533,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                     if (lastInteraction.getIteractionType().getIterationName() != null) {
                         StringBuffer retStr = new StringBuffer(lastInteraction.getIteractionType().getIterationName());
                         retLabel.setValue(lastInteraction.getIteractionType().getIterationName());
+                        retLabel.setDescription(lastInteraction.getIteractionType().getIterationName());
                     }
                 }
             }
@@ -580,6 +587,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                             if (iteractionList.getVacancy().equals(op) &&
                                     iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
                                 retLabel.setValue(iteractionList.getRecrutier().getName());
+                                retLabel.setDescription(iteractionList.getRecrutier().getName());
                             }
                         }
                     }
@@ -624,6 +632,92 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
+    private void setSuggestOpenPositionTable() {
+        List<Position> positions = new ArrayList<>();
+
+        if (selectedJobCandidate != null)
+            if (selectedJobCandidate.getPositionList() != null) {
+                for (JobCandidatePositionLists positionLists : selectedJobCandidate.getPositionList()) {
+                    positions.add(positionLists.getPositionList());
+                }
+
+                suggestOpenPositionDl.setParameter("positionType", selectedJobCandidate.getPersonPosition());
+                if (positions.size() > 0) {
+                    suggestOpenPositionDl.setParameter("positionTypes", positions);
+                }
+                suggestOpenPositionDl.load();
+            }
+
+        suggestVacancyTable.addStyleName("borderless");
+        suggestVacancyTable.addStyleName("no-horizontal-lines");
+        suggestVacancyTable.addStyleName("no-vertical-lines");
+    }
+
+    @Install(to = "suggestVacancyTable.notSendedIconColumn", subject = "columnGenerator")
+    private Component suggestVacancyTableNotSendedIconColumnColumnGenerator(OpenPosition openPosition) {
+        String retStr = "font-icon:CHECK";
+        String retStyle = "h2-green";
+        String retDescriplion = "<b>Можно начинать процесс с кандидатом.</b><br> Кандидату не предлагали эту вакансию.";
+
+        Label retIcon = uiComponents.create(Label.class);
+
+        if (selectedJobCandidate != null) {
+            for (IteractionList list : selectedJobCandidate.getIteractionList()) {
+                if (openPosition.equals(list.getVacancy())) {
+                    if (list.getIteractionType() != null) {
+                        if (list.getIteractionType().getSignSendToClient() != null ?
+                                list.getIteractionType().getSignSendToClient() != null : false) {
+                            if (list.getIteractionType().getSignSendToClient()) {
+                                retStr = "font-icon:REFRESH";
+                                retStyle = "h2-blue";
+                                retDescriplion = "<b>Можно послать еще раз.</b><br> Резюме отправлено клиенту, но не было ответа";
+                                break;
+                            }
+                        }
+
+                        if (list.getIteractionType().getSignEndCase() != null ?
+                                list.getIteractionType().getSignEndCase() : false) {
+                            retStr = "font-icon:CLOSE";
+                            retStyle = "h2-red";
+                            retDescriplion = "<b>Слать резюме не рекомендуется.</b><br> Процесс с заказчиком закончен.";
+                            break;
+                        }
+
+                        retStr = "font-icon:QUESTION";
+                        retStyle = "h2-orange";
+                        retDescriplion = "<b>Можно выслать заказчику.</b><br> Процесс с кандидатом начат, но резюме не отослали.";
+                    }
+                }
+            }
+
+            retIcon.setIcon(retStr);
+            retIcon.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            retIcon.setStyleName(retStyle);
+            retIcon.setDescriptionAsHtml(true);
+            retIcon.setDescription(retDescriplion);
+        }
+
+        return retIcon;
+    }
+
+    @Install(to = "suggestVacancyTable", subject = "itemDescriptionProvider")
+    private String suggestVacancyTableItemDescriptionProvider(OpenPosition openPosition, String string) {
+        String retStr = "<b>Вакансия:</b><br><br>";
+
+        retStr += "<i>" + openPosition.getVacansyName() + "</i><br>"
+                + "<i>Проект: </i>" + openPosition.getProjectName().getProjectName()
+                + "<br><i>Ответственный за проект у заказчика:</i>"
+                + openPosition.getProjectName().getProjectOwner().getSecondName()
+                + openPosition.getProjectName().getProjectOwner().getSecondName()
+                + "<br><i>Ответственный за проект на нашей стороне: </i>"
+                + openPosition.getOwner().getName()
+                + "<br><i>Дата открытия вакансии: "
+                + openPosition.getLastOpenDate()
+                + "<br><br><i>Описание вакансии: </i><br>" + openPosition.getComment();
+
+        return retStr;
+    }
+
     public Component whoIsRecruterGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
 
@@ -637,6 +731,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                             if (iteractionList.getVacancy().equals(op) &&
                                     iteractionList.getIteractionType().getSignOurInterview()) {
                                 retLabel.setValue(iteractionList.getRecrutier().getName());
+                                retLabel.setDescription(iteractionList.getRecrutier().getName());
                             }
                         }
                     }
