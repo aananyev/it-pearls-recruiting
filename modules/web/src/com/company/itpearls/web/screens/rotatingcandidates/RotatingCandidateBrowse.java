@@ -12,6 +12,7 @@ import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
+import com.haulmont.cuba.gui.components.data.table.ContainerTableItems;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
@@ -23,10 +24,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @UiController("itpearls_RotatingCandidate.browse")
 @UiDescriptor("rotating-candidate-browse.xml")
@@ -87,7 +85,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private ScreenBuilders screenBuilders;
     @Inject
     private DataComponents dataComponents;
-
     @Inject
     private DataGrid<IteractionList> jobCandidateTable;
     @Inject
@@ -122,6 +119,9 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private Table<OpenPosition> suggestVacancyTable;
     @Inject
     private CollectionLoader<OpenPosition> suggestOpenPositionDl;
+    // Fields
+    private JobCandidate selectedJobCandidate;
+    private Skillsbar skillBoxFragment = null;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -233,6 +233,103 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
     }
 
+    private void setCandidateInactiveEntityLabels() {
+        CollectionContainer<IteractionList> iteractionListNewDc;
+
+        List<IteractionList> setList = new ArrayList<>();
+        // Долбанный алгоритм получения уникальной последовательности списка кандидатов
+        for (int i = 0; i < iteractionListsDc.getItems().size(); i++) {
+            IteractionList il1 = iteractionListsDc.getItems().get(i);
+            Boolean flag = true;
+            for (int j = 0; j < iteractionListsDc.getItems().size(); j++) {
+                if (i != j) {
+                    if (il1.getCandidate().equals(iteractionListsDc.getItems().get(j).getCandidate())) {
+                        if (i > j) {
+                            flag = false;
+                            break;
+                        }
+
+                        if (isInactiveCandidate(il1)) {
+                            setList.add(il1);
+                            flag = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (isInactiveCandidate(il1)) {
+                if (flag) {
+                    setList.add(il1);
+                }
+            }
+        }
+
+        iteractionListNewDc = dataComponents.createCollectionContainer(IteractionList.class);
+        iteractionListNewDc.setItems(setList);
+        jobCandidateTable.setItems(new ContainerDataGridItems<>(iteractionListNewDc));
+
+        candidateCountLabel.setValue("Кандидатов: "
+                + String.valueOf(setList.size()));
+    }
+
+    private void setCandidateActiveEntityLabels() {
+        CollectionContainer<IteractionList> iteractionListNewDc;
+
+        List<IteractionList> setList = new ArrayList<>();
+        // Долбанный алгоритм получения уникальной последовательности списка кандидатов
+        for (int i = 0; i < iteractionListsDc.getItems().size(); i++) {
+            IteractionList il1 = iteractionListsDc.getItems().get(i);
+            Boolean flag = true;
+            for (int j = 0; j < iteractionListsDc.getItems().size(); j++) {
+                if (i != j) {
+                    if (il1.getCandidate().equals(iteractionListsDc.getItems().get(j).getCandidate())) {
+                        if (i > j) {
+                            flag = false;
+                            break;
+                        }
+
+                        if (!isInactiveCandidate(il1)) {
+                            setList.add(il1);
+                            flag = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!isInactiveCandidate(il1)) {
+                if (flag) {
+                    setList.add(il1);
+                }
+            }
+        }
+
+        iteractionListNewDc = dataComponents.createCollectionContainer(IteractionList.class);
+        iteractionListNewDc.setItems(setList);
+        jobCandidateTable.setItems(new ContainerDataGridItems<>(iteractionListNewDc));
+
+        candidateCountLabel.setValue("Кандидатов: "
+                + String.valueOf(setList.size()));
+    }
+
+    private boolean isInactiveCandidate(IteractionList il1) {
+        Boolean flag = false;
+        for (IteractionList list : il1.getCandidate().getIteractionList()) {
+            if (!false) {
+                if (list.equals(il1)) {
+                    flag = true;
+                }
+            } else {
+                if (list.getIteractionType().getSignEndCase()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private void setCandidateEntityLabels() {
         CollectionContainer<IteractionList> iteractionListNewDc;
 
@@ -269,6 +366,20 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 + String.valueOf(setList.size()));
     }
 
+    private void setCandidateCVTable() {
+        CollectionContainer candidateCVContainer = dataComponents.createCollectionContainer(CandidateCV.class);
+        List<CandidateCV> cvs = new ArrayList<>();
+
+        if (selectedJobCandidate != null) {
+            for (CandidateCV cv : selectedJobCandidate.getCandidateCv()) {
+                cvs.add(cv);
+            }
+
+            candidateCVContainer.setItems(cvs);
+            candidatesCVTable.setItems(new ContainerTableItems<>(candidateCVContainer));
+        }
+    }
+
     @Install(to = "jobCandidateTable.candidatePhoto", subject = "columnGenerator")
     private Component jobCandidateTableCandidatePhotoColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
 
@@ -284,32 +395,13 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                         new ContainerValueSource<>(event.getContainer(), "candidate.fileImageFace"));
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
-//                String address = "https://st3.depositphotos.com/11953928/35822/v/450/depositphotos_358227294-stock-illustration-teen-with-laptop-computer-home.jpg";
 
-                String address = "icons/no-programmer.jpg";
-                URL url = null;
-
-                try {
-                    url = new URL(address);
-                } catch (MalformedURLException g) {
-                    g.printStackTrace();
-                }
-
-//                retImage.setSource(UrlResource.class).setUrl(url);
+                String address = "icons/no-programmer.jpeg";
                 retImage.setSource(ThemeResource.class).setPath(address);
             }
         } else {
-            String address = "https://st3.depositphotos.com/11953928/35822/v/450/depositphotos_358227294-stock-illustration-teen-with-laptop-computer-home.jpg";
-
-            URL url = null;
-
-            try {
-                url = new URL(address);
-            } catch (MalformedURLException g) {
-                g.printStackTrace();
-            }
-
-            retImage.setSource(UrlResource.class).setUrl(url);
+            String address = "icons/no-programmer.jpeg";
+            retImage.setSource(ThemeResource.class).setPath(address);
         }
 
         return retImage;
@@ -345,8 +437,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         lastProjectDl.setParameter("candidate", iteractionList.getCandidate());
         lastProjectDl.load();
 
-        candidateCVDl.setParameter("candidate", iteractionList.getCandidate());
-        candidateCVDl.load();
+//        candidateCVDl.setParameter("candidate", iteractionList.getCandidate());
+//        candidateCVDl.load();
 
         try {
             FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
@@ -356,17 +448,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             candidatePic.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            String address = "https://st3.depositphotos.com/11953928/35822/v/450/depositphotos_358227294-stock-illustration-teen-with-laptop-computer-home.jpg";
-
-            URL url = null;
-
-            try {
-                url = new URL(address);
-            } catch (MalformedURLException g) {
-                g.printStackTrace();
-            }
-
-            candidatePic.setSource(UrlResource.class).setUrl(url);
+            String address = "icons/no-programmer.jpeg";
+            candidatePic.setSource(ThemeResource.class).setPath(address);
         }
 
         setupSkillBox();
@@ -379,7 +462,9 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         setLinkButtonPhone();
         setLinkButtonTelegram();
         setLinkButtonSkype();
+
         setSuggestOpenPositionTable();
+        setCandidateCVTable();
     }
 
     @Subscribe("emailLinkButton")
@@ -398,7 +483,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             webBrowserTools.showWebPage("http://t.me/" + retStr.substring(1, retStr.length() - 1), null);
         }
     }
-
 
     private void setLinkButtonEmail() {
         if (selectedJobCandidate != null) {
@@ -501,7 +585,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
-
     public Component lastIteractionCount(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
         int lastIteractionCount = 0;
@@ -517,8 +600,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return retLabel;
     }
-
-    private JobCandidate selectedJobCandidate;
 
     public Component lastInteractionGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
@@ -597,8 +678,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return retLabel;
     }
-
-    private Skillsbar skillBoxFragment = null;
 
     private void setupSkillBox() {
         if (skillBoxFragment != null) {
@@ -742,7 +821,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         return retLabel;
     }
 
-
     public Component addInteractionsViewButton(Entity entity) {
         Button retButton = uiComponents.create(Button.NAME);
         retButton.setCaption("Просмотр");
@@ -849,5 +927,20 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return retLabel;
+    }
+
+    public Component addOpenPositionViewButton(Entity entity) {
+        Button retButton = uiComponents.create(Button.NAME);
+        retButton.setCaption("Просмотр");
+
+        retButton.setAction(new BaseAction("viewVacancy")
+                .withHandler(actionPerformedEvent -> {
+                    screenBuilders.editor(OpenPosition.class, this)
+                            .editEntity(suggestVacancyTable.getSingleSelected())
+                            .withOpenMode(OpenMode.NEW_TAB)
+                            .show();
+                }));
+
+        return retButton;
     }
 }

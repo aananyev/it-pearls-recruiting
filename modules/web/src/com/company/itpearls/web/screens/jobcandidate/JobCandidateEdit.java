@@ -1741,10 +1741,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
         try {
+
+            candidateDefaultPic.setVisible(false);
+            candidatePic.setVisible(true);
+
             FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
                     .setFileDescriptor(fileImageFaceUpload.getFileDescriptor());
 
             candidatePic.setSource(fileDescriptorResource);
+
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
