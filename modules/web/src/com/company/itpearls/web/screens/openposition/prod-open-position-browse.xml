@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/openposition/open-position-browse.xml"
+        messagesPack="com.company.itpearls.web.screens.openposition">
+    <layout>
+        <treeDataGrid ext:index="2"
+                      id="openPositionsTable"
+                      contextMenuEnabled="false"
+                      bodyRowHeight="60px">
+            <columns>
+                <column id="folder"/>
+                <column ext:index="2"
+                        id="icon"
+                        collapsible="true"
+                        collapsed="true"/>
+                <column ext:index="2"
+                        id="lastOpenCloseColumn"/>
+                <column ext:index="2"
+                        maximumWidth="45px"
+                        id="lastCVSend"/>
+                <column ext:index="2"
+                        id="vacansyName">
+                    <componentRenderer/>
+                </column>
+                <column ext:index="2"
+                        id="positionType"
+                        collapsed="true"
+                        collapsible="true"/>
+                <column ext:index="2"
+                        id="projectName"
+                        collapsed="true"
+                        collapsible="true"/>
+                <column ext:index="2" id="cityPositionList"
+                        collapsed="true"
+                        collapsible="true"/>
+                <column ext:index="2"
+                        id="description"
+                        collapsible="true"
+                        collapsed="true"/>
+            </columns>
+        </treeDataGrid>
+    </layout>
+</window>

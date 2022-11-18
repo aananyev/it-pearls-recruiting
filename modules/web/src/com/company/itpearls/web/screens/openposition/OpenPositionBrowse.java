@@ -1228,6 +1228,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setOpenPositionNotPaused();
         setStatusNotLower();
         setStatusRemoteWork();
+
+        notLowerRatingLookupField.setValue(PRIORITY_NORMAL);
         setUrgentlyPositios(3);
 
         clearUrgentFilter();

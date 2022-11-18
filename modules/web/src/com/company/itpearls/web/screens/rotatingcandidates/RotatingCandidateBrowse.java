@@ -22,8 +22,6 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 
 @UiController("itpearls_RotatingCandidate.browse")
@@ -94,8 +92,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private Table<CandidateCV> candidatesCVTable;
     @Inject
-    private CollectionLoader<CandidateCV> candidateCVDl;
-    @Inject
     private Label<String> candidateCityLocationLabel;
     @Inject
     private WebBrowserTools webBrowserTools;
@@ -141,22 +137,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     @Subscribe("openOrCloseCaseRadioButtonsGroup")
     public void onOpenOrCloseCaseRadioButtonsGroupValueChange(HasValue.ValueChangeEvent<Integer> event) {
         if (!openOrCloseCaseRadioButtonsGroupOld.equals(event.getValue())) {
-            switch (event.getValue()) {
-                case 0:
-                    iteractionListsDl.removeParameter("endCase");
-                    break;
-                case 1:
-                    iteractionListsDl.setParameter("endCase", false);
-                    break;
-                case 2:
-                    iteractionListsDl.setParameter("endCase", true);
-                    break;
-                default:
-                    iteractionListsDl.removeParameter("endCase");
-                    break;
-            }
-
-            iteractionListsDl.load();
+            setCandidateEntityLabels();
             openOrCloseCaseRadioButtonsGroupOld = event.getValue();
         }
     }
@@ -198,7 +179,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private void recruterRadioButtonsSetMap() {
         recruterRadioButtonsGroupMap.put("Все", 0);
         recruterRadioButtonsGroupMap.put("Только мои", 1);
-        recruterRadioButtonsGroupMap.put("Рекрутера", 2);
+        recruterRadioButtonsGroupMap.put("Рекрутер", 2);
 
         recruterRadioButtonsGroup.setOptionsMap(recruterRadioButtonsGroupMap);
     }
@@ -233,137 +214,170 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
     }
 
-    private void setCandidateInactiveEntityLabels() {
-        CollectionContainer<IteractionList> iteractionListNewDc;
+    private boolean isActiveCandidate(JobCandidate jobCandidate) {
+        // Сначала найдем уникальный список кандидатов из коллеiкции взаимодействий
+        HashMap<OpenPosition, Boolean> candidateOpenPositionClose = new HashMap<>();
+        List<OpenPosition> openPositions = getOpenPositionsFromCandidate(jobCandidate);
 
-        List<IteractionList> setList = new ArrayList<>();
-        // Долбанный алгоритм получения уникальной последовательности списка кандидатов
-        for (int i = 0; i < iteractionListsDc.getItems().size(); i++) {
-            IteractionList il1 = iteractionListsDc.getItems().get(i);
-            Boolean flag = true;
-            for (int j = 0; j < iteractionListsDc.getItems().size(); j++) {
-                if (i != j) {
-                    if (il1.getCandidate().equals(iteractionListsDc.getItems().get(j).getCandidate())) {
-                        if (i > j) {
-                            flag = false;
-                            break;
-                        }
-
-                        if (isInactiveCandidate(il1)) {
-                            setList.add(il1);
-                            flag = false;
+        // выделили все проекты где был кандидат задействован
+        // бежим по каждому кандидату и определяем из его взаимодействий список проектов,
+        // где он учавствовал за конкретный интервал времени
+        for (OpenPosition openPosition : openPositions) {
+            Boolean flag = false;
+            for (IteractionList list : jobCandidate.getIteractionList()) {
+                if (!list.getVacancy().getVacansyName().equals("Default")) {
+                    if (list.getVacancy().equals(openPosition)) {
+                        if (list.getIteractionType().getSignEndCase()) {
+                            candidateOpenPositionClose.put(openPosition, true);
+                            flag = true;
                             break;
                         }
                     }
                 }
             }
 
-            if (isInactiveCandidate(il1)) {
-                if (flag) {
-                    setList.add(il1);
+            if (!flag) {
+                candidateOpenPositionClose.put(openPosition, false);
+            }
+        }
+
+        Boolean retBoolean = false;
+        for (Map.Entry<OpenPosition, Boolean> entrySet : candidateOpenPositionClose.entrySet()) {
+            if (!entrySet.getKey().getVacansyName().equals("Default")) {
+                if (entrySet.getValue() == false) {
+                    retBoolean = true;
+                    break;
                 }
             }
         }
 
-        iteractionListNewDc = dataComponents.createCollectionContainer(IteractionList.class);
-        iteractionListNewDc.setItems(setList);
-        jobCandidateTable.setItems(new ContainerDataGridItems<>(iteractionListNewDc));
-
-        candidateCountLabel.setValue("Кандидатов: "
-                + String.valueOf(setList.size()));
+        return retBoolean;
     }
 
-    private void setCandidateActiveEntityLabels() {
-        CollectionContainer<IteractionList> iteractionListNewDc;
+    private boolean isInactiveCandidate(JobCandidate jobCandidate) {
+        // Сначала найдем уникальный список кандидатов из коллеiкции взаимодействий
+        HashMap<OpenPosition, Boolean> candidateOpenPositionClose = new HashMap<>();
+        List<OpenPosition> openPositions = getOpenPositionsFromCandidate(jobCandidate);
 
-        List<IteractionList> setList = new ArrayList<>();
-        // Долбанный алгоритм получения уникальной последовательности списка кандидатов
-        for (int i = 0; i < iteractionListsDc.getItems().size(); i++) {
-            IteractionList il1 = iteractionListsDc.getItems().get(i);
-            Boolean flag = true;
-            for (int j = 0; j < iteractionListsDc.getItems().size(); j++) {
-                if (i != j) {
-                    if (il1.getCandidate().equals(iteractionListsDc.getItems().get(j).getCandidate())) {
-                        if (i > j) {
-                            flag = false;
-                            break;
-                        }
-
-                        if (!isInactiveCandidate(il1)) {
-                            setList.add(il1);
-                            flag = false;
+        // выделили все проекты где был кандидат задействован
+        // бежим по каждому кандидату и определяем из его взаимодействий список проектов,
+        // где он учавствовал за конкретный интервал времени
+        for (OpenPosition openPosition : openPositions) {
+            Boolean flag = false;
+            for (IteractionList list : jobCandidate.getIteractionList()) {
+                if (!list.getVacancy().getVacansyName().equals("Default")) {
+                    if (list.getVacancy().equals(openPosition)) {
+                        if (list.getIteractionType().getSignEndCase()) {
+                            candidateOpenPositionClose.put(openPosition, true);
+                            flag = true;
                             break;
                         }
                     }
                 }
             }
 
-            if (!isInactiveCandidate(il1)) {
-                if (flag) {
-                    setList.add(il1);
+            if (!flag) {
+                candidateOpenPositionClose.put(openPosition, false);
+            }
+        }
+
+        Boolean retBoolean = true;
+        for (Map.Entry<OpenPosition, Boolean> entrySet : candidateOpenPositionClose.entrySet()) {
+            if (!entrySet.getKey().getVacansyName().equals("Default")) {
+                if (entrySet.getValue() == false) {
+                    retBoolean = false;
                 }
             }
         }
 
-        iteractionListNewDc = dataComponents.createCollectionContainer(IteractionList.class);
-        iteractionListNewDc.setItems(setList);
-        jobCandidateTable.setItems(new ContainerDataGridItems<>(iteractionListNewDc));
-
-        candidateCountLabel.setValue("Кандидатов: "
-                + String.valueOf(setList.size()));
+        return retBoolean;
     }
 
-    private boolean isInactiveCandidate(IteractionList il1) {
-        Boolean flag = false;
-        for (IteractionList list : il1.getCandidate().getIteractionList()) {
-            if (!false) {
-                if (list.equals(il1)) {
-                    flag = true;
-                }
-            } else {
-                if (list.getIteractionType().getSignEndCase()) {
-                    return true;
-                }
-            }
+    private List<OpenPosition> getOpenPositionsFromCandidate(JobCandidate jobCandidate) {
+        Set<OpenPosition> openPositionSet = new HashSet<>();
+
+        for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
+            openPositionSet.add(iteractionList.getVacancy());
         }
 
-        return false;
+        List<OpenPosition> openPositions = new ArrayList<>(openPositionSet);
+        return openPositions;
     }
 
     private void setCandidateEntityLabels() {
-        CollectionContainer<IteractionList> iteractionListNewDc;
+        if (openOrCloseCaseRadioButtonsGroup.getValue() != null) {
+            CollectionContainer<IteractionList> iteractionListNewDc;
 
-        List<IteractionList> setList = new ArrayList<>();
-        // Долбанный алгоритм получения уникальной последовательности списка кандидатов
-        for (int i = 0; i < iteractionListsDc.getItems().size(); i++) {
-            IteractionList il1 = iteractionListsDc.getItems().get(i);
-            Boolean flag = true;
-            for (int j = 0; j < iteractionListsDc.getItems().size(); j++) {
-                if (i != j) {
-                    if (il1.getCandidate().equals(iteractionListsDc.getItems().get(j).getCandidate())) {
-                        if (i > j) {
-                            flag = false;
-                            break;
+            List<IteractionList> setList = new ArrayList<>();
+            // Долбанный алгоритм получения уникальной последовательности списка кандидатов
+            for (int i = 0; i < iteractionListsDc.getItems().size(); i++) {
+                IteractionList il1 = iteractionListsDc.getItems().get(i);
+                Boolean flag = true;
+                for (int j = 0; j < iteractionListsDc.getItems().size(); j++) {
+                    if (i != j) {
+                        if (il1.getCandidate().equals(iteractionListsDc.getItems().get(j).getCandidate())) {
+                            if (i > j) {
+                                flag = false;
+                                break;
+                            }
+
+                            if (openOrCloseCaseRadioButtonsGroup.getValue() != null) {
+                                switch ((int) openOrCloseCaseRadioButtonsGroup.getValue()) {
+                                    case 0:
+                                        setList.add(il1);
+                                        break;
+                                    case 1:
+                                        if (isActiveCandidate(il1.getCandidate())) {
+                                            setList.add(il1);
+                                        }
+                                        break;
+                                    case 2:
+                                        if (isInactiveCandidate(il1.getCandidate())) {
+                                            setList.add(il1);
+                                        }
+                                        break;
+                                    default:
+                                        setList.add(il1);
+                                        break;
+                                }
+                                flag = false;
+                                break;
+                            }
                         }
+                    }
+                }
 
-                        setList.add(il1);
-                        flag = false;
-                        break;
+                if (flag) {
+                    if (openOrCloseCaseRadioButtonsGroup.getValue() != null) {
+                        switch ((int) openOrCloseCaseRadioButtonsGroup.getValue()) {
+                            case 0:
+                                setList.add(il1);
+                                break;
+                            case 1:
+                                if (isActiveCandidate(il1.getCandidate())) {
+                                    setList.add(il1);
+                                }
+                                break;
+                            case 2:
+                                if (isInactiveCandidate(il1.getCandidate())) {
+                                    setList.add(il1);
+                                }
+                                break;
+                            default:
+                                setList.add(il1);
+                                break;
+                        }
                     }
                 }
             }
 
-            if (flag) {
-                setList.add(il1);
-            }
+            iteractionListNewDc = dataComponents.createCollectionContainer(IteractionList.class);
+            iteractionListNewDc.setItems(setList);
+            jobCandidateTable.setItems(new ContainerDataGridItems<>(iteractionListNewDc));
+
+            candidateCountLabel.setValue("Кандидатов: "
+                    + String.valueOf(setList.size()));
         }
-
-        iteractionListNewDc = dataComponents.createCollectionContainer(IteractionList.class);
-        iteractionListNewDc.setItems(setList);
-        jobCandidateTable.setItems(new ContainerDataGridItems<>(iteractionListNewDc));
-
-        candidateCountLabel.setValue("Кандидатов: "
-                + String.valueOf(setList.size()));
     }
 
     private void setCandidateCVTable() {
@@ -427,7 +441,13 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         candidateCardVBox.setVisible(true);
 
-        candidateNameLabel.setValue(iteractionList.getCandidate().getFullName());
+        if (iteractionList.getCandidate().getFullName() != null)
+            candidateNameLabel.setValue(iteractionList.getCandidate().getFullName());
+        else
+            candidateNameLabel.setValue(iteractionList.getCandidate().getSecondName()
+                    + " "
+                    + iteractionList.getCandidate().getFirstName());
+
         candidatePersonPositionLabel.setValue(iteractionList.getCandidate().getPersonPosition().getPositionRuName()
                 + " / "
                 + iteractionList.getCandidate().getPersonPosition().getPositionEnName());

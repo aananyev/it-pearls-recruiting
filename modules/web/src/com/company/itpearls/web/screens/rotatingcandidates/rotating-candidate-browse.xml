@@ -8,30 +8,48 @@
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="_local">
-                <property name="candidate" view="_local">
-                    <property name="cityOfResidence" view="_local"/>
-                    <property name="candidateCv" view="_local">
-                        <property name="toVacancy" view="_local"/>
-                        <property name="resumePosition" view="_local"/>
+                <property name="candidate"
+                          view="_local">
+                    <property name="cityOfResidence"
+                              view="_local"/>
+                    <property name="candidateCv"
+                              view="_local">
+                        <property name="toVacancy"
+                                  view="_local"/>
+                        <property name="resumePosition"
+                                  view="_local"/>
                     </property>
-                    <property name="personPosition" view="_local"/>
-                    <property name="positionList" view="_local">
-                        <property name="positionList" view="_local"/>
+                    <property name="personPosition"
+                              view="_local"/>
+                    <property name="positionList"
+                              view="_local">
+                        <property name="positionList"
+                                  view="_local"/>
                     </property>
-                    <property name="fileImageFace" view="_base"/>
-                    <property name="iteractionList" view="_local">
-                        <property name="recrutier" view="_local"/>
-                        <property name="vacancy" view="_local"/>
-                        <property name="iteractionType" view="_local"/>
+                    <property name="fileImageFace"
+                              view="_base"/>
+                    <property name="iteractionList"
+                              view="_local">
+                        <property name="recrutier"
+                                  view="_local"/>
+                        <property name="vacancy"
+                                  view="_local"/>
+                        <property name="iteractionType"
+                                  view="_local"/>
                     </property>
                 </property>
-                <property name="iteractionType" view="_local"/>
-                <property name="recrutier" view="_local"/>
-                <property name="vacancy" view="_local">
-                    <property name="projectName" view="_local"/>
+                <property name="iteractionType"
+                          view="_local"/>
+                <property name="recrutier"
+                          view="_local"/>
+                <property name="vacancy"
+                          view="_local">
+                    <property name="projectName"
+                              view="_local"/>
                 </property>
             </view>
-            <loader id="iteractionListsDl" cacheable="true">
+            <loader id="iteractionListsDl"
+                    cacheable="true">
                 <query><![CDATA[select e
                     from itpearls_IteractionList e
                     order by e.candidate.fullName ]]>
@@ -98,10 +116,14 @@
         <collection id="suggestOpenPositionDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
-                <property name="projectName" view="_local"/>
-                <property name="positionType" view="_local"/>
-                <property name="cityPosition" view="_local"/>
-                <property name="laborAgreement" view="_local"/>
+                <property name="projectName"
+                          view="_local"/>
+                <property name="positionType"
+                          view="_local"/>
+                <property name="cityPosition"
+                          view="_local"/>
+                <property name="laborAgreement"
+                          view="_local"/>
             </view>
             <loader id="suggestOpenPositionDl"
                     cacheable="true">
@@ -156,22 +178,25 @@
                   width="100%"
                   height="AUTO"
                   stylename="light">
-            <hbox>
-                <hbox spacing="true"
+            <hbox width="100%"
+                  spacing="true">
+                <hbox spacing="false"
                       width="100%"
                       stylename="v-panel-caption"
                       margin="true,true,true,true">
                     <radioButtonGroup id="openOrCloseCaseRadioButtonsGroup"
                                       orientation="horizontal"
+                                      captionAsHtml="true"
                                       description="msg://msgOpenOrClose"
                                       caption="msg://msgOpenOrClose"
                                       width="AUTO"/>
                 </hbox>
-                <hbox spacing="true"
+                <hbox spacing="false"
                       stylename="v-panel-caption"
                       margin="true,true,true,true">
                     <radioButtonGroup id="daysIntervalRadioButtonsGroup"
                                       orientation="horizontal"
+                                      captionAsHtml="true"
                                       description="msg://msgDateInterval"
                                       caption="msg://msgDateInterval"
                                       width="AUTO"/>
@@ -181,6 +206,8 @@
                       margin="true,true,true,true">
                     <radioButtonGroup id="recruterRadioButtonsGroup"
                                       caption="msg://msgRecruter"
+                                      captionAsHtml="true"
+                                      align="BOTTOM_LEFT"
                                       orientation="horizontal"
                                       width="AUTO"/>
                     <lookupPickerField id="recruterLookupPickerField"

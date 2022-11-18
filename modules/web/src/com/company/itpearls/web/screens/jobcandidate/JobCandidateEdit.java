@@ -2776,7 +2776,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableToVacancyDescriptionProvider(CandidateCV candidateCV) {
-        return "" + candidateCV.getToVacancy().getVacansyName()
+        return "" +
+                (candidateCV.getToVacancy() != null ? candidateCV.getToVacancy().getVacansyName() : "")
                 + (candidateCV.getToVacancy().getLastOpenDate() != null ? "\n"
                 + "\nОткрыта: \n" + candidateCV.getToVacancy().getLastOpenDate() : "");
     }

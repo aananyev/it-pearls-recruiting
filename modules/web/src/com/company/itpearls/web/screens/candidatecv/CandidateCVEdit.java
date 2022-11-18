@@ -219,7 +219,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     candidateCVRichTextArea.setValue(textResume);
                 }
             }
-        } catch (FileStorageException | IOException  e) {
+        } catch (FileStorageException | IOException | IllegalArgumentException e) {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
                     .show();
