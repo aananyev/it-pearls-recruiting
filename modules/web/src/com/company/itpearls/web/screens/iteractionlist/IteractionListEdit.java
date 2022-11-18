@@ -118,12 +118,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private HBoxLayout mostPopularHbox;
     @Inject
-    private CollectionLoader<LaborAgreement> laborAgreementDl;
-    @Inject
-    private CollectionContainer<LaborAgreement> laborAgreementDc;
-    @Inject
-    private LookupPickerField<LaborAgreement> laborAgreementLookupPickerField;
-    @Inject
     private Label<String> currentPriorityLabel;
 
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
@@ -139,8 +133,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Image ratingImage;
     @Inject
     private HBoxLayout outstaffingCostHBox;
-    @Inject
-    private CollectionContainer<JobCandidate> candidatesDc;
     @Inject
     private SuggestionPickerField<JobCandidate> candidateField;
 
@@ -949,11 +941,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {
-        setLaborAgreement();
+//        setLaborAgreement();
 
     }
 
-    private void setLaborAgreement() {
+/*    private void setLaborAgreement() {
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.OUSTAFF_NAMAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
             laborAgreementLookupPickerField.setVisible(true);
@@ -971,11 +963,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         } else {
             laborAgreementLookupPickerField.setVisible(false);
         }
-    }
+    } */
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange1(HasValue.ValueChangeEvent<OpenPosition> event) {
-        setLaborAgreement();
+//        setLaborAgreement();
     }
 
     private void setMostPopularIteraction() {

@@ -58,7 +58,7 @@
             </view>
             <loader id="iteractionListDl"/>
         </instance>
-        <collection id="laborAgreementDc"
+<!--        <collection id="laborAgreementDc"
                     class="com.company.itpearls.entity.LaborAgreement">
             <view extends="_local">
                 <property name="laborAgreementType"
@@ -84,7 +84,7 @@
                     </condition>
                 </query>
             </loader>
-        </collection>
+        </collection> -->
         <collection id="iteractionTypesDc"
                     class="com.company.itpearls.entity.Iteraction">
             <view extends="_local">
@@ -106,17 +106,17 @@
                 </query>
             </loader>
         </collection>
-        <collection id="candidatesDc"
-                    class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_local">
-                <property name="personPosition"
-                          view="_local"/>
-            </view>
-            <loader id="candidatesLc"
-                    cacheable="true">
-                <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
-            </loader>
-        </collection>
+        <!--        <collection id="candidatesDc"
+                            class="com.company.itpearls.entity.JobCandidate">
+                    <view extends="_local">
+                        <property name="personPosition"
+                                  view="_local"/>
+                    </view>
+                    <loader id="candidatesLc"
+                            cacheable="true">
+                        <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
+                    </loader>
+                </collection> -->
         <collection id="vacancyDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local">
@@ -335,8 +335,8 @@
                                         from itpearls_JobCandidate e
                                         where lower(e.fullName) like lower(:searchString) escape '\'
                                         and e.middleName not like '(не использовать)'
-                                        and e.blockCandidate is not true
-                                        order by e.fullName
+                                        and not e.blockCandidate = true
+                                        order by e.secondName, e.firstName
                                     </query>
                                 </suggestionPickerField>
                                 <!--                                <lookupPickerField id="candidateField"
@@ -435,24 +435,24 @@
                               caption="msg://msgComment"
                               height="150pt"/>
             </tab>
-            <tab id="outSteffingTab"
-                 icon="CUBES"
-                 spacing="true"
-                 expand="outstaffingVBox"
-                 margin="true,true,true,true"
-                 caption="msg://msgOutstaffing">
-                <vbox id="outstaffingVBox"
-                      spacing="true"
-                      width="100%"
-                      height="100%">
-                    <lookupPickerField id="laborAgreementLookupPickerField"
-                                       dataContainer="iteractionListDc"
-                                       optionsContainer="laborAgreementDc"
-                                       width="100%"
-                                       caption="msg://msgLaborAgreement"
-                                       property="laborAgreement"/>
-                </vbox>
-            </tab>
+            <!--            <tab id="outSteffingTab"
+                             icon="CUBES"
+                             spacing="true"
+                             expand="outstaffingVBox"
+                             margin="true,true,true,true"
+                             caption="msg://msgOutstaffing">
+                            <vbox id="outstaffingVBox"
+                                  spacing="true"
+                                  width="100%"
+                                  height="100%">
+                                <lookupPickerField id="laborAgreementLookupPickerField"
+                                                   dataContainer="iteractionListDc"
+                                                   optionsContainer="laborAgreementDc"
+                                                   width="100%"
+                                                   caption="msg://msgLaborAgreement"
+                                                   property="laborAgreement"/>
+                            </vbox>
+                        </tab> -->
         </tabSheet>
         <hbox id="editActions"
               spacing="true"
