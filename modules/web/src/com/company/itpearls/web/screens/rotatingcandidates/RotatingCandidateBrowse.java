@@ -7,7 +7,6 @@ import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -36,13 +35,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private RadioButtonGroup<Integer> daysIntervalRadioButtonsGroup;
 
-    private Map<String, Integer> recruterRadioButtonsGroupMap = new LinkedHashMap<>();
-    private Map<String, Integer> daysIntervalRadioButtonsGroupMap = new LinkedHashMap<>();
-    private Map<String, Integer> openOrCloseCaseRadioButtonsGroupMap = new LinkedHashMap<>();
-
-    private Integer recruterRadioButtonsGroupOld = -1;
-    private Integer daysIntervalRadioButtonsGroupOld = -1;
-    private Integer openOrCloseCaseRadioButtonsGroupOld = -1;
 
     @Inject
     private UserSession userSession;
@@ -116,14 +108,25 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private Table<OpenPosition> suggestVacancyTable;
     @Inject
     private CollectionLoader<OpenPosition> suggestOpenPositionDl;
+    @Inject
+    private LookupPickerField<Iteraction> interactionLookupPickerField;
+    @Inject
+    private LookupPickerField<Position> positionLookupPickerField;
+    @Inject
+    private Label<String> activeInactiveLabel;
+
     // Fields
     private JobCandidate selectedJobCandidate;
     private Skillsbar skillBoxFragment = null;
-    @Inject
-    private LookupPickerField<Iteraction> interactionLookupPickerField;
     private boolean reloadDataLoaders = false;
-    @Inject
-    private LookupPickerField<Position> positionLookupPickerField;
+    private Map<String, Integer> recruterRadioButtonsGroupMap = new LinkedHashMap<>();
+    private Map<String, Integer> daysIntervalRadioButtonsGroupMap = new LinkedHashMap<>();
+    private Map<String, Integer> openOrCloseCaseRadioButtonsGroupMap = new LinkedHashMap<>();
+    private Integer recruterRadioButtonsGroupOld = -1;
+    private Integer daysIntervalRadioButtonsGroupOld = -1;
+    private Integer openOrCloseCaseRadioButtonsGroupOld = -1;
+    private String CANDIDATE_INACTIVE = "Inactive";
+    private String CANDIDATE_ACTIVE = "Active";
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -136,10 +139,34 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         openOrCloseCaseRadioButtonsGroupMap.put("Все", 0);
         openOrCloseCaseRadioButtonsGroupMap.put("Активный", 1);
         openOrCloseCaseRadioButtonsGroupMap.put("Закрытый", 2);
-//        openOrCloseCaseRadioButtonsGroupMap.put("Взаимодействие", 3);
+//        openOrCloseCaseRadioButtonsGroupMap.put("Завис", 3);
         openOrCloseCaseRadioButtonsGroupMap.put("Должность", 4);
 
         openOrCloseCaseRadioButtonsGroup.setOptionsMap(openOrCloseCaseRadioButtonsGroupMap);
+    }
+
+    @Install(to = "jobCandidateTable.activeUnactiveColumn", subject = "columnGenerator")
+    private Component jobCandidateTableActiveUnactiveColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setStyleName("h4");
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retLabel.setHeightAuto();
+        retLabel.setWidthFull();
+
+        if (isActiveCandidate(event.getItem().getCandidate())) {
+            retLabel.addStyleName("label_table_green");
+            retLabel.setValue(CANDIDATE_ACTIVE);
+        }
+
+        if (isInactiveCandidate(event.getItem().getCandidate())) {
+            retLabel.addStyleName("label_table_red");
+            retLabel.setHeightAuto();
+            retLabel.setWidthFull();
+            retLabel.setValue(CANDIDATE_INACTIVE);
+
+        }
+
+        return retLabel;
     }
 
     @Subscribe("interactionLookupPickerField")
@@ -155,9 +182,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     public void onPositionLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
         if (positionLookupPickerField.getValue() != null) {
             iteractionListsDl.setParameter("personPosition", positionLookupPickerField.getValue());
-            iteractionListsDl.load();
+        } else {
+            iteractionListsDl.removeParameter("personPosition");
         }
 
+        iteractionListsDl.load();
         setCandidateEntityLabels();
     }
 
@@ -168,8 +197,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             if (event.getValue() == 4) { // Должность
                 if (positionLookupPickerField.getValue() != null) {
                     iteractionListsDl.setParameter("personPosition", positionLookupPickerField.getValue());
-                    iteractionListsDl.load();
+                } else {
+                    iteractionListsDl.removeParameter("personPosition");
                 }
+
+                iteractionListsDl.load();
             }
 
             if (event.getValue() == 3) { // Должность
@@ -179,6 +211,12 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
             setCandidateEntityLabels();
             openOrCloseCaseRadioButtonsGroupOld = event.getValue();
+
+            if (event.getValue() != 4)
+                positionLookupPickerField.setValue(null);
+
+            if (event.getValue() != 3)
+                interactionLookupPickerField.setValue(null);
         }
 
         positionLookupPickerField.setVisible(event.getValue() == 4);
@@ -400,13 +438,13 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                                             setList.add(il1);
                                         }
                                         break;
-/*                                    case 3: // проверки на зависшего
+                                    case 3: // проверки на зависшего
                                         if (interactionLookupPickerField.getValue() != null) {
                                             if (isLostIteraction(il1.getCandidate())) {
                                                 setList.add(il1);
                                             }
                                         }
-                                        break; */
+                                        break;
                                     default:
                                         setList.add(il1);
                                         break;
@@ -434,13 +472,13 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                                     setList.add(il1);
                                 }
                                 break;
-/*                            case 3: // проверки на зависшего
+                            case 3: // проверки на зависшего
                                 if (interactionLookupPickerField.getValue() != null) {
                                     if (isLostIteraction(il1.getCandidate())) {
                                         setList.add(il1);
                                     }
                                 }
-                                break; */
+                                break;
                             default:
                                 setList.add(il1);
                                 break;
@@ -507,7 +545,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             }
         }
 
-        return retBool != null ? retBool : false;
+        return retBool != null ? !retBool : false;
     }
 
     private void setCandidateCVTable() {
@@ -577,6 +615,16 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             candidateNameLabel.setValue(iteractionList.getCandidate().getSecondName()
                     + " "
                     + iteractionList.getCandidate().getFirstName());
+
+        if (isInactiveCandidate(iteractionList.getCandidate())) {
+            activeInactiveLabel.setValue(CANDIDATE_INACTIVE);
+            activeInactiveLabel.setStyleName("label_button_red");
+        }
+
+        if (isActiveCandidate(iteractionList.getCandidate())) {
+            activeInactiveLabel.setValue(CANDIDATE_ACTIVE);
+            activeInactiveLabel.setStyleName("label_button_green");
+        }
 
         candidatePersonPositionLabel.setValue(iteractionList.getCandidate().getPersonPosition().getPositionRuName()
                 + " / "

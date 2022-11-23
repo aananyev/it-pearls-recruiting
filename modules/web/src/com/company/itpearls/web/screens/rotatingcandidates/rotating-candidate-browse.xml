@@ -301,6 +301,10 @@
                                             width="300px"
                                             sortable="true"
                                             sort="ASCENDING"/>
+                                    <column id="activeUnactiveColumn"
+                                            width="100px">
+                                        <componentRenderer/>
+                                    </column>
                                 </columns>
                             </dataGrid>
                             <vbox id="candidateCardVBox"
@@ -326,8 +330,12 @@
                                           spacing="true">
                                         <hbox spacing="true">
                                             <label id="candidateNameLabel"
+                                                   align="MIDDLE_CENTER"
                                                    stylename="h3"/>
                                             <label id="candidateCityLocationLabel"
+                                                   align="MIDDLE_CENTER"
+                                                   stylename="h3"/>
+                                            <label id="activeInactiveLabel"
                                                    stylename="h3"/>
                                         </hbox>
                                         <label id="candidatePersonPositionLabel"
