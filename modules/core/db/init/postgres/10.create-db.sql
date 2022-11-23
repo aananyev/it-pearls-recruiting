@@ -267,6 +267,7 @@ create table ITPEARLS_PROJECT (
     PROJECT_NAME varchar(160),
     PROJECT_TREE_ID uuid,
     PROJECT_IS_CLOSED boolean,
+    DEFAULT_PROJECT boolean,
     START_PROJECT_DATE date,
     END_PROJECT_DATE date,
     PROJECT_DEPARTMENT_ID uuid,

@@ -2776,10 +2776,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableToVacancyDescriptionProvider(CandidateCV candidateCV) {
-        return "" +
-                (candidateCV.getToVacancy() != null ? candidateCV.getToVacancy().getVacansyName() : "")
-                + (candidateCV.getToVacancy().getLastOpenDate() != null ? "\n"
-                + "\nОткрыта: \n" + candidateCV.getToVacancy().getLastOpenDate() : "");
+        String retStr = (candidateCV.getToVacancy() != null ? candidateCV.getToVacancy().getVacansyName() : "");
+
+        if (candidateCV.getToVacancy() != null) {
+            if (candidateCV.getToVacancy().getLastOpenDate() != null) {
+                retStr += "\nОткрыта: \n" + candidateCV.getToVacancy().getLastOpenDate();
+            }
+        }
+
+        return retStr;
     }
 
     @Install(to = "jobCandidateCandidateCvTable.resumePosition", subject = "descriptionProvider")

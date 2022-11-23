@@ -161,6 +161,7 @@
         <property name="resumePosition" view="_minimal"/>
         <property name="toVacancy" view="_minimal">
             <property name="positionType" view="_local"/>
+            <property name="projectName" view="_local"/>
         </property>
         <property name="owner" view="_minimal">
         </property>
@@ -210,6 +211,7 @@
         </property>
         <property name="candidate" view="_local">
             <property name="personPosition" view="_local"/>
+            <property name="fileImageFace" view="_local"/>
         </property>
         <property name="chainInteraction" view="_local"/>
     </view>

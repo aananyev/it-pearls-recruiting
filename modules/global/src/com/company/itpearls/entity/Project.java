@@ -32,6 +32,9 @@ public class Project extends StandardEntity {
     @Column(name = "PROJECT_IS_CLOSED")
     protected Boolean projectIsClosed = false;
 
+    @Column(name = "DEFAULT_PROJECT")
+    private Boolean defaultProject;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "START_PROJECT_DATE")
     protected Date startProjectDate;
@@ -68,6 +71,14 @@ public class Project extends StandardEntity {
 
     @Column(name = "CHAT_FOR_CV")
     private String chatForCV;
+
+    public Boolean getDefaultProject() {
+        return defaultProject;
+    }
+
+    public void setDefaultProject(Boolean defaultProject) {
+        this.defaultProject = defaultProject;
+    }
 
     public String getChatForCV() {
         return chatForCV;

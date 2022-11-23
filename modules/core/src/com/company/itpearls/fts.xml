@@ -58,13 +58,7 @@
         <entity class="com.company.itpearls.entity.CandidateCV">
             <include re=".*"/>
         </entity>
-        <entity class="com.company.itpearls.entity.Setup">
-            <include re=".*"/>
-        </entity>
         <entity class="com.company.itpearls.entity.RecrutiesTasks">
-            <include re=".*"/>
-        </entity>
-        <entity class="com.company.itpearls.entity.RecruitingRecrutiers">
             <include re=".*"/>
         </entity>
         <entity class="com.company.itpearls.entity.SomeFiles">
@@ -104,9 +98,6 @@
             <include re=".*"/>
         </entity>
         <entity class="com.company.itpearls.entity.InternalEmailer">
-            <include re=".*"/>
-        </entity>
-        <entity class="com.company.itpearls.entity.ExtSettingsWindow">
             <include re=".*"/>
         </entity>
     </entities>

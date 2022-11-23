@@ -6,11 +6,13 @@
     <data>
         <collection id="calendarDataDc" class="com.company.itpearls.entity.IteractionList"
                     view="iteractionList-view">
-            <loader id="calendarDataDl">
+            <loader id="calendarDataDl"
+                    cacheable="true">
                 <query>
                     select e
                     from itpearls_IteractionList e
-                    where (e.addDate is not null and e.iteractionType.calendarItem=TRUE)
+                    where (e.addDate is not null and e.iteractionType.calendarItem=TRUE) and
+                    @between(e.dateIteraction, now-7, now+7, day)
                     order by e.addDate DESC
                     <condition>
                         <or>

@@ -711,7 +711,6 @@
                                     maximumWidth="200px"/>
                             <column id="networkURLS"
                                     editable="true"
-                                    maximumWidth="300px"
                                     property="networkURLS"/>
                             <column id="linkToWeb"
                                     caption="msg://msgLinkURL"

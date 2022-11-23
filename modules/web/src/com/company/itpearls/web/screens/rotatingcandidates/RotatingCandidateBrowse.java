@@ -7,6 +7,7 @@ import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -118,6 +119,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     // Fields
     private JobCandidate selectedJobCandidate;
     private Skillsbar skillBoxFragment = null;
+    @Inject
+    private LookupPickerField<Iteraction> interactionLookupPickerField;
+    private boolean reloadDataLoaders = false;
+    @Inject
+    private LookupPickerField<Position> positionLookupPickerField;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -130,16 +136,55 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         openOrCloseCaseRadioButtonsGroupMap.put("Все", 0);
         openOrCloseCaseRadioButtonsGroupMap.put("Активный", 1);
         openOrCloseCaseRadioButtonsGroupMap.put("Закрытый", 2);
+//        openOrCloseCaseRadioButtonsGroupMap.put("Взаимодействие", 3);
+        openOrCloseCaseRadioButtonsGroupMap.put("Должность", 4);
 
         openOrCloseCaseRadioButtonsGroup.setOptionsMap(openOrCloseCaseRadioButtonsGroupMap);
     }
 
+    @Subscribe("interactionLookupPickerField")
+    public void onInteractionLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
+        setInteractionsFilter(event);
+    }
+
+    private void setInteractionsFilter(HasValue.ValueChangeEvent<Iteraction> event) {
+        setCandidateEntityLabels();
+    }
+
+    @Subscribe("positionLookupPickerField")
+    public void onPositionLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
+        if (positionLookupPickerField.getValue() != null) {
+            iteractionListsDl.setParameter("personPosition", positionLookupPickerField.getValue());
+            iteractionListsDl.load();
+        }
+
+        setCandidateEntityLabels();
+    }
+
+
     @Subscribe("openOrCloseCaseRadioButtonsGroup")
     public void onOpenOrCloseCaseRadioButtonsGroupValueChange(HasValue.ValueChangeEvent<Integer> event) {
         if (!openOrCloseCaseRadioButtonsGroupOld.equals(event.getValue())) {
+            if (event.getValue() == 4) { // Должность
+                if (positionLookupPickerField.getValue() != null) {
+                    iteractionListsDl.setParameter("personPosition", positionLookupPickerField.getValue());
+                    iteractionListsDl.load();
+                }
+            }
+
+            if (event.getValue() == 3) { // Должность
+                if (interactionLookupPickerField.getValue() != null) {
+                }
+            }
+
             setCandidateEntityLabels();
             openOrCloseCaseRadioButtonsGroupOld = event.getValue();
         }
+
+        positionLookupPickerField.setVisible(event.getValue() == 4);
+        positionLookupPickerField.setEnabled(event.getValue() == 4);
+        interactionLookupPickerField.setEnabled(event.getValue() == 3);
+        interactionLookupPickerField.setVisible(event.getValue() == 3);
     }
 
     private void daysIntervalRadioButtonsSetMap() {
@@ -304,6 +349,25 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         return openPositions;
     }
 
+/*    private void setCandidateEntityLabels() {
+        Set<JobCandidate> setList = new HashSet<>();
+        CollectionContainer<JobCandidate> jobCandidateNewDc;
+
+        if (openOrCloseCaseRadioButtonsGroup.getValue() != null) {
+            switch ((int) openOrCloseCaseRadioButtonsGroup.getValue()) {
+                case 0:
+                    break;
+            }
+
+            jobCandidateNewDc = dataComponents.createCollectionContainer(JobCandidate.class);
+            jobCandidateNewDc.setItems(setList);
+            jobCandidateTable.setItems(new ContainerDataGridItems<>(jobCandidateNewDc));
+
+            candidateCountLabel.setValue("Кандидатов: "
+                    + String.valueOf(setList.size()));
+        }
+    } */
+
     private void setCandidateEntityLabels() {
         if (openOrCloseCaseRadioButtonsGroup.getValue() != null) {
             CollectionContainer<IteractionList> iteractionListNewDc;
@@ -336,6 +400,13 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                                             setList.add(il1);
                                         }
                                         break;
+/*                                    case 3: // проверки на зависшего
+                                        if (interactionLookupPickerField.getValue() != null) {
+                                            if (isLostIteraction(il1.getCandidate())) {
+                                                setList.add(il1);
+                                            }
+                                        }
+                                        break; */
                                     default:
                                         setList.add(il1);
                                         break;
@@ -363,6 +434,13 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                                     setList.add(il1);
                                 }
                                 break;
+/*                            case 3: // проверки на зависшего
+                                if (interactionLookupPickerField.getValue() != null) {
+                                    if (isLostIteraction(il1.getCandidate())) {
+                                        setList.add(il1);
+                                    }
+                                }
+                                break; */
                             default:
                                 setList.add(il1);
                                 break;
@@ -378,6 +456,58 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             candidateCountLabel.setValue("Кандидатов: "
                     + String.valueOf(setList.size()));
         }
+    }
+
+    private boolean isLostIteraction(JobCandidate candidate) {
+        Boolean retBool = false;
+        Set<Project> projects = new HashSet<>();
+
+        for (IteractionList iteractionList : candidate.getIteractionList()) {
+            if (iteractionList.getVacancy().getProjectName().getDefaultProject() == null) {
+                projects.add((iteractionList.getVacancy().getProjectName()));
+            } else {
+                if (!iteractionList.getVacancy().getProjectName().getDefaultProject()) {
+                    projects.add(iteractionList.getVacancy().getProjectName());
+                }
+            }
+        }
+
+        for (Project project : projects) {
+            int numberFoundInteraction = -1;
+            Boolean foundInteraction = false;
+            Boolean foundNextInteraction = false;
+
+            for (int i = 0; i < candidate.getIteractionList().size(); i++) {
+                if (candidate
+                        .getIteractionList()
+                        .get(i)
+                        .getVacancy()
+                        .getProjectName()
+                        .equals(project)) {
+                    if (candidate
+                            .getIteractionList()
+                            .get(i)
+                            .getIteractionType()
+                            .equals(interactionLookupPickerField.getValue())) {
+                        foundInteraction = true;
+                        numberFoundInteraction = i;
+                    }
+
+                    if (foundInteraction && i > numberFoundInteraction) {
+                        foundNextInteraction = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if (foundNextInteraction && !foundNextInteraction) {
+                retBool = true;
+                break;
+            }
+        }
+
+        return retBool != null ? retBool : false;
     }
 
     private void setCandidateCVTable() {
@@ -538,7 +668,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 telegramLinkButton.setVisible(true);
             } else {
                 telegramLabel.setVisible(false);
-                telegramLabel.setVisible(false);
+                telegramLinkButton.setVisible(false);
             }
         }
     }
@@ -551,7 +681,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 skypeLinkButton.setVisible(true);
             } else {
                 skypeLabel.setVisible(false);
-                skypeLabel.setVisible(false);
+                skypeLinkButton.setVisible(false);
             }
         }
     }
@@ -920,8 +1050,32 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         return retButton;
     }
 
+    @Install(to = "lastProjectTable", subject = "itemDescriptionProvider")
+    private String lastProjectTableItemDescriptionProvider(Object object, String string) {
+        if (string.equals("vacancy")) {
+            return ((OpenPosition) object).getVacansyName();
+        }
+
+        return null;
+    }
+
     @Install(to = "lastProjectTable", subject = "styleProvider")
     protected String lastProjectTableStyleProvider(IteractionList iteractionList, String property) {
+        if (property.equals("lastInteraction")) {
+            if (iteractionList.getIteractionType().getSignOurInterview() ||
+                    iteractionList.getIteractionType().getSignClientInterview()) {
+                return "label_table_red";
+            }
+
+            if (iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
+                return "label_table_orange";
+            }
+
+            if (iteractionList.getIteractionType().getSignSendToClient()) {
+                return "label_table_green";
+            }
+        }
+
         return null;
     }
 
@@ -934,8 +1088,19 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             IteractionList lastInteraction = getLastInteraction(selectedJobCandidate, openPosition);
 
             if (lastInteraction != null) {
+                Boolean flag = false;
+                for (IteractionList iteractionList : selectedJobCandidate.getIteractionList()) {
+                    if (entity.getValue("vacancy").equals(iteractionList.getVacancy())) {
+                        if (iteractionList.getIteractionType().getSignEndCase()) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+
                 if (lastInteraction.getIteractionType() != null) {
-                    if (lastInteraction.getIteractionType().getSignEndCase()) {
+                    if (flag) {
+//                    if (lastInteraction.getIteractionType().getSignEndCase()) {
                         retLabel.setIcon(CubaIcon.CLOSE.source());
                         retLabel.setStyleName("open-position-pic-center-large-red");
                     } else {
@@ -962,5 +1127,14 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 }));
 
         return retButton;
+    }
+
+    public Component addVacancyNameColumn(Entity entity) {
+        Label retLabel = uiComponents.create(Label.class);
+
+        retLabel.setValue(((OpenPosition) entity.getValue("vacancy")).getVacansyName());
+        retLabel.setDescription(((OpenPosition) entity.getValue("vacancy")).getVacansyName());
+
+        return retLabel;
     }
 }

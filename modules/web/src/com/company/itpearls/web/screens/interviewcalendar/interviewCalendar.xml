@@ -12,6 +12,7 @@
                     select e
                     from itpearls_IteractionList e
                     where (e.addDate is not null and e.iteractionType.calendarItem=TRUE)
+                    and @between(e.dateIteraction, now-1, now+1, month)
                     order by e.addDate DESC
                     <condition>
                         <or>

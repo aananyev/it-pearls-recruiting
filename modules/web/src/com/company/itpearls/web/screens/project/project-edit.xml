@@ -61,8 +61,13 @@
                  id="tabProject">
                 <vbox spacing="true">
                     <checkBox id="checkBoxProjectIsClosed"
-                              dataContainer="projectDc" property="projectIsClosed"
+                              dataContainer="projectDc"
+                              property="projectIsClosed"
                               caption="msg://msgProjectIsClosed"/>
+                    <checkBox id="defaultProjectCheckBox"
+                              dataContainer="projectDc"
+                              property="defaultProject"
+                              caption="msg://msgDefault"/>
                     <lookupPickerField id="highLevelProjectLookupPickerField"
                                        dataContainer="projectDc"
                                        property="projectTree"
