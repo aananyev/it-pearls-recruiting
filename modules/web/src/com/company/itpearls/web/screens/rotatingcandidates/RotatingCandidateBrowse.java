@@ -195,6 +195,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     public void onOpenOrCloseCaseRadioButtonsGroupValueChange(HasValue.ValueChangeEvent<Integer> event) {
         if (!openOrCloseCaseRadioButtonsGroupOld.equals(event.getValue())) {
             if (event.getValue() == 4) { // Должность
+                setPositionsFieldFilter();
+
                 if (positionLookupPickerField.getValue() != null) {
                     iteractionListsDl.setParameter("personPosition", positionLookupPickerField.getValue());
                 } else {
@@ -278,6 +280,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         userDl.load();
         recruterLookupPickerField.setOptionsList(userDc.getItems());
+//        setPositionsFieldFilter();
 
         daysIntervalRadioButtonsGroup.setValue(2);
         recruterRadioButtonsGroup.setValue(1);
@@ -295,6 +298,17 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         suggestVacancyTable.addStyleName("no-horizontal-lines");
         suggestVacancyTable.addStyleName("no-vertical-lines");
 
+    }
+
+    private void setPositionsFieldFilter() {
+        Set<Position> positions = new HashSet<>();
+
+        for (IteractionList iteractionList : iteractionListsDc.getItems()) {
+            positions.add(iteractionList.getCandidate().getPersonPosition());
+        }
+
+        List<Position> list = new ArrayList<>(positions);
+        positionLookupPickerField.setOptionsList(list);
     }
 
     private boolean isActiveCandidate(JobCandidate jobCandidate) {

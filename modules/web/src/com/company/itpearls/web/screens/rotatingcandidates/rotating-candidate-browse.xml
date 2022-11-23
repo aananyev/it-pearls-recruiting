@@ -130,14 +130,6 @@
                 </query>
             </loader>
         </collection>
-        <collection id="positionDc" class="com.company.itpearls.entity.Position">
-            <view extends="_local"/>
-            <loader id="positionDl" cacheable="true">
-                <query>
-                    <![CDATA[select e from itpearls_Position e where e.positionRuName not like '%(не использовать)%']]>
-                </query>
-            </loader>
-        </collection>
         <collection id="suggestOpenPositionDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
@@ -234,8 +226,7 @@
                                        width="100%"
                                        visible="false"
                                        align="BOTTOM_RIGHT"
-                                       enable="false"
-                                       optionsContainer="positionDc"/>
+                                       enable="false"/>
                 </vbox>
                 <vbox spacing="true"
                       margin="true,true,true,true">
