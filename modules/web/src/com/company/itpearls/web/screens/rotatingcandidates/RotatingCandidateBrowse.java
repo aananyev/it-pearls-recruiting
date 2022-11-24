@@ -322,12 +322,14 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         for (OpenPosition openPosition : openPositions) {
             Boolean flag = false;
             for (IteractionList list : jobCandidate.getIteractionList()) {
-                if (!list.getVacancy().getVacansyName().equals("Default")) {
-                    if (list.getVacancy().equals(openPosition)) {
-                        if (list.getIteractionType().getSignEndCase()) {
-                            candidateOpenPositionClose.put(openPosition, true);
-                            flag = true;
-                            break;
+                if (list.getVacancy() != null) {
+                    if (!list.getVacancy().getVacansyName().equals("Default")) {
+                        if (list.getVacancy().equals(openPosition)) {
+                            if (list.getIteractionType().getSignEndCase()) {
+                                candidateOpenPositionClose.put(openPosition, true);
+                                flag = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -340,10 +342,12 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         Boolean retBoolean = false;
         for (Map.Entry<OpenPosition, Boolean> entrySet : candidateOpenPositionClose.entrySet()) {
-            if (!entrySet.getKey().getVacansyName().equals("Default")) {
-                if (entrySet.getValue() == false) {
-                    retBoolean = true;
-                    break;
+            if (entrySet.getKey() != null) {
+                if (!entrySet.getKey().getVacansyName().equals("Default")) {
+                    if (entrySet.getValue() == false) {
+                        retBoolean = true;
+                        break;
+                    }
                 }
             }
         }
@@ -362,12 +366,14 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         for (OpenPosition openPosition : openPositions) {
             Boolean flag = false;
             for (IteractionList list : jobCandidate.getIteractionList()) {
-                if (!list.getVacancy().getVacansyName().equals("Default")) {
-                    if (list.getVacancy().equals(openPosition)) {
-                        if (list.getIteractionType().getSignEndCase()) {
-                            candidateOpenPositionClose.put(openPosition, true);
-                            flag = true;
-                            break;
+                if (list.getVacancy() != null) {
+                    if (!list.getVacancy().getVacansyName().equals("Default")) {
+                        if (list.getVacancy().equals(openPosition)) {
+                            if (list.getIteractionType().getSignEndCase()) {
+                                candidateOpenPositionClose.put(openPosition, true);
+                                flag = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -380,9 +386,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         Boolean retBoolean = true;
         for (Map.Entry<OpenPosition, Boolean> entrySet : candidateOpenPositionClose.entrySet()) {
-            if (!entrySet.getKey().getVacansyName().equals("Default")) {
-                if (entrySet.getValue() == false) {
-                    retBoolean = false;
+            if (entrySet.getKey() != null) {
+                if (!entrySet.getKey().getVacansyName().equals("Default")) {
+                    if (entrySet.getValue() == false) {
+                        retBoolean = false;
+                    }
                 }
             }
         }
@@ -400,25 +408,6 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         List<OpenPosition> openPositions = new ArrayList<>(openPositionSet);
         return openPositions;
     }
-
-/*    private void setCandidateEntityLabels() {
-        Set<JobCandidate> setList = new HashSet<>();
-        CollectionContainer<JobCandidate> jobCandidateNewDc;
-
-        if (openOrCloseCaseRadioButtonsGroup.getValue() != null) {
-            switch ((int) openOrCloseCaseRadioButtonsGroup.getValue()) {
-                case 0:
-                    break;
-            }
-
-            jobCandidateNewDc = dataComponents.createCollectionContainer(JobCandidate.class);
-            jobCandidateNewDc.setItems(setList);
-            jobCandidateTable.setItems(new ContainerDataGridItems<>(jobCandidateNewDc));
-
-            candidateCountLabel.setValue("Кандидатов: "
-                    + String.valueOf(setList.size()));
-        }
-    } */
 
     private void setCandidateEntityLabels() {
         if (openOrCloseCaseRadioButtonsGroup.getValue() != null) {
@@ -579,11 +568,13 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     @Install(to = "jobCandidateTable.candidatePhoto", subject = "columnGenerator")
     private Component jobCandidateTableCandidatePhotoColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
 
+        HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
         Image retImage = uiComponents.create(Image.NAME);
-        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setScaleMode(Image.ScaleMode.FILL);
         retImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        retImage.setWidth("100%");
-        retImage.setHeight("60px");
+        retImage.setWidth("45px");
+        retImage.setHeight("45px");
+        retImage.setStyleName("circle");
 
         if (event.getItem().getCandidate().getFileImageFace() != null) {
             try {
@@ -600,7 +591,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             retImage.setSource(ThemeResource.class).setPath(address);
         }
 
-        return retImage;
+        hBox.setWidthFull();
+        hBox.setHeightFull();
+        hBox.add(retImage);
+
+        return hBox;
     }
 
     @Install(to = "jobCandidateTable.candidateCard", subject = "columnGenerator")

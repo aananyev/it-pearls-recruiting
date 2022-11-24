@@ -220,6 +220,7 @@ public class Suggestjobcandidate extends Screen {
                 iteractionLists = dataManager.load(IteractionList.class)
                         .query("select e from itpearls_IteractionList e where e.candidate = :candidate")
                         .view("iteractionList-view")
+                        .cacheable(true)
                         .parameter("candidate", jobCandidate)
                         .list();
             } catch (Exception e) {
@@ -310,6 +311,7 @@ public class Suggestjobcandidate extends Screen {
                 .editEntity(dataManager.load(JobCandidate.class)
                         .query("select e from itpearls_JobCandidate e where e = :candidate")
                         .view("jobCandidate-view")
+                        .cacheable(true)
                         .parameter("candidate", suitableCheckDataGrid.getSingleSelected().getCandidate())
                         .one()
                 )

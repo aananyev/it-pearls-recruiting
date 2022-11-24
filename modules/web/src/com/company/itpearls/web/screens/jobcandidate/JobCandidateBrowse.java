@@ -1209,6 +1209,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private void candidateImageColumnRenderer() {
         jobCandidatesTable.addGeneratedColumn("fileImageFace", entity -> {
+            HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
             Image image = uiComponents.create(Image.NAME);
 
             if (entity.getItem().getFileImageFace() != null) {
@@ -1219,15 +1220,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     e.printStackTrace();
                 }
 
-                image.setWidth("50px");
-//            image.setStyleName("image-candidate-face-little-image");
-                image.setStyleName("round-photo");
+                image.setWidth("20px");
+                image.setStyleName("circle-20px");
             } else {
                 image.setStyleName("pic-center");
             }
+
             image.setScaleMode(Image.ScaleMode.CONTAIN);
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            return image;
+
+            hBox.setWidthFull();
+            hBox.setHeightFull();
+            hBox.add(image);
+
+            return hBox;
         });
     }
 

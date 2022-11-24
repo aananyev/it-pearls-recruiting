@@ -331,10 +331,11 @@
                                         </hbox>
                                         <label id="candidatePersonPositionLabel"
                                                stylename="h4"/>
-                                        <grid>
+                                        <grid width="AUTO"
+                                              align="TOP_LEFT">
                                             <columns count="2"/>
                                             <rows>
-                                                <row>
+                                                <row rowspan="1">
                                                     <label id="emailLabel"
                                                            icon="font-icon:ADDRESS_CARD"
                                                            value="Email: "
@@ -344,7 +345,7 @@
                                                                 align="MIDDLE_LEFT"
                                                                 visible="false"/>
                                                 </row>
-                                                <row>
+                                                <row rowspan="3">
                                                     <label id="phoneLabel"
                                                            icon="font-icon:PHONE"
                                                            value="Phone: "
