@@ -70,10 +70,10 @@ public class InternalEmailerEdit extends StandardEditor<InternalEmailer> {
     private PickerField<ExtUser> fromEmailField;
     @Inject
     private SuggestionPickerField<JobCandidate> toEmailField;
-    @Inject
-    private CollectionLoader<JobCandidate> jobCandidateDl;
-    @Inject
-    private CollectionContainer<JobCandidate> jobCandidateDc;
+//    @Inject
+//    private CollectionLoader<JobCandidate> jobCandidateDl;
+//    @Inject
+//    private CollectionContainer<JobCandidate> jobCandidateDc;
     @Inject
     private MetadataTools metadataTools;
     @Inject
@@ -147,14 +147,14 @@ public class InternalEmailerEdit extends StandardEditor<InternalEmailer> {
     public void onInit(InitEvent event) {
         InternalEmailer internalEmailer = metadata.create(InternalEmailer.class);
         emailerDc.setItem(internalEmailer);
-        jobCandidateDl.load();
+//        jobCandidateDl.load();
 
-        List<JobCandidate> jobCandidateList = new ArrayList<>(jobCandidateDc.getItems());
+/*        List<JobCandidate> jobCandidateList = new ArrayList<>(jobCandidateDc.getItems());
         toEmailField.setSearchExecutor((searchString, searchParams) ->
                 jobCandidateList.stream()
                         .filter(jobCandidate ->
                                 StringUtils.containsIgnoreCase(metadataTools.getInstanceName(jobCandidate), searchString))
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList())); */
     }
 
     private void sendByEmailDefault() {

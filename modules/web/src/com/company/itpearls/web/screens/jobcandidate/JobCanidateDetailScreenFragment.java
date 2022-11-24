@@ -218,8 +218,17 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         }
         // последнее взаимодействие
         if (iteractionList.size() != 0) {
-            String lastIteraction = iteractionList.get(0).getIteractionType().getIterationName() + " ("
-                    + simpleDateFormat.format((iteractionList.get(0).getDateIteraction())) + ")";
+            String lastIteraction = "";
+
+            if (iteractionList.get(0).getIteractionType() != null) {
+                if (iteractionList.get(0).getIteractionType().getIterationName() != null) {
+                    lastIteraction = iteractionList.get(0).getIteractionType().getIterationName();
+                }
+            }
+
+            if (iteractionList.get(0).getDateIteraction() != null) {
+                lastIteraction += "(" + simpleDateFormat.format((iteractionList.get(0).getDateIteraction())) + ")";
+            }
 
             lastIteractionLabel.setValue(lastIteraction);
             lastIteractionLabel.setDescription(lastIteraction);

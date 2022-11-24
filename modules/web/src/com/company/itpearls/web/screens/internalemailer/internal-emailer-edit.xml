@@ -25,7 +25,7 @@
             </view>
             <loader/>
         </instance>
-        <collection id="jobCandidateDc"
+<!--        <collection id="jobCandidateDc"
                     class="com.company.itpearls.entity.JobCandidate">
             <view extends="_minimal">
                 <property name="fullName"/>
@@ -40,7 +40,7 @@
                     <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
                 </query>
             </loader>
-        </collection>
+        </collection> -->
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -70,8 +70,10 @@
                                width="100%"
                                editable="false"/>
                     <suggestionPickerField id="toEmailField"
+                                           required="true"
                                            caption="msg://msgToEmail"
                                            dataContainer="emailerDc"
+                                           inputPrompt="mainMsg://msgStartInput"
                                            width="100%"
                                            minSearchStringLength="3"
                                            property="toEmail">
@@ -79,6 +81,16 @@
                             <action id="lookup" type="picker_lookup"/>
                             <action id="clear" type="picker_clear"/>
                         </actions>
+                        <query entityClass="com.company.itpearls.entity.JobCandidate"
+                               escapeValueForLike="true"
+                               searchStringFormat="%$searchString%">
+                            select e
+                            from itpearls_JobCandidate e
+                            where lower(e.fullName) like lower(:searchString) escape '\'
+                            and e.middleName not like '(не использовать)'
+                            and not e.blockCandidate = true
+                            order by e.secondName, e.firstName
+                        </query>
                     </suggestionPickerField>
                 </vbox>
                 <vbox width="AUTO"
