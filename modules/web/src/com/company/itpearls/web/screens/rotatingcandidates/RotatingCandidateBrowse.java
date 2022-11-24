@@ -22,6 +22,7 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import javax.swing.*;
 import java.util.*;
 
 @UiController("itpearls_RotatingCandidate.browse")
@@ -30,12 +31,15 @@ import java.util.*;
 @LoadDataBeforeShow
 public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
+    private static final String DESCRIPTION_VACANCY_OPEN = "Вакансия открыта на текущий момент";
+    private static final String DESCRIPTION_VACANCY_CLOSE = "Вакансия закрыта на текущий момент";
+    private static final String CASE_IS_CLOSED = "Кейс с кандидатом закрыт по этой вакансии";
+    private static final String CASE_IS_OPENED = "Кейс с кандидатом по этой вакансии продолжаетcя";
+
     @Inject
     private RadioButtonGroup<Integer> recruterRadioButtonsGroup;
     @Inject
     private RadioButtonGroup<Integer> daysIntervalRadioButtonsGroup;
-
-
     @Inject
     private UserSession userSession;
     @Inject
@@ -1160,9 +1164,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 //                    if (lastInteraction.getIteractionType().getSignEndCase()) {
                         retLabel.setIcon(CubaIcon.CLOSE.source());
                         retLabel.setStyleName("open-position-pic-center-large-red");
+                        retLabel.setDescription(CASE_IS_CLOSED);
                     } else {
                         retLabel.setIcon(CubaIcon.YES.source());
                         retLabel.setStyleName("open-position-pic-center-large-green");
+                        retLabel.setDescription(CASE_IS_OPENED);
                     }
                 }
             }
@@ -1193,5 +1199,33 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         retLabel.setDescription(((OpenPosition) entity.getValue("vacancy")).getVacansyName());
 
         return retLabel;
+    }
+
+    public Component addOpenClosePosition(Entity entity) {
+        HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.class);
+        Label retLabel = uiComponents.create(Label.class);
+
+        if (((OpenPosition) entity.getValue("vacancy")).getOpenClose() != null) {
+            if (((OpenPosition) entity.getValue("vacancy")).getOpenClose()) {
+                retLabel.setIcon(CubaIcon.MINUS_CIRCLE.source());
+                retLabel.setStyleName("label_table_red");
+                retLabel.setDescription(DESCRIPTION_VACANCY_CLOSE);
+
+            } else {
+                retLabel.setIcon(CubaIcon.PLUS_CIRCLE.source());
+                retLabel.setStyleName("label_table_green");
+                retLabel.setDescription(DESCRIPTION_VACANCY_OPEN);
+
+            }
+        } else {
+            retLabel.setValue(CubaIcon.PLUS_CIRCLE);
+            retLabel.setStyleName("label_table_green");
+            retLabel.setDescription(DESCRIPTION_VACANCY_OPEN);
+        }
+
+        hBoxLayout.add(retLabel);
+        hBoxLayout.setHeightFull();
+        hBoxLayout.setWidthFull();
+        return hBoxLayout;
     }
 }

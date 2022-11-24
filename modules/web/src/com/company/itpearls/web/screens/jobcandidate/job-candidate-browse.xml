@@ -91,7 +91,8 @@
                 </column>
                 <column id="fileImageFace"
                         property="fileImageFace"
-                        width="60px">
+                        maximumWidth="50px"
+                        width="50px">
                     <componentRenderer/>
                 </column>
                 <column id="fullName"

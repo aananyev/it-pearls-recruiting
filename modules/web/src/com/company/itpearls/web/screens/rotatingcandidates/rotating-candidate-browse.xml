@@ -432,12 +432,17 @@
                                                             caption="msg://msgStatus"
                                                             generator="statusInteractions"/>
                                                     <column id="vacancy"
-                                                            width="330px"
+                                                            width="300px"
                                                             maxTextLength="40"
                                                             generator="addVacancyNameColumn"
                                                             caption="msg://msgVacancy"/>
+                                                    <column id="openCloseVacansyColumn"
+                                                            width="20px"
+                                                            maxTextLength="0"
+                                                            caption=""
+                                                            generator="addOpenClosePosition"/>
                                                     <column id="lastInteraction"
-                                                            width="170"
+                                                            width="150"
                                                             maxTextLength="40"
                                                             caption="msg://msgLastInteraction"
                                                             generator="lastInteractionGeneratorColumn"/>
@@ -475,6 +480,7 @@
                                                     <column id="notSendedIconColumn"
                                                             caption="msg://msgStatus"
                                                             width="40px"/>
+
                                                     <column id="vacansyName"
                                                             captionAsHtml="true"
                                                             width="760px"
