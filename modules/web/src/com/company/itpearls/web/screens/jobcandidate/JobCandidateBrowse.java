@@ -382,8 +382,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         infoLabel.setStyleName("h3");
         infoLabel.setValue("Информация о кандидате:");
 
-        Boolean checkBlockCandidate = !(jobCandidatesTable.getSingleSelected().getBlockCandidate() == null
-                ? false : jobCandidatesTable.getSingleSelected().getBlockCandidate());
+        Boolean checkBlockCandidate = false;
+        if (jobCandidatesTable.getSingleSelected() != null) {
+            checkBlockCandidate = !(jobCandidatesTable.getSingleSelected().getBlockCandidate() == null
+                    ? false : jobCandidatesTable.getSingleSelected().getBlockCandidate());
+        }
+
         Label<String> candidateStatusLabel = uiComponents.create(Label.NAME);
         candidateStatusLabel.setHtmlEnabled(true);
         candidateStatusLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);

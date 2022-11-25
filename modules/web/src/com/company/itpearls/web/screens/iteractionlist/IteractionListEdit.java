@@ -135,6 +135,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private HBoxLayout outstaffingCostHBox;
     @Inject
     private SuggestionPickerField<JobCandidate> candidateField;
+    @Inject
+    private LinkButton alternativeVacancyLinkButton;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -965,11 +967,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     } */
 
-    @Subscribe("vacancyFiels")
-    public void onVacancyFielsValueChange1(HasValue.ValueChangeEvent<OpenPosition> event) {
-//        setLaborAgreement();
-    }
-
     private void setMostPopularIteraction() {
         int maxCount = 5;
         mostPopular = getMostPolularIteraction(userSession.getUser(), maxCount);
@@ -1272,12 +1269,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
-/*        if (event.getPrevValue() != null && event.getValue() != null) {
-            if (!event.getValue().equals(event.getPrevValue())) {
-                vacancyFieldValueChange(event);
-            }
-        } */
-
         if (!beforeCommitFlag) {
             vacancyFieldValueChange(event);
             setPriorityLabel(event);
@@ -1286,16 +1277,46 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setStatusOfVacancyLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
+        String QUERY
+                = "select v from itpearls_OpenPosition v where not (v.openClose = true) and v.positionType = :positionType";
+
         if (event.getValue() != null) {
             if (event.getValue().getOpenClose()) {
                 statusOfVacansyLabel.setValue("ЗАКРЫТА");
                 statusOfVacansyLabel.setStyleName("h3-red");
+
+
+                List<OpenPosition> alternatives = dataManager
+                        .load(OpenPosition.class)
+                        .query(QUERY)
+                        .view("openPosition-view")
+                        .parameter("positionType", event.getValue().getPositionType())
+                        .list();
+
+                if ( alternatives.size() > 0) {
+                    alternativeVacancyLinkButton.setVisible(true);
+                    alternativeVacancyLinkButton.addStyleName("transition-red");
+
+                    String description = "<b>Альтернативные вакансии для кандидата:</b></br><ul>";
+                    for (OpenPosition openPosition : alternatives) {
+                        description += "<li>" + openPosition.getVacansyName();
+                    }
+
+                    description += "</ul>";
+
+                    alternativeVacancyLinkButton.setDescription(description);
+                } else {
+                    alternativeVacancyLinkButton.setVisible(false);
+                }
             } else {
                 statusOfVacansyLabel.setValue("ОТКРЫТА");
                 statusOfVacansyLabel.setStyleName("h3-green");
+
+                alternativeVacancyLinkButton.setVisible(false);
             }
         } else {
             statusOfVacansyLabel.setValue("");
+            alternativeVacancyLinkButton.setVisible(false);
         }
     }
 
@@ -1530,7 +1551,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange2(HasValue.ValueChangeEvent<OpenPosition> event) {
-        outstaffingCostHBox.setVisible(event.getValue().getOutstaffingCost() != null);
+        if (event.getValue() != null) {
+            outstaffingCostHBox.setVisible(event.getValue().getOutstaffingCost() != null);
+        }
     }
 
     @Install(to = "recrutierField", subject = "optionIconProvider")

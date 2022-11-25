@@ -2557,11 +2557,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             OpenPosition op = entity.getValue("vacancy");
 
             if (op != null) {
-                if (iteractionList.getIteractionType().getSignOurInterviewAssigned() != null) {
-                    if (iteractionList.getVacancy() != null) {
-                        if (iteractionList.getVacancy().equals(op) &&
-                                iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
-                            retLabel.setValue(iteractionList.getRecrutier().getName());
+                if (iteractionList.getIteractionType() != null) {
+                    if (iteractionList.getIteractionType().getSignOurInterviewAssigned() != null) {
+                        if (iteractionList.getVacancy() != null) {
+                            if (iteractionList.getVacancy().equals(op) &&
+                                    iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
+                                retLabel.setValue(iteractionList.getRecrutier().getName());
+                            }
                         }
                     }
                 }
@@ -2578,11 +2580,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             OpenPosition op = entity.getValue("vacancy");
 
             if (op != null) {
-                if (iteractionList.getIteractionType().getSignOurInterview() != null) {
-                    if (iteractionList.getVacancy() != null) {
-                        if (iteractionList.getVacancy().equals(op) &&
-                                iteractionList.getIteractionType().getSignOurInterview()) {
-                            retLabel.setValue(iteractionList.getRecrutier().getName());
+                if (iteractionList.getIteractionType() != null) {
+                    if (iteractionList.getIteractionType().getSignOurInterview() != null) {
+                        if (iteractionList.getVacancy() != null) {
+                            if (iteractionList.getVacancy().equals(op) &&
+                                    iteractionList.getIteractionType().getSignOurInterview()) {
+                                retLabel.setValue(iteractionList.getRecrutier().getName());
+                            }
                         }
                     }
                 }
@@ -2605,29 +2609,41 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .getMutableItems()
                             .get(i)
                             .getVacancy())) {
-                        if (lastInteraction.getDateIteraction().before(jobCandidateIteractionDc
+                        if (jobCandidateIteractionDc
                                 .getMutableItems()
                                 .get(i)
-                                .getDateIteraction())) {
+                                .getDateIteraction() != null) {
+                            if (lastInteraction.getDateIteraction().before(
+                                    jobCandidateIteractionDc
+                                            .getMutableItems()
+                                            .get(i)
+                                            .getDateIteraction())) {
+                                lastInteraction = jobCandidateIteractionDc
+                                        .getMutableItems()
+                                        .get(i);
+                            }
+                        }
+                    }
+                } else {
+                    if (jobCandidateIteractionDc
+                            .getMutableItems()
+                            .get(i)
+                            .getVacancy() != null) {
+                        if (openPosition.equals(jobCandidateIteractionDc
+                                .getMutableItems()
+                                .get(i)
+                                .getVacancy())) {
                             lastInteraction = jobCandidateIteractionDc
                                     .getMutableItems()
                                     .get(i);
                         }
                     }
-                } else {
-                    if (openPosition.equals(jobCandidateIteractionDc
-                            .getMutableItems()
-                            .get(i)
-                            .getVacancy())) {
-                        lastInteraction = jobCandidateIteractionDc
-                                .getMutableItems()
-                                .get(i);
-                    }
                 }
             }
         }
 
-        StringBuffer retStr = new StringBuffer(lastInteraction.getIteractionType().getIterationName());
+        StringBuffer retStr = new StringBuffer(
+                lastInteraction.getIteractionType().getIterationName());
         retLabel.setValue(retStr);
 
         return retLabel;
@@ -2769,12 +2785,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         }
                     }
 
-                    if (list.getIteractionType().getSignEndCase() != null ?
-                            list.getIteractionType().getSignEndCase() : false) {
-                        retStr = "font-icon:CLOSE";
-                        retStyle = "h2-red";
-                        retDescriplion = "<b>Слать резюме не рекомендуется.</b><br> Процесс с заказчиком закончен.";
-                        break;
+                    if (list.getIteractionType() != null) {
+                        if (list.getIteractionType().getSignEndCase() != null ?
+                                list.getIteractionType().getSignEndCase() : false) {
+                            retStr = "font-icon:CLOSE";
+                            retStyle = "h2-red";
+                            retDescriplion = "<b>Слать резюме не рекомендуется.</b><br> Процесс с заказчиком закончен.";
+                            break;
+                        }
                     }
 
                     retStr = "font-icon:QUESTION";

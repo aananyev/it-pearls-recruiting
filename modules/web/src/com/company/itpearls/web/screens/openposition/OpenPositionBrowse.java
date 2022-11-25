@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.openposition;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
@@ -181,7 +182,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private void initCheckBoxOnlyOpenedPosition() {
         Map<String, Integer> onlyOpenedPositionMap = new LinkedHashMap<>();
 
-        if (!getRoleService.isUserRoles(userSession.getUser(), ROLE_RESEARCHER)) {
+        if (!getRoleService.isUserRoles(userSession.getUser(), StandartRoles.RESEARCHER)) {
             onlyOpenedPositionMap.put("Все вакансии", 2);
         }
 
@@ -1221,7 +1222,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         checkBoxOnlyOpenedPosition.setValue(true); // только открытые позиции
-        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER));
+        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
 
         setInternalProjectFilter();
         setSubcribersFilter();
@@ -1229,7 +1230,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setStatusNotLower();
         setStatusRemoteWork();
 
-        notLowerRatingLookupField.setValue(PRIORITY_NORMAL);
+        if (!getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER)) {
+            notLowerRatingLookupField.setValue(PRIORITY_NORMAL);
+        }
+
         setUrgentlyPositios(3);
 
         clearUrgentFilter();
@@ -1257,7 +1261,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsTable.addItemClickListener(e -> {
             buttonSubscribe.setEnabled(true);
             listBtn.setEnabled(true);
-            if (getRoleService.isUserRoles(userSession.getUser(), ROLE_MANAGER)) {
+            if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER)) {
                 if (e.getItem().getOpenClose()) {
                     openCloseButton.setEnabled(true);
                     openCloseButton.setIconFromSet(CubaIcon.YES);
@@ -1460,7 +1464,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setInternalProjectFilter() {
-        if (!getRoleService.isUserRoles(userSession.getUser(), ROLE_RESEARCHER)) {
+        if (!getRoleService.isUserRoles(userSession.getUser(), StandartRoles.RESEARCHER)) {
             openPositionsDl.removeParameter("subscriber");
         } else {
             openPositionsDl.setParameter("subscriber", userSession.getUser());

@@ -20,6 +20,8 @@
                 </property>
                 <property name="vacancy"
                           view="_local">
+                    <property name="positionType"
+                              view="_local"/>
                     <property name="owner"
                               view="_local"/>
                     <property name="projectName"
@@ -272,6 +274,12 @@
                                                width="AUTO"
                                                align="MIDDLE_LEFT"
                                                stylename="h3"/>
+                                        <linkButton id="alternativeVacancyLinkButton"
+                                                    visible="false"
+                                                    descriptionAsHtml="true"
+                                                    description="msg://msgAlarmAlternativeVacancy"
+                                                    stylename="huge"
+                                                    icon="WARNING"/>
                                     </hbox>
                                     <hbox spacing="true">
                                         <label value="msg://msgPriority"

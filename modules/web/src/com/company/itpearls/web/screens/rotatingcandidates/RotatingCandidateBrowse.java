@@ -35,6 +35,9 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private static final String DESCRIPTION_VACANCY_CLOSE = "Вакансия закрыта на текущий момент";
     private static final String CASE_IS_CLOSED = "Кейс с кандидатом закрыт по этой вакансии";
     private static final String CASE_IS_OPENED = "Кейс с кандидатом по этой вакансии продолжаетcя";
+    private static final String RESEARCHING_INTERACION_NUMBER = "001";
+    private static final String RECRUITING_INTERACION_NUMBER = "002";
+    private static final String ACCOUNTING_INTERACION_NUMBER = "003";
 
     @Inject
     private RadioButtonGroup<Integer> recruterRadioButtonsGroup;
@@ -131,6 +134,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private Integer openOrCloseCaseRadioButtonsGroupOld = -1;
     private String CANDIDATE_INACTIVE = "Inactive";
     private String CANDIDATE_ACTIVE = "Active";
+    @Inject
+    private Label<String> reserchingLabel;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -691,6 +696,48 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         setSuggestOpenPositionTable();
         setCandidateCVTable();
+        setPictogrammsStatus();
+    }
+
+    private void setPictogrammsStatus() {
+        setResearchingLabel();
+//        setRecruitingLabel();
+//        setAccountingLabel();
+    }
+
+    private void setResearchingLabel() {
+        Boolean researching = false;
+        Boolean recruiting = false;
+        Boolean accounting = false;
+
+        if (selectedJobCandidate != null) {
+            for (IteractionList iteractionList : selectedJobCandidate.getIteractionList()) {
+                if (iteractionList != null) {
+                    if (iteractionList.getIteractionType() != null) {
+                        if (iteractionList.getIteractionType().getIteractionTree() != null) {
+                            if (iteractionList.getIteractionType().getIteractionTree().getNumber()
+                                    .equals(RESEARCHING_INTERACION_NUMBER)) {
+                                researching = true;
+                            }
+
+                            if (iteractionList.getIteractionType().getIteractionTree().getNumber().equals(RECRUITING_INTERACION_NUMBER)) {
+                                recruiting = true;
+                            }
+
+                            if (iteractionList.getIteractionType().getIteractionTree().getNumber().equals(ACCOUNTING_INTERACION_NUMBER)) {
+                                accounting = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (researching && !recruiting && !accounting) {
+            reserchingLabel.setStyleName("label_button_red");
+        } else {
+            reserchingLabel.setStyleName("label_button_green");
+        }
     }
 
     @Subscribe("emailLinkButton")
