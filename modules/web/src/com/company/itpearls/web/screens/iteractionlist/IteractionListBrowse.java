@@ -2,9 +2,8 @@ package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
@@ -12,7 +11,6 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
@@ -21,7 +19,6 @@ import com.vaadin.ui.JavaScript;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
@@ -39,23 +36,11 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Inject
     private Button buttonCopy;
     @Inject
-    private UserSessionSource userSessionSource;
-    @Inject
     private Button buttonExcel;
     @Inject
     private GetRoleService getRoleService;
-
-    static String RESEARCHER = "Researcher";
-    static String RECRUITER = "Recruiter";
-    static String MANAGER = "Manager";
-    static String ADMINISTRATOR = "Administrators";
-    static String STAGER = "Стажер";
-
-    @Inject
-    private DataManager dataManager;
     @Inject
     private DataGrid<IteractionList> iteractionListsTable;
-    private DataContext dataContext;
     @Inject
     private Screens screens;
     @Inject
@@ -71,7 +56,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), MANAGER));
+        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
 
         filterStagerField();
         filterUoustaffing();
@@ -80,7 +65,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     }
 
     private void filterUoustaffing() {
-        if (userSession.getUser().getGroup().getName().equals(MANAGER)) {
+        if (userSession.getUser().getGroup().getName().equals(StandartRoles.MANAGER)) {
             iteractionListsDl.setParameter("outStaffing", true);
         } else {
             iteractionListsDl.removeParameter("outStaffing");
@@ -90,7 +75,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     }
 
     private void filterStagerField() {
-        if (userSession.getUser().getGroup().getName().equals(STAGER)) {
+        if (userSession.getUser().getGroup().getName().equals(StandartRoles.STAGER)) {
             iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
 
             checkBoxShowOnlyMy.setValue(true);
@@ -119,8 +104,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     }
 
     private void filterInternalProject() {
-        if (getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
+        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
             iteractionListsDl.removeParameter("internalProject");
         } else {
             iteractionListsDl.setParameter("internalProject", false);
@@ -152,8 +137,6 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
                         data.setCandidate(iteractionListsTable.getSingleSelected().getCandidate());
                         data.setVacancy(iteractionListsTable.getSingleSelected().getVacancy());
-                        // data.setCompanyDepartment( iteractionListsTable.getSingleSelected().getCompanyDepartment() );
-                        // data.getVacancy().setProjectName(iteractionListsTable.getSingleSelected().getVacancy().getProjectName());
                     }
                 })
                 .withScreenClass(IteractionListEdit.class)

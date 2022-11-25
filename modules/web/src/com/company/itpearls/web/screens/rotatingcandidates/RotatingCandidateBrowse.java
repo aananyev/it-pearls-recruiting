@@ -151,6 +151,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidateTable.activeUnactiveColumn", subject = "columnGenerator")
     private Component jobCandidateTableActiveUnactiveColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setStyleName("h4");
         retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
@@ -170,7 +175,9 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         }
 
-        return retLabel;
+        retHBox.add(retLabel);
+
+        return retHBox;
     }
 
     @Subscribe("interactionLookupPickerField")
@@ -329,10 +336,14 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 if (list.getVacancy() != null) {
                     if (!list.getVacancy().getVacansyName().equals("Default")) {
                         if (list.getVacancy().equals(openPosition)) {
-                            if (list.getIteractionType().getSignEndCase()) {
-                                candidateOpenPositionClose.put(openPosition, true);
-                                flag = true;
-                                break;
+                            if (list.getIteractionType() != null) {
+                                if (list.getIteractionType().getSignEndCase() != null) {
+                                    if (list.getIteractionType().getSignEndCase()) {
+                                        candidateOpenPositionClose.put(openPosition, true);
+                                        flag = true;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
@@ -373,10 +384,14 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 if (list.getVacancy() != null) {
                     if (!list.getVacancy().getVacansyName().equals("Default")) {
                         if (list.getVacancy().equals(openPosition)) {
-                            if (list.getIteractionType().getSignEndCase()) {
-                                candidateOpenPositionClose.put(openPosition, true);
-                                flag = true;
-                                break;
+                            if (list.getIteractionType() != null) {
+                                if (list.getIteractionType().getSignEndCase() != null) {
+                                    if (list.getIteractionType().getSignEndCase()) {
+                                        candidateOpenPositionClose.put(openPosition, true);
+                                        flag = true;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }

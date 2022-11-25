@@ -6,4 +6,5 @@ public class StandartRoles {
     public final static String MANAGER = "Manager";
     public final static String ADMINISTRATOR = "Administrators";
     public final static String OUSTAFF_NAMAGER = "Outstaff Manager";
+    public final static String STAGER = "Стажер";
 }

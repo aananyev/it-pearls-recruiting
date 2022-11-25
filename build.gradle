@@ -81,8 +81,8 @@ configure(globalModule) {
         }
         compile 'org.apache.pdfbox:pdfbox:3.0.0-alpha3'
         compile 'org.webjars.npm:domelementtype:2.2.0'
-        compile 'org.apache.poi:poi:5.2.3'
         compile 'com.ibm.icu:icu4j:69.1'
+        compile 'org.apache.poi:poi-ooxml-lite:5.2.3'
     }
 
     entitiesEnhancing {

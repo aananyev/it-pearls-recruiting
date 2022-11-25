@@ -289,7 +289,7 @@
                                             collapsed="true"
                                             collapsible="true"
                                             property="candidate"
-                                            width="300px"
+                                            width="280px"
                                             sortable="true"
                                             sort="ASCENDING"/>
                                     <column id="activeUnactiveColumn"

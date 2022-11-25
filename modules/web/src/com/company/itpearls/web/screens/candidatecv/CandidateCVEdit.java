@@ -19,14 +19,9 @@ import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.poi.extractor.POIOLE2TextExtractor;
 import org.apache.poi.extractor.POITextExtractor;
-import org.apache.poi.ooxml.extractor.ExtractorFactory;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.xmlbeans.XmlException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -54,8 +49,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private TextField<String> textFieldITPearlsCV;
     @Inject
-    private FileUploadField fileOriginalCVField;
-    @Inject
     private Notifications notifications;
     @Inject
     private LookupPickerField<OpenPosition> candidateCVFieldOpenPosition;
@@ -82,15 +75,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private MessageBundle messageBundle;
     @Inject
-    private FileUploadField fileCVField;
-    @Inject
-    private FileUploadingAPI fileUploadingAPI;
-    @Inject
     private RichTextArea cvResomandation;
     @Inject
     private RichTextArea letterRecommendation;
-    @Inject
-    private InstanceContainer<CandidateCV> candidateCVDc;
     @Inject
     private ParseCVService parseCVService;
     @Inject
