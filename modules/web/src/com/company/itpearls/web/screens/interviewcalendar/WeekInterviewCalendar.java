@@ -116,10 +116,10 @@ public class WeekInterviewCalendar extends Screen {
 
             String a = getCandidateName(dateCalendarEventClickEvent.getCalendarEvent().getCaption());
 
-            JobCandidate jobCandidate = dataManager.load(JobCandidate.class)
+/*            JobCandidate jobCandidate = dataManager.load(JobCandidate.class)
                     .query("select e from itpearls_JobCandidate e where e.fullName = \'"+a+"\'")
                     .view("jobCandidate-view")
-                    .one();
+                    .one(); */
 
             IteractionList iteractionList = dataManager.load(IteractionList.class)
                     .query("select e " +

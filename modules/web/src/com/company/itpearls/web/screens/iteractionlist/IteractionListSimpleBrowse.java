@@ -122,7 +122,11 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     }
 
     private String getIcon(IteractionList item) {
-        return item.getIteractionType().getPic();
+        if (item.getIteractionType() != null) {
+            return item.getIteractionType().getPic();
+        } else {
+            return "icons/one1d.png";
+        }
     }
 
     private void addIconColumn() {
@@ -262,8 +266,20 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
             return columnGeneratorEvent.getItem().getCurrentOpenClose()
                     ? CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
         } else {
-            return columnGeneratorEvent.getItem().getVacancy().getOpenClose() ?
-                    CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+            if (columnGeneratorEvent.getItem() != null) {
+                if (columnGeneratorEvent.getItem().getVacancy() != null) {
+                    if (columnGeneratorEvent.getItem().getVacancy().getOpenClose() != null) {
+                        return columnGeneratorEvent.getItem().getVacancy().getOpenClose() ?
+                                CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+                    } else {
+                        return CubaIcon.MINUS_CIRCLE;
+                    }
+                } else {
+                    return CubaIcon.MINUS_CIRCLE;
+                }
+            } else {
+                return CubaIcon.MINUS_CIRCLE;
+            }
         }
     }
 
@@ -275,8 +291,20 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
             return iteractionList.getCurrentOpenClose()
                     ? "pic-center-large-red" : "pic-center-large-green";
         } else {
-            return iteractionList.getVacancy().getOpenClose() ?
-                    "pic-center-large-red" : "pic-center-large-green";
+            if (iteractionList != null) {
+                if (iteractionList.getVacancy() != null) {
+                    if (iteractionList.getVacancy().getOpenClose() != null) {
+                        return iteractionList.getVacancy().getOpenClose() ?
+                                "pic-center-large-red" : "pic-center-large-green";
+                    } else {
+                        return "pic-center-large-red";
+                    }
+                } else {
+                    return "pic-center-large-red";
+                }
+            } else {
+                return "pic-center-large-red";
+            }
         }
     }
 
@@ -287,8 +315,20 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 return iteractionList.getCurrentOpenClose()
                         ? "Закрыта на момент создания взаимодействия" : "Открыта на момент создания взаимодействия";
             } else {
-                return iteractionList.getVacancy().getOpenClose() ?
-                        "Закрыта на текущий момент" : "Открыта на текущий момент";
+                if (iteractionList != null) {
+                    if (iteractionList.getVacancy() != null) {
+                        if (iteractionList.getVacancy().getOpenClose() != null) {
+                            return iteractionList.getVacancy().getOpenClose() ?
+                                    "Закрыта на текущий момент" : "Открыта на текущий момент";
+                        } else {
+                            return "Закрыта на текущий момент";
+                        }
+                    } else {
+                        return "Закрыта на текущий момент";
+                    }
+                } else {
+                    return "Закрыта на текущий момент";
+                }
             }
     }
 

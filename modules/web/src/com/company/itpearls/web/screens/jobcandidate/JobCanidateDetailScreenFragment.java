@@ -193,14 +193,15 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             if (iteraction.getRecrutier() != null)
                 if (iteraction.getRecrutier().getGroup() != null)
                     if (iteraction.getRecrutier().getGroup().getName() != null)
-                        if (iteraction.getRecrutier().getGroup().getName().equals(RECRUTIER_GROUP)) {
-                            String lastRecrutier = iteraction.getRecrutier().getName() + " ("
-                                    + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+                        if (iteraction.getDateIteraction() != null)
+                            if (iteraction.getRecrutier().getGroup().getName().equals(RECRUTIER_GROUP)) {
+                                String lastRecrutier = iteraction.getRecrutier().getName() + " ("
+                                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
 
-                            lastRecruterLabel.setValue(lastRecrutier);
-                            lastRecruterLabel.setDescription(lastRecrutier);
-                            break;
-                        }
+                                lastRecruterLabel.setValue(lastRecrutier);
+                                lastRecruterLabel.setDescription(lastRecrutier);
+                                break;
+                            }
         }
 
         //Найти последнего реcthxthf
@@ -208,13 +209,14 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             if (iteraction.getRecrutier() != null)
                 if (iteraction.getRecrutier().getGroup() != null)
                     if (iteraction.getRecrutier().getGroup().getName() != null)
-                        if (iteraction.getRecrutier().getGroup().getName().equals(RESEARCHER_GROUP)) {
-                            String lastResearcher = iteraction.getRecrutier().getName() + " ("
-                                    + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
-                            lastResearcherLabel.setValue(lastResearcher);
-                            lastRecruterLabel.setDescription(lastResearcher);
-                            break;
-                        }
+                        if (iteraction.getDateIteraction() != null)
+                            if (iteraction.getRecrutier().getGroup().getName().equals(RESEARCHER_GROUP)) {
+                                String lastResearcher = iteraction.getRecrutier().getName() + " ("
+                                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+                                lastResearcherLabel.setValue(lastResearcher);
+                                lastRecruterLabel.setDescription(lastResearcher);
+                                break;
+                            }
         }
         // последнее взаимодействие
         if (iteractionList.size() != 0) {
@@ -378,9 +380,14 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     static private String DESC_DAYS_ON_LAST_PROJECT = "Количество дней на рассмотрении последнего проекта";
 
     public void setStatisticsLabel() {
-        if(iteractionList.size() != 0) {
+        if (iteractionList.size() != 0) {
             LocalDate d1 = LocalDate.now();
-            LocalDate d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate d2 = LocalDate.now();
+
+            if (iteractionList.get(0).getDateIteraction() != null) {
+                d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            }
+
             long days = ChronoUnit.DAYS.between(d2, d1) - 30;
 
             if (iteractionList.size() > 0) {
@@ -433,34 +440,42 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         Label countAfterSendCVToClient = uiComponents.create(Label.NAME);
 
         for (IteractionList iList : iteractionList) {
-            if (iList.getIteractionType().getSignSendToClient() != null) {
-                if (iList.getIteractionType().getSignSendToClient()) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(iList.getDateIteraction());
-                    calendar.add(Calendar.DAY_OF_MONTH, 3);
+            if (iList.getIteractionType() != null) {
+                if (iList.getIteractionType().getSignSendToClient() != null) {
+                    if (iList.getIteractionType().getSignSendToClient()) {
+                        Calendar calendar = Calendar.getInstance();
+                        if (iList.getDateIteraction() != null)
+                            calendar.setTime(iList.getDateIteraction());
+                        calendar.add(Calendar.DAY_OF_MONTH, 3);
 
-                    Calendar calendar1 = Calendar.getInstance();
+                        Calendar calendar1 = Calendar.getInstance();
 
-                    Calendar calendar2 = Calendar.getInstance();
-                    calendar2.setTime(iteractionList.get(0).getDateIteraction());
-                    calendar2.add(Calendar.DAY_OF_MONTH, 7);
+                        Calendar calendar2 = Calendar.getInstance();
+                        if (iteractionList.get(0).getDateIteraction() != null)
+                            calendar2.setTime(iteractionList.get(0).getDateIteraction());
+                        calendar2.add(Calendar.DAY_OF_MONTH, 7);
 
-                    LocalDate d1 = LocalDate.now();
-                    LocalDate d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                    long days = ChronoUnit.DAYS.between(d2, d1);
+                        LocalDate d1 = LocalDate.now();
+                        LocalDate d2 = LocalDate.now();
+                        if (iList.getDateIteraction() != null) {
+                            d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                        }
+
+                        long days = ChronoUnit.DAYS.between(d2, d1);
 
 
-                    if(days != 0) {
-                        countAfterSendCVToClient.setValue("CV у заказчика: " + days + " дней");
-                        countAfterSendCVToClient.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
-                    } else {
-                        countAfterSendCVToClient.setValue("Сегодня CV отправлено");
-                        countAfterSendCVToClient.setStyleName("button_table_blue");
+                        if (days != 0) {
+                            countAfterSendCVToClient.setValue("CV у заказчика: " + days + " дней");
+                            countAfterSendCVToClient.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
+                        } else {
+                            countAfterSendCVToClient.setValue("Сегодня CV отправлено");
+                            countAfterSendCVToClient.setStyleName("button_table_blue");
+                        }
+
+                        countAfterSendCVToClient.setDescription("Число дней с момента передачи резюме заказчику.");
+
+                        return countAfterSendCVToClient;
                     }
-
-                    countAfterSendCVToClient.setDescription("Число дней с момента передачи резюме заказчику.");
-
-                    return countAfterSendCVToClient;
                 }
             }
         }
@@ -473,34 +488,44 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         Label countAfrerClientInterview = uiComponents.create(Label.NAME);
 
         for (IteractionList iList : iteractionList) {
-            if (iList.getIteractionType().getSignClientInterview() != null) {
-                if (iList.getIteractionType().getSignClientInterview()) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(iList.getDateIteraction());
-                    calendar.add(Calendar.DAY_OF_MONTH, 3);
+            if (iList.getIteractionType() != null) {
+                if (iList.getIteractionType().getSignClientInterview() != null) {
+                    if (iList.getIteractionType().getSignClientInterview()) {
+                        Calendar calendar = Calendar.getInstance();
+                        if (iList.getDateIteraction() != null) {
+                            calendar.setTime(iList.getDateIteraction());
+                        }
+                        calendar.add(Calendar.DAY_OF_MONTH, 3);
 
-                    Calendar calendar1 = Calendar.getInstance();
+                        Calendar calendar1 = Calendar.getInstance();
 
-                    Calendar calendar2 = Calendar.getInstance();
-                    calendar2.setTime(iteractionList.get(0).getDateIteraction());
-                    calendar2.add(Calendar.DAY_OF_MONTH, 7);
+                        Calendar calendar2 = Calendar.getInstance();
+                        if (iteractionList.get(0).getDateIteraction() != null) {
+                            calendar2.setTime(iteractionList.get(0).getDateIteraction());
+                        }
+                        calendar2.add(Calendar.DAY_OF_MONTH, 7);
 
-                    LocalDate d1 = LocalDate.now();
-                    LocalDate d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                    long days = ChronoUnit.DAYS.between(d2, d1);
+                        LocalDate d1 = LocalDate.now();
+                        LocalDate d2 = LocalDate.now();
+                        if (iList.getDateIteraction() != null) {
+                            d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                        }
+
+                        long days = ChronoUnit.DAYS.between(d2, d1);
 
 
-                    if(days != 0) {
-                        countAfrerClientInterview.setValue("Интервью заказчика: " + days + " дней");
-                        countAfrerClientInterview.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
-                    } else {
-                        countAfrerClientInterview.setValue("Сегодня интервью у заказчика");
-                        countAfrerClientInterview.setStyleName("button_table_blue");
+                        if (days != 0) {
+                            countAfrerClientInterview.setValue("Интервью заказчика: " + days + " дней");
+                            countAfrerClientInterview.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
+                        } else {
+                            countAfrerClientInterview.setValue("Сегодня интервью у заказчика");
+                            countAfrerClientInterview.setStyleName("button_table_blue");
 
+                        }
+                        countAfrerClientInterview.setDescription("Число дней с момента последнего интервью на стороне заказчика: технического или  рекрутером.");
+
+                        return countAfrerClientInterview;
                     }
-                    countAfrerClientInterview.setDescription("Число дней с момента последнего интервью на стороне заказчика: технического или  рекрутером.");
-
-                    return countAfrerClientInterview;
                 }
             }
         }
@@ -512,34 +537,43 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         Label countAfterITPearlsInterview = uiComponents.create(Label.NAME);
 
         for (IteractionList iList : iteractionList) {
-            if (iList.getIteractionType().getSignOurInterview() != null) {
-                if (iList.getIteractionType().getSignOurInterview()) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(iList.getDateIteraction());
-                    calendar.add(Calendar.DAY_OF_MONTH, 3);
+            if (iList.getIteractionType() != null) {
+                if (iList.getIteractionType().getSignOurInterview() != null) {
+                    if (iList.getIteractionType().getSignOurInterview()) {
+                        Calendar calendar = Calendar.getInstance();
+                        if (iList.getDateIteraction() != null) {
+                            calendar.setTime(iList.getDateIteraction());
+                        }
+                        calendar.add(Calendar.DAY_OF_MONTH, 3);
 
-                    Calendar calendar1 = Calendar.getInstance();
+                        Calendar calendar1 = Calendar.getInstance();
 
-                    Calendar calendar2 = Calendar.getInstance();
-                    calendar2.setTime(iteractionList.get(0).getDateIteraction());
-                    calendar2.add(Calendar.DAY_OF_MONTH, 7);
+                        Calendar calendar2 = Calendar.getInstance();
+                        if (iteractionList.get(0).getDateIteraction() != null) {
+                            calendar2.setTime(iteractionList.get(0).getDateIteraction());
+                        }
+                        calendar2.add(Calendar.DAY_OF_MONTH, 7);
 
-                    LocalDate d1 = LocalDate.now();
-                    LocalDate d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                    long days = ChronoUnit.DAYS.between(d2, d1);
+                        LocalDate d1 = LocalDate.now();
+                        LocalDate d2 = LocalDate.now();
+                        if (iList.getDateIteraction() != null) {
+                            d2 = iList.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                        }
+                        long days = ChronoUnit.DAYS.between(d2, d1);
 
 
-                    if (days != 0) {
-                        countAfterITPearlsInterview.setValue("Локальное интервью: " + days + " дней");
-                        countAfterITPearlsInterview.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
-                    } else {
-                        countAfterITPearlsInterview.setValue("Сегодня локальное интервью");
-                        countAfterITPearlsInterview.setStyleName("button_table_blue");
+                        if (days != 0) {
+                            countAfterITPearlsInterview.setValue("Локальное интервью: " + days + " дней");
+                            countAfterITPearlsInterview.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
+                        } else {
+                            countAfterITPearlsInterview.setValue("Сегодня локальное интервью");
+                            countAfterITPearlsInterview.setStyleName("button_table_blue");
+                        }
+
+                        countAfterITPearlsInterview.setDescription("Число дней с момента последнего интервью на нашей стороне рекрутером IT Pearls.");
+
+                        return countAfterITPearlsInterview;
                     }
-
-                    countAfterITPearlsInterview.setDescription("Число дней с момента последнего интервью на нашей стороне рекрутером IT Pearls.");
-
-                    return countAfterITPearlsInterview;
                 }
             }
         }
@@ -551,10 +585,14 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         String style;
 
         if (cal.after(cal1)) {
-            if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
-                style = "button_table_gray";
+            if (iteractionList.get(0).getRecrutier() != null) {
+                if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
+                    style = "button_table_gray";
+                } else {
+                    style = "button_table_yellow";
+                }
             } else {
-                style = "button_table_yellow";
+                style = "button_table_gray";
             }
         } else {
             if (cal1.after(cal2)) {
@@ -574,27 +612,34 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         IteractionList lastItercationOnProject = iteractionList.get(0);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(iteractionList.get(0).getDateIteraction());
+        if (iteractionList.get(0).getDateIteraction() != null) {
+            calendar.setTime(iteractionList.get(0).getDateIteraction());
+        }
         calendar.add(Calendar.MONTH, 1);
 
         Calendar calendar1 = Calendar.getInstance();
 
         Calendar calendar2 = Calendar.getInstance();
-        calendar2.setTime(iteractionList.get(0).getDateIteraction());
+        if (iteractionList.get(0).getDateIteraction() != null) {
+            calendar2.setTime(iteractionList.get(0).getDateIteraction());
+        }
         calendar2.add(Calendar.MONTH, 3);
 
         LocalDate d1 = LocalDate.now();
-        LocalDate d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate d2 = LocalDate.now();
+        if (iteractionList.get(0).getDateIteraction() != null) {
+            d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
 
-        for(int i = iteractionList.size() ; i > 0 ; i--) {
-            if(iteractionList.get(i - 1).equals(iteractionList.get(0))) {
+        for (int i = iteractionList.size(); i > 0; i--) {
+            if (iteractionList.get(i - 1).equals(iteractionList.get(0))) {
                 lastItercationOnProject = iteractionList.get(i - 1);
                 break;
             }
         }
 
         for (IteractionList iteraction : iteractionList) {
-            if(iteraction.getVacancy() != null) {
+            if (iteraction.getVacancy() != null) {
                 if (lastOpenPosition.equals(iteraction.getVacancy())) {
                     firstIteractionOnProject = iteraction;
                     break;
@@ -606,7 +651,11 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             Label countDaysOnLastProject = uiComponents.create(Label.NAME);
             countDaysOnLastProject.setStyleName(getStyleOnTime(calendar, calendar1, calendar1));
 //            LocalDate d3 = firstIteractionOnProject.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate d3 = lastItercationOnProject.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate d3 = LocalDate.now();
+            if (lastItercationOnProject.getDateIteraction() != null) {
+                d3 = lastItercationOnProject.getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            }
+
             long daysOnProject = ChronoUnit.DAYS.between(d3, d1);
 
             countDaysOnLastProject.setValue("На последнем проекте " + daysOnProject + " дней");
@@ -624,10 +673,13 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
         Label startIteraction = uiComponents.create(Label.NAME);
-        startIteraction.setValue("Даты: c "
-                + simpleDateFormat.format(iteractionList.get(iteractionList.size() - 1).getDateIteraction())
-                + " по "
-                + simpleDateFormat.format(iteractionList.get(0).getDateIteraction()));
+        if (iteractionList.get(iteractionList.size() - 1).getDateIteraction() != null
+                && iteractionList.get(0).getDateIteraction() != null) {
+            startIteraction.setValue("Даты: c "
+                    + simpleDateFormat.format(iteractionList.get(iteractionList.size() - 1).getDateIteraction())
+                    + " по "
+                    + simpleDateFormat.format(iteractionList.get(0).getDateIteraction()));
+        }
         startIteraction.setAlignment(Component.Alignment.MIDDLE_LEFT);
         startIteraction.setDescription(DESC_DATE_ITERACTION);
         startIteraction.setStyleName("button_table_green");
@@ -639,17 +691,26 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         Label lastItercationDayCount = uiComponents.create(Label.NAME);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(iteractionList.get(0).getDateIteraction());
+        if (iteractionList.get(0).getDateIteraction() != null) {
+            calendar.setTime(iteractionList.get(0).getDateIteraction());
+        }
         calendar.add(Calendar.MONTH, 1);
 
         Calendar calendar1 = Calendar.getInstance();
 
         Calendar calendar2 = Calendar.getInstance();
-        calendar2.setTime(iteractionList.get(0).getDateIteraction());
+        if (iteractionList.get(0).getDateIteraction() != null) {
+            calendar2.setTime(iteractionList.get(0).getDateIteraction());
+        }
         calendar2.add(Calendar.MONTH, 3);
 
         LocalDate d1 = LocalDate.now();
-        LocalDate d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate d2 = LocalDate.now();
+
+        if (iteractionList.get(0).getDateIteraction() != null) {
+            d2 = iteractionList.get(0).getDateIteraction().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+
         long days = ChronoUnit.DAYS.between(d2, d1) - 30;
 
         if (days > 0) {
@@ -668,22 +729,32 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         String activity = "";
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(iteractionList.get(0).getDateIteraction());
+        if (iteractionList.get(0).getDateIteraction() != null) {
+            calendar.setTime(iteractionList.get(0).getDateIteraction());
+        }
         calendar.add(Calendar.MONTH, 1);
 
         Calendar calendar1 = Calendar.getInstance();
 
         Calendar calendar2 = Calendar.getInstance();
-        calendar2.setTime(iteractionList.get(0).getDateIteraction());
+
+        if (iteractionList.get(0).getDateIteraction() != null) {
+            calendar2.setTime(iteractionList.get(0).getDateIteraction());
+        }
+
         calendar2.add(Calendar.MONTH, 3);
 
         style = getStyleOnTime(calendar, calendar1, calendar2);
 
         if (calendar.after(calendar1)) {
-            if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
-                activity = "В работе";
+            if (iteractionList.get(0).getRecrutier() != null) {
+                if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
+                    activity = "В работе";
+                } else {
+                    activity = "В работе";
+                }
             } else {
-                activity = "В работе";
+                activity = "СВОБОДЕН";
             }
         } else {
             if (calendar1.after(calendar2)) {
@@ -703,10 +774,14 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         String style;
 
         if (cal.after(cal1)) {
-            if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
-                style = "button_table_red";
+            if (iteractionList.get(0).getRecrutier() != null) {
+                if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
+                    style = "button_table_red";
+                } else {
+                    style = "button_table_yellow";
+                }
             } else {
-                style = "button_table_yellow";
+                style = "button_table_gray";
             }
         } else {
             if (cal1.after(cal2)) {

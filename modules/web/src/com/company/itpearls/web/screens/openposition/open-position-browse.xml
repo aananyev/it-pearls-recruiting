@@ -8,11 +8,14 @@
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
-                <property name="projectName" view="_minimal">
-                    <property name="projectOwner" view="_minimal"/>
-                    <property name="projectDepartment" view="_minimal">
-                        <property name="companyName" view="_minimal">
-                            <property name="fileCompanyLogo" view="_minimal"/>
+                <property name="parentOpenPosition" view="_local"/>
+                <property name="cityPosition" view="_local"/>
+                <property name="positionType" view="_local"/>
+                <property name="projectName" view="_local">
+                    <property name="projectOwner" view="_local"/>
+                    <property name="projectDepartment" view="_local">
+                        <property name="companyName" view="_local">
+                            <property name="fileCompanyLogo" view="_local"/>
                         </property>
                         <property name="templateLetter"/>
                     </property>

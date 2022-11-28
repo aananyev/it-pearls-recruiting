@@ -20,8 +20,8 @@ public class ItpearlsTestContainer extends TestContainer {
                 "de.diedavids.cuba.dataimport",
                 "com.haulmont.addon.dashboard",
                 "com.haulmont.addon.helium",
-                "com.haulmont.reports",
                 "com.haulmont.charts",
+                "com.haulmont.reports",
                 "com.haulmont.fts");
         appPropertiesFiles = Arrays.asList(
                 // List the files defined in your web.xml

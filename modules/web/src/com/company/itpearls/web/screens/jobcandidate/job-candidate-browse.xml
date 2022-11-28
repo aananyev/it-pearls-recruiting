@@ -15,8 +15,11 @@
                     </property>
                     <property name="iteractionType" view="_local"/>
                     <property name="vacancy" view="_local">
+                        <property name="positionType" view="_local"/>
                         <property name="projectName" view="_local">
-                            <property name="projectDepartment" view="_local"/>
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
                         </property>
                     </property>
                 </property>
