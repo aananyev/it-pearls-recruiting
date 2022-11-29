@@ -310,26 +310,37 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable.currentOpenCloseColumn", subject = "descriptionProvider")
     private String iteractionListsTableCurrentOpenCloseColumnDescriptionProvider(IteractionList iteractionList) {
+        String retStr;
+        final String OPENED_NOW = "Закрыта на текущий момент";
+        final String CLOSED_NOW = "Открыта на текущий момент";
 
             if (iteractionList.getCurrentOpenClose() != null) {
-                return iteractionList.getCurrentOpenClose()
+                retStr = iteractionList.getCurrentOpenClose()
                         ? "Закрыта на момент создания взаимодействия" : "Открыта на момент создания взаимодействия";
+
+                if (iteractionList.getVacancy().getOpenClose() != null) {
+                    retStr += "\n\n" + (iteractionList.getVacancy().getOpenClose() ?
+                            CLOSED_NOW : OPENED_NOW);
+
+                }
             } else {
                 if (iteractionList != null) {
                     if (iteractionList.getVacancy() != null) {
                         if (iteractionList.getVacancy().getOpenClose() != null) {
-                            return iteractionList.getVacancy().getOpenClose() ?
-                                    "Закрыта на текущий момент" : "Открыта на текущий момент";
+                            retStr = iteractionList.getVacancy().getOpenClose() ?
+                                    CLOSED_NOW : OPENED_NOW;
                         } else {
-                            return "Закрыта на текущий момент";
+                            retStr = CLOSED_NOW;
                         }
                     } else {
-                        return "Закрыта на текущий момент";
+                        retStr = CLOSED_NOW;
                     }
                 } else {
-                    return "Закрыта на текущий момент";
+                    retStr = CLOSED_NOW;
                 }
             }
+
+            return retStr;
     }
 
 

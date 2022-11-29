@@ -9,10 +9,13 @@
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="iteractionList-view">
                 <property name="rating"/>
-                <property name="vacancy" view="_minimal">
-                    <property name="projectName" view="_minimal">
-                        <property name="projectDepartment" view="_minimal"/>
-                        <property name="projectOwner" view="_minimal"/>
+                <property name="vacancy" view="_local">
+                    <property name="positionType" view="_local"/>
+                    <property name="projectName" view="_local">
+                        <property name="projectDepartment" view="_local">
+                            <property name="companyName" view="_local"/>
+                        </property>
+                        <property name="projectOwner" view="_local"/>
                     </property>
                 </property>
             </view>

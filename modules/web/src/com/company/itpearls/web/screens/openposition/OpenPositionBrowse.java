@@ -624,6 +624,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         HBoxLayout buttonsHBox = uiComponents.create(HBoxLayout.NAME);
 
         buttonsHBox.setSpacing(true);
+        buttonsHBox.setWidthAuto();
         buttonsHBox.setAlignment(Component.Alignment.TOP_RIGHT);
 
         Component suitableButton = findSuitableButton(entity);
@@ -633,6 +634,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Component priorityField = createPriorityField(entity);
         Component openCloseButton = createOpenCloseButton(entity);
         Component viewDescriptionButton = createViewDescriptionButton(entity);
+        Component sendedCandidatesButton = createSendedCandidatesButton(entity);
 
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
         openCloseButton.setAlignment(Component.Alignment.TOP_RIGHT);
@@ -645,6 +647,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         buttonsHBox.add(openCloseButton);
         buttonsHBox.add(editButton);
         buttonsHBox.add(viewDescriptionButton);
+        buttonsHBox.add(sendedCandidatesButton);
 
         if (suitableButton != null)
             buttonsHBox.add(suitableButton);
@@ -673,6 +676,30 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         closeAllAnoterDetailsScreenFragments();
 
         return mainLayout;
+    }
+
+    private Component createSendedCandidatesButton(OpenPosition entity) {
+        Button retButton = uiComponents.create(Button.class);
+        retButton.setIcon(CubaIcon.USER_CIRCLE.source());
+        retButton.setDescription("Отправленные кандидаты заказчику");
+        retButton.setEnabled(true);
+
+        retButton.addClickListener(e -> {
+            if (openPositionsTable.getSingleSelected() != null) {
+                JobCandidateSimpleBrowse jobCandidateSimpleBrowse = screens.create(JobCandidateSimpleBrowse.class);
+                jobCandidateSimpleBrowse.setOpenPosition(openPositionsTable.getSingleSelected());
+
+                screens.show(jobCandidateSimpleBrowse);
+
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("ВНИМАНИЕ")
+                        .withDescription("Кандидатов отправленных заказчику на какую вакансию Вы хотите посмотреть?")
+                        .show();
+            }
+        });
+
+        return retButton;
     }
 
     // TODO закрыть все Details другие
@@ -765,7 +792,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             Button suitableButton = uiComponents.create(Button.class);
             suitableButton.setDescription("Подобрать резюме по вакансии");
-            suitableButton.setCaption("Подобрать");
+//            suitableButton.setCaption("Подобрать");
             suitableButton.setIconFromSet(CubaIcon.EYE);
 
             suitableButton.setAction(new BaseAction("Suggestjobcandidate")
@@ -1128,7 +1155,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private Component createTitleFragment(OpenPosition entity) {
         Label<String> titleLabel = uiComponents.create(Label.NAME);
-        titleLabel.setStyleName("h2");
+        titleLabel.setStyleName("h3");
         titleLabel.setDescription(entity.getVacansyName());
         titleLabel.setValue(entity.getVacansyName());
         titleLabel.setAlignment(Component.Alignment.BOTTOM_LEFT);
@@ -1158,8 +1185,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Button closeButton = uiComponents.create(Button.class);
         closeButton.setIcon("icons/close.png");
         BaseAction closeAction = new BaseAction("closeAction")
-                .withHandler(actionPerformedEvent ->
-                        openPositionsTable.setDetailsVisible(entity, false))
+                .withHandler(actionPerformedEvent -> {
+                    openPositionsTable.setDetailsVisible(entity, false);
+                    openPositionsTable.repaint();
+                    openPositionsTable.setSelected(entity);
+
+                })
                 .withCaption("");
         closeButton.setAction(closeAction);
         return closeButton;
@@ -1240,7 +1271,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setButtonsEnableDisable();
 
         initCheckBoxOnlyOpenedPosition();
-
     }
 
     private void setButtonsEnableDisable() {
@@ -1729,7 +1759,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         } else {
             suggestCandidateButton.setEnabled(false);
         }
-
     }
 
     public void suggestCandidateButton() {
@@ -2232,7 +2261,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         return labelRet;
     }
-
 }
 
 
