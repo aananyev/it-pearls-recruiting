@@ -2825,8 +2825,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateCandidateCvTable.resumePosition", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableResumePositionDescriptionProvider(CandidateCV candidateCV) {
-        return candidateCV.getResumePosition().getPositionRuName()
-                + " / "
-                + candidateCV.getResumePosition().getPositionEnName();
+        String retStr = "";
+
+        if (candidateCV.getResumePosition() != null) {
+            if (candidateCV.getResumePosition().getPositionRuName() != null) {
+                if (candidateCV.getResumePosition().getPositionEnName() != null) {
+                    return candidateCV.getResumePosition().getPositionRuName()
+                            + " / "
+                            + candidateCV.getResumePosition().getPositionEnName();
+                } else {
+                    return candidateCV.getResumePosition().getPositionRuName();
+                }
+            }
+        }
+
+        return retStr;
     }
 }

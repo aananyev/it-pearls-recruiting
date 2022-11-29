@@ -8,10 +8,16 @@
         <collection id="jobCandidatesDc"
                     class="com.company.itpearls.entity.JobCandidate">
             <view extends="_local">
-
+                <property name="personPosition" view="_local"/>
+                <property name="iteractionList"
+                          view="_local">
+                    <property name="iteractionType"
+                              view="_local"/>
+                    <property name="recrutier" view="_local"/>
+                </property>
             </view>
             <loader id="jobCandidateDl" cacheable="true">
-                <query><![CDATA[select e from itpearls_JobCandidate e]]>
+                <query><![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
                 <condition>
                     <and>
                         <c:jpql>
@@ -59,7 +65,35 @@
                   width="100%"
                   dataContainer="jobCandidatesDc">
             <columns>
-                <column id="fullName" property="fullName"/>
+                <column id="fullName"
+                        property="fullName"/>
+                <column id="personPosition"
+                        property="personPosition"/>
+                <column id="active"
+                        caption="msg://msgActive"
+                        width="40px">
+                    <componentRenderer/>
+                </column>
+                <column id="lastInterationName"
+                        caption="msg://msgLastInteractionType"
+                        width="300px">
+                    <componentRenderer/>
+                </column>
+                <column id="lastInteractionDate"
+                        caption="msg://msgLastInteractionDate"
+                        width="100px">
+                    <componentRenderer/>
+                </column>
+                <column id="recruter"
+                        caption="msg://msgRecruter"
+                        width="170px">
+                    <componentRenderer/>
+                </column>
+                <column id="sourcer"
+                        caption="msg://msgSourcer"
+                        width="170px">
+                    <componentRenderer/>
+                </column>
             </columns>
         </dataGrid>
         <button action="lookupCancelAction"
