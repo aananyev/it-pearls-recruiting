@@ -7,17 +7,26 @@
         <collection id="candidateCVDc"
                     class="com.company.itpearls.entity.CandidateCV">
             <view extends="_local">
-                <property name="candidate" view="_local">
-                    <property name="fullName"/>
-                    <property name="cityOfResidence" view="_minimal"/>
-                    <property name="iteractionList" view="_minimal"/>
+                <property name="candidate"
+                          view="_local">
+                    <property name="cityOfResidence"
+                              view="_local"/>
+                    <property name="iteractionList"
+                              view="_local">
+                        <property name="recrutier"
+                                  view="_local"/>
+                        <property name="iteractionType"
+                                  view="_local"/>
+                    </property>
                 </property>
-                <property name="resumePosition" view="_minimal"/>
-                <property name="toVacancy" view="_minimal">
-                    <property name="comment"/>
+                <property name="resumePosition"
+                          view="_local"/>
+                <property name="toVacancy"
+                          view="_local">
                 </property>
             </view>
-            <loader id="candidateCVDl">
+            <loader id="candidateCVDl"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName]]>
                     <condition>
@@ -33,7 +42,7 @@
                 </query>
             </loader>
         </collection>
-        <collection id="personPositionDc"
+<!--        <collection id="personPositionDc"
                     class="com.company.itpearls.entity.Position"
                     view="position-view">
             <loader id="personPositionDl">
@@ -41,7 +50,7 @@
                     <![CDATA[select e from itpearls_Position e order by e.positionRuName]]>
                 </query>
             </loader>
-        </collection>
+        </collection> -->
     </data>
     <dialogMode height="600"
                 width="1000"

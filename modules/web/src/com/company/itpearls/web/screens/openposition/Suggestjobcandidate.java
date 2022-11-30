@@ -55,8 +55,8 @@ public class Suggestjobcandidate extends Screen {
     private UiComponents uiComponents;
     @Inject
     private Button viewCandidateCheckSkillsButton;
-    @Inject
-    private CollectionContainer<Position> personPositionDc;
+    //   @Inject
+//    private CollectionContainer<Position> personPositionDc;
 
     private OpenPosition openPosition = null;
     @Inject
@@ -217,12 +217,13 @@ public class Suggestjobcandidate extends Screen {
             List<IteractionList> iteractionLists = new ArrayList<>();
 
             try {
-                iteractionLists = dataManager.load(IteractionList.class)
+                iteractionLists = jobCandidate.getIteractionList();
+/*                iteractionLists = dataManager.load(IteractionList.class)
                         .query("select e from itpearls_IteractionList e where e.candidate = :candidate")
                         .view("iteractionList-view")
                         .cacheable(true)
                         .parameter("candidate", jobCandidate)
-                        .list();
+                        .list(); */
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -307,6 +308,10 @@ public class Suggestjobcandidate extends Screen {
 
     public void viewCandidateButton() {
         screenBuilders.editor(JobCandidate.class, this)
+                .editEntity(suitableCheckDataGrid.getSingleSelected().getCandidate())
+                .build()
+                .show();
+/*        screenBuilders.editor(JobCandidate.class, this)
                 .withScreenClass(JobCandidateEdit.class)
                 .editEntity(dataManager.load(JobCandidate.class)
                         .query("select e from itpearls_JobCandidate e where e = :candidate")
@@ -316,7 +321,7 @@ public class Suggestjobcandidate extends Screen {
                         .one()
                 )
                 .build()
-                .show();
+                .show();*/
     }
 
     @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "descriptionProvider")

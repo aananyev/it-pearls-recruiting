@@ -286,17 +286,23 @@
                                       bodyRowHeight="55px"
                                       dataContainer="iteractionListsDc">
                                 <columns>
-                                    <column id="candidatePhoto" caption="" width="100px">
+                                    <column id="candidatePhoto"
+                                            caption=""
+                                            maximumWidth="64px"
+                                            width="80px">
                                         <componentRenderer/>
                                     </column>
-                                    <column id="candidateCard">
+                                    <column id="candidateCard" box.expandRatio="10"
+                                            width="250px">
                                         <htmlRenderer nullRepresentation="null"/>
                                     </column>
                                     <column id="candidate"
+                                            box.expandRatio="3"
                                             collapsed="true"
                                             collapsible="true"
                                             property="candidate"
-                                            width="280px"
+                                            width="200px"
+                                            maximumWidth="200px"
                                             sortable="true"
                                             sort="ASCENDING"/>
                                     <column id="activeUnactiveColumn"

@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="jobCandidatesDc"
                     class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_local">
+            <view extends="jobCandidate-view">
                 <property name="personPosition" view="_local"/>
                 <property name="iteractionList"
                           view="_local">
@@ -35,17 +35,7 @@
     <layout expand="iteractionListsTable"
             spacing="true">
         <hbox spacing="false">
-            <label id="candidateLabel"
-                   stylename="h3"/>
-            <label value="("
-                   stylename="h3"/>
-            <label id="candidatePositionLabel"
-                   stylename="h3"/>
-            <label value=" / "
-                   stylename="h3"/>
-            <label id="candidatePositionEnLabel"
-                   stylename="h3"/>
-            <label value=")"
+            <label id="vacancyLabel"
                    stylename="h3"/>
         </hbox>
         <vbox height="AUTO"
@@ -66,6 +56,8 @@
                   dataContainer="jobCandidatesDc">
             <columns>
                 <column id="fullName"
+                        sort="ASCENDING"
+                        sortable="true"
                         property="fullName"/>
                 <column id="personPosition"
                         property="personPosition"/>
@@ -76,22 +68,31 @@
                 </column>
                 <column id="lastInterationName"
                         caption="msg://msgLastInteractionType"
+                        maximumWidth="300px"
                         width="300px">
                     <componentRenderer/>
                 </column>
                 <column id="lastInteractionDate"
                         caption="msg://msgLastInteractionDate"
+                        maximumWidth="100px"
                         width="100px">
                     <componentRenderer/>
                 </column>
                 <column id="recruter"
                         caption="msg://msgRecruter"
+                        maximumWidth="170px"
                         width="170px">
                     <componentRenderer/>
                 </column>
                 <column id="sourcer"
                         caption="msg://msgSourcer"
+                        maximumWidth="170px"
                         width="170px">
+                    <componentRenderer/>
+                </column>
+                <column id="jobCandidateCard"
+                        caption=""
+                        width="80px">
                     <componentRenderer/>
                 </column>
             </columns>

@@ -688,6 +688,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (openPositionsTable.getSingleSelected() != null) {
                 JobCandidateSimpleBrowse jobCandidateSimpleBrowse = screens.create(JobCandidateSimpleBrowse.class);
                 jobCandidateSimpleBrowse.setOpenPosition(openPositionsTable.getSingleSelected());
+                jobCandidateSimpleBrowse.setHeader(openPositionsTable.getSingleSelected());
 
                 screens.show(jobCandidateSimpleBrowse);
 
