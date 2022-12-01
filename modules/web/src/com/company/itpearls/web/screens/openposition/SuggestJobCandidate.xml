@@ -8,7 +8,7 @@
                     class="com.company.itpearls.entity.CandidateCV">
             <view extends="_local">
                 <property name="candidate"
-                          view="_local">
+                          view="jobCandidate-view">
                     <property name="cityOfResidence"
                               view="_local"/>
                     <property name="iteractionList"

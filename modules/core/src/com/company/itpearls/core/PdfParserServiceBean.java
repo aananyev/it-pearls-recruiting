@@ -39,6 +39,7 @@ public class PdfParserServiceBean implements PdfParserService {
         List<SkillTree> competitions = dataManager.load(SkillTree.class)
                 .query(QUERY_SKILL_TREE)
                 .view("skillTree-view")
+                .cacheable(true)
                 .list();
 
         for (SkillTree specialisation : competitions) {
