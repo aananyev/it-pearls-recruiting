@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://staffingTableEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.staffingtable">
+    <data>
+        <instance id="staffingTableDc"
+                  class="com.company.itpearls.entity.StaffingTable">
+            <view extends="_local">
+                <property name="openPosition" view="_local"/>
+                <property name="grade" view="_local"/>
+            </view>
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="staffingTableDc">
+            <column width="350px">
+                <pickerField id="openPositionField" property="openPosition">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="clear" type="picker_clear"/>
+                    </actions>
+                </pickerField>
+                <pickerField id="gradeField" property="grade">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="clear" type="picker_clear"/>
+                    </actions>
+                </pickerField>
+                <textField id="numberOfStaffField" property="numberOfStaff"/>
+                <textField id="salaryMinField" property="salaryMin"/>
+                <textField id="salaryMaxField" property="salaryMax"/>
+                <textArea id="commentField" property="comment" rows="5"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

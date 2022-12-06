@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://staffingTableBrowse.caption"
+        focusComponent="staffingTablesTable"
+        messagesPack="com.company.itpearls.web.screens.staffingtable">
+    <data readOnly="true">
+        <collection id="staffingTablesDc"
+                    class="com.company.itpearls.entity.StaffingTable">
+            <view extends="_local">
+                <property name="openPosition" view="_local"/>
+                <property name="grade" view="_local"/>
+            </view>
+            <loader id="staffingTablesDl">
+                <query>
+                    <![CDATA[select e from itpearls_StaffingTable e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="staffingTablesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="staffingTablesTable"
+                dataLoader="staffingTablesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="staffingTablesTable"
+                    width="100%"
+                    dataContainer="staffingTablesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="openPosition"/>
+                <column id="grade"/>
+                <column id="numberOfStaff"/>
+                <column id="salaryMin"/>
+                <column id="salaryMax"/>
+                <column id="comment"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="staffingTablesTable.create"/>
+                <button id="editBtn" action="staffingTablesTable.edit"/>
+                <button id="removeBtn" action="staffingTablesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

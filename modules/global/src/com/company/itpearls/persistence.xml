@@ -37,5 +37,7 @@
         <class>com.company.itpearls.entity.OpenPositionNews</class>
         <class>com.company.itpearls.entity.Interview</class>
         <class>com.company.itpearls.entity.InternalEmailer</class>
+        <class>com.company.itpearls.entity.StaffingTable</class>
+        <class>com.company.itpearls.entity.Grade</class>
     </persistence-unit>
 </persistence>

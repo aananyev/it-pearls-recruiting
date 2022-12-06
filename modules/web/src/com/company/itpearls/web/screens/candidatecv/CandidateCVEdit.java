@@ -318,6 +318,26 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     private void setLetterRecommendation() {
         String caption = "Структура письма:";
+        String text = candidateCVFieldOpenPosition.getValue() != null ?
+                candidateCVFieldOpenPosition.getValue().getTemplateLetter() : "";
+
+        String example = "Пример:\n" +
+                "\n" +
+                "Уважаемые коллеги, хочу представить Вам Александра Катаева Devops инженера в компании Грид Динамикс в саратовском офисе. Мы предложили Алексею поговорить о сотрудничестве с Вашей командой на позиции DevOps инженера.\n" +
+                "\n" +
+                "Алексей имеет общий опыт работы более 5 лет на позиции IT Engineer в компании Нет Крекер и с февраля 2018 года DevOps Engineer в компании Grid Dynamics.\n" +
+                "\n" +
+                "Алексей в настоящее время не находится в активном поиске работы, но у него есть интерес в программировании “железа” и он согласился пообщаться с Вами. Алексей рассматривает возможность своей релокации за рубеж в будущем.\n" +
+                "\n" +
+                "Алексей в процессе беседы показал себя как сдержанный и вежливый человек. Алексей - надежный сотрудник и не склонен к частой смене работы (время работы в компании Нет Крекер - 5 лет). Алексей командный игрок и комфортно чувствует себя в коллективе единомышленников.\n";
+
+        letterRecommendation.setValue(text);
+        letterRecommendation.setCaption(caption);
+        letterRecommendation.setDescription(example);
+    }
+
+    /*    private void setLetterRecommendation() {
+        String caption = "Структура письма:";
         String text = "<ol>\n" +
                 "<li>Представление кандидата, его ФИО, текущей позиции, позиции на которую он претендует в компании партнера или проекте. </li>" +
                 "<li>Опыт работы кандидата и значимые компании или проекты, которые должны быть значимы для нашего заказчика. 2-3 предложения не более.</li>" +
@@ -341,7 +361,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         letterRecommendation.setValue(text);
         letterRecommendation.setCaption(caption);
         letterRecommendation.setDescription(example);
-    }
+    } */
 
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {

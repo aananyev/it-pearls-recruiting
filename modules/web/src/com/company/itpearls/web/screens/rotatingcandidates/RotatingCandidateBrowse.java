@@ -734,9 +734,9 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         if (researching && !recruiting && !accounting) {
-            reserchingLabel.setStyleName("label_button_red");
+            reserchingLabel.addStyleName("label_button_red");
         } else {
-            reserchingLabel.setStyleName("label_button_green");
+            reserchingLabel.addStyleName("label_button_green");
         }
     }
 

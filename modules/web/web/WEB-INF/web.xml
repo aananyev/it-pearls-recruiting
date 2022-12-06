@@ -18,7 +18,7 @@
         <param-name>appComponents</param-name>
         <param-value>com.haulmont.cuba com.haulmont.addon.globalevents com.haulmont.addon.emailtemplates
             de.diedavids.cuba.dataimport com.haulmont.addon.dashboard com.haulmont.addon.helium com.haulmont.charts
-            com.haulmont.reports com.haulmont.fts</param-value>
+            com.haulmont.reports com.haulmont.fts com.haulmont.bpm</param-value>
     </context-param>
     <listener>
         <listener-class>com.vaadin.server.communication.JSR356WebsocketInitializer</listener-class>

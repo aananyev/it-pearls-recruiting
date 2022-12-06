@@ -100,5 +100,11 @@
         <entity class="com.company.itpearls.entity.InternalEmailer">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.StaffingTable">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Grade">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>
