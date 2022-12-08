@@ -441,11 +441,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                     setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             "Изменены зарплатные предложение (MAX): старое "
-                                    + startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                    + (startSalaryMaxValue.toString().length() >= 3
+                                        ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                        : "НЕ ОПРЕДЕЛЕНО")
                                     + " на новое "
                                     + openPositionFieldSalaryMax.getValue(),
                             "Изменены зарплатные предложение (MAX): старое "
-                                    + startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                    + (startSalaryMaxValue.toString().length() >= 3
+                                        ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                        : "НЕ ОПРЕДЕЛЕНО")
                                     + " на новое "
                                     + openPositionFieldSalaryMax.getValue(),
                             new Date(),

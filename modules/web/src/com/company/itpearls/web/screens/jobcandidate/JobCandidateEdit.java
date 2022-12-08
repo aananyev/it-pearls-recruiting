@@ -2823,6 +2823,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return retStr;
     }
 
+    @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "styleProvider")
+    private String jobCandidateIteractionListTableVacancyStyleProvider(IteractionList iteractionList) {
+        return "table-wordwrap";
+    }
+
     @Install(to = "jobCandidateCandidateCvTable.resumePosition", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableResumePositionDescriptionProvider(CandidateCV candidateCV) {
         String retStr = "";
@@ -2840,5 +2845,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return retStr;
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "styleProvider")
+    private String jobCandidateCandidateCvTableToVacancyStyleProvider(CandidateCV candidateCV) {
+        return "table-wordwrap";
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.iteractionType", subject = "styleProvider")
+    private String jobCandidateIteractionListTableIteractionTypeStyleProvider(IteractionList iteractionList) {
+        return "table-wordwrap";
     }
 }

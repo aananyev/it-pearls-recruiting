@@ -936,12 +936,14 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 OpenPosition op = entity.getValue("vacancy");
 
                 if (op != null) {
-                    if (iteractionList.getIteractionType().getSignOurInterviewAssigned() != null) {
-                        if (iteractionList.getVacancy() != null) {
-                            if (iteractionList.getVacancy().equals(op) &&
-                                    iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
-                                retLabel.setValue(iteractionList.getRecrutier().getName());
-                                retLabel.setDescription(iteractionList.getRecrutier().getName());
+                    if (iteractionList.getIteractionType() != null) {
+                        if (iteractionList.getIteractionType().getSignOurInterviewAssigned() != null) {
+                            if (iteractionList.getVacancy() != null) {
+                                if (iteractionList.getVacancy().equals(op) &&
+                                        iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
+                                    retLabel.setValue(iteractionList.getRecrutier().getName());
+                                    retLabel.setDescription(iteractionList.getRecrutier().getName());
+                                }
                             }
                         }
                     }

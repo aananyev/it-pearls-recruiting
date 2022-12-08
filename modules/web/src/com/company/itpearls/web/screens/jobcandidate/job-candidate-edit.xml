@@ -770,6 +770,7 @@
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionDc"
                           width="100%"
+                          bodyRowHeight="50px"
                           contextMenuEnabled="false"
                           textSelectionEnabled="false"
                           reorderingAllowed="true"
@@ -802,9 +803,11 @@
                         <column id="numberIteraction"
                                 property="numberIteraction"
                                 sort="DESCENDING"
+                                width="85px"
                                 sortable="true"/>
                         <column id="rating"
                                 minimumWidth="85px"
+                                maximumWidth="100px"
                                 caption="msg://msgRating">
                             <htmlRenderer nullRepresentation="null"/>
                         </column>
@@ -829,6 +832,7 @@
                                 property="recrutier"/>
                         <column id="dateIteraction"
                                 property="dateIteraction"
+                                width="100px"
                                 caption="msg://msgDate">
                             <formatter format="dd.MM.yyyy"
                                        class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
@@ -855,41 +859,48 @@
                               width="100%"
                               descriptionAsHtml="true"
                               captionAsHtml="true"
+                              bodyRowHeight="50px"
                               dataContainer="jobCandidateCandidateCvsDc">
                         <columns>
                             <column id="datePost"
-                                    width="150px"
+                                    width="100px"
+                                    maximumWidth="100px"
                                     property="datePost"
                                     caption="msg://msgDatePost"/>
-                            <column id="resumePosition"
-                                    property="resumePosition"
-                                    caption="msg://msgToPosition"/>
                             <column id="toVacancy"
                                     property="toVacancy"
-                                    maximumWidth="400px"
-                                    caption="msg://msgToVacansy"/>
+                                    caption="msg://msgToVacansy">
+                            </column>
+                            <column id="resumePosition"
+                                    collapsible="true"
+                                    collapsed="true"
+                                    property="resumePosition"
+                                    caption="msg://msgToPosition"/>
                             <column id="iconOriginalCVFile"
                                     width="100px"
+                                    maximumWidth="100px"
                                     caption="msg://msgOriginalCV">
                                 <iconRenderer/>
                             </column> <!--                                <iconRenderer/> -->
                             <column id="iconITPearlsCVFile"
                                     width="100px"
+                                    maximumWidth="100px"
                                     caption="msg://msgITPearlsCV">
                                 <iconRenderer/>
                             </column> <!--                                <iconRenderer/> -->
                             <column id="letter"
                                     width="100px"
+                                    maximumWidth="100px"
                                     caption="msg://msgCoverLetter">
                                 <iconRenderer/>
                             </column><!--                                <iconRenderer/> -->
                             <column id="candidateOriginalCVColumn"
-                                    width="120px"
+                                    width="150px"
                                     caption="msg://msgOriginalCV">
                                 <componentRenderer/>
                             </column><!--                                <componentRenderer/> -->
                             <column id="candidateITPearlsCVColumn"
-                                    width="120px"
+                                    width="150px"
                                     caption="msg://msgITPearlsCV">
                                 <componentRenderer/>
                             </column><!--                                <componentRenderer/> -->

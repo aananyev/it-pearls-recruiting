@@ -668,8 +668,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 IteractionList lastInteraction = iteractionLists.get(0);
 
                 for (IteractionList iL : iteractionLists) {
-                    if (iL.getDateIteraction().after(lastInteraction.getDateIteraction())) {
-                        lastInteraction = iL;
+                    if (iL.getIteractionType() != null) {
+                        if (iL.getDateIteraction().after(lastInteraction.getDateIteraction())) {
+                            lastInteraction = iL;
+                        }
                     }
                 }
 
