@@ -27,7 +27,8 @@
         <item screen="itpearls_LaborAgreement.browse" caption="mainMsg://menu_config.itpearls_LaborAgreement.browse"
               icon="TEXT_HEIGHT"/>
         <item screen="itpearls_OurCompany.browse" caption="mainMsg://msgOurCompany" icon="BUILDING_O"/>
-        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"/>
+        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse" icon="GROUP"/>
+        <item screen="staff-itpearls_IteractionList.browse" caption="mainMsg://mainmsgStaffInteractionListBrowse" icon="REORDER"/>
     </menu>
     <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>

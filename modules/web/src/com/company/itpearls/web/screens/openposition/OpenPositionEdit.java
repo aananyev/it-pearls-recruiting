@@ -5,6 +5,8 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.position.PositionEdit;
+import com.haulmont.bpm.entity.ProcAttachment;
+import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
@@ -180,6 +182,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     protected Boolean openCloseStartStatus = false;
     protected Boolean openCloseCurrentStatus;
 
+    private static final String PROCESS_CODE = "openpositionApproval";
+
     @Inject
     private Logger log;
     @Inject
@@ -205,6 +209,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Label<String> signDraftLabel;
     @Inject
     private Metadata metadata;
+    @Inject
+    private CollectionLoader<ProcAttachment> procAttachmentsDl;
+    @Inject
+    private ProcActionsFragment procActionsFragment;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1509,6 +1517,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         openClosePositionCheckBox.setValue(openClosePositionCheckBox.getValue() == null ? false : true);
+
+        setInitApprovalProcess();
+    }
+
+    private void setInitApprovalProcess() {
+        UUID entityId = getEditedEntity().getId();
+        procAttachmentsDl.setParameter("entityId",entityId);
+        procAttachmentsDl.load();
+        procActionsFragment.initializer()
+                .standard()
+                .init(PROCESS_CODE, getEditedEntity());
     }
 
     private void setTopLabel() {

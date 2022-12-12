@@ -8,4 +8,8 @@ import com.company.itpearls.entity.StaffingTable;
 @LookupComponent("staffingTablesTable")
 @LoadDataBeforeShow
 public class StaffingTableBrowse extends StandardLookup<StaffingTable> {
+    @Install(to = "staffingTablesTable.openPosition", subject = "styleProvider")
+    private String staffingTablesTableOpenPositionStyleProvider(StaffingTable staffingTable) {
+        return "table-wordwrap";
+    }
 }

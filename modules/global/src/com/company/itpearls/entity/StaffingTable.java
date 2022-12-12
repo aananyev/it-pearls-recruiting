@@ -11,6 +11,9 @@ import java.math.BigDecimal;
 public class StaffingTable extends StandardEntity {
     private static final long serialVersionUID = -6705890660852104185L;
 
+    @Column(name = "CODE", length = 32)
+    private String code;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "OPEN_POSITION_ID")
     @NotNull
@@ -34,6 +37,14 @@ public class StaffingTable extends StandardEntity {
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 
     public Grade getGrade() {
         return grade;

@@ -12,33 +12,74 @@
             </view>
             <loader/>
         </instance>
+        <collection id="procAttachmentsDc"
+                    class="com.haulmont.bpm.entity.ProcAttachment"
+                    view="procAttachment-browse">
+            <loader id="procAttachmentsDl">
+                <query><![CDATA[select e from bpm$ProcAttachment e
+                                where e.procInstance.entity.entityId  = :entityId
+                                order by e.createTs]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="staffingTableDc">
-            <column width="350px">
-                <pickerField id="openPositionField" property="openPosition">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="clear" type="picker_clear"/>
-                    </actions>
-                </pickerField>
-                <pickerField id="gradeField" property="grade">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="clear" type="picker_clear"/>
-                    </actions>
-                </pickerField>
-                <textField id="numberOfStaffField" property="numberOfStaff"/>
-                <textField id="salaryMinField" property="salaryMin"/>
-                <textField id="salaryMaxField" property="salaryMax"/>
-                <textArea id="commentField" property="comment" rows="5"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
-            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-            <button id="closeBtn" action="windowClose"/>
+        <tabSheet id="staffingTableTabsheet" width="100%">
+            <tab id="staffingTableTab"
+                 spacing="true"
+                 caption="msg://msgStaffingTable">
+                <form id="form" dataContainer="staffingTableDc">
+                    <column width="350px">
+                        <pickerField id="openPositionField"
+                                     property="openPosition">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                                <action id="clear"
+                                        type="picker_clear"/>
+                            </actions>
+                        </pickerField>
+                        <pickerField id="gradeField"
+                                     property="grade">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                                <action id="clear"
+                                        type="picker_clear"/>
+                            </actions>
+                        </pickerField>
+                        <textField id="numberOfStaffField"
+                                   property="numberOfStaff"/>
+                        <textField id="salaryMinField"
+                                   property="salaryMin"/>
+                        <textField id="salaryMaxField"
+                                   property="salaryMax"/>
+                        <textArea id="commentField"
+                                  property="comment"
+                                  rows="5"/>
+                    </column>
+                </form>
+            </tab>
+            <tab id="openVacancyTab"
+                 caption="msg://msgOpenVacancy">
+                <groupBox id="procActionsBox"
+                          caption="msg://msgOpenPositionProcessApproval"
+                          spacing="true"
+                          width="AUTO"
+                          orientation="vertical">
+                    <fragment id="procActionsFragment"
+                              screen="bpm_ProcActionsFragment"/>
+                </groupBox>
+            </tab>
+        </tabSheet>
+        <hbox id="editActions"
+              spacing="true">
+            <button id="commitAndCloseBtn"
+                    action="windowCommitAndClose"/>
+            <button id="closeBtn"
+                    action="windowClose"/>
         </hbox>
     </layout>
 </window>

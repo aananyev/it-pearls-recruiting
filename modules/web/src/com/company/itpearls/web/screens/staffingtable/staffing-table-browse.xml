@@ -27,30 +27,46 @@
                 dataLoader="staffingTablesDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="staffingTablesTable"
-                    width="100%"
-                    dataContainer="staffingTablesDc">
+        <dataGrid id="staffingTablesTable"
+                  width="100%"
+                  bodyRowHeight="50px"
+                  dataContainer="staffingTablesDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="openPosition"/>
-                <column id="grade"/>
-                <column id="numberOfStaff"/>
-                <column id="salaryMin"/>
-                <column id="salaryMax"/>
-                <column id="comment"/>
+                <column id="code"
+                        property="code"
+                        width="100px"/>
+                <column id="openPosition"
+                        property="openPosition"
+                        width="700px"/>
+                <column id="grade"
+                        property="grade"
+                        width="150px"/>
+                <column id="numberOfStaff"
+                        property="numberOfStaff"
+                        width="50px"/>
+                <column id="salaryMin"
+                        property="salaryMin"
+                        width="200px"/>
+                <column id="salaryMax"
+                        property="salaryMax"
+                        width="200px"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="staffingTablesTable.create"/>
-                <button id="editBtn" action="staffingTablesTable.edit"/>
-                <button id="removeBtn" action="staffingTablesTable.remove"/>
+                <button id="createBtn"
+                        action="staffingTablesTable.create"/>
+                <button id="editBtn"
+                        action="staffingTablesTable.edit"/>
+                <button id="removeBtn"
+                        action="staffingTablesTable.remove"/>
             </buttonsPanel>
-        </groupTable>
+        </dataGrid>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

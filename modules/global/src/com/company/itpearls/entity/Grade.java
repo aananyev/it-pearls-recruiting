@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.Column;
@@ -8,6 +9,7 @@ import javax.persistence.Table;
 
 @Table(name = "ITPEARLS_GRADE")
 @Entity(name = "itpearls_Grade")
+@NamePattern("%s|gradeName")
 public class Grade extends StandardEntity {
     private static final long serialVersionUID = -2883382796090234777L;
 

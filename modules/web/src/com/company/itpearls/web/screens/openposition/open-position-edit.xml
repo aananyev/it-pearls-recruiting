@@ -27,6 +27,16 @@
             <collection id="laborAgreementDc"
                         property="laborAgreement"/>
         </instance>
+        <collection id="procAttachmentsDc"
+                    class="com.haulmont.bpm.entity.ProcAttachment"
+                    view="procAttachment-browse">
+            <loader id="procAttachmentsDl">
+                <query><![CDATA[select e from bpm$ProcAttachment e
+                                where e.procInstance.entity.entityId  = :entityId
+                                order by e.createTs]]>
+                </query>
+            </loader>
+        </collection>
         <collection id="openPositionParentDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
@@ -832,6 +842,22 @@
                                   width="AUTO"
                                   caption="msg://msgPriorityNewsCheckBox"/>
                     </vbox>
+                </tab>
+                <tab id="tabApproval"
+                     caption="msg://msgOpenPositionNews"
+                     margin="true,true,true,true"
+                     spacing="true"
+                     expand="procActionsBox"
+                     icon="NEWSPAPER_O">
+                    <groupBox id="procActionsBox"
+                              caption="msg://msgOpenPositionProcessApproval"
+                              spacing="true"
+                              width="AUTO"
+                              orientation="vertical">
+                        <fragment id="procActionsFragment"
+                                  screen="bpm_ProcActionsFragment"/>
+                    </groupBox>
+
                 </tab>
             </tabSheet>
         </vbox>

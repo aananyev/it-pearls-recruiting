@@ -31,6 +31,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "ITERATION_NAME", nullable = false, unique = true, length = 80)
     protected String iterationName;
 
+    @Column(name = "INTERACTION_STATUS")
+    private Integer interactionStatus;
+
     @Column(name = "PIC", length = 80)
     protected String pic;
 
@@ -127,6 +130,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public void setInteractionStatus(InteractionStatus interactionStatus) {
+        this.interactionStatus = interactionStatus == null ? null : interactionStatus.getId();
+    }
+
+    public InteractionStatus getInteractionStatus() {
+        return interactionStatus == null ? null : InteractionStatus.fromId(interactionStatus);
+    }
 
     public Boolean getSignEndCase() {
         return signEndCase;

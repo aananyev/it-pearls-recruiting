@@ -318,10 +318,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     private void setLetterRecommendation() {
         String caption = "Структура письма:";
+        final String startText = "<center><h4>Прошу в сопроводительном письме и резюме отразить следующую информацию: </h4></center></br></br>";
         String text = candidateCVFieldOpenPosition.getValue() != null ?
-                candidateCVFieldOpenPosition.getValue().getTemplateLetter() : "";
+                (startText + candidateCVFieldOpenPosition.getValue().getTemplateLetter()) : "";
 
-        String example = "Пример:\n" +
+        final String example = "Пример:\n" +
                 "\n" +
                 "Уважаемые коллеги, хочу представить Вам Александра Катаева Devops инженера в компании Грид Динамикс в саратовском офисе. Мы предложили Алексею поговорить о сотрудничестве с Вашей командой на позиции DevOps инженера.\n" +
                 "\n" +
