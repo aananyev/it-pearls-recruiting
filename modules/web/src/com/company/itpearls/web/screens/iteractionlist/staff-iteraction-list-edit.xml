@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/iteractionlist/iteraction-list-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.iteractionlist">
+    <layout>
+        <tabSheet id="iteractionListTabSheeet" ext:index="1">
+            <tab id="outStaffingTab"
+                 ext:index="1"
+                 icon="CUBES"
+                 spacing="true"
+                 expand="outstaffingVBox"
+                 margin="true,true,true,true"
+                 caption="msg://msgOutstaffing">
+                <vbox id="outstaffingVBox"
+                      ext:index="1"
+                      spacing="true"
+                      width="100%"
+                      height="100%">
+                    <lookupPickerField id="laborAgreementLookupPickerField"
+                                       ext:index="1"
+                                       dataContainer="iteractionListDc"
+                                       optionsContainer="laborAgreementDc"
+                                       width="100%"
+                                       caption="msg://msgLaborAgreement"
+                                       property="laborAgreement"/>
+                </vbox>
+            </tab>
+        </tabSheet>
+    </layout>
+</window>

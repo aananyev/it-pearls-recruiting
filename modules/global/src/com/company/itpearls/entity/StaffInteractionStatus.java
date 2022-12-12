@@ -5,7 +5,7 @@ import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import javax.annotation.Nullable;
 
 
-public enum InteractionStatus implements EnumClass<Integer> {
+public enum StaffInteractionStatus implements EnumClass<Integer> {
 
     DISPOSAL(-1),
     ADVENT(1),
@@ -13,7 +13,7 @@ public enum InteractionStatus implements EnumClass<Integer> {
 
     private Integer id;
 
-    InteractionStatus(Integer value) {
+    StaffInteractionStatus(Integer value) {
         this.id = value;
     }
 
@@ -22,8 +22,8 @@ public enum InteractionStatus implements EnumClass<Integer> {
     }
 
     @Nullable
-    public static InteractionStatus fromId(Integer id) {
-        for (InteractionStatus at : InteractionStatus.values()) {
+    public static StaffInteractionStatus fromId(Integer id) {
+        for (StaffInteractionStatus at : StaffInteractionStatus.values()) {
             if (at.getId().equals(id)) {
                 return at;
             }

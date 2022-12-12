@@ -36,7 +36,10 @@ order by e.number]]>
         <label id="labelItercationName" stylename="h1"/>
         <label id="labelWarning" icon="WARNING" description="msg://msgWarning" stylename="h2"/>
         <tabSheet stylename="framed">
-            <tab caption="msg://msgIteracionType" spacing="true" id="tabType">
+            <tab caption="msg://msgIteracionType"
+                 spacing="true"
+                 margin="true,true,true,true"
+                 id="tabType">
                 <groupBox height="AUTO" spacing="true">
                     <checkBox id="iteractionCheckBoxMandatory"
                               dataContainer="iteractionDc"
@@ -72,6 +75,7 @@ order by e.number]]>
             </tab>
             <tab id="tabSigns"
                  spacing="true"
+                 margin="true,true,true,true"
                  caption="msg://msgSings">
                 <groupBox height="AUTO"
                           spacing="true">
@@ -110,22 +114,30 @@ order by e.number]]>
                                   caption="msg://mshSignEndCase"
                                   dataContainer="iteractionDc"
                                   property="signEndCase"/>
+
                     </vbox>
                 </groupBox>
             </tab>
             <tab id="outstaffingTab"
                  spacing="true"
                  icon="CUBES"
+                 margin="true,true,true,true"
                  caption="msg://mshOutstaffingTab">
                 <vbox spacing="true">
                     <checkBox id="outstaffingSign"
                               dataContainer="iteractionDc"
                               property="outstaffingSign"
                               caption="msg://msgOutstaffingSign"/>
+                    <radioButtonGroup id="staffInteractionStatusRadioButtonsGroup"
+                                      dataContainer="iteractionDc"
+                                      caption="msg://msgStaffStatus"
+                                      property="staffInteractionStatus"
+                                      optionsEnum="com.company.itpearls.entity.StaffInteractionStatus"/>
                 </vbox>
             </tab>
             <tab caption="msg://Tab"
                  spacing="true"
+                 margin="true,true,true,true"
                  id="tabIcons">
                 <groupBox height="AUTO" spacing="true">
                     <hbox id="callDialogHbox"
@@ -155,6 +167,7 @@ order by e.number]]>
                 </groupBox>
             </tab>
             <tab id="tabNotifictions"
+                 margin="true,true,true,true"
                  caption="msg://msgNotifications"
                  expand="notificationGroupBox"
                  spacing="true">
@@ -231,7 +244,10 @@ order by e.number]]>
                     </vbox>
                 </groupBox>
             </tab>
-            <tab caption="msg://msgSetupFiels" spacing="true" id="tabSetup">
+            <tab caption="msg://msgSetupFiels"
+                 spacing="true"
+                 margin="true,true,true,true"
+                 id="tabSetup">
                 <groupBox spacing="true" height="AUTO">
                     <hbox width="100%" height="AUTO" spacing="true">
                         <groupBox height="AUTO" spacing="true" width="100%">
@@ -308,14 +324,18 @@ order by e.number]]>
                     </groupBox>
                 </groupBox>
             </tab>
-            <tab id="setupWidgets" spacing="true" caption="msg://msgWidgetsSetup" expand="widgetSetupGroupBox">
+            <tab id="setupWidgets"
+                 spacing="true"
+                 margin="true,true,true,true"
+                 caption="msg://msgWidgetsSetup"
+                 expand="widgetSetupGroupBox">
                 <checkBox id="myJobCandidatesWingetCheckBox"
                           dataContainer="iteractionDc"
                           property="widgetChackJobCandidates"
                           caption="msg://msgCheckJobCandidateWidget"/>
                 <groupBox id="widgetSetupGroupBox">
                     <accordion id="widgetSetupAccordion" height="100%">
-                        <tab id="widgetPausedTab" margin="trus" spacing="true" caption="msg://msgWidgetPaused">
+                        <tab id="widgetPausedTab" margin="true" spacing="true" caption="msg://msgWidgetPaused">
                         </tab>
                         <tab id="widgetGraph" margin="true" spacing="true" caption="msg://msgGraph">
                         </tab>
@@ -323,6 +343,7 @@ order by e.number]]>
                 </groupBox>
             </tab>
             <tab id="checkTrace"
+                 margin="true,true,true,true"
                  caption="msg://msgCheckTrace"
                  spacing="true"
                  expand="traceHBox">
@@ -360,7 +381,11 @@ order by e.number]]>
                 </vbox>
             </tab>
         </tabSheet>
-        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
+        <hbox id="editActions"
+              width="AUTO"
+              height="100%"
+              spacing="true"
+              align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

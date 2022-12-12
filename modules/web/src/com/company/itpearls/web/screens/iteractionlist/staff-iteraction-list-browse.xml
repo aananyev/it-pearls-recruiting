@@ -16,5 +16,20 @@
             </loader>
         </collection>
     </data>
-    <layout/>
+    <layout>
+        <dataGrid id="iteractionListsTable"
+                  ext:index="1">
+            <buttonsPanel id="buttonsPanel"
+                          ext:index="1"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        ext:index="1"
+                        invoke="staffCreateBtn"/>
+                <button id="editBtn"
+                        ext:index="1"/>
+                <button id="removeBtn"
+                        ext:index="1"/>
+            </buttonsPanel>
+        </dataGrid>
+    </layout>
 </window>
