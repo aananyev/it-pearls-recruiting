@@ -24,6 +24,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -93,12 +94,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> ratingLabel;
     @Inject
     private StarsAndOtherService starsAndOtherService;
-
-/*    static String RESEARCHER = "Researcher";
-    static String RECRUITER = "Recruiter";
-    static String MANAGER = "Manager";
-    static String ADMINISTRATOR = "Administrators";
-    static String OUSTAFF_NAMAGER = "Outstaff Manager"; */
 
     private Boolean newProject;
     static Boolean myClient;
@@ -943,32 +938,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    @Subscribe
-    public void onAfterShow1(AfterShowEvent event) {
-//        setLaborAgreement();
-
-    }
-
-/*    private void setLaborAgreement() {
-        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.OUSTAFF_NAMAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
-            laborAgreementLookupPickerField.setVisible(true);
-
-            if (vacancyFiels.getValue() != null) {
-                laborAgreementDl.setParameter("openPositions", vacancyFiels.getValue());
-                laborAgreementLookupPickerField.setEnabled(true);
-            } else {
-                laborAgreementDl.removeParameter("openPositions");
-                laborAgreementLookupPickerField.setEnabled(false);
-            }
-
-            laborAgreementDl.load();
-            laborAgreementLookupPickerField.setOptionsList(laborAgreementDc.getItems());
-        } else {
-            laborAgreementLookupPickerField.setVisible(false);
-        }
-    } */
-
     private void setMostPopularIteraction() {
         int maxCount = 5;
         mostPopular = getMostPolularIteraction(userSession.getUser(), maxCount);
@@ -1295,7 +1264,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         .parameter("positionType", event.getValue().getPositionType())
                         .list();
 
-                if ( alternatives.size() > 0) {
+                if (alternatives.size() > 0) {
                     alternativeVacancyLinkButton.setVisible(true);
                     alternativeVacancyLinkButton.addStyleName("transition-red");
 

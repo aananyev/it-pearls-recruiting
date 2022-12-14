@@ -32,6 +32,9 @@
                  caption="msg://msgStaffingTable">
                 <form id="form" dataContainer="staffingTableDc">
                     <column width="350px">
+                        <checkBox id="activeCheckBox" property="active"/>
+                        <textField id="vacancyCodeTextField"
+                                   property="code"/>
                         <pickerField id="openPositionField"
                                      property="openPosition">
                             <actions>

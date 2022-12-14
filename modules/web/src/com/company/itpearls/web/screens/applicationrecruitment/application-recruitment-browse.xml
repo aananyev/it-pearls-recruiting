@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://applicationRecruitmentBrowse.caption"
+        focusComponent="applicationRecruitmentsTable"
+        messagesPack="com.company.itpearls.web.screens.applicationrecruitment">
+    <data readOnly="true">
+        <collection id="applicationRecruitmentsDc"
+                    class="com.company.itpearls.entity.ApplicationRecruitment">
+            <view extends="_local">
+                <property name="staffingTable" view="_local">
+                    <property name="openPosition" view="_local"/>
+                    <property name="grade" view="_local"/>
+                </property>
+            </view>
+            <loader id="applicationRecruitmentsDl">
+                <query>
+                    <![CDATA[select e from itpearls_ApplicationRecruitment e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="applicationRecruitmentsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="applicationRecruitmentsTable"
+                dataLoader="applicationRecruitmentsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="applicationRecruitmentsTable"
+                    width="100%"
+                    dataContainer="applicationRecruitmentsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="staffingTable"/>
+                <column id="approval"/>
+                <column id="amount"/>
+                <column id="exitDate"/>
+                <column id="comment"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="applicationRecruitmentsTable.create"/>
+                <button id="editBtn" action="applicationRecruitmentsTable.edit"/>
+                <button id="removeBtn" action="applicationRecruitmentsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

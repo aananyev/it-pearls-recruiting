@@ -205,10 +205,6 @@
         <property name="recrutier" view="_local">
             <property name="group" view="_local"/>
         </property>
-        <property name="laborAgreement" view="_minimal">
-            <property name="company" view="_minimal"/>
-            <property name="openPositions" view="_minimal"/>
-        </property>
         <property name="candidate" view="_local">
             <property name="personPosition" view="_local"/>
             <property name="fileImageFace" view="_local"/>

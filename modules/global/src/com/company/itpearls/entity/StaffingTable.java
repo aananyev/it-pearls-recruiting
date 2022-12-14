@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.*;
@@ -8,8 +9,12 @@ import java.math.BigDecimal;
 
 @Table(name = "ITPEARLS_STAFFING_TABLE")
 @Entity(name = "itpearls_StaffingTable")
+@NamePattern("%s|openPosition")
 public class StaffingTable extends StandardEntity {
     private static final long serialVersionUID = -6705890660852104185L;
+
+    @Column(name = "ACTIVE")
+    private Boolean active;
 
     @Column(name = "CODE", length = 32)
     private String code;
@@ -37,6 +42,14 @@ public class StaffingTable extends StandardEntity {
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
     public String getCode() {
         return code;

@@ -349,7 +349,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void setMostPopularInteractionPopupButton(Iteraction iteraction) {
         if (jobCandidateIteractionListTable != null) {
             if (jobCandidateIteractionListTable.getSingleSelected() != null) {
-                screenBuilders.editor(IteractionList.class, this)
+                screenBuilders.editor(jobCandidateIteractionListTable)
+//                screenBuilders.editor(IteractionList.class, this)
                         .newEntity()
                         .withInitializer(e -> {
                             e.setCandidate(getEditedEntity());
@@ -359,7 +360,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .build()
                         .show();
             } else {
-                screenBuilders.editor(IteractionList.class, this)
+//                screenBuilders.editor(IteractionList.class, this)
+                screenBuilders.editor(jobCandidateIteractionListTable)
                         .newEntity()
                         .withInitializer(e -> {
                             e.setCandidate(getEditedEntity());
@@ -1603,7 +1605,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void addIteractionJobCandidate() {
-        screenBuilders.editor(IteractionList.class, this)
+//        screenBuilders.editor(IteractionList.class, this)
+        screenBuilders.editor(jobCandidateIteractionListTable)
                 .newEntity()
                 .withOptions(new JobCandidateScreenOptions(false))
                 .withParentDataContext(dataContext)
@@ -1640,12 +1643,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (lastIteraction != null) {
                 IteractionList finalLastIteraction = lastIteraction;
 
-                Screen copyIteractionScreen = screenBuilders.editor(IteractionList.class, this)
+//                Screen copyIteractionScreen = screenBuilders.editor(IteractionList.class, this)
+                Screen copyIteractionScreen = screenBuilders.editor(jobCandidateIteractionListTable)
                         .withParentDataContext(dataContext)
                         .withInitializer(candidate -> {
                             candidate.setVacancy(finalLastIteraction.getVacancy());
                             candidate.setNumberIteraction(numBerIteractionForNewEntity());
-                            candidate.setLaborAgreement(finalLastIteraction.getLaborAgreement());
 
                             IteractionList iteractionList = dataContext.merge(candidate);
                             jobCandidateDc.getItem().getIteractionList().add(iteractionList);
@@ -1671,7 +1674,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .show();
             }
         } else {
-            screenBuilders.editor(IteractionList.class, this)
+//            screenBuilders.editor(IteractionList.class, this)
+            screenBuilders.editor(jobCandidateIteractionListTable)
                     .withParentDataContext(dataContext)
                     .withInitializer(candidate -> {
                         candidate.setCandidate(jobCandidateIteractionListTable.getSingleSelected().getCandidate());
@@ -1913,7 +1917,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
 
                 if (candidateCV != null) {
-                    screenBuilders.editor(CandidateCV.class, this)
+//                    screenBuilders.editor(CandidateCV.class, this)
+                    screenBuilders.editor(jobCandidateCandidateCvTable)
                             .withInitializer(candidate -> {
                                 candidate.setCandidate(getEditedEntity());
 
@@ -1937,7 +1942,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .show();
                 }
             } else {
-                Screen s = screenBuilders.editor(CandidateCV.class, this)
+//                Screen s = screenBuilders.editor(CandidateCV.class, this)
+                Screen s = screenBuilders.editor(jobCandidateCandidateCvTable)
                         .withParentDataContext(dataContext)
                         .withInitializer(candidate -> {
                             candidate.setCandidate(jobCandidateCandidateCvTable.getSingleSelected().getCandidate());

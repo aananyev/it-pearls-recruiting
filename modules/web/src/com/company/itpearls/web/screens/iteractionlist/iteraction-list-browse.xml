@@ -24,8 +24,11 @@
                 </property>
                 <property name="comment"/>
             </view>
-            <loader id="iteractionListsDl" cacheable="true">
-                <query><![CDATA[select e from itpearls_IteractionList e order by e.numberIteraction desc]]>
+            <loader id="iteractionListsDl"
+                    cacheable="true">
+                <query><![CDATA[select e
+                        from itpearls_IteractionList e
+                        order by e.numberIteraction desc]]>
                     <condition>
                         <and>
                             <c:jpql>

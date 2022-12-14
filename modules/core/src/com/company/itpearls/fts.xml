@@ -106,5 +106,11 @@
         <entity class="com.company.itpearls.entity.Grade">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.StaffCurrent">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.ApplicationRecruitment">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

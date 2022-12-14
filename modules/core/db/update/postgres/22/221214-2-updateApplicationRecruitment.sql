@@ -1,0 +1,1 @@
+alter table ITPEARLS_APPLICATION_RECRUITMENT add column APPROVAL boolean ;

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://staffCurrentEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.staffcurrent">
+    <data>
+        <instance id="staffCurrentDc"
+                  class="com.company.itpearls.entity.StaffCurrent">
+            <view extends="_local">
+                <property name="employee" view="_local"/>
+                <property name="staffingTable" view="_local"/>
+            </view>
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="staffCurrentDc">
+            <column width="350px">
+                <pickerField id="employeeField" property="employee">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="clear" type="picker_clear"/>
+                    </actions>
+                </pickerField>
+                <pickerField id="staffingTableField" property="staffingTable">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="clear" type="picker_clear"/>
+                    </actions>
+                </pickerField>
+                <textField id="salaryField" property="salary"/>
+                <lookupField id="formEmploymentField" property="formEmployment"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

@@ -39,5 +39,7 @@
         <class>com.company.itpearls.entity.InternalEmailer</class>
         <class>com.company.itpearls.entity.StaffingTable</class>
         <class>com.company.itpearls.entity.Grade</class>
+        <class>com.company.itpearls.entity.StaffCurrent</class>
+        <class>com.company.itpearls.entity.ApplicationRecruitment</class>
     </persistence-unit>
 </persistence>

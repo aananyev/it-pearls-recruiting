@@ -101,7 +101,6 @@ create table ITPEARLS_ITERACTION_LIST (
     ADD_DATE timestamp,
     ADD_STRING varchar(255),
     ADD_INTEGER integer,
-    LEGAL_ENTITY_ID uuid,
     RATING integer,
     CURRENT_PRIORITY integer,
     CURRENT_OPEN_CLOSE boolean,
@@ -862,6 +861,7 @@ create table ITPEARLS_STAFFING_TABLE (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    ACTIVE boolean,
     CODE varchar(32),
     OPEN_POSITION_ID uuid not null,
     GRADE_ID uuid not null,
@@ -889,3 +889,44 @@ create table ITPEARLS_GRADE (
     primary key (ID)
 )^
 -- end ITPEARLS_GRADE
+-- begin ITPEARLS_STAFF_CURRENT
+create table ITPEARLS_STAFF_CURRENT (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    EMPLOYEE_ID uuid not null,
+    STAFFING_TABLE_ID uuid,
+    SALARY integer not null,
+    FORM_EMPLOYMENT varchar(50) not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_STAFF_CURRENT
+-- begin ITPEARLS_APPLICATION_RECRUITMENT
+create table ITPEARLS_APPLICATION_RECRUITMENT (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    ACTIVE boolean,
+    STAFFING_TABLE_ID uuid not null,
+    APPROVAL boolean,
+    APPLICATION_DATE timestamp not null,
+    AMOUNT integer not null,
+    EXIT_DATE date not null,
+    COMMENT_ text,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_APPLICATION_RECRUITMENT

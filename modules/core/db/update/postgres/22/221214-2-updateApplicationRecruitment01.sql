@@ -1,0 +1,4 @@
+alter table ITPEARLS_APPLICATION_RECRUITMENT add column ACTIVE boolean ;
+alter table ITPEARLS_APPLICATION_RECRUITMENT add column APPLICATION_DATE timestamp ^
+update ITPEARLS_APPLICATION_RECRUITMENT set APPLICATION_DATE = current_timestamp where APPLICATION_DATE is null ;
+alter table ITPEARLS_APPLICATION_RECRUITMENT alter column APPLICATION_DATE set not null ;
