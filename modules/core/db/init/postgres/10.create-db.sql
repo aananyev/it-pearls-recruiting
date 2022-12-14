@@ -926,7 +926,28 @@ create table ITPEARLS_APPLICATION_RECRUITMENT (
     AMOUNT integer not null,
     EXIT_DATE date not null,
     COMMENT_ text,
+    APPLICATION_RECRUITMENT_LIST_ID uuid not null,
     --
     primary key (ID)
 )^
 -- end ITPEARLS_APPLICATION_RECRUITMENT
+-- begin ITPEARLS_APPLICATION_RECRUITMENT_LIST
+create table ITPEARLS_APPLICATION_RECRUITMENT_LIST (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    ACTIVE boolean,
+    OPEN_DATE date,
+    CLOSE_DATE date,
+    RECRUITER_ID uuid,
+    COMMENT_ text,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_APPLICATION_RECRUITMENT_LIST

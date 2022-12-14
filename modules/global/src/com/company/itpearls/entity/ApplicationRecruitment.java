@@ -43,6 +43,18 @@ public class ApplicationRecruitment extends StandardEntity {
     @Column(name = "COMMENT_")
     private String comment;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "APPLICATION_RECRUITMENT_LIST_ID")
+    private ApplicationRecruitmentList applicationRecruitmentList;
+
+    public ApplicationRecruitmentList getApplicationRecruitmentList() {
+        return applicationRecruitmentList;
+    }
+
+    public void setApplicationRecruitmentList(ApplicationRecruitmentList applicationRecruitmentList) {
+        this.applicationRecruitmentList = applicationRecruitmentList;
+    }
+
     public Boolean getActive() {
         return active;
     }

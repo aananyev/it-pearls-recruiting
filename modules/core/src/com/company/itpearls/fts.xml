@@ -112,5 +112,8 @@
         <entity class="com.company.itpearls.entity.ApplicationRecruitment">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.ApplicationRecruitmentList">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>
