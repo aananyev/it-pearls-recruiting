@@ -19,6 +19,19 @@
                 </query>
             </loader>
         </collection>
+        <collection id="procAttachmentsDc"
+                    class="com.haulmont.bpm.entity.ProcAttachment"
+                    view="procAttachment-browse">
+            <loader id="procAttachmentsDl">
+                <query><![CDATA[select e from bpm$ProcAttachment e order by e.createTs]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.procInstance.entity.entityId  = :entityId</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -38,6 +51,7 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="procApproval" generator="approvalProcColumn" caption="msg://msgActionProc"/>
                 <column id="staffingTable"/>
                 <column id="approval"/>
                 <column id="amount"/>

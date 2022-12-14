@@ -5,7 +5,6 @@ import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Table(name = "ITPEARLS_APPLICATION_RECRUITMENT")
@@ -16,9 +15,8 @@ public class ApplicationRecruitment extends StandardEntity {
     @Column(name = "ACTIVE")
     private Boolean active;
 
-    @NotNull
     @OnDelete(DeletePolicy.CASCADE)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "STAFFING_TABLE_ID")
     private StaffingTable staffingTable;
 
@@ -26,24 +24,21 @@ public class ApplicationRecruitment extends StandardEntity {
     private Boolean approval;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @NotNull
-    @Column(name = "APPLICATION_DATE", nullable = false)
+    @Column(name = "APPLICATION_DATE")
     private Date applicationDate;
 
-    @NotNull
-    @Column(name = "AMOUNT", nullable = false)
+    @Column(name = "AMOUNT")
     private Integer amount;
 
     @Temporal(TemporalType.DATE)
-    @NotNull
-    @Column(name = "EXIT_DATE", nullable = false)
+    @Column(name = "EXIT_DATE")
     private Date exitDate;
 
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APPLICATION_RECRUITMENT_LIST_ID")
     private ApplicationRecruitmentList applicationRecruitmentList;
 

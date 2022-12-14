@@ -12,35 +12,88 @@
                     <property name="grade" view="_local"/>
                 </property>
             </view>
-            <loader/>
+            <loader id="applicationRecruitmentDl"/>
         </instance>
+        <collection id="procAttachmentsDc"
+                    class="com.haulmont.bpm.entity.ProcAttachment"
+                    view="procAttachment-browse">
+            <loader id="procAttachmentsDl">
+                <query><![CDATA[select e from bpm$ProcAttachment e
+                                where e.procInstance.entity.entityId  = :entityId
+                                order by e.createTs]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="applicationRecruitmentDc">
-            <column width="350px">
-                <pickerField id="staffingTableField" property="staffingTable">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="clear" type="picker_clear"/>
-                    </actions>
-                </pickerField>
-                <checkBox id="approvalCheckBox"
-                          property="approval"/>
-                <checkBox id="activeCheckBox"
-                          property="active"/>
-                <dateField id="applicationDateField"
-                           property="applicationDate"/>
-                <textField id="amountField"
-                           property="amount"/>
-                <dateField id="exitDateField"
-                           property="exitDate"/>
-                <textArea id="commentField"
-                          property="comment"
-                          rows="5"/>
-            </column>
-        </form>
+    <layout expand="mainTabSheet" spacing="true">
+        <tabSheet id="mainTabSheet" width="100%" height="100%" stylename="framed">
+            <tab id="mainFormTab"
+                 spacing="true"
+                 caption="msg://msgMain"
+                 margin="true,true,true,true">
+                <form id="form" dataContainer="applicationRecruitmentDc">
+                    <column width="350px">
+                        <pickerField id="staffingTableField" property="staffingTable">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="clear" type="picker_clear"/>
+                            </actions>
+                        </pickerField>
+                        <checkBox id="approvalCheckBox"
+                                  property="approval"/>
+                        <checkBox id="activeCheckBox"
+                                  property="active"/>
+                        <dateField id="applicationDateField"
+                                   property="applicationDate"/>
+                        <textField id="amountField"
+                                   property="amount"/>
+                        <dateField id="exitDateField"
+                                   property="exitDate"/>
+                        <textArea id="commentField"
+                                  property="comment"
+                                  rows="5"/>
+                    </column>
+                </form>
+            </tab>
+            <tab id="procActionTab"
+                 spacing="true"
+                 expand="attachmentsGroupBox"
+                 margin="true,true,true,true"
+                 caption="msg://msgActionProcTab">
+                <groupBox id="procActionsBox"
+                          caption="msg://process"
+                          spacing="true"
+                          width="100%"
+                          orientation="vertical">
+                    <fragment id="procActionsFragment"
+                              screen="bpm_ProcActionsFragment"/>
+                    <label id="lastComment"
+                           dataContainer="procAttachmentsDc"
+                           stylename="h4"
+                           property="procTask.comment"/>
+                </groupBox>
+                <groupBox id="attachmentsGroupBox"
+                        caption="msg://attachments"
+                          height="100%"
+                          spacing="true"
+                          width="100%">
+                    <table id="attachmentsTable"
+                           dataContainer="procAttachmentsDc"
+                           height="100%"
+                           width="100%">
+                        <columns>
+                            <column id="file.name"/>
+                            <column id="author"/>
+                            <column id="type"/>
+                            <column id="comment"
+                                    maxTextLength="50"/>
+                        </columns>
+                    </table>
+                </groupBox>
+            </tab>
+        </tabSheet>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>

@@ -36,11 +36,11 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="active"/>
-                <column id="openDate"/>
-                <column id="closeDate"/>
+                <column id="active" width="50px"/>
+                <column id="quickDescription"/>
+                <column id="openDate" width="100px"/>
+                <column id="closeDate" width="100px"/>
                 <column id="recruiter"/>
-                <column id="comment"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

@@ -385,4 +385,16 @@
         <property name="candidates" view="_minimal"/>
         <property name="author" view="_minimal"/>
     </view>
+    <view entity="itpearls_StaffingTable" name="staffingTable-view" extends="_local"/>
+    <view entity="itpearls_StaffCurrent" name="staffCurrent-view" extends="_local">
+        <property name="staffingTable" view="_local"/>
+    </view>
+    <view entity="itpearls_ApplicationRecruitmentList" name="applicationRecruitmentList-view" extends="_local">
+        <property name="applicationRecruitment" view="_local"/>
+        <property name="recruiter" view="_local"/>
+    </view>
+    <view entity="itpearls_ApplicationRecruitment" name="applicationRecruitment-view" extends="_local">
+        <property name="staffingTable" view="_local"/>
+        <property name="applicationRecruitmentList" view="_local"/>
+    </view>
 </views>

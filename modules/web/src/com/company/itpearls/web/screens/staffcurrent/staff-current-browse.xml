@@ -8,8 +8,12 @@
         <collection id="staffCurrentsDc"
                     class="com.company.itpearls.entity.StaffCurrent">
             <view extends="_local">
-                <property name="employee" view="_local"/>
-                <property name="staffingTable" view="_local"/>
+                <property name="employee" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
+                <property name="staffingTable" view="_local">
+                    <property name="openPosition" view="_local"/>
+                </property>
             </view>
             <loader id="staffCurrentsDl">
                 <query>
@@ -37,6 +41,7 @@
                 <action id="excel" type="excel"/>
             </actions>
             <columns>
+                <column id="staffingTable.code"/>
                 <column id="employee"/>
                 <column id="staffingTable"/>
                 <column id="salary"/>

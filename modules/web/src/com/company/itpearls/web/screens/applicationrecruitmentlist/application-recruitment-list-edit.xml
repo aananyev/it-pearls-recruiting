@@ -7,54 +7,118 @@
         <instance id="applicationRecruitmentListDc"
                   class="com.company.itpearls.entity.ApplicationRecruitmentList">
             <view extends="_local">
-                <property name="applicationRecruitment" view="_local"/>
+                <property name="applicationRecruitment" view="_local">
+                    <property name="staffingTable" view="_local">
+                        <property name="openPosition" view="_local"/>
+                    </property>
+                </property>
                 <property name="recruiter" view="_local"/>
             </view>
-            <loader/>
+            <loader id="applicationRecruitmentListDl"/>
             <collection id="applicationRecruitmentDc" property="applicationRecruitment"/>
         </instance>
+        <collection id="procAttachmentsDc"
+                    class="com.haulmont.bpm.entity.ProcAttachment"
+                    view="procAttachment-browse">
+            <loader id="procAttachmentsDl">
+                <query><![CDATA[select e from bpm$ProcAttachment e
+                                where e.procInstance.entity.entityId  = :entityId
+                                order by e.createTs]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="applicationRecruitmentListDc">
-            <column width="350px">
-                <checkBox id="activeField" property="active"/>
-                <dateField id="openDateField" property="openDate"/>
-                <dateField id="closeDateField" property="closeDate"/>
-                <pickerField id="recruiterField" property="recruiter">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="clear" type="picker_clear"/>
-                    </actions>
-                </pickerField>
-                <textArea id="commentField" property="comment" rows="5"/>
-            </column>
-        </form>
-        <groupBox id="applicationRecruitmentBox"
-                  caption="msg://com.company.itpearls.entity/ApplicationRecruitmentList.applicationRecruitment">
-            <table id="applicationRecruitmentTable" dataContainer="applicationRecruitmentDc" width="100%"
-                   height="200px">
-                <actions>
-                    <action id="create" type="create"/>
-                    <action id="edit" type="edit"/>
-                    <action id="remove" type="remove"/>
-                </actions>
-                <columns>
-                    <column id="active"/>
-                    <column id="approval"/>
-                    <column id="applicationDate"/>
-                    <column id="amount"/>
-                    <column id="exitDate"/>
-                    <column id="comment"/>
-                </columns>
-                <buttonsPanel>
-                    <button action="applicationRecruitmentTable.create"/>
-                    <button action="applicationRecruitmentTable.edit"/>
-                    <button action="applicationRecruitmentTable.remove"/>
-                </buttonsPanel>
-            </table>
-        </groupBox>
+    <layout expand="mainTabSheet" spacing="true">
+        <tabSheet id="mainTabSheet"
+                  stylename="framed">
+            <tab id="mainTab"
+                 caption="msg://msgApplication"
+                 margin="true,true,true,true">
+                <form id="form" dataContainer="applicationRecruitmentListDc" width="100%">
+                    <column width="50%">
+                        <checkBox id="activeField" property="active" width="100%"/>
+                        <textField id="quickDescription" property="quickDescription" width="100%"/>
+                        <dateField id="openDateField" property="openDate" width="100%"/>
+                        <dateField id="closeDateField" property="closeDate" width="100%"/>
+                        <pickerField id="recruiterField" property="recruiter" width="100%">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="clear" type="picker_clear"/>
+                            </actions>
+                        </pickerField>
+                    </column>
+                    <column width="50%">
+                        <textArea id="commentField" property="comment" width="100%" height="100%" rowspan="7"/>
+                    </column>
+                </form>
+
+                <groupBox id="applicationRecruitmentBox"
+                          caption="msg://com.company.itpearls.entity/ApplicationRecruitmentList.applicationRecruitment">
+                    <table id="applicationRecruitmentTable"
+                           dataContainer="applicationRecruitmentDc"
+                           editable="true"
+                           width="100%"
+                           height="200px">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="add" type="add"/>
+                        </actions>
+                        <columns>
+                            <column id="active" width="50px" editable="true"/>
+                            <column id="approval" width="50px" editable="false"/>
+                            <column id="staffingTable.code"/>
+                            <column id="staffingTable.openPosition"/>
+                            <column id="staffingTable.salaryMax"/>
+                            <column id="amount" editable="true"/>
+                            <column id="exitDate" editable="true"/>
+                            <column id="applicationDate"/>
+                        </columns>
+                        <buttonsPanel>
+                            <button id="automationFillButton"
+                                    caption="msg://msgAutomaticFill"
+                                    invoke="automatingFillButton"/>
+                            <button action="applicationRecruitmentTable.add"/>
+                            <button action="applicationRecruitmentTable.create"/>
+                            <button action="applicationRecruitmentTable.edit"/>
+                            <button action="applicationRecruitmentTable.remove"/>
+                        </buttonsPanel>
+                    </table>
+                </groupBox>
+            </tab>
+            <tab id="approvalTab"
+                 margin="true,true,true,true"
+                 caption="msg://msgApproval">
+                <groupBox id="procActionsBox"
+                          caption="msg://process"
+                          spacing="true"
+                          width="AUTO"
+                          orientation="vertical">
+                    <fragment id="procActionsFragment"
+                              screen="bpm_ProcActionsFragment"/>
+                </groupBox>
+                <groupBox caption="msg://attachments"
+                          height="300px"
+                          spacing="true"
+                          width="700px">
+                    <table id="attachmentsTable"
+                           dataContainer="procAttachmentsDc"
+                           height="100%"
+                           width="100%">
+                        <columns>
+                            <column id="file.name"/>
+                            <column id="author"/>
+                            <column id="type"/>
+                            <column id="comment"
+                                    maxTextLength="50"/>
+                        </columns>
+                    </table>
+                </groupBox>
+            </tab>
+        </tabSheet>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>

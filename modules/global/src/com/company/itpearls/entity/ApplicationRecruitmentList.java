@@ -6,6 +6,7 @@ import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,10 @@ public class ApplicationRecruitmentList extends StandardEntity {
     @Temporal(TemporalType.DATE)
     @Column(name = "OPEN_DATE")
     private Date openDate;
+
+    @NotNull
+    @Column(name = "QUICK_DESCRIPTION", nullable = false, length = 80)
+    private String quickDescription;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "CLOSE_DATE")
@@ -37,6 +42,14 @@ public class ApplicationRecruitmentList extends StandardEntity {
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
+
+    public String getQuickDescription() {
+        return quickDescription;
+    }
+
+    public void setQuickDescription(String quickDescription) {
+        this.quickDescription = quickDescription;
+    }
 
     public Date getOpenDate() {
         return openDate;

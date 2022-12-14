@@ -920,13 +920,13 @@ create table ITPEARLS_APPLICATION_RECRUITMENT (
     DELETED_BY varchar(50),
     --
     ACTIVE boolean,
-    STAFFING_TABLE_ID uuid not null,
+    STAFFING_TABLE_ID uuid,
     APPROVAL boolean,
-    APPLICATION_DATE timestamp not null,
-    AMOUNT integer not null,
-    EXIT_DATE date not null,
+    APPLICATION_DATE timestamp,
+    AMOUNT integer,
+    EXIT_DATE date,
     COMMENT_ text,
-    APPLICATION_RECRUITMENT_LIST_ID uuid not null,
+    APPLICATION_RECRUITMENT_LIST_ID uuid,
     --
     primary key (ID)
 )^
@@ -944,6 +944,7 @@ create table ITPEARLS_APPLICATION_RECRUITMENT_LIST (
     --
     ACTIVE boolean,
     OPEN_DATE date,
+    QUICK_DESCRIPTION varchar(80) not null,
     CLOSE_DATE date,
     RECRUITER_ID uuid,
     COMMENT_ text,

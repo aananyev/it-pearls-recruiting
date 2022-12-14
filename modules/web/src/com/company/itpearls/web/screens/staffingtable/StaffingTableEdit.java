@@ -2,6 +2,8 @@ package com.company.itpearls.web.screens.staffingtable;
 
 import com.haulmont.bpm.entity.ProcAttachment;
 import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
+import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.StaffingTable;
@@ -20,9 +22,15 @@ public class StaffingTableEdit extends StandardEditor<StaffingTable> {
     private ProcActionsFragment procActionsFragment;
 
     private static final String PROCESS_CODE = "staffingTableApproval";
+    @Inject
+    private CheckBox activeCheckBox;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            activeCheckBox.setValue(false);
+        }
+
         setInitApprovalProcess();
     }
 
