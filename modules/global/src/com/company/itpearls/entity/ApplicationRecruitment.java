@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
@@ -9,11 +10,15 @@ import java.util.Date;
 
 @Table(name = "ITPEARLS_APPLICATION_RECRUITMENT")
 @Entity(name = "itpearls_ApplicationRecruitment")
+@NamePattern("%s|code")
 public class ApplicationRecruitment extends StandardEntity {
     private static final long serialVersionUID = 8849531439698151090L;
 
     @Column(name = "ACTIVE")
     private Boolean active;
+
+    @Column(name = "CODE", length = 80)
+    private String code;
 
     @OnDelete(DeletePolicy.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,6 +46,14 @@ public class ApplicationRecruitment extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APPLICATION_RECRUITMENT_LIST_ID")
     private ApplicationRecruitmentList applicationRecruitmentList;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 
     public ApplicationRecruitmentList getApplicationRecruitmentList() {
         return applicationRecruitmentList;

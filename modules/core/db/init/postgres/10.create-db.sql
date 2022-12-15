@@ -920,6 +920,7 @@ create table ITPEARLS_APPLICATION_RECRUITMENT (
     DELETED_BY varchar(50),
     --
     ACTIVE boolean,
+    CODE varchar(80),
     STAFFING_TABLE_ID uuid,
     APPROVAL boolean,
     APPLICATION_DATE timestamp,

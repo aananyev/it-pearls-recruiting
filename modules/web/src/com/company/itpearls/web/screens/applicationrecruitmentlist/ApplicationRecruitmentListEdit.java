@@ -4,11 +4,13 @@ import com.company.itpearls.entity.*;
 import com.haulmont.bpm.entity.ProcAttachment;
 import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.app.core.file.FileDownloadHelper;
 import com.haulmont.cuba.gui.components.DateField;
 import com.haulmont.cuba.gui.components.PickerField;
 import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -54,6 +56,10 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     private Table<ProcAttachment> attachmentsTable;
 
     private static final String PROCESS_CODE = "approvalApplicationRecruiting";
+    @Inject
+    private TextField<String> codeTextField;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -77,43 +83,57 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     }
 
     public void automatingFillButton() {
-        final String QUERY_STAFFING_TABLE
-                = "select e from itpearls_StaffingTable e where e.active = true";
-        final String QUERY_STAFF_CURRENT
-                = "select e from itpearls_StaffCurrent e where e.staffingTable = :staffingTable";
+        if (codeTextField.getValue() != null) {
+            final String QUERY_STAFFING_TABLE
+                    = "select e from itpearls_StaffingTable e where e.active = true";
+            final String QUERY_STAFF_CURRENT
+                    = "select e from itpearls_StaffCurrent e where e.staffingTable = :staffingTable";
 
-        if (PersistenceHelper.isNew(getEditedEntity())) {
+            if (PersistenceHelper.isNew(getEditedEntity())) {
 
-            LoadContext staffTable = LoadContext.create(StaffingTable.class)
-                    .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE));
-            List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
+                LoadContext staffTable = LoadContext.create(StaffingTable.class)
+                        .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE));
+                List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
 
-            dataContext.create(ApplicationRecruitment.class);
-            List<ApplicationRecruitment> applicationRecruitments = new ArrayList<>();
+                dataContext.create(ApplicationRecruitment.class);
+                List<ApplicationRecruitment> applicationRecruitments = new ArrayList<>();
+                Integer counter = 1;
 
-            for (StaffingTable st : staffingTable) {
-                LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
-                        .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
-                                .setParameter("staffingTable", st))
-                        .setView("staffCurrent-view");
+                for (StaffingTable st : staffingTable) {
+                    LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
+                            .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
+                                    .setParameter("staffingTable", st))
+                            .setView("staffCurrent-view");
 
-                List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);
+                    List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);
 
-                if (st.getActive()) {
-                    if (st.getNumberOfStaff() > staffCurrents.size()) {
-                        ApplicationRecruitment applicationRecruitment = metadata.create(ApplicationRecruitment.class);
-                        applicationRecruitment.setActive(true);
-                        applicationRecruitment.setAmount(st.getNumberOfStaff() - staffCurrents.size());
-                        applicationRecruitment.setApplicationDate(new Date());
-                        applicationRecruitment.setStaffingTable(st);
+                    if (st.getActive()) {
+                        if (st.getNumberOfStaff() > staffCurrents.size()) {
+                            ApplicationRecruitment applicationRecruitment = metadata.create(ApplicationRecruitment.class);
 
-                        applicationRecruitmentDc.getMutableItems().add(applicationRecruitment);
-                        applicationRecruitments.add(applicationRecruitment);
+                            applicationRecruitment.setActive(true);
+                            applicationRecruitment.setAmount(st.getNumberOfStaff() - staffCurrents.size());
+                            applicationRecruitment.setApplicationDate(new Date());
+                            applicationRecruitment.setStaffingTable(st);
+                            applicationRecruitment.setCode(codeTextField.getValue() + "/" + counter++);
+                            applicationRecruitment.setApplicationRecruitmentList(getEditedEntity());
+
+                            applicationRecruitmentDc.getMutableItems().add(applicationRecruitment);
+//                            applicationRecruitments.add(applicationRecruitment);
+                            dataContext.merge(applicationRecruitment);
+                        }
                     }
                 }
-            }
 
-            dataContext.merge(applicationRecruitments);
+                dataContext.commit();
+            }
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Заполните код вакансии")
+                    .withDescription("ВНИМАНИЕ")
+                    .show();
+
+            getWindow().setFocusComponent("codeTextField");
         }
     }
 }

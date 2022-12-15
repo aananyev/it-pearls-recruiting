@@ -12,6 +12,7 @@
                     <property name="openPosition" view="_local"/>
                     <property name="grade" view="_local"/>
                 </property>
+                <property name="createTs"/>
             </view>
             <loader id="applicationRecruitmentsDl">
                 <query>
@@ -51,12 +52,18 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="procApproval" generator="approvalProcColumn" caption="msg://msgActionProc"/>
-                <column id="staffingTable"/>
+                <column id="createTs"
+                        width="80px"/>
+                <column id="code"
+                        width="80px"/>
+                <column id="procApproval"
+                        generator="approvalProcColumn"
+                        caption="msg://msgActionProc"
+                        width="50px"/>
                 <column id="approval"/>
-                <column id="amount"/>
-                <column id="exitDate"/>
-                <column id="comment"/>
+                <column id="staffingTable"/>
+                <column id="amount" width="50px"/>
+                <column id="exitDate" width="80px"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

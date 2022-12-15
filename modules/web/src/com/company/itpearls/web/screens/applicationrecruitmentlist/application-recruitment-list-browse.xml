@@ -37,7 +37,7 @@
             </actions>
             <columns>
                 <column id="active" width="50px"/>
-                <column id="quickDescription"/>
+                <column id="code"/>
                 <column id="openDate" width="100px"/>
                 <column id="closeDate" width="100px"/>
                 <column id="recruiter"/>

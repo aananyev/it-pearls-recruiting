@@ -39,7 +39,7 @@
                 <form id="form" dataContainer="applicationRecruitmentListDc" width="100%">
                     <column width="50%">
                         <checkBox id="activeField" property="active" width="100%"/>
-                        <textField id="quickDescription" property="quickDescription" width="100%"/>
+                        <textField id="codeTextField" property="code" width="100%"/>
                         <dateField id="openDateField" property="openDate" width="100%"/>
                         <dateField id="closeDateField" property="closeDate" width="100%"/>
                         <pickerField id="recruiterField" property="recruiter" width="100%">
@@ -68,6 +68,7 @@
                             <action id="add" type="add"/>
                         </actions>
                         <columns>
+                            <column id="code" width="100px" editable="true"/>
                             <column id="active" width="50px" editable="true"/>
                             <column id="approval" width="50px" editable="false"/>
                             <column id="staffingTable.code"/>

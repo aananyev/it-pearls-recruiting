@@ -1,6 +1,7 @@
 package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Table(name = "ITPEARLS_APPLICATION_RECRUITMENT_LIST")
 @Entity(name = "itpearls_ApplicationRecruitmentList")
+@NamePattern("%s|code")
 public class ApplicationRecruitmentList extends StandardEntity {
     private static final long serialVersionUID = -792797817950444495L;
 
@@ -24,7 +26,7 @@ public class ApplicationRecruitmentList extends StandardEntity {
 
     @NotNull
     @Column(name = "QUICK_DESCRIPTION", nullable = false, length = 80)
-    private String quickDescription;
+    private String code;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "CLOSE_DATE")
@@ -43,12 +45,12 @@ public class ApplicationRecruitmentList extends StandardEntity {
     @Column(name = "COMMENT_")
     private String comment;
 
-    public String getQuickDescription() {
-        return quickDescription;
+    public String getCode() {
+        return code;
     }
 
-    public void setQuickDescription(String quickDescription) {
-        this.quickDescription = quickDescription;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public Date getOpenDate() {

@@ -11,6 +11,7 @@
                     <property name="openPosition" view="_local"/>
                     <property name="grade" view="_local"/>
                 </property>
+                <property name="applicationRecruitmentList" view="_local"/>
             </view>
             <loader id="applicationRecruitmentDl"/>
         </instance>
@@ -34,7 +35,9 @@
                  caption="msg://msgMain"
                  margin="true,true,true,true">
                 <form id="form" dataContainer="applicationRecruitmentDc">
-                    <column width="350px">
+                    <column width="500px">
+                        <textField id="codeTextField"
+                                   property="code"/>
                         <pickerField id="staffingTableField" property="staffingTable">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
@@ -51,6 +54,8 @@
                                    property="amount"/>
                         <dateField id="exitDateField"
                                    property="exitDate"/>
+                        <pickerField id="applicationRecruitmentLists"
+                                     property="applicationRecruitmentList"/>
                         <textArea id="commentField"
                                   property="comment"
                                   rows="5"/>
