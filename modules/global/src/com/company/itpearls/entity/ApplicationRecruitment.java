@@ -17,7 +17,7 @@ public class ApplicationRecruitment extends StandardEntity {
     @Column(name = "ACTIVE")
     private Boolean active;
 
-    @Column(name = "CODE", length = 80)
+    @Column(name = "CODE", unique = true, length = 80)
     private String code;
 
     @OnDelete(DeletePolicy.CASCADE)

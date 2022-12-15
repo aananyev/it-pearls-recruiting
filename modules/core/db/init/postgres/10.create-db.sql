@@ -867,7 +867,7 @@ create table ITPEARLS_STAFFING_TABLE (
     GRADE_ID uuid not null,
     NUMBER_OF_STAFF integer not null,
     SALARY_MIN decimal(19, 2),
-    SALARY_MAX varchar(255),
+    SALARY_MAX decimal(19, 2),
     COMMENT_ text,
     --
     primary key (ID)
@@ -945,7 +945,7 @@ create table ITPEARLS_APPLICATION_RECRUITMENT_LIST (
     --
     ACTIVE boolean,
     OPEN_DATE date,
-    QUICK_DESCRIPTION varchar(80) not null,
+    QUICK_DESCRIPTION varchar(80),
     CLOSE_DATE date,
     RECRUITER_ID uuid,
     COMMENT_ text,

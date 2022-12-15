@@ -7,7 +7,6 @@ import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -24,8 +23,7 @@ public class ApplicationRecruitmentList extends StandardEntity {
     @Column(name = "OPEN_DATE")
     private Date openDate;
 
-    @NotNull
-    @Column(name = "QUICK_DESCRIPTION", nullable = false, length = 80)
+    @Column(name = "QUICK_DESCRIPTION", unique = true, length = 80)
     private String code;
 
     @Temporal(TemporalType.DATE)

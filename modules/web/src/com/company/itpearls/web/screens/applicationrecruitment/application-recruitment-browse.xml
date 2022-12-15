@@ -16,7 +16,7 @@
             </view>
             <loader id="applicationRecruitmentsDl">
                 <query>
-                    <![CDATA[select e from itpearls_ApplicationRecruitment e]]>
+                    <![CDATA[select e from itpearls_ApplicationRecruitment e where e.code is not null and e.code not like '']]>
                 </query>
             </loader>
         </collection>

@@ -39,22 +39,25 @@
             <columns>
                 <column id="code"
                         property="code"
-                        width="100px"/>
+                        width="150px"/>
+                <column id="active"
+                        width="50px"
+                        property="active"/>
                 <column id="openPosition"
                         property="openPosition"
                         width="700px"/>
                 <column id="grade"
                         property="grade"
-                        width="150px"/>
+                        width="100px"/>
                 <column id="numberOfStaff"
                         property="numberOfStaff"
                         width="50px"/>
                 <column id="salaryMin"
                         property="salaryMin"
-                        width="200px"/>
+                        width="150px"/>
                 <column id="salaryMax"
                         property="salaryMax"
-                        width="200px"/>
+                        width="150px"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

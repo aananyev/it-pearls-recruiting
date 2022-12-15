@@ -55,7 +55,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     @Inject
     private Table<ProcAttachment> attachmentsTable;
 
-    private static final String PROCESS_CODE = "approvalApplicationRecruiting";
+    private static final String PROCESS_CODE = "applicationRecruitmentApproval";
     @Inject
     private TextField<String> codeTextField;
     @Inject
@@ -98,6 +98,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                 dataContext.create(ApplicationRecruitment.class);
                 List<ApplicationRecruitment> applicationRecruitments = new ArrayList<>();
                 Integer counter = 1;
+                Boolean flag = false;
 
                 for (StaffingTable st : staffingTable) {
                     LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
@@ -121,11 +122,14 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                             applicationRecruitmentDc.getMutableItems().add(applicationRecruitment);
 //                            applicationRecruitments.add(applicationRecruitment);
                             dataContext.merge(applicationRecruitment);
+                            flag = true;
                         }
                     }
                 }
 
-                dataContext.commit();
+                if (flag) {
+                    dataContext.commit();
+                }
             }
         } else {
             notifications.create(Notifications.NotificationType.WARNING)

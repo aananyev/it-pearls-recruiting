@@ -54,6 +54,7 @@
                     </column>
                 </form>
 
+
                 <groupBox id="applicationRecruitmentBox"
                           caption="msg://com.company.itpearls.entity/ApplicationRecruitmentList.applicationRecruitment">
                     <table id="applicationRecruitmentTable"

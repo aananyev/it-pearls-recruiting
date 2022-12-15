@@ -37,11 +37,19 @@ public class StaffingTable extends StandardEntity {
     private BigDecimal salaryMin;
 
     @Column(name = "SALARY_MAX")
-    private String salaryMax;
+    private BigDecimal salaryMax;
 
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
+
+    public void setSalaryMax(BigDecimal salaryMax) {
+        this.salaryMax = salaryMax;
+    }
+
+    public BigDecimal getSalaryMax() {
+        return salaryMax;
+    }
 
     public Boolean getActive() {
         return active;
@@ -65,14 +73,6 @@ public class StaffingTable extends StandardEntity {
 
     public void setGrade(Grade grade) {
         this.grade = grade;
-    }
-
-    public String getSalaryMax() {
-        return salaryMax;
-    }
-
-    public void setSalaryMax(String salaryMax) {
-        this.salaryMax = salaryMax;
     }
 
     public BigDecimal getSalaryMin() {

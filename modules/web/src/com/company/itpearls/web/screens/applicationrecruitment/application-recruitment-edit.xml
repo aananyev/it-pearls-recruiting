@@ -61,6 +61,11 @@
                                   rows="5"/>
                     </column>
                 </form>
+                <button id="openPositionButton"
+                        enable="false"
+                        width="AUTO"
+                        caption="msg://msgOpenPosition"
+                        invoke="openPositionInvoke"/>
             </tab>
             <tab id="procActionTab"
                  spacing="true"
