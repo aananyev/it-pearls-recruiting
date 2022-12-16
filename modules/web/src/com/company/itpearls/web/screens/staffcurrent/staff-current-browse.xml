@@ -12,7 +12,13 @@
                     <property name="personPosition" view="_local"/>
                 </property>
                 <property name="staffingTable" view="_local">
-                    <property name="openPosition" view="_local"/>
+                    <property name="openPosition" view="_local">
+                        <property name="projectName" view="_local">
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
+                        </property>
+                    </property>
                 </property>
             </view>
             <loader id="staffCurrentsDl">
@@ -33,6 +39,7 @@
         </filter>
         <groupTable id="staffCurrentsTable"
                     width="100%"
+                    aggregatable="true"
                     dataContainer="staffCurrentsDc">
             <actions>
                 <action id="create" type="create"/>
@@ -41,9 +48,13 @@
                 <action id="excel" type="excel"/>
             </actions>
             <columns>
+                <group>
+                    <column id="staffingTable.openPosition.projectName.projectDepartment"
+                            groupAllowed="true"/>
+                </group>
                 <column id="staffingTable.code"/>
-                <column id="employee"/>
-                <column id="staffingTable"/>
+                <column id="employee" width="400px"/>
+                <column id="staffingTable" width="400px"/>
                 <column id="salary"/>
                 <column id="formEmployment"/>
             </columns>

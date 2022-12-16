@@ -13,7 +13,6 @@
   width: 45px;
   height: 45px;
   border: 2px solid black;
-  box-shadow: 0 0 0 2px green, 0 0 5px #333; /* Параметры теней */
   border-radius: 100%;
   display: flex;
   align-items: center;
@@ -663,6 +662,7 @@ rating_battery_yellow_3:before {
    white-space: -pre-wrap;     /* Opera <7 */
    white-space: -o-pre-wrap;   /* Opera 7 */
    word-wrap: break-word;      /* IE */
+   line-height: 1.5;
 }
 
 .transition-orange {

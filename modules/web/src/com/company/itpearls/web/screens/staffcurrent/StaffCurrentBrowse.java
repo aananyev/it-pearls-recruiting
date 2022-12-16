@@ -8,4 +8,8 @@ import com.company.itpearls.entity.StaffCurrent;
 @LookupComponent("staffCurrentsTable")
 @LoadDataBeforeShow
 public class StaffCurrentBrowse extends StandardLookup<StaffCurrent> {
+    @Install(to = "staffCurrentsTable", subject = "styleProvider")
+    private String staffCurrentsTableStyleProvider(StaffCurrent entity, String property) {
+        return "table-wordwrap";
+    }
 }

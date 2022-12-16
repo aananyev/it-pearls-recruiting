@@ -8,7 +8,13 @@
         <collection id="staffingTablesDc"
                     class="com.company.itpearls.entity.StaffingTable">
             <view extends="_local">
-                <property name="openPosition" view="_local"/>
+                <property name="openPosition" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectDepartment" view="_local">
+                            <property name="companyName" view="_local"/>
+                        </property>
+                    </property>
+                </property>
                 <property name="grade" view="_local"/>
             </view>
             <loader id="staffingTablesDl">
@@ -27,9 +33,8 @@
                 dataLoader="staffingTablesDl">
             <properties include=".*"/>
         </filter>
-        <dataGrid id="staffingTablesTable"
+        <groupTable id="staffingTablesTable"
                   width="100%"
-                  bodyRowHeight="50px"
                   dataContainer="staffingTablesDc">
             <actions>
                 <action id="create" type="create"/>
@@ -37,26 +42,22 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <group>
+                    <column id="openPosition.projectName.projectDepartment"/>
+                </group>
                 <column id="code"
-                        property="code"
                         width="150px"/>
                 <column id="active"
-                        width="50px"
-                        property="active"/>
+                        width="50px"/>
                 <column id="openPosition"
-                        property="openPosition"
                         width="700px"/>
                 <column id="grade"
-                        property="grade"
                         width="100px"/>
                 <column id="numberOfStaff"
-                        property="numberOfStaff"
                         width="50px"/>
                 <column id="salaryMin"
-                        property="salaryMin"
                         width="150px"/>
                 <column id="salaryMax"
-                        property="salaryMax"
                         width="150px"/>
             </columns>
             <rowsCount/>
@@ -69,7 +70,7 @@
                 <button id="removeBtn"
                         action="staffingTablesTable.remove"/>
             </buttonsPanel>
-        </dataGrid>
+        </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
