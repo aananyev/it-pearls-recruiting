@@ -26,6 +26,18 @@ public class ApplicationRecruitmentList extends StandardEntity {
     @Column(name = "QUICK_DESCRIPTION", unique = true, length = 80)
     private String code;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PROJECT_ID")
+    private Project project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PROJECT_DEPARTMENT_ID")
+    private CompanyDepartament projectDepartment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMPANY_ID")
+    private Company company;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "CLOSE_DATE")
     private Date closeDate;
@@ -42,6 +54,30 @@ public class ApplicationRecruitmentList extends StandardEntity {
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public void setProjectDepartment(CompanyDepartament projectDepartment) {
+        this.projectDepartment = projectDepartment;
+    }
+
+    public CompanyDepartament getProjectDepartment() {
+        return projectDepartment;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
+    }
 
     public String getCode() {
         return code;

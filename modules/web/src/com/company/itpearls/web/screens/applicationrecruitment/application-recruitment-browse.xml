@@ -9,7 +9,13 @@
                     class="com.company.itpearls.entity.ApplicationRecruitment">
             <view extends="_local">
                 <property name="staffingTable" view="_local">
-                    <property name="openPosition" view="_local"/>
+                    <property name="openPosition" view="_local">
+                        <property name="projectName" view="_local">
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
+                        </property>
+                    </property>
                     <property name="grade" view="_local"/>
                 </property>
                 <property name="createTs"/>
@@ -52,6 +58,9 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <group>
+                    <column id="staffingTable.openPosition.projectName"/>
+                </group>
                 <column id="createTs"
                         width="80px"/>
                 <column id="code"

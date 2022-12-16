@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://applicationRecruitmentListEdit.caption"
         focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.applicationrecruitmentlist">
@@ -20,10 +21,53 @@
         <collection id="procAttachmentsDc"
                     class="com.haulmont.bpm.entity.ProcAttachment"
                     view="procAttachment-browse">
-            <loader id="procAttachmentsDl">
+            <loader id="procAttachmentsDl"
+                    cacheable="true">
                 <query><![CDATA[select e from bpm$ProcAttachment e
                                 where e.procInstance.entity.entityId  = :entityId
                                 order by e.createTs]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="projectDc"
+                    class="com.company.itpearls.entity.Project"
+                    view="project-view">
+            <loader id="projectDl" cacheable="true">
+                <query><![CDATA[select e from itpearls_Project e
+                                order by e.projectName]]>
+                <condition>
+                    <and>
+                        <c:jpql>
+                            <c:where>e.projectDepartment = :projectDepartment</c:where>
+                        </c:jpql>
+                    </and>
+                </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="projectDepartmentDc"
+                    class="com.company.itpearls.entity.CompanyDepartament"
+                    view="companyDepartament-view">
+            <loader id="projectDepartmentDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_CompanyDepartament e
+                             order by e.departamentRuName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.companyName = :companyName</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="companyDc"
+                    class="com.company.itpearls.entity.Company"
+                    view="company-view">
+            <loader id="companyDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_Company e order by e.comanyName]]>
                 </query>
             </loader>
         </collection>
@@ -39,11 +83,33 @@
                  margin="true,true,true,true">
                 <form id="form" dataContainer="applicationRecruitmentListDc" width="100%">
                     <column width="50%">
-                        <checkBox id="activeField" property="active" width="100%"/>
-                        <textField id="codeTextField" property="code" width="100%"/>
-                        <dateField id="openDateField" property="openDate" width="100%"/>
-                        <dateField id="closeDateField" property="closeDate" width="100%"/>
-                        <pickerField id="recruiterField" property="recruiter" width="100%">
+                        <checkBox id="activeField"
+                                  property="active"
+                                  width="100%"/>
+                        <textField id="codeTextField"
+                                   property="code"
+                                   width="100%"/>
+                        <lookupPickerField id="projectLookupPickerField"
+                                           property="project"
+                                           optionsContainer="projectDc"
+                                           width="100%"/>
+                        <lookupPickerField id="projectDepartmentLookupPicketField"
+                                           property="projectDepartment"
+                                           optionsContainer="projectDepartmentDc"
+                                           width="100%"/>
+                        <lookupPickerField id="companyLookupPickerField"
+                                           property="company"
+                                           optionsContainer="companyDc"
+                                           width="100%"/>
+                        <dateField id="openDateField"
+                                   property="openDate"
+                                   width="100%"/>
+                        <dateField id="closeDateField"
+                                   property="closeDate"
+                                   width="100%"/>
+                        <pickerField id="recruiterField"
+                                     property="recruiter"
+                                     width="100%">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
                                 <action id="clear" type="picker_clear"/>

@@ -18,12 +18,18 @@ import javax.inject.Inject;
 @LookupComponent("applicationRecruitmentsTable")
 @LoadDataBeforeShow
 public class ApplicationRecruitmentBrowse extends StandardLookup<ApplicationRecruitment> {
+
     @Inject
     private CollectionLoader<ProcAttachment> procAttachmentsDl;
     @Inject
     private CollectionContainer<ProcAttachment> procAttachmentsDc;
     @Inject
     private UiComponents uiComponents;
+
+    @Install(to = "applicationRecruitmentsTable", subject = "styleProvider")
+    private String applicationRecruitmentsTableStyleProvider(ApplicationRecruitment entity, String property) {
+        return "table-worldwrap";
+    }
 
     public Component approvalProcColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.class);
