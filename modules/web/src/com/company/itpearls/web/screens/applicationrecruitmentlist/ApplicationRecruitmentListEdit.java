@@ -4,13 +4,11 @@ import com.company.itpearls.entity.*;
 import com.haulmont.bpm.entity.ProcAttachment;
 import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.app.core.file.FileDownloadHelper;
-import com.haulmont.cuba.gui.components.DateField;
-import com.haulmont.cuba.gui.components.PickerField;
-import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -60,6 +58,12 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     private TextField<String> codeTextField;
     @Inject
     private Notifications notifications;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private Button openPositionsButton;
+    @Inject
+    private Button approveAllButton;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -138,6 +142,80 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                     .show();
 
             getWindow().setFocusComponent("codeTextField");
+        }
+    }
+
+    public void openPositionButtonInvoke() {
+        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                .withType(Dialogs.MessageType.CONFIRMATION)
+                .withCaption("ЗАПРОС")
+                .withMessage("Открыть все согласованные вакансии?")
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                    setOpenPositionAllApprovedApplication();
+
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withDescription("Открыты все согласованные вакансии из списка")
+                            .withCaption("ИНФОРМАЦИЯ")
+                            .show();
+                }), new DialogAction((DialogAction.Type.NO)))
+                .show();;
+    }
+
+    @Subscribe(id = "applicationRecruitmentDc", target = Target.DATA_CONTAINER)
+    public void onApplicationRecruitmentDcCollectionChange(CollectionContainer.CollectionChangeEvent<ApplicationRecruitment> event) {
+
+        if (event.getSource().getItems().size() == 0) {
+            approveAllButton.setEnabled(false);
+        } else {
+            approveAllButton.setEnabled(true);
+        }
+
+        enableOpenPositionButton();
+    }
+
+    private void enableOpenPositionButton() {
+        Boolean flag = false;
+
+        for (ApplicationRecruitment applicationRecruitment : applicationRecruitmentDc.getItems()) {
+            if (applicationRecruitment.getApproval() != null) {
+                if (applicationRecruitment.getApproval()) {
+                    flag = true;
+                    break;
+                }
+            }
+        }
+
+        openPositionsButton.setEnabled(flag);
+    }
+
+
+    private void setOpenPositionAllApprovedApplication() {
+        for (ApplicationRecruitment applicationRecruitment : applicationRecruitmentDc.getItems()) {
+            if (applicationRecruitment.getActive()) {
+                applicationRecruitment.getStaffingTable().getOpenPosition().setOpenClose(false);
+            }
+        }
+    }
+
+    public void approveAllButtonInvoke() {
+        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                .withType(Dialogs.MessageType.CONFIRMATION)
+                .withCaption("ЗАПРОС")
+                .withMessage("Согласовать все не заполненные вакансии?")
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                    setApprovalAllApplication();
+
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withDescription("Согласованы все вакансии из списка")
+                            .withCaption("ИНФОРМАЦИЯ")
+                            .show();
+                }), new DialogAction(DialogAction.Type.NO))
+                .show();
+    }
+
+    private void setApprovalAllApplication() {
+        for (ApplicationRecruitment applicationRecruitment : applicationRecruitmentDc.getItems()) {
+            applicationRecruitment.setApproval(true);
         }
     }
 }

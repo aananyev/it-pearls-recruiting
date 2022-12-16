@@ -35,6 +35,7 @@
                   stylename="framed">
             <tab id="mainTab"
                  caption="msg://msgApplication"
+                 expand="applicationRecruitmentBox"
                  margin="true,true,true,true">
                 <form id="form" dataContainer="applicationRecruitmentListDc" width="100%">
                     <column width="50%">
@@ -53,15 +54,15 @@
                         <textArea id="commentField" property="comment" width="100%" height="100%" rowspan="7"/>
                     </column>
                 </form>
-
-
                 <groupBox id="applicationRecruitmentBox"
+                          width="100%"
+                          expand="applicationRecruitmentTable"
                           caption="msg://com.company.itpearls.entity/ApplicationRecruitmentList.applicationRecruitment">
                     <table id="applicationRecruitmentTable"
                            dataContainer="applicationRecruitmentDc"
                            editable="true"
                            width="100%"
-                           height="200px">
+                           height="100%">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -71,7 +72,7 @@
                         <columns>
                             <column id="code" width="100px" editable="true"/>
                             <column id="active" width="50px" editable="true"/>
-                            <column id="approval" width="50px" editable="false"/>
+                            <column id="approval" width="50px" editable="true"/>
                             <column id="staffingTable.code"/>
                             <column id="staffingTable.openPosition"/>
                             <column id="staffingTable.salaryMax"/>
@@ -83,6 +84,15 @@
                             <button id="automationFillButton"
                                     caption="msg://msgAutomaticFill"
                                     invoke="automatingFillButton"/>
+                            <button id="approveAllButton"
+                                    enable="false"
+                                    caption="msg://msgApproveAll"
+                                    invoke="approveAllButtonInvoke"/>
+                            <button id="openPositionsButton"
+                                    enable="false"
+                                    caption="msg://msgSetOpenPosition"
+                                    description="msg://msgSetOpenPositionDesc"
+                                    invoke="openPositionButtonInvoke"/>
                             <button action="applicationRecruitmentTable.add"/>
                             <button action="applicationRecruitmentTable.create"/>
                             <button action="applicationRecruitmentTable.edit"/>
@@ -93,19 +103,22 @@
             </tab>
             <tab id="approvalTab"
                  margin="true,true,true,true"
+                 expand="attachmentsGroupBox"
                  caption="msg://msgApproval">
                 <groupBox id="procActionsBox"
                           caption="msg://process"
                           spacing="true"
-                          width="AUTO"
+                          width="100%"
                           orientation="vertical">
                     <fragment id="procActionsFragment"
                               screen="bpm_ProcActionsFragment"/>
                 </groupBox>
-                <groupBox caption="msg://attachments"
+                <groupBox id="attachmentsGroupBox"
+                          caption="msg://attachments"
                           height="300px"
                           spacing="true"
-                          width="700px">
+                          expand="attachmentsTable"
+                          width="100%">
                     <table id="attachmentsTable"
                            dataContainer="procAttachmentsDc"
                            height="100%"

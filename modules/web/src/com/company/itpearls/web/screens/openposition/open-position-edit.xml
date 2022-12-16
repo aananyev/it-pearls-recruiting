@@ -13,7 +13,9 @@
                 <property name="projectName" view="_minimal">
                     <property name="projectIsClosed"/>
                     <property name="projectDepartment" view="_local">
-                        <property name="companyName" view="_local"/>
+                        <property name="companyName" view="_local">
+                            <property name="cityOfCompany" view="_local"/>
+                        </property>
                     </property>
                 </property>
                 <property name="positionType" view="_local">

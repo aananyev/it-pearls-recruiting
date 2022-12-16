@@ -23,10 +23,9 @@
                           width="AUTO">
                         <image id="logoImage"
                                align="MIDDLE_CENTER"
-                               height="100px"
                                scaleMode="SCALE_DOWN"
                                stylename="c-login-logo"
-                               width="100px"/>
+                               width="350px"/>
                         <label id="welcomeLabel"
                                align="MIDDLE_CENTER"
                                stylename="c-login-welcome-label h1"
