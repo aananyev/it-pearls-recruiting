@@ -13,6 +13,7 @@
 
 .c-login-wrapper .c-login-button {
   margin-top: 30px;
+  border-radius: 5px;
 }
 
 .c-login-background {

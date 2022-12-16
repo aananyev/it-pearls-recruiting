@@ -76,6 +76,8 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     private CollectionLoader<Project> projectDl;
     @Inject
     private CollectionLoader<CompanyDepartament> projectDepartmentDl;
+    @Inject
+    private LookupPickerField<Project> projectLookupPickerField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -105,10 +107,19 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
             final String QUERY_STAFF_CURRENT
                     = "select e from itpearls_StaffCurrent e where e.staffingTable = :staffingTable";
 
+            StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
+
+            // Project
+            QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+                    ? " and e.openPosition.projectName.projectName like '" : "");
+
+            QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+                    ? projectLookupPickerField.getValue().getProjectName() + "'" : "");
+
             if (PersistenceHelper.isNew(getEditedEntity())) {
 
                 LoadContext staffTable = LoadContext.create(StaffingTable.class)
-                        .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE));
+                        .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE_RESULT.toString()));
                 List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
 
                 dataContext.create(ApplicationRecruitment.class);
@@ -233,18 +244,9 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
 
     @Subscribe("projectLookupPickerField")
     public void onProjectLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
-
-/*    }
-
-    @Subscribe("projectLookupPickerField")
-    public void onProjectLookupPickerFieldFieldValueChange(PickerField.FieldValueChangeEvent<Project> event) { */
-        if (event.getSource().getValue() != null) {
-            if (event.getSource().getValue().getProjectDepartment() != null) {
-                projectDepartmentLookupPicketField.setValue(event.getSource().getValue().getProjectDepartment());
-
-                if (event.getSource().getValue().getProjectDepartment().getCompanyName() != null) {
-                    companyLookupPickerField.setValue(event.getSource().getValue().getProjectDepartment().getCompanyName());
-                }
+        if (event.getValue() != null) {
+            if (event.getValue().getProjectDepartment() != null) {
+                projectDepartmentLookupPicketField.setValue(event.getValue().getProjectDepartment());
             }
         } else {
             projectDepartmentLookupPicketField.setValue(null);
@@ -254,5 +256,14 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
         }
 
         projectDepartmentDl.removeParameter("companyName");
+    }
+
+    @Subscribe("projectDepartmentLookupPicketField")
+    public void onProjectDepartmentLookupPicketFieldValueChange(HasValue.ValueChangeEvent<CompanyDepartament> event) {
+        if (event.getValue() != null) {
+            if (event.getValue().getCompanyName() != null) {
+                companyLookupPickerField.setValue(event.getValue().getCompanyName());
+            }
+        }
     }
 }

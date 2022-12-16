@@ -1,15 +1,19 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.annotation.Extends;
 import com.haulmont.cuba.security.entity.User;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
 
 @Entity(name = "itpearls_ExtUser")
 @Extends(User.class)
 public class ExtUser extends User {
     private static final long serialVersionUID = 6173000981123148225L;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "IMAGE_ID")
+    private FileDescriptor fileImageFace;
 
     @Column(name = "SMTP_SERVER", length = 128)
     private String smtpServer;
@@ -46,6 +50,14 @@ public class ExtUser extends User {
 
     @Column(name = "IMAP_PASSWORD", length = 128)
     private String imapPassword;
+
+    public FileDescriptor getFileImageFace() {
+        return fileImageFace;
+    }
+
+    public void setFileImageFace(FileDescriptor fileImageFace) {
+        this.fileImageFace = fileImageFace;
+    }
 
     public Boolean getImapPasswordRequired() {
         return imapPasswordRequired;

@@ -758,6 +758,7 @@ create table ITPEARLS_POSSIBLE_NAMES (
 )^
 -- end ITPEARLS_POSSIBLE_NAMES
 -- begin SEC_USER
+alter table SEC_USER add column IMAGE_ID uuid ^
 alter table SEC_USER add column SMTP_SERVER varchar(128) ^
 alter table SEC_USER add column SMTP_PORT integer ^
 alter table SEC_USER add column SMTP_PASSWORD_REQUIRED boolean ^

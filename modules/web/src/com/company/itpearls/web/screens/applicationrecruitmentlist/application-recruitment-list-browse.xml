@@ -10,6 +10,9 @@
             <view extends="_local">
                 <property name="applicationRecruitment" view="_local"/>
                 <property name="recruiter" view="_local"/>
+                <property name="project" view="_local"/>
+                <property name="projectDepartment" view="_local"/>
+                <property name="company" view="_local"/>
             </view>
             <loader id="applicationRecruitmentListsDl">
                 <query>
@@ -38,6 +41,9 @@
             <columns>
                 <column id="active" width="50px"/>
                 <column id="code"/>
+                <column id="project" width="200px"/>
+                <column id="projectDepartment" width="200px"/>
+                <column id="company" width="200px"/>
                 <column id="openDate" width="100px"/>
                 <column id="closeDate" width="100px"/>
                 <column id="recruiter"/>

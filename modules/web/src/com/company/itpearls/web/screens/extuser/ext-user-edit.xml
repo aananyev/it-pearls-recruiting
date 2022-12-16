@@ -9,7 +9,7 @@
     </companions>
 
     <dsContext>
-        <datasource id="userDs" class="com.haulmont.cuba.security.entity.User" view="user.edit">
+        <datasource id="userDs" class="com.haulmont.cuba.security.entity.User" view="extUser-view">
             <groupDatasource id="rolesDs" property="userRoles"/>
             <collectionDatasource id="substitutionsDs" property="substitutions"/>
         </datasource>
@@ -19,47 +19,83 @@
                 width="theme://cuba.gui.dialogSize.width.xlarge"
                 resizable="true"/>
     <layout expand="userSettingTabSheet" spacing="true">
-        <tabSheet id="userSettingTabSheet">
-            <tab id="userSettingTab" expand="split" caption="User Settings">
-                <groupBox id="propertiesBox">
-                    <grid id="propertiesGrid" width="100%" spacing="true">
-                        <columns>
-                            <column id="fieldGroupLeftColumn" flex="1"/>
-                            <column id="fieldGroupRightColumn" flex="3"/>
-                        </columns>
-                        <rows>
-                            <row id="propertiesRow">
-                                <fieldGroup id="fieldGroupLeft" datasource="userDs" width="AUTO">
-                                    <column width="250px">
-                                        <field id="login" required="true" requiredMessage="msg://loginMsg"/>
-                                        <field id="passw" custom="true" caption="msg://password"/>
-                                        <field id="confirmPassw" custom="true" caption="msg://confirmPassword"/>
-                                        <field id="firstName"/>
-                                        <field id="middleName"/>
-                                        <field id="lastName"/>
-                                        <field id="name"/>
-                                        <field id="email">
-                                            <validator
-                                                    class="com.haulmont.cuba.gui.components.validators.EmailValidator"
-                                                    message="msg://email.alert"/>
-                                        </field>
-                                    </column>
-                                </fieldGroup>
-                                <fieldGroup id="fieldGroupRight" datasource="userDs" width="AUTO">
-                                    <column width="250px">
-                                        <field id="group" custom="true"/>
-                                        <field id="position"/>
-                                        <field id="language" custom="true"/>
-                                        <field id="timeZone" custom="true"/>
-                                        <field id="ipMask"/>
-                                        <field id="active"/>
-                                    </column>
-                                </fieldGroup>
-                            </row>
-                        </rows>
-                    </grid>
-                </groupBox>
-
+        <tabSheet id="userSettingTabSheet" stylename="framed">
+            <tab id="userSettingTab" expand="split" caption="User Settings" margin="true">
+                <hbox expand="propertiesBox" spacing="true" width="100%">
+                    <groupBox id="propertiesBox" width="100%">
+                        <grid id="propertiesGrid" width="100%" spacing="true">
+                            <columns>
+                                <column id="fieldGroupLeftColumn" flex="1"/>
+                                <column id="fieldGroupRightColumn" flex="3"/>
+                            </columns>
+                            <rows>
+                                <row id="propertiesRow">
+                                    <fieldGroup id="fieldGroupLeft" datasource="userDs" width="AUTO">
+                                        <column width="250px">
+                                            <field id="login" required="true" requiredMessage="msg://loginMsg"/>
+                                            <field id="passw" custom="true" caption="msg://password"/>
+                                            <field id="confirmPassw" custom="true" caption="msg://confirmPassword"/>
+                                            <field id="firstName"/>
+                                            <field id="middleName"/>
+                                            <field id="lastName"/>
+                                            <field id="name"/>
+                                            <field id="email">
+                                                <validator
+                                                        class="com.haulmont.cuba.gui.components.validators.EmailValidator"
+                                                        message="msg://email.alert"/>
+                                            </field>
+                                        </column>
+                                    </fieldGroup>
+                                    <fieldGroup id="fieldGroupRight" datasource="userDs" width="AUTO">
+                                        <column width="250px">
+                                            <field id="group" custom="true"/>
+                                            <field id="position"/>
+                                            <field id="language" custom="true"/>
+                                            <field id="timeZone" custom="true"/>
+                                            <field id="ipMask"/>
+                                            <field id="active"/>
+                                        </column>
+                                    </fieldGroup>
+                                </row>
+                            </rows>
+                        </grid>
+                    </groupBox>
+                    <vbox id="dropZone"
+                          spacing="true"
+                          width="200px"
+                          height="266px"
+                          align="BOTTOM_RIGHT"
+                          expand="picVBox"
+                          stylename="dropzone-container">
+                        <vbox id="picVBox">
+                            <image id="userPic"
+                                   datasource="userDs"
+                                   property="fileImageFace"
+                                   width="100%"
+                                   height="100%"
+                                   visible="true"
+                                   align="TOP_RIGHT"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <image id="defaultPic"
+                                   width="100%"
+                                   visible="false"
+                                   align="TOP_RIGHT"
+                                   stylename="widget-border"
+                                   scaleMode="FILL">
+                                <theme path="icons/no-programmer.jpeg"/>
+                            </image>
+                        </vbox>
+                        <upload id="fileImageFaceUpload"
+                                fileStoragePutMode="IMMEDIATE"
+                                datasource="userDs"
+                                align="BOTTOM_CENTER"
+                                showFileName="false"
+                                dropZone="dropZone"
+                                showClearButton="true"
+                                property="fileImageFace"/>
+                    </vbox>
+                </hbox>
                 <split id="split" orientation="horizontal" pos="50" width="100%">
                     <vbox id="rolesPanel" expand="rolesTable" spacing="true" margin="false,true,false,false"
                           height="100%" width="100%">
@@ -136,13 +172,16 @@
                                 <fieldGroup id="emailFieldGroupRight" datasource="userDs" width="AUTO">
                                     <column width="250px">
                                         <field id="smtpPort" caption="SMTP port">
-                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            <validator
+                                                    class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                         </field>
                                         <field id="pop3Port" caption="POP3 port">
-                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            <validator
+                                                    class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                         </field>
                                         <field id="imapPort" caption="IMAP port">
-                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            <validator
+                                                    class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                         </field>
                                     </column>
                                 </fieldGroup>

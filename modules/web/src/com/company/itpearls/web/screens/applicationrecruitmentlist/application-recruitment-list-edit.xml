@@ -14,6 +14,9 @@
                     </property>
                 </property>
                 <property name="recruiter" view="_local"/>
+                <property name="project" view="_local"/>
+                <property name="projectDepartment" view="_local"/>
+                <property name="company" view="_local"/>
             </view>
             <loader id="applicationRecruitmentListDl"/>
             <collection id="applicationRecruitmentDc" property="applicationRecruitment"/>
@@ -35,13 +38,13 @@
             <loader id="projectDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Project e
                                 order by e.projectName]]>
-                <condition>
-                    <and>
-                        <c:jpql>
-                            <c:where>e.projectDepartment = :projectDepartment</c:where>
-                        </c:jpql>
-                    </and>
-                </condition>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.projectDepartment = :projectDepartment</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -92,29 +95,64 @@
                         <lookupPickerField id="projectLookupPickerField"
                                            property="project"
                                            optionsContainer="projectDc"
-                                           width="100%"/>
+                                           width="100%">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                                <action id="open"
+                                        type="picker_open"/>
+                                <action id="clear"
+                                        type="picker_clear"/>
+                            </actions>
+                        </lookupPickerField>
                         <lookupPickerField id="projectDepartmentLookupPicketField"
                                            property="projectDepartment"
                                            optionsContainer="projectDepartmentDc"
-                                           width="100%"/>
+                                           width="100%">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                                <action id="open"
+                                        type="picker_open"/>
+                                <action id="clear"
+                                        type="picker_clear"/>
+                            </actions>
+                        </lookupPickerField>
                         <lookupPickerField id="companyLookupPickerField"
                                            property="company"
                                            optionsContainer="companyDc"
-                                           width="100%"/>
-                        <dateField id="openDateField"
-                                   property="openDate"
-                                   width="100%"/>
-                        <dateField id="closeDateField"
-                                   property="closeDate"
-                                   width="100%"/>
+                                           width="100%">
+                            <actions>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                                <action id="open"
+                                        type="picker_open"/>
+                                <action id="clear"
+                                        type="picker_clear"/>
+                            </actions>
+                        </lookupPickerField>
                         <pickerField id="recruiterField"
                                      property="recruiter"
                                      width="100%">
                             <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                                <action id="clear" type="picker_clear"/>
+                                <action id="lookup"
+                                        type="picker_lookup"/>
+                                <action id="clear"
+                                        type="picker_clear"/>
                             </actions>
                         </pickerField>
+                        <hbox spacing="true" width="100%">
+                            <dateField id="openDateField"
+                                       datatype="date"
+                                       caption="msg://msgOpenDate"
+                                       property="openDate"
+                                       width="100%"/>
+                            <dateField id="closeDateField"
+                                       datatype="date"
+                                       caption="msg://msgCloseDate"
+                                       property="closeDate"
+                                       width="100%"/>
+                        </hbox>
                     </column>
                     <column width="50%">
                         <textArea id="commentField" property="comment" width="100%" height="100%" rowspan="7"/>
@@ -149,13 +187,16 @@
                         <buttonsPanel>
                             <button id="automationFillButton"
                                     caption="msg://msgAutomaticFill"
+                                    icon="RECYCLE"
                                     invoke="automatingFillButton"/>
                             <button id="approveAllButton"
                                     enable="false"
+                                    icon="ADJUST"
                                     caption="msg://msgApproveAll"
                                     invoke="approveAllButtonInvoke"/>
                             <button id="openPositionsButton"
                                     enable="false"
+                                    icon="VIEW_ACTION"
                                     caption="msg://msgSetOpenPosition"
                                     description="msg://msgSetOpenPositionDesc"
                                     invoke="openPositionButtonInvoke"/>

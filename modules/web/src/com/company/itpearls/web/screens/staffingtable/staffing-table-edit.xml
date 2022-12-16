@@ -26,7 +26,9 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <tabSheet id="staffingTableTabsheet" width="100%">
+        <tabSheet id="staffingTableTabsheet"
+                  width="100%"
+                  stylename="framed">
             <tab id="staffingTableTab"
                  spacing="true"
                  caption="msg://msgStaffingTable">
@@ -35,24 +37,28 @@
                         <checkBox id="activeCheckBox" property="active"/>
                         <textField id="vacancyCodeTextField"
                                    property="code"/>
-                        <pickerField id="openPositionField"
+                        <lookupPickerField id="openPositionField"
                                      property="openPosition">
                             <actions>
                                 <action id="lookup"
                                         type="picker_lookup"/>
+                                <action id="open"
+                                        type="picker_open"/>
                                 <action id="clear"
                                         type="picker_clear"/>
                             </actions>
-                        </pickerField>
-                        <pickerField id="gradeField"
+                        </lookupPickerField>
+                        <lookupPickerField id="gradeField"
                                      property="grade">
                             <actions>
                                 <action id="lookup"
                                         type="picker_lookup"/>
+                                <action id="open"
+                                        type="picker_open"/>
                                 <action id="clear"
                                         type="picker_clear"/>
                             </actions>
-                        </pickerField>
+                        </lookupPickerField>
                         <textField id="numberOfStaffField"
                                    property="numberOfStaff"/>
                         <textField id="salaryMinField"
