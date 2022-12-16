@@ -64,6 +64,18 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     private Button openPositionsButton;
     @Inject
     private Button approveAllButton;
+    @Inject
+    private LookupPickerField<CompanyDepartament> projectDepartmentLookupPicketField;
+    @Inject
+    private LookupPickerField<Company> companyLookupPickerField;
+    @Inject
+    private CollectionLoader<Company> companyDl;
+    @Inject
+    private CollectionContainer<Project> projectDc;
+    @Inject
+    private CollectionLoader<Project> projectDl;
+    @Inject
+    private CollectionLoader<CompanyDepartament> projectDepartmentDl;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -217,5 +229,30 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
         for (ApplicationRecruitment applicationRecruitment : applicationRecruitmentDc.getItems()) {
             applicationRecruitment.setApproval(true);
         }
+    }
+
+    @Subscribe("projectLookupPickerField")
+    public void onProjectLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
+
+/*    }
+
+    @Subscribe("projectLookupPickerField")
+    public void onProjectLookupPickerFieldFieldValueChange(PickerField.FieldValueChangeEvent<Project> event) { */
+        if (event.getSource().getValue() != null) {
+            if (event.getSource().getValue().getProjectDepartment() != null) {
+                projectDepartmentLookupPicketField.setValue(event.getSource().getValue().getProjectDepartment());
+
+                if (event.getSource().getValue().getProjectDepartment().getCompanyName() != null) {
+                    companyLookupPickerField.setValue(event.getSource().getValue().getProjectDepartment().getCompanyName());
+                }
+            }
+        } else {
+            projectDepartmentLookupPicketField.setValue(null);
+            companyLookupPickerField.setValue(null);
+
+            projectDl.removeParameter("projectDepartment");
+        }
+
+        projectDepartmentDl.removeParameter("companyName");
     }
 }
