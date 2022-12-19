@@ -5,7 +5,7 @@
     <layout>
         <groupTable id="usersTable">
             <columns>
-                <column ext:index="2" id="smtpServer"/>
+                <column id="icon" ext:index="2" generator="userFaceColumn"/>
             </columns>
         </groupTable>
     </layout>

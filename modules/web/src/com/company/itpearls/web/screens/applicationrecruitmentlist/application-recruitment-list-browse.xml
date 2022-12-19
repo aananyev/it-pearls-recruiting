@@ -11,7 +11,9 @@
                 <property name="applicationRecruitment" view="_local"/>
                 <property name="recruiter" view="_local"/>
                 <property name="project" view="_local"/>
-                <property name="projectDepartment" view="_local"/>
+                <property name="projectDepartment" view="_local">
+                    <property name="companyName" view="_local"/>
+                </property>
                 <property name="company" view="_local"/>
             </view>
             <loader id="applicationRecruitmentListsDl">

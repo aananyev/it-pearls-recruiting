@@ -33,8 +33,6 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     @Inject
     private InstanceContainer<ApplicationRecruitmentList> applicationRecruitmentListDc;
     @Inject
-    private Table<ApplicationRecruitment> applicationRecruitmentTable;
-    @Inject
     private DataContext dataContext;
     @Inject
     private CollectionPropertyContainer<ApplicationRecruitment> applicationRecruitmentDc;
@@ -43,8 +41,6 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     @Inject
     private UserSession userSession;
     @Inject
-    private UserSessionSource userSessionSource;
-    @Inject
     private InstanceLoader<ApplicationRecruitmentList> applicationRecruitmentListDl;
     @Inject
     private CollectionLoader<ProcAttachment> procAttachmentsDl;
@@ -52,8 +48,6 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     private ProcActionsFragment procActionsFragment;
     @Inject
     private Table<ProcAttachment> attachmentsTable;
-
-    private static final String PROCESS_CODE = "applicationRecruitmentApproval";
     @Inject
     private TextField<String> codeTextField;
     @Inject
@@ -69,15 +63,13 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
     @Inject
     private LookupPickerField<Company> companyLookupPickerField;
     @Inject
-    private CollectionLoader<Company> companyDl;
-    @Inject
-    private CollectionContainer<Project> projectDc;
-    @Inject
     private CollectionLoader<Project> projectDl;
     @Inject
     private CollectionLoader<CompanyDepartament> projectDepartmentDl;
     @Inject
     private LookupPickerField<Project> projectLookupPickerField;
+
+    private static final String PROCESS_CODE = "applicationRecruitmentApproval";
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -147,7 +139,6 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                             applicationRecruitment.setApplicationRecruitmentList(getEditedEntity());
 
                             applicationRecruitmentDc.getMutableItems().add(applicationRecruitment);
-//                            applicationRecruitments.add(applicationRecruitment);
                             dataContext.merge(applicationRecruitment);
                             flag = true;
                         }

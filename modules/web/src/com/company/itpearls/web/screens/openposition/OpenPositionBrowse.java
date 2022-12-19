@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
+
     private static final String NULL_SALARY = "0 т.р./0 т.р.";
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
@@ -60,33 +61,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private DataGrid<OpenPosition> openPositionsTable;
     @Inject
     private UiComponents uiComponents;
-
-    private String ROLE_MANAGER = "Manager";
-    private String ROLE_RESEARCHER = "Researcher";
-    private static final String MANAGEMENT_GROUP = "Менеджмент";
-    private static final String HUNTING_GROUP = "Хантинг";
-    private String ROLE_ADMINISTRATOR = "Administrators";
-    private Map<String, Integer> remoteWork = new LinkedHashMap<>();
-    private Map<String, Integer> priorityMap = new LinkedHashMap<>();
-    private Map<String, Integer> mapWorkExperience = new LinkedHashMap<>();
-    private List<User> users = new ArrayList<>();
-    private static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
-
-    public final static int PRIORITY_DRAFT = -1;
-    public final static int PRIORITY_PAUSED = 0;
-    public final static int PRIORITY_LOW = 1;
-    public final static int PRIORITY_NORMAL = 2;
-    public final static int PRIORITY_HIGH = 3;
-    public final static int PRIORITY_CRITICAL = 4;
-
-    String QUERY_COUNT_ITERACTIONS = "select e.iteractionType, count(e.iteractionType) " +
-            "from itpearls_IteractionList e " +
-            "where e.dateIteraction between :startDate and :endDate and " +
-            "(e.vacancy = :vacancy or " +
-            "(e.vacancy in (select f from itpearls_OpenPosition f where f.parentOpenPosition = :vacancy))) and " +
-            "e.iteractionType.statistics = true " +
-            "group by e.iteractionType";
-
     @Inject
     private Button groupSubscribe;
     @Inject
@@ -123,6 +97,59 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Dialogs dialogs;
     @Inject
     private Button openCloseButton;
+
+    private final String ROLE_MANAGER = "Manager";
+    private final String ROLE_RESEARCHER = "Researcher";
+    private final String ROLE_ADMINISTRATOR = "Administrators";
+
+    private static final String MANAGEMENT_GROUP = "Менеджмент";
+    private static final String HUNTING_GROUP = "Хантинг";
+
+    private Map<String, Integer> remoteWork = new LinkedHashMap<>();
+    private Map<String, Integer> priorityMap = new LinkedHashMap<>();
+    private Map<String, Integer> mapWorkExperience = new LinkedHashMap<>();
+
+    private List<User> users = new ArrayList<>();
+    private static final String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
+    public final static int PRIORITY_DRAFT = -1;
+    public final static int PRIORITY_PAUSED = 0;
+    public final static int PRIORITY_LOW = 1;
+    public final static int PRIORITY_NORMAL = 2;
+    public final static int PRIORITY_HIGH = 3;
+    public final static int PRIORITY_CRITICAL = 4;
+
+    @Install(to = "openPositionsTable.vacansyName", subject = "styleProvider")
+    private String openPositionsTableVacansyNameStyleProvider(OpenPosition openPosition) {
+        return "table-wordwrap";
+    }
+
+    @Install(to = "openPositionsTable.projectName", subject = "styleProvider")
+    private String openPositionsTableProjectNameStyleProvider(OpenPosition openPosition) {
+        return "table-wordwrap";
+    }
+
+    @Install(to = "openPositionsTable.workExperience", subject = "styleProvider")
+    private String openPositionsTableWorkExperienceStyleProvider(OpenPosition openPosition) {
+        return "table-wordwrap";
+    }
+
+    @Install(to = "openPositionsTable.cityPositionList", subject = "styleProvider")
+    private String openPositionsTableCityPositionListStyleProvider(OpenPosition openPosition) {
+        return "table-wordwrap";
+    }
+
+    @Install(to = "openPositionsTable.owner", subject = "styleProvider")
+    private String openPositionsTableOwnerStyleProvider(OpenPosition openPosition) {
+        return "table-wordwrap";
+    }
+
+    final String QUERY_COUNT_ITERACTIONS = "select e.iteractionType, count(e.iteractionType) " +
+            "from itpearls_IteractionList e " +
+            "where e.dateIteraction between :startDate and :endDate and " +
+            "(e.vacancy = :vacancy or " +
+            "(e.vacancy in (select f from itpearls_OpenPosition f where f.parentOpenPosition = :vacancy))) and " +
+            "e.iteractionType.statistics = true " +
+            "group by e.iteractionType";
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -203,75 +230,80 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         subscribeRadioButtonGroup.addValueChangeListener(e -> {
+            final String SUBSCRIBER = "subscriber";
+            final String NOTSUBSCRIBER = "notsubscriber";
+            final String FREESUBSCRIBER = "freesubscriber";
+            final String NEWOPENPOSITION = "newOpenPosition";
+            final String PRIORITY = "priority";
+
             listBtn.setEnabled(openPositionsTable.getSingleSelected() != null);
             buttonSubscribe.setEnabled(openPositionsTable.getSingleSelected() != null);
 
-//            buttonSubscribe.setEnabled(((Integer) subscribeRadioButtonGroup.getValue()) == 0);
             suggestCandidateButton.setVisible(((Integer) subscribeRadioButtonGroup.getValue()) == 1);
 
             switch ((Integer) subscribeRadioButtonGroup.getValue()) {
                 case 1:
-                    openPositionsDl.setParameter("subscriber", userSession.getUser());
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.removeParameter("priority");
+                    openPositionsDl.setParameter(SUBSCRIBER, userSession.getUser());
+                    openPositionsDl.removeParameter(NOTSUBSCRIBER);
+                    openPositionsDl.removeParameter(FREESUBSCRIBER);
+                    openPositionsDl.removeParameter(NEWOPENPOSITION);
+                    openPositionsDl.removeParameter(PRIORITY);
                     checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 0:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.setParameter("notsubscriber", userSession.getUser());
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.removeParameter("priority");
+                    openPositionsDl.removeParameter(SUBSCRIBER);
+                    openPositionsDl.setParameter(NOTSUBSCRIBER, userSession.getUser());
+                    openPositionsDl.removeParameter(FREESUBSCRIBER);
+                    openPositionsDl.removeParameter(NEWOPENPOSITION);
+                    openPositionsDl.removeParameter(PRIORITY);
                     checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 2:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.removeParameter("priority");
+                    openPositionsDl.removeParameter(SUBSCRIBER);
+                    openPositionsDl.removeParameter(NOTSUBSCRIBER);
+                    openPositionsDl.removeParameter(FREESUBSCRIBER);
+                    openPositionsDl.removeParameter(NEWOPENPOSITION);
+                    openPositionsDl.removeParameter(PRIORITY);
                     checkBoxOnlyNotPaused.setValue(false);
                     break;
                 case 3:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.setParameter("freesubscriber", false);
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.removeParameter("priority");
+                    openPositionsDl.removeParameter(SUBSCRIBER);
+                    openPositionsDl.removeParameter(NOTSUBSCRIBER);
+                    openPositionsDl.setParameter(FREESUBSCRIBER, false);
+                    openPositionsDl.removeParameter(NEWOPENPOSITION);
+                    openPositionsDl.removeParameter(PRIORITY);
                     checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 4:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.setParameter("newOpenPosition", 3);
-                    openPositionsDl.removeParameter("priority");
+                    openPositionsDl.removeParameter(SUBSCRIBER);
+                    openPositionsDl.removeParameter(NOTSUBSCRIBER);
+                    openPositionsDl.removeParameter(FREESUBSCRIBER);
+                    openPositionsDl.setParameter(NEWOPENPOSITION, 3);
+                    openPositionsDl.removeParameter(PRIORITY);
                     checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 5:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.setParameter("newOpenPosition", 7);
-                    openPositionsDl.removeParameter("priority");
+                    openPositionsDl.removeParameter(SUBSCRIBER);
+                    openPositionsDl.removeParameter(NOTSUBSCRIBER);
+                    openPositionsDl.removeParameter(FREESUBSCRIBER);
+                    openPositionsDl.setParameter(NEWOPENPOSITION, 7);
+                    openPositionsDl.removeParameter(PRIORITY);
                     checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 6:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.setParameter("newOpenPosition", 30);
-                    openPositionsDl.removeParameter("priority");
+                    openPositionsDl.removeParameter(SUBSCRIBER);
+                    openPositionsDl.removeParameter(NOTSUBSCRIBER);
+                    openPositionsDl.removeParameter(FREESUBSCRIBER);
+                    openPositionsDl.setParameter(NEWOPENPOSITION, 30);
+                    openPositionsDl.removeParameter(PRIORITY);
                     checkBoxOnlyNotPaused.setValue(true);
                     break;
                 case 7:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.setParameter("priority", 0);
+                    openPositionsDl.removeParameter(SUBSCRIBER);
+                    openPositionsDl.removeParameter(NOTSUBSCRIBER);
+                    openPositionsDl.removeParameter(FREESUBSCRIBER);
+                    openPositionsDl.removeParameter(NEWOPENPOSITION);
+                    openPositionsDl.setParameter(PRIORITY, 0);
                     checkBoxOnlyNotPaused.setValue(false);
                     break;
                 default:
@@ -348,7 +380,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return returnIcon;
     }
 
-
     @Install(to = "openPositionsTable.remoteWork", subject = "descriptionProvider")
     private String openPositionsTableRemoteWorkDescriptionProvider(OpenPosition openPosition) {
         String retStr = String.valueOf(remoteWork.get(openPosition.getRemoteWork()));
@@ -383,20 +414,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         switch (event.getItem().getRemoteWork()) {
             case 1:
-                returnIcon = "PLUS_CIRCLE";
+                returnIcon = CubaIcon.PLUS_CIRCLE.source();//"PLUS_CIRCLE";
                 break;
             case 0:
-                returnIcon = "MINUS_CIRCLE";
+                returnIcon = CubaIcon.MINUS_CIRCLE.source();//"MINUS_CIRCLE";
                 break;
             case 2:
-                returnIcon = "QUESTION_CIRCLE";
+                returnIcon = CubaIcon.QUESTION_CIRCLE_O.source();//"QUESTION_CIRCLE";
                 break;
             default:
-                returnIcon = "QUESTION_CIRCLE";
+                returnIcon = CubaIcon.QUESTION_CIRCLE.source();//"QUESTION_CIRCLE";
                 break;
         }
 
-        return CubaIcon.valueOf(returnIcon);
+        return CubaIcon.valueOf(returnIcon.substring(10));
     }
 
     @Install(to = "openPositionsTable.testExserice", subject = "columnGenerator")
@@ -550,7 +581,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.vacansyName", subject = "descriptionProvider")
     private String openPositionsTableVacansyNameDescriptionProvider(OpenPosition openPosition) {
-        String QUERY_RECRUTIER_TASK = "select e " +
+        final String QUERY_RECRUTIER_TASK = "select e " +
                 "from itpearls_RecrutiesTasks e " +
                 "where e.endDate > current_date " +
                 "and e.closed = false " +
@@ -711,7 +742,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
-
     private Component createViewDescriptionButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
         retButton.setIcon(CubaIcon.STREET_VIEW.iconName());
@@ -793,7 +823,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             Button suitableButton = uiComponents.create(Button.class);
             suitableButton.setDescription("Подобрать резюме по вакансии");
-//            suitableButton.setCaption("Подобрать");
             suitableButton.setIconFromSet(CubaIcon.EYE);
 
             suitableButton.setAction(new BaseAction("Suggestjobcandidate")
@@ -1197,16 +1226,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return closeButton;
     }
 
-
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")
     private String openPositionsTableRowStyleProvider(OpenPosition openPosition) {
-        String returnStr = "";
-
-        Integer s = dataManager.loadValue("select count(e.reacrutier) " +
+        final String QUERY = "select count(e.reacrutier) " +
                 "from itpearls_RecrutiesTasks e " +
                 "where e.openPosition = :openPos and " +
                 "e.closed = false and " +
-                "e.endDate >= :currentDate", Integer.class)
+                "e.endDate >= :currentDate";
+        String returnStr = "";
+
+        Integer s = dataManager.loadValue( QUERY, Integer.class)
                 .parameter("openPos", openPosition)
                 .parameter("currentDate", new Date())
                 .one();
@@ -1337,7 +1366,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setUrgentlyPositios(int priority) {
-        String QUERY_URGENTLY_POSITIONS = "select e from itpearls_OpenPosition e " +
+        final String QUERY_URGENTLY_POSITIONS = "select e from itpearls_OpenPosition e " +
                 "where e.openClose = false and " +
                 "e.priority >= :priority";
 
@@ -1348,7 +1377,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .view("openPosition-view")
                 .list();
 
-//        Map<Integer,String> opList = new ArrayList<Integer, String>();
         HashMap<String, Integer> opList = new HashMap<>();
 
         // перемешать коллекцию случайным образом
@@ -1536,7 +1564,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
-
     @Subscribe("checkBoxOnlyOpenedPosition")
     public void onCheckBoxOnlyOpenedPositionValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (checkBoxOnlyOpenedPosition.getValue()) {
@@ -1649,6 +1676,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 : "";
     }
 
+    @Install(to = "openPositionsTable", subject = "rowStyleProvider")
+    private String openPositionsTableRowStyleProvider1(OpenPosition openPosition) {
+        return "table-wordwrap";
+    }
+
     @Install(to = "openPositionsTable.cityPositionList", subject = "descriptionProvider")
     private String openPositionsTableCityPositionListDescriptionProvider(OpenPosition openPosition) {
         String outStr = "";
@@ -1681,20 +1713,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         switch (getQueryQuestion(event)) {
             case 1:
-                returnIcon = "PLUS_CIRCLE";
+                returnIcon = CubaIcon.PLUS_SQUARE.source();//"PLUS_CIRCLE";
                 break;
             case 0:
-                returnIcon = "MINUS_CIRCLE";
+                returnIcon = CubaIcon.MINUS_CIRCLE.source();//"MINUS_CIRCLE";
                 break;
             case 2:
-                returnIcon = "QUESTION_CIRCLE";
+                returnIcon = CubaIcon.QUESTION_CIRCLE.source();//"QUESTION_CIRCLE";
                 break;
             default:
-                returnIcon = "QUESTION_CIRCLE";
+                returnIcon = CubaIcon.QUESTION_CIRCLE.source();//"QUESTION_CIRCLE";
                 break;
         }
 
-        return CubaIcon.valueOf(returnIcon);
+        return CubaIcon.valueOf(returnIcon.substring(10));
     }
 
     private int getQueryQuestion(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -1928,8 +1960,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retStr;
     }
 
-    String more_10_msg = "<font color=red>>10</font>";
-    String clarification_required = "<font color=blue>???</font>";
+    final String more_10_msg = "<font color=red>>10</font>";
+    final String clarification_required = "<font color=blue>???</font>";
 
     @Install(to = "openPositionsTable.numberPosition", subject = "columnGenerator")
     private Object openPositionsTableNumberPositionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -1989,11 +2021,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.owner", subject = "columnGenerator")
     private Object openPositionsTableOwnerColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-
         return whoOwner(event);
-        /* return event.getItem().getOwner() != null
-                ? event.getItem().getOwner().getName()
-                : event.getItem().getCreatedBy(); */
     }
 
     private Object whoOwner(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -2009,11 +2037,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
                 if (userName != null)
                     break;
-
-//                userName = user.getLogin().equals(event.getItem().getCreatedBy()) ? user.getName() : null;
             }
         } else {
-            e = event.getItem().getOwner().getName();
             userName = event.getItem().getOwner().getName();
         }
 
@@ -2068,52 +2093,51 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
-    private Icons.Icon openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
-        String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
-        String retStr = "QUESTION_CIRCLE";
+    private Icons.Icon openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        final String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+        String retStr = CubaIcon.QUESTION_CIRCLE.source(); //"QUESTION_CIRCLE";
 
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
-                .parameter("parentOpenPosition", columnGeneratorEvent.getItem())
+                .parameter("parentOpenPosition", event.getItem())
                 .list().size() > 0) {
             retStr = "FOLDER";
         } else {
-            if (columnGeneratorEvent.getItem() != null) {
-                if (columnGeneratorEvent.getItem().getPriority() != null) {
-                    switch (columnGeneratorEvent.getItem().getPriority()) {
+            if (event.getItem() != null) {
+                if (event.getItem().getPriority() != null) {
+                    switch (event.getItem().getPriority()) {
                         case PRIORITY_DRAFT:
-                            retStr = "REFRESH_ACTION";
+                            retStr = CubaIcon.REFRESH_ACTION.source();//"REFRESH_ACTION";
                             break;
                         case PRIORITY_PAUSED:
-                            retStr = "PAUSE_CIRCLE";
+                            retStr = CubaIcon.PAUSE_CIRCLE.source();//"PAUSE_CIRCLE";
                             break;
                         case PRIORITY_LOW:
-                            retStr = "ARROW_CIRCLE_DOWN";
+                            retStr = CubaIcon.ARROW_CIRCLE_O_DOWN.source();//"ARROW_CIRCLE_DOWN";
                             break;
                         case PRIORITY_NORMAL:
-                            retStr = "LOOKUP_OK";
+                            retStr = CubaIcon.LOOKUP_OK.source();//"LOOKUP_OK";
                             break;
                         case PRIORITY_HIGH:
-                            retStr = "ARROW_CIRCLE_UP";
+                            retStr = CubaIcon.ARROW_CIRCLE_UP.source();//"ARROW_CIRCLE_UP";
                             break;
                         case PRIORITY_CRITICAL:
-                            retStr = "EXCLAMATION_CIRCLE";
+                            retStr = CubaIcon.EXCLAMATION_CIRCLE.source();//"EXCLAMATION_CIRCLE";
                             break;
                         default:
-                            retStr = "LOOKUP_OK";
+                            retStr = CubaIcon.LOOKUP_OK.source();//"LOOKUP_OK";
                             break;
                     }
                 }
             }
         }
 
-        return CubaIcon.valueOf(retStr);
-
+        return CubaIcon.valueOf(retStr.substring(10));
     }
 
     @Install(to = "openPositionsTable.folder", subject = "descriptionProvider")
     private String openPositionsTableFolderDescriptionProvider(OpenPosition openPosition) {
-        String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+        final String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
         String retStr = "";
 
         if (dataManager.load(OpenPosition.class)
@@ -2159,7 +2183,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.folder", subject = "styleProvider")
     private String openPositionsTableFolderStyleProvider(OpenPosition openPosition) {
-        String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+        final String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
         String retStr = "";
 
         if (dataManager.load(OpenPosition.class)
@@ -2197,17 +2221,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
         }
 
-        return retStr; /*
-                dataManager.load(OpenPosition.class)
-                .query(QUERY)
-                .parameter("parentOpenPosition", openPosition)
-                .list().size() > 0
-                ? "open-position-pic-center-large-gray" :
-                switch(openPosition.getPriority()) {
-                    case PRIOPITY_DRAFT: "open-position-pic-center-large-gray";
-                    default: "open-position-pic-center-large-gray";
-                }
-        );*/
+        return retStr;
     }
 
     public void openCloseButtonInvoke() {
@@ -2219,7 +2233,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.lastCVSend", subject = "columnGenerator")
     private Object openPositionsTableLastCVSendColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         Label labelRet = uiComponents.create(Label.NAME);
-        String QUERY = "select e " +
+        final String QUERY = "select e " +
                 "from itpearls_IteractionList e " +
                 "where e.vacancy = :vacancy " +
                 "and e.iteractionType.signSendToClient = true " +

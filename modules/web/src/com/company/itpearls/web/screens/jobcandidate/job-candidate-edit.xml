@@ -770,7 +770,7 @@
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionDc"
                           width="100%"
-                          bodyRowHeight="50px"
+                          bodyRowHeight="58px"
                           contextMenuEnabled="false"
                           textSelectionEnabled="false"
                           reorderingAllowed="true"
@@ -804,15 +804,17 @@
                                 property="numberIteraction"
                                 sort="DESCENDING"
                                 width="85px"
+                                maximumWidth="100px"
                                 sortable="true"/>
                         <column id="rating"
                                 minimumWidth="85px"
+                                width="85px"
                                 maximumWidth="100px"
                                 caption="msg://msgRating">
                             <htmlRenderer nullRepresentation="null"/>
                         </column>
                         <column id="vacancy"
-                                maximumWidth="300px"
+                                maximumWidth="400px"
                                 property="vacancy"/>
                         <column id="currentOpenCloseColumn"
                                 caption="mainMsg://msgCurrentOpenClose"
@@ -829,10 +831,11 @@
                             <iconRenderer/>
                         </column>
                         <column id="recrutier"
+                                maximumWidth="150px"
                                 property="recrutier"/>
                         <column id="dateIteraction"
                                 property="dateIteraction"
-                                width="100px"
+                                width="80px"
                                 caption="msg://msgDate">
                             <formatter format="dd.MM.yyyy"
                                        class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>

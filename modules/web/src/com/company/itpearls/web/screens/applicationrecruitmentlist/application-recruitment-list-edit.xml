@@ -14,8 +14,12 @@
                     </property>
                 </property>
                 <property name="recruiter" view="_local"/>
-                <property name="project" view="_local"/>
-                <property name="projectDepartment" view="_local"/>
+                <property name="project" view="_local">
+                    <property name="projectDepartment" view="_local"/>
+                </property>
+                <property name="projectDepartment" view="_local">
+                    <property name="companyName" view="_local"/>
+                </property>
                 <property name="company" view="_local"/>
             </view>
             <loader id="applicationRecruitmentListDl"/>
