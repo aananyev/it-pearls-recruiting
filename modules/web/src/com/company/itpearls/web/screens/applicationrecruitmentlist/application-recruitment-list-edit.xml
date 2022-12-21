@@ -189,10 +189,26 @@
                             <column id="applicationDate"/>
                         </columns>
                         <buttonsPanel>
-                            <button id="automationFillButton"
+                            <popupButton id="automationFillButton"
                                     caption="msg://msgAutomaticFill"
-                                    icon="RECYCLE"
-                                    invoke="automatingFillButton"/>
+                                         icon="RECYCLE">
+                                <actions>
+                                    <action id="fromAll"
+                                            caption="msg://msgFillFromAll"
+                                            invoke="automatingFillButton"/>
+                                    <action id="fromProject"
+                                            caption="msg://msgFillFromProject"
+                                            invoke="automatingFillFromProjectButton"/>
+                                    <action id="fromDepartment"
+                                            caption="msg://msgFillFromDepartament"
+                                            invoke="automaticFillFromDepartmentButton"/>
+                                    <action id="fromCompany"
+                                            caption="msg://msgFillFromCompany"
+                                            invoke="automaticFillFromCompanyButton"/>
+                                </actions>
+
+                            </popupButton>
+                          <!--          invoke="automatingFillButton"/> -->
                             <button id="approveAllButton"
                                     enable="false"
                                     icon="ADJUST"

@@ -414,23 +414,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         switch (event.getItem().getRemoteWork()) {
             case 1:
-                returnIcon = CubaIcon.PLUS_CIRCLE.source();//"PLUS_CIRCLE";
+                returnIcon = "PLUS_CIRCLE";
                 break;
             case 0:
-                returnIcon = CubaIcon.MINUS_CIRCLE.source();//"MINUS_CIRCLE";
+                returnIcon = "MINUS_CIRCLE";
                 break;
             case 2:
-                returnIcon = CubaIcon.QUESTION_CIRCLE_O.source();//"QUESTION_CIRCLE";
+                returnIcon = "QUESTION_CIRCLE";
                 break;
             default:
-                returnIcon = CubaIcon.QUESTION_CIRCLE.source();//"QUESTION_CIRCLE";
+                returnIcon = "QUESTION_CIRCLE";
                 break;
         }
 
-        return CubaIcon.valueOf(returnIcon.substring(10));
+        return CubaIcon.valueOf(returnIcon);
     }
 
-    @Install(to = "openPositionsTable.testExserice", subject = "columnGenerator")
+/*    @Install(to = "openPositionsTable.testExserice", subject = "columnGenerator")
     private Object openPositionsTableTestExsericeColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = "";
 
@@ -443,7 +443,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             returnIcon = "MINUS_CIRCLE";
 
         return CubaIcon.valueOf(returnIcon);
-    }
+    }*/
 
     @Install(to = "openPositionsTable.testExserice", subject = "descriptionProvider")
     private String openPositionsTableTestExsericeDescriptionProvider(OpenPosition openPosition) {
@@ -1707,27 +1707,27 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
-    @Install(to = "openPositionsTable.queryQuestion", subject = "columnGenerator")
+/*    @Install(to = "openPositionsTable.queryQuestion", subject = "columnGenerator")
     private Object openPositionsTableQueryQuestionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = "";
 
         switch (getQueryQuestion(event)) {
             case 1:
-                returnIcon = CubaIcon.PLUS_SQUARE.source();//"PLUS_CIRCLE";
+                returnIcon = "PLUS_CIRCLE";
                 break;
             case 0:
-                returnIcon = CubaIcon.MINUS_CIRCLE.source();//"MINUS_CIRCLE";
+                returnIcon = "MINUS_CIRCLE";
                 break;
             case 2:
-                returnIcon = CubaIcon.QUESTION_CIRCLE.source();//"QUESTION_CIRCLE";
+                returnIcon = "QUESTION_CIRCLE";
                 break;
             default:
-                returnIcon = CubaIcon.QUESTION_CIRCLE.source();//"QUESTION_CIRCLE";
+                returnIcon = "QUESTION_CIRCLE";
                 break;
         }
 
-        return CubaIcon.valueOf(returnIcon.substring(10));
-    }
+        return CubaIcon.valueOf(returnIcon);
+    } */
 
     private int getQueryQuestion(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
 
@@ -1883,7 +1883,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
-    @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "columnGenerator")
+/*    @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "columnGenerator")
     private Object openPositionsTableMemoForCandidateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         Object returnIcon = CubaIcon.MINUS_CIRCLE;
 
@@ -1896,7 +1896,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return returnIcon;
-    }
+    }*/
 
     Integer montOfStat = 3;
 
@@ -2093,9 +2093,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
-    private Icons.Icon openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+    private Object openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        return null;
+    }
+    
+    
+
+/*    @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
+    private Object openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         final String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
-        String retStr = CubaIcon.QUESTION_CIRCLE.source(); //"QUESTION_CIRCLE";
+        String retStr = "QUESTION_CIRCLE";
 
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
@@ -2107,33 +2114,33 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 if (event.getItem().getPriority() != null) {
                     switch (event.getItem().getPriority()) {
                         case PRIORITY_DRAFT:
-                            retStr = CubaIcon.REFRESH_ACTION.source();//"REFRESH_ACTION";
+                            retStr = "REFRESH_ACTION";
                             break;
                         case PRIORITY_PAUSED:
-                            retStr = CubaIcon.PAUSE_CIRCLE.source();//"PAUSE_CIRCLE";
+                            retStr = "PAUSE_CIRCLE";
                             break;
                         case PRIORITY_LOW:
-                            retStr = CubaIcon.ARROW_CIRCLE_O_DOWN.source();//"ARROW_CIRCLE_DOWN";
+                            retStr = "ARROW_CIRCLE_DOWN";
                             break;
                         case PRIORITY_NORMAL:
-                            retStr = CubaIcon.LOOKUP_OK.source();//"LOOKUP_OK";
+                            retStr = "LOOKUP_OK";
                             break;
                         case PRIORITY_HIGH:
-                            retStr = CubaIcon.ARROW_CIRCLE_UP.source();//"ARROW_CIRCLE_UP";
+                            retStr = "ARROW_CIRCLE_UP";
                             break;
                         case PRIORITY_CRITICAL:
-                            retStr = CubaIcon.EXCLAMATION_CIRCLE.source();//"EXCLAMATION_CIRCLE";
+                            retStr = "EXCLAMATION_CIRCLE";
                             break;
                         default:
-                            retStr = CubaIcon.LOOKUP_OK.source();//"LOOKUP_OK";
+                            retStr = "LOOKUP_OK";
                             break;
                     }
                 }
             }
         }
 
-        return CubaIcon.valueOf(retStr.substring(10));
-    }
+        return CubaIcon.valueOf(retStr);
+    } */
 
     @Install(to = "openPositionsTable.folder", subject = "descriptionProvider")
     private String openPositionsTableFolderDescriptionProvider(OpenPosition openPosition) {

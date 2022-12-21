@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
-        messagesPack="com.company.itpearls.web.screens" xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        messagesPack="com.company.itpearls.web.screens"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
         extends="com/company/itpearls/web/screens/openposition/open-position-browse.xml">
     <data>
         <collection>
@@ -13,8 +14,24 @@ where e.registrationForWork = 0 or e.registrationForWork = 2
                 </query>
             </loader>
         </collection>
+<!--        <collection id="staffingTableDc"
+                    class="com.company.itpearls.entity.StaffingTable"
+                    view="staffingTable-view">
+            <loader id="staffingTableDl" cacheable="true"/>
+        </collection> -->
     </data>
     <layout>
+        <treeDataGrid id="openPositionsTable">
+            <actions/>
+            <columns/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel" ext:index="1">
+                <button id="addToStaffTableButton"
+                        caption="msg://msgAddToStaffTable"
+                        invoke="attToStaffTableButtonInvoke"
+                        enable="false"/>
+            </buttonsPanel>
+        </treeDataGrid>
         <groupBox>
             <hbox>
                 <scrollBox scrollBars="horizontal" orientation="horizontal"/>

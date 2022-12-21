@@ -257,4 +257,243 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
             }
         }
     }
+
+    public void automatingFillFromProjectButton() {
+        if (projectDepartmentLookupPicketField.getValue() != null) {
+            if (codeTextField.getValue() != null) {
+                final String QUERY_STAFFING_TABLE
+                        = "select e from itpearls_StaffingTable e where e.active = true and e.openPosition.projectName = :projectName";
+                final String QUERY_STAFF_CURRENT
+                        = "select e from itpearls_StaffCurrent e where e.staffingTable = :staffingTable and e.openPosition.projectName = :projectName";
+
+                StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
+
+                // Project
+                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+                        ? " and e.openPosition.projectName.projectName like '" : "");
+
+                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+                        ? projectLookupPickerField.getValue().getProjectName() + "'" : "");
+
+                if (PersistenceHelper.isNew(getEditedEntity())) {
+
+                    LoadContext staffTable = LoadContext.create(StaffingTable.class)
+                            .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE_RESULT.toString())
+                                    .setParameter("projectName", projectLookupPickerField.getValue()));
+                    List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
+
+                    dataContext.create(ApplicationRecruitment.class);
+                    List<ApplicationRecruitment> applicationRecruitments = new ArrayList<>();
+                    Integer counter = 1;
+                    Boolean flag = false;
+
+                    for (StaffingTable st : staffingTable) {
+                        LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
+                                .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
+                                        .setParameter("staffingTable", st)
+                                        .setParameter("projectName", projectLookupPickerField.getValue()))
+                                .setView("staffCurrent-view");
+
+                        List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);
+
+                        if (st.getActive()) {
+                            if (st.getNumberOfStaff() > staffCurrents.size()) {
+                                ApplicationRecruitment applicationRecruitment = metadata.create(ApplicationRecruitment.class);
+
+                                applicationRecruitment.setActive(true);
+                                applicationRecruitment.setAmount(st.getNumberOfStaff() - staffCurrents.size());
+                                applicationRecruitment.setApplicationDate(new Date());
+                                applicationRecruitment.setStaffingTable(st);
+                                applicationRecruitment.setCode(codeTextField.getValue() + "/" + counter++);
+                                applicationRecruitment.setApplicationRecruitmentList(getEditedEntity());
+
+                                applicationRecruitmentDc.getMutableItems().add(applicationRecruitment);
+                                dataContext.merge(applicationRecruitment);
+                                flag = true;
+                            }
+                        }
+                    }
+
+                    if (flag) {
+                        dataContext.commit();
+                    }
+                }
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("Заполните код вакансии")
+                        .withDescription("ВНИМАНИЕ")
+                        .show();
+
+                getWindow().setFocusComponent("codeTextField");
+            }
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Выберите проект")
+                    .withDescription("ВНИМАНИЕ")
+                    .show();
+            getWindow().setFocusComponent("projectLookupPickerField");
+        }
+    }
+
+    public void automaticFillFromDepartmentButton() {
+        if (projectDepartmentLookupPicketField.getValue() != null) {
+            if (codeTextField.getValue() != null) {
+                final String QUERY_STAFFING_TABLE
+                        = "select e from itpearls_StaffingTable e " +
+                        "where e.active = true " +
+                        "and e.openPosition.projectName.projectDepartment = :projectDepartment";
+                final String QUERY_STAFF_CURRENT
+                        = "select e from itpearls_StaffCurrent e " +
+                        "where e.staffingTable = :staffingTable " +
+                        "and e.openPosition.projectNameprojectDepartment = :projectDepartment";
+
+                StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
+
+                // Project
+                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+                        ? " and e.openPosition.projectName.projectName like '" : "");
+
+                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+                        ? projectLookupPickerField.getValue().getProjectName() + "'" : "");
+
+                if (PersistenceHelper.isNew(getEditedEntity())) {
+
+                    LoadContext staffTable = LoadContext.create(StaffingTable.class)
+                            .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE_RESULT.toString())
+                                    .setParameter("projectDepartment", projectDepartmentLookupPicketField.getValue()));
+                    List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
+
+                    dataContext.create(ApplicationRecruitment.class);
+                    List<ApplicationRecruitment> applicationRecruitments = new ArrayList<>();
+                    Integer counter = 1;
+                    Boolean flag = false;
+
+                    for (StaffingTable st : staffingTable) {
+                        LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
+                                .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
+                                        .setParameter("staffingTable", st)
+                                        .setParameter("projectDepartment", projectDepartmentLookupPicketField.getValue()))
+                                .setView("staffCurrent-view");
+
+                        List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);
+
+                        if (st.getActive()) {
+                            if (st.getNumberOfStaff() > staffCurrents.size()) {
+                                ApplicationRecruitment applicationRecruitment = metadata.create(ApplicationRecruitment.class);
+
+                                applicationRecruitment.setActive(true);
+                                applicationRecruitment.setAmount(st.getNumberOfStaff() - staffCurrents.size());
+                                applicationRecruitment.setApplicationDate(new Date());
+                                applicationRecruitment.setStaffingTable(st);
+                                applicationRecruitment.setCode(codeTextField.getValue() + "/" + counter++);
+                                applicationRecruitment.setApplicationRecruitmentList(getEditedEntity());
+
+                                applicationRecruitmentDc.getMutableItems().add(applicationRecruitment);
+                                dataContext.merge(applicationRecruitment);
+                                flag = true;
+                            }
+                        }
+                    }
+
+                    if (flag) {
+                        dataContext.commit();
+                    }
+                }
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("Заполните код вакансии")
+                        .withDescription("ВНИМАНИЕ")
+                        .show();
+
+                getWindow().setFocusComponent("codeTextField");
+            }
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Выберите проект")
+                    .withDescription("ВНИМАНИЕ")
+                    .show();
+            getWindow().setFocusComponent("projectDepartmentLookupPicketField");
+        }
+    }
+
+    public void automaticFillFromCompanyButton() {
+        if (projectDepartmentLookupPicketField.getValue() != null) {
+            if (codeTextField.getValue() != null) {
+                final String QUERY_STAFFING_TABLE
+                        = "select e from itpearls_StaffingTable e " +
+                        "where e.active = true " +
+                        "and e.openPosition.projectName.projectDepartment.companyName = :companyName";
+                final String QUERY_STAFF_CURRENT
+                        = "select e from itpearls_StaffCurrent e " +
+                        "where e.staffingTable = :staffingTable " +
+                        "and e.openPosition.projectNameprojectDepartment.companyName = :companyName";
+
+                StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
+
+                // Project
+                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+                        ? " and e.openPosition.projectName.projectName like '" : "");
+
+                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+                        ? projectLookupPickerField.getValue().getProjectName() + "'" : "");
+
+                if (PersistenceHelper.isNew(getEditedEntity())) {
+
+                    LoadContext staffTable = LoadContext.create(StaffingTable.class)
+                            .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE_RESULT.toString())
+                                    .setParameter("companyName", companyLookupPickerField.getValue()));
+                    List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
+
+                    dataContext.create(ApplicationRecruitment.class);
+                    List<ApplicationRecruitment> applicationRecruitments = new ArrayList<>();
+                    Integer counter = 1;
+                    Boolean flag = false;
+
+                    for (StaffingTable st : staffingTable) {
+                        LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
+                                .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
+                                        .setParameter("staffingTable", st)
+                                        .setParameter("companyName", companyLookupPickerField.getValue()))
+                                .setView("staffCurrent-view");
+
+                        List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);
+
+                        if (st.getActive()) {
+                            if (st.getNumberOfStaff() > staffCurrents.size()) {
+                                ApplicationRecruitment applicationRecruitment = metadata.create(ApplicationRecruitment.class);
+
+                                applicationRecruitment.setActive(true);
+                                applicationRecruitment.setAmount(st.getNumberOfStaff() - staffCurrents.size());
+                                applicationRecruitment.setApplicationDate(new Date());
+                                applicationRecruitment.setStaffingTable(st);
+                                applicationRecruitment.setCode(codeTextField.getValue() + "/" + counter++);
+                                applicationRecruitment.setApplicationRecruitmentList(getEditedEntity());
+
+                                applicationRecruitmentDc.getMutableItems().add(applicationRecruitment);
+                                dataContext.merge(applicationRecruitment);
+                                flag = true;
+                            }
+                        }
+                    }
+
+                    if (flag) {
+                        dataContext.commit();
+                    }
+                }
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("Заполните код вакансии")
+                        .withDescription("ВНИМАНИЕ")
+                        .show();
+
+                getWindow().setFocusComponent("codeTextField");
+            }
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Выберите проект")
+                    .withDescription("ВНИМАНИЕ")
+                    .show();
+            getWindow().setFocusComponent("companyLookupPickerField");
+        }
+    }
 }
