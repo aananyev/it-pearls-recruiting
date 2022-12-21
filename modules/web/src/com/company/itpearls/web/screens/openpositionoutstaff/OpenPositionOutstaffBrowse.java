@@ -25,6 +25,8 @@ import java.util.List;
 @UiDescriptor("open-position-outstaff-browse.xml")
 public class OpenPositionOutstaffBrowse extends OpenPositionBrowse {
     private static final String QUERY_GET_DEFAULT_GRADE = "select e from itpearls_Grade e where e.gradeName like 'Default'";
+    private static final String QUERY_STAFF_CURRENTS = "select e from itpearls_StaffCurrent e";
+    private static final String QUERY_STAFF_TABLE = "select e from itpearls_StaffingTable e";
 
     @Inject
     private Metadata metadata;
@@ -91,11 +93,13 @@ public class OpenPositionOutstaffBrowse extends OpenPositionBrowse {
     }
 
     private boolean isNotDublicateOpenPosition(OpenPosition singleSelected) {
-        List<StaffCurrent> staffCurrents = dataManager.load(StaffCurrent.class)
+        List<StaffingTable> staffTable = dataManager.load(StaffingTable.class)
+                .query(QUERY_STAFF_TABLE)
+                .view("staffingTable-view")
                 .list();
 
-        for (StaffCurrent staffCurrent : staffCurrents) {
-            if (staffCurrent.equals(singleSelected)) {
+        for (StaffingTable staff : staffTable) {
+            if (staff.getOpenPosition().equals(singleSelected)) {
                 return false;
             }
         }
