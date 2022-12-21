@@ -405,4 +405,5 @@
         <property name="staffingTable" view="_local"/>
         <property name="applicationRecruitmentList" view="_local"/>
     </view>
+    <view entity="itpearls_Grade" name="grade-view" extends="_local"/>
 </views>

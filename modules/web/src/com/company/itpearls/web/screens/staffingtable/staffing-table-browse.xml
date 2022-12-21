@@ -34,8 +34,8 @@
             <properties include=".*"/>
         </filter>
         <groupTable id="staffingTablesTable"
-                  width="100%"
-                  dataContainer="staffingTablesDc">
+                    width="100%"
+                    dataContainer="staffingTablesDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
@@ -46,18 +46,24 @@
                     <column id="openPosition.projectName.projectDepartment"/>
                 </group>
                 <column id="code"
+                        editable="true"
                         width="150px"/>
                 <column id="active"
+                        editable="true"
                         width="50px"/>
                 <column id="openPosition"
-                        width="700px"/>
+                        width="600px"/>
                 <column id="grade"
+                        editable="true"
                         width="100px"/>
                 <column id="numberOfStaff"
+                        editable="true"
                         width="50px"/>
                 <column id="salaryMin"
+                        editable="true"
                         width="150px"/>
                 <column id="salaryMax"
+                        editable="true"
                         width="150px"/>
             </columns>
             <rowsCount/>

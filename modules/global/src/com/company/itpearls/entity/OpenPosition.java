@@ -41,6 +41,11 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "VACANSY_NAME", nullable = false, length = 250)
     protected String vacansyName;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GRADE_ID")
+    private Grade grade;
+
     @NotNull
     @Column(name = "REMOTE_WORK", nullable = false)
     protected Integer remoteWork;
@@ -196,6 +201,14 @@ public class OpenPosition extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
     private User owner;
+
+    public Grade getGrade() {
+        return grade;
+    }
+
+    public void setGrade(Grade grade) {
+        this.grade = grade;
+    }
 
     public String getPriorityComment() {
         return priorityComment;

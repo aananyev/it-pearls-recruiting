@@ -9,6 +9,7 @@
         <instance id="openPositionDc"
                   class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
+                <property name="grade" view="_local"/>
                 <property name="laborAgreement" view="_minimal"/>
                 <property name="projectName" view="_minimal">
                     <property name="projectIsClosed"/>
@@ -137,10 +138,17 @@
         <collection id="citiesDc"
                     class="com.company.itpearls.entity.City"
                     view="city-view">
-            <loader id="citiesDl">
+            <loader id="citiesDl" cacheable="true">
                 <query><![CDATA[select e
                 from itpearls_City e
                 order by e.cityRuName]]></query>
+            </loader>
+        </collection>
+        <collection id="gradeDc"
+                    class="com.company.itpearls.entity.Grade"
+                    view="_local">
+            <loader id="gradeDl" cacheable="true">
+                <query><![CDATA[select e from itpearls_Grade e order by e.gradeName]]></query>
             </loader>
         </collection>
     </data>
@@ -187,13 +195,29 @@
                                height="100%"
                                width="100%">
                         <vbox spacing="false">
-                            <textField id="vacansyNameField"
-                                       dataContainer="openPositionDc"
-                                       property="vacansyName"
-                                       caption="msg://msgVacansy"
-                                       stylename="text-field-title-form"
-                                       width="100%"
-                                       required="true"/>
+                            <hbox spacing="true"
+                                  width="100%"
+                                  expand="vacansyNameField">
+                                <textField id="vacansyNameField"
+                                           dataContainer="openPositionDc"
+                                           property="vacansyName"
+                                           caption="msg://msgVacansy"
+                                           stylename="large"
+                                           width="100%"
+                                           required="true"/>
+                                <lookupPickerField id="gradeLookupPickerField"
+                                             dataContainer="openPositionDc"
+                                             property="grade"
+                                                   stylename="large"
+                                             optionsContainer="gradeDc"
+                                             caption="msg://msgGrade"
+                                                   width="AUTO">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </hbox>
                             <hbox/>
                             <hbox id="hboxProject1"
                                   spacing="true"

@@ -154,12 +154,10 @@
                       descriptionAsHtml="true"
                       captionAsHtml="true"
                       width="100%"
-                      bodyRowHeight="60px"
-                      headerRowHeight="40px"
-                      stylename="table-wordwrap"
                       editorEnabled="false"
                       headerVisible="true"
                       contextMenuEnabled="false"
+                      bodyRowHeight="60px"
                       textSelectionEnabled="false"
                       hierarchyProperty="parentOpenPosition"
                       selectionMode="SINGLE"
@@ -178,7 +176,7 @@
                         resizable="false"
                         width="100px"
                         caption="msg://msgFolder">
-                    <componentRenderer/>
+                    <iconRenderer/>
                 </column>
                 <column id="icon"
                         resizable="true"
@@ -210,9 +208,6 @@
                         property="projectName"
                         maximumWidth="250px"
                         caption="msg://msgProjectName"/>
-                <column id="projectName.projectOwner"
-                        property="projectName.projectOwner"
-                        maximumWidth="100px"/>
                 <column id="cityPositionList"
                         caption="msg://msgCity"
                         minimumWidth="60px"

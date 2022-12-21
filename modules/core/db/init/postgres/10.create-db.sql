@@ -441,6 +441,7 @@ create table ITPEARLS_OPEN_POSITION (
     SIGN_DRAFT boolean,
     LAST_OPEN_DATE date,
     VACANSY_NAME varchar(250) not null,
+    GRADE_ID uuid,
     REMOTE_WORK integer not null,
     REGISTRATION_FOR_WORK integer,
     REMOTE_COMMENT varchar(40),
