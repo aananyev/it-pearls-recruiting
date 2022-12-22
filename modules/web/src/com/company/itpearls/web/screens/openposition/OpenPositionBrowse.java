@@ -20,7 +20,6 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.cuba.web.App;
 import com.haulmont.reports.entity.Report;
 import com.haulmont.reports.gui.ReportGuiManager;
 import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
@@ -40,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @LoadDataBeforeShow
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
-    
+
     private static final String NULL_SALARY = "0 т.р./0 т.р.";
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
@@ -120,11 +119,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private Actions actions;
     @Inject
-    private Button listBtn;
-    @Inject
     private Dialogs dialogs;
     @Inject
     private Button openCloseButton;
+    @Inject
+    private PopupButton reportsPopupButton;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -139,13 +138,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         Action listPrintFormAction = actions.create(ListPrintFormAction.class, "listPrintFormAction");
         openPositionsTable.addAction(listPrintFormAction);
-        listBtn.setAction(listPrintFormAction);
 
         String QUERY_USER = "select e from sec$User e where e.active = true";
         users = dataManager.load(User.class)
                 .query(QUERY_USER)
                 .list();
-
     }
 
     @Install(to = "subscribeRadioButtonGroup", subject = "optionDescriptionProvider")
@@ -205,7 +202,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         subscribeRadioButtonGroup.addValueChangeListener(e -> {
-            listBtn.setEnabled(openPositionsTable.getSingleSelected() != null);
+            reportsPopupButton.setEnabled(openPositionsTable.getSingleSelected() != null);
             buttonSubscribe.setEnabled(openPositionsTable.getSingleSelected() != null);
 
 //            buttonSubscribe.setEnabled(((Integer) subscribeRadioButtonGroup.getValue()) == 0);
@@ -1278,12 +1275,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private void setButtonsEnableDisable() {
         buttonSubscribe.setEnabled(false);
-        listBtn.setEnabled(false);
+        reportsPopupButton.setEnabled(false);
+
         openCloseButton.setEnabled(false);
         openPositionsTable.addSelectionListener(e -> {
             if (e.getSelected() == null) {
                 buttonSubscribe.setEnabled(false);
-                listBtn.setEnabled(false);
+                reportsPopupButton.setEnabled(false);
 
                 openCloseButton.setEnabled(false);
                 openCloseButton.setIconFromSet(CubaIcon.CLOSE);
@@ -1293,7 +1291,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         openPositionsTable.addItemClickListener(e -> {
             buttonSubscribe.setEnabled(true);
-            listBtn.setEnabled(true);
+            reportsPopupButton.setEnabled(true);
+
             if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER)) {
                 if (e.getItem().getOpenClose()) {
                     openCloseButton.setEnabled(true);
@@ -2057,16 +2056,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     public void getMemoForCandidate() {
+        Map<String,Object> reportParams = new HashMap<>();
+        reportParams.put("openPosition", openPositionsTable.getSingleSelected());
+
         LoadContext<Report> loadContext = LoadContext.create(Report.class)
                 .setQuery(LoadContext
                         .createQuery("select p from report$Report p where p.code = 'memoForCandidates'"))
                 .setView("report.edit");
         Report report = dataManager.load(loadContext);
-
-        report.setValue("openPosition", openPositionsTable.getSingleSelected(), false);
-
-        FrameOwner window = App.getInstance().getTopLevelWindow().getFrameOwner();
-        reportGuiManager.runReport(report, window);
+        reportGuiManager.printReport(report, reportParams);
     }
 
     @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
@@ -2269,6 +2267,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableProjectNameStyleProvider(OpenPosition openPosition) {
         return "table-wordwrap";
     }
+
     @Install(to = "openPositionsTable.vacansyName", subject = "styleProvider")
     private String openPositionsTableVacansyNameStyleProvider(OpenPosition openPosition) {
         return "table-wordwrap";

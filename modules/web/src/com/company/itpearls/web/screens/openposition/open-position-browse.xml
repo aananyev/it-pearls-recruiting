@@ -333,11 +333,18 @@
                         icon="EYE"
                         enable="false"
                         invoke="suggestCandidateButton"/>
-                <button id="listBtn"
-                        icon="COMMENT_O"
-                        enable="false"
-                        caption="msg://msgGetMemoForCandidate"
-                        action="openPositionsTable.list"/>
+                <popupButton id="reportsPopupButton"
+                             icon="FILE_TEXT"
+                             enable="false"
+                             caption="msg://msgReports">
+                    <actions>
+                        <action id="listPrintFormAction"
+                                enable="true"
+                                invoke="getMemoForCandidate"
+                                type="listPrintForm"
+                                caption="msg://msgGetMemoForCandidate"/>
+                    </actions>
+                </popupButton>
             </buttonsPanel>
         </treeDataGrid>
         <hbox spacing="true"

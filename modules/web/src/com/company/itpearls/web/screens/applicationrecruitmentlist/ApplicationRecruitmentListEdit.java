@@ -266,19 +266,19 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                 final String QUERY_STAFF_CURRENT
                         = "select e from itpearls_StaffCurrent e where e.staffingTable = :staffingTable and e.openPosition.projectName = :projectName";
 
-                StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
+//                StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
 
                 // Project
-                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
-                        ? " and e.openPosition.projectName.projectName like '" : "");
+//                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+//                        ? " and e.openPosition.projectName.projectName like '" : "");
 
-                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
-                        ? projectLookupPickerField.getValue().getProjectName() + "'" : "");
+//                QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
+//                        ? projectLookupPickerField.getValue().getProjectName() + "'" : "");
 
                 if (PersistenceHelper.isNew(getEditedEntity())) {
 
                     LoadContext staffTable = LoadContext.create(StaffingTable.class)
-                            .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE_RESULT.toString())
+                            .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE.toString())
                                     .setParameter("projectName", projectLookupPickerField.getValue()));
                     List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
 
