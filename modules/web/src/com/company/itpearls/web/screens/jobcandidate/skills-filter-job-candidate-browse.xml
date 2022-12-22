@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://skillsFilterJobCandidateBrowse.caption"
+        focusComponent="jobCandidatesTable"
+        messagesPack="com.company.itpearls.web.screens.jobcandidate">
+    <data readOnly="true">
+        <collection id="jobCandidatesDc"
+                    class="com.company.itpearls.entity.JobCandidate">
+            <view extends="_local">
+                <property name="cityOfResidence"
+                          view="_local"/>
+                <property name="personPosition"
+                          view="_local"/>
+                <property name="candidateCv"
+                          view="_minimal">
+                    <property name="textCV"/>
+                </property>
+            </view>
+            <loader id="jobCandidatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="mainBox"
+            spacing="true">
+        <vbox id="mainBox"
+              width="100%"
+              height="100%"
+              spacing="true">
+            <hbox id="skillBoxHBox"
+                  width="100%"
+                  height="100%"
+                  stylename="card">
+                <scrollBox id="allSkillsScrollBox"
+                           stylename="v-panel-caption"
+                           width="100%"
+                           height="100%"/>
+                <scrollBox id="neededSkillsScrollBox"
+                           stylename="v-panel-caption"
+                           width="100%"
+                           height="100%"/>
+            </hbox>
+            <vbox expand="jobCandidatesTable"
+                  id="jobCandidatesTableVBox"
+                  width="100%"
+                  height="100%">
+                <filter id="filter"
+                        applyTo="jobCandidatesTable"
+                        dataLoader="jobCandidatesDl">
+                    <properties include=".*"/>
+                </filter>
+                <dataGrid id="jobCandidatesTable"
+                          width="100%"
+                          height="100%"
+                          dataContainer="jobCandidatesDc">
+                    <actions>
+                    </actions>
+                    <columns>
+                        <column property="fullName" id="fullName"/>
+                        <column property="personPosition" id="personPosition"/>
+                        <column property="cityOfResidence" id="cityOfResidence"/>
+                    </columns>
+                    <rowsCount/>
+                    <buttonsPanel id="buttonsPanel"
+                                  alwaysVisible="true">
+                    </buttonsPanel>
+                </dataGrid>
+            </vbox>
+        </vbox>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

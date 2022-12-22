@@ -7,8 +7,12 @@
         <instance id="staffCurrentDc"
                   class="com.company.itpearls.entity.StaffCurrent">
             <view extends="_local">
-                <property name="employee" view="_local"/>
-                <property name="staffingTable" view="_local"/>
+                <property name="employee" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
+                <property name="staffingTable" view="_local">
+                    <property name="openPosition" view="_local"/>
+                </property>
             </view>
             <loader/>
         </instance>

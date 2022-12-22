@@ -35,6 +35,7 @@
         </filter>
         <groupTable id="staffingTablesTable"
                     width="100%"
+                    editable="true"
                     dataContainer="staffingTablesDc">
             <actions>
                 <action id="create" type="create"/>
@@ -55,7 +56,7 @@
                         width="600px"/>
                 <column id="grade"
                         editable="true"
-                        width="100px"/>
+                        width="150px"/>
                 <column id="numberOfStaff"
                         editable="true"
                         width="50px"/>

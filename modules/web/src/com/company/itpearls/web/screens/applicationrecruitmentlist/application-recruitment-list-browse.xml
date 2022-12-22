@@ -34,6 +34,7 @@
         </filter>
         <groupTable id="applicationRecruitmentListsTable"
                     width="100%"
+                    stylename="table-wordwrap"
                     dataContainer="applicationRecruitmentListsDc">
             <actions>
                 <action id="create" type="create"/>
@@ -41,21 +42,30 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="active" width="50px"/>
+                <column id="active"
+                        width="50px"/>
                 <column id="code"/>
-                <column id="project" width="200px"/>
-                <column id="projectDepartment" width="200px"/>
-                <column id="company" width="200px"/>
-                <column id="openDate" width="100px"/>
-                <column id="closeDate" width="100px"/>
+                <column id="project"
+                        width="200px"/>
+                <column id="projectDepartment"
+                        width="200px"/>
+                <column id="company"
+                        width="200px"/>
+                <column id="openDate"
+                        width="100px"/>
+                <column id="closeDate"
+                        width="100px"/>
                 <column id="recruiter"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="applicationRecruitmentListsTable.create"/>
-                <button id="editBtn" action="applicationRecruitmentListsTable.edit"/>
-                <button id="removeBtn" action="applicationRecruitmentListsTable.remove"/>
+                <button id="createBtn"
+                        action="applicationRecruitmentListsTable.create"/>
+                <button id="editBtn"
+                        action="applicationRecruitmentListsTable.edit"/>
+                <button id="removeBtn"
+                        action="applicationRecruitmentListsTable.remove"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">

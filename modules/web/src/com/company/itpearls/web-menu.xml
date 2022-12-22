@@ -16,6 +16,8 @@
     <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
         <item screen="itpearls_OpenPositionMaster.browse"
               caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse" icon="icons/clear.png"/>
+        <item screen="itpearls_SkillsFilterJobCandidate.browse"
+              caption="mainMsg://menu_config.itpearls_SkillsFilterJobCandidate.browse"/>
     </menu>
     <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
         <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
