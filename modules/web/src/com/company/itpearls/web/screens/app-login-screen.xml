@@ -87,7 +87,7 @@
             <image id="backgroundImage"
                    scaleMode="COVER"
                    stylename="c-login-background">
-                <relativePath path="VAADIN/brand-login-screen/backgroud.jpg"/>
+                <relativePath path="VAADIN/brand-login-screen/background-2023.jpg"/>
             </image>
         </cssLayout>
     </layout>

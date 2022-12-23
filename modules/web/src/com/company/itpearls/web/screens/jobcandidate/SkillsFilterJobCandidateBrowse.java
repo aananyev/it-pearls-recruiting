@@ -1,14 +1,19 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.entity.SkillTree;
+import com.company.itpearls.web.SkillsFilterCandidateEvent;
 import com.company.itpearls.web.StandartPrioritySkills;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -25,31 +30,158 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             = "select e from itpearls_SkillTree e where e.skillTree is null order by e.skillName";
     private static final String QUERY_SKILL_TREE_ITEM
             = "select e from itpearls_SkillTree e where e.skillTree = :skillGroup";
+
     private List<SkillTree> skillTreeGroup = new ArrayList<>();
     private HashMap<SkillTree, GroupBoxLayout> skillGroupGroupBoxLayouts = new HashMap<>();
+    private HashMap<SkillTree, GroupBoxLayout> skillGroupFilterGroupBoxLayouts = new HashMap<>();
+    private HashMap<LinkButton, LinkButton> skillsPairAllToFilter = new HashMap<>();
+    private HashMap<LinkButton, LinkButton> skillsPairFilterToAll = new HashMap<>();
 
-    @Inject
-    private DataManager dataManager;
     @Inject
     private UiComponents uiComponents;
     @Inject
     private ScrollBoxLayout allSkillsScrollBox;
+    @Inject
+    private ScrollBoxLayout filterSkillsScrollBox;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private Events events;
+    @Inject
+    private UserSession userSession;
+
+    @Order(15)
+    @EventListener
+    protected void onSkillSelected(SkillsFilterCandidateEvent event) {
+        skillsPairAllToFilter.get((LinkButton) event.getSource()).setVisible(true);
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         skillTreeGroup = getSkillTreeGroup();
-        skillGroupGroupBoxLayouts = setSkillTreesGroupGreoupBoxLayouts();
-        addSkillsTreeGroupGroupBoxes();
+
+//        setSkillTreesGroupGroupBoxLayouts(skillGroupGroupBoxLayouts);
+//        setSkillTreesGroupGroupBoxLayouts(skillGroupFilterGroupBoxLayouts);
+
+//        addSkillsTreeGroupGroupBoxes(skillGroupGroupBoxLayouts, allSkillsScrollBox, true);
+//        addSkillsTreeGroupGroupBoxes(skillGroupFilterGroupBoxLayouts, filterSkillsScrollBox, false);
+        addSkillTreeGroupBoxes();
     }
 
-    private void addSkillsTreeGroupGroupBoxes() {
-        for (Map.Entry<SkillTree, GroupBoxLayout> groupBoxLayoutEntry : skillGroupGroupBoxLayouts.entrySet()) {
-            addSkillLabels(groupBoxLayoutEntry);
-            allSkillsScrollBox.add(groupBoxLayoutEntry.getValue());
+    private GroupBoxLayout setSkillGroupBox(SkillTree skillTree) {
+        GroupBoxLayout groupBoxLayout = uiComponents.create(GroupBoxLayout.class);
+
+        groupBoxLayout.setStyleName("light");
+        groupBoxLayout.setCollapsable(true);
+        groupBoxLayout.setCaption(skillTree.getSkillName());
+        groupBoxLayout.setDescription(skillTree.getComment() != null
+                ? Jsoup.parse(skillTree.getComment()).text() : "");
+        groupBoxLayout.setWidthFull();
+
+        return groupBoxLayout;
+    }
+
+    private void addSkillTreeGroupBoxes() {
+        for (SkillTree skillTree : skillTreeGroup) {
+            // Левый
+            GroupBoxLayout groupBoxLayoutLeft = setSkillGroupBox(skillTree);
+            // Правый
+            GroupBoxLayout groupBoxLayoutRight = setSkillGroupBox(skillTree);
+
+            addSkillPairLabels(skillTree, groupBoxLayoutLeft, groupBoxLayoutRight);
+
+            allSkillsScrollBox.add(groupBoxLayoutLeft);
+            filterSkillsScrollBox.add(groupBoxLayoutRight);
         }
     }
 
-    private void addSkillLabels(Map.Entry<SkillTree, GroupBoxLayout> groupBoxLayoutEntry) {
+    private FlowBoxLayout setFlowBoxLayout() {
+        FlowBoxLayout flowBoxLayoutLeft = uiComponents.create(FlowBoxLayout.class);
+        flowBoxLayoutLeft.setWidthAuto();
+        flowBoxLayoutLeft.setSpacing(true);
+
+        return flowBoxLayoutLeft;
+    }
+
+    private LinkButton setLinkButton(SkillTree st) {
+        LinkButton label = uiComponents.create(LinkButton.class);
+        label.setCaption(st.getSkillName());
+        label.setStyleName(getStyleForSkillPriority(st));
+        label.setVisible(true);
+
+        return label;
+    }
+
+    private void addSkillPairLabels(SkillTree skillTreeGroup,
+                                    GroupBoxLayout groupBoxLayoutLeft,
+                                    GroupBoxLayout groupBoxLayoutRight) {
+        List<SkillTree> skillTree = dataManager.load(SkillTree.class)
+                .query(QUERY_SKILL_TREE_ITEM)
+                .parameter("skillGroup", skillTreeGroup)
+                .list();
+
+        FlowBoxLayout flowBoxLayoutLeft = setFlowBoxLayout();
+        FlowBoxLayout flowBoxLayoutRight = setFlowBoxLayout();
+
+        for (SkillTree st : skillTree) {
+            // левый
+            LinkButton labelLeft = setLinkButton(st);
+            LinkButton labelRight = setLinkButton(st);
+            labelRight.setVisible(false);
+
+            labelLeft.addClickListener(e -> {
+                reverseVisible(e);
+            });
+
+            labelRight.addClickListener(e -> {
+                reverseVisibleFilter(e);
+            });
+
+            skillsPairAllToFilter.put(labelLeft, labelRight);
+            skillsPairFilterToAll.put(labelRight, labelLeft);
+
+            flowBoxLayoutLeft.add(labelLeft);
+            flowBoxLayoutRight.add(labelRight);
+        }
+
+        groupBoxLayoutLeft.add(flowBoxLayoutLeft);
+        groupBoxLayoutRight.add(flowBoxLayoutRight);
+    }
+
+    private void reverseVisibleFilter(Button.ClickEvent e) {
+        e.getSource().setVisible(!e.getSource().isVisible());
+        skillsPairFilterToAll.get(e.getSource()).setVisible(
+                !skillsPairFilterToAll.get(e.getSource()).isVisible());
+    }
+
+    private void setSkillTreesGroupGroupBoxLayouts(HashMap<SkillTree, GroupBoxLayout> skillBoxLayouts) {
+        for (SkillTree skillTree : skillTreeGroup) {
+            GroupBoxLayout groupBoxLayout = uiComponents.create(GroupBoxLayout.class);
+
+            groupBoxLayout.setStyleName("light");
+            groupBoxLayout.setCollapsable(true);
+            groupBoxLayout.setCaption(skillTree.getSkillName());
+            groupBoxLayout.setDescription(skillTree.getComment() != null
+                    ? Jsoup.parse(skillTree.getComment()).text() : "");
+            groupBoxLayout.setWidthFull();
+
+            skillBoxLayouts.put(skillTree, groupBoxLayout);
+        }
+    }
+
+    private void addSkillsTreeGroupGroupBoxes(HashMap<SkillTree, GroupBoxLayout> skillBoxLayouts,
+                                              ScrollBoxLayout scrollBox,
+                                              Boolean visible) {
+        for (Map.Entry<SkillTree, GroupBoxLayout> groupBoxLayoutEntry : skillBoxLayouts.entrySet()) {
+            addSkillLabels(groupBoxLayoutEntry, scrollBox, visible);
+            scrollBox.add(groupBoxLayoutEntry.getValue());
+
+        }
+    }
+
+    private void addSkillLabels(Map.Entry<SkillTree, GroupBoxLayout> groupBoxLayoutEntry,
+                                ScrollBoxLayout scrollBoxLayout,
+                                Boolean visible) {
         List<SkillTree> skillTree = dataManager.load(SkillTree.class)
                 .query(QUERY_SKILL_TREE_ITEM)
                 .parameter("skillGroup", groupBoxLayoutEntry.getKey())
@@ -60,10 +192,34 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         hBoxLayout.setSpacing(true);
 
         for (SkillTree st : skillTree) {
-            Label<String> label = uiComponents.create(Label.class);
-            label.setValue(st.getSkillName());
+            LinkButton label = uiComponents.create(LinkButton.class);
+            label.setCaption(st.getSkillName());
             label.setStyleName(getStyleForSkillPriority(st));
+            label.setVisible(visible);
+
+            label.addClickListener(e -> {
+                reverseVisible(e);
+            });
+
             hBoxLayout.add(label);
+
+            if (visible) {
+                skillsPairAllToFilter.put(label, null);
+
+                for (Map.Entry<LinkButton, LinkButton> entry : skillsPairFilterToAll.entrySet()) {
+                    if (entry.getKey().getCaption().equals(label.getCaption())) {
+                        skillsPairFilterToAll.replace(entry.getKey(), label);
+                    }
+                }
+            } else {
+                skillsPairFilterToAll.put(label, null);
+
+                for (Map.Entry<LinkButton, LinkButton> entry : skillsPairAllToFilter.entrySet()) {
+                    if (entry.getKey().getCaption().equals(label.getCaption())) {
+                        skillsPairAllToFilter.replace(entry.getKey(), label);
+                    }
+                }
+            }
         }
 
         groupBoxLayoutEntry.getValue().add(hBoxLayout);
@@ -73,6 +229,12 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         } else {
             groupBoxLayoutEntry.getValue().setVisible(true);
         }
+    }
+
+    private void reverseVisible(Button.ClickEvent e) {
+        e.getSource().setVisible(!e.getSource().isVisible());
+        skillsPairAllToFilter.get(e.getSource()).setVisible(
+                !skillsPairAllToFilter.get(e.getSource()).isVisible());
     }
 
     private String getStyleForSkillPriority(SkillTree st) {
@@ -118,23 +280,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         }
 
         return retStr;
-    }
-
-    private HashMap<SkillTree, GroupBoxLayout> setSkillTreesGroupGreoupBoxLayouts() {
-        for (SkillTree skillTree : skillTreeGroup) {
-            GroupBoxLayout groupBoxLayout = uiComponents.create(GroupBoxLayout.class);
-
-            groupBoxLayout.setStyleName("light");
-            groupBoxLayout.setCollapsable(true);
-            groupBoxLayout.setCaption(skillTree.getSkillName());
-            groupBoxLayout.setDescription(skillTree.getComment() != null
-                    ? Jsoup.parse(skillTree.getComment()).text() : "");
-            groupBoxLayout.setWidthFull();
-
-            skillGroupGroupBoxLayouts.put(skillTree, groupBoxLayout);
-        }
-
-        return skillGroupGroupBoxLayouts;
     }
 
     private List<SkillTree> getSkillTreeGroup() {
