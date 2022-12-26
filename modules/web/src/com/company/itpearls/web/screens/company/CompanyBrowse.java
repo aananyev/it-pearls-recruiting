@@ -1,13 +1,13 @@
 package com.company.itpearls.web.screens.company;
 
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.DataGrid;
-import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Company;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 
 import javax.inject.Inject;
 
@@ -16,6 +16,39 @@ import javax.inject.Inject;
 @LookupComponent("companiesTable")
 @LoadDataBeforeShow
 public class CompanyBrowse extends StandardLookup<Company> {
+    @Inject
+    private UiComponents uiComponents;
+
+    @Install(to = "companiesTable.companyLogoColumn", subject = "columnGenerator")
+    private Component companiesTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Company> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        Image image = uiComponents.create(Image.class);
+        image.setDescriptionAsHtml(true);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("20px");
+        image.setHeight("20px");
+        image.setStyleName("circle-no-border-20px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        image.setDescription("<h4>"
+                + event.getItem().getComanyName()
+                + "</h4><br><br>"
+                + event.getItem().getCompanyDescription());
+
+        if (event.getItem().getFileCompanyLogo() != null) {
+            image.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(event
+                            .getItem()
+                            .getFileCompanyLogo());
+        } else {
+            image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+
+        retBox.add(image);
+        return retBox;
+    }
 
     @Inject
     private CheckBox checkBoxOnlyOurClient;

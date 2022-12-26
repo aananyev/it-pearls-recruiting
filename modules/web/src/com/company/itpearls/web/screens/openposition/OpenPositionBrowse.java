@@ -38,6 +38,39 @@ import java.util.concurrent.atomic.AtomicReference;
 @LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
+    @Install(to = "openPositionsTable.companyLogoColumn", subject = "columnGenerator")
+    private Object openPositionsTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        Image image = uiComponents.create(Image.class);
+        image.setDescriptionAsHtml(true);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("50px");
+        image.setHeight("50px");
+        image.setStyleName("circle-no-border-50px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        image.setDescription("<h4>"
+                + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getComanyName()
+                + "</h4><br><br>"
+                + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription());
+
+        if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo() != null) {
+            image.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(event
+                            .getItem()
+                            .getProjectName()
+                            .getProjectDepartment()
+                            .getCompanyName()
+                            .getFileCompanyLogo());
+        } else {
+            image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+
+        retBox.add(image);
+        return retBox;
+    }
 
 
     private static final String NULL_SALARY = "0 т.р./0 т.р.";
@@ -2058,7 +2091,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     public void getMemoForCandidate() {
-        Map<String,Object> reportParams = new HashMap<>();
+        Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("openPosition", openPositionsTable.getSingleSelected());
 
         LoadContext<Report> loadContext = LoadContext.create(Report.class)

@@ -45,6 +45,14 @@ order by e.comanyName]]>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="companyLogoColumn"
+                        resizable="true"
+                        collapsible="true"
+                        collapsed="false"
+                        width="70px"
+                        minimumWidth="50px">
+                    <componentRenderer/>
+                </column>
                 <column id="ourCompanyIconColumn"
                         maximumWidth="100px"
                         caption="msg://msgOurLegalEntity">

@@ -186,6 +186,14 @@
                         width="70px"
                         minimumWidth="35px"
                         caption=""/>
+                <column id="companyLogoColumn"
+                        resizable="true"
+                        collapsible="true"
+                        collapsed="false"
+                        width="70px"
+                        minimumWidth="50px">
+                    <componentRenderer/>
+                </column>
                 <column id="lastOpenCloseColumn"
                         collapsible="true"
                         collapsed="true"
