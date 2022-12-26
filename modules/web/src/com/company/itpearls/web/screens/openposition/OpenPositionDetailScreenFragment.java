@@ -1,22 +1,16 @@
 package com.company.itpearls.web.screens.openposition;
 
-import com.company.itpearls.entity.ExtUser;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.RecrutiesTasks;
-import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 
 import javax.inject.Inject;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @UiController("itpearls_OpenPositionDetailScreenFragment")
 @UiDescriptor("open-position-detail-screen-fragment.xml")
@@ -39,6 +33,15 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
     @Inject
     private HBoxLayout recrutersHBox;
 
+    Map<Integer, String> remoteWork = new HashMap<Integer, String>();
+    @Inject
+    private Label<String> remoteWorkTextField;
+
+    public void setRemoteLabel() {
+        String ret = remoteWork.get(openPosition.getRemoteWork());
+        remoteWorkTextField.setValue(remoteWork.get(openPosition.getRemoteWork()));
+    }
+
     public void setOpenPosition(OpenPosition openPosition) {
         this.openPosition = openPosition;
     }
@@ -48,6 +51,10 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
     }
 
     public void setLabels() {
+        remoteWork.put(0, "Нет");
+        remoteWork.put(1, "Удаленная работа");
+        remoteWork.put(2, "Частично 50/50");
+
         if (openPosition != null) {
             if (openPosition.getNeedExercise() != null) {
                 if (openPosition.getNeedExercise()) {
@@ -73,6 +80,8 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
             salaryComment1.setDescription(openPosition.getSalaryComment());
             salaryComment2.setDescription(openPosition.getSalaryComment());
         }
+
+        setRemoteLabel();
     }
 
     public void setSubscribersRecruters() {
@@ -88,28 +97,33 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
                 .view("recrutiesTasks-view")
                 .list();
 
-        for (RecrutiesTasks user : tasks) {
-            Image image = uiComponents.create(Image.class);
+        if (tasks.size() != 0) {
+            for (RecrutiesTasks user : tasks) {
+                Image image = uiComponents.create(Image.class);
 
-            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-            image.setWidth("30px");
-            image.setStyleName("circle-30px");
-            image.setDescription(user.getReacrutier().getName());
+                image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+                image.setWidth("30px");
+                image.setStyleName("circle-30px");
+                image.setDescription(user.getReacrutier().getName());
 
-            try {
-                ExtUser extUser = (ExtUser) user.getReacrutier();
+                try {
+                    ExtUser extUser = (ExtUser) user.getReacrutier();
 
-                if (extUser.getFileImageFace() != null) {
-                    image.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(extUser.getFileImageFace());
-                } else {
-                    image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                    if (extUser.getFileImageFace() != null) {
+                        image.setSource(FileDescriptorResource.class)
+                                .setFileDescriptor(extUser.getFileImageFace());
+                    } else {
+                        image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
-            recrutersHBox.add(image);
+                recrutersHBox.add(image);
+                recrutersGroupBox.setVisible(true);
+            }
+        } else {
+            recrutersGroupBox.setVisible(false);
         }
     }
 }

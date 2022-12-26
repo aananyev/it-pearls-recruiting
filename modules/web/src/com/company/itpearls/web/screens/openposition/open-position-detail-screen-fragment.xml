@@ -177,9 +177,7 @@
                                 </hbox>
                                 <hbox>
                                     <label id="remoteWorkTextField"
-                                           align="BOTTOM_LEFT"
-                                           dataContainer="openPositionsDc"
-                                           property="remoteWork"/>
+                                           align="BOTTOM_LEFT"/>
                                 </hbox>
                             </row>
                             <row>
