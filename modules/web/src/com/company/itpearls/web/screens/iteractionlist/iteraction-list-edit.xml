@@ -20,6 +20,7 @@
                 </property>
                 <property name="vacancy"
                           view="_local">
+                    <property name="grade" view="_local"/>
                     <property name="positionType"
                               view="_local"/>
                     <property name="owner"

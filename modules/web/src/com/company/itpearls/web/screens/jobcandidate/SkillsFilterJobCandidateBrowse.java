@@ -39,6 +39,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private List<SkillTree> skillTreeGroup = new ArrayList<>();
     private HashMap<LinkButton, LinkButton> skillsPairAllToFilter = new HashMap<>();
     private HashMap<LinkButton, LinkButton> skillsPairFilterToAll = new HashMap<>();
+    private HashMap<LinkButton, SkillTree> filter = new HashMap<>();
 
     @Inject
     private UiComponents uiComponents;
@@ -54,15 +55,20 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private DataGrid<JobCandidate> jobCandidatesTable;
     @Inject
     private Screens screens;
+    @Inject
+    private ProgressBar progressBar;
 
     @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
+    public void onAfterShow(AfterShowEvent event) {
         skillTreeGroup = getSkillTreeGroup();
-
         addSkillTreeGroupBoxes();
         candidateImageColumnRenderer();
         candidateLastInteractionColumnRenderer();
+
+        progressBar.setVisible(false);
     }
+
+
 
     private void candidateLastInteractionColumnRenderer() {
         DataGrid.ClickableTextRenderer<JobCandidate> jobCandidatesTableLastIteractionRenderer =
@@ -190,6 +196,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         FlowBoxLayout flowBoxLayoutLeft = setFlowBoxLayout();
         FlowBoxLayout flowBoxLayoutRight = setFlowBoxLayout();
 
+        int progressBarCounter = 0;
+
         if (skillTree.size() != 0) {
             for (SkillTree st : skillTree) {
                 // левый
@@ -199,10 +207,35 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                 labelLeft.addClickListener(e -> {
                     reverseVisible(e);
+
+                    SkillTree sTree = new SkillTree();
+                    for (SkillTree s : skillTree) {
+                        if (s.getSkillName().equals(e.getSource().getCaption())) {
+                            sTree.setSkillName(s.getSkillName());
+                            sTree.setComment(s.getComment());
+                            sTree.setOpenPosition(s.getOpenPosition());
+                            sTree.setSkillTree(s.getSkillTree());
+                            sTree.setNotParsing(s.getNotParsing());
+                            sTree.setPrioritySkill(s.getPrioritySkill());
+                            sTree.setSpecialisation(s.getSpecialisation());
+                            sTree.setFileImageLogo(s.getFileImageLogo());
+                            sTree.setStyleHighlighting(s.getStyleHighlighting());
+                            break;
+                        }
+                    }
+
+                    filter.put(skillsPairAllToFilter.get(e.getSource()), sTree);
                 });
 
                 labelRight.addClickListener(e -> {
                     reverseVisibleFilter(e);
+
+                            SkillTree sTree = new SkillTree();
+                            for (SkillTree s : skillTree) {
+                                if (s.getSkillName().equals(e.getSource().getCaption())) {
+                                    filter.remove(s);
+                                }
+                            }
                 });
 
                 skillsPairAllToFilter.put(labelLeft, labelRight);
@@ -210,6 +243,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                 flowBoxLayoutLeft.add(labelLeft);
                 flowBoxLayoutRight.add(labelRight);
+
+                progressBar.setValue((double) (progressBarCounter++ / skillTree.size()));
 
             }
 

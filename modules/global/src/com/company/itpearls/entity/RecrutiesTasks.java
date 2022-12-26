@@ -4,7 +4,6 @@ import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -29,11 +28,11 @@ public class RecrutiesTasks extends StandardEntity {
     @NotNull
     private Boolean closed;
 
-    @NotNull
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "REACRUTIER_ID")
-    protected User reacrutier;
+    @NotNull
+    protected ExtUser reacrutier;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
@@ -47,6 +46,14 @@ public class RecrutiesTasks extends StandardEntity {
 
     @Column(name = "PLAN_FOR_PERIOD")
     private Integer planForPeriod;
+
+    public void setReacrutier(ExtUser reacrutier) {
+        this.reacrutier = reacrutier;
+    }
+
+    public ExtUser getReacrutier() {
+        return reacrutier;
+    }
 
     public Boolean getClosed() {
         return closed;
@@ -86,14 +93,6 @@ public class RecrutiesTasks extends StandardEntity {
 
     public void setOpenPosition(OpenPosition openPosition) {
         this.openPosition = openPosition;
-    }
-
-    public void setReacrutier(User reacrutier) {
-        this.reacrutier = reacrutier;
-    }
-
-    public User getReacrutier() {
-        return reacrutier;
     }
 
     public Date getEndDate() {

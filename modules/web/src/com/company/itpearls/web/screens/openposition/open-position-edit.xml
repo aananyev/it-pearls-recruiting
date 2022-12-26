@@ -206,11 +206,11 @@
                                            width="100%"
                                            required="true"/>
                                 <lookupPickerField id="gradeLookupPickerField"
-                                             dataContainer="openPositionDc"
-                                             property="grade"
+                                                   dataContainer="openPositionDc"
+                                                   property="grade"
                                                    stylename="large"
-                                             optionsContainer="gradeDc"
-                                             caption="msg://msgGrade"
+                                                   optionsContainer="gradeDc"
+                                                   caption="msg://msgGrade"
                                                    width="AUTO">
                                     <actions>
                                         <action id="lookup"

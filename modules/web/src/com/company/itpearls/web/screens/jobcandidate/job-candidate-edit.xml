@@ -12,6 +12,7 @@
                     <property name="candidate" view="_local"/>
                     <property name="resumePosition" view="_local"/>
                     <property name="toVacancy" view="_local">
+                        <property name="grade" view="_local"/>
                         <property name="positionType" view="_local"/>
                         <property name="projectName" view="_local">
                             <property name="projectDepartment" view="_local">

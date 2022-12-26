@@ -8,6 +8,7 @@
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
+                <property name="grade" view="_local"/>
                 <property name="candidates" view="_local"/>
                 <property name="parentOpenPosition" view="_local"/>
                 <property name="cityPosition" view="_local"/>
@@ -186,6 +187,8 @@
                         minimumWidth="35px"
                         caption=""/>
                 <column id="lastOpenCloseColumn"
+                        collapsible="true"
+                        collapsed="true"
                         sortable="true"
                         caption="msg://msgLastOpenCloseColumn"
                         resizable="true"
@@ -194,21 +197,27 @@
                     <textRenderer/>
                 </column>
                 <column id="vacansyName"
+                        collapsible="false"
                         property="vacansyName"
                         resizable="true"
-                        maximumWidth="400px"
                         caption="msg://msgVacancy"/>
                 <column id="positionType"
+                        collapsible="true"
+                        collapsed="true"
                         resizable="true"
                         property="positionType"
                         maximumWidth="300px"
                         caption="msg://msgPositionType"/>
                 <column id="projectName"
+                        collapsible="true"
+                        collapsed="true"
                         resizable="true"
                         property="projectName"
                         maximumWidth="250px"
                         caption="msg://msgProjectName"/>
                 <column id="cityPositionList"
+                        collapsed="true"
+                        collapsible="true"
                         caption="msg://msgCity"
                         minimumWidth="60px"
                         width="120px">
@@ -237,6 +246,8 @@
                         resizable="true"
                         maximumWidth="65px"
                         minimumWidth="45px"
+                        collapsible="true"
+                        collapsed="true"
                         caption="msg://msgCVDescription">
                     <iconRenderer/>
                 </column>
@@ -245,6 +256,7 @@
                         sortable="false"
                         caption="msg://msgNeedExercise"
                         resizable="true"
+                        collapsible="true"
                         maximumWidth="65px"
                         minimumWidth="45px">
                     <iconRenderer/>
@@ -253,6 +265,8 @@
                         property="remoteWork"
                         sortable="false"
                         resizable="true"
+                        collapsible="true"
+                        collapsed="true"
                         maximumWidth="65px"
                         minimumWidth="45px"
                         caption="msg://msgRemoteWork">
@@ -270,6 +284,7 @@
                 </column>
                 <column id="memoForCandidateColumn"
                         collapsed="true"
+                        collapsible="true"
                         sortable="false"
                         caption="msg://msgMemoForCandidate"
                         resizable="true"
@@ -287,6 +302,8 @@
                     <componentRenderer/>
                 </column>
                 <column id="idStatistics"
+                        collapsible="true"
+                        collapsed="true"
                         resizable="true"
                         width="70px"
                         minimumWidth="35px"
@@ -294,6 +311,8 @@
                     <textRenderer/>
                 </column>
                 <column id="owner"
+                        collapsed="true"
+                        collapsible="true"
                         resizable="true"
                         width="120px">
                     <textRenderer/>

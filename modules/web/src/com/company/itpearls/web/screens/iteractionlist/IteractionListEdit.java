@@ -389,7 +389,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                 .withScreenClass(RecrutiesTasksEdit.class)
                                                 .withLaunchMode(OpenMode.DIALOG)
                                                 .withInitializer(data -> {
-                                                    data.setReacrutier(userSession.getUser());
+                                                    data.setReacrutier((ExtUser) userSession.getUser());
                                                     data.setOpenPosition(op);
                                                     data.setStartDate(new Date());
                                                     data.setEndDate(subscribeDateService.dateOfNextMonday());

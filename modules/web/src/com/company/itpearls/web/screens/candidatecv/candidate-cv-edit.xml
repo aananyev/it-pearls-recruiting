@@ -21,6 +21,9 @@
         <instance id="candidateCVDc"
                   class="com.company.itpearls.entity.CandidateCV">
             <view extends="candidateCV-view">
+                <property name="toVacancy" view="_local">
+                    <property name="grade" view="_local"/>
+                </property>
                 <property name="candidate" view="_minimal"/>
                 <property name="someFiles" view="_minimal">
                     <property name="fileType" view="_minimal"/>

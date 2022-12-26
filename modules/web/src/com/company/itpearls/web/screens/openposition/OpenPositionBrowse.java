@@ -659,10 +659,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         mainLayout.add(titleBox);
 
+        openPositionDetailScreenFragment.setSubscribersRecruters();
         Fragment fragment = openPositionDetailScreenFragment.getFragment();
         fragment.setWidth("100%");
         mainLayout.add(fragment);
 
+//        mainLayout.add(setSubscribersRecruters(entity));
 
         Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
         if (skillBoxFragment.generateSkillLabels(
@@ -2291,6 +2293,44 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.positionType", subject = "styleProvider")
     private String openPositionsTablePositionTypeStyleProvider(OpenPosition openPosition) {
         return "table-wordwrap";
+    }
+
+
+    private HBoxLayout setSubscribersRecruters(OpenPosition openPosition) {
+        final String QUERY_SUBSCRIBERS = "select e "
+                + "from itpearls_RecrutiesTasks e "
+                + "where e.endDate >= :currentDate and "
+                + "e.openPosition = :openPosition";
+
+        HBoxLayout recrutersHBox = uiComponents.create(HBoxLayout.class);
+
+        List<RecrutiesTasks> tasks = dataManager.load(RecrutiesTasks.class)
+                .query(QUERY_SUBSCRIBERS)
+                .parameter("openPosition", openPosition)
+                .parameter("currentDate", new Date())
+                .view("recrutiesTasks-view")
+                .list();
+
+        for (RecrutiesTasks user : tasks) {
+            Image image = uiComponents.create(Image.class);
+
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("30px");
+            image.setStyleName("circle-30px");
+            image.setDescription(user.getReacrutier().getName());
+
+            try {
+                ExtUser extUser = (ExtUser) user.getReacrutier();
+                image.setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(extUser.getFileImageFace());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            recrutersHBox.add(image);
+        }
+
+        return recrutersHBox;
     }
 }
 

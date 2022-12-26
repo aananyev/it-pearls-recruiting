@@ -302,6 +302,9 @@
         <property name="endDate"/>
         <property name="subscribe"/>
         <property name="closed"/>
+        <property name="reacrutier" view="_local">
+            <property name="fileImageFace" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
         <property name="projectName" view="_minimal">
@@ -401,7 +404,9 @@
     </view>
     <view entity="itpearls_ApplicationRecruitmentList" name="applicationRecruitmentList-view" extends="_local">
         <property name="applicationRecruitment" view="_local"/>
-        <property name="recruiter" view="_local"/>
+        <property name="recruiter" view="_local">
+            <property name="fileImageFace" view="_minimal"/>
+        </property>
     </view>
     <view entity="itpearls_ApplicationRecruitment" name="applicationRecruitment-view" extends="_local">
         <property name="staffingTable" view="_local"/>

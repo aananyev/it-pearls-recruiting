@@ -9,8 +9,7 @@
         <hbox id="mainHBox"
               spacing="true"
               width="100%"
-              height="100%"
-              expand="projectCompanyFieldGroup">
+              expand="mainDetailFragmentVBox">
             <image id="companyLogoImage"
                    rowspan="5"
                    stylename="renderer-photo-150px"
@@ -36,157 +35,202 @@
                        stylename="label_button_red"
                        value="msg://mshNeedLetterLabel"/>
             </hbox>
-            <grid id="projectCompanyFieldGroup"
-                  spacing="false"
-                  width="100%"
-                  height="100%">
-                <columns>
-                    <column flex="1"/>
-                    <column flex="1"/>
-                    <column flex="1"/>
-                </columns>
-                <rows>
-                    <row>
-                        <label value="msg://msgCompany"
-                               align="BOTTOM_LEFT"
-                               stylename="h3"/>
-                        <label value="msg://msgProjectDetail"
-                               align="BOTTOM_LEFT"
-                               stylename="h3"/>
-                        <label value="msg://msgProjectDescription"
-                               align="BOTTOM_LEFT"
-                               stylename="h3"/>
-                    </row>
-                    <row>
-                        <hbox expand="conpanyTextField"
-                              spacing="true">
-                            <label value="msg://msgCompanyName"
-                                   align="BOTTOM_LEFT"
-                                   stylename="bold"/>
-                            <label id="conpanyTextField"
-                                   dataContainer="openPositionsDc"
-                                   align="MIDDLE_LEFT"
-                                   property="projectName.projectDepartment.companyName"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label value="msg://msgSalaryMin"
-                                   stylename="bold"
-                                   align="BOTTOM_LEFT"/>
-                            <label id="salaryMinTextField"
-                                   property="salaryMin"
-                                   align="BOTTOM_LEFT"
-                                   dataContainer="openPositionsDc"/>
-                            <label id="salaryComment1"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label value="msg://msgShortDescription"
-                                   align="BOTTOM_LEFT"
-                                   stylename="bold"/>
+            <vbox id="mainDetailFragmentVBox"
+                  expand="projectCompanyHBox">
+                <groupBox id="projectCompanyHBox"
+                          caption="msg://msgDetails"
+                          width="100%"
+                          stylename="light"
+                          collapsable="true">
+                    <grid id="projectCompanyFieldGroup"
+                          spacing="false"
+                          width="100%">
+                        <columns>
+                            <column flex="1"/>
+                            <column flex="1"/>
+                            <column flex="1"/>
+                            <column flex="1"/>
+                            <column flex="3"/>
+                        </columns>
+                        <rows>
+                            <row>
+                                <label value="msg://msgCompany"
+                                       align="BOTTOM_LEFT"
+                                       stylename="h3"/>
+                                <label/>
+                                <label value="msg://msgProjectDetail"
+                                       align="BOTTOM_LEFT"
+                                       stylename="h3"/>
+                                <label/>
+                                <label value="msg://msgProjectDescription"
+                                       align="BOTTOM_LEFT"
+                                       stylename="h3"/>
+                            </row>
+                            <row>
+                                <hbox spacing="true">
+                                    <label value="msg://msgCompanyName"
+                                           align="BOTTOM_LEFT"
+                                           stylename="bold"/>
+                                </hbox>
+                                <hbox>
+                                    <label id="conpanyTextField"
+                                           dataContainer="openPositionsDc"
+                                           stylename="table-wordwrap"
+                                           align="MIDDLE_LEFT"
+                                           property="projectName.projectDepartment.companyName"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label value="msg://msgSalaryMin"
+                                           stylename="bold"
+                                           align="BOTTOM_LEFT"/>
+                                </hbox>
+                                <hbox>
+                                    <label id="salaryMinTextField"
+                                           property="salaryMin"
+                                           align="BOTTOM_LEFT"
+                                           dataContainer="openPositionsDc"/>
+                                    <label id="salaryComment1"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label value="msg://msgShortDescription"
+                                           align="BOTTOM_LEFT"
+                                           stylename="bold"/>
+                                </hbox>
+                            </row>
+                            <row>
+                                <hbox spacing="true">
+                                    <label stylename="bold"
+                                           align="BOTTOM_LEFT"
+                                           value="msg://msgProjectDepartament"/>
+                                </hbox>
+                                <hbox>
+                                    <label id="departamentTextField"
+                                           align="BOTTOM_LEFT"
+                                           dataContainer="openPositionsDc"
+                                           stylename="table-wordwrap"
+                                           property="projectName.projectDepartment"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label value="msg://msgSalaryMax"
+                                           align="BOTTOM_LEFT"
+                                           stylename="bold"/>
+                                </hbox>
+                                <hbox>
+                                    <label id="salaryMaxTextField"
+                                           align="BOTTOM_LEFT"
+                                           property="salaryMax"
+                                           dataContainer="openPositionsDc"/>
+                                    <label id="salaryComment2"/>
+                                </hbox>
+                                <hbox rowspan="5">
+                                    <textArea id="shortDescriptionTextArea"
+                                              stylename="borderless"
+                                              align="BOTTOM_LEFT"
+                                              editable="false"
+                                              dataContainer="openPositionsDc"
+                                              property="shortDescription"/>
+                                </hbox>
+                            </row>
+                            <row>
+                                <hbox spacing="true">
+                                    <label value="msg://msgProject"
+                                           align="BOTTOM_LEFT"
+                                           stylename="bold"/>
+                                </hbox>
+                                <hbox>
+                                    <label id="projectTextField"
+                                           align="BOTTOM_LEFT"
+                                           stylename="table-wordwrap"
+                                           dataContainer="openPositionsDc"
+                                           property="projectName"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label value="msg://msgStartProjectDate"
+                                           align="BOTTOM_LEFT"
+                                           stylename="bold"/>
+                                </hbox>
+                                <hbox>
+                                    <label id="startProjectDateTextField"
+                                           property="projectName.startProjectDate"
+                                           align="MIDDLE_LEFT"
+                                           dataContainer="openPositionsDc">
+                                        <formatter format="dd.MM.yyyy"
+                                                   class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                                    </label>
+                                </hbox>
+                            </row>
+                            <row>
+                                <hbox spacing="true">
+                                    <label value="msg://msgCity"
+                                           stylename="bold"/>
 
-                        </hbox>
-                    </row>
-                    <row>
-                        <hbox spacing="true">
-                            <label stylename="bold"
-                                   align="BOTTOM_LEFT"
-                                   value="msg://msgProjectDepartament"/>
-                            <label id="departamentTextField"
-                                   align="BOTTOM_LEFT"
-                                   dataContainer="openPositionsDc"
-                                   property="projectName.projectDepartment"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label value="msg://msgSalaryMax"
-                                   align="BOTTOM_LEFT"
-                                   stylename="bold"/>
-                            <label id="salaryMaxTextField"
-                                   align="BOTTOM_LEFT"
-                                   property="salaryMax"
-                                   dataContainer="openPositionsDc"/>
-                            <label id="salaryComment2"/>
-                        </hbox>
-                        <hbox rowspan="5">
-                            <textArea id="shortDescriptionTextArea"
-                                      stylename="borderless"
-                                      align="BOTTOM_LEFT"
-                                      editable="false"
-                                      dataContainer="openPositionsDc"
-                                      property="shortDescription"/>
-                        </hbox>
-                    </row>
-                    <row>
-                        <hbox spacing="true">
-                            <label value="msg://msgProject"
-                                   align="BOTTOM_LEFT"
-                                   stylename="bold"/>
-                            <label id="projectTextField"
-                                   align="BOTTOM_LEFT"
-                                   dataContainer="openPositionsDc"
-                                   property="projectName"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label value="msg://msgStartProjectDate"
-                                   align="BOTTOM_LEFT"
-                                   stylename="bold"/>
-                            <label id="startProjectDateTextField"
-                                   property="projectName.startProjectDate"
-                                   align="MIDDLE_LEFT"
-                                   dataContainer="openPositionsDc">
-                                <formatter format="dd.MM.yyyy"
-                                           class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
-                            </label>
-                        </hbox>
-                    </row>
-                    <row>
-                        <hbox spacing="true">
-                            <label value="msg://msgCity"
-                                   stylename="bold"/>
-                            <label id="cityPositionTextField"
-                                   property="cityPosition"
-                                   dataContainer="openPositionsDc"/>
-                        </hbox>
-                    </row>
-                    <row>
-                        <hbox spacing="true">
-                            <label value="msg://msgProjectOwner"
-                                   stylename="bold"
-                                   align="BOTTOM_LEFT"/>
-                            <label id="firstNameTextField"
-                                   align="MIDDLE_LEFT"
-                                   property="projectName.projectOwner.firstName"
-                                   dataContainer="openPositionsDc"/>
-                            <label id="middleNameTextField"
-                                   align="BOTTOM_LEFT"
-                                   property="projectName.projectOwner.secondName"
-                                   dataContainer="openPositionsDc"/>
-                            <label property="projectName.projectOwner.middleName"
-                                   align="BOTTOM_LEFT"
-                                   dataContainer="openPositionsDc"/>
-                        </hbox>
-                        <hbox spacing="true">
-                            <label value="msg://msgNumberPosition"
-                                   align="BOTTOM_LEFT"
-                                   stylename="bold"/>
-                            <label id="numberPositionTextField"
-                                   align="BOTTOM_LEFT"
-                                   property="numberPosition"
-                                   dataContainer="openPositionsDc"/>
-                        </hbox>
-                    </row>
-                    <row>
-                        <label/>
-                        <hbox>
-                            <label value="msg://msgRemoteWork"
-                                   align="BOTTOM_LEFT"
-                                   stylename="bold"/>
-                            <label id="remoteWorkTextField"
-                                   align="BOTTOM_LEFT"
-                                   dataContainer="openPositionsDc"
-                                   property="remoteWork"/>
-                        </hbox>
-                    </row>
-                </rows>
-            </grid>
+                                </hbox>
+                                <hbox>
+                                    <label id="cityPositionTextField"
+                                           property="cityPosition"
+                                           dataContainer="openPositionsDc"/>
+                                </hbox>
+                                <hbox>
+                                    <label value="msg://msgRemoteWork"
+                                           align="BOTTOM_LEFT"
+                                           stylename="bold"/>
+                                </hbox>
+                                <hbox>
+                                    <label id="remoteWorkTextField"
+                                           align="BOTTOM_LEFT"
+                                           dataContainer="openPositionsDc"
+                                           property="remoteWork"/>
+                                </hbox>
+                            </row>
+                            <row>
+                                <hbox spacing="true">
+                                    <label value="msg://msgProjectOwner"
+                                           stylename="bold"
+                                           align="BOTTOM_LEFT"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label id="firstNameTextField"
+                                           align="MIDDLE_LEFT"
+                                           property="projectName.projectOwner.firstName"
+                                           dataContainer="openPositionsDc"/>
+                                    <label id="middleNameTextField"
+                                           align="BOTTOM_LEFT"
+                                           property="projectName.projectOwner.secondName"
+                                           dataContainer="openPositionsDc"/>
+                                    <label property="projectName.projectOwner.middleName"
+                                           align="BOTTOM_LEFT"
+                                           dataContainer="openPositionsDc"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label value="msg://msgNumberPosition"
+                                           align="BOTTOM_LEFT"
+                                           stylename="bold"/>
+
+                                </hbox>
+                                <hbox>
+                                    <label id="numberPositionTextField"
+                                           align="BOTTOM_LEFT"
+                                           property="numberPosition"
+                                           dataContainer="openPositionsDc"/>
+                                </hbox>
+                            </row>
+                            <row>
+                            </row>
+                        </rows>
+                    </grid>
+                </groupBox>
+                <groupBox id="recrutersGroupBox"
+                          stylename="light"
+                          collapsable="true"
+                          caption="msg://msgSubscrubers"
+                          description="msg://msgSubscribersDesc"
+                          align="BOTTOM_LEFT"
+                          width="100%"
+                          expand="recrutersHBox"
+                          spacing="true">
+                    <hbox id="recrutersHBox" spacing="true"/>
+                </groupBox>
+            </vbox>
         </hbox>
     </layout>
 </fragment>
