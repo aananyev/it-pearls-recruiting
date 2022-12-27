@@ -1218,8 +1218,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
             if (entity.getItem().getFileImageFace() != null) {
                 try {
-                    image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
-                            "fileImageFace"));
+                    if (entity.getItem().getFileImageFace() != null) {
+                        image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
+                                "fileImageFace"));
+                    } else {
+                        image.setSource(ThemeResource.class).setPath(String.valueOf(StdPictures.NO_CANDIDATE));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

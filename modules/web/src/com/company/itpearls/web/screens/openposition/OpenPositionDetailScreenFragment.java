@@ -4,6 +4,7 @@ import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -15,6 +16,22 @@ import java.util.*;
 @UiController("itpearls_OpenPositionDetailScreenFragment")
 @UiDescriptor("open-position-detail-screen-fragment.xml")
 public class OpenPositionDetailScreenFragment extends ScreenFragment {
+    @Inject
+    private CollectionContainer<OpenPosition> openPositionsDc;
+    @Inject
+    private Image companyLogoImage;
+
+    @Subscribe
+    public void onAttach(AttachEvent event) {
+       setDefaultCompanyLogo();
+    }
+
+    public void setDefaultCompanyLogo() {
+        if (companyLogoImage.getSource() == null) {
+            companyLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+    }
+
     private OpenPosition openPosition = null;
     @Inject
     private Label<String> needExeciseLabel;

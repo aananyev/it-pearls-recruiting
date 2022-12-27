@@ -68,7 +68,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             .getCompanyName()
                             .getFileCompanyLogo());
         } else {
-            image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            image.setSource(ThemeResource.class).setPath(String.valueOf(StdPictures.NO_COMPANY));
         }
 
         retBox.add(image);
@@ -651,6 +651,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         openPositionDetailScreenFragment.setOpenPosition(entity);
         openPositionDetailScreenFragment.setLabels();
+        openPositionDetailScreenFragment.setDefaultCompanyLogo();
 
         GroupBoxLayout mainLayout = uiComponents.create(GroupBoxLayout.NAME);
         mainLayout.setWidth("100%");

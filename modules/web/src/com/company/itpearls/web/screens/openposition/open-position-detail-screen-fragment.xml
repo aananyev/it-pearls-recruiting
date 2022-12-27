@@ -16,7 +16,7 @@
                    width="150px"
                    height="200px"
                    align="TOP_RIGHT"
-                   scaleMode="FILL"
+                   scaleMode="SCALE_DOWN"
                    dataContainer="openPositionsDc"
                    property="projectName.projectDepartment.companyName.fileCompanyLogo"/>
             <hbox id="labelIndicatorsHBox"

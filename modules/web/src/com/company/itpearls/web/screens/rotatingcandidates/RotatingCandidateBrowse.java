@@ -22,7 +22,6 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import javax.swing.*;
 import java.util.*;
 
 @UiController("itpearls_RotatingCandidate.browse")
@@ -679,7 +678,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
             candidatePic.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            String address = "icons/no-programmer.jpeg";
+            String address = String.valueOf(StdPictures.NO_CANDIDATE);
             candidatePic.setSource(ThemeResource.class).setPath(address);
         }
 

@@ -165,35 +165,29 @@
                                   rows="5"
                                   caption="msg://mshCompanyAddress"/>
                     </vbox>
-                    <vbox align="TOP_RIGHT"
-                          width="AUTO"
+                    <vbox id="dropZone"
                           spacing="true"
-                          expand="dropZone"
-                          height="100%">
-                        <vbox id="dropZone"
-                              spacing="true"
-                              width="200px"
-                              height="266px"
-                              align="BOTTOM_RIGHT"
-                              expand="companyLogoFileImage"
-                              stylename="dropzone-container">
-                            <image id="companyLogoFileImage"
-                                   dataContainer="companyDc"
-                                   property="fileCompanyLogo"
-                                   width="100%"
-                                   align="TOP_RIGHT"
-                                   height="100%"
-                                   stylename="widget-border"
-                                   scaleMode="FILL"/>
-                            <upload id="companyLogoFileUpload"
-                                    fileStoragePutMode="IMMEDIATE"
-                                    dataContainer="companyDc"
-                                    align="BOTTOM_CENTER"
-                                    showFileName="false"
-                                    dropZone="dropZone"
-                                    showClearButton="true"
-                                    property="fileCompanyLogo"/>
-                        </vbox>
+                          width="200px"
+                          height="266px"
+                          align="TOP_RIGHT"
+                          expand="companyLogoFileImage"
+                          stylename="dropzone-container">
+                        <image id="companyLogoFileImage"
+                               dataContainer="companyDc"
+                               property="fileCompanyLogo"
+                               width="100%"
+                               align="TOP_RIGHT"
+                               height="100%"
+                               stylename="widget-border"
+                               scaleMode="FILL"/>
+                        <upload id="companyLogoFileUpload"
+                                fileStoragePutMode="IMMEDIATE"
+                                dataContainer="companyDc"
+                                align="BOTTOM_CENTER"
+                                showFileName="false"
+                                dropZone="dropZone"
+                                showClearButton="true"
+                                property="fileCompanyLogo"/>
                     </vbox>
                 </hbox>
             </tab>
