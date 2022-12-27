@@ -362,7 +362,9 @@
     <view entity="itpearls_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
     <view entity="itpearls_ExtUser" name="extUser-view" extends="_local">
         <property name="fileImageFace" view="_local"/>
-        <property name="substitutions" view="_local"/>
+        <property name="substitutions" view="_local">
+            <property name="substitutedUser" view="_local"/>
+        </property>
         <property name="group" view="_local"/>
         <property name="userRoles" view="_local">
             <property name="role" view="_local"/>

@@ -30,7 +30,7 @@ public class CompanyBrowse extends StandardLookup<Company> {
         image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         image.setWidth("20px");
         image.setHeight("20px");
-        image.setStyleName("circle-no-border-20px");
+        image.setStyleName("icon-no-border-20px");
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
         image.setDescription("<h4>"
                 + event.getItem().getComanyName()

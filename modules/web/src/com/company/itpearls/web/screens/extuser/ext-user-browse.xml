@@ -3,10 +3,6 @@
         xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
         extends="/com/haulmont/cuba/gui/app/security/user/browse/user-browse.xml">
     <layout>
-        <groupTable id="usersTable">
-            <columns>
-                <column id="icon" ext:index="2" generator="userFaceColumn"/>
-            </columns>
-        </groupTable>
+        <groupTable id="usersTable"/>
     </layout>
 </window>

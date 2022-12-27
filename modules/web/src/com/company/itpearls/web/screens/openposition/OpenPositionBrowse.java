@@ -49,12 +49,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         image.setWidth("50px");
         image.setHeight("50px");
-        image.setStyleName("circle-no-border-50px");
+        image.setStyleName("icon-no-border-50px");
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        image.setDescription("<h4>"
-                + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getComanyName()
-                + "</h4><br><br>"
-                + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription());
+
+        if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription() != null) {
+            image.setDescription("<h4>"
+                    + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getComanyName()
+                    + "</h4><br><br>"
+                    + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription());
+        }
 
         if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo() != null) {
             image.setSource(FileDescriptorResource.class)
@@ -2206,43 +2209,33 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (openPosition.getPriority() != null) {
                 switch (openPosition.getPriority()) {
                     case PRIORITY_DRAFT:
-                        retStr = "open-position-pic-center-large-gray";
+                        retStr = "open-position-pic-center-x-large-gray";
                         break;
                     case PRIORITY_PAUSED:
-                        retStr = "open-position-pic-center-large-gray";
+                        retStr = "open-position-pic-center-x-large-gray";
                         break;
                     case PRIORITY_LOW:
-                        retStr = "open-position-pic-center-large-blue";
+                        retStr = "open-position-pic-center-x-large-blue";
                         break;
                     case PRIORITY_NORMAL:
-                        retStr = "open-position-pic-center-large-green";
+                        retStr = "open-position-pic-center-x-large-green";
                         break;
                     case PRIORITY_HIGH:
-                        retStr = "open-position-pic-center-large-orange";
+                        retStr = "open-position-pic-center-x-large-orange";
                         break;
                     case PRIORITY_CRITICAL:
-                        retStr = "open-position-pic-center-large-red";
+                        retStr = "open-position-pic-center-x-large-red";
                         break;
                     default:
-                        retStr = "open-position-pic-center-large-gray";
+                        retStr = "open-position-pic-center-x-large-gray";
                         break;
                 }
             } else {
-                retStr = "open-position-pic-center-large-yellow";
+                retStr = "open-position-pic-center-large-x-yellow";
             }
         }
 
-        return retStr; /*
-                dataManager.load(OpenPosition.class)
-                .query(QUERY)
-                .parameter("parentOpenPosition", openPosition)
-                .list().size() > 0
-                ? "open-position-pic-center-large-gray" :
-                switch(openPosition.getPriority()) {
-                    case PRIOPITY_DRAFT: "open-position-pic-center-large-gray";
-                    default: "open-position-pic-center-large-gray";
-                }
-        );*/
+        return retStr;
     }
 
     public void openCloseButtonInvoke() {
