@@ -1218,21 +1218,18 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
             if (entity.getItem().getFileImageFace() != null) {
                 try {
-                    if (entity.getItem().getFileImageFace() != null) {
-                        image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
-                                "fileImageFace"));
-                    } else {
-                        image.setSource(ThemeResource.class).setPath(String.valueOf(StdPictures.NO_CANDIDATE));
-                    }
+                    image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
+                            "fileImageFace"));
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                image.setWidth("20px");
-                image.setStyleName("circle-20px");
             } else {
-                image.setStyleName("pic-center");
+                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
             }
+
+            image.setWidth("20px");
+            image.setStyleName("circle-20px");
 
             image.setScaleMode(Image.ScaleMode.CONTAIN);
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);

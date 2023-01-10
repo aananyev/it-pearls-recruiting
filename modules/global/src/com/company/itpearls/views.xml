@@ -46,6 +46,7 @@
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true"
           overwrite="true">
+        <property name="grade" view="_local"/>
         <property name="cityPosition" view="_local"/>
         <property name="positionType" view="_local">
         </property>
@@ -199,6 +200,7 @@
         <property name="vacancy" view="_local">
             <property name="positionType" view="_local"/>
             <property name="projectName" view="_local"/>
+            <property name="grade" view="_local"/>
         </property>
         <property name="iteractionType" view="_local">
         </property>
@@ -222,6 +224,7 @@
         <property name="recrutier" view="_local"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-candidate" extends="_local">
+        <property name="grade" view="_local"/>
         <property name="projectName" view="_local">
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local"/>
@@ -399,7 +402,9 @@
         <property name="author" view="_minimal"/>
     </view>
     <view entity="itpearls_StaffingTable" name="staffingTable-view" extends="_local">
-        <property name="openPosition" view="_local"/>
+        <property name="openPosition" view="_local">
+            <property name="grade" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_StaffCurrent" name="staffCurrent-view" extends="_local">
         <property name="staffingTable" view="_local"/>

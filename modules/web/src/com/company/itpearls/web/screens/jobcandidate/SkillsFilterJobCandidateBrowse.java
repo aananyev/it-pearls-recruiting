@@ -17,10 +17,9 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
 
 @UiController("itpearls_SkillsFilterJobCandidate.browse")
 @UiDescriptor("skills-filter-job-candidate-browse.xml")
@@ -31,7 +30,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             = "select e " +
             "from itpearls_SkillTree e " +
             "where e.skillTree is null and " +
-                "e in (select f.skillTree from itpearls_SkillTree f where f.skillTree = e) " +
+            "e in (select f.skillTree from itpearls_SkillTree f where f.skillTree = e) " +
             "order by e.skillName";
     private static final String QUERY_SKILL_TREE_ITEM
             = "select e from itpearls_SkillTree e where e.skillTree = :skillGroup";
@@ -56,7 +55,17 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     @Inject
     private Screens screens;
     @Inject
-    private ProgressBar progressBar;
+    private Label<String> arrowLeft1;
+    @Inject
+    private Label<String> arrowLeft2;
+    @Inject
+    private Label<String> arrowLeft3;
+    @Inject
+    private Label<String> arrowRight1;
+    @Inject
+    private Label<String> arrowRight2;
+    @Inject
+    private Label<String> arrowRight3;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -64,11 +73,55 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         addSkillTreeGroupBoxes();
         candidateImageColumnRenderer();
         candidateLastInteractionColumnRenderer();
-
-        progressBar.setVisible(false);
+        initArrows();
     }
 
+    private void initArrows() {
+        int filterSize = getFilterSize();
 
+        if (filterSize == 0) {
+            arrowLeft1.setVisible(false);
+            arrowLeft2.setVisible(false);
+            arrowLeft3.setVisible(false);
+
+            arrowRight1.setVisible(true);
+            arrowRight2.setVisible(true);
+            arrowRight3.setVisible(true);
+        }
+
+        if (filterSize > 0 && filterSize < skillsPairAllToFilter.size()) {
+            arrowLeft1.setVisible(true);
+            arrowLeft2.setVisible(true);
+            arrowLeft3.setVisible(true);
+
+            arrowRight1.setVisible(true);
+            arrowRight2.setVisible(true);
+            arrowRight3.setVisible(true);
+        }
+
+        if (filterSize == skillsPairAllToFilter.size()) {
+            arrowLeft1.setVisible(true);
+            arrowLeft2.setVisible(true);
+            arrowLeft3.setVisible(true);
+
+            arrowRight1.setVisible(false);
+            arrowRight2.setVisible(false);
+            arrowRight3.setVisible(false);
+
+        }
+    }
+
+    private int getFilterSize() {
+        int ret = 0;
+
+        for (Map.Entry s : filter.entrySet()) {
+            if (s.getValue() != null) {
+                ret++;
+            }
+        }
+
+        return ret;
+    }
 
     private void candidateLastInteractionColumnRenderer() {
         DataGrid.ClickableTextRenderer<JobCandidate> jobCandidatesTableLastIteractionRenderer =
@@ -191,12 +244,11 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         List<SkillTree> skillTree = dataManager.load(SkillTree.class)
                 .query(QUERY_SKILL_TREE_ITEM)
                 .parameter("skillGroup", skillTreeGroup)
+                .view("skillTree-view")
                 .list();
 
         FlowBoxLayout flowBoxLayoutLeft = setFlowBoxLayout();
         FlowBoxLayout flowBoxLayoutRight = setFlowBoxLayout();
-
-        int progressBarCounter = 0;
 
         if (skillTree.size() != 0) {
             for (SkillTree st : skillTree) {
@@ -225,17 +277,19 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     }
 
                     filter.put(skillsPairAllToFilter.get(e.getSource()), sTree);
+                    initArrows();
                 });
 
                 labelRight.addClickListener(e -> {
                     reverseVisibleFilter(e);
 
-                            SkillTree sTree = new SkillTree();
-                            for (SkillTree s : skillTree) {
-                                if (s.getSkillName().equals(e.getSource().getCaption())) {
-                                    filter.remove(s);
-                                }
-                            }
+                    SkillTree sTree = new SkillTree();
+                    for (SkillTree s : skillTree) {
+                        if (s.getSkillName().equals(e.getSource().getCaption())) {
+                            filter.remove(e.getSource());
+                            initArrows();
+                        }
+                    }
                 });
 
                 skillsPairAllToFilter.put(labelLeft, labelRight);
@@ -243,9 +297,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                 flowBoxLayoutLeft.add(labelLeft);
                 flowBoxLayoutRight.add(labelRight);
-
-                progressBar.setValue((double) (progressBarCounter++ / skillTree.size()));
-
             }
 
             groupBoxLayoutLeft.setVisible(true);
@@ -386,6 +437,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private List<SkillTree> getSkillTreeGroup() {
         return dataManager.load(SkillTree.class)
                 .query(QUERY_SKILL_TREE_GROUP)
+                .view("skillTree-view")
                 .list();
     }
 }

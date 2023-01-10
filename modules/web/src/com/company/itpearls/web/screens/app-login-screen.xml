@@ -81,7 +81,7 @@
                            align="MIDDLE_LEFT"
                            htmlEnabled="true"
                            stylename="c-login-powered-by-link"
-                           value="mainMsg://cuba.poweredBy"/>
+                           value="mainMsg://itpearls.poweredBy"/>
                 </hbox>
             </vbox>
             <image id="backgroundImage"

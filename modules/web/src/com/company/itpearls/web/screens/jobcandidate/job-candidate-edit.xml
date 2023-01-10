@@ -863,7 +863,7 @@
                               width="100%"
                               descriptionAsHtml="true"
                               captionAsHtml="true"
-                              bodyRowHeight="50px"
+                              bodyRowHeight="55px"
                               dataContainer="jobCandidateCandidateCvsDc">
                         <columns>
                             <column id="datePost"

@@ -11,7 +11,7 @@
                 <property name="skillTree"
                           view="_local">
                     <property name="skillTree"
-                              view="_local"/>
+                              view="_minimal"/>
                 </property>
                 <property name="fileImageFace"
                           view="_local"/>
@@ -43,35 +43,65 @@
             spacing="true">
         <vbox id="mainBox"
               width="100%"
-              height="100%"
               spacing="true">
-            <progressBar id="progressBar" width="100%" visible="true"/>
             <hbox id="skillBoxHBox"
                   width="100%"
                   height="100%"
                   stylename="card">
                 <scrollBox id="allSkillsScrollBox"
+                           box.expandRatio="5"
                            stylename="v-panel-caption"
                            width="100%"
                            height="100%"/>
-                <vbox spacing="true"
-                      width="AUTO"
-                      align="MIDDLE_CENTER"
-                      height="100%">
-                    <label icon="ARROW_RIGHT"
-                           stylename="huge"
-                           align="MIDDLE_CENTER"
-                           width="AUTO"/>
-                    <label icon="ARROW_RIGHT"
-                           stylename="huge"
-                           align="MIDDLE_CENTER"
-                           width="AUTO"/>
-                    <label icon="ARROW_RIGHT"
-                           stylename="huge"
-                           align="MIDDLE_CENTER"
-                           width="AUTO"/>
-                </vbox>
+                <hbox width="100%" box.expandRatio="1"
+                      height="100%"
+                      spacing="false">
+                    <vbox spacing="true"
+                          width="100%"
+                          expand="arrow2Box"
+                          align="MIDDLE_CENTER"
+                          height="100%">
+                        <vbox spacing="true" width="AUTO" visible="false"
+                              align="MIDDLE_CENTER">
+                            <label id="arrowRight1"
+                                   icon="ARROW_RIGHT"
+                                   stylename="huge"
+                                   align="MIDDLE_CENTER"
+                                   width="AUTO"/>
+                            <label id="arrowLeft1"
+                                   icon="ARROW_LEFT"
+                                   stylename="huge"
+                                   align="MIDDLE_CENTER"
+                                   width="AUTO"/>
+                        </vbox>
+                        <vbox id="arrow2Box" spacing="true" width="AUTO" align="MIDDLE_CENTER">
+                            <label id="arrowRight2"
+                                   icon="ARROW_RIGHT"
+                                   stylename="huge"
+                                   align="MIDDLE_CENTER"
+                                   width="AUTO"/>
+                            <label id="arrowLeft2"
+                                   icon="ARROW_LEFT"
+                                   stylename="huge"
+                                   align="MIDDLE_CENTER"
+                                   width="AUTO"/>
+                        </vbox>
+                        <vbox spacing="true" width="AUTO" visible="false" align="MIDDLE_CENTER">
+                            <label id="arrowRight3"
+                                   icon="ARROW_RIGHT"
+                                   stylename="huge"
+                                   align="MIDDLE_CENTER"
+                                   width="AUTO"/>
+                            <label id="arrowLeft3"
+                                   icon="ARROW_LEFT"
+                                   stylename="huge"
+                                   align="MIDDLE_CENTER"
+                                   width="AUTO"/>
+                        </vbox>
+                    </vbox>
+                </hbox>
                 <scrollBox id="filterSkillsScrollBox"
+                           box.expandRatio="5"
                            stylename="v-panel-caption"
                            width="100%"
                            height="100%"/>
@@ -80,14 +110,13 @@
                   id="jobCandidatesTableVBox"
                   width="100%"
                   height="100%">
-<!--                <filter id="filter"
+                <filter id="filter" visible="false"
                         applyTo="jobCandidatesTable"
                         dataLoader="jobCandidatesDl">
                     <properties include=".*"/>
-                </filter> -->
+                </filter>
                 <dataGrid id="jobCandidatesTable"
                           width="100%"
-                          height="100%"
                           dataContainer="jobCandidatesDc">
                     <actions>
                     </actions>
