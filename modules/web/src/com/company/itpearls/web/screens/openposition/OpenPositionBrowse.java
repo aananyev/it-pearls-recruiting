@@ -52,23 +52,29 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         image.setStyleName("icon-no-border-50px");
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-        if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription() != null) {
-            image.setDescription("<h4>"
-                    + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getComanyName()
-                    + "</h4><br><br>"
-                    + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription());
-        }
+        if (event.getItem().getProjectName() != null) {
+            if (event.getItem().getProjectName().getProjectDepartment() != null) {
+                if (event.getItem().getProjectName().getProjectDepartment().getCompanyName() != null) {
+                    if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription() != null) {
+                        image.setDescription("<h4>"
+                                + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getComanyName()
+                                + "</h4><br><br>"
+                                + event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription());
+                    }
 
-        if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo() != null) {
-            image.setSource(FileDescriptorResource.class)
-                    .setFileDescriptor(event
-                            .getItem()
-                            .getProjectName()
-                            .getProjectDepartment()
-                            .getCompanyName()
-                            .getFileCompanyLogo());
-        } else {
-            image.setSource(ThemeResource.class).setPath(String.valueOf(StdPictures.NO_COMPANY));
+                    if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo() != null) {
+                        image.setSource(FileDescriptorResource.class)
+                                .setFileDescriptor(event
+                                        .getItem()
+                                        .getProjectName()
+                                        .getProjectDepartment()
+                                        .getCompanyName()
+                                        .getFileCompanyLogo());
+                    } else {
+                        image.setSource(ThemeResource.class).setPath(String.valueOf(StdPictures.NO_COMPANY));
+                    }
+                }
+            }
         }
 
         retBox.add(image);

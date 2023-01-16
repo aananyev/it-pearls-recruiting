@@ -1,25 +1,33 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.entity.IteractionList;
-import com.company.itpearls.entity.SkillTree;
+import com.company.itpearls.core.PdfParserService;
+import com.company.itpearls.entity.*;
 import com.company.itpearls.web.StandartPrioritySkills;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.math.BigDecimal;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 @UiController("itpearls_SkillsFilterJobCandidate.browse")
 @UiDescriptor("skills-filter-job-candidate-browse.xml")
@@ -66,6 +74,24 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private Label<String> arrowRight2;
     @Inject
     private Label<String> arrowRight3;
+    @Inject
+    private CollectionContainer<JobCandidate> jobCandidatesDc;
+    @Inject
+    private PdfParserService pdfParserService;
+    @Inject
+    private ProgressBar filterProgressbar;
+    @Inject
+    private BackgroundWorker backgroundWorker;
+    @Inject
+    private Label<String> progressLabel;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private Label<String> foundLabel;
+    @Inject
+    private Button buttonStop;
+    @Inject
+    private CollectionLoader<JobCandidate> jobCandidatesDl;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -439,5 +465,135 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 .query(QUERY_SKILL_TREE_GROUP)
                 .view("skillTree-view")
                 .list();
+    }
+
+    private int ITERATIONS = 0;
+    BackgroundTaskHandler taskHandler;
+
+    public void startSearchProcessButtonInvoke() {
+        ITERATIONS = jobCandidatesDc.getItems().size();
+        final int[] count = {0};
+        final int[] foundedCounter = {0};
+        List<JobCandidate> jobCandidatesFilered = new ArrayList<>();
+        final long[] parsingAverageTime = {0};
+        final int[] timeCounter = {0};
+
+        for (JobCandidate jobCandidate : jobCandidatesDc.getMutableItems()) {
+
+            BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(1000, this) {
+                @Override
+                public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
+                    long startTime = System.currentTimeMillis();
+
+                    if (!taskLifeCycle.isCancelled()) {
+                        JobCandidate retJobCandidate = scanJobCandidatesCV(jobCandidate, filter);
+                        taskLifeCycle.publish(count[0]);
+                        count[0] = ++count[0];
+
+                        if (retJobCandidate != null) {
+                            jobCandidatesFilered.add(retJobCandidate);
+                            foundedCounter[0]++;
+                        }
+                    }
+
+                    long endTime = System.currentTimeMillis();
+                    if (timeCounter[0] == 0) {
+                        parsingAverageTime[0] = endTime - startTime;
+                        timeCounter[0] ++;
+                    } else {
+                        parsingAverageTime[0] = ((parsingAverageTime[0] * timeCounter[0]) + endTime - startTime) /
+                                ++ timeCounter[0];
+                    }
+
+
+                    return null;
+                }
+
+                @Override
+                public void progress(List<Integer> changes) {
+                    double percent = (double) count[0] / (double) ITERATIONS;
+                    double seconds = parsingAverageTime[0] * jobCandidatesDc.getMutableItems().size() / 1000;
+
+                    int numberOfDays = (int) (seconds / 86400);
+                    int numberOfHours = (int) ((seconds % 86400) / 3600);
+                    int numberOfMinutes = (int) (((seconds % 86400) % 3600) / 60);
+                    int numberOfSeconds = (int) (((seconds % 86400) % 3600) % 60);
+
+                    filterProgressbar.setValue(percent);
+                    progressLabel.setValue(count[0] + " из " + ITERATIONS);
+                    progressLabel.setDescription("Осталось до конца операции: "
+                            + (numberOfHours != 0 ? numberOfHours + " ч.": "")
+                            + (numberOfMinutes != 0 ? numberOfMinutes + " м.": "")
+                            + (numberOfSeconds != 0 ? numberOfSeconds + " с." : ""));
+
+                    foundLabel.setValue("найдено: " + foundedCounter[0]);
+                }
+
+                @Override
+                public void canceled() {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withType(Notifications.NotificationType.WARNING)
+                            .withDescription("Процесс сканирования резюме прерван")
+                            .withCaption("ВНИМАНИЕ")
+                            .show();
+                }
+            };
+
+            taskHandler = backgroundWorker.handle(task);
+            taskHandler.execute();
+
+            if (taskHandler.isCancelled()) {
+                break;
+            }
+        }
+    }
+
+    @Subscribe("personPositionLookupPickerField")
+    public void onPersonPositionLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
+        if (event.getValue() != null) {
+            jobCandidatesDl.setParameter("personPosition", event.getValue());
+        } else {
+            jobCandidatesDl.removeParameter("personPosition");
+        }
+
+        jobCandidatesDl.load();
+    }
+
+
+    private JobCandidate scanJobCandidatesCV(JobCandidate jobCandidate, HashMap<LinkButton, SkillTree> filter) {
+        Boolean flag = false;
+
+        for (CandidateCV candidateCV : jobCandidate.getCandidateCv()) {
+            for (Map.Entry entry : filter.entrySet()) {
+                List<SkillTree> skillTreesFromCV = pdfParserService.parseSkillTree(candidateCV.getTextCV());
+
+                for (SkillTree skill : skillTreesFromCV) {
+                    if (((SkillTree) entry.getValue()).getSkillName().equals(skill.getSkillName())) {
+                        flag = true;
+
+                        break;
+                    }
+
+                    if (flag)
+                        break;
+                }
+
+                if (flag)
+                    break;
+            }
+
+            if (flag)
+                break;
+        }
+
+        if (flag) {
+            return jobCandidate;
+        } else {
+            return null;
+        }
+    }
+
+    public void stopSearchProcessButtonInvoke() {
+        taskHandler.cancel();
     }
 }
