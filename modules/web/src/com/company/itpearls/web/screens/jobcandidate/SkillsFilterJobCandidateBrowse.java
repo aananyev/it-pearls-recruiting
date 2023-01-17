@@ -7,6 +7,7 @@ import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrows
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
@@ -22,12 +23,10 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
 
 @UiController("itpearls_SkillsFilterJobCandidate.browse")
 @UiDescriptor("skills-filter-job-candidate-browse.xml")
@@ -92,6 +91,17 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private Button buttonStop;
     @Inject
     private CollectionLoader<JobCandidate> jobCandidatesDl;
+    private boolean stopScan = false;
+    @Inject
+    private LookupPickerField<Position> personPositionLookupPickerField;
+    @Inject
+    private LookupPickerField<City> cityLookupPickerField;
+    @Inject
+    private Button clearFilterButton;
+    @Inject
+    private HBoxLayout progressBarHBox;
+    @Inject
+    private ScreenBuilders screenBuilders;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -469,6 +479,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     private int ITERATIONS = 0;
     BackgroundTaskHandler taskHandler;
+    final long[] startParsingTime = {0};
+    final long[] endParsingTime = {0};
 
     public void startSearchProcessButtonInvoke() {
         ITERATIONS = jobCandidatesDc.getItems().size();
@@ -478,74 +490,152 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         final long[] parsingAverageTime = {0};
         final int[] timeCounter = {0};
 
+
+        startParsingTime[0] = System.currentTimeMillis();
+        jobCandidatesDl.removeParameter("jobCandidateFiltered");
+        jobCandidatesDl.load();
+
+        endScanBackgroundTaskListener();
+
         for (JobCandidate jobCandidate : jobCandidatesDc.getMutableItems()) {
+            if (!stopScan) {
+                BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(1000, this) {
+                    @Override
+                    public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
+                        long startTime = System.currentTimeMillis();
 
-            BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(1000, this) {
-                @Override
-                public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
-                    long startTime = System.currentTimeMillis();
-
-                    if (!taskLifeCycle.isCancelled()) {
                         JobCandidate retJobCandidate = scanJobCandidatesCV(jobCandidate, filter);
-                        taskLifeCycle.publish(count[0]);
+                        taskLifeCycle.publish(count[0] + 1);
                         count[0] = ++count[0];
 
                         if (retJobCandidate != null) {
                             jobCandidatesFilered.add(retJobCandidate);
                             foundedCounter[0]++;
+
+                            jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
+                            jobCandidatesDl.load();
+                        }
+
+                        long endTime = System.currentTimeMillis();
+                        if (timeCounter[0] == 0) {
+                            parsingAverageTime[0] = endTime - startTime;
+                            timeCounter[0]++;
+                        } else {
+                            parsingAverageTime[0] = (parsingAverageTime[0] * (timeCounter[0] + 1) + endTime - startTime) /
+                                    (++timeCounter[0] + 1);
+                        }
+
+                        return null;
+                    }
+
+                    @Override
+                    public void progress(List<Integer> changes) {
+                        if (count[0] != 0) {
+
+                            double percent = ((double) count[0] + 1) / (double) ITERATIONS;
+                            double seconds = parsingAverageTime[0] * jobCandidatesDc.getMutableItems().size() / 1000;
+
+                            seconds = seconds - parsingAverageTime[0] * count[0] / 1000;
+
+                            int numberOfDays = (int) (seconds / 86400);
+                            int numberOfHours = (int) ((seconds % 86400) / 3600);
+                            int numberOfMinutes = (int) (((seconds % 86400) % 3600) / 60);
+                            int numberOfSeconds = (int) (((seconds % 86400) % 3600) % 60);
+
+                            filterProgressbar.setValue(percent);
+                            progressLabel.setValue((count[0] + 1) + " из " + ITERATIONS);
+                            progressLabel.setDescription("Осталось до конца операции: "
+                                    + (numberOfHours != 0 ? numberOfHours + " ч. " : "")
+                                    + (numberOfMinutes != 0 ? numberOfMinutes + " м. " : "")
+                                    + (numberOfSeconds != 0 ? numberOfSeconds + " с." : ""));
+
+                            foundLabel.setValue("найдено: " + foundedCounter[0]);
                         }
                     }
 
-                    long endTime = System.currentTimeMillis();
-                    if (timeCounter[0] == 0) {
-                        parsingAverageTime[0] = endTime - startTime;
-                        timeCounter[0] ++;
-                    } else {
-                        parsingAverageTime[0] = ((parsingAverageTime[0] * timeCounter[0]) + endTime - startTime) /
-                                ++ timeCounter[0];
+                    @Override
+                    public void canceled() {
+                        stopScan = true;
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withType(Notifications.NotificationType.WARNING)
+                                .withDescription("Процесс сканирования резюме прерван")
+                                .withCaption("ВНИМАНИЕ")
+                                .show();
+
                     }
+                };
 
+                taskHandler = backgroundWorker.handle(task);
+                taskHandler.execute();
 
-                    return null;
+                if (taskHandler.isCancelled()) {
+                    break;
                 }
+            } else {
+                endParsingTime[0] = System.currentTimeMillis();
+                long parsingTimeSec = (endParsingTime[0] - startParsingTime[0]) / 1000;
 
-                @Override
-                public void progress(List<Integer> changes) {
-                    double percent = (double) count[0] / (double) ITERATIONS;
-                    double seconds = parsingAverageTime[0] * jobCandidatesDc.getMutableItems().size() / 1000;
-
-                    int numberOfDays = (int) (seconds / 86400);
-                    int numberOfHours = (int) ((seconds % 86400) / 3600);
-                    int numberOfMinutes = (int) (((seconds % 86400) % 3600) / 60);
-                    int numberOfSeconds = (int) (((seconds % 86400) % 3600) % 60);
-
-                    filterProgressbar.setValue(percent);
-                    progressLabel.setValue(count[0] + " из " + ITERATIONS);
-                    progressLabel.setDescription("Осталось до конца операции: "
-                            + (numberOfHours != 0 ? numberOfHours + " ч.": "")
-                            + (numberOfMinutes != 0 ? numberOfMinutes + " м.": "")
-                            + (numberOfSeconds != 0 ? numberOfSeconds + " с." : ""));
-
-                    foundLabel.setValue("найдено: " + foundedCounter[0]);
-                }
-
-                @Override
-                public void canceled() {
-                    notifications.create(Notifications.NotificationType.WARNING)
-                            .withType(Notifications.NotificationType.WARNING)
-                            .withDescription("Процесс сканирования резюме прерван")
-                            .withCaption("ВНИМАНИЕ")
-                            .show();
-                }
-            };
-
-            taskHandler = backgroundWorker.handle(task);
-            taskHandler.execute();
-
-            if (taskHandler.isCancelled()) {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withType(Notifications.NotificationType.HUMANIZED)
+                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                        .withDescription("Процесс сканирования резюме завершен за "
+                                + parsingTimeSec
+                                + " секунд. Найдено "
+                                + jobCandidatesFilered.size() + " кандидатов с указанными скиллами.")
+                        .withCaption("ВНИМАНИЕ")
+                        .show();
                 break;
             }
         }
+    }
+
+    @Install(to = "jobCandidatesTable.viewCandidateButton", subject = "columnGenerator")
+    private Component jobCandidatesTableViewCandidateButtonColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Button retButton = uiComponents.create(Button.class);
+
+        retButton.setCaption("Просмотр");
+
+        retButton.addClickListener(e -> {
+            screenBuilders.editor(JobCandidate.class, this)
+                    .withScreenClass(JobCandidateEdit.class)
+                    .editEntity(event.getItem())
+                    .build()
+                    .show();
+        });
+
+        return retButton;
+    }
+
+    @Subscribe("filterProgressbar")
+    public void onFilterProgressbarValueChange(HasValue.ValueChangeEvent<Double> event) {
+        if (event.getValue() == 1) {
+            endParsingTime[0] = System.currentTimeMillis();
+            long parsingTimeSec = (endParsingTime[0] - startParsingTime[0]) / 1000;
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.WARNING)
+                    .withDescription("Процесс сканирования резюме завершен за "
+                            + parsingTimeSec
+                            + "секунд. Найдено "
+                            + jobCandidatesDc.getItems().size() + " кандидатов с указанными скиллами.")
+                    .withCaption("ВНИМАНИЕ")
+                    .show();
+
+        }
+
+        if (event.getValue() == 0 || event.getValue() == 1) {
+            clearFilterButton.setEnabled(true);
+            progressBarHBox.setVisible(false);
+            filterProgressbar.setVisible(false);
+        } else {
+            clearFilterButton.setEnabled(false);
+            progressBarHBox.setVisible(true);
+            filterProgressbar.setVisible(true);
+        }
+
+    }
+
+    private void endScanBackgroundTaskListener() {
     }
 
     @Subscribe("personPositionLookupPickerField")
@@ -562,6 +652,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     private JobCandidate scanJobCandidatesCV(JobCandidate jobCandidate, HashMap<LinkButton, SkillTree> filter) {
         Boolean flag = false;
+
 
         for (CandidateCV candidateCV : jobCandidate.getCandidateCv()) {
             for (Map.Entry entry : filter.entrySet()) {
@@ -593,7 +684,94 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         }
     }
 
+    @Subscribe("cityLookupPickerField")
+    public void onCityLookupPickerFieldValueChange(HasValue.ValueChangeEvent<City> event) {
+        if (event.getValue() != null) {
+            if (event.getValue() != null) {
+                jobCandidatesDl.setParameter("city", event.getValue());
+            } else {
+                jobCandidatesDl.removeParameter("city");
+            }
+
+            jobCandidatesDl.load();
+        }
+
+    }
+
     public void stopSearchProcessButtonInvoke() {
         taskHandler.cancel();
+        stopScan = true;
+        buttonStop.setVisible(false);
+    }
+
+    public void clearFilterButtonInvoke() {
+        personPositionLookupPickerField.setValue(null);
+        cityLookupPickerField.setValue(null);
+
+        jobCandidatesDl.removeParameter("personPosition");
+        jobCandidatesDl.removeParameter("city");
+        jobCandidatesDl.removeParameter("jobCandidateFiltered");
+        jobCandidatesDl.load();
+    }
+
+    @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
+    private String jobCandidatesTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        IteractionList iteractionList = getLastIteraction(event.getItem());
+
+        String date = null;
+
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy").format(iteractionList.getDateIteraction());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        String retStr = "";
+        Boolean checkBlockCandidate = event.getItem().getBlockCandidate() == null ? false : event.getItem().getBlockCandidate();
+
+        if (checkBlockCandidate != null) {
+            if (checkBlockCandidate != true) {
+                if (iteractionList != null) {
+                    Calendar calendar = Calendar.getInstance();
+
+                    if (iteractionList.getDateIteraction() != null) {
+                        calendar.setTime(iteractionList.getDateIteraction());
+                    } else {
+                        calendar.setTime(event.getItem().getCreateTs());
+                    }
+
+                    calendar.add(Calendar.MONTH, 1);
+
+                    Calendar calendar1 = Calendar.getInstance();
+
+                    if (calendar.after(calendar1)) {
+                        if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                            retStr = "button_table_red";
+                        } else {
+                            retStr = "button_table_yellow";
+                        }
+                    } else {
+                        retStr = "button_table_green";
+                    }
+                } else {
+                    retStr = "button_table_white";
+                }
+            } else {
+                retStr = "button_table_black";
+            }
+        } else {
+            retStr = "button_table_green";
+        }
+
+        return
+                "<div class=\"" +
+                        retStr
+                        + "\">" +
+                        (date != null ? date : "нет")
+                        + "</div>"
+                ;
+    }
+
+    public void loadFromOpenPositionButtonInvoke() {
     }
 }

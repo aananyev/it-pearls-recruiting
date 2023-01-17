@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="jobCandidatesDc"
                     class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_local">
+            <view extends="jobCandidate-view">
                 <property name="skillTree"
                           view="_local">
                     <property name="skillTree"
@@ -43,6 +43,12 @@
                             <c:jpql>
                                 <c:where>e.personPosition = :personPosition</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>e.cityOfResidence = :city</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in :jobCandidateFiltered</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -60,19 +66,71 @@
                 </query>
             </loader>
         </collection>
+        <collection id="citiesDc"
+                    class="com.company.itpearls.entity.City"
+                    view="city-view">
+            <loader id="citiesDl" cacheable="true">
+                <query><![CDATA[select e
+                from itpearls_City e
+                order by e.cityRuName]]></query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="mainBox"
             spacing="true">
-        <lookupPickerField id="personPositionLookupPickerField"
-                           width="AUTO"
-                           optionsContainer="personPositionDc">
-            <actions>
-                <action id="lookup"
-                        type="picker_lookup"/>
-            </actions>
-        </lookupPickerField>
+        <groupBox id="filterGroupBix"
+                  stylename="light"
+                  visible="true"
+                  caption="msg://msgFilter"
+                  collapsed="false"
+                  expand="filterHBox"
+                  spacing="true"
+                  collapsable="true"
+                  width="100%"
+                  height="AUTO">
+            <hbox id="filterHBox" spacing="true" width="100%"
+                  height="AUTO">
+                <button id="clearFilterButton"
+                        visible="true"
+                        align="MIDDLE_LEFT"
+                        width="AUTO"
+                        height="100%"
+                        caption="msg://msgClearFilter"
+                        description="msg://mshClearFilterDesc"
+                        invoke="clearFilterButtonInvoke"/>
+                <lookupPickerField id="personPositionLookupPickerField"
+                                   caption="msg://msgPosition"
+                                   width="AUTO"
+                                   optionsContainer="personPositionDc">
+                    <actions>
+                        <action id="lookup"
+                                type="picker_lookup"/>
+                        <action id="clear"
+                                type="picker_clear"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="cityLookupPickerField"
+                                   caption="msg://msgCity"
+                                   width="AUTO"
+                                   optionsContainer="citiesDc">
+                    <actions>
+                        <action id="lookup"
+                                type="picker_lookup"/>
+                        <action id="clear"
+                                type="picker_clear"/>
+                    </actions>
+                </lookupPickerField>
+                <button id="loadFromOpenPositionButton"
+                        width="AUTO"
+                        height="100%"
+                        align="MIDDLE_RIGHT"
+                        caption="msg://msgLoad"
+                        description="msg://msgLoadDesc"
+                        invoke="loadFromOpenPositionButtonInvoke"/>
+            </hbox>
+        </groupBox>
         <vbox id="mainBox"
               width="100%"
               spacing="true">
@@ -146,13 +204,14 @@
                   align="TOP_LEFT"
                   width="100%"
                   height="100%">
-<!--                <filter id="filter" visible="false"
-                        applyTo="jobCandidatesTable"
-                        dataLoader="jobCandidatesDl">
-                    <properties include=".*"/>
-                </filter> -->
+                <!--                <filter id="filter" visible="false"
+                                        applyTo="jobCandidatesTable"
+                                        dataLoader="jobCandidatesDl">
+                                    <properties include=".*"/>
+                                </filter> -->
                 <dataGrid id="jobCandidatesTable"
                           width="100%"
+                          visible="true"
                           dataContainer="jobCandidatesDc">
                     <actions>
                     </actions>
@@ -170,7 +229,12 @@
                                 caption="msg://msgDateLastIteraction"
                                 maximumWidth="90px"
                                 minimumWidth="90px">
-                            <htmlRenderer/>
+                            <htmlRenderer nullRepresentation="null"/>
+                        </column>
+                        <column id="viewCandidateButton"
+                                width="100px"
+                                caption="msg://msgView">
+                            <componentRenderer/>
                         </column>
                     </columns>
                     <rowsCount/>
@@ -178,8 +242,9 @@
                                   alwaysVisible="true">
                     </buttonsPanel>
                 </dataGrid>
-                <label/>
-                <hbox spacing="true"
+                <hbox id="progressBarHBox"
+                      spacing="true"
+                      visible="false"
                       expand="filterProgressbar"
                       width="100%">
                     <progressBar id="filterProgressbar"
@@ -193,12 +258,12 @@
                            width="AUTO"/>
                     <button id="buttonStop"
                             align="MIDDLE_CENTER"
+                            visible="false"
                             caption="msg://msgStopFindButton"
                             description="msg://msgStopFindButtonDesc"
                             width="AUTO"
                             invoke="stopSearchProcessButtonInvoke"/>
                 </hbox>
-                <groupBox stylename="light"/>
                 <hbox id="searchFilterHBox"
                       spacing="true"
                       margin="true"
