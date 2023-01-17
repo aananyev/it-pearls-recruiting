@@ -90,7 +90,9 @@
                   collapsable="true"
                   width="100%"
                   height="AUTO">
-            <hbox id="filterHBox" spacing="true" width="100%"
+            <hbox id="filterHBox"
+                  spacing="true"
+                  width="100%"
                   height="AUTO">
                 <button id="clearFilterButton"
                         visible="true"
@@ -134,149 +136,166 @@
         <vbox id="mainBox"
               width="100%"
               spacing="true">
-
-            <hbox id="skillBoxHBox"
-                  width="100%"
-                  height="100%"
-                  stylename="card">
-                <scrollBox id="allSkillsScrollBox"
-                           box.expandRatio="5"
-                           stylename="v-panel-caption"
-                           width="100%"
-                           height="100%"/>
-                <hbox width="100%" box.expandRatio="1"
-                      height="100%"
-                      spacing="false">
-                    <vbox spacing="true"
-                          width="100%"
-                          expand="arrow2Box"
-                          align="MIDDLE_CENTER"
-                          height="100%">
-                        <vbox spacing="true" width="AUTO" visible="false"
-                              align="MIDDLE_CENTER">
-                            <label id="arrowRight1"
-                                   icon="ARROW_RIGHT"
-                                   stylename="huge"
-                                   align="MIDDLE_CENTER"
-                                   width="AUTO"/>
-                            <label id="arrowLeft1"
-                                   icon="ARROW_LEFT"
-                                   stylename="huge"
-                                   align="MIDDLE_CENTER"
-                                   width="AUTO"/>
-                        </vbox>
-                        <vbox id="arrow2Box" spacing="true" width="AUTO" align="MIDDLE_CENTER">
-                            <label id="arrowRight2"
-                                   icon="ARROW_RIGHT"
-                                   stylename="huge"
-                                   align="MIDDLE_CENTER"
-                                   width="AUTO"/>
-                            <label id="arrowLeft2"
-                                   icon="ARROW_LEFT"
-                                   stylename="huge"
-                                   align="MIDDLE_CENTER"
-                                   width="AUTO"/>
-                        </vbox>
-                        <vbox spacing="true" width="AUTO" visible="false" align="MIDDLE_CENTER">
-                            <label id="arrowRight3"
-                                   icon="ARROW_RIGHT"
-                                   stylename="huge"
-                                   align="MIDDLE_CENTER"
-                                   width="AUTO"/>
-                            <label id="arrowLeft3"
-                                   icon="ARROW_LEFT"
-                                   stylename="huge"
-                                   align="MIDDLE_CENTER"
-                                   width="AUTO"/>
-                        </vbox>
-                    </vbox>
-                </hbox>
-                <scrollBox id="filterSkillsScrollBox"
-                           box.expandRatio="5"
-                           stylename="v-panel-caption"
-                           width="100%"
-                           height="100%"/>
-            </hbox>
-            <vbox expand="jobCandidatesTable"
-                  id="jobCandidatesTableVBox"
-                  stylename="card"
-                  margin="true"
-                  align="TOP_LEFT"
-                  width="100%"
-                  height="100%">
-                <!--                <filter id="filter" visible="false"
-                                        applyTo="jobCandidatesTable"
-                                        dataLoader="jobCandidatesDl">
-                                    <properties include=".*"/>
-                                </filter> -->
-                <dataGrid id="jobCandidatesTable"
-                          width="100%"
-                          visible="true"
-                          dataContainer="jobCandidatesDc">
-                    <actions>
-                    </actions>
-                    <columns>
-                        <column id="fileImageFace"
-                                property="fileImageFace"
-                                maximumWidth="50px"
-                                width="50px">
-                            <componentRenderer/>
-                        </column>
-                        <column property="fullName" id="fullName"/>
-                        <column property="personPosition" id="personPosition"/>
-                        <column property="cityOfResidence" id="cityOfResidence"/>
-                        <column id="lastIteraction"
-                                caption="msg://msgDateLastIteraction"
-                                maximumWidth="90px"
-                                minimumWidth="90px">
-                            <htmlRenderer nullRepresentation="null"/>
-                        </column>
-                        <column id="viewCandidateButton"
-                                width="100px"
-                                caption="msg://msgView">
-                            <componentRenderer/>
-                        </column>
-                    </columns>
-                    <rowsCount/>
-                    <buttonsPanel id="buttonsPanel"
-                                  alwaysVisible="true">
-                    </buttonsPanel>
-                </dataGrid>
-                <hbox id="progressBarHBox"
-                      spacing="true"
-                      visible="false"
-                      expand="filterProgressbar"
-                      width="100%">
-                    <progressBar id="filterProgressbar"
-                                 align="MIDDLE_CENTER"
-                                 width="100%"/>
-                    <label id="progressLabel"
-                           align="MIDDLE_CENTER"
-                           width="AUTO"/>
-                    <label id="foundLabel"
-                           align="MIDDLE_CENTER"
-                           width="AUTO"/>
-                    <button id="buttonStop"
-                            align="MIDDLE_CENTER"
-                            visible="false"
-                            caption="msg://msgStopFindButton"
-                            description="msg://msgStopFindButtonDesc"
-                            width="AUTO"
-                            invoke="stopSearchProcessButtonInvoke"/>
-                </hbox>
-                <hbox id="searchFilterHBox"
-                      spacing="true"
-                      margin="true"
+            <groupBox id="skillGroupBox"
+                      stylename="light"
                       width="100%"
-                      height="AUTO">
-                    <button id="startSearchProcessButton"
-                            width="AUTO"
-                            align="MIDDLE_RIGHT"
-                            caption="msg://msgSearch"
-                            description="msg://msgSearchDesc"
-                            invoke="startSearchProcessButtonInvoke"/>
+                      height="100%"
+                      collapsable="true"
+                      expand="skillBoxHBox"
+                      collapsed="false"
+                      caption="msg://msgSkillBox">
+                <hbox id="skillBoxHBox"
+                      width="100%"
+                      height="100%"
+                      stylename="card">
+                    <scrollBox id="allSkillsScrollBox"
+                               box.expandRatio="5"
+                               stylename="v-panel-caption"
+                               width="100%"
+                               height="100%"/>
+                    <hbox width="100%" box.expandRatio="1"
+                          height="100%"
+                          spacing="false">
+                        <vbox spacing="true"
+                              width="100%"
+                              expand="arrow2Box"
+                              align="MIDDLE_CENTER"
+                              height="100%">
+                            <vbox spacing="true" width="AUTO" visible="false"
+                                  align="MIDDLE_CENTER">
+                                <label id="arrowRight1"
+                                       icon="ARROW_RIGHT"
+                                       stylename="huge"
+                                       align="MIDDLE_CENTER"
+                                       width="AUTO"/>
+                                <label id="arrowLeft1"
+                                       icon="ARROW_LEFT"
+                                       stylename="huge"
+                                       align="MIDDLE_CENTER"
+                                       width="AUTO"/>
+                            </vbox>
+                            <vbox id="arrow2Box" spacing="true" width="AUTO" align="MIDDLE_CENTER">
+                                <label id="arrowRight2"
+                                       icon="ARROW_RIGHT"
+                                       stylename="huge"
+                                       align="MIDDLE_CENTER"
+                                       width="AUTO"/>
+                                <label id="arrowLeft2"
+                                       icon="ARROW_LEFT"
+                                       stylename="huge"
+                                       align="MIDDLE_CENTER"
+                                       width="AUTO"/>
+                            </vbox>
+                            <vbox spacing="true" width="AUTO" visible="false" align="MIDDLE_CENTER">
+                                <label id="arrowRight3"
+                                       icon="ARROW_RIGHT"
+                                       stylename="huge"
+                                       align="MIDDLE_CENTER"
+                                       width="AUTO"/>
+                                <label id="arrowLeft3"
+                                       icon="ARROW_LEFT"
+                                       stylename="huge"
+                                       align="MIDDLE_CENTER"
+                                       width="AUTO"/>
+                            </vbox>
+                        </vbox>
+                    </hbox>
+                    <scrollBox id="filterSkillsScrollBox"
+                               box.expandRatio="5"
+                               stylename="v-panel-caption"
+                               width="100%"
+                               height="100%"/>
                 </hbox>
-            </vbox>
+            </groupBox>
+            <groupBox id="jobCandidateTableGroupBox"
+                      stylename="light"
+                      width="100%"
+                      expand="jobCandidatesTableVBox"
+                      height="100%"
+                      collapsable="true"
+                      collapsed="false"
+                      caption="msg://msgJobCandidateTable">
+                <vbox expand="jobCandidatesTable"
+                      id="jobCandidatesTableVBox"
+                      stylename="card"
+                      margin="true"
+                      align="TOP_LEFT"
+                      width="100%"
+                      height="100%">
+                    <!--                <filter id="filter" visible="false"
+                                            applyTo="jobCandidatesTable"
+                                            dataLoader="jobCandidatesDl">
+                                        <properties include=".*"/>
+                                    </filter> -->
+                    <dataGrid id="jobCandidatesTable"
+                              width="100%"
+                              visible="true"
+                              dataContainer="jobCandidatesDc">
+                        <actions>
+                        </actions>
+                        <columns>
+                            <column id="fileImageFace"
+                                    property="fileImageFace"
+                                    maximumWidth="50px"
+                                    width="50px">
+                                <componentRenderer/>
+                            </column>
+                            <column property="fullName" id="fullName"/>
+                            <column property="personPosition" id="personPosition"/>
+                            <column property="cityOfResidence" id="cityOfResidence"/>
+                            <column id="lastIteraction"
+                                    caption="msg://msgDateLastIteraction"
+                                    maximumWidth="90px"
+                                    minimumWidth="90px">
+                                <htmlRenderer nullRepresentation="null"/>
+                            </column>
+                            <column id="viewCandidateButton"
+                                    width="100px"
+                                    caption="msg://msgView">
+                                <componentRenderer/>
+                            </column>
+                        </columns>
+                        <rowsCount/>
+                        <buttonsPanel id="buttonsPanel"
+                                      alwaysVisible="true">
+                        </buttonsPanel>
+                    </dataGrid>
+                    <hbox id="progressBarHBox"
+                          spacing="true"
+                          visible="false"
+                          expand="filterProgressbar"
+                          width="100%">
+                        <progressBar id="filterProgressbar"
+                                     align="MIDDLE_CENTER"
+                                     width="100%"/>
+                        <label id="progressLabel"
+                               align="MIDDLE_CENTER"
+                               width="AUTO"/>
+                        <label id="foundLabel"
+                               align="MIDDLE_CENTER"
+                               width="AUTO"/>
+                        <button id="buttonStop"
+                                align="MIDDLE_CENTER"
+                                visible="false"
+                                caption="msg://msgStopFindButton"
+                                description="msg://msgStopFindButtonDesc"
+                                width="AUTO"
+                                invoke="stopSearchProcessButtonInvoke"/>
+                    </hbox>
+                    <hbox id="searchFilterHBox"
+                          spacing="true"
+                          margin="true"
+                          width="100%"
+                          height="AUTO">
+                        <button id="startSearchProcessButton"
+                                width="AUTO"
+                                align="MIDDLE_RIGHT"
+                                caption="msg://msgSearch"
+                                description="msg://msgSearchDesc"
+                                invoke="startSearchProcessButtonInvoke"/>
+                    </hbox>
+                </vbox>
+            </groupBox>
         </vbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>

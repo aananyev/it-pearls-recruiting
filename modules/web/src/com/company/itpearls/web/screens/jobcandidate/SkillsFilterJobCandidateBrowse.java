@@ -591,9 +591,15 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Install(to = "jobCandidatesTable.viewCandidateButton", subject = "columnGenerator")
     private Component jobCandidatesTableViewCandidateButtonColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        Button retButton = uiComponents.create(Button.class);
+        VBoxLayout retVBox = uiComponents.create(VBoxLayout.class);
+        retVBox.setWidthFull();
+        retVBox.setHeightFull();
+        retVBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retVBox.setSpacing(true);
 
+        Button retButton = uiComponents.create(Button.class);
         retButton.setCaption("Просмотр");
+        retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         retButton.addClickListener(e -> {
             screenBuilders.editor(JobCandidate.class, this)
@@ -603,7 +609,9 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     .show();
         });
 
-        return retButton;
+        retVBox.add(retButton);
+
+        return retVBox;
     }
 
     @Subscribe("filterProgressbar")
@@ -614,13 +622,13 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
             notifications.create(Notifications.NotificationType.WARNING)
                     .withType(Notifications.NotificationType.WARNING)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .withDescription("Процесс сканирования резюме завершен за "
                             + parsingTimeSec
-                            + "секунд. Найдено "
+                            + " сек. Найдено "
                             + jobCandidatesDc.getItems().size() + " кандидатов с указанными скиллами.")
                     .withCaption("ВНИМАНИЕ")
                     .show();
-
         }
 
         if (event.getValue() == 0 || event.getValue() == 1) {
