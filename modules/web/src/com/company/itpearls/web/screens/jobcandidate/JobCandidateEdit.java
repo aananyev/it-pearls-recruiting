@@ -2591,7 +2591,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         if (iteractionList.getVacancy() != null) {
                             if (iteractionList.getVacancy().equals(op) &&
                                     iteractionList.getIteractionType().getSignOurInterview()) {
-                                retLabel.setValue(iteractionList.getRecrutier().getName());
+                                if (iteractionList.getRecrutier() != null) {
+                                    if (iteractionList.getRecrutier().getName() != null) {
+                                        retLabel.setValue(iteractionList.getRecrutier().getName());
+                                    }
+                                }
                             }
                         }
                     }

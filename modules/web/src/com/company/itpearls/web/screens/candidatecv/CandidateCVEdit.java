@@ -96,6 +96,16 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private FileLoader fileLoader;
     @Inject
     private SuggestionPickerField candidateField;
+    @Inject
+    private LookupPickerField<Position> resumePositionField;
+    @Inject
+    private VBoxLayout letterVbox;
+    @Inject
+    private HBoxLayout letterHBox;
+    @Inject
+    private Image candidatePic;
+    @Inject
+    private Image candidateFaceDefaultImage;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -276,6 +286,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         setCVRecommendation();
         setLetterRecommendation();
+        setVisibleLogo();
     }
 
     @Subscribe
@@ -316,25 +327,43 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         cvResomandation.setValue(text);
     }
 
+    public void setVisibleLogo() {
+
+        if (candidatePic.getValueSource().getValue() == null) {
+            candidatePic.setVisible(false);
+            candidateFaceDefaultImage.setVisible(true);
+        } else {
+            candidatePic.setVisible(true);
+            candidateFaceDefaultImage.setVisible(false);
+        }
+    }
+
     private void setLetterRecommendation() {
-        String caption = "Структура письма:";
-        final String startText = "<center><h4>Прошу в сопроводительном письме и резюме отразить следующую информацию: </h4></center></br></br>";
-        String text = candidateCVFieldOpenPosition.getValue() != null ?
-                (startText + candidateCVFieldOpenPosition.getValue().getTemplateLetter()) : "";
+        if (candidateCVFieldOpenPosition.getValue() != null) {
+            if (candidateCVFieldOpenPosition.getValue().getTemplateLetter() != null) {
+                String caption = "Структура письма:";
+                final String startText = "<center><h4>Прошу в сопроводительном письме и резюме отразить следующую информацию: </h4></center></br></br>";
+                String text = candidateCVFieldOpenPosition.getValue() != null ?
+                        (startText + candidateCVFieldOpenPosition.getValue().getTemplateLetter()) : "";
 
-        final String example = "Пример:\n" +
-                "\n" +
-                "Уважаемые коллеги, хочу представить Вам Александра Катаева Devops инженера в компании Грид Динамикс в саратовском офисе. Мы предложили Алексею поговорить о сотрудничестве с Вашей командой на позиции DevOps инженера.\n" +
-                "\n" +
-                "Алексей имеет общий опыт работы более 5 лет на позиции IT Engineer в компании Нет Крекер и с февраля 2018 года DevOps Engineer в компании Grid Dynamics.\n" +
-                "\n" +
-                "Алексей в настоящее время не находится в активном поиске работы, но у него есть интерес в программировании “железа” и он согласился пообщаться с Вами. Алексей рассматривает возможность своей релокации за рубеж в будущем.\n" +
-                "\n" +
-                "Алексей в процессе беседы показал себя как сдержанный и вежливый человек. Алексей - надежный сотрудник и не склонен к частой смене работы (время работы в компании Нет Крекер - 5 лет). Алексей командный игрок и комфортно чувствует себя в коллективе единомышленников.\n";
+                final String example = "Пример:\n" +
+                        "\n" +
+                        "Уважаемые коллеги, хочу представить Вам Александра Катаева Devops инженера в компании Грид Динамикс в саратовском офисе. Мы предложили Алексею поговорить о сотрудничестве с Вашей командой на позиции DevOps инженера.\n" +
+                        "\n" +
+                        "Алексей имеет общий опыт работы более 5 лет на позиции IT Engineer в компании Нет Крекер и с февраля 2018 года DevOps Engineer в компании Grid Dynamics.\n" +
+                        "\n" +
+                        "Алексей в настоящее время не находится в активном поиске работы, но у него есть интерес в программировании “железа” и он согласился пообщаться с Вами. Алексей рассматривает возможность своей релокации за рубеж в будущем.\n" +
+                        "\n" +
+                        "Алексей в процессе беседы показал себя как сдержанный и вежливый человек. Алексей - надежный сотрудник и не склонен к частой смене работы (время работы в компании Нет Крекер - 5 лет). Алексей командный игрок и комфортно чувствует себя в коллективе единомышленников.\n";
 
-        letterRecommendation.setValue(text);
-        letterRecommendation.setCaption(caption);
-        letterRecommendation.setDescription(example);
+                letterRecommendation.setValue(text);
+                letterRecommendation.setCaption(caption);
+                letterRecommendation.setDescription(example);
+                letterRecommendation.setVisible(true);
+            } else {
+                letterRecommendation.setVisible(false);
+            }
+        }
     }
 
     /*    private void setLetterRecommendation() {

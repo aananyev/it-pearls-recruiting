@@ -102,6 +102,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private HBoxLayout progressBarHBox;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -490,6 +492,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         final long[] parsingAverageTime = {0};
         final int[] timeCounter = {0};
 
+        jobCandidatesFilered.removeAll(jobCandidatesFilered);
+        jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
 
         startParsingTime[0] = System.currentTimeMillis();
         jobCandidatesDl.removeParameter("jobCandidateFiltered");
@@ -533,9 +537,11 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                         if (count[0] != 0) {
 
                             double percent = ((double) count[0] + 1) / (double) ITERATIONS;
-                            double seconds = parsingAverageTime[0] * jobCandidatesDc.getMutableItems().size() / 1000;
+//                            double seconds = parsingAverageTime[0] * jobCandidatesDc.getMutableItems().size() / 1000;
+                            double seconds = (System.currentTimeMillis() - startParsingTime[0]) / ((double) count[0] + 1)
+                                    * (((double) ITERATIONS) - ((double) count[0] + 1)) / 1000;
 
-                            seconds = seconds - parsingAverageTime[0] * count[0] / 1000;
+//                            seconds = seconds - parsingAverageTime[0] * count[0] / 1000;
 
                             int numberOfDays = (int) (seconds / 86400);
                             int numberOfHours = (int) ((seconds % 86400) / 3600);
@@ -558,8 +564,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                         stopScan = true;
                         notifications.create(Notifications.NotificationType.WARNING)
                                 .withType(Notifications.NotificationType.WARNING)
-                                .withDescription("Процесс сканирования резюме прерван")
-                                .withCaption("ВНИМАНИЕ")
+                                .withDescription(messageBundle.getMessage("msgInterruptScanningCV"))
+                                .withCaption(messageBundle.getMessage("msgWarning"))
                                 .show();
 
                     }
@@ -582,7 +588,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 + parsingTimeSec
                                 + " секунд. Найдено "
                                 + jobCandidatesFilered.size() + " кандидатов с указанными скиллами.")
-                        .withCaption("ВНИМАНИЕ")
+                        .withCaption(messageBundle.getMessage("msgWarning"))
                         .show();
                 break;
             }

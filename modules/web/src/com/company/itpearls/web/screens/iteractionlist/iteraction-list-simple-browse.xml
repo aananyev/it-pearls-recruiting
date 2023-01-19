@@ -10,6 +10,7 @@
             <view extends="iteractionList-view">
                 <property name="rating"/>
                 <property name="vacancy" view="_local">
+                    <property name="grade" view="_local"/>
                     <property name="positionType" view="_local"/>
                     <property name="projectName" view="_local">
                         <property name="projectDepartment" view="_local">
