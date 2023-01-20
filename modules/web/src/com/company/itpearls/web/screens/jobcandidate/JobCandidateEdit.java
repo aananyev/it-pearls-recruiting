@@ -2866,4 +2866,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private String jobCandidateIteractionListTableIteractionTypeStyleProvider(IteractionList iteractionList) {
         return "table-wordwrap";
     }
+
+    @Install(to = "jobCandidateCommentsDataGrid.comment", subject = "styleProvider")
+    private String jobCandidateCommentsDataGridCommentStyleProvider(IteractionList iteractionList) {
+        return "table-wordwrap";
+    }
 }

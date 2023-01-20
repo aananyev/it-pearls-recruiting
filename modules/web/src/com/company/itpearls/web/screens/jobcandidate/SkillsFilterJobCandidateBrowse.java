@@ -108,6 +108,10 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private Button clearSearchResultButton;
     @Inject
     private Button loadFromOpenPositionButton;
+    @Inject
+    private Button startSearchProcessButton;
+    @Inject
+    private SuggestionPickerField findSkillsSuggestionPickerField;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -649,12 +653,20 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         }
 
         if (event.getValue() == 0 || event.getValue() == 1) {
+            cityLookupPickerField.setEnabled(true);
+            personPositionLookupPickerField.setEnabled(true);
+            findSkillsSuggestionPickerField.setEnabled(true);
             clearFilterButton.setEnabled(true);
+            startSearchProcessButton.setEnabled(true);
             progressBarHBox.setVisible(false);
             filterProgressbar.setVisible(false);
             loadFromOpenPositionButton.setEnabled(true);
         } else {
+            cityLookupPickerField.setEnabled(false);
+            personPositionLookupPickerField.setEnabled(false);
+            findSkillsSuggestionPickerField.setEnabled(false);
             clearFilterButton.setEnabled(false);
+            startSearchProcessButton.setEnabled(false);
             progressBarHBox.setVisible(true);
             filterProgressbar.setVisible(true);
             loadFromOpenPositionButton.setEnabled(false);
@@ -817,5 +829,20 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         jobCandidatesDl.load();
 
         clearSearchResultButton.setEnabled(false);
+    }
+
+    @Subscribe("findSkillsSuggestionPickerField")
+    public void onFindSkillsSuggestionPickerFieldValueChange(HasValue.ValueChangeEvent event) {
+        for (Map.Entry s : skillsPairAllToFilter.entrySet()) {
+            if (((LinkButton) s.getKey()).getCaption().equals(((SkillTree) event.getValue()).getSkillName())) {
+                ((LinkButton) s.getKey()).setVisible(false);
+                ((LinkButton) s.getValue()).setVisible(true);
+
+                filter.put( (LinkButton) s.getValue(), (SkillTree) event.getValue());
+            }
+        }
+    }
+
+    public void stopAndCloseButtonInvoke() {
     }
 }

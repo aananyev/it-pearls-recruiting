@@ -153,7 +153,25 @@
                       collapsable="true"
                       expand="skillBoxHBox"
                       collapsed="false"
+                      spacing="true"
                       caption="msg://msgSkillBox">
+                <suggestionPickerField id="findSkillsSuggestionPickerField"
+                                       width="AUTO"
+                                       inputPrompt="mainMsg://msgStartInput"
+                                       minSearchStringLength="3"
+                                       rowspan="1"
+                                       colspan="1"
+                                       caption="msg://msgSkills">
+                    <actions/>
+                    <query entityClass="com.company.itpearls.entity.SkillTree"
+                           escapeValueForLike="true"
+                           searchStringFormat="%$searchString%">
+                        select e
+                        from itpearls_SkillTree e
+                        where lower(e.skillName) like lower(:searchString) escape '\'
+                        order by e.skillName
+                    </query>
+                </suggestionPickerField>
                 <hbox id="skillBoxHBox"
                       width="100%"
                       stylename="card">
@@ -308,6 +326,12 @@
                                 caption="msg://msgSearch"
                                 description="msg://msgSearchDesc"
                                 invoke="startSearchProcessButtonInvoke"/>
+                        <button id="stopAndCloseButton"
+                                width="AUTO"
+                                align="MIDDLE_RIGHT"
+                                caption="msg://msgStopAndClose"
+                                description="msg://msgStopAndCloseDesc"
+                                invoke="stopAndCloseButtonInvoke"/>
                     </hbox>
                 </vbox>
             </groupBox>
