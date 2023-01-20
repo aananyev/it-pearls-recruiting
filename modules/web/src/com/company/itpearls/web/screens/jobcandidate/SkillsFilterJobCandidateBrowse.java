@@ -104,6 +104,10 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private ScreenBuilders screenBuilders;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private Button clearSearchResultButton;
+    @Inject
+    private Button loadFromOpenPositionButton;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -483,17 +487,17 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     BackgroundTaskHandler taskHandler;
     final long[] startParsingTime = {0};
     final long[] endParsingTime = {0};
+    List<JobCandidate> jobCandidatesFilered = new ArrayList<>();
 
     public void startSearchProcessButtonInvoke() {
         ITERATIONS = jobCandidatesDc.getItems().size();
         final int[] count = {0};
         final int[] foundedCounter = {0};
-        List<JobCandidate> jobCandidatesFilered = new ArrayList<>();
         final long[] parsingAverageTime = {0};
         final int[] timeCounter = {0};
 
         jobCandidatesFilered.removeAll(jobCandidatesFilered);
-        jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
+        clearSearchResultButton.setEnabled(false);
 
         startParsingTime[0] = System.currentTimeMillis();
         jobCandidatesDl.removeParameter("jobCandidateFiltered");
@@ -515,9 +519,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                         if (retJobCandidate != null) {
                             jobCandidatesFilered.add(retJobCandidate);
                             foundedCounter[0]++;
-
-                            jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
-                            jobCandidatesDl.load();
                         }
 
                         long endTime = System.currentTimeMillis();
@@ -537,11 +538,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                         if (count[0] != 0) {
 
                             double percent = ((double) count[0] + 1) / (double) ITERATIONS;
-//                            double seconds = parsingAverageTime[0] * jobCandidatesDc.getMutableItems().size() / 1000;
                             double seconds = (System.currentTimeMillis() - startParsingTime[0]) / ((double) count[0] + 1)
                                     * (((double) ITERATIONS) - ((double) count[0] + 1)) / 1000;
-
-//                            seconds = seconds - parsingAverageTime[0] * count[0] / 1000;
 
                             int numberOfDays = (int) (seconds / 86400);
                             int numberOfHours = (int) ((seconds % 86400) / 3600);
@@ -590,6 +588,12 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 + jobCandidatesFilered.size() + " кандидатов с указанными скиллами.")
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .show();
+
+                if (jobCandidatesFilered.size() == 0) {
+                    jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
+                    jobCandidatesDl.load();
+                }
+
                 break;
             }
         }
@@ -635,16 +639,25 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                             + jobCandidatesDc.getItems().size() + " кандидатов с указанными скиллами.")
                     .withCaption("ВНИМАНИЕ")
                     .show();
+
+            clearSearchResultButton.setEnabled(true);
+
+            if (jobCandidatesFilered.size() == 0) {
+                jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
+                jobCandidatesDl.load();
+            }
         }
 
         if (event.getValue() == 0 || event.getValue() == 1) {
             clearFilterButton.setEnabled(true);
             progressBarHBox.setVisible(false);
             filterProgressbar.setVisible(false);
+            loadFromOpenPositionButton.setEnabled(true);
         } else {
             clearFilterButton.setEnabled(false);
             progressBarHBox.setVisible(true);
             filterProgressbar.setVisible(true);
+            loadFromOpenPositionButton.setEnabled(false);
         }
 
     }
@@ -704,7 +717,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             if (event.getValue() != null) {
                 jobCandidatesDl.setParameter("city", event.getValue());
             } else {
-                jobCandidatesDl.removeParameter("city");
             }
 
             jobCandidatesDl.load();
@@ -722,10 +734,21 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         personPositionLookupPickerField.setValue(null);
         cityLookupPickerField.setValue(null);
 
+        clearAllSkillsFromFilter();
+
         jobCandidatesDl.removeParameter("personPosition");
         jobCandidatesDl.removeParameter("city");
         jobCandidatesDl.removeParameter("jobCandidateFiltered");
         jobCandidatesDl.load();
+    }
+
+    private void clearAllSkillsFromFilter() {
+        for (Map.Entry s : skillsPairFilterToAll.entrySet()) {
+            ((LinkButton) s.getKey()).setVisible(false);
+            ((LinkButton) s.getValue()).setVisible(true);
+        }
+
+        filter.clear();
     }
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
@@ -787,5 +810,12 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
     public void loadFromOpenPositionButtonInvoke() {
+    }
+
+    public void clearSearchResultButtonInvoke() {
+        jobCandidatesDl.removeParameter("jobCandidateFiltered");
+        jobCandidatesDl.load();
+
+        clearSearchResultButton.setEnabled(false);
     }
 }

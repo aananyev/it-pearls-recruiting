@@ -92,45 +92,55 @@
                   height="AUTO">
             <hbox id="filterHBox"
                   spacing="true"
-                  width="100%"
-                  height="AUTO">
-                <button id="clearFilterButton"
-                        visible="true"
-                        align="MIDDLE_LEFT"
-                        width="AUTO"
-                        height="100%"
-                        caption="msg://msgClearFilter"
-                        description="msg://mshClearFilterDesc"
-                        invoke="clearFilterButtonInvoke"/>
-                <lookupPickerField id="personPositionLookupPickerField"
-                                   caption="msg://msgPosition"
-                                   width="AUTO"
-                                   optionsContainer="personPositionDc">
-                    <actions>
-                        <action id="lookup"
-                                type="picker_lookup"/>
-                        <action id="clear"
-                                type="picker_clear"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="cityLookupPickerField"
-                                   caption="msg://msgCity"
-                                   width="AUTO"
-                                   optionsContainer="citiesDc">
-                    <actions>
-                        <action id="lookup"
-                                type="picker_lookup"/>
-                        <action id="clear"
-                                type="picker_clear"/>
-                    </actions>
-                </lookupPickerField>
-                <button id="loadFromOpenPositionButton"
-                        width="AUTO"
-                        height="100%"
-                        align="MIDDLE_RIGHT"
-                        caption="msg://msgLoad"
-                        description="msg://msgLoadDesc"
-                        invoke="loadFromOpenPositionButtonInvoke"/>
+                  align="MIDDLE_LEFT"
+                  expand="filterLookupPickerFields"
+                  width="100%">
+                <hbox id="filterLookupPickerFields"
+                      spacing="true"
+                      width="100%">
+                    <lookupPickerField id="personPositionLookupPickerField"
+                                       caption="msg://msgPosition"
+                                       width="100%"
+                                       optionsContainer="personPositionDc">
+                        <actions>
+                            <action id="lookup"
+                                    type="picker_lookup"/>
+                            <action id="clear"
+                                    type="picker_clear"/>
+                        </actions>
+                    </lookupPickerField>
+                    <lookupPickerField id="cityLookupPickerField"
+                                       caption="msg://msgCity"
+                                       width="AUTO"
+                                       optionsContainer="citiesDc">
+                        <actions>
+                            <action id="lookup"
+                                    type="picker_lookup"/>
+                            <action id="clear"
+                                    type="picker_clear"/>
+                        </actions>
+                    </lookupPickerField>
+                </hbox>
+                <hbox id="loadOpenPositionButtonHBox"
+                      align="BOTTOM_RIGHT"
+                      spacing="true"
+                      width="AUTO">
+                    <button id="loadFromOpenPositionButton"
+                            width="AUTO"
+                            height="100%"
+                            align="BOTTOM_RIGHT"
+                            caption="msg://msgLoad"
+                            description="msg://msgLoadDesc"
+                            invoke="loadFromOpenPositionButtonInvoke"/>
+                    <button id="clearFilterButton"
+                            visible="true"
+                            align="BOTTOM_LEFT"
+                            width="AUTO"
+                            height="100%"
+                            caption="msg://msgClearFilter"
+                            description="msg://mshClearFilterDesc"
+                            invoke="clearFilterButtonInvoke"/>
+                </hbox>
             </hbox>
         </groupBox>
         <vbox id="mainBox"
@@ -146,7 +156,6 @@
                       caption="msg://msgSkillBox">
                 <hbox id="skillBoxHBox"
                       width="100%"
-                      height="100%"
                       stylename="card">
                     <scrollBox id="allSkillsScrollBox"
                                box.expandRatio="5"
@@ -220,13 +229,12 @@
                       stylename="card"
                       margin="true"
                       align="TOP_LEFT"
-                      width="100%"
-                      height="100%">
-                    <!--                <filter id="filter" visible="false"
-                                            applyTo="jobCandidatesTable"
-                                            dataLoader="jobCandidatesDl">
-                                        <properties include=".*"/>
-                                    </filter> -->
+                      width="100%">
+                    <!-- <filter id="filter" visible="false"
+                            applyTo="jobCandidatesTable"
+                            dataLoader="jobCandidatesAllDl">
+                        <properties include=".*"/>
+                    </filter> -->
                     <dataGrid id="jobCandidatesTable"
                               width="100%"
                               visible="true"
@@ -266,8 +274,7 @@
                           expand="filterProgressbar"
                           width="100%">
                         <progressBar id="filterProgressbar"
-                                     align="MIDDLE_CENTER"
-                                     width="100%"/>
+                                     align="MIDDLE_CENTER"/>
                         <label id="progressLabel"
                                align="MIDDLE_CENTER"
                                width="AUTO"/>
@@ -285,8 +292,16 @@
                     <hbox id="searchFilterHBox"
                           spacing="true"
                           margin="true"
-                          width="100%"
+                          align="MIDDLE_RIGHT"
+                          width="AUTO"
                           height="AUTO">
+                        <button id="clearSearchResultButton"
+                                width="AUTO"
+                                enable="false"
+                                align="MIDDLE_RIGHT"
+                                caption="msg://msgClearSearchResult"
+                                description="msg://msgClearResultButtonDesc"
+                                invoke="clearSearchResultButtonInvoke"/>
                         <button id="startSearchProcessButton"
                                 width="AUTO"
                                 align="MIDDLE_RIGHT"
