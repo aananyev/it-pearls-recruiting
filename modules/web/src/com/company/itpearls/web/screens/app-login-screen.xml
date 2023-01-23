@@ -85,7 +85,7 @@
                 </hbox>
             </vbox>
             <image id="backgroundImage"
-                   scaleMode="COVER"
+                   scaleMode="FILL"
                    stylename="c-login-background">
                 <relativePath path="VAADIN/brand-login-screen/background-2023.jpg"/>
             </image>

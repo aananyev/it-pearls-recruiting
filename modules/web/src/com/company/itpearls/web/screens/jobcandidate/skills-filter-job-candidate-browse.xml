@@ -3,6 +3,7 @@
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://skillsFilterJobCandidateBrowse.caption"
         focusComponent="jobCandidatesTable"
+        icon="FILTER"
         messagesPack="com.company.itpearls.web.screens.jobcandidate">
     <data readOnly="true">
         <collection id="jobCandidatesDc"
@@ -320,18 +321,20 @@
                                 caption="msg://msgClearSearchResult"
                                 description="msg://msgClearResultButtonDesc"
                                 invoke="clearSearchResultButtonInvoke"/>
+                        <button id="stopAndCloseButton"
+                                width="AUTO"
+                                enable="false"
+                                align="MIDDLE_RIGHT"
+                                caption="msg://msgStopSearch"
+                                description="msg://msgStopSearchDesc"
+                                invoke="stopAndCloseButtonInvoke"/>
                         <button id="startSearchProcessButton"
                                 width="AUTO"
                                 align="MIDDLE_RIGHT"
+                                enable="false"
                                 caption="msg://msgSearch"
                                 description="msg://msgSearchDesc"
                                 invoke="startSearchProcessButtonInvoke"/>
-                        <button id="stopAndCloseButton"
-                                width="AUTO"
-                                align="MIDDLE_RIGHT"
-                                caption="msg://msgStopAndClose"
-                                description="msg://msgStopAndCloseDesc"
-                                invoke="stopAndCloseButtonInvoke"/>
                     </hbox>
                 </vbox>
             </groupBox>

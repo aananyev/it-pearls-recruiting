@@ -20,12 +20,22 @@ public class AppLoginScreen extends LoginScreen {
 
     @Inject
     protected Label<String> poweredByLink;
+    @Inject
+    private Image backgroundImage;
 
     @Subscribe
     public void onAppLoginScreenInit(InitEvent event) {
         loadStyles();
 
         initBottomPanel();
+        initLoginImage();
+    }
+
+    private void initLoginImage() {
+        int count = (int) (Math.random() * 20 + 1);
+            backgroundImage
+                    .setSource(RelativePathResource.class)
+                    .setPath("VAADIN/brand-login-screen/recruit" + count + ".jpg");
     }
 
     @Subscribe("submit")

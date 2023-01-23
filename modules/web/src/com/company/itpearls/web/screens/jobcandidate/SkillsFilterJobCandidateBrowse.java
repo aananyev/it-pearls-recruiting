@@ -16,6 +16,7 @@ import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -46,6 +47,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private HashMap<LinkButton, LinkButton> skillsPairAllToFilter = new HashMap<>();
     private HashMap<LinkButton, LinkButton> skillsPairFilterToAll = new HashMap<>();
     private HashMap<LinkButton, SkillTree> filter = new HashMap<>();
+    private Boolean stopSearchProcess = false;
 
     @Inject
     private UiComponents uiComponents;
@@ -112,6 +114,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private Button startSearchProcessButton;
     @Inject
     private SuggestionPickerField findSkillsSuggestionPickerField;
+    @Inject
+    private Button stopAndCloseButton;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -133,6 +137,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             arrowRight1.setVisible(true);
             arrowRight2.setVisible(true);
             arrowRight3.setVisible(true);
+
+            startSearchProcessButton.setEnabled(false);
         }
 
         if (filterSize > 0 && filterSize < skillsPairAllToFilter.size()) {
@@ -143,6 +149,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             arrowRight1.setVisible(true);
             arrowRight2.setVisible(true);
             arrowRight3.setVisible(true);
+
+            startSearchProcessButton.setEnabled(true);
         }
 
         if (filterSize == skillsPairAllToFilter.size()) {
@@ -154,6 +162,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             arrowRight2.setVisible(false);
             arrowRight3.setVisible(false);
 
+            startSearchProcessButton.setEnabled(true);
         }
     }
 
@@ -323,6 +332,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     }
 
                     filter.put(skillsPairAllToFilter.get(e.getSource()), sTree);
+                    startSearchProcessButton.setEnabled(true);
                     initArrows();
                 });
 
@@ -508,30 +518,34 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         jobCandidatesDl.load();
 
         endScanBackgroundTaskListener();
+        getWindow().setIcon(CubaIcon.CLOCK_O.source());
+        stopAndCloseButton.setEnabled(true);
 
         for (JobCandidate jobCandidate : jobCandidatesDc.getMutableItems()) {
             if (!stopScan) {
                 BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(1000, this) {
+                    long startTime;
+                    long endTime;
+
                     @Override
                     public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
-                        long startTime = System.currentTimeMillis();
+                        if (!stopSearchProcess) {
+                            startTime = System.currentTimeMillis();
 
-                        JobCandidate retJobCandidate = scanJobCandidatesCV(jobCandidate, filter);
-                        taskLifeCycle.publish(count[0] + 1);
-                        count[0] = ++count[0];
+                            taskLifeCycle.publish(count[0] + 1);
+                            count[0] = ++count[0];
 
-                        if (retJobCandidate != null) {
-                            jobCandidatesFilered.add(retJobCandidate);
-                            foundedCounter[0]++;
-                        }
+                            if (!stopSearchProcess) {
+                                JobCandidate retJobCandidate = scanJobCandidatesCV(jobCandidate, filter);
 
-                        long endTime = System.currentTimeMillis();
-                        if (timeCounter[0] == 0) {
-                            parsingAverageTime[0] = endTime - startTime;
-                            timeCounter[0]++;
-                        } else {
-                            parsingAverageTime[0] = (parsingAverageTime[0] * (timeCounter[0] + 1) + endTime - startTime) /
-                                    (++timeCounter[0] + 1);
+                                if (retJobCandidate != null) {
+                                    jobCandidatesFilered.add(retJobCandidate);
+                                    foundedCounter[0]++;
+                                }
+
+                                jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
+                                jobCandidatesDl.load();
+                            }
                         }
 
                         return null;
@@ -539,25 +553,35 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                     @Override
                     public void progress(List<Integer> changes) {
-                        if (count[0] != 0) {
+                        if (!stopSearchProcess) {
+                            endTime = System.currentTimeMillis();
+                            if (timeCounter[0] == 0) {
+                                parsingAverageTime[0] = endTime - startTime;
+                                timeCounter[0]++;
+                            } else {
+                                parsingAverageTime[0] = (parsingAverageTime[0] * (timeCounter[0] + 1) + endTime - startTime) /
+                                        (++timeCounter[0] + 1);
+                            }
 
-                            double percent = ((double) count[0] + 1) / (double) ITERATIONS;
-                            double seconds = (System.currentTimeMillis() - startParsingTime[0]) / ((double) count[0] + 1)
-                                    * (((double) ITERATIONS) - ((double) count[0] + 1)) / 1000;
+                            if (count[0] != 0) {
+                                double percent = ((double) count[0] + 1) / (double) ITERATIONS;
+                                double seconds = (System.currentTimeMillis() - startParsingTime[0]) / ((double) count[0] + 1)
+                                        * (((double) ITERATIONS) - ((double) count[0] + 1)) / 1000;
 
-                            int numberOfDays = (int) (seconds / 86400);
-                            int numberOfHours = (int) ((seconds % 86400) / 3600);
-                            int numberOfMinutes = (int) (((seconds % 86400) % 3600) / 60);
-                            int numberOfSeconds = (int) (((seconds % 86400) % 3600) % 60);
+                                int numberOfDays = (int) (seconds / 86400);
+                                int numberOfHours = (int) ((seconds % 86400) / 3600);
+                                int numberOfMinutes = (int) (((seconds % 86400) % 3600) / 60);
+                                int numberOfSeconds = (int) (((seconds % 86400) % 3600) % 60);
 
-                            filterProgressbar.setValue(percent);
-                            progressLabel.setValue((count[0] + 1) + " из " + ITERATIONS);
-                            progressLabel.setDescription("Осталось до конца операции: "
-                                    + (numberOfHours != 0 ? numberOfHours + " ч. " : "")
-                                    + (numberOfMinutes != 0 ? numberOfMinutes + " м. " : "")
-                                    + (numberOfSeconds != 0 ? numberOfSeconds + " с." : ""));
+                                filterProgressbar.setValue(percent);
+                                progressLabel.setValue((count[0] + 1) + " из " + ITERATIONS);
+                                progressLabel.setDescription("Осталось до конца операции: "
+                                        + (numberOfHours != 0 ? numberOfHours + " ч. " : "")
+                                        + (numberOfMinutes != 0 ? numberOfMinutes + " м. " : "")
+                                        + (numberOfSeconds != 0 ? numberOfSeconds + " с." : ""));
 
-                            foundLabel.setValue("найдено: " + foundedCounter[0]);
+                                foundLabel.setValue("найдено: " + foundedCounter[0]);
+                            }
                         }
                     }
 
@@ -570,6 +594,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 .withCaption(messageBundle.getMessage("msgWarning"))
                                 .show();
 
+                        getWindow().setIcon(CubaIcon.FILTER.source());
+                        stopAndCloseButton.setEnabled(false);
                     }
                 };
 
@@ -593,14 +619,16 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .show();
 
-                if (jobCandidatesFilered.size() == 0) {
-                    jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
-                    jobCandidatesDl.load();
-                }
+                getWindow().setIcon(CubaIcon.FILTER.source());
+                stopAndCloseButton.setEnabled(false);
+
+                jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
+                jobCandidatesDl.load();
 
                 break;
             }
         }
+
     }
 
     @Install(to = "jobCandidatesTable.viewCandidateButton", subject = "columnGenerator")
@@ -644,12 +672,12 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     .withCaption("ВНИМАНИЕ")
                     .show();
 
+            getWindow().setIcon(CubaIcon.FILTER.source());
+            stopAndCloseButton.setEnabled(false);
             clearSearchResultButton.setEnabled(true);
 
-            if (jobCandidatesFilered.size() == 0) {
-                jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
-                jobCandidatesDl.load();
-            }
+            jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
+            jobCandidatesDl.load();
         }
 
         if (event.getValue() == 0 || event.getValue() == 1) {
@@ -760,6 +788,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             ((LinkButton) s.getValue()).setVisible(true);
         }
 
+        startSearchProcessButton.setEnabled(false);
         filter.clear();
     }
 
@@ -829,6 +858,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         jobCandidatesDl.load();
 
         clearSearchResultButton.setEnabled(false);
+        startSearchProcessButton.setEnabled(false);
     }
 
     @Subscribe("findSkillsSuggestionPickerField")
@@ -838,11 +868,31 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 ((LinkButton) s.getKey()).setVisible(false);
                 ((LinkButton) s.getValue()).setVisible(true);
 
-                filter.put( (LinkButton) s.getValue(), (SkillTree) event.getValue());
+                filter.put((LinkButton) s.getValue(), (SkillTree) event.getValue());
+                startSearchProcessButton.setEnabled(true);
             }
         }
     }
 
     public void stopAndCloseButtonInvoke() {
+        stopSearchProcess = true;
+        stopAndCloseButton.setEnabled(false);
+
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withType(Notifications.NotificationType.WARNING)
+                .withDescription(messageBundle.getMessage("msgInterruptScanningCV"))
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .show();
+
+        getWindow().setIcon(CubaIcon.FILTER.source());
+        stopAndCloseButton.setEnabled(false);
+        clearSearchResultButton.setEnabled(true);
+        startSearchProcessButton.setEnabled(true);
+        findSkillsSuggestionPickerField.setEnabled(true);
+        loadFromOpenPositionButton.setEnabled(true);
+        clearFilterButton.setEnabled(true);
+        personPositionLookupPickerField.setEnabled(true);
+        cityLookupPickerField.setEnabled(true);
+        progressBarHBox.setVisible(false);
     }
 }
