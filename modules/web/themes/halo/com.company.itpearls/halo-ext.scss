@@ -1317,12 +1317,11 @@ rating_battery_yellow_3:before {
 }
 
 .tailVacancy {
-    font-size:normal;
+    font-size:small;
     font-style: italic;
 }
 
 .tailShadow {
-    background-color: transparent;
     width: 4px;
     height: 4px;
     position: absolute;
@@ -1332,6 +1331,14 @@ rating_battery_yellow_3:before {
     box-shadow: 0px 0px 8px 1px black;
     -moz-box-shadow: 0px 0px 8px 1px black;
     -webkit-box-shadow: 0px 0px 8px 1px black;
+}
+
+.tailMyMessage {
+        background-color: ffb259;
+}
+
+.tailOtherMessage {
+    background-color: c4c6ff;
 }
 
 .tail1 {

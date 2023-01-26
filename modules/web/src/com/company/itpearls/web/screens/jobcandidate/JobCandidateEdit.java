@@ -1,5 +1,4 @@
 package com.company.itpearls.web.screens.jobcandidate;
-// TODO сделать сортировку по номеру взаимодействия или дате в таблице IteractioNList.Borwse
 
 import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.ParseCVService;
@@ -21,7 +20,6 @@ import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -229,6 +227,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Table<OpenPosition> suggestVacancyTable;
     @Inject
     private Image candidateDefaultPic;
+    @Inject
+    private MessageBundle messageBundle;
+    @Inject
+    private Button sendCommentButton;
+    @Inject
+    private TextField<String> chatMessageTextField;
+    @Inject
+    private LookupPickerField<OpenPosition> vacancyPopupPickerField;
+    @Inject
+    private DataGrid<IteractionList> jobCandidateCommentsDataGrid;
+    @Inject
+    private CollectionLoader<IteractionList> interactionCommentDl;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -350,26 +360,32 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void setMostPopularInteractionPopupButton(Iteraction iteraction) {
         if (jobCandidateIteractionListTable != null) {
             if (jobCandidateIteractionListTable.getSingleSelected() != null) {
-                screenBuilders.editor(jobCandidateIteractionListTable)
-//                screenBuilders.editor(IteractionList.class, this)
+                Screen screen = screenBuilders.editor(jobCandidateIteractionListTable)
                         .newEntity()
                         .withInitializer(e -> {
                             e.setCandidate(getEditedEntity());
                             e.setIteractionType(iteraction);
                             e.setVacancy(jobCandidateIteractionListTable.getSingleSelected().getVacancy());
                         })
-                        .build()
-                        .show();
+                        .build();
+
+                screen.addAfterCloseListener(afterCloseEvent -> {
+                    reloadInteractions();
+                });
+                screen.show();
             } else {
-//                screenBuilders.editor(IteractionList.class, this)
-                screenBuilders.editor(jobCandidateIteractionListTable)
+                Screen screen = screenBuilders.editor(jobCandidateIteractionListTable)
                         .newEntity()
                         .withInitializer(e -> {
                             e.setCandidate(getEditedEntity());
                             e.setIteractionType(iteraction);
                         })
-                        .build()
-                        .show();
+                        .build();
+
+                screen.addAfterCloseListener(afterCloseEvent -> {
+                    reloadInteractions();
+                });
+                screen.show();
             }
         }
     }
@@ -645,6 +661,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        initInteractionCommentDl();
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
@@ -695,6 +712,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 //        setLaborAgreement();
         setLastProjectTable();
+    }
+
+    private void initInteractionCommentDl() {
+        interactionCommentDl.setParameter("candidate", getEditedEntity());
+        interactionCommentDl.setParameter("comment", null);
+        interactionCommentDl.load();
     }
 
     private void setCandidatePicImage() {
@@ -2892,13 +2915,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if (event.getItem().getComment() != null) {
             Label name = uiComponents.create(Label.class);
-            name.setIconFromSet(CubaIcon.USER_CIRCLE_O);
             name.setValue(event.getItem().getRecrutier().getName() != null
                     ? event.getItem().getRecrutier().getName() : "");
             name.setStyleName("tailName");
 
             Label vacancy = uiComponents.create(Label.class);
-            vacancy.setValue(event.getItem().getVacancy() != null
+            vacancy.setValue(event.getItem().getVacancy() != null &&
+                    !event.getItem().getVacancy().getVacansyName().equals("Default")
                     ? event.getItem().getVacancy().getVacansyName() : "");
             vacancy.setStyleName("tailVacancy");
 
@@ -2918,14 +2941,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 image.setSource(FileDescriptorResource.class)
                         .setFileDescriptor(((ExtUser) event.getItem().getRecrutier()).getFileImageFace());
             } else {
-               image.setSource(ThemeResource.class)
-                       .setPath("icons/no-programmer.jpeg");
+                image.setSource(ThemeResource.class)
+                        .setPath("icons/no-programmer.jpeg");
             }
 
             image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
             image.setWidth("50px");
             image.setHeight("50px");
             image.setStyleName("circle-50px");
+
+            innerBox.setStyleName("toolTip");
 
             if (userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
                 outerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
@@ -2934,7 +2959,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 text.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 name.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 innerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
-                innerBox.setStyleName("toolTip");
+                innerBox.addStyleName("tailMyMessage");
             } else {
                 outerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 date.setAlignment(Component.Alignment.MIDDLE_LEFT);
@@ -2942,20 +2967,110 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 text.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 name.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 innerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
-                innerBox.setStyleName("toolTip");
+                innerBox.addStyleName("tailOtherMessage");
             }
 
             outerBox.add(name);
             if (!vacancy.getValue().equals("")) {
                 outerBox.add(vacancy);
             }
+
             outerBox.add(text);
             outerBox.add(date);
-            innerBox.add(image);
+            if (!userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
+                innerBox.add(image);
+            }
             innerBox.add(outerBox);
+            if (userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
+                innerBox.add(image);
+            }
+
             retBox.add(innerBox);
         }
 
         return retBox;
+    }
+
+    @Subscribe("chatMessageTextField")
+    public void onChatMessageTextFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() == null || event.getValue().equals("")) {
+            sendCommentButton.setEnabled(false);
+        } else {
+            sendCommentButton.setEnabled(true);
+        }
+    }
+
+    @Subscribe("chatMessageTextField")
+    public void onChatMessageTextFieldEnterPress(TextInputField.EnterPressEvent event) {
+        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                .withCaption(messageBundle.getMessage("msgQuuestionSendMessage"))
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                        .withHandler(e -> {
+                            sendCommentButtonInvoke();
+                        }), new DialogAction(DialogAction.Type.NO));
+    }
+
+
+    public void sendCommentButtonInvoke() {
+        Iteraction iteractionComment = null;
+
+        try {
+            iteractionComment = dataManager
+                    .loadValue("select e from itpearls_Iteraction e where e.signComment = true",
+                            Iteraction.class)
+                    .one();
+        } catch (IllegalStateException e) {
+        }
+
+        if (iteractionComment != null) {
+            BigDecimal numberInteraction = dataManager
+                    .loadValue("select max(e.numberIteraction) from itpearls_IteractionList e",
+                            BigDecimal.class)
+                    .one();
+            numberInteraction = numberInteraction.add(BigDecimal.ONE);
+
+            IteractionList comment = metadata.create(IteractionList.class);
+            comment.setCandidate(getEditedEntity());
+            comment.setDateIteraction(new Date());
+            comment.setCurrentOpenClose(vacancyPopupPickerField.getValue() != null ?
+                    vacancyPopupPickerField.getValue().getOpenClose() : false);
+            comment.setRecrutier(userSession.getUser());
+            comment.setComment(chatMessageTextField.getValue());
+            comment.setRecrutierName(userSession.getUser().getName());
+            comment.setCurrentPriority(0);
+            comment.setIteractionType(iteractionComment);
+            comment.setRating(0);
+            comment.setNumberIteraction(numberInteraction);
+
+            if (vacancyPopupPickerField.getValue() != null) {
+                comment.setVacancy(vacancyPopupPickerField.getValue());
+            } else {
+                comment.setVacancy(dataManager
+                        .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'",
+                                OpenPosition.class)
+                        .one());
+            }
+
+            jobCandidateDc.getItem().getIteractionList().add(comment);
+            reloadInteractions();
+            chatMessageTextField.setValue(null);
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgDoNotCommentInteraction"))
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
+    private void reloadInteractions()
+    {
+        dataContext.commit();
+
+        interactionCommentDl.load();
+        jobCandidateCommentsDataGrid.repaint();
+
+        jobCandidateDl.load();
+        jobCandidateIteractionListTable.repaint();
     }
 }

@@ -223,6 +223,7 @@ create table ITPEARLS_ITERACTION (
     SIGN_SEND_TO_CLIENT boolean,
     SIGN_PRIORITY_NEWS boolean,
     SIGN_VIEW_ONLY_MANAGER boolean,
+    SIGN_COMMENT boolean,
     OUTSTAFFING_SIGN boolean not null,
     SIGN_END_CASE boolean,
     NOTIFICATION_NEED_SEND boolean,

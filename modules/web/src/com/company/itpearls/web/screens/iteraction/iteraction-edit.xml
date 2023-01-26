@@ -114,6 +114,10 @@ order by e.number]]>
                                   caption="msg://mshSignEndCase"
                                   dataContainer="iteractionDc"
                                   property="signEndCase"/>
+                        <checkBox id="signCommentCheckBox"
+                                  caption="msg://mshSignComment"
+                                  dataContainer="iteractionDc"
+                                  property="signComment"/>
 
                     </vbox>
                 </groupBox>

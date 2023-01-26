@@ -43,9 +43,7 @@
                 <property name="socialNetwork" view="_local">
                     <property name="socialNetworkURL" view="_local"/>
                 </property>
-                <property name="laborAgreement" view="_local">
-
-                </property>
+                <property name="laborAgreement" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
                 <property name="currentCompany" view="_local"/>
                 <property name="fileImageFace" view="_local"/>
@@ -90,6 +88,18 @@
                           name="max"/>
             </properties>
         </keyValueCollection>
+        <collection id="openPositionDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local"/>
+            <loader id="openPositionDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                    where e.openClose = false or e.openClose is null
+                    order by e.vacansyName]]>
+                </query>
+            </loader>
+        </collection>
         <collection id="suggestOpenPositionDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local"/>
@@ -136,6 +146,24 @@
             <loader id="citiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e order by e.cityRuName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="interactionCommentDc" class="com.company.itpearls.entity.IteractionList">
+            <view extends="_local"/>
+            <loader id="interactionCommentDl" cacheable="true">
+                <query>
+                    <![CDATA[select e
+                    from itpearls_IteractionList e
+                    where e.comment is not null
+                    order by e.deteIteraction desc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.candidate = :candidate</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -831,7 +859,7 @@
                                 maximumWidth="80px"
                                 width="60px"
                                 caption="msg://msgIsComment">
-                            <componentRenderer/>
+                            <iconRenderer/>
                         </column>
                         <column id="recrutier"
                                 maximumWidth="150px"
@@ -952,7 +980,7 @@
                   height="100%"
                   expand="jobCandidateCommentsDataGrid">
                 <dataGrid id="jobCandidateCommentsDataGrid"
-                          dataContainer="jobCandidateIteractionDc"
+                          dataContainer="interactionCommentDc"
                           bodyRowHeight="110px"
                           headerVisible="false"
                           reorderingAllowed="false"
@@ -983,6 +1011,23 @@
                                 property="comment"/>
                     </columns>
                 </dataGrid>
+                <vbox spacing="true" width="100%">
+                    <textField id="chatMessageTextField"
+                               width="100%"/>
+                    <hbox width="100%">
+                    <lookupPickerField id="vacancyPopupPickerField"
+                                       optionsContainer="openPositionDc"
+                                       width="100%"/>
+                    </hbox>
+                    <hbox width="100%">
+                        <button id="sendCommentButton"
+                                caption="msg://msgSendComment"
+                                width="AUTO"
+                                enable="false"
+                                align="MIDDLE_RIGHT"
+                                invoke="sendCommentButtonInvoke"/>
+                    </hbox>
+                </vbox>
             </vbox>
             </tab>
         </tabSheet>

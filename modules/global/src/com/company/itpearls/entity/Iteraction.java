@@ -107,6 +107,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_VIEW_ONLY_MANAGER")
     private Boolean signViewOnlyManager;
 
+    @Column(name = "SIGN_COMMENT")
+    private Boolean signComment;
+
     @Column(name = "OUTSTAFFING_SIGN", nullable = false)
     protected Boolean outstaffingSign = false;
 
@@ -130,6 +133,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public Boolean getSignComment() {
+        return signComment;
+    }
+
+    public void setSignComment(Boolean signComment) {
+        this.signComment = signComment;
+    }
 
     public void setStaffInteractionStatus(StaffInteractionStatus staffInteractionStatus) {
         this.staffInteractionStatus = staffInteractionStatus == null ? null : staffInteractionStatus.getId();
