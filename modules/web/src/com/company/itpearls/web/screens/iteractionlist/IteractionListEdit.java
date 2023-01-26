@@ -1531,4 +1531,45 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private String recrutierFieldOptionIconProvider(User user) {
         return user.getActive() ? CubaIcon.PLUS_CIRCLE.source() : CubaIcon.MINUS_CIRCLE.source();
     }
+
+    @Subscribe("addDate")
+    public void onAddDateValueChange(HasValue.ValueChangeEvent<Date> event) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy hh.mm");
+
+        if (event.getValue() != null) {
+            String retStr = commentField.getValue() != null ? commentField.getValue() : "";
+
+            commentField.setValue((commentField.getValue() != null ? retStr
+                    + "\n" : "")
+                    + iteractionTypeField.getValue().getIterationName()
+                    + ": "
+                    + sdf.format(addDate.getValue()));
+        }
+    }
+
+    @Subscribe("addString")
+    public void onAddStringValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            String retStr = commentField.getValue() != null ? commentField.getValue() : "";
+
+            commentField.setValue((commentField.getValue() != null ? retStr
+                    + "\n": "")
+                    + iteractionTypeField.getValue().getIterationName()
+                    + ": "
+                    + event.getValue());
+        }
+    }
+
+    @Subscribe("addInteger")
+    public void onAddIntegerValueChange(HasValue.ValueChangeEvent<Integer> event) {
+        if (event.getValue() != null) {
+            String retStr = commentField.getValue() != null ? commentField.getValue() : "";
+
+            commentField.setValue((commentField.getValue() != null ? retStr
+                    + "\n": "")
+                    + iteractionTypeField.getValue().getIterationName()
+                    + ": "
+                    + event.getValue());
+        }
+    }
 }

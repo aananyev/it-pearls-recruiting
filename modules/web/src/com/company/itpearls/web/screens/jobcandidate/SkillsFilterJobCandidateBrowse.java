@@ -109,13 +109,13 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     @Inject
     private Button clearSearchResultButton;
     @Inject
-    private Button loadFromOpenPositionButton;
-    @Inject
     private Button startSearchProcessButton;
     @Inject
     private SuggestionPickerField findSkillsSuggestionPickerField;
     @Inject
     private Button stopAndCloseButton;
+    @Inject
+    private PopupButton loadFromOpenPositionPopupButton;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -688,7 +688,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             startSearchProcessButton.setEnabled(true);
             progressBarHBox.setVisible(false);
             filterProgressbar.setVisible(false);
-            loadFromOpenPositionButton.setEnabled(true);
+            loadFromOpenPositionPopupButton.setEnabled(true);
         } else {
             cityLookupPickerField.setEnabled(false);
             personPositionLookupPickerField.setEnabled(false);
@@ -697,7 +697,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             startSearchProcessButton.setEnabled(false);
             progressBarHBox.setVisible(true);
             filterProgressbar.setVisible(true);
-            loadFromOpenPositionButton.setEnabled(false);
+            loadFromOpenPositionPopupButton.setEnabled(false);
         }
 
     }
@@ -850,9 +850,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 ;
     }
 
-    public void loadFromOpenPositionButtonInvoke() {
-    }
-
     public void clearSearchResultButtonInvoke() {
         jobCandidatesDl.removeParameter("jobCandidateFiltered");
         jobCandidatesDl.load();
@@ -889,10 +886,45 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         clearSearchResultButton.setEnabled(true);
         startSearchProcessButton.setEnabled(true);
         findSkillsSuggestionPickerField.setEnabled(true);
-        loadFromOpenPositionButton.setEnabled(true);
+        loadFromOpenPositionPopupButton.setEnabled(true);
         clearFilterButton.setEnabled(true);
         personPositionLookupPickerField.setEnabled(true);
         cityLookupPickerField.setEnabled(true);
         progressBarHBox.setVisible(false);
+    }
+
+    @Subscribe("loadFromOpenPositionPopupButton.loadFromFile")
+    public void onLoadFromOpenPositionPopupButtonLoadFromFile(Action.ActionPerformedEvent event) {
+        screenBuilders.lookup(OpenPosition.class, this)
+                .withScreenId("itpearls_OpenPosition.browse")
+                .withLaunchMode(OpenMode.DIALOG)
+                .withSelectHandler(openPosition -> {
+                    scanOpenPositionField(openPosition);
+                })
+                .build()
+                .show();
+    }
+
+    private void scanOpenPositionField(Collection<OpenPosition> openPosition) {
+        for (OpenPosition op : openPosition) {
+            List<SkillTree> skillTreesRu = pdfParserService.parseSkillTree(op.getComment());
+            List<SkillTree> skillTreesEn = pdfParserService.parseSkillTree(op.getCommentEn());
+
+            for (SkillTree st : skillTreesRu) {
+                for (Map.Entry entry: skillsPairFilterToAll.entrySet()) {
+                    if (st.getSkillName().equals(((LinkButton)entry.getKey()).getCaption())) {
+                        ((LinkButton) entry.getKey()).setVisible(true);
+                        ((LinkButton) entry.getValue()).setVisible(false);
+
+//                        filter.put((LinkButton) entry.getKey(), st);
+                    }
+                }
+            }
+        }
+    }
+
+    @Subscribe("loadFromOpenPositionPopupButton.loadFromOpenPosition")
+    public void onLoadFromOpenPositionPopupButtonLoadFromOpenPosition(Action.ActionPerformedEvent event) {
+        
     }
 }

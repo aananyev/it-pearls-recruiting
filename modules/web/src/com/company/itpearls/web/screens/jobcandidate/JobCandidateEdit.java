@@ -21,6 +21,7 @@ import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -2870,5 +2871,91 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Install(to = "jobCandidateCommentsDataGrid.comment", subject = "styleProvider")
     private String jobCandidateCommentsDataGridCommentStyleProvider(IteractionList iteractionList) {
         return "table-wordwrap";
+    }
+
+    @Install(to = "jobCandidateCommentsDataGrid.commentDialog", subject = "columnGenerator")
+    private Component jobCandidateCommentsDataGridCommentDialogColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        VBoxLayout retBox = uiComponents.create(VBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setSpacing(false);
+        retBox.setMargin(false);
+
+        HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
+        innerBox.setMargin(true);
+        innerBox.setWidthAuto();
+        innerBox.setSpacing(true);
+
+        VBoxLayout outerBox = uiComponents.create(VBoxLayout.class);
+        outerBox.setMargin(false);
+        outerBox.setWidthAuto();
+        outerBox.setSpacing(false);
+
+        if (event.getItem().getComment() != null) {
+            Label name = uiComponents.create(Label.class);
+            name.setIconFromSet(CubaIcon.USER_CIRCLE_O);
+            name.setValue(event.getItem().getRecrutier().getName() != null
+                    ? event.getItem().getRecrutier().getName() : "");
+            name.setStyleName("tailName");
+
+            Label vacancy = uiComponents.create(Label.class);
+            vacancy.setValue(event.getItem().getVacancy() != null
+                    ? event.getItem().getVacancy().getVacansyName() : "");
+            vacancy.setStyleName("tailVacancy");
+
+            Label text = uiComponents.create(Label.class);
+            text.setValue(event.getItem().getComment() != null ?
+                    event.getItem().getComment() : "");
+
+            Label date = uiComponents.create(Label.class);
+            date.setValue(event.getItem().getDateIteraction() != null ?
+                    event.getItem().getDateIteraction() : "");
+            date.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+            date.setStyleName("tailDate");
+
+            Image image = uiComponents.create(Image.class);
+
+            if (((ExtUser) event.getItem().getRecrutier()).getFileImageFace() != null) {
+                image.setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(((ExtUser) event.getItem().getRecrutier()).getFileImageFace());
+            } else {
+               image.setSource(ThemeResource.class)
+                       .setPath("icons/no-programmer.jpeg");
+            }
+
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("50px");
+            image.setHeight("50px");
+            image.setStyleName("circle-50px");
+
+            if (userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
+                outerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                date.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                vacancy.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                text.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                name.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                innerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                innerBox.setStyleName("toolTip");
+            } else {
+                outerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                date.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                vacancy.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                text.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                name.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                innerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                innerBox.setStyleName("toolTip");
+            }
+
+            outerBox.add(name);
+            if (!vacancy.getValue().equals("")) {
+                outerBox.add(vacancy);
+            }
+            outerBox.add(text);
+            outerBox.add(date);
+            innerBox.add(image);
+            innerBox.add(outerBox);
+            retBox.add(innerBox);
+        }
+
+        return retBox;
     }
 }

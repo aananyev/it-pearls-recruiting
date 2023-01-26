@@ -126,13 +126,17 @@
                       align="BOTTOM_RIGHT"
                       spacing="true"
                       width="AUTO">
-                    <button id="loadFromOpenPositionButton"
+                    <popupButton id="loadFromOpenPositionPopupButton"
                             width="AUTO"
                             height="100%"
                             align="BOTTOM_RIGHT"
                             caption="msg://msgLoad"
-                            description="msg://msgLoadDesc"
-                            invoke="loadFromOpenPositionButtonInvoke"/>
+                            description="msg://msgLoadDesc">
+                        <actions>
+                            <action id="loadFromOpenPosition" caption="msg://msgLoadFromOpenPosition"/>
+                            <action id="loadFromFile" caption="msg://msgLoadFromFile"/>
+                        </actions>
+                    </popupButton>
                     <button id="clearFilterButton"
                             visible="true"
                             align="BOTTOM_LEFT"

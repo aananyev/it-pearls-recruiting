@@ -1289,4 +1289,113 @@ rating_battery_yellow_3:before {
 .v-calendar-header-week .v-calendar-back, .v-calendar-header-week .v-calendar-next {
   display: none;
 }
+
+.toolTip {
+    background-color: #ffffff;
+    border: 1px solid #73a7f0;
+    margin-left: 32px;
+    position:relative;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    box-shadow: 0px 0px 8px -1px black;
+    -moz-box-shadow: 0px 0px 8px -1px black;
+    -webkit-box-shadow: 0px 0px 8px -1px black;
+}
+
+.toolTip p {
+    padding:10px;
+}
+
+.tailDate {
+    font-size: xx-small;
+}
+
+.tailName {
+    font-size: normal;
+    font-weight: bold;
+}
+
+.tailVacancy {
+    font-size:normal;
+    font-style: italic;
+}
+
+.tailShadow {
+    background-color: transparent;
+    width: 4px;
+    height: 4px;
+    position: absolute;
+    top: 16px;
+    left: -8px;
+    z-index: -10;
+    box-shadow: 0px 0px 8px 1px black;
+    -moz-box-shadow: 0px 0px 8px 1px black;
+    -webkit-box-shadow: 0px 0px 8px 1px black;
+}
+
+.tail1 {
+    width: 0px;
+    height: 0px;
+    border: 10px solid;
+    border-color: transparent #73a7f0 transparent transparent;
+    position:absolute;
+    top: 8px;
+    left: -20px;
+}
+
+.tail2 {
+    width: 0px;
+    height: 0px;
+    border: 10px solid;
+    border-color: transparent #ffffff transparent transparent;
+    position:absolute;
+    left: -18px;
+    top: 8px;
+}
+
+.chat__header {
+  text-align: center;
+}
+
+.chat__item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.chat__person-avatar {
+  border-radius: 50%;
+}
+
+.chat__messages {
+  margin-left: 10px;
+}
+
+.chat__message {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.chat__message-content {
+  border-radius: 5px;
+  padding: 7px;
+  background-color: #ccc;
+  display: inline-block;
+
+  margin-left: 5px;
+}
+
+.chat__item--responder {
+  flex-direction: row-reverse;
+}
+
+  .chat__item--responder .chat__message {
+    flex-direction: row-reverse;
+  }
+
+  .chat__item--responder .chat__message-content {
+    margin-left: 0;
+    margin-right: 5px;
+  }
 }

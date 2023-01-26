@@ -36,7 +36,9 @@
                         </property>
                     </property>
                     <property name="iteractionType" view="_local"/>
-                    <property name="recrutier" view="_local"/>
+                    <property name="recrutier" view="_local">
+                        <property name="fileImageFace"/>
+                    </property>
                 </property>
                 <property name="socialNetwork" view="_local">
                     <property name="socialNetworkURL" view="_local"/>
@@ -829,7 +831,7 @@
                                 maximumWidth="80px"
                                 width="60px"
                                 caption="msg://msgIsComment">
-                            <iconRenderer/>
+                            <componentRenderer/>
                         </column>
                         <column id="recrutier"
                                 maximumWidth="150px"
@@ -951,19 +953,32 @@
                   expand="jobCandidateCommentsDataGrid">
                 <dataGrid id="jobCandidateCommentsDataGrid"
                           dataContainer="jobCandidateIteractionDc"
-                          bodyRowHeight="60px"
+                          bodyRowHeight="110px"
+                          headerVisible="false"
+                          reorderingAllowed="false"
+                          textSelectionEnabled="false"
+                          selectionMode="NONE"
+                          stylename="no-horizontal-lines no-stripes no-vertical-lines borderless"
+                          sortable="false"
                           width="100%"
                           height="100%">
                     <columns>
+                        <column id="commentDialog"
+                                sortable="false">
+                            <componentRenderer/>
+                        </column>
                         <column id="dateIteraction"
                                 sortable="true"
                                 sort="DESCENDING"
                                 width="80px"
+                                collapsed="true"
                                 property="dateIteraction"/>
                         <column id="recrutier"
+                                collapsed="true"
                                 width="250px"
                                 property="recrutier"/>
                         <column id="comment"
+                                collapsed="true"
                                 sortable="false"
                                 property="comment"/>
                     </columns>
