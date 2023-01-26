@@ -149,7 +149,8 @@
                 </query>
             </loader>
         </collection>
-        <collection id="interactionCommentDc" class="com.company.itpearls.entity.IteractionList">
+        <collection id="interactionCommentDc"
+                    class="com.company.itpearls.entity.IteractionList">
             <view extends="_local"/>
             <loader id="interactionCommentDl" cacheable="true">
                 <query>

@@ -1667,7 +1667,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (lastIteraction != null) {
                 IteractionList finalLastIteraction = lastIteraction;
 
-//                Screen copyIteractionScreen = screenBuilders.editor(IteractionList.class, this)
                 Screen copyIteractionScreen = screenBuilders.editor(jobCandidateIteractionListTable)
                         .withParentDataContext(dataContext)
                         .withInitializer(candidate -> {
@@ -1681,7 +1680,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .build();
 
                 copyIteractionScreen.addAfterCloseListener(e -> {
-                    jobCandidateDl.load();
+                    reloadInteractions();
                 });
 
                 copyIteractionScreen.show();
@@ -1941,8 +1940,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
 
                 if (candidateCV != null) {
-//                    screenBuilders.editor(CandidateCV.class, this)
-                    screenBuilders.editor(jobCandidateCandidateCvTable)
+                    Screen screen = screenBuilders.editor(jobCandidateCandidateCvTable)
                             .withInitializer(candidate -> {
                                 candidate.setCandidate(getEditedEntity());
 
@@ -1952,8 +1950,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                 jobCandidateDc.getItem().getCandidateCv().add(cv);
                             })
                             .newEntity()
-                            .build()
-                            .show();
+                            .build();
+
+                    screen.addAfterCloseListener(afterCloseEvent -> {
+                        reloadCV();
+                    });
+
+                    screen.show();
                 } else {
                     dialogs.createOptionDialog()
                             .withCaption("Нет резюме кандидата")
@@ -3054,6 +3057,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             jobCandidateDc.getItem().getIteractionList().add(comment);
             reloadInteractions();
             chatMessageTextField.setValue(null);
+            jobCandidateCommentsDataGrid.setSelected(comment);
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
@@ -3063,8 +3067,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    private void reloadInteractions()
-    {
+    private void reloadCV() {
+        dataContext.commit();
+
+        jobCandidateDl.load();
+        jobCandidateCandidateCvTable.repaint();
+    }
+
+    private void reloadInteractions() {
         dataContext.commit();
 
         interactionCommentDl.load();
