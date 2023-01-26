@@ -21,9 +21,9 @@ public class ItpearlsTestContainer extends TestContainer {
                 "com.haulmont.addon.dashboard",
                 "com.haulmont.addon.helium",
                 "com.haulmont.charts",
-                "com.haulmont.reports",
                 "com.haulmont.bpm",
-                "com.haulmont.fts");
+                "com.haulmont.fts",
+                "com.haulmont.reports");
         appPropertiesFiles = Arrays.asList(
                 // List the files defined in your web.xml
                 // in appPropertiesConfig context parameter of the core module

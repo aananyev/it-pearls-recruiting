@@ -2916,7 +2916,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         outerBox.setWidthAuto();
         outerBox.setSpacing(false);
 
-        if (event.getItem().getComment() != null) {
+        if (event.getItem().getComment() != null
+                && !event.getItem().getComment().equals("")) {
             Label name = uiComponents.create(Label.class);
             name.setValue(event.getItem().getRecrutier().getName() != null
                     ? event.getItem().getRecrutier().getName() : "");

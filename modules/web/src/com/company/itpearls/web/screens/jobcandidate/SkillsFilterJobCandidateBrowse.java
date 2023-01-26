@@ -28,6 +28,8 @@ import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @UiController("itpearls_SkillsFilterJobCandidate.browse")
 @UiDescriptor("skills-filter-job-candidate-browse.xml")
@@ -680,7 +682,11 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             jobCandidatesDl.load();
         }
 
-        if (event.getValue() == 0 || event.getValue() == 1) {
+        setEnabledButtons(event.getValue());
+    }
+
+    private void setEnabledButtons(Double value) {
+        if (value == 0 || value == 1) {
             cityLookupPickerField.setEnabled(true);
             personPositionLookupPickerField.setEnabled(true);
             findSkillsSuggestionPickerField.setEnabled(true);
@@ -699,7 +705,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             filterProgressbar.setVisible(true);
             loadFromOpenPositionPopupButton.setEnabled(false);
         }
-
     }
 
     private void endScanBackgroundTaskListener() {
@@ -902,6 +907,35 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Subscribe("loadFromOpenPositionPopupButton.loadFromFile")
     public void onLoadFromOpenPositionPopupButtonLoadFromFile(Action.ActionPerformedEvent event) {
+    }
+
+    private void scanOpenPositionField(Collection<OpenPosition> openPosition) {
+        for (OpenPosition op : openPosition) {
+            List<SkillTree> skillTreesRu = pdfParserService.parseSkillTree(op.getComment());
+            List<SkillTree> skillTreesEn = pdfParserService.parseSkillTree(op.getCommentEn());
+            Set<SkillTree> allSkill = Stream.concat(skillTreesRu.stream(), skillTreesEn.stream())
+                    .collect(Collectors.toSet());
+
+            List<SkillTree> allSkills = new ArrayList<>(allSkill);
+
+            for (SkillTree st : allSkills) {
+                for (Map.Entry entry : skillsPairFilterToAll.entrySet()) {
+                    if (st.getSkillName().equals(((LinkButton) entry.getKey()).getCaption())) {
+                        ((LinkButton) entry.getKey()).setVisible(true);
+                        ((LinkButton) entry.getKey()).getParent().getParent().setVisible(true);
+                        ((LinkButton) entry.getValue()).setVisible(false);
+
+                        filter.put((LinkButton) entry.getKey(), st);
+                    }
+                }
+            }
+        }
+
+        setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
+    }
+
+    @Subscribe("loadFromOpenPositionPopupButton.loadFromOpenPosition")
+    public void onLoadFromOpenPositionPopupButtonLoadFromOpenPosition(Action.ActionPerformedEvent event) {
         screenBuilders.lookup(OpenPosition.class, this)
                 .withScreenId("itpearls_OpenPosition.browse")
                 .withLaunchMode(OpenMode.DIALOG)
@@ -910,28 +944,5 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 })
                 .build()
                 .show();
-    }
-
-    private void scanOpenPositionField(Collection<OpenPosition> openPosition) {
-        for (OpenPosition op : openPosition) {
-            List<SkillTree> skillTreesRu = pdfParserService.parseSkillTree(op.getComment());
-            List<SkillTree> skillTreesEn = pdfParserService.parseSkillTree(op.getCommentEn());
-
-            for (SkillTree st : skillTreesRu) {
-                for (Map.Entry entry: skillsPairFilterToAll.entrySet()) {
-                    if (st.getSkillName().equals(((LinkButton)entry.getKey()).getCaption())) {
-                        ((LinkButton) entry.getKey()).setVisible(true);
-                        ((LinkButton) entry.getValue()).setVisible(false);
-
-//                        filter.put((LinkButton) entry.getKey(), st);
-                    }
-                }
-            }
-        }
-    }
-
-    @Subscribe("loadFromOpenPositionPopupButton.loadFromOpenPosition")
-    public void onLoadFromOpenPositionPopupButtonLoadFromOpenPosition(Action.ActionPerformedEvent event) {
-        
     }
 }

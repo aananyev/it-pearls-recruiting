@@ -1009,6 +1009,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     // изменение надписи на кнопке в зависимости от щначения поля ItercationType
     @Subscribe("iteractionTypeField")
     public void onIteractionTypeFieldValueChange(HasValue.ValueChangeEvent<Iteraction> event) {
+        setCommentMandatory(event.getValue());
+
         try {
             if (!event.getValue().equals(event.getPrevValue())) {
                 changeField();
@@ -1036,6 +1038,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         } catch (NullPointerException e) {
             log.error("Error", e);
+        }
+    }
+
+    private void setCommentMandatory(Iteraction iteraction) {
+        if (iteraction != null) {
+            if (iteraction.getSignComment() != null) {
+                if (iteraction.getSignComment()) {
+                    commentField.setRequired(true);
+                } else {
+                    commentField.setRequired(false);
+                }
+            }
         }
     }
 

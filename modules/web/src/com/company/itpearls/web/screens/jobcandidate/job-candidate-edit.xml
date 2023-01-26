@@ -156,7 +156,7 @@
                 <query>
                     <![CDATA[select e
                     from itpearls_IteractionList e
-                    where e.comment is not null
+                    where e.comment is not null and e.comment not like ''
                     order by e.deteIteraction desc]]>
                     <condition>
                         <and>
