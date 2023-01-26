@@ -860,14 +860,21 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Subscribe("findSkillsSuggestionPickerField")
     public void onFindSkillsSuggestionPickerFieldValueChange(HasValue.ValueChangeEvent event) {
-        for (Map.Entry s : skillsPairAllToFilter.entrySet()) {
-            if (((LinkButton) s.getKey()).getCaption().equals(((SkillTree) event.getValue()).getSkillName())) {
-                ((LinkButton) s.getKey()).setVisible(false);
-                ((LinkButton) s.getValue()).setVisible(true);
+        if (findSkillsSuggestionPickerField.getValue() != null) {
+            for (Map.Entry s : skillsPairAllToFilter.entrySet()) {
+                if (((LinkButton) s.getKey()).getCaption().equals(((SkillTree) event.getValue()).getSkillName())) {
+                    ((LinkButton) s.getKey()).setVisible(false);
+                    ((LinkButton) s.getValue()).getParent().getParent().setVisible(true);
+                    ((LinkButton) s.getValue()).setVisible(true);
 
-                filter.put((LinkButton) s.getValue(), (SkillTree) event.getValue());
-                startSearchProcessButton.setEnabled(true);
+                    filter.put((LinkButton) s.getValue(), (SkillTree) event.getValue());
+                    startSearchProcessButton.setEnabled(true);
+
+                    break;
+                }
             }
+
+            findSkillsSuggestionPickerField.setValue(null);
         }
     }
 
