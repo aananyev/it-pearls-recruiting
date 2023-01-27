@@ -576,7 +576,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 int numberOfSeconds = (int) (((seconds % 86400) % 3600) % 60);
 
                                 filterProgressbar.setValue(percent);
-                                filterProgressbar.setDescription((count[0] +1) / ITERATIONS * 100 + "%");
+                                filterProgressbar.setDescription((count[0] + 1) / ITERATIONS * 100 + "%");
                                 progressLabel.setValue((count[0] + 1) + " из " + ITERATIONS);
                                 progressLabel.setDescription("Осталось до конца операции: "
                                         + (numberOfHours != 0 ? numberOfHours + " ч. " : "")
@@ -948,14 +948,42 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
     public void expandAllSkillsButtonInvoke() {
+        for (Component component : allSkillsScrollBox.getComponents()) {
+            try {
+                ((GroupBoxLayout) component).setExpanded(true);
+            } catch (ClassCastException e) {
+
+            }
+        }
     }
 
     public void compressAllSkillsButtonInvoke() {
+        for (Component component : allSkillsScrollBox.getComponents()) {
+            try {
+                ((GroupBoxLayout) component).setExpanded(false);
+            } catch (ClassCastException e) {
+
+            }
+        }
     }
 
     public void compressFilterSkillsButtonInvoke() {
+        for (Component component : filterSkillsScrollBox.getComponents()) {
+            try {
+                ((GroupBoxLayout) component).setExpanded(false);
+            } catch (ClassCastException e) {
+
+            }
+        }
     }
 
     public void expandFilterSkillsButtonInvoke() {
+        for (Component component : filterSkillsScrollBox.getComponents()) {
+            try {
+                ((GroupBoxLayout) component).setExpanded(true);
+            } catch (ClassCastException e) {
+
+            }
+        }
     }
 }
