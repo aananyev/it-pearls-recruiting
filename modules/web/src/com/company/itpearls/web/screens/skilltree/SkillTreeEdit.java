@@ -232,7 +232,10 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
     public void onBeforeShow(BeforeShowEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             notParsingCheckBox.setValue(false);
+        } else {
+            if (notParsingCheckBox.getValue() == null) {
+                notParsingCheckBox.setValue(false);
+            }
         }
-
     }
 }

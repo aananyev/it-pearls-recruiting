@@ -10,6 +10,7 @@ import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -24,6 +25,7 @@ import java.util.Set;
 @Service(PdfParserService.NAME)
 public class PdfParserServiceBean implements PdfParserService {
 
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(PdfParserServiceBean.class);
     @Inject
     private DataManager dataManager;
 
@@ -31,8 +33,7 @@ public class PdfParserServiceBean implements PdfParserService {
     public List<SkillTree> parseSkillTree(String inputText) {
         String QUERY_SKILL_TREE =
                 "select e " +
-                        "from itpearls_SkillTree e " +
-                        "where e.notParsing = false";
+                        "from itpearls_SkillTree e";
 
         List<SkillTree> candidateSkills = new ArrayList<>();
 
@@ -44,16 +45,18 @@ public class PdfParserServiceBean implements PdfParserService {
 
         for (SkillTree specialisation : competitions) {
             try {
-                if (inputText.toLowerCase().contains(specialisation.getSkillName().toLowerCase())) {
-                    candidateSkills.add(specialisation);
+                if (!specialisation.getNotParsing()) {
+                    if (inputText.toLowerCase().contains(specialisation.getSkillName().toLowerCase())) {
+                        candidateSkills.add(specialisation);
 
-                    if (specialisation.getSkillTree() != null &&
-                            checkHiLevel(candidateSkills, specialisation.getSkillTree())) {
-                        candidateSkills.add(specialisation.getSkillTree());
+                        if (specialisation.getSkillTree() != null &&
+                                checkHiLevel(candidateSkills, specialisation.getSkillTree())) {
+                            candidateSkills.add(specialisation.getSkillTree());
+                        }
                     }
                 }
             } catch (NullPointerException e) {
-                e.printStackTrace();
+                log.error("Error", e);
             }
         }
         // удаляем дубликаты

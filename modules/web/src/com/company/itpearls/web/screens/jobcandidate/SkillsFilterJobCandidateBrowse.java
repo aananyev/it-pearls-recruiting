@@ -576,6 +576,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 int numberOfSeconds = (int) (((seconds % 86400) % 3600) % 60);
 
                                 filterProgressbar.setValue(percent);
+                                filterProgressbar.setDescription((count[0] +1) / ITERATIONS * 100 + "%");
                                 progressLabel.setValue((count[0] + 1) + " из " + ITERATIONS);
                                 progressLabel.setDescription("Осталось до конца операции: "
                                         + (numberOfHours != 0 ? numberOfHours + " ч. " : "")
@@ -944,5 +945,17 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 })
                 .build()
                 .show();
+    }
+
+    public void expandAllSkillsButtonInvoke() {
+    }
+
+    public void compressAllSkillsButtonInvoke() {
+    }
+
+    public void compressFilterSkillsButtonInvoke() {
+    }
+
+    public void expandFilterSkillsButtonInvoke() {
     }
 }

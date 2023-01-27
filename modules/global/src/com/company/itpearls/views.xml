@@ -114,6 +114,13 @@
     </view>
     <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
         <property name="skillTree" view="_minimal">
+            <property name="fileImageLogo" view="_local"/>
+            <property name="comment"/>
+            <property name="wikiPage"/>
+            <property name="specialisation" view="_local"/>
+            <property name="styleHighlighting"/>
+            <property name="notParsing"/>
+            <property name="prioritySkill"/>
         </property>
         <property name="openPosition" view="_local"/>
         <property name="candidates" view="_local">

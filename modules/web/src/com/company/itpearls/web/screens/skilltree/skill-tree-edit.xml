@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        messagesPack="com.company.itpearls.web.screens.skilltree" icon="CODE_FORK">
+        messagesPack="com.company.itpearls.web.screens.skilltree"
+        icon="CODE_FORK">
     <data>
         <instance id="skillTreeDc"
                   class="com.company.itpearls.entity.SkillTree"
                   view="skillTree-view">
             <loader/>
-            <collection id="skillTreeCandidatesesDc" property="candidates"/>
+            <collection id="skillTreeCandidatesesDc"
+                        property="candidates"/>
         </instance>
-        <collection id="skillTreesDc" class="com.company.itpearls.entity.SkillTree" view="_minimal">
+        <collection id="skillTreesDc"
+                    class="com.company.itpearls.entity.SkillTree"
+                    view="_minimal">
             <loader id="skillTreesLc">
                 <query>
                     <![CDATA[select e from itpearls_SkillTree e
-where e.skillTree is null
-order by e.skillName]]>
+                    where e.skillTree is null
+                    order by e.skillName]]>
                 </query>
             </loader>
         </collection>
-        <collection id="specialisationDc" class="com.company.itpearls.entity.Specialisation" view="specialisation-view">
+        <collection id="specialisationDc"
+                    class="com.company.itpearls.entity.Specialisation"
+                    view="specialisation-view">
             <loader id="specialisationDl">
                 <query>
                     <![CDATA[select e from itpearls_Specialisation e order by e.specRuName]]>
@@ -29,7 +35,11 @@ order by e.skillName]]>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="allBox" spacing="true">
-        <vbox id="allBox" width="100%" height="AUTO" expand="areaBox" spacing="true">
+        <vbox id="allBox"
+              width="100%"
+              height="AUTO"
+              expand="areaBox"
+              spacing="true">
             <hbox id="fieldBox"
                   width="100%"
                   height="AUTO"
@@ -48,12 +58,13 @@ order by e.skillName]]>
                                        property="skillTree"
                                        width="50%">
                         <actions>
-                            <action id="lookup" type="picker_lookup"/>
+                            <action id="lookup"
+                                    type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
                     <lookupPickerField id="specialisationField"
                                        optionsContainer="specialisationDc"
-                                       dataContainer="skillTreesDc"
+                                       dataContainer="skillTreeDc"
                                        caption="msg://msgSpecialisation"
                                        align="TOP_LEFT"
                                        property="specialisation"
@@ -78,7 +89,7 @@ order by e.skillName]]>
                                      dataContainer="skillTreeDc"
                                      property="prioritySkill"/>
                         <checkBox id="notParsingCheckBox"
-                                  dataContainer="skillTreesDc"
+                                  dataContainer="skillTreeDc"
                                   property="notParsing"
                                   caption="msg://msgNotParsing"
                                   description="msg://msgNotParsingDesc"

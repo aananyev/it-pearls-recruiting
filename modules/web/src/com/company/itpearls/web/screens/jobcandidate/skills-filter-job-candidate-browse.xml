@@ -181,10 +181,23 @@
                       width="100%"
                       stylename="card">
                     <scrollBox id="allSkillsScrollBox"
-                               box.expandRatio="5"
+                               box.expandRatio="7"
                                stylename="v-panel-caption"
                                width="100%"
                                height="100%"/>
+                    <vbox box.expandRatio="1"
+                          margin="true"
+                          width="AUTO"
+                          spacing="true">
+                        <button id="expandLeftButton"
+                                icon="EXPAND"
+                                align="TOP_CENTER"
+                                invoke="expandAllSkillsButtonInvoke"/>
+                        <button id="compressLeftButton"
+                                icon="COMPRESS"
+                                align="TOP_CENTER"
+                                invoke="compressAllSkillsButtonInvoke"/>
+                    </vbox>
                     <hbox width="100%" box.expandRatio="1"
                           height="100%"
                           spacing="false">
@@ -233,10 +246,23 @@
                         </vbox>
                     </hbox>
                     <scrollBox id="filterSkillsScrollBox"
-                               box.expandRatio="5"
+                               box.expandRatio="7"
                                stylename="v-panel-caption"
                                width="100%"
                                height="100%"/>
+                    <vbox box.expandRatio="1"
+                          margin="true"
+                          width="AUTO"
+                          spacing="true">
+                        <button id="expandRightButton"
+                                icon="EXPAND"
+                                align="TOP_CENTER"
+                                invoke="expandFilterSkillsButtonInvoke"/>
+                        <button id="compressRightButton"
+                                icon="COMPRESS"
+                                align="TOP_CENTER"
+                                invoke="compressFilterSkillsButtonInvoke"/>
+                    </vbox>
                 </hbox>
             </groupBox>
             <groupBox id="jobCandidateTableGroupBox"
