@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 
 @UiController("itpearls_QuickViewOpenPositionDescription")
@@ -175,6 +176,12 @@ public class QuickViewOpenPositionDescription extends Screen {
         return retBool;
     }
 
+    public void setClipboardContents(String string){
+        StringSelection stringSelection = new StringSelection(string);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, stringSelection);
+    }
+
     public void copyToClipboard() {
         String strToCopy = "";
         String breakStr = "<br>";
@@ -244,9 +251,11 @@ public class QuickViewOpenPositionDescription extends Screen {
 
         if (strToCopy != null) {
 
-            StringSelection selec = new StringSelection(strToCopy.replaceAll("&nbsp", ""));
+/*            StringSelection selec = new StringSelection(strToCopy.replaceAll("&nbsp", ""));
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            clipboard.setContents(selec, selec);
+            clipboard.setContents(selec, selec); */
+
+            setClipboardContents(strToCopy);
 
             notifications.create(Notifications.NotificationType.SYSTEM)
                     .withCaption("Информация")

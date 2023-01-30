@@ -70,11 +70,13 @@ public class Skillsbar extends ScreenFragment {
             List<SkillTree> skillTrees = pdfParserService.parseSkillTree(skillText);
 
             for (Integer i = 0; i < skillTrees.size(); i++) {
-                for (Integer j = i + 1; j < skillTrees.size(); j++) {
-                    if (skillTrees.get(i).getSkillName().toLowerCase().equals(
-                            skillTrees.get(j).getSkillName().toLowerCase())) {
-                        skillTrees.remove(skillTrees.get(j));
-                        break;
+                if (!skillTrees.get(i).getNotParsing()) {
+                    for (Integer j = i + 1; j < skillTrees.size(); j++) {
+                        if (skillTrees.get(i).getSkillName().toLowerCase().equals(
+                                skillTrees.get(j).getSkillName().toLowerCase())) {
+                            skillTrees.remove(skillTrees.get(j));
+                            break;
+                        }
                     }
                 }
             }
@@ -88,15 +90,17 @@ public class Skillsbar extends ScreenFragment {
             for (Integer i = StandartPrioritySkills.PROGRAMMING_LANGUAGE_INT;
                  i >= StandartPrioritySkills.DEFAULT_INT; i--) {
                 for (SkillTree st : skillTrees) {
-                    if (st.getPrioritySkill() != null) {
-                        if (st.getPrioritySkill().equals(i)) {
-                            Label labelSkill = uiComponents.create(Label.NAME);
-                            labelSkill.setValue(st.getSkillName());
-                            labelSkill.setStyleName(getStyleForSkillPriority(st));
-                            labelSkill.setDescription(st.getComment());
-                            labelSkill.setDescriptionAsHtml(true);
+                    if (!st.getNotParsing()) {
+                        if (st.getPrioritySkill() != null) {
+                            if (st.getPrioritySkill().equals(i)) {
+                                Label labelSkill = uiComponents.create(Label.NAME);
+                                labelSkill.setValue(st.getSkillName());
+                                labelSkill.setStyleName(getStyleForSkillPriority(st));
+                                labelSkill.setDescription(st.getComment());
+                                labelSkill.setDescriptionAsHtml(true);
 
-                            skillsFlowBox.add(labelSkill);
+                                skillsFlowBox.add(labelSkill);
+                            }
                         }
                     }
                 }

@@ -982,7 +982,7 @@
                   expand="jobCandidateCommentsDataGrid">
                 <dataGrid id="jobCandidateCommentsDataGrid"
                           dataContainer="interactionCommentDc"
-                          bodyRowHeight="110px"
+                          bodyRowHeight="130px"
                           headerVisible="false"
                           reorderingAllowed="false"
                           textSelectionEnabled="false"

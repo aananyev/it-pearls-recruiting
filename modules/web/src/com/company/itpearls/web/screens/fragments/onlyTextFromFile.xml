@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/fragments/onlyText.xml"
+        messagesPack="com.company.itpearls.web.screens.fragments">
+    <layout>
+        <richTextArea/>
+        <hbox id="mainHBox">
+            <hbox id="addButtonsHBox">
+                <button id="copyFromClipboard"
+                        ext:index="0"
+                        visible="false"/>
+                <button id="loadFromFileButton"
+                        width="AUTO"
+                        align="MIDDLE_LEFT"
+                        icon="FILE_TEXT"
+                        caption="msg://msgLoadFromFile"
+                        invoke="loadFromFileButtonInvoke"/>
+            </hbox>
+        </hbox>
+    </layout>
+</window>

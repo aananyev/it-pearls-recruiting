@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://onlytext.caption"
+        messagesPack="com.company.itpearls.web.screens.fragments">
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="textRichTextArea" spacing="true">
+        <richTextArea id="textRichTextArea"
+                      width="100%"
+                      height="100%"/>
+        <hbox id="mainHBox" width="100%">
+            <hbox id="addButtonsHBox"
+                  width="AUTO"
+                  spacing="true"
+                  align="MIDDLE_LEFT">
+                <button id="copyFromClipboard"
+                        width="AUTO"
+                        caption="msg://msgCopyFromClipboard"
+                        align="MIDDLE_LEFT"
+                        icon="CLIPBOARD"
+                        invoke="copyFromClipboardButtonInvoke"/>
+            </hbox>
+            <hbox width="AUTO"
+                  spacing="true"
+                  align="MIDDLE_RIGHT">
+                <button id="okButton"
+                        width="AUTO"
+                        caption="msg://msgOK"
+                        align="MIDDLE_RIGHT"
+                        icon="DIALOG_OK"
+                        invoke="okButtonInvoke"/>
+                <button id="cancelButton"
+                        width="AUTO"
+                        align="MIDDLE_RIGHT"
+                        caption="msg://msgCancel"
+                        icon="DIALOG_CANCEL"
+                        invoke="cancelButtonInvoke"/>
+            </hbox>
+        </hbox>
+    </layout>
+</window>

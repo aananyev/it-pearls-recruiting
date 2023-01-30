@@ -127,14 +127,15 @@
                       spacing="true"
                       width="AUTO">
                     <popupButton id="loadFromOpenPositionPopupButton"
-                            width="AUTO"
-                            height="100%"
-                            align="BOTTOM_RIGHT"
-                            caption="msg://msgLoad"
-                            description="msg://msgLoadDesc">
+                                 width="AUTO"
+                                 height="100%"
+                                 align="BOTTOM_RIGHT"
+                                 caption="msg://msgLoad"
+                                 description="msg://msgLoadDesc">
                         <actions>
                             <action id="loadFromOpenPosition" caption="msg://msgLoadFromOpenPosition"/>
                             <action id="loadFromFile" caption="msg://msgLoadFromFile"/>
+                            <action id="loadFromClipboard" caption="msg://msgLoadFromClipboard"/>
                         </actions>
                     </popupButton>
                     <button id="clearFilterButton"

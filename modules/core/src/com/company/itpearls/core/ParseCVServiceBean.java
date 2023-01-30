@@ -221,7 +221,7 @@ public class ParseCVServiceBean implements ParseCVService {
 
     private boolean skillContains(List<SkillTree> skillTreesFromOpenPosition, SkillTree skillTree) {
         for (SkillTree st : skillTreesFromOpenPosition) {
-            if (st.getSkillName().equals(skillTree.getSkillName())) {
+            if (st.getSkillName().toLowerCase().equals(skillTree.getSkillName().toLowerCase())) {
                 return true;
             }
         }

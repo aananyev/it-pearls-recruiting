@@ -820,7 +820,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     + skillTree.getSkillName()
                     + "</font></b>";
             if (!value.contains(keyWithStyle)) {
-                value = value.replaceAll(skillTree.getSkillName(), keyWithStyle);
+                value = value.replaceAll("(?i)" + skillTree.getSkillName(), keyWithStyle);
             }
         }
 

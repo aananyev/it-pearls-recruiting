@@ -3,6 +3,8 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.StandartPrioritySkills;
+import com.company.itpearls.web.screens.fragments.OnlyTextFromFile;
+import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
@@ -576,7 +578,9 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 int numberOfSeconds = (int) (((seconds % 86400) % 3600) % 60);
 
                                 filterProgressbar.setValue(percent);
-                                filterProgressbar.setDescription((count[0] + 1) / ITERATIONS * 100 + "%");
+
+                                double progressPercent = (count[0] + 1) / ITERATIONS * 100;
+                                filterProgressbar.setDescription(((int) progressPercent) + "%");
                                 progressLabel.setValue((count[0] + 1) + " из " + ITERATIONS);
                                 progressLabel.setDescription("Осталось до конца операции: "
                                         + (numberOfHours != 0 ? numberOfHours + " ч. " : "")
@@ -906,8 +910,64 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         progressBarHBox.setVisible(false);
     }
 
+    @Subscribe("loadFromOpenPositionPopupButton.loadFromClipboard")
+    public void onLoadFromOpenPositionPopupButtonLoadFromClipboard(Action.ActionPerformedEvent event) {
+        Screen screen = screenBuilders.screen(this)
+                .withScreenClass(Onlytext.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        screen.addAfterCloseListener(afterCloseEvent -> {
+            if (!((Onlytext) screen).getCancel()) {
+                List<SkillTree> allSkills = pdfParserService.parseSkillTree(((Onlytext) screen).getResultText());
+
+                for (SkillTree st : allSkills) {
+                    for (Map.Entry entry : skillsPairFilterToAll.entrySet()) {
+                        if (st.getSkillName().equals(((LinkButton) entry.getKey()).getCaption())) {
+                            ((LinkButton) entry.getKey()).setVisible(true);
+                            ((LinkButton) entry.getKey()).getParent().getParent().setVisible(true);
+                            ((LinkButton) entry.getValue()).setVisible(false);
+
+                            filter.put((LinkButton) entry.getKey(), st);
+                        }
+                    }
+                }
+
+                setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
+            }
+        });
+
+        screen.show();
+    }
+
     @Subscribe("loadFromOpenPositionPopupButton.loadFromFile")
     public void onLoadFromOpenPositionPopupButtonLoadFromFile(Action.ActionPerformedEvent event) {
+        Screen screen = screenBuilders.screen(this)
+                .withScreenClass(OnlyTextFromFile.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        screen.addAfterCloseListener(afterCloseEvent -> {
+            if (!((Onlytext) screen).getCancel()) {
+                List<SkillTree> allSkills = pdfParserService.parseSkillTree(((Onlytext) screen).getResultText());
+
+                for (SkillTree st : allSkills) {
+                    for (Map.Entry entry : skillsPairFilterToAll.entrySet()) {
+                        if (st.getSkillName().equals(((LinkButton) entry.getKey()).getCaption())) {
+                            ((LinkButton) entry.getKey()).setVisible(true);
+                            ((LinkButton) entry.getKey()).getParent().getParent().setVisible(true);
+                            ((LinkButton) entry.getValue()).setVisible(false);
+
+                            filter.put((LinkButton) entry.getKey(), st);
+                        }
+                    }
+                }
+
+                setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
+            }
+        });
+
+        screen.show();
     }
 
     private void scanOpenPositionField(Collection<OpenPosition> openPosition) {
