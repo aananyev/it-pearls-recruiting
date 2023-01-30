@@ -10,12 +10,12 @@
                 <button id="copyFromClipboard"
                         ext:index="0"
                         visible="false"/>
-                <button id="loadFromFileButton"
+                <upload id="uploadField"
                         width="AUTO"
                         align="MIDDLE_LEFT"
                         icon="FILE_TEXT"
                         caption="msg://msgLoadFromFile"
-                        invoke="loadFromFileButtonInvoke"/>
+                        fileStoragePutMode="MANUAL"/>
             </hbox>
         </hbox>
     </layout>
