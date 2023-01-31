@@ -90,7 +90,9 @@
         </keyValueCollection>
         <collection id="openPositionDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local"/>
+            <view extends="_local">
+                <property name="positionType" view="_local"/>
+            </view>
             <loader id="openPositionDl"
                     cacheable="true">
                 <query>
@@ -187,7 +189,7 @@
                       dataContainer="jobCandidateDc"
                       property="blockCandidate"
                       visible="false"/>
-            <grid spacing="true">
+            <grid spacing="true" height="45px">
                 <columns count="12"/>
                 <rows>
                     <row>
@@ -196,7 +198,8 @@
                                align="MIDDLE_LEFT"
                                dataContainer="jobCandidateDc"
                                property="fullName"/>
-                        <label stylename="h2"
+                        <label stylename="h1"
+                               align="MIDDLE_LEFT"
                                value="|"/>
                         <label stylename="h2"
                                value="msg://msgRating"
@@ -204,22 +207,30 @@
                         <label id="candidateRatingLabel"
                                stylename="h2"
                                align="MIDDLE_LEFT"/>
-                        <label stylename="h2" value="|"/>
+                        <label stylename="h1"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
                         <label stylename="h2"
                                align="MIDDLE_LEFT"
                                dataContainer="jobCandidateDc"
                                property="personPosition"/>
-                        <label stylename="h2" value="|"/>
+                        <label stylename="h1"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
                         <label id="cityOfCandidate"
                                stylename="h2"
                                align="MIDDLE_LEFT"
                                dataContainer="jobCandidateDc"
                                property="cityOfResidence"/>
-                        <label stylename="h2" value="|"/>
+                        <label stylename="h1"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
                         <label id="labelCV"
                                align="MIDDLE_CENTER"
                                stylename="h3"/>
-                        <label stylename="h2" value="|"/>
+                        <label stylename="h1"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
                         <label id="labelQualityPercent"
                                align="MIDDLE_CENTER"
                                stylename="h3"/>

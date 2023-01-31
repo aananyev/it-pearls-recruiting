@@ -120,6 +120,24 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private Button stopAndCloseButton;
     @Inject
     private PopupButton loadFromOpenPositionPopupButton;
+    @Inject
+    private RadioButtonGroup filterMethodRadioButtonGroup;
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        initFilterMethodRadioButtonGroup();
+    }
+
+    private void initFilterMethodRadioButtonGroup() {
+        Map<String, Integer> filterMethodMap = new LinkedHashMap<>();
+
+        filterMethodMap.put("Одно из", 0);
+        filterMethodMap.put("Все", 1);
+
+        filterMethodRadioButtonGroup.setOptionsMap(filterMethodMap);
+
+        filterMethodRadioButtonGroup.setValue(0);
+    }
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -508,6 +526,10 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     List<JobCandidate> jobCandidatesFilered = new ArrayList<>();
 
     public void startSearchProcessButtonInvoke() {
+        searchProcessRun(((int) filterMethodRadioButtonGroup.getValue()));
+    }
+
+    private void searchProcessRun(int searchMethod) {
         ITERATIONS = jobCandidatesDc.getItems().size();
         final int[] count = {0};
         final int[] foundedCounter = {0};
@@ -540,7 +562,18 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                             count[0] = ++count[0];
 
                             if (!stopSearchProcess) {
-                                JobCandidate retJobCandidate = scanJobCandidatesCV(jobCandidate, filter);
+                                JobCandidate retJobCandidate = null;
+
+                                switch (searchMethod) {
+                                    case 0:
+                                        retJobCandidate = scanJobCandidatesCV(jobCandidate, filter);
+                                        break;
+                                    case 1:
+                                        retJobCandidate = scanJobCandidatesCVAllFromMany(jobCandidate, filter);
+                                        break;
+                                    default:
+                                        break;
+                                }
 
                                 if (retJobCandidate != null) {
                                     jobCandidatesFilered.add(retJobCandidate);
@@ -579,8 +612,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                                 filterProgressbar.setValue(percent);
 
-                                double progressPercent = (count[0] + 1) / ITERATIONS * 100;
-                                filterProgressbar.setDescription(((int) progressPercent) + "%");
+                                int progressPercent = (int) (percent * 100);
+                                filterProgressbar.setDescription("Прогресс: " + progressPercent + "%");
                                 progressLabel.setValue((count[0] + 1) + " из " + ITERATIONS);
                                 progressLabel.setDescription("Осталось до конца операции: "
                                         + (numberOfHours != 0 ? numberOfHours + " ч. " : "")
@@ -635,7 +668,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 break;
             }
         }
-
     }
 
     @Install(to = "jobCandidatesTable.viewCandidateButton", subject = "columnGenerator")
@@ -700,6 +732,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             progressBarHBox.setVisible(false);
             filterProgressbar.setVisible(false);
             loadFromOpenPositionPopupButton.setEnabled(true);
+            filterMethodRadioButtonGroup.setEnabled(true);
         } else {
             cityLookupPickerField.setEnabled(false);
             personPositionLookupPickerField.setEnabled(false);
@@ -709,6 +742,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             progressBarHBox.setVisible(true);
             filterProgressbar.setVisible(true);
             loadFromOpenPositionPopupButton.setEnabled(false);
+            filterMethodRadioButtonGroup.setEnabled(false);
         }
     }
 
@@ -726,15 +760,46 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         jobCandidatesDl.load();
     }
 
+    private JobCandidate scanJobCandidatesCVAllFromMany(JobCandidate jobCandidate,
+                                             HashMap<LinkButton, SkillTree> filter) {
+        Boolean flag = false;
 
-    private JobCandidate scanJobCandidatesCV(JobCandidate jobCandidate, HashMap<LinkButton, SkillTree> filter) {
+        for (CandidateCV candidateCV : jobCandidate.getCandidateCv()) {
+            List<SkillTree> skillTreesFromCV = pdfParserService.parseSkillTree(candidateCV.getTextCV());
+            for (Map.Entry entry : filter.entrySet()) {
+                for (SkillTree skill : skillTreesFromCV) {
+                    if (!((SkillTree) entry.getValue()).getSkillName().equals(skill.getSkillName())) {
+                        flag = true;
+                        break;
+                    }
+
+                    if (flag)
+                        break;
+                }
+
+                if (flag)
+                    break;
+            }
+
+            if (flag)
+                break;
+        }
+
+        if (flag) {
+            return null;
+        } else {
+            return jobCandidate;
+        }
+    }
+
+    private JobCandidate scanJobCandidatesCV(JobCandidate jobCandidate,
+                                             HashMap<LinkButton, SkillTree> filter) {
         Boolean flag = false;
 
 
         for (CandidateCV candidateCV : jobCandidate.getCandidateCv()) {
+            List<SkillTree> skillTreesFromCV = pdfParserService.parseSkillTree(candidateCV.getTextCV());
             for (Map.Entry entry : filter.entrySet()) {
-                List<SkillTree> skillTreesFromCV = pdfParserService.parseSkillTree(candidateCV.getTextCV());
-
                 for (SkillTree skill : skillTreesFromCV) {
                     if (((SkillTree) entry.getValue()).getSkillName().equals(skill.getSkillName())) {
                         flag = true;
@@ -864,15 +929,20 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         jobCandidatesDl.removeParameter("jobCandidateFiltered");
         jobCandidatesDl.load();
 
+        jobCandidatesDl.setParameter("personPosition",
+                personPositionLookupPickerField.getValue());
+        jobCandidatesDl.load();
+
         clearSearchResultButton.setEnabled(false);
-        startSearchProcessButton.setEnabled(false);
+        startSearchProcessButton.setEnabled(true);
     }
 
     @Subscribe("findSkillsSuggestionPickerField")
     public void onFindSkillsSuggestionPickerFieldValueChange(HasValue.ValueChangeEvent event) {
         if (findSkillsSuggestionPickerField.getValue() != null) {
             for (Map.Entry s : skillsPairAllToFilter.entrySet()) {
-                if (((LinkButton) s.getKey()).getCaption().equals(((SkillTree) event.getValue()).getSkillName())) {
+                if (((LinkButton) s.getKey()).getCaption()
+                        .equals(((SkillTree) event.getValue()).getSkillName())) {
                     ((LinkButton) s.getKey()).setVisible(false);
                     ((LinkButton) s.getValue()).getParent().getParent().setVisible(true);
                     ((LinkButton) s.getValue()).setVisible(true);
@@ -900,6 +970,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
         getWindow().setIcon(CubaIcon.FILTER.source());
         stopAndCloseButton.setEnabled(false);
+        filterMethodRadioButtonGroup.setEnabled(true);
         clearSearchResultButton.setEnabled(true);
         startSearchProcessButton.setEnabled(true);
         findSkillsSuggestionPickerField.setEnabled(true);
@@ -948,8 +1019,9 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 .build();
 
         screen.addAfterCloseListener(afterCloseEvent -> {
-            if (!((Onlytext) screen).getCancel()) {
-                List<SkillTree> allSkills = pdfParserService.parseSkillTree(((Onlytext) screen).getResultText());
+            if (!((OnlyTextFromFile) screen).getCancel()) {
+                List<SkillTree> allSkills =
+                        pdfParserService.parseSkillTree(((OnlyTextFromFile) screen).getResultText());
 
                 for (SkillTree st : allSkills) {
                     for (Map.Entry entry : skillsPairFilterToAll.entrySet()) {

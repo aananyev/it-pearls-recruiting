@@ -345,10 +345,10 @@
     font-weight: bold;
     text-align: center;
 /*    font-family: bold; */
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border: 1px solid;
-    border-radius: 15px;
+    border-radius: 20px;
     line-height: 17px;
     color: $color_p;
     box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
@@ -1294,7 +1294,7 @@ rating_battery_yellow_3:before {
     background-color: #ffffff;
     border: 1px solid #73a7f0;
     margin-left: 32px;
-    position:relative;
+    position: relative;
     border-radius: 4px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
@@ -1317,8 +1317,8 @@ rating_battery_yellow_3:before {
 }
 
 .tailVacancy {
-    font-size:small;
-    font-style: italic;
+    font-size:x-small;
+    font-style:italic;
 }
 
 .tailShadow {

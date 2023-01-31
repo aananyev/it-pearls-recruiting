@@ -239,6 +239,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataGrid<IteractionList> jobCandidateCommentsDataGrid;
     @Inject
     private CollectionLoader<IteractionList> interactionCommentDl;
+    @Inject
+    private CollectionContainer<OpenPosition> suggestOpenPositionDc;
+    @Inject
+    private GridLayout dictionatysTavlesHBox;
+    @Inject
+    private GroupBoxLayout lastProjects;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -738,6 +744,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void setSuggestOpenPositionTable() {
         List<Position> positions = new ArrayList<>();
 
+        suggestVacancyTable.addStyleName("borderless");
+        suggestVacancyTable.addStyleName("no-horizontal-lines");
+        suggestVacancyTable.addStyleName("no-vertical-lines");
+
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getPositionList() != null) {
                 for (JobCandidatePositionLists positionLists : getEditedEntity().getPositionList()) {
@@ -748,13 +758,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 if (positions.size() > 0) {
                     suggestOpenPositionDl.setParameter("positionTypes", positions);
                 }
-                suggestOpenPositionDl.load();
-            }
 
-            suggestVacancyTable.addStyleName("borderless");
-            suggestVacancyTable.addStyleName("no-horizontal-lines");
-            suggestVacancyTable.addStyleName("no-vertical-lines");
+            }
+        } else {
+            suggestOpenPositionDl.setMaxResults(1);
+            lastProjects.setVisible(false);
+            suggestVacancyTable.setVisible(false);
+            lastProjectTable.setVisible(false);
+            dictionatysTavlesHBox.setVisible(false);
         }
+
+        suggestOpenPositionDl.load();
     }
 
     private void setLastProjectOfCandidate() {
@@ -2679,8 +2693,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         }
 
-        StringBuffer retStr = new StringBuffer(
-                lastInteraction.getIteractionType().getIterationName());
+        StringBuffer retStr = new StringBuffer("");
+        if (lastInteraction.getIteractionType() != null) {
+            if (lastInteraction.getIteractionType().getIterationName() != null) {
+                retStr.append(lastInteraction.getIteractionType().getIterationName());
+            }
+        }
+
         retLabel.setValue(retStr);
 
         return retLabel;
@@ -2905,6 +2924,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retBox.setWidthFull();
         retBox.setSpacing(false);
         retBox.setMargin(false);
+        retBox.setHeight("100px");
 
         HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
         innerBox.setMargin(true);
@@ -2931,7 +2951,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             Label text = uiComponents.create(Label.class);
             text.setValue(event.getItem().getComment() != null ?
-                    event.getItem().getComment() : "");
+                    event.getItem().getComment().replaceAll("\n\n", "\n") : "");
+            text.addStyleName("table-wordwrap");
 
             Label date = uiComponents.create(Label.class);
             date.setValue(event.getItem().getDateIteraction() != null ?
@@ -2981,9 +3002,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             outerBox.add(text);
             outerBox.add(date);
+
             if (!userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
                 innerBox.add(image);
             }
+
             innerBox.add(outerBox);
             if (userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
                 innerBox.add(image);

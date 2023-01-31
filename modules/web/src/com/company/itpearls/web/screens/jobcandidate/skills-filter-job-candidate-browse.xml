@@ -161,23 +161,32 @@
                       collapsed="false"
                       spacing="true"
                       caption="msg://msgSkillBox">
-                <suggestionPickerField id="findSkillsSuggestionPickerField"
-                                       width="AUTO"
-                                       inputPrompt="mainMsg://msgStartInput"
-                                       minSearchStringLength="3"
-                                       rowspan="1"
-                                       colspan="1"
-                                       caption="msg://msgSkills">
-                    <actions/>
-                    <query entityClass="com.company.itpearls.entity.SkillTree"
-                           escapeValueForLike="true"
-                           searchStringFormat="%$searchString%">
-                        select e
-                        from itpearls_SkillTree e
-                        where lower(e.skillName) like lower(:searchString) escape '\'
-                        order by e.skillName
-                    </query>
-                </suggestionPickerField>
+                <hbox width="100%" spacing="true">
+                    <suggestionPickerField id="findSkillsSuggestionPickerField"
+                                           width="AUTO"
+                                           inputPrompt="mainMsg://msgStartInput"
+                                           minSearchStringLength="3"
+                                           icon="PAPERCLIP"
+                                           rowspan="1"
+                                           colspan="1"
+                                           caption="msg://msgSkills">
+                        <actions/>
+                        <query entityClass="com.company.itpearls.entity.SkillTree"
+                               escapeValueForLike="true"
+                               searchStringFormat="%$searchString%">
+                            select e
+                            from itpearls_SkillTree e
+                            where lower(e.skillName) like lower(:searchString) escape '\'
+                            order by e.skillName
+                        </query>
+                    </suggestionPickerField>
+                    <radioButtonGroup id="filterMethodRadioButtonGroup"
+                                      width="AUTO"
+                                      caption="msg://msgSearchMethod"
+                                      orientation="horizontal"
+                                      align="MIDDLE_RIGHT"
+                                      icon="FILTER"/>
+                </hbox>
                 <hbox id="skillBoxHBox"
                       width="100%"
                       stylename="card">
