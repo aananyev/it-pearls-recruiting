@@ -9,13 +9,17 @@
               icon="CALENDAR"/>
 
     </menu>
-    <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
+    <menu id="application-hrmasters"
+          icon="BALANCE_SCALE"
+          insertAfter="application-calendars">
         <item screen="itpearls_OpenPositionMaster.browse"
-              caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse" icon="PENCIL"/>
-        <item screen="itpearls_SkillsFilterJobCandidate.browse"
-              caption="mainMsg://menu_config.itpearls_SkillsFilterJobCandidate.browse" icon="SEARCH"/>
+              caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse"
+              icon="PENCIL"/>
         <item screen="itpearls_RotatingCandidate.browse"
               caption="mainMsg://menu_config.itpearls_RotatingCandidate.browse" icon="RECYCLE"/>
+        <item screen="itpearls_SkillsFilterJobCandidate.browse"
+              caption="mainMsg://menu_config.itpearls_SkillsFilterJobCandidate.browse"
+              icon="SEARCH"/>
     </menu>
     <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
         <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"

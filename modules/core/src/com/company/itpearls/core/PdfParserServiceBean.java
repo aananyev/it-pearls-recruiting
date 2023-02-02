@@ -17,10 +17,7 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service(PdfParserService.NAME)
 public class PdfParserServiceBean implements PdfParserService {
@@ -33,7 +30,8 @@ public class PdfParserServiceBean implements PdfParserService {
     public List<SkillTree> parseSkillTree(String inputText) {
         String QUERY_SKILL_TREE =
                 "select e " +
-                        "from itpearls_SkillTree e";
+                        "from itpearls_SkillTree e " +
+                        "order by e.skillName";
 
         List<SkillTree> candidateSkills = new ArrayList<>();
 
@@ -42,6 +40,8 @@ public class PdfParserServiceBean implements PdfParserService {
                 .view("skillTree-view")
                 .cacheable(true)
                 .list();
+
+        Collections.reverse(competitions);
 
         for (SkillTree specialisation : competitions) {
             try {
@@ -59,10 +59,9 @@ public class PdfParserServiceBean implements PdfParserService {
                 log.error("Error", e);
             }
         }
-        // удаляем дубликаты
-/*        Set<SkillTree> st = new HashSet<>(candidateSkills);
-        candidateSkills.clear();
-        candidateSkills.addAll(st); */
+
+        Collections.reverse(candidateSkills);
+        Collections.reverse(candidateSkills);
 
         return candidateSkills;
     }

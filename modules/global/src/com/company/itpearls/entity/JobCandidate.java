@@ -139,6 +139,17 @@ public class JobCandidate extends StandardEntity {
     @Column(name = "PRIORITY_CONTACT")
     private Integer priorityContact;
 
+    @Column(name = "VISIBLE")
+    private Boolean tablesVisible;
+
+    public Boolean getTablesVisible() {
+        return tablesVisible;
+    }
+
+    public void setTablesVisible(Boolean tablesVisible) {
+        this.tablesVisible = tablesVisible;
+    }
+
     public List<LaborAgreement> getLaborAgreement() {
         return laborAgreement;
     }

@@ -2609,7 +2609,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         if (iteractionList.getVacancy() != null) {
                             if (iteractionList.getVacancy().equals(op) &&
                                     iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
-                                retLabel.setValue(iteractionList.getRecrutier().getName());
+                                if (iteractionList.getRecrutier() != null) {
+                                    retLabel.setValue(iteractionList.getRecrutier().getName());
+                                } else {
+                                    if (iteractionList.getRecrutierName() != null) {
+                                        retLabel.setValue(iteractionList.getRecrutierName());
+                                    }
+                                }
                             }
                         }
                     }
@@ -2939,8 +2945,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (event.getItem().getComment() != null
                 && !event.getItem().getComment().equals("")) {
             Label name = uiComponents.create(Label.class);
-            name.setValue(event.getItem().getRecrutier().getName() != null
-                    ? event.getItem().getRecrutier().getName() : "");
+            if (event.getItem().getRecrutier() != null) {
+                name.setValue(event.getItem().getRecrutier().getName() != null
+                        ? event.getItem().getRecrutier().getName() :
+                        (event.getItem().getRecrutierName() != null ? event.getItem().getRecrutierName() : ""));
+            }
             name.setStyleName("tailName");
 
             Label vacancy = uiComponents.create(Label.class);
@@ -2962,9 +2971,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             Image image = uiComponents.create(Image.class);
 
-            if (((ExtUser) event.getItem().getRecrutier()).getFileImageFace() != null) {
-                image.setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(((ExtUser) event.getItem().getRecrutier()).getFileImageFace());
+            if (event.getItem().getRecrutier() != null) {
+                if (((ExtUser) event.getItem().getRecrutier()).getFileImageFace() != null) {
+                    image.setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(((ExtUser) event.getItem().getRecrutier()).getFileImageFace());
+                } else {
+                    image.setSource(ThemeResource.class)
+                            .setPath("icons/no-programmer.jpeg");
+                }
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");

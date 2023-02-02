@@ -6,6 +6,7 @@ import com.company.itpearls.web.StandartPrioritySkills;
 import com.company.itpearls.web.screens.fragments.OnlyTextFromFile;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
@@ -122,21 +123,46 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private PopupButton loadFromOpenPositionPopupButton;
     @Inject
     private RadioButtonGroup filterMethodRadioButtonGroup;
+    @Inject
+    private Button openPositionViewButton;
+    private OpenPosition selectedOpenPosition = null;
+    @Inject
+    private Label<String> counterSelectedCandidatesLabel;
+    private Integer counter = 0;
 
     @Subscribe
     public void onInit(InitEvent event) {
         initFilterMethodRadioButtonGroup();
+        setVisibleOfCandidates();
+    }
+
+    private void setVisibleOfCandidates() {
+    }
+
+    @Install(to = "jobCandidatesTable", subject = "rowStyleProvider")
+    private String jobCandidatesTableRowStyleProvider(JobCandidate jobCandidate) {
+        String retStyle = "";
+
+        if (jobCandidate.getTablesVisible() != null) {
+            if (jobCandidate.getTablesVisible()) {
+                retStyle = "table-row-not-visibe";
+            } else {
+                retStyle = "table-row-visibe";
+            }
+        }
+
+        return retStyle;
     }
 
     private void initFilterMethodRadioButtonGroup() {
         Map<String, Integer> filterMethodMap = new LinkedHashMap<>();
 
-        filterMethodMap.put("Одно из", 0);
-        filterMethodMap.put("Все", 1);
+        filterMethodMap.put(messageBundle.getMessage("msgSearchAllFromMany"), 1);
+        filterMethodMap.put(messageBundle.getMessage("msgSearchOneFromMany"), 0);
 
         filterMethodRadioButtonGroup.setOptionsMap(filterMethodMap);
 
-        filterMethodRadioButtonGroup.setValue(0);
+        filterMethodRadioButtonGroup.setValue(1);
     }
 
     @Subscribe
@@ -670,6 +696,36 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         }
     }
 
+    @Subscribe("jobCandidatesTable")
+    public void onJobCandidatesTableItemClick(DataGrid.ItemClickEvent<JobCandidate> event) {
+
+    }
+
+    @Install(to = "jobCandidatesTable.selectCandidateColumn", subject = "columnGenerator")
+    private Component jobCandidatesTableSelectCandidateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        CheckBox retCheckBox = uiComponents.create(CheckBox.class);
+
+        retCheckBox.setDescription(messageBundle.getMessage("msgSelectCandidate"));
+        retCheckBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retCheckBox.addValueChangeListener(e -> {
+            countSelectedCandidates(e.getValue());
+        });
+
+        return retCheckBox;
+    }
+
+    private void countSelectedCandidates(Boolean checkBoxValue) {
+        counter = counter + (checkBoxValue ? 1 : -1);
+
+        if (counter != 0) {
+            counterSelectedCandidatesLabel.setValue(
+                    messageBundle.getMessage("msgCounterCandidates") + counter);
+            counterSelectedCandidatesLabel.setVisible(true);
+        } else {
+            counterSelectedCandidatesLabel.setVisible(false);
+        }
+    }
+
     @Install(to = "jobCandidatesTable.viewCandidateButton", subject = "columnGenerator")
     private Component jobCandidatesTableViewCandidateButtonColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         VBoxLayout retVBox = uiComponents.create(VBoxLayout.class);
@@ -679,7 +735,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         retVBox.setSpacing(true);
 
         Button retButton = uiComponents.create(Button.class);
-        retButton.setCaption("Просмотр");
+        retButton.setCaption(messageBundle.getMessage("msgView"));
         retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         retButton.addClickListener(e -> {
@@ -761,7 +817,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
     private JobCandidate scanJobCandidatesCVAllFromMany(JobCandidate jobCandidate,
-                                             HashMap<LinkButton, SkillTree> filter) {
+                                                        HashMap<LinkButton, SkillTree> filter) {
         Boolean flag = false;
 
         for (CandidateCV candidateCV : jobCandidate.getCandidateCv()) {
@@ -1004,7 +1060,9 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     }
                 }
 
+                openPositionViewButton.setVisible(false);
                 setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
+                selectedOpenPosition = null;
             }
         });
 
@@ -1035,7 +1093,9 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     }
                 }
 
+                openPositionViewButton.setVisible(false);
                 setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
+                selectedOpenPosition = null;
             }
         });
 
@@ -1062,6 +1122,13 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     }
                 }
             }
+
+            loadFromOpenPositionPopupButton.setDescription(loadFromOpenPositionPopupButton.getDescription()
+                    + ": "
+                    + op.getVacansyName());
+            openPositionViewButton.setDescription(op.getVacansyName());
+            openPositionViewButton.setVisible(true);
+            selectedOpenPosition = op;
         }
 
         setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
@@ -1116,6 +1183,24 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             } catch (ClassCastException e) {
 
             }
+        }
+    }
+
+    public void openPositionViewButtonInvoke() {
+        if (selectedOpenPosition != null) {
+            screenBuilders.editor(OpenPosition.class, this)
+                    .withScreenClass(OpenPositionEdit.class)
+                    .editEntity(selectedOpenPosition)
+                    .build()
+                    .show();
+        } else {
+            openPositionViewButton.setVisible(false);
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgNotSelectedOpenPosition"))
+                    .withHideDelayMs(5000)
+                    .show();
         }
     }
 }

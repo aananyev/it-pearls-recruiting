@@ -727,6 +727,17 @@ rating_battery_yellow_3:before {
    line-height: 150%;
 }
 
+.table-row-not-visibe {
+    text-color: gray;
+    text-decoration: line-through;
+}
+
+
+.table-row-visibe {
+    text-color: black;
+    text-decoration: normal;
+}
+
 .transition-orange {
     animation-name: blink;
     animation-timing-function: linear;

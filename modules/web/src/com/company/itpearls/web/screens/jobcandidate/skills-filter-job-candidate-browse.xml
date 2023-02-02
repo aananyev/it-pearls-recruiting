@@ -128,7 +128,6 @@
                       width="AUTO">
                     <popupButton id="loadFromOpenPositionPopupButton"
                                  width="AUTO"
-                                 height="100%"
                                  align="BOTTOM_RIGHT"
                                  caption="msg://msgLoad"
                                  description="msg://msgLoadDesc">
@@ -138,11 +137,17 @@
                             <action id="loadFromClipboard" caption="msg://msgLoadFromClipboard"/>
                         </actions>
                     </popupButton>
+                    <button id="openPositionViewButton"
+                            icon="FILE_TEXT"
+                            width="AUTO"
+                            align="BOTTOM_RIGHT"
+                            visible="false"
+                            description="msg://msgViewOpenPosition"
+                            invoke="openPositionViewButtonInvoke"/>
                     <button id="clearFilterButton"
                             visible="true"
                             align="BOTTOM_LEFT"
                             width="AUTO"
-                            height="100%"
                             caption="msg://msgClearFilter"
                             description="msg://mshClearFilterDesc"
                             invoke="clearFilterButtonInvoke"/>
@@ -297,6 +302,7 @@
                     <dataGrid id="jobCandidatesTable"
                               width="100%"
                               visible="true"
+                              editorEnabled="true"
                               dataContainer="jobCandidatesDc">
                         <actions>
                         </actions>
@@ -307,16 +313,30 @@
                                     width="50px">
                                 <componentRenderer/>
                             </column>
-                            <column property="fullName" id="fullName"/>
-                            <column property="personPosition" id="personPosition"/>
-                            <column property="cityOfResidence" id="cityOfResidence"/>
+                            <column id="selectCandidateColumn"
+                                    width="40px"
+                                    editable="true"
+                                    caption="msg://msgSelectCandidate">
+                                <componentRenderer/>
+                            </column>
+                            <column property="fullName"
+                                    editable="false"
+                                    id="fullName"/>
+                            <column property="personPosition"
+                                    editable="false"
+                                    id="personPosition"/>
+                            <column property="cityOfResidence"
+                                    editable="false"
+                                    id="cityOfResidence"/>
                             <column id="lastIteraction"
+                                    editable="false"
                                     caption="msg://msgDateLastIteraction"
                                     maximumWidth="90px"
                                     minimumWidth="90px">
                                 <htmlRenderer nullRepresentation="null"/>
                             </column>
                             <column id="viewCandidateButton"
+                                    editable="false"
                                     width="100px"
                                     caption="msg://msgView">
                                 <componentRenderer/>
@@ -354,6 +374,10 @@
                           align="MIDDLE_RIGHT"
                           width="AUTO"
                           height="AUTO">
+                        <label id="counterSelectedCandidatesLabel"
+                               width="AUTO"
+                               align="MIDDLE_LEFT"
+                               visible="false"/>
                         <button id="clearSearchResultButton"
                                 width="AUTO"
                                 enable="false"

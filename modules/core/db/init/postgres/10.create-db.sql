@@ -51,6 +51,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     FILE_IMAGE_FACE uuid,
     WORK_STATUS integer,
     PRIORITY_CONTACT integer,
+    VISIBLE boolean,
     --
     primary key (ID)
 )^

@@ -1215,9 +1215,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 Boolean flag = false;
                 for (IteractionList iteractionList : selectedJobCandidate.getIteractionList()) {
                     if (entity.getValue("vacancy").equals(iteractionList.getVacancy())) {
-                        if (iteractionList.getIteractionType().getSignEndCase()) {
-                            flag = true;
-                            break;
+                        if (iteractionList.getIteractionType().getSignEndCase() != null) {
+                            if (iteractionList.getIteractionType().getSignEndCase()) {
+                                flag = true;
+                                break;
+                            }
                         }
                     }
                 }
