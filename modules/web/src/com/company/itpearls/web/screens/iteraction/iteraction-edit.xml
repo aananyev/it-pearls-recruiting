@@ -255,7 +255,9 @@ order by e.number]]>
                 <groupBox spacing="true" height="AUTO">
                     <hbox width="100%" height="AUTO" spacing="true">
                         <groupBox height="AUTO" spacing="true" width="100%">
-                            <checkBox id="checkBoxFlag" caption="msg://msgAdd" dataContainer="iteractionDc"
+                            <checkBox id="checkBoxFlag"
+                                      caption="msg://msgAdd"
+                                      dataContainer="iteractionDc"
                                       property="addFlag"/>
                             <hbox expand="radioButtonAddType">
                                 <radioButtonGroup id="radioButtonAddType"

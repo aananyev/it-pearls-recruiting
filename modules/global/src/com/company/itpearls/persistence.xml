@@ -42,5 +42,6 @@
         <class>com.company.itpearls.entity.StaffCurrent</class>
         <class>com.company.itpearls.entity.ApplicationRecruitment</class>
         <class>com.company.itpearls.entity.ApplicationRecruitmentList</class>
+        <class>com.company.itpearls.entity.PersonelReserve</class>
     </persistence-unit>
 </persistence>

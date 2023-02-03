@@ -7,12 +7,13 @@ import com.company.itpearls.web.screens.fragments.OnlyTextFromFile;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
-import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
@@ -22,6 +23,7 @@ import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
@@ -52,6 +54,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private HashMap<LinkButton, LinkButton> skillsPairAllToFilter = new HashMap<>();
     private HashMap<LinkButton, LinkButton> skillsPairFilterToAll = new HashMap<>();
     private HashMap<LinkButton, SkillTree> filter = new HashMap<>();
+    private List<JobCandidate> selectedCandidates = new ArrayList<>();
+
     private Boolean stopSearchProcess = false;
 
     @Inject
@@ -129,6 +133,18 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     @Inject
     private Label<String> counterSelectedCandidatesLabel;
     private Integer counter = 0;
+    @Inject
+    private Button deleteUnselectedCandidatesButton;
+    @Inject
+    private Button putPersonelReserveButton;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
+    private DataContext dataContext;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -137,21 +153,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
     private void setVisibleOfCandidates() {
-    }
-
-    @Install(to = "jobCandidatesTable", subject = "rowStyleProvider")
-    private String jobCandidatesTableRowStyleProvider(JobCandidate jobCandidate) {
-        String retStyle = "";
-
-        if (jobCandidate.getTablesVisible() != null) {
-            if (jobCandidate.getTablesVisible()) {
-                retStyle = "table-row-not-visibe";
-            } else {
-                retStyle = "table-row-visibe";
-            }
-        }
-
-        return retStyle;
     }
 
     private void initFilterMethodRadioButtonGroup() {
@@ -640,13 +641,13 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                                 int progressPercent = (int) (percent * 100);
                                 filterProgressbar.setDescription("Прогресс: " + progressPercent + "%");
-                                progressLabel.setValue((count[0] + 1) + " из " + ITERATIONS);
+                                progressLabel.setValue((count[0]) + " из " + ITERATIONS);
                                 progressLabel.setDescription("Осталось до конца операции: "
                                         + (numberOfHours != 0 ? numberOfHours + " ч. " : "")
                                         + (numberOfMinutes != 0 ? numberOfMinutes + " м. " : "")
                                         + (numberOfSeconds != 0 ? numberOfSeconds + " с." : ""));
 
-                                foundLabel.setValue("найдено: " + foundedCounter[0]);
+                                foundLabel.setValue("найдено: " + (foundedCounter[0] - 1));
                             }
                         }
                     }
@@ -708,21 +709,27 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         retCheckBox.setDescription(messageBundle.getMessage("msgSelectCandidate"));
         retCheckBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
         retCheckBox.addValueChangeListener(e -> {
-            countSelectedCandidates(e.getValue());
+            countSelectedCandidates(event.getItem(), e.getValue());
         });
 
         return retCheckBox;
     }
 
-    private void countSelectedCandidates(Boolean checkBoxValue) {
+    private void countSelectedCandidates(JobCandidate jobCandidate, Boolean checkBoxValue) {
         counter = counter + (checkBoxValue ? 1 : -1);
 
         if (counter != 0) {
             counterSelectedCandidatesLabel.setValue(
                     messageBundle.getMessage("msgCounterCandidates") + counter);
-            counterSelectedCandidatesLabel.setVisible(true);
+            deleteUnselectedCandidatesButton.setEnabled(true);
+            putPersonelReserveButton.setEnabled(true);
+
+            selectedCandidates.add(jobCandidate);
         } else {
-            counterSelectedCandidatesLabel.setVisible(false);
+            deleteUnselectedCandidatesButton.setEnabled(false);
+            putPersonelReserveButton.setEnabled(false);
+
+            selectedCandidates.remove(jobCandidate);
         }
     }
 
@@ -1201,6 +1208,69 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     .withDescription(messageBundle.getMessage("msgNotSelectedOpenPosition"))
                     .withHideDelayMs(5000)
                     .show();
+        }
+    }
+
+    public void deleteUnselectedCandidatesButtonInvoke() {
+        jobCandidatesDl.setParameter("jobCandidateFiltered", selectedCandidates);
+        jobCandidatesDl.load();
+    }
+
+    public void putPersonelReserveButtonInvoke() {
+        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                .withMessage(messageBundle.getMessage("msgPutToPersonelReserve")
+                        + "\n\nВыбрано: "
+                        + selectedCandidates.size()
+                        + " "
+                        + messageBundle.getMessage("msgCandidatesPoint"))
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> putCandidatesToPersonelReserve()),
+                        new DialogAction(DialogAction.Type.NO, Action.Status.NORMAL))
+                .withType(Dialogs.MessageType.CONFIRMATION)
+                .show();
+    }
+
+    private void putCandidatesToPersonelReserve() {
+        List<PersonelReserve> personelReserves = new ArrayList<>();
+
+        for (JobCandidate jobCandidate : selectedCandidates) {
+            PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
+
+            personelReserve.setDate(new Date());
+            personelReserve.setJobCandidate(jobCandidate);
+            personelReserve.setRectutier(userSessionSource.getUserSession().getUser());
+            personelReserve.setInProcess(true);
+
+            if (personPositionLookupPickerField.getValue() != null) {
+                personelReserve.setPersonPosition(personPositionLookupPickerField.getValue());
+            }
+
+            if (selectedOpenPosition != null) {
+                personelReserve.setOpenPosition(selectedOpenPosition);
+            }
+
+            personelReserves.add(personelReserve);
+        }
+
+        CommitContext commitContext = new CommitContext(personelReserves);
+        dataManager.commit(commitContext);
+
+        counter -= selectedCandidates.size();
+
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withHideDelayMs(5000)
+                .withDescription(
+                        messageBundle.getMessage("msgCountOfPersonalReserve")
+                                + selectedCandidates.size()
+                                + " "
+                                + messageBundle.getMessage("msgCandidatesPoint"))
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .show();
+
+        jobCandidatesDl.setParameter("jobCandidateNotFiltered", selectedCandidates);
+        jobCandidatesDl.load();
+
+        for (JobCandidate jobCandidate : selectedCandidates) {
+            selectedCandidates.remove(jobCandidate);
         }
     }
 }

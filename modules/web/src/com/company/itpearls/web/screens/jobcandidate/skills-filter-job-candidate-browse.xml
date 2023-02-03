@@ -50,6 +50,9 @@
                             <c:jpql>
                                 <c:where>e in :jobCandidateFiltered</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>not e in :jobCandidateNotFiltered</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -314,7 +317,7 @@
                                 <componentRenderer/>
                             </column>
                             <column id="selectCandidateColumn"
-                                    width="40px"
+                                    width="35px"
                                     editable="true"
                                     caption="msg://msgSelectCandidate">
                                 <componentRenderer/>
@@ -372,12 +375,32 @@
                           spacing="true"
                           margin="true"
                           align="MIDDLE_RIGHT"
-                          width="AUTO"
+                          width="100%"
+                          expand="selectCandidateForWorkHBox"
                           height="AUTO">
-                        <label id="counterSelectedCandidatesLabel"
-                               width="AUTO"
-                               align="MIDDLE_LEFT"
-                               visible="false"/>
+                        <hbox id="selectCandidateForWorkHBox"
+                              width="100%"
+                              spacing="true"
+                              align="MIDDLE_LEFT">
+                            <hbox spacing="true">
+                                <label id="counterSelectedCandidatesLabel"
+                                       value="msg://msgCounterCandidates"
+                                       width="AUTO"
+                                       align="MIDDLE_LEFT"
+                                       visible="true"/>
+                                <button id="deleteUnselectedCandidatesButton"
+                                        width="AUTO"
+                                        align="MIDDLE_LEFT"
+                                        caption="msg://msgDeleteUnselectedCandidates"
+                                        enable="false"
+                                        invoke="deleteUnselectedCandidatesButtonInvoke"/>
+                                <button id="putPersonelReserveButton"
+                                        caption="msg://msgputPersonelReserve"
+                                        align="MIDDLE_LEFT"
+                                        enable="false"
+                                        invoke="putPersonelReserveButtonInvoke"/>
+                            </hbox>
+                        </hbox>
                         <button id="clearSearchResultButton"
                                 width="AUTO"
                                 enable="false"

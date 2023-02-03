@@ -205,7 +205,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     }
 
 
-
     @Subscribe("typeTraceRadioButtons")
     public void onTypeTraceRadioButtonsValueChange(HasValue.ValueChangeEvent<Integer> event) {
         switch (event.getValue()) {
@@ -279,8 +278,8 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         neetToSendEmailCheckBox.addValueChangeListener(event -> {
             textEmailToSendRichTextArea.setEnabled(false);
 
-            if(event.getValue() != null) {
-                if(event.getValue()) {
+            if (event.getValue() != null) {
+                if (event.getValue()) {
                     textEmailToSendRichTextArea.setEnabled(true);
                 } else {
                     textEmailToSendRichTextArea.setEnabled(false);
@@ -291,7 +290,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         HashMap<String, String> emailKeys = emailGenerationService.generateKeys();
         String retStr = "";
 
-        for(Map.Entry<String, String> entry : emailKeys.entrySet()) {
+        for (Map.Entry<String, String> entry : emailKeys.entrySet()) {
             retStr = retStr + entry.getKey() + " - " + entry.getValue() + "<br>";
         }
 
@@ -306,9 +305,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe("checkBoxFlag")
     public void onCheckBoxFlagValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if (checkBoxFlag.getValue()) {
-            checkBoxCallDialog.setValue(false);
-        }
+        checkBoxCallDialog.setValue(!checkBoxFlag.getValue());
 
         radioButtonAddType.setRequired(checkBoxFlag.getValue());
         textFieldCaption.setRequired(checkBoxFlag.getValue());
@@ -373,6 +370,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe("notificationNeedSendCheckBox")
     public void onNotificationNeedSendCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-         notificationSetupHBox.setEnabled(event.getValue());
+        notificationSetupHBox.setEnabled(event.getValue());
     }
 }
