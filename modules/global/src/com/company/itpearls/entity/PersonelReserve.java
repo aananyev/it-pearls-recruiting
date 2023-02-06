@@ -21,7 +21,20 @@ public class PersonelReserve extends StandardEntity {
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REACTUTIER_ID")
-    private User rectutier;
+    private User recruter;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PERSON_POSITION_ID")
+    private Position personPosition;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "OPEN_POSITION_ID")
+    private OpenPosition openPosition;
+
+    @Column(name = "IN_PROCESSED")
+    private Boolean inProcess;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "DATE_")
@@ -34,21 +47,8 @@ public class PersonelReserve extends StandardEntity {
     @Column(name = "END_DATE")
     private Date endDate;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {})
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PERSON_POSITION_ID")
-    private Position personPosition;
-
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "OPEN_POSITION_ID")
-    private OpenPosition openPosition;
-
     @Column(name = "REMOVED_FROM_RESERVE")
     private Boolean removedFromReserve;
-
-    @Column(name = "IN_PROCESSED")
-    private Boolean inProcess;
 
     public Boolean getInProcess() {
         return inProcess;
@@ -106,12 +106,12 @@ public class PersonelReserve extends StandardEntity {
         this.date = date;
     }
 
-    public User getRectutier() {
-        return rectutier;
+    public User getRecruter() {
+        return recruter;
     }
 
-    public void setRectutier(User rectutier) {
-        this.rectutier = rectutier;
+    public void setRecruter(User recruter) {
+        this.recruter = recruter;
     }
 
     public JobCandidate getJobCandidate() {

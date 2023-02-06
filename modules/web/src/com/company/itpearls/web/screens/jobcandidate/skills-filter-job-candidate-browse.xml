@@ -188,6 +188,10 @@
                             order by e.skillName
                         </query>
                     </suggestionPickerField>
+                    <label id="loadFromVacancyLabel"
+                           width="100%"
+                           align="TOP_CENTER"
+                           stylename="large"/>
                     <radioButtonGroup id="filterMethodRadioButtonGroup"
                                       width="AUTO"
                                       caption="msg://msgSearchMethod"

@@ -7,9 +7,7 @@ import com.company.itpearls.web.screens.fragments.OnlyTextFromFile;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
-import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -33,6 +31,7 @@ import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,6 +54,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private HashMap<LinkButton, LinkButton> skillsPairFilterToAll = new HashMap<>();
     private HashMap<LinkButton, SkillTree> filter = new HashMap<>();
     private List<JobCandidate> selectedCandidates = new ArrayList<>();
+    private HashMap<JobCandidate, CheckBox> personalReserveCheckBoxes = new HashMap<>();
 
     private Boolean stopSearchProcess = false;
 
@@ -145,6 +145,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private UserSessionSource userSessionSource;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private Label<String> loadFromVacancyLabel;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -647,7 +649,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                         + (numberOfMinutes != 0 ? numberOfMinutes + " м. " : "")
                                         + (numberOfSeconds != 0 ? numberOfSeconds + " с." : ""));
 
-                                foundLabel.setValue("найдено: " + (foundedCounter[0] - 1));
+                                foundLabel.setValue("найдено: " + (foundedCounter[0]));
                             }
                         }
                     }
@@ -708,9 +710,14 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
         retCheckBox.setDescription(messageBundle.getMessage("msgSelectCandidate"));
         retCheckBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
         retCheckBox.addValueChangeListener(e -> {
             countSelectedCandidates(event.getItem(), e.getValue());
         });
+
+        retCheckBox.setValue(false);
+
+        personalReserveCheckBoxes.put(event.getItem(), retCheckBox);
 
         return retCheckBox;
     }
@@ -718,7 +725,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private void countSelectedCandidates(JobCandidate jobCandidate, Boolean checkBoxValue) {
         counter = counter + (checkBoxValue ? 1 : -1);
 
-        if (counter != 0) {
+        if (counter > 0) {
             counterSelectedCandidatesLabel.setValue(
                     messageBundle.getMessage("msgCounterCandidates") + counter);
             deleteUnselectedCandidatesButton.setEnabled(true);
@@ -729,6 +736,9 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             deleteUnselectedCandidatesButton.setEnabled(false);
             putPersonelReserveButton.setEnabled(false);
 
+            counter = 0;
+            counterSelectedCandidatesLabel.setValue(
+                    messageBundle.getMessage("msgCounterCandidates") + counter);
             selectedCandidates.remove(jobCandidate);
         }
     }
@@ -1067,6 +1077,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     }
                 }
 
+
+                loadFromVacancyLabel.setVisible(false);
                 openPositionViewButton.setVisible(false);
                 setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
                 selectedOpenPosition = null;
@@ -1100,6 +1112,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     }
                 }
 
+                loadFromVacancyLabel.setVisible(false);
                 openPositionViewButton.setVisible(false);
                 setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
                 selectedOpenPosition = null;
@@ -1133,6 +1146,9 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             loadFromOpenPositionPopupButton.setDescription(loadFromOpenPositionPopupButton.getDescription()
                     + ": "
                     + op.getVacansyName());
+
+            loadFromVacancyLabel.setValue(op.getVacansyName());
+            loadFromVacancyLabel.setVisible(true);
             openPositionViewButton.setDescription(op.getVacansyName());
             openPositionViewButton.setVisible(true);
             selectedOpenPosition = op;
@@ -1223,54 +1239,102 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                         + selectedCandidates.size()
                         + " "
                         + messageBundle.getMessage("msgCandidatesPoint"))
-                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> putCandidatesToPersonelReserve()),
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                .withHandler(e -> putCandidatesToPersonelReserve()),
                         new DialogAction(DialogAction.Type.NO, Action.Status.NORMAL))
                 .withType(Dialogs.MessageType.CONFIRMATION)
                 .show();
     }
 
     private void putCandidatesToPersonelReserve() {
-        List<PersonelReserve> personelReserves = new ArrayList<>();
+        String QUERY_GET_PERSONEL_RESERVE = "select e from itpearls_PersonelReserve e " +
+                "where e.jobCandidate = :jobCandidate " +
+                "and " +
+                "(e.endDate > :currDate or e.endDate is null)";
+        List<JobCandidate> removeFromTable = new ArrayList<>();
+        int failedCounter = 0;
 
         for (JobCandidate jobCandidate : selectedCandidates) {
-            PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
+            PersonelReserve personelReserveCheck = null;
 
-            personelReserve.setDate(new Date());
-            personelReserve.setJobCandidate(jobCandidate);
-            personelReserve.setRectutier(userSessionSource.getUserSession().getUser());
-            personelReserve.setInProcess(true);
-
-            if (personPositionLookupPickerField.getValue() != null) {
-                personelReserve.setPersonPosition(personPositionLookupPickerField.getValue());
+            try {
+                personelReserveCheck = dataManager.load(PersonelReserve.class)
+                        .query(QUERY_GET_PERSONEL_RESERVE)
+                        .view("personelReserve-view")
+                        .parameter("jobCandidate", jobCandidate)
+                        .parameter("currDate", new Date())
+                        .one();
+            } catch (IllegalStateException e) {
+                personelReserveCheck = null;
             }
 
-            if (selectedOpenPosition != null) {
-                personelReserve.setOpenPosition(selectedOpenPosition);
-            }
+            if (personelReserveCheck == null) {
+                PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
 
-            personelReserves.add(personelReserve);
+                personelReserve.setDate(new Date());
+                personelReserve.setJobCandidate(jobCandidate);
+                personelReserve.setRecruter(userSessionSource.getUserSession().getUser());
+                personelReserve.setInProcess(true);
+
+                int noOfDays = 14;
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(new Date());
+                calendar.add(Calendar.DAY_OF_YEAR, noOfDays);
+                Date endDate = calendar.getTime();
+                personelReserve.setEndDate(endDate);
+
+                if (personPositionLookupPickerField.getValue() != null) {
+                    personelReserve.setPersonPosition(personPositionLookupPickerField.getValue());
+                }
+
+                if (selectedOpenPosition != null) {
+                    personelReserve.setOpenPosition(selectedOpenPosition);
+                }
+
+                dataManager.commit(personelReserve);
+                removeFromTable.add(jobCandidate);
+            } else {
+                SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
+
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("ВНИМАНИЕ")
+                        .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
+                                + ": " + jobCandidate.getFullName()
+                                + "\n" + messageBundle.getMessage("msgRecruterOwner")
+                                + " " + personelReserveCheck.getRecruter().getName()
+                                + "\n" + messageBundle.getMessage("msgEndDateReserve")
+                                + " " + (personelReserveCheck.getEndDate() != null
+                                ? sdf.format(personelReserveCheck.getEndDate()) : messageBundle.getMessage("msgUnlimited")))
+                        .withType(Notifications.NotificationType.ERROR)
+                        .show();
+
+                failedCounter ++;
+            }
+        }
+        // Удалить все чекбоксы
+        for (Map.Entry<JobCandidate, CheckBox> entry : personalReserveCheckBoxes.entrySet()) {
+            if (entry.getValue().getValue()) {
+                entry.getValue().setValue(false);
+                counter --;
+                countSelectedCandidates(entry.getKey(), false);
+            }
         }
 
-        CommitContext commitContext = new CommitContext(personelReserves);
-        dataManager.commit(commitContext);
+        if (removeFromTable.size() > 0 && counter > failedCounter) {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withHideDelayMs(5000)
+                    .withType(Notifications.NotificationType.TRAY)
+                    .withDescription(
+                            messageBundle.getMessage("msgCountOfPersonalReserve")
+                                    + removeFromTable.size()
+                                    + " "
+                                    + messageBundle.getMessage("msgCandidatesPoint"))
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .show();
 
-        counter -= selectedCandidates.size();
-
-        notifications.create(Notifications.NotificationType.WARNING)
-                .withHideDelayMs(5000)
-                .withDescription(
-                        messageBundle.getMessage("msgCountOfPersonalReserve")
-                                + selectedCandidates.size()
-                                + " "
-                                + messageBundle.getMessage("msgCandidatesPoint"))
-                .withCaption(messageBundle.getMessage("msgWarning"))
-                .show();
-
-        jobCandidatesDl.setParameter("jobCandidateNotFiltered", selectedCandidates);
-        jobCandidatesDl.load();
-
-        for (JobCandidate jobCandidate : selectedCandidates) {
-            selectedCandidates.remove(jobCandidate);
+            selectedCandidates.remove(removeFromTable);
+            jobCandidatesDl.setParameter("jobCandidateNotFiltered", removeFromTable);
+            jobCandidatesDl.load();
         }
     }
 }
