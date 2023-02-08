@@ -7,7 +7,9 @@
         <instance id="personelReserveDc"
                   class="com.company.itpearls.entity.PersonelReserve">
             <view extends="_local">
-                <property name="jobCandidate" view="_local"/>
+                <property name="jobCandidate" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
                 <property name="recruter" view="_local"/>
                 <property name="personPosition" view="_local"/>
                 <property name="openPosition" view="_local"/>

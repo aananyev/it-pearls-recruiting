@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.StandartPrioritySkills;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.OnlyTextFromFile;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
@@ -56,6 +57,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             "where e.reacrutier = :reacrutier " +
             "and e.openPosition = :openPosition " +
             "and @dateAfter(e.endDate, now)";
+    private static final String QUERY_GET_ALL_PERSONEL_RESERVE = "select e from itpearls_PersonelReserve e " +
+            "where (e.endDate > :currDate or e.endDate is null)";
 
     private List<SkillTree> skillTreeGroup = new ArrayList<>();
     private HashMap<LinkButton, LinkButton> skillsPairAllToFilter = new HashMap<>();
@@ -63,6 +66,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private HashMap<LinkButton, SkillTree> filter = new HashMap<>();
     private List<JobCandidate> selectedCandidates = new ArrayList<>();
     private HashMap<JobCandidate, CheckBox> personalReserveCheckBoxes = new HashMap<>();
+//    private List<JobCandidate> removeFromTable = new ArrayList<>();
 
     private Boolean stopSearchProcess = false;
     private OpenPosition openPosition = null;
@@ -156,6 +160,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private DataContext dataContext;
     @Inject
     private Label<String> loadFromVacancyLabel;
+    @Inject
+    private Button basketUnselectedCandidatesButton;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -708,11 +714,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         }
     }
 
-    @Subscribe("jobCandidatesTable")
-    public void onJobCandidatesTableItemClick(DataGrid.ItemClickEvent<JobCandidate> event) {
-
-    }
-
     @Install(to = "jobCandidatesTable.selectCandidateColumn", subject = "columnGenerator")
     private Component jobCandidatesTableSelectCandidateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         CheckBox retCheckBox = uiComponents.create(CheckBox.class);
@@ -732,25 +733,29 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
     private void countSelectedCandidates(JobCandidate jobCandidate, Boolean checkBoxValue) {
-        counter = counter + (checkBoxValue ? 1 : -1);
+        if (checkBoxValue != null) {
+            counter = counter + (checkBoxValue ? 1 : -1);
+        } else {
+            counter--;
+        }
 
         if (counter > 0) {
-            counterSelectedCandidatesLabel.setValue(
-                    messageBundle.getMessage("msgCounterCandidates") + counter);
             deleteUnselectedCandidatesButton.setEnabled(true);
             putPersonelReserveButton.setEnabled(true);
+            basketUnselectedCandidatesButton.setEnabled(true);
 
             selectedCandidates.add(jobCandidate);
         } else {
             deleteUnselectedCandidatesButton.setEnabled(false);
             putPersonelReserveButton.setEnabled(false);
-
-            counter = 0;
-            counterSelectedCandidatesLabel.setValue(
-                    messageBundle.getMessage("msgCounterCandidates") + counter);
+            basketUnselectedCandidatesButton.setEnabled(false);
             selectedCandidates.remove(jobCandidate);
         }
+
+        counterSelectedCandidatesLabel.setValue(
+                messageBundle.getMessage("msgCounterCandidates") + counter);
     }
+
 
     @Install(to = "jobCandidatesTable.viewCandidateButton", subject = "columnGenerator")
     private Component jobCandidatesTableViewCandidateButtonColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -763,6 +768,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         PopupButton retButton = uiComponents.create(PopupButton.class);
         retButton.setCaption(messageBundle.getMessage("msgActions"));
         retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
         retButton.addAction(new BaseAction("openCandidateCardAction")
                 .withCaption(messageBundle.getMessage("msgOpenCard"))
                 .withHandler(actionPerformedEvent ->
@@ -771,6 +777,19 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 .editEntity(event.getItem())
                                 .build()
                                 .show()));
+        retButton.addAction(new BaseAction("openCVList")
+                .withCaption(messageBundle.getMessage("msgOpenCVList"))
+                .withHandler(actionPerformedEvent -> {
+                    CandidateCVSimpleBrowse candidateCVSimpleBrowse = screens.create(CandidateCVSimpleBrowse.class);
+                    candidateCVSimpleBrowse.setSelectedCandidate(event.getItem());
+                    candidateCVSimpleBrowse.setJobCandidate(event.getItem());
+                    screens.show(candidateCVSimpleBrowse);
+                }));
+        retButton.addAction(new BaseAction("addPersonalReserve")
+                .withCaption(messageBundle.getMessage("msgAddPersonalReserve"))
+                .withHandler(actionPerformedEvent -> {
+                    addPersonaLReserveMonth(event.getItem());
+                }));
 
         retVBox.add(retButton);
 
@@ -1009,7 +1028,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     public void clearSearchResultButtonInvoke() {
         jobCandidatesDl.removeParameter("jobCandidateFiltered");
-        jobCandidatesDl.load();
+//        jobCandidatesDl.load();
 
         jobCandidatesDl.setParameter("personPosition",
                 personPositionLookupPickerField.getValue());
@@ -1256,8 +1275,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
     private void putCandidatesToPersonelReserve() {
-        List<JobCandidate> removeFromTable = new ArrayList<>();
-        int failedCounter = 0;
 
         for (JobCandidate jobCandidate : selectedCandidates) {
             PersonelReserve personelReserveCheck = null;
@@ -1268,7 +1285,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     .parameter("openPosition", selectedOpenPosition)
                     .view("recrutiesTasks-view")
                     .list();
-            if (recrutiesTasks.size() > 0) {
+            if (recrutiesTasks.size() > 0 || loadFromVacancyLabel.getValue() == null) {
                 try {
                     personelReserveCheck = dataManager.load(PersonelReserve.class)
                             .query(QUERY_GET_PERSONEL_RESERVE)
@@ -1281,30 +1298,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 }
 
                 if (personelReserveCheck == null) {
-                    PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
-
-                    personelReserve.setDate(new Date());
-                    personelReserve.setJobCandidate(jobCandidate);
-                    personelReserve.setRecruter(userSessionSource.getUserSession().getUser());
-                    personelReserve.setInProcess(true);
-
-                    int noOfDays = 30;
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.DAY_OF_YEAR, noOfDays);
-                    Date endDate = calendar.getTime();
-                    personelReserve.setEndDate(endDate);
-
-                    if (personPositionLookupPickerField.getValue() != null) {
-                        personelReserve.setPersonPosition(personPositionLookupPickerField.getValue());
-                    }
-
-                    if (selectedOpenPosition != null) {
-                        personelReserve.setOpenPosition(selectedOpenPosition);
-                    }
-
-                    dataManager.commit(personelReserve);
-                    removeFromTable.add(jobCandidate);
+                    addPersonaLReserveMonth(jobCandidate);
                 } else {
                     SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
 
@@ -1319,8 +1313,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                     ? sdf.format(personelReserveCheck.getEndDate()) : messageBundle.getMessage("msgUnlimited")))
                             .withType(Notifications.NotificationType.ERROR)
                             .show();
-
-                    failedCounter++;
                 }
             } else {
                 notifications.create(Notifications.NotificationType.ERROR)
@@ -1331,34 +1323,49 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 "\nОформите подписку на вакании в пункте меню \"Подписки\".")
                         .withCaption(messageBundle.getMessage("msgError"))
                         .show();
-
-                failedCounter++;
             }
         }
-        // Удалить все чекбоксы
+
+        selectedCandidates.clear();
+        jobCandidatesDl.load();
+
+        counterSelectedCandidatesLabel.setValue(
+                messageBundle.getMessage("msgCounterCandidates") + counter);
+    }
+
+    private void removeAllCheckBoxesPersonalReserve() {
         for (Map.Entry<JobCandidate, CheckBox> entry : personalReserveCheckBoxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                entry.getValue().setValue(false);
-                counter--;
-                countSelectedCandidates(entry.getKey(), false);
-            }
+            entry.getValue().setValue(false);
+        }
+    }
+
+    private void addPersonaLReserveMonth(JobCandidate jobCandidate) {
+        PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
+
+        personelReserve.setDate(new Date());
+        personelReserve.setJobCandidate(jobCandidate);
+        personelReserve.setRecruter(userSessionSource.getUserSession().getUser());
+        personelReserve.setInProcess(true);
+
+        int noOfDays = 30;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_YEAR, noOfDays);
+        Date endDate = calendar.getTime();
+        personelReserve.setEndDate(endDate);
+
+        if (personPositionLookupPickerField.getValue() != null) {
+            personelReserve.setPersonPosition(personPositionLookupPickerField.getValue());
         }
 
-        if (removeFromTable.size() > 0 && counter > failedCounter) {
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withHideDelayMs(5000)
-                    .withType(Notifications.NotificationType.TRAY)
-                    .withDescription(
-                            messageBundle.getMessage("msgCountOfPersonalReserve")
-                                    + removeFromTable.size()
-                                    + " "
-                                    + messageBundle.getMessage("msgCandidatesPoint"))
-                    .withCaption(messageBundle.getMessage("msgWarning"))
-                    .show();
-
-            selectedCandidates.remove(removeFromTable);
-            jobCandidatesDl.setParameter("jobCandidateNotFiltered", removeFromTable);
-            jobCandidatesDl.load();
+        if (selectedOpenPosition != null) {
+            personelReserve.setOpenPosition(selectedOpenPosition);
         }
+
+        dataManager.commit(personelReserve);
+        counter--;
+    }
+
+    public void basketUnselectedCandidatesButtonInvoke() {
     }
 }

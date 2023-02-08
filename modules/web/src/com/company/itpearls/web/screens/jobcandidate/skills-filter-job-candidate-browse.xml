@@ -38,6 +38,10 @@
                     where e in (select g.candidate
                                 from itpearls_CandidateCV g
                                 where g.candidate = e)
+                          and
+                          not e in (select f.jobCandidate
+                                    from itpearls_PersonelReserve f
+                                    where (f.endDate > CURRENT_DATE or f.endDate is null))
                     order by e.fullName]]>
                     <condition>
                         <and>
@@ -309,6 +313,7 @@
                     <dataGrid id="jobCandidatesTable"
                               width="100%"
                               visible="true"
+                              selectionMode="NONE"
                               editorEnabled="true"
                               dataContainer="jobCandidatesDc">
                         <actions>
@@ -344,7 +349,7 @@
                             </column>
                             <column id="viewCandidateButton"
                                     editable="false"
-                                    width="100px"
+                                    width="120px"
                                     caption="msg://msgView">
                                 <componentRenderer/>
                             </column>
@@ -392,17 +397,26 @@
                                        width="AUTO"
                                        align="MIDDLE_LEFT"
                                        visible="true"/>
+                                <button id="putPersonelReserveButton"
+                                        description="msg://msgputPersonelReserve"
+                                        align="MIDDLE_LEFT"
+                                        enable="false"
+                                        icon="SHOPPING_BASKET"
+                                        invoke="putPersonelReserveButtonInvoke"/>
+                                <button id="basketUnselectedCandidatesButton"
+                                        width="AUTO"
+                                        align="MIDDLE_LEFT"
+                                        description="msg://msgBasketUnselectedCandidates"
+                                        icon="BAN"
+                                        enable="false"
+                                        invoke="basketUnselectedCandidatesButtonInvoke"/>
                                 <button id="deleteUnselectedCandidatesButton"
                                         width="AUTO"
                                         align="MIDDLE_LEFT"
-                                        caption="msg://msgDeleteUnselectedCandidates"
+                                        description="msg://msgDeleteUnselectedCandidates"
+                                        icon="REMOVE"
                                         enable="false"
                                         invoke="deleteUnselectedCandidatesButtonInvoke"/>
-                                <button id="putPersonelReserveButton"
-                                        caption="msg://msgputPersonelReserve"
-                                        align="MIDDLE_LEFT"
-                                        enable="false"
-                                        invoke="putPersonelReserveButtonInvoke"/>
                             </hbox>
                         </hbox>
                         <button id="clearSearchResultButton"
