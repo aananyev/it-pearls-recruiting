@@ -13,6 +13,7 @@ import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
@@ -31,7 +32,6 @@ import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,6 +48,14 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             "order by e.skillName";
     private static final String QUERY_SKILL_TREE_ITEM
             = "select e from itpearls_SkillTree e where e.skillTree = :skillGroup";
+    private static final String QUERY_GET_PERSONEL_RESERVE = "select e from itpearls_PersonelReserve e " +
+            "where e.jobCandidate = :jobCandidate " +
+            "and " +
+            "(e.endDate > :currDate or e.endDate is null)";
+    private static final String QUERY_GET_FROM_SUBSCRIBERS = "select e from itpearls_RecrutiesTasks e " +
+            "where e.reacrutier = :reacrutier " +
+            "and e.openPosition = :openPosition " +
+            "and @dateAfter(e.endDate, now)";
 
     private List<SkillTree> skillTreeGroup = new ArrayList<>();
     private HashMap<LinkButton, LinkButton> skillsPairAllToFilter = new HashMap<>();
@@ -57,6 +65,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private HashMap<JobCandidate, CheckBox> personalReserveCheckBoxes = new HashMap<>();
 
     private Boolean stopSearchProcess = false;
+    private OpenPosition openPosition = null;
 
     @Inject
     private UiComponents uiComponents;
@@ -751,17 +760,17 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         retVBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
         retVBox.setSpacing(true);
 
-        Button retButton = uiComponents.create(Button.class);
-        retButton.setCaption(messageBundle.getMessage("msgView"));
+        PopupButton retButton = uiComponents.create(PopupButton.class);
+        retButton.setCaption(messageBundle.getMessage("msgActions"));
         retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        retButton.addClickListener(e -> {
-            screenBuilders.editor(JobCandidate.class, this)
-                    .withScreenClass(JobCandidateEdit.class)
-                    .editEntity(event.getItem())
-                    .build()
-                    .show();
-        });
+        retButton.addAction(new BaseAction("openCandidateCardAction")
+                .withCaption(messageBundle.getMessage("msgOpenCard"))
+                .withHandler(actionPerformedEvent ->
+                        screenBuilders.editor(JobCandidate.class, this)
+                                .withScreenClass(JobCandidateEdit.class)
+                                .editEntity(event.getItem())
+                                .build()
+                                .show()));
 
         retVBox.add(retButton);
 
@@ -1247,75 +1256,90 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
     private void putCandidatesToPersonelReserve() {
-        String QUERY_GET_PERSONEL_RESERVE = "select e from itpearls_PersonelReserve e " +
-                "where e.jobCandidate = :jobCandidate " +
-                "and " +
-                "(e.endDate > :currDate or e.endDate is null)";
         List<JobCandidate> removeFromTable = new ArrayList<>();
         int failedCounter = 0;
 
         for (JobCandidate jobCandidate : selectedCandidates) {
             PersonelReserve personelReserveCheck = null;
 
-            try {
-                personelReserveCheck = dataManager.load(PersonelReserve.class)
-                        .query(QUERY_GET_PERSONEL_RESERVE)
-                        .view("personelReserve-view")
-                        .parameter("jobCandidate", jobCandidate)
-                        .parameter("currDate", new Date())
-                        .one();
-            } catch (IllegalStateException e) {
-                personelReserveCheck = null;
-            }
-
-            if (personelReserveCheck == null) {
-                PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
-
-                personelReserve.setDate(new Date());
-                personelReserve.setJobCandidate(jobCandidate);
-                personelReserve.setRecruter(userSessionSource.getUserSession().getUser());
-                personelReserve.setInProcess(true);
-
-                int noOfDays = 14;
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(new Date());
-                calendar.add(Calendar.DAY_OF_YEAR, noOfDays);
-                Date endDate = calendar.getTime();
-                personelReserve.setEndDate(endDate);
-
-                if (personPositionLookupPickerField.getValue() != null) {
-                    personelReserve.setPersonPosition(personPositionLookupPickerField.getValue());
+            List<RecrutiesTasks> recrutiesTasks = dataManager.load(RecrutiesTasks.class)
+                    .query(QUERY_GET_FROM_SUBSCRIBERS)
+                    .parameter("reacrutier", userSession.getUser())
+                    .parameter("openPosition", selectedOpenPosition)
+                    .view("recrutiesTasks-view")
+                    .list();
+            if (recrutiesTasks.size() > 0) {
+                try {
+                    personelReserveCheck = dataManager.load(PersonelReserve.class)
+                            .query(QUERY_GET_PERSONEL_RESERVE)
+                            .view("personelReserve-view")
+                            .parameter("jobCandidate", jobCandidate)
+                            .parameter("currDate", new Date())
+                            .one();
+                } catch (IllegalStateException e) {
+                    personelReserveCheck = null;
                 }
 
-                if (selectedOpenPosition != null) {
-                    personelReserve.setOpenPosition(selectedOpenPosition);
-                }
+                if (personelReserveCheck == null) {
+                    PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
 
-                dataManager.commit(personelReserve);
-                removeFromTable.add(jobCandidate);
+                    personelReserve.setDate(new Date());
+                    personelReserve.setJobCandidate(jobCandidate);
+                    personelReserve.setRecruter(userSessionSource.getUserSession().getUser());
+                    personelReserve.setInProcess(true);
+
+                    int noOfDays = 30;
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.DAY_OF_YEAR, noOfDays);
+                    Date endDate = calendar.getTime();
+                    personelReserve.setEndDate(endDate);
+
+                    if (personPositionLookupPickerField.getValue() != null) {
+                        personelReserve.setPersonPosition(personPositionLookupPickerField.getValue());
+                    }
+
+                    if (selectedOpenPosition != null) {
+                        personelReserve.setOpenPosition(selectedOpenPosition);
+                    }
+
+                    dataManager.commit(personelReserve);
+                    removeFromTable.add(jobCandidate);
+                } else {
+                    SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
+
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("ВНИМАНИЕ")
+                            .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
+                                    + ": " + jobCandidate.getFullName()
+                                    + "\n" + messageBundle.getMessage("msgRecruterOwner")
+                                    + " " + personelReserveCheck.getRecruter().getName()
+                                    + "\n" + messageBundle.getMessage("msgEndDateReserve")
+                                    + " " + (personelReserveCheck.getEndDate() != null
+                                    ? sdf.format(personelReserveCheck.getEndDate()) : messageBundle.getMessage("msgUnlimited")))
+                            .withType(Notifications.NotificationType.ERROR)
+                            .show();
+
+                    failedCounter++;
+                }
             } else {
-                SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
-
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withCaption("ВНИМАНИЕ")
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withType(Notifications.NotificationType.ERROR)
                         .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
                                 + ": " + jobCandidate.getFullName()
-                                + "\n" + messageBundle.getMessage("msgRecruterOwner")
-                                + " " + personelReserveCheck.getRecruter().getName()
-                                + "\n" + messageBundle.getMessage("msgEndDateReserve")
-                                + " " + (personelReserveCheck.getEndDate() != null
-                                ? sdf.format(personelReserveCheck.getEndDate()) : messageBundle.getMessage("msgUnlimited")))
-                        .withType(Notifications.NotificationType.ERROR)
+                                + "\nДобавить кандидата возможно только на те вакансии на которые Вы подписаны." +
+                                "\nОформите подписку на вакании в пункте меню \"Подписки\".")
+                        .withCaption(messageBundle.getMessage("msgError"))
                         .show();
 
-                failedCounter ++;
+                failedCounter++;
             }
         }
         // Удалить все чекбоксы
         for (Map.Entry<JobCandidate, CheckBox> entry : personalReserveCheckBoxes.entrySet()) {
             if (entry.getValue().getValue()) {
                 entry.getValue().setValue(false);
-                counter --;
+                counter--;
                 countSelectedCandidates(entry.getKey(), false);
             }
         }

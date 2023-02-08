@@ -10,6 +10,7 @@
             <view extends="_local">
                 <property name="jobCandidate" view="_local">
                     <property name="personPosition" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
                 </property>
                 <property name="recruter" view="_local"/>
                 <property name="personPosition" view="_local"/>
@@ -43,6 +44,7 @@
         </filter>
         <groupTable id="personelReservesTable"
                     width="100%"
+                    multiLineCells="true"
                     dataContainer="personelReservesDc">
             <actions>
                 <action id="create" type="create"/>
@@ -50,15 +52,16 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="jobCandidate"/>
-                <column id="recruter"/>
-                <column id="personPosition"/>
-                <column id="openPosition"/>
-                <column id="date"/>
-                <column id="termOfPlacement"/>
-                <column id="endDate"/>
+                <column id="statusColumn" width="50px"/>
+                <column id="jobCandidate" width="300px"/>
+                <column id="recruter" width="150px"/>
+                <column id="personPosition" width="150px"/>
+                <column id="openPosition" width="300px"/>
+                <column id="date" width="150px"/>
+                <column id="termOfPlacement" width="150px"/>
+                <column id="endDate" width="150px"/>
             </columns>
-            <rowsCount/>
+            <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
                 <button id="createBtn" action="personelReservesTable.create"/>
