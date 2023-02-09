@@ -53,6 +53,7 @@
             </actions>
             <columns>
                 <column id="statusColumn" width="50px"/>
+                <column id="inWorkColumn" width="50px" generator="inWorkColumnGenerator"/>
                 <column id="jobCandidate" width="300px"/>
                 <column id="recruter" width="150px"/>
                 <column id="personPosition" width="150px"/>

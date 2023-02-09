@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.personelreserve;
 
 import com.company.itpearls.entity.JobCandidate;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
@@ -145,5 +146,9 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
        }
 
        personelReservesDl.load();
+    }
+
+    public Component inWorkColumnGenerator(Entity entity) {
+        return null;
     }
 }

@@ -23,7 +23,6 @@ import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
@@ -66,7 +65,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private HashMap<LinkButton, SkillTree> filter = new HashMap<>();
     private List<JobCandidate> selectedCandidates = new ArrayList<>();
     private HashMap<JobCandidate, CheckBox> personalReserveCheckBoxes = new HashMap<>();
-//    private List<JobCandidate> removeFromTable = new ArrayList<>();
+    private List<JobCandidate> removeFromTable = new ArrayList<>();
 
     private Boolean stopSearchProcess = false;
     private OpenPosition openPosition = null;
@@ -156,8 +155,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private Metadata metadata;
     @Inject
     private UserSessionSource userSessionSource;
-    @Inject
-    private DataContext dataContext;
     @Inject
     private Label<String> loadFromVacancyLabel;
     @Inject
@@ -790,10 +787,21 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 .withHandler(actionPerformedEvent -> {
                     addPersonaLReserveMonth(event.getItem());
                 }));
+        retButton.addAction(new BaseAction("removeFromList")
+        .withCaption(messageBundle.getMessage("msgDelete"))
+        .withHandler(actionPerformedEvent -> {
+            deleteFromSelections(event.getItem());
+        }));
 
         retVBox.add(retButton);
 
         return retVBox;
+    }
+
+    private void deleteFromSelections(JobCandidate jobCandidate) {
+        removeFromTable.add(jobCandidate);
+        jobCandidatesDl.setParameter("jobCandidateNotFiltered", removeFromTable);
+        jobCandidatesDl.load();
     }
 
     @Subscribe("filterProgressbar")
@@ -1364,6 +1372,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
         dataManager.commit(personelReserve);
         counter--;
+
+        deleteFromSelections(jobCandidate);
     }
 
     public void basketUnselectedCandidatesButtonInvoke() {
