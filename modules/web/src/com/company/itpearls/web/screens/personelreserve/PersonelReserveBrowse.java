@@ -1,8 +1,10 @@
 package com.company.itpearls.web.screens.personelreserve;
 
+import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.filter.LogicalCondition;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
@@ -15,6 +17,7 @@ import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
 import javax.swing.*;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -38,29 +41,41 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private UiComponents uiComponents;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private CheckBox inNotWorkCheckBox;
 
     private final static String statusColumn = "statusColumn";
+    private final static String inWorkColumn = "inWorkColumn";
     private final static String faceImage = "faceImage";
+
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         allCandidatesCheckBox.setValue(true);
         activesCheckBox.setValue(true);
+        inNotWorkCheckBox.setValue(true);
 
         initPersonelReservesTable();
     }
 
     private Boolean currentDateBeforeCheck(Date date, int days) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
+//        calendar.setTime(date);
         calendar.add(Calendar.DAY_OF_YEAR, days);
         Date currentDate = calendar.getTime();
 
-        return date.after(currentDate) ? true : false;
+        return date.after(currentDate) ? false : true;
+    }
+
+    @Subscribe("inNotWorkCheckBox")
+    public void onInNotWorkCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        String QUERY_ITERACTION_IN_WORK = "select e from itpearls_IteractionList e where e.iteractionDate ";
+
+        if (event.getValue()) {
+        }
     }
 
     private void initPersonelReservesTable() {
-
         personelReservesTable.addGeneratedColumn(statusColumn, entity -> {
             Label retLabel = uiComponents.create(Label.class);
 
@@ -72,7 +87,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
                 if (currentDateBeforeCheck(entity.getEndDate(), 7)) {
                     retLabel.setIconFromSet(CubaIcon.CIRCLE);
-                    retLabel.setStyleName("pic-center-large-yellow");
+                    retLabel.setStyleName("pic-center-large-orange");
                     retLabel.setDescription(messageBundle.getMessage("msgReserveIsSevenDays"));
                 } else {
                     if (currentDateBeforeCheck(entity.getEndDate(), 30)) {
@@ -124,6 +139,12 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         personelReservesTable.getColumn(statusColumn).setAlignment(Table.ColumnAlignment.CENTER);
         personelReservesTable.getColumn(statusColumn).setCaption(
                 messageBundle.getMessage("msgStatusColumn"));
+
+        personelReservesTable.getColumn(inWorkColumn).setWidth(50);
+        personelReservesTable.getColumn(inWorkColumn).setCollapsed(false);
+        personelReservesTable.getColumn(inWorkColumn).setAlignment(Table.ColumnAlignment.CENTER);
+        personelReservesTable.getColumn(inWorkColumn).setCaption(
+                messageBundle.getMessage("msgInWorkColumn"));
     }
 
     @Subscribe("allCandidatesCheckBox")
@@ -139,16 +160,50 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
     @Subscribe("activesCheckBox")
     public void onActivesCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-       if (event.getValue()) {
-           personelReservesDl.setParameter("actives", true);
-       } else {
-           personelReservesDl.removeParameter("actives");
-       }
+        if (event.getValue()) {
+            personelReservesDl.setParameter("actives", true);
+        } else {
+            personelReservesDl.removeParameter("actives");
+        }
 
-       personelReservesDl.load();
+        personelReservesDl.load();
     }
 
     public Component inWorkColumnGenerator(Entity entity) {
-        return null;
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setIconFromSet(CubaIcon.QUESTION_CIRCLE);
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retLabel.setStyleName("pic-center-large-gray");
+        retLabel.setDescription(messageBundle.getMessage("msgEmptyWork"));
+
+        for (IteractionList iteractionList :
+                ((JobCandidate) entity.getValue("jobCandidate")).getIteractionList()) {
+            if (iteractionList
+                    .getDateIteraction()
+                    .after((Date) entity.getValue("date"))) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+
+                retLabel.setStyleName("pic-center-large-red");
+                retLabel.setIconFromSet(CubaIcon.SIGN_IN);
+                retLabel.setDescription(messageBundle.getMessage("msgInWork")
+                        + " "
+                        + iteractionList.getVacancy().getVacansyName()
+                        + "\n\n"
+                        + messageBundle.getMessage("msgLastInteraction")
+                        + " \'"
+                        + iteractionList.getIteractionType().getIterationName()
+                        + "\' "
+                        + messageBundle.getMessage("msgFrom")
+                        + " "
+                        + sdf.format(iteractionList.getDateIteraction()));
+                break;
+            } else {
+                retLabel.setStyleName("pic-center-large-green");
+                retLabel.setIconFromSet(CubaIcon.CIRCLE_O);
+                retLabel.setDescription(messageBundle.getMessage("msgNotWork"));
+            }
+        }
+
+        return retLabel;
     }
 }

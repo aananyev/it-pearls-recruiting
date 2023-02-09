@@ -9,10 +9,6 @@
               icon="CALENDAR"/>
 
     </menu>
-    <menu id="application-sending-messages" icon="font-icon:SEND" insertBefore="application-hrmasters">
-        <item screen="itpearls_Emailer.browse" caption="mainMsg://menu_config.itpearls_Emailer.browse"
-              icon="font-icon:MAIL_FORWARD"/>
-    </menu>
     <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
         <item screen="itpearls_OpenPositionMaster.browse"
               caption="mainMsg://menu_config.itpearls_OpenPositionMaster.browse" icon="PENCIL"/>
@@ -23,15 +19,6 @@
         <item screen="itpearls_PersonelReserve.browse" caption="mainMsg://menu_config.itpearls_PersonelReserve.browse"
               icon="EXPEDITEDSSL"/>
     </menu>
-    <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
-        <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
-              icon="COMPASS"/>
-        <item screen="itpearls_LaborAgeementType.browse"
-              caption="mainMsg://menu_config.itpearls_LaborAgeementType.browse" icon="TEXT_WIDTH"/>
-        <item screen="itpearls_LaborAgreement.browse" caption="mainMsg://menu_config.itpearls_LaborAgreement.browse"
-              icon="TEXT_HEIGHT"/>
-        <item screen="itpearls_OurCompany.browse" caption="mainMsg://msgOurCompany" icon="BUILDING_O"/>
-    </menu>
     <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
         <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
               icon="font-icon:ADDRESS_BOOK_O"/>
@@ -40,6 +27,15 @@
         <item screen="itpearls_ApplicationRecruitment.browse"
               caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
         <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
+    </menu>
+    <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
+        <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
+              icon="COMPASS"/>
+        <item screen="itpearls_LaborAgeementType.browse"
+              caption="mainMsg://menu_config.itpearls_LaborAgeementType.browse" icon="TEXT_WIDTH"/>
+        <item screen="itpearls_LaborAgreement.browse" caption="mainMsg://menu_config.itpearls_LaborAgreement.browse"
+              icon="TEXT_HEIGHT"/>
+        <item screen="itpearls_OurCompany.browse" caption="mainMsg://msgOurCompany" icon="BUILDING_O"/>
     </menu>
     <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
@@ -53,18 +49,10 @@
         <item screen="itpearls_CompanyDepartament.browse" icon="GROUP"/>
         <item screen="itpearls_Company.browse" icon="BUILDING"/>
         <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
-    </menu>
-    <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-project">
-        <item bean="itpearls_MemoForCandidatesBean" beanMethod="runReport" caption="mainMsg://msgMemoForCandidates"
-              icon="COMMENT_O"/>
-        <item bean="itpearls_RunReportBean" beanMethod="runReport"
-              caption="mainMsg://menu-config.itpearls_RunReportBean.runReport" icon="USER"/>
-        <item bean="itpearls_NumberInterviewsRecrutierRunReportBean" beanMethod="runReport"
-              caption="mainMsg://menu-config.itpearls_NumberInterviewsRecrutierRunReportBean.runReport"
-              icon="ARROW_RIGHT"/>
-        <item bean="itpearls_NumberInterviewsResearcherRunReportBean" beanMethod="runReport"
-              caption="mainMsg://menu-config.itpearls_NumberInterviewsResearcherRunReportBean.runReport"
-              icon="ARROW_RIGHT"/>
+        <menu id="application-sending-messages" icon="font-icon:SEND">
+            <item screen="itpearls_Emailer.browse" caption="mainMsg://menu_config.itpearls_Emailer.browse"
+                  icon="font-icon:MAIL_FORWARD"/>
+        </menu>
     </menu>
     <menu id="application-researching" icon="BOLT" insertAfter="application-project">
         <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>
@@ -83,6 +71,18 @@
         <item screen="itpearls_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="FACEBOOK_OFFICIAL"/>
         <item screen="itpearls_Grade.browse" caption="mainMsg://menu_config.itpearls_Grade.browse"/>
+    </menu>
+    <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-hadbook">
+        <item bean="itpearls_MemoForCandidatesBean" beanMethod="runReport" caption="mainMsg://msgMemoForCandidates"
+              icon="COMMENT_O"/>
+        <item bean="itpearls_RunReportBean" beanMethod="runReport"
+              caption="mainMsg://menu-config.itpearls_RunReportBean.runReport" icon="USER"/>
+        <item bean="itpearls_NumberInterviewsRecrutierRunReportBean" beanMethod="runReport"
+              caption="mainMsg://menu-config.itpearls_NumberInterviewsRecrutierRunReportBean.runReport"
+              icon="ARROW_RIGHT"/>
+        <item bean="itpearls_NumberInterviewsResearcherRunReportBean" beanMethod="runReport"
+              caption="mainMsg://menu-config.itpearls_NumberInterviewsResearcherRunReportBean.runReport"
+              icon="ARROW_RIGHT"/>
     </menu>
     <item screen="itpearls_CheckCandidate.browse" icon="CHECK" insertAfter="application-hadbook" openType="DIALOG"/>
 </menu-config>

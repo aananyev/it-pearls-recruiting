@@ -11,6 +11,10 @@
                 <property name="jobCandidate" view="_local">
                     <property name="personPosition" view="_local"/>
                     <property name="fileImageFace" view="_local"/>
+                    <property name="iteractionList" view="_local">
+                        <property name="vacancy" view="_local"/>
+                        <property name="iteractionType" view="_local"/>
+                    </property>
                 </property>
                 <property name="recruter" view="_local"/>
                 <property name="personPosition" view="_local"/>
@@ -26,6 +30,9 @@
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.inProcess = :actives</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.jobCandidate.iteractionList in :iteractionList</c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -76,11 +83,14 @@
                   caption="msg://msgFilter"
                   spacing="true"
                   width="100%">
-            <hbox spacing="true" width="100%">
+            <hbox spacing="true" width="AUTO">
                 <checkBox id="allCandidatesCheckBox"
                           caption="msg://msgAllCandidates"/>
                 <checkBox id="activesCheckBox"
                           caption="msg://msgNoActives"/>
+                <checkBox id="inNotWorkCheckBox"
+                          visible="false"
+                          caption="msg://msgInWork"/>
             </hbox>
         </groupBox>
         <hbox id="lookupActions" spacing="true" visible="false">

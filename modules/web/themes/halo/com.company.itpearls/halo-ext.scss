@@ -959,6 +959,15 @@ rating_battery_yellow_3:before {
     margin: 0 auto;
 }
 
+
+.pic-center-large-gray {
+    color: gray;
+    text-align: center;
+    text-color: gray;
+    font-size: large;
+    margin: 0 auto;
+}
+
 .pic-center-large {
     font-size: large;
     text-align: center;
@@ -1168,6 +1177,16 @@ rating_battery_yellow_3:before {
 }
 
 .open-position-notification-close {
+    color: black;
+    font-size: large;
+    font-weight: bold;
+    background-color: #FFC0CB;
+    border: 2px solid #008000;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
+}
+
+.personal-reserve-notification-close {
     color: black;
     font-size: large;
     font-weight: bold;

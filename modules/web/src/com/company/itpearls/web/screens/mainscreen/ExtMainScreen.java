@@ -4,20 +4,24 @@ import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
+import com.company.itpearls.entity.PersonelReserve;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.app.main.MainScreen;
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.springframework.context.event.EventListener;
 import com.haulmont.cuba.gui.components.ContentMode;
 
 import javax.inject.Inject;
 import javax.management.Notification;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 
 
@@ -33,9 +37,26 @@ public class ExtMainScreen extends MainScreen {
     @Inject
     private Events events;
 
-    static String EVENT_NOTIFICATION_REMINDER = "НАПОМИНАНИЕ";
-    static String EVENT_NOTIFICATIOM_OPEN_POSITION = "Открыт";
-    static String EVENT_NOTIFICATION_CLOSE_POSITION = "Закрыт";
+    static final String EVENT_NOTIFICATION_REMINDER = "НАПОМИНАНИЕ";
+    static final String EVENT_NOTIFICATIOM_OPEN_POSITION = "Открыт";
+    static final String EVENT_NOTIFICATION_CLOSE_POSITION = "Закрыт";
+    static final String QUERY_GET_ITERACTIONS_FOR_NOTIFICATIONS =
+            "select e from itpearls_IteractionList e " +
+                    "where e.addDate between :startDate and :endDate " +
+                    "and e.recrutier = :recrutier " +
+                    "and e.numberIteraction >= " +
+                    "(select max(g.numberIteraction) " +
+                    "   from itpearls_IteractionList g " +
+                    "   where g.candidate = e.candidate) " +
+                    "and e.iteractionType in " +
+                    "(select f from itpearls_Iteraction f where f.notificationNeedSend = true)";
+    static final String QUERY_GET_EXPIRED_PERSONAL_RESERVE =
+            "select e from itpearls_PersonelReserve e " +
+                    "where e.date < :date " +
+                    "and e.recruter = :recruter " +
+                    "and e.endDate > :date";
+    @Inject
+    private MessageBundle messageBundle;
 
     @EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {
@@ -59,7 +80,7 @@ public class ExtMainScreen extends MainScreen {
                         .show();
             }
         } else {
-            if(event.getMessage().startsWith(EVENT_NOTIFICATION_REMINDER)) {
+            if (event.getMessage().startsWith(EVENT_NOTIFICATION_REMINDER)) {
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withCaption(event.getMessage())
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -84,19 +105,36 @@ public class ExtMainScreen extends MainScreen {
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {
         publishMyNotification();
+        checkPersonalReserveCandidates();
+    }
+
+    private void checkPersonalReserveCandidates() {
+        List<PersonelReserve> personelReserves = dataManager.load(PersonelReserve.class)
+                .query(QUERY_GET_EXPIRED_PERSONAL_RESERVE)
+                .parameter("recruter", userSession.getUser())
+                .parameter("date", new Date())
+                .view("personelReserve-view")
+                .list();
+        Date currentDate = new Date();
+
+        for (PersonelReserve pr : personelReserves) {
+            int duffDate = ((int) (currentDate.getTime() - pr.getEndDate().getTime()))
+                    / (24 * 60 * 60 * 1000);
+
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withType(Notifications.NotificationType.TRAY)
+                    .withCaption("WARNING")
+                    .withDescription("Через " + duffDate + " дней кончится резерв на кандидата " +
+                            pr.getJobCandidate().getFullName() + ".")
+                    .withHideDelayMs(5000)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withStyleName("personal-reserve-notification-close")
+                    .show();
+        }
     }
 
     private void publishMyNotification() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        String QUERY_GET_ITERACTIONS_FOR_NOTIFICATIONS = "select e from itpearls_IteractionList e " +
-                "where e.addDate between :startDate and :endDate " +
-                "and e.recrutier = :recrutier " +
-                "and e.numberIteraction >= " +
-                "(select max(g.numberIteraction) " +
-                "   from itpearls_IteractionList g " +
-                "   where g.candidate = e.candidate) " +
-                "and e.iteractionType in " +
-                "(select f from itpearls_Iteraction f where f.notificationNeedSend = true)";
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
@@ -121,7 +159,7 @@ public class ExtMainScreen extends MainScreen {
 
         for (IteractionList list : iteractionList) {
             if (list.getIteractionType() != null) {
-                if(list.getIteractionType().getNotificationNeedSend() != null) {
+                if (list.getIteractionType().getNotificationNeedSend() != null) {
                     if (list.getIteractionType().getNotificationNeedSend()) {
                         if (list.getIteractionType().getNotificationWhenSend() != null) {
                             String caption = EVENT_NOTIFICATION_REMINDER;
