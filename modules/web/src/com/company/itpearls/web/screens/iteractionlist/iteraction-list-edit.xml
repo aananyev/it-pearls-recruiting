@@ -69,17 +69,6 @@
                 </query>
             </loader>
         </collection>
-        <!--        <collection id="candidatesDc"
-                            class="com.company.itpearls.entity.JobCandidate">
-                    <view extends="_local">
-                        <property name="personPosition"
-                                  view="_local"/>
-                    </view>
-                    <loader id="candidatesLc"
-                            cacheable="true">
-                        <query><![CDATA[select e from itpearls_JobCandidate e order by e.secondName, e.firstName]]></query>
-                    </loader>
-                </collection> -->
         <collection id="vacancyDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local">

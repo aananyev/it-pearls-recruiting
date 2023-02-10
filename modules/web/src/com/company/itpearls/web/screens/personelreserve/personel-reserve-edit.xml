@@ -50,7 +50,31 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="personelReserveDc">
             <column width="350px">
-                <lookupPickerField id="jobCandidateField" optionsContainer="jobCandidatesDc" property="jobCandidate"/>
+                <suggestionPickerField id="jobCandidateField"
+                                       inputPrompt="mainMsg://msgStartInput"
+                                       minSearchStringLength="3"
+                                       rowspan="1"
+                                       colspan="1"
+                                       caption="msg://msgCandidate"
+                                       width="100%"
+                                       required="true"
+                                       dataContainer="personelReserveDc"
+                                       property="jobCandidate">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                    </actions>
+                    <query entityClass="com.company.itpearls.entity.JobCandidate"
+                           escapeValueForLike="true"
+                           searchStringFormat="%$searchString%">
+                        select e
+                        from itpearls_JobCandidate e
+                        where lower(e.fullName) like lower(:searchString) escape '\'
+                        and e.middleName not like '(не использовать)'
+                        and not e.blockCandidate = true
+                        order by e.secondName, e.firstName
+                    </query>
+                </suggestionPickerField>
                 <lookupPickerField id="reactutierField" optionsContainer="reactutiersDc" property="recruter"/>
                 <dateField id="dateField" property="date"/>
                 <textField id="termOfPlacementField" property="termOfPlacement"/>

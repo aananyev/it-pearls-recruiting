@@ -49,34 +49,73 @@
                 dataLoader="personelReservesDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="personelReservesTable"
-                    width="100%"
-                    multiLineCells="true"
-                    dataContainer="personelReservesDc">
+        <dataGrid id="personelReservesTable"
+                  editorEnabled="false"
+                  sortable="true"
+                  height="100%"
+                  width="100%"
+                  bodyRowHeight="60px"
+                  dataContainer="personelReservesDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="statusColumn" width="50px"/>
-                <column id="inWorkColumn" width="50px" generator="inWorkColumnGenerator"/>
-                <column id="jobCandidate" width="300px"/>
-                <column id="recruter" width="150px"/>
-                <column id="personPosition" width="150px"/>
-                <column id="openPosition" width="300px"/>
-                <column id="date" width="150px"/>
-                <column id="termOfPlacement" width="150px"/>
-                <column id="endDate" width="150px"/>
+                <column id="statusColumn"
+                        collapsed="false"
+                        caption="msg://msgStatusColumn"
+                        width="50px">
+                    <componentRenderer/>
+                </column>
+                <column id="inWorkColumn"
+                        collapsed="false"
+                        caption="msg://msgInWorkColumn"
+                        width="50px">
+                    <componentRenderer/>
+                </column>
+                <column id="fileImageFace"
+                        width="50px">
+                    <componentRenderer/>
+                </column>
+                <column id="jobCandidate"
+                        property="jobCandidate"
+                        width="300px"/>
+                <column id="recruter"
+                        property="recruter"
+                        width="150px"/>
+                <column id="personPosition"
+                        property="personPosition"
+                        width="150px"/>
+                <column id="openPosition"
+                        property="openPosition"
+                        width="300px"/>
+                <column id="date"
+                        property="date"
+                        width="150px"/>
+                <column id="termOfPlacement"
+                        property="termOfPlacement"
+                        width="150px"/>
+                <column id="endDate"
+                        property="endDate"
+                        width="150px"/>
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="personelReservesTable.create"/>
-                <button id="editBtn" action="personelReservesTable.edit"/>
-                <button id="removeBtn" action="personelReservesTable.remove"/>
+                <button id="createBtn"
+                        action="personelReservesTable.create"/>
+                <button id="editBtn"
+                        action="personelReservesTable.edit"/>
+                <button id="removeBtn"
+                        action="personelReservesTable.remove"/>
+                <button id="closePersonalReserveButton"
+                        width="AUTO"
+                        icon="CLOSE"
+                        caption="msg://msgClosePersonalReserve"
+                        invoke="closePersonalReserveButtonInvoke"/>
             </buttonsPanel>
-        </groupTable>
+        </dataGrid>
         <groupBox id="filtersHBox"
                   collapsed="false"
                   collapsable="true"

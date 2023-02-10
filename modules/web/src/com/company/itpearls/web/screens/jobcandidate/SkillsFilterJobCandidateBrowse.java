@@ -1423,6 +1423,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     private void addPersonaLReserveMonth(JobCandidate jobCandidate) {
         PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
+        // сначала итерацию, а уж потом остальное
+        addPersonalReserveInteraction(jobCandidate, selectedOpenPosition);
 
         personelReserve.setDate(new Date());
         personelReserve.setJobCandidate(jobCandidate);
@@ -1447,7 +1449,6 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         dataManager.commit(personelReserve);
         counter--;
 
-        addPersonalReserveInteraction(jobCandidate, selectedOpenPosition);
         deleteFromSelections(jobCandidate);
     }
 
