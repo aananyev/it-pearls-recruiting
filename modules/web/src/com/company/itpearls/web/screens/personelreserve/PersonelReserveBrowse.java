@@ -185,9 +185,17 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
                 retLabel.setStyleName("pic-center-large-red");
                 retLabel.setIconFromSet(CubaIcon.SIGN_IN);
+                String vacancy = "";
+
+                if (iteractionList.getVacancy() != null) {
+                    if (iteractionList.getVacancy().getVacansyName() != null) {
+                        iteractionList.getVacancy().getVacansyName();
+                    }
+                }
+
                 retLabel.setDescription(messageBundle.getMessage("msgInWork")
                         + " "
-                        + iteractionList.getVacancy().getVacansyName()
+                        + vacancy
                         + "\n\n"
                         + messageBundle.getMessage("msgLastInteraction")
                         + " \'"

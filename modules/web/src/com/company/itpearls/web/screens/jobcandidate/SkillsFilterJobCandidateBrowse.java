@@ -9,6 +9,7 @@ import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -25,10 +26,13 @@ import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
@@ -40,24 +44,30 @@ import java.util.stream.Stream;
 @LookupComponent("jobCandidatesTable")
 @LoadDataBeforeShow
 public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate> {
-    private static final String QUERY_SKILL_TREE_GROUP
-            = "select e " +
-            "from itpearls_SkillTree e " +
-            "where e.skillTree is null and " +
-            "e in (select f.skillTree from itpearls_SkillTree f where f.skillTree = e) " +
-            "order by e.skillName";
+    private static final String QUERY_SKILL_TREE_GROUP =
+            "select e " +
+                    "from itpearls_SkillTree e " +
+                    "where e.skillTree is null and " +
+                    "e in (select f.skillTree from itpearls_SkillTree f where f.skillTree = e) " +
+                    "order by e.skillName";
     private static final String QUERY_SKILL_TREE_ITEM
             = "select e from itpearls_SkillTree e where e.skillTree = :skillGroup";
-    private static final String QUERY_GET_PERSONEL_RESERVE = "select e from itpearls_PersonelReserve e " +
-            "where e.jobCandidate = :jobCandidate " +
-            "and " +
-            "(e.endDate > :currDate or e.endDate is null)";
-    private static final String QUERY_GET_FROM_SUBSCRIBERS = "select e from itpearls_RecrutiesTasks e " +
-            "where e.reacrutier = :reacrutier " +
-            "and e.openPosition = :openPosition " +
-            "and @dateAfter(e.endDate, now)";
-    private static final String QUERY_GET_ALL_PERSONEL_RESERVE = "select e from itpearls_PersonelReserve e " +
-            "where (e.endDate > :currDate or e.endDate is null)";
+    private static final String QUERY_GET_PERSONEL_RESERVE =
+            "select e from itpearls_PersonelReserve e " +
+                    "where e.jobCandidate = :jobCandidate " +
+                    "and " +
+                    "(e.endDate > :currDate or e.endDate is null)";
+    private static final String QUERY_GET_FROM_SUBSCRIBERS =
+            "select e from itpearls_RecrutiesTasks e " +
+                    "where e.reacrutier = :reacrutier " +
+                    "and e.openPosition = :openPosition " +
+                    "and @dateAfter(e.endDate, now)";
+    private static final String QUERY_GET_ALL_PERSONEL_RESERVE =
+            "select e from itpearls_PersonelReserve e " +
+                    "where (e.endDate > :currDate or e.endDate is null)";
+    private static final String QUERY_GET_DEFAULT_VACANCY =
+            "select e from itpearls_OpenPosition e " +
+                    "where e.vacansyName like \'Default\'";
 
     private List<SkillTree> skillTreeGroup = new ArrayList<>();
     private HashMap<LinkButton, LinkButton> skillsPairAllToFilter = new HashMap<>();
@@ -159,6 +169,10 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private Label<String> loadFromVacancyLabel;
     @Inject
     private Button basketUnselectedCandidatesButton;
+    private String QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION =
+            "select e " +
+                    "from itpearls_Iteraction e " +
+                    "where e.signPersonalReservePut = true";
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -788,10 +802,10 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     addPersonaLReserveMonth(event.getItem());
                 }));
         retButton.addAction(new BaseAction("removeFromList")
-        .withCaption(messageBundle.getMessage("msgDelete"))
-        .withHandler(actionPerformedEvent -> {
-            deleteFromSelections(event.getItem());
-        }));
+                .withCaption(messageBundle.getMessage("msgDelete"))
+                .withHandler(actionPerformedEvent -> {
+                    deleteFromSelections(event.getItem());
+                }));
 
         retVBox.add(retButton);
 
@@ -1373,7 +1387,130 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         dataManager.commit(personelReserve);
         counter--;
 
+        addPersonalReserveInteraction(jobCandidate, selectedOpenPosition);
         deleteFromSelections(jobCandidate);
+    }
+
+
+    private BigDecimal getCountIteraction() {
+        IteractionList e = dataManager.load(IteractionList.class)
+                .query("select e from itpearls_IteractionList e where e.numberIteraction = " +
+                        "(select max(f.numberIteraction) from itpearls_IteractionList f)")
+                .view("iteractionList-view")
+                .cacheable(true)
+                .one();
+
+        return e.getNumberIteraction().add(BigDecimal.ONE);
+    }
+
+    private void addPersonalReserveInteraction(JobCandidate jobCandidate,
+                                               OpenPosition openPosition) {
+
+        OpenPosition defaultPosition = null;
+        Iteraction interactionType = null;
+        IteractionList iteractionList = metadata.create(IteractionList.class);
+
+        try {
+            defaultPosition = dataManager
+                    .loadValue(QUERY_GET_DEFAULT_VACANCY, OpenPosition.class)
+                    .one();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            interactionType = dataManager.load(Iteraction.class)
+                    .query(QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION)
+                    .cacheable(true)
+                    .view("iteraction-view")
+                    .one();
+        } catch (NoResultException e) {
+            e.printStackTrace();
+        }
+
+        if (interactionType != null) {
+            iteractionList.setCandidate(jobCandidate);
+            iteractionList.setDateIteraction(new Date());
+            iteractionList.setRating(4);
+
+            if (openPosition != null) {
+                iteractionList.setVacancy(openPosition);
+                iteractionList.setCurrentOpenClose(openPosition.getOpenClose());
+                iteractionList.setCurrentPriority(openPosition.getPriority());
+            } else {
+                if (defaultPosition != null) {
+                    iteractionList.setVacancy(defaultPosition);
+                    iteractionList.setCurrentOpenClose(defaultPosition.getOpenClose());
+                    iteractionList.setCurrentPriority(defaultPosition.getPriority());
+                } else {
+                    notifications.create(Notifications.NotificationType.ERROR)
+                            .withCaption(messageBundle.getMessage("msgError"))
+                            .withDescription(messageBundle.getMessage("msgNotDefaultInteraction"))
+                            .withType(Notifications.NotificationType.ERROR)
+                            .show();
+                }
+            }
+
+            iteractionList.setRecrutierName(userSession.getUser().getName());
+            iteractionList.setRecrutier(userSession.getUser());
+            iteractionList.setNumberIteraction(getCountIteraction());
+            iteractionList.setIteractionType(interactionType);
+
+            dataManager.commit(iteractionList);
+
+            if (openPosition != null) {
+                setOpenPositionNewsAutomatedMessage(openPosition,
+                        iteractionList.getIteractionType().getIterationName(),
+                        messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
+                        iteractionList.getDateIteraction(),
+                        jobCandidate,
+                        userSession.getUser(),
+                        interactionType.getSignPriorityNews());
+            } else {
+                setOpenPositionNewsAutomatedMessage(defaultPosition,
+                        iteractionList.getIteractionType().getIterationName(),
+                        messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
+                        iteractionList.getDateIteraction(),
+                        jobCandidate,
+                        userSession.getUser(),
+                        interactionType.getSignPriorityNews());
+
+            }
+
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgNotSignPersonalReserveInteractions"))
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
+
+    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+                                                     String subject,
+                                                     String comment,
+                                                     Date date,
+                                                     JobCandidate jobCandidate,
+                                                     User user,
+                                                     Boolean priority) {
+        try {
+            OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
+
+            openPositionNews.setOpenPosition(editedEntity);
+            openPositionNews.setAuthor(user);
+            openPositionNews.setDateNews(date);
+            openPositionNews.setSubject(subject);
+            openPositionNews.setComment(comment);
+            openPositionNews.setCandidates(jobCandidate);
+            openPositionNews.setPriorityNews(priority != null ? priority : false);
+
+            CommitContext commitContext = new CommitContext();
+            commitContext.addInstanceToCommit(openPositionNews);
+            dataManager.commit(commitContext);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void basketUnselectedCandidatesButtonInvoke() {

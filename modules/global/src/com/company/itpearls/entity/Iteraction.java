@@ -110,6 +110,15 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_COMMENT")
     private Boolean signComment;
 
+    @Column(name = "SIGN_PERSONAL_RESERVE")
+    private Boolean signPersonalReserve;
+
+    @Column(name = "SIGN_PUT_RESONAL", unique = true)
+    private Boolean signPersonalReservePut;
+
+    @Column(name = "SIGN_PERSONAL_RESERVE_REMOVE", unique = true)
+    private Boolean signPersonalReserveRemove;
+
     @Column(name = "OUTSTAFFING_SIGN", nullable = false)
     protected Boolean outstaffingSign = false;
 
@@ -133,6 +142,30 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public void setSignPersonalReservePut(Boolean signPersonalReservePut) {
+        this.signPersonalReservePut = signPersonalReservePut;
+    }
+
+    public Boolean getSignPersonalReservePut() {
+        return signPersonalReservePut;
+    }
+
+    public Boolean getSignPersonalReserveRemove() {
+        return signPersonalReserveRemove;
+    }
+
+    public void setSignPersonalReserveRemove(Boolean signPersonalReserveRemove) {
+        this.signPersonalReserveRemove = signPersonalReserveRemove;
+    }
+
+    public Boolean getSignPersonalReserve() {
+        return signPersonalReserve;
+    }
+
+    public void setSignPersonalReserve(Boolean signPersonalReserve) {
+        this.signPersonalReserve = signPersonalReserve;
+    }
 
     public Boolean getSignComment() {
         return signComment;

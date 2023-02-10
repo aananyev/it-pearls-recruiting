@@ -202,6 +202,14 @@ public class OpenPosition extends StandardEntity {
     @JoinColumn(name = "OWNER_ID")
     private User owner;
 
+    public void setPriority(Integer priority) {
+        this.priority = priority;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
     public Grade getGrade() {
         return grade;
     }
@@ -401,14 +409,6 @@ public class OpenPosition extends StandardEntity {
 
     public List<RecrutiesTasks> getCandidates() {
         return candidates;
-    }
-
-    public Integer getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Integer priority) {
-        this.priority = priority;
     }
 
     public BigDecimal getSalaryMax() {

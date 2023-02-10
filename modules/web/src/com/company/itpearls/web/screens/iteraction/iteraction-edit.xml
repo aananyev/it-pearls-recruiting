@@ -118,6 +118,18 @@ order by e.number]]>
                                   caption="msg://mshSignComment"
                                   dataContainer="iteractionDc"
                                   property="signComment"/>
+                        <checkBox id="signPersonalReserveCheckBox"
+                                  dataContainer="iteractionDc"
+                                  property="signPersonalReserve"
+                                  caption="msg://msgSignPersonalReserve"/>
+                        <checkBox id="signPersonalReservePutCheckBox"
+                                  dataContainer="iteractionDc"
+                                  property="signPersonalReservePut"
+                                  caption="msg://msgSignPersonalReservePut"/>
+                        <checkBox id="signPersonalReserveRemove"
+                                  dataContainer="iteractionDc"
+                                  property="signPersonalReserveRemove"
+                                  caption="msg://msgPersonalReserveRemove"/>
 
                     </vbox>
                 </groupBox>
