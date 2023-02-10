@@ -140,6 +140,7 @@
                                  description="msg://msgLoadDesc">
                         <actions>
                             <action id="loadFromOpenPosition" caption="msg://msgLoadFromOpenPosition"/>
+                            <action id="loadFromStandartDescription" caption="msg://msgLoadFromStandartDescription"/>
                             <action id="loadFromFile" caption="msg://msgLoadFromFile"/>
                             <action id="loadFromClipboard" caption="msg://msgLoadFromClipboard"/>
                         </actions>

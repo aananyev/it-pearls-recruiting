@@ -971,6 +971,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     public void clearFilterButtonInvoke() {
         personPositionLookupPickerField.setValue(null);
         cityLookupPickerField.setValue(null);
+        loadFromVacancyLabel.setValue(null);
 
         clearAllSkillsFromFilter();
 
@@ -1202,6 +1203,65 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             openPositionViewButton.setDescription(op.getVacansyName());
             openPositionViewButton.setVisible(true);
             selectedOpenPosition = op;
+        }
+
+        setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
+    }
+
+    @Subscribe("loadFromOpenPositionPopupButton.loadFromStandartDescription")
+    public void onLoadFromOpenPositionPopupButtonLoadFromStandartDescription(Action.ActionPerformedEvent event) {
+        screenBuilders.lookup(Position.class, this)
+                .withScreenId("itpearls_Position.browse")
+                .withLaunchMode(OpenMode.DIALOG)
+                .withSelectHandler(position -> {
+                    scanStandadtDescription(position);
+                })
+                .build()
+                .show();
+    }
+
+    private void scanStandadtDescription(Collection<Position> position) {
+        for (Position op : position) {
+            if (op.getStandartDescription() != null && !op.getStandartDescription().equals("")) {
+                List<SkillTree> skillTreesRu = pdfParserService.parseSkillTree(op.getStandartDescription());
+                List<SkillTree> skillTreesEn = pdfParserService.parseSkillTree(op.getStandartDescription());
+                Set<SkillTree> allSkill = Stream.concat(skillTreesRu.stream(), skillTreesEn.stream())
+                        .collect(Collectors.toSet());
+
+                List<SkillTree> allSkills = new ArrayList<>(allSkill);
+
+                for (SkillTree st : allSkills) {
+                    for (Map.Entry entry : skillsPairFilterToAll.entrySet()) {
+                        if (st.getSkillName().equals(((LinkButton) entry.getKey()).getCaption())) {
+                            ((LinkButton) entry.getKey()).setVisible(true);
+                            ((LinkButton) entry.getKey()).getParent().getParent().setVisible(true);
+                            ((LinkButton) entry.getValue()).setVisible(false);
+
+                            filter.put((LinkButton) entry.getKey(), st);
+                        }
+                    }
+                }
+
+                String positionName = op.getPositionEnName()
+                        + " / "
+                        + op.getPositionRuName();
+
+                loadFromOpenPositionPopupButton.setDescription(loadFromOpenPositionPopupButton.getDescription()
+                        + ": "
+                        + positionName);
+
+                loadFromVacancyLabel.setValue(positionName);
+                loadFromVacancyLabel.setVisible(true);
+                openPositionViewButton.setDescription(positionName);
+                openPositionViewButton.setVisible(true);
+                selectedOpenPosition = null;
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withType(Notifications.NotificationType.WARNING)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription(messageBundle.getMessage("msgStandartDescriptionIsEmpty"))
+                        .show();
+            }
         }
 
         setEnabledButtons((double) (filter.size() > 0 ? 1 : 0));
