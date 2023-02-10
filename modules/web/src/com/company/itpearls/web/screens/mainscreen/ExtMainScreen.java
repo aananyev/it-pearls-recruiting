@@ -118,18 +118,20 @@ public class ExtMainScreen extends MainScreen {
         Date currentDate = new Date();
 
         for (PersonelReserve pr : personelReserves) {
-            int duffDate = ((int) (currentDate.getTime() - pr.getEndDate().getTime()))
-                    / (24 * 60 * 60 * 1000);
+            int duffDate = ((int) (pr.getEndDate().getTime() - currentDate.getTime()))
+                    / (24 * 60 * 60 * 1000) + 1;
 
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withType(Notifications.NotificationType.TRAY)
-                    .withCaption("WARNING")
-                    .withDescription("Через " + duffDate + " дней кончится резерв на кандидата " +
-                            pr.getJobCandidate().getFullName() + ".")
-                    .withHideDelayMs(5000)
-                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                    .withStyleName("personal-reserve-notification-close")
-                    .show();
+            if (duffDate <= 7 && duffDate >= 0) {
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withType(Notifications.NotificationType.TRAY)
+                        .withCaption("WARNING")
+                        .withDescription("Через " + duffDate + " дней кончится резерв на кандидата " +
+                                pr.getJobCandidate().getFullName() + ".")
+                        .withHideDelayMs(5000)
+                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                        .withStyleName("personal-reserve-notification-close")
+                        .show();
+            }
         }
     }
 
