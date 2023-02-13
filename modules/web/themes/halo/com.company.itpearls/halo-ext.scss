@@ -666,6 +666,16 @@ rating_battery_yellow_3:before {
     margin: 0px 10px 0px 0px;
 }
 
+.table_row_gray {
+    color: gray;
+    text-color: gray;
+}
+
+.table_row_black {
+    color: black;
+    text-color: black;
+}
+
 .transition-blue {
     animation-name: blink;
     animation-timing-function: linear;

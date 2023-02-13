@@ -89,6 +89,11 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 //        candidateImageColumnRenderer();
         initInWorkColumnRenderer();
         initStatusColumnRenderer();
+
+        personelReservesTable.setItemClickAction(new BaseAction("itemClickAction")
+                .withHandler(actionPerformedEvent -> {
+                    personelReservesTable.setDetailsVisible(personelReservesTable.getSingleSelected(), true);
+                }));
     }
 
     @Subscribe

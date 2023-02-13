@@ -38,6 +38,7 @@
                     </condition>
                 </query>
             </loader>
+            <collection id="jobCandidatesDc" property="jobCandidate"/>
         </collection>
     </data>
     <dialogMode height="600"

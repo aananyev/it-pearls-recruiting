@@ -139,10 +139,14 @@
                                  caption="msg://msgLoad"
                                  description="msg://msgLoadDesc">
                         <actions>
-                            <action id="loadFromOpenPosition" caption="msg://msgLoadFromOpenPosition"/>
-                            <action id="loadFromStandartDescription" caption="msg://msgLoadFromStandartDescription"/>
-                            <action id="loadFromFile" caption="msg://msgLoadFromFile"/>
-                            <action id="loadFromClipboard" caption="msg://msgLoadFromClipboard"/>
+                            <action id="loadFromOpenPosition"
+                                    caption="msg://msgLoadFromOpenPosition"/>
+                            <action id="loadFromStandartDescription"
+                                    caption="msg://msgLoadFromStandartDescription"/>
+                            <action id="loadFromFile"
+                                    caption="msg://msgLoadFromFile"/>
+                            <action id="loadFromClipboard"
+                                    caption="msg://msgLoadFromClipboard"/>
                         </actions>
                     </popupButton>
                     <button id="openPositionViewButton"
@@ -306,11 +310,6 @@
                       margin="true"
                       align="TOP_LEFT"
                       width="100%">
-                    <!-- <filter id="filter" visible="false"
-                            applyTo="jobCandidatesTable"
-                            dataLoader="jobCandidatesAllDl">
-                        <properties include=".*"/>
-                    </filter> -->
                     <dataGrid id="jobCandidatesTable"
                               width="100%"
                               visible="true"

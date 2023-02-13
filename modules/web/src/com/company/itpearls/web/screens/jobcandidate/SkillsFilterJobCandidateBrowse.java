@@ -767,6 +767,15 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 messageBundle.getMessage("msgCounterCandidates") + counter);
     }
 
+    @Install(to = "jobCandidatesTable", subject = "rowStyleProvider")
+    private String jobCandidatesTableRowStyleProvider(JobCandidate jobCandidate) {
+        if (viewedCVSet.contains(jobCandidate))
+            return "table_row_gray";
+        else
+            return "table_row_black";
+    }
+
+    private Set<JobCandidate> viewedCVSet = new HashSet<>();
 
     @Install(to = "jobCandidatesTable.viewCandidateButton", subject = "columnGenerator")
     private Component jobCandidatesTableViewCandidateButtonColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -782,28 +791,51 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
         retButton.addAction(new BaseAction("openCandidateCardAction")
                 .withCaption(messageBundle.getMessage("msgOpenCard"))
-                .withHandler(actionPerformedEvent ->
-                        screenBuilders.editor(JobCandidate.class, this)
-                                .withScreenClass(JobCandidateEdit.class)
-                                .editEntity(event.getItem())
-                                .build()
-                                .show()));
+                .withHandler(actionPerformedEvent -> {
+                    screenBuilders.editor(JobCandidate.class, this)
+                            .withScreenClass(JobCandidateEdit.class)
+                            .editEntity(event.getItem())
+                            .build()
+                            .show();
+
+                    viewedCVSet.add(event.getItem());
+                    jobCandidatesTable.repaint();
+                    jobCandidatesTable.setSelected(event.getItem());
+                }));
+
         retButton.addAction(new BaseAction("openCVList")
                 .withCaption(messageBundle.getMessage("msgOpenCVList"))
                 .withHandler(actionPerformedEvent -> {
-                    CandidateCVSimpleBrowse candidateCVSimpleBrowse = screens.create(CandidateCVSimpleBrowse.class);
+                    viewedCVSet.add(event.getItem());
+                    jobCandidatesTable.repaint();
+                    jobCandidatesTable.setSelected(event.getItem());
+
+                    CandidateCVSimpleBrowse candidateCVSimpleBrowse =
+                            screens.create(CandidateCVSimpleBrowse.class);
+
                     candidateCVSimpleBrowse.setSelectedCandidate(event.getItem());
                     candidateCVSimpleBrowse.setJobCandidate(event.getItem());
+
                     screens.show(candidateCVSimpleBrowse);
                 }));
+
         retButton.addAction(new BaseAction("addPersonalReserve")
                 .withCaption(messageBundle.getMessage("msgAddPersonalReserve"))
                 .withHandler(actionPerformedEvent -> {
+                    viewedCVSet.add(event.getItem());
+                    jobCandidatesTable.repaint();
+                    jobCandidatesTable.setSelected(event.getItem());
+
                     addPersonaLReserveMonth(event.getItem());
                 }));
+
         retButton.addAction(new BaseAction("removeFromList")
                 .withCaption(messageBundle.getMessage("msgDelete"))
                 .withHandler(actionPerformedEvent -> {
+                    viewedCVSet.add(event.getItem());
+                    jobCandidatesTable.repaint();
+                    jobCandidatesTable.setSelected(event.getItem());
+
                     deleteFromSelections(event.getItem());
                 }));
 
