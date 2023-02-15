@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <data>
+        <instance id="personelReservesDc"
+                  class="com.company.itpearls.entity.PersonelReserve"
+                  provided="true">
+            <view extends="_local">
+                <property name="jobCandidate" view="_local">
+                    <property name="currentCompany" view="_local"/>
+                    <property name="cityOfResidence" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
+                    <property name="iteractionList" view="_local">
+                        <property name="recrutier" view="_local">
+                            <property name="group" view="_local"/>
+                        </property>
+                    </property>
+                </property>
+            </view>
+        </instance>
+    </data>
+    <layout width="100%"
+            spacing="false"
+            expand="mainHbox">
+        <groupBox id="statisticsGroupBox"
+                  collapsable="true"
+                  spacing="true"
+                  width="100%"
+                  stylename="light"
+                  height="100%">
+            <hbox id="statisticsHLabelBox"
+                  spacing="true"
+                  width="AUTO"
+                  height="100%"/>
+        </groupBox>
+        <hbox id="mainHbox"
+              spacing="true"
+              align="BOTTOM_LEFT"
+              width="100%"
+              expand="infoHBox"
+              height="100%">
+            <image id="candidateFaceImage"
+                   rowspan="5"
+                   stylename="renderer-photo-150px"
+                   width="150px"
+                   align="TOP_RIGHT"
+                   scaleMode="FILL"
+                   visible="true"
+                   dataContainer="personelReservesDc"
+                   property="jobCandidate.fileImageFace"/>
+            <image id="candidateFaceDefaultImage"
+                   rowspan="5"
+                   stylename="renderer-photo-150px"
+                   width="150px"
+                   align="TOP_RIGHT"
+                   scaleMode="FILL"
+                   visible="false">
+                <theme path="icons/no-programmer.jpeg"/>
+            </image>
+            <hbox id="infoHBox" spacing="false">
+                <vbox id="jobCandidateVBox" width="25%">
+                    <label id="jobCandidateLabel"
+                           align="BOTTOM_LEFT"
+                           stylename="h3"
+                           value="msg://msgCandidate"/>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgCandidate"/>
+                        <label align="BOTTOM_LEFT"
+                               dataContainer="personelReservesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               property="jobCandidate.fullName"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgPersonPosition"/>
+                        <label align="BOTTOM_LEFT"
+                               dataContainer="personelReservesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               property="personPosition"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgCorrentCompany"/>
+                        <label align="BOTTOM_LEFT"
+                               dataContainer="personelReservesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               property="jobCandidate.currentCompany"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgCity"/>
+                        <label align="BOTTOM_LEFT"
+                               dataContainer="personelReservesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               property="jobCandidate.cityOfResidence"/>
+                    </hbox>
+                </vbox>
+                <vbox id="jobCandidateContactsVBox" width="25%">
+                    <label id="jobCandidateContactsLabel"
+                           align="BOTTOM_LEFT"
+                           stylename="h3"
+                           value="msg://msgCandidateContacts"/>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgEmail"/>
+                        <linkButton id="emailLinkButton"
+                                    align="BOTTOM_LEFT"
+                                    description="msg://msgEmail"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgPhone"/>
+                        <label align="BOTTOM_LEFT"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               dataContainer="personelReservesDc"
+                               property="jobCandidate.phone"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgMobilePhone"/>
+                        <label align="BOTTOM_LEFT"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               dataContainer="personelReservesDc"
+                               property="jobCandidate.mobilePhone"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgSkype"/>
+                        <linkButton id="skypeLinkButton"
+                                    align="BOTTOM_LEFT"
+                                    description="msg://msgSkype"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgTelegram"/>
+                        <linkButton id="telegrammLinkButton"
+                                    align="BOTTOM_LEFT"
+                                    description="msg://msgTelegram"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgTelegramGroup"/>
+                        <linkButton id="telegrammGroupLinkButton"
+                                    align="BOTTOM_LEFT"
+                                    description="msg://msgTelegramGroup"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgViberAccount"/>
+                        <label align="BOTTOM_LEFT"
+                               dataContainer="personelReservesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               property="jobCandidate.wiberName"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               width="100px"
+                               value="msg://msgWhatsAppAccount"/>
+                        <label align="BOTTOM_LEFT"
+                               dataContainer="personelReservesDc"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               property="jobCandidate.whatsupName"/>
+                    </hbox>
+                </vbox>
+                <vbox id="jobCandidateIteractionInfoVBox" width="25%">
+                    <label id="jobCandidateIteractionLabel"
+                           align="BOTTOM_LEFT"
+                           stylename="h3"
+                           value="msg://msgCandidateIteraction"/>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               width="105px"
+                               stylename="bold"
+                               value="msg://msgCompany"/>
+                        <label id="companyLabel"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="BOTTOM_LEFT"/>
+                        align="MIDDLE_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               width="105px"
+                               stylename="bold"
+                               value="msg://msgVacancyName"/>
+                        <label id="vacancyNameLabel"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               width="105px"
+                               stylename="bold"
+                               value="msg://msgDepartament"/>
+                        <label id="departamentLabel"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               width="105px"
+                               stylename="bold"
+                               value="msg://msgProjectName"/>
+                        <label id="projectNameLabel"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               width="105px"
+                               stylename="bold"
+                               value="msg://msgIteraction"/>
+                        <label id="lastIteractionLabel"
+                               width="190px"
+                               stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               width="105px"
+                               stylename="bold"
+                               value="msg://msgSalaryExpectation"/>
+                        <label id="salaryExpectationLabel"
+                               width="190px" stylename="job-candidate-fragment-label"
+                               align="MIDDLE_LEFT"/>
+                    </hbox>
+                </vbox>
+                <vbox id="jobCandidateStatisticsVBox" width="25%">
+                    <label id="jobCandidateStatisticsLabel"
+                           align="BOTTOM_LEFT"
+                           stylename="h3"
+                           value="msg://msgCandidateStatistic"/>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgRecrutier"/>
+                        <label id="lastRecruterLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgResearcher"/>
+                        <label id="lastResearcherLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgIteractionCount"/>
+                        <label id="iteractionCountLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                    <hbox spacing="true">
+                        <label align="BOTTOM_LEFT"
+                               stylename="bold"
+                               value="msg://msgResumeCount"/>
+                        <label id="resumeCountLabel"
+                               align="BOTTOM_LEFT"/>
+                    </hbox>
+                </vbox>
+            </hbox>
+        </hbox>
+    </layout>
+</fragment>

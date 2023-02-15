@@ -1,15 +1,16 @@
-package com.company.itpearls.web.screens.jobcandidate;
+package com.company.itpearls.web.screens.personelreserve;
 
-import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.IteractionList;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WebBrowserTools;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.gui.model.InstanceContainer;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
@@ -17,18 +18,17 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
-@UiController("itpearls_JobCanidateDetailScreenFragment")
-@UiDescriptor("job-canidate-detail-screen-fragment.xml")
-public class JobCanidateDetailScreenFragment extends ScreenFragment {
+@UiController("itpearls_PersonalReverveJobCandidateFragment")
+@UiDescriptor("personal-reverve-job-candidate-fragment.xml")
+public class PersonalReverveJobCandidateFragment extends ScreenFragment {
     @Inject
     private Label<String> lastRecruterLabel;
     @Inject
     private DataManager dataManager;
-    @Inject
-    private CollectionContainer<JobCandidate> jobCandidatesDc;
     @Inject
     private Label<String> salaryExpectationLabel;
 
@@ -75,6 +75,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private HBoxLayout statisticsHLabelBox;
     @Inject
     private Image candidateFaceDefaultImage;
+    @Inject
+    private InstanceContainer<PersonelReserve> personelReservesDc;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -83,9 +85,9 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     public void setLinkButtonTelegrem() {
         String retStr = "";
 
-        if (jobCandidatesDc.getItem().getTelegramName() != null) {
+        if (personelReservesDc.getItem().getJobCandidate().getTelegramName() != null) {
             if (jobCandidate == null) {
-                retStr = jobCandidatesDc.getItem().getTelegramName().trim();
+                retStr = personelReservesDc.getItem().getJobCandidate().getTelegramName().trim();
             } else {
                 retStr = jobCandidate.getTelegramName().trim();
             }
@@ -103,9 +105,9 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     public void setLinkButtonTelegremGroup() {
         String retStr = "";
 
-        if (jobCandidatesDc.getItem().getTelegramGroup() != null) {
+        if (personelReservesDc.getItem().getJobCandidate().getTelegramGroup() != null) {
             if (jobCandidate == null) {
-                retStr = jobCandidatesDc.getItem().getTelegramGroup().trim();
+                retStr = personelReservesDc.getItem().getJobCandidate().getTelegramGroup().trim();
             } else {
                 retStr = jobCandidate.getTelegramGroup().trim();
             }
@@ -122,9 +124,9 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
     public void setLinkButtonEmail() {
         if (jobCandidate == null) {
-            if (jobCandidatesDc.getItem().getEmail() != null) {
+            if (personelReservesDc.getItem().getJobCandidate().getEmail() != null) {
 
-                emailLinkButton.setCaption(jobCandidatesDc.getItem().getEmail());
+                emailLinkButton.setCaption(personelReservesDc.getItem().getJobCandidate().getEmail());
             }
         } else {
             emailLinkButton.setCaption(jobCandidate.getEmail());
@@ -134,8 +136,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
     public void setLinkButtonSkype() {
         if (jobCandidate == null) {
-            if (jobCandidatesDc.getItem().getSkypeName() != null) {
-                skypeLinkButton.setCaption(jobCandidatesDc.getItem().getSkypeName());
+            if (personelReservesDc.getItem().getJobCandidate().getSkypeName() != null) {
+                skypeLinkButton.setCaption(personelReservesDc.getItem().getJobCandidate().getSkypeName());
             }
         } else
             skypeLinkButton.setCaption(jobCandidate.getSkypeName());
@@ -321,7 +323,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             List<CandidateCV> candidateCV = dataManager.load(CandidateCV.class)
                     .query(QUERY_ALL_CV)
                     .view("candidateCV-view")
-                    .parameter("candidate", jobCandidatesDc.getItem())
+                    .parameter("candidate", personelReservesDc.getItem().getJobCandidate())
                     .list();
 
             retStr = String.valueOf(candidateCV.size());
@@ -343,7 +345,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             iteractionLists = dataManager.load(IteractionList.class)
                     .query(QUERY_ALL_ITERACIONS)
                     .view("iteractionList-view")
-                    .parameter("candidate", jobCandidatesDc.getItem())
+                    .parameter("candidate", personelReservesDc.getItem().getJobCandidate())
                     .list();
         } catch (Exception e) {
         }
@@ -364,7 +366,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                     .query(QUERY_LAST_SALARY)
                     .view("iteractionList-view")
                     .parameter("iteractionName", iteractionName)
-                    .parameter("candidate", jobCandidatesDc.getItem())
+                    .parameter("candidate", personelReservesDc.getItem().getJobCandidate())
                     .one();
         } catch (Exception e) {
             e.printStackTrace();

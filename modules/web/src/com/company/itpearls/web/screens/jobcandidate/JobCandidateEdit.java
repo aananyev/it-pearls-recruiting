@@ -2942,6 +2942,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         outerBox.setWidthAuto();
         outerBox.setSpacing(false);
 
+        Button replyButton = uiComponents.create(Button.class);
+        replyButton.setWidthAuto();
+        replyButton.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+        replyButton.setCaption(messageBundle.getMessage("msgReplyButton"));
+        replyButton.setDescription(messageBundle.getMessage("msgReplyButtonDesc"));
+        replyButton.addClickListener(e -> {
+            replyButtonInvoke(e);
+        });
+
         if (event.getItem().getComment() != null
                 && !event.getItem().getComment().equals("")) {
             Label name = uiComponents.create(Label.class);
@@ -3016,6 +3025,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             outerBox.add(text);
             outerBox.add(date);
+            outerBox.add(replyButton);
 
             if (!userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
                 innerBox.add(image);
@@ -3030,6 +3040,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return retBox;
+    }
+
+    private void replyButtonInvoke(Button.ClickEvent e) {
     }
 
     @Subscribe("chatMessageTextField")

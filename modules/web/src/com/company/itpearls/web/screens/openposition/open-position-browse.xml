@@ -325,6 +325,14 @@
                         width="120px">
                     <textRenderer/>
                 </column>
+                <column id="candidateSendedColumn"
+                        collapsed="false"
+                        collapsible="true"
+                        caption="msg://msgSendedCandidates"
+                        width="120px"
+                        resizable="true">
+                    <componentRenderer/>
+                </column>
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"

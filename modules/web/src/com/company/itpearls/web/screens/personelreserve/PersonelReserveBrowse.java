@@ -9,16 +9,12 @@ import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
 import com.company.itpearls.web.screens.jobcandidate.JobCanidateDetailScreenFragment;
-import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
-import com.haulmont.cuba.core.global.filter.LogicalCondition;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -26,12 +22,10 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import javax.swing.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 @UiController("itpearls_PersonelReserve.browse")
@@ -122,8 +116,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
             image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         }
 
-        image.setWidth("20px");
-        image.setStyleName("circle-20px");
+        image.setWidth("30px");
+        image.setStyleName("circle-30px");
 
         image.setScaleMode(Image.ScaleMode.CONTAIN);
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
@@ -329,8 +323,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         mainLayout.setWidth("100%");
         mainLayout.setMargin(true);
 
-        JobCanidateDetailScreenFragment jobCanidateDetailScreenFragment = fragments.create(this,
-                JobCanidateDetailScreenFragment.class);
+        PersonalReverveJobCandidateFragment jobCanidateDetailScreenFragment = fragments.create(this,
+                PersonalReverveJobCandidateFragment.class);
         jobCanidateDetailScreenFragment.setJobCandidate(entity.getJobCandidate());
 
         HBoxLayout headerBox = uiComponents.create(HBoxLayout.NAME);

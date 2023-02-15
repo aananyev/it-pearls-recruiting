@@ -5,6 +5,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
@@ -38,6 +39,9 @@ import java.util.concurrent.atomic.AtomicReference;
 @LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
+    @Inject
+    private MessageBundle messageBundle;
+
     @Install(to = "openPositionsTable.companyLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
@@ -2364,6 +2368,27 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return recrutersHBox;
+    }
+
+    @Install(to = "openPositionsTable.candidateSendedColumn", subject = "columnGenerator")
+    private Object openPositionsTableCandidateSendedColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.class);
+
+        hBoxLayout.setWidthFull();
+        hBoxLayout.setHeightFull();
+
+        Button retButton = uiComponents.create(Button.class);
+        retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retButton.setCaption(messageBundle.getMessage("msgSendedCandidates"));
+        retButton.addClickListener(event1 -> {
+            JobCandidateSimpleBrowse jobCandidateSimpleBrowse =
+                    screens.create(JobCandidateSimpleBrowse.class);
+            jobCandidateSimpleBrowse.setOpenPosition(event.getItem());
+            jobCandidateSimpleBrowse.show();
+        });
+
+        hBoxLayout.add(retButton);
+        return hBoxLayout;
     }
 }
 

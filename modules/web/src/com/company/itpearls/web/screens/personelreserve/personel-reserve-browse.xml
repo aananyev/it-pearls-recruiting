@@ -9,6 +9,8 @@
                     class="com.company.itpearls.entity.PersonelReserve">
             <view extends="_local">
                 <property name="jobCandidate" view="_local">
+                    <property name="currentCompany" view="_local"/>
+                    <property name="cityOfResidence" view="_local"/>
                     <property name="personPosition" view="_local"/>
                     <property name="fileImageFace" view="_local"/>
                     <property name="iteractionList" view="_local">
@@ -38,7 +40,6 @@
                     </condition>
                 </query>
             </loader>
-            <collection id="jobCandidatesDc" property="jobCandidate"/>
         </collection>
     </data>
     <dialogMode height="600"
