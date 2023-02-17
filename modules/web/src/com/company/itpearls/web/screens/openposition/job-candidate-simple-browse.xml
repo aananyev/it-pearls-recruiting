@@ -18,13 +18,29 @@
             </view>
             <loader id="jobCandidateDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
-                <condition>
-                    <and>
-                        <c:jpql>
-                            <c:where>e in (select k.candidate from itpearls_IteractionList k where k.vacancy = :vacancy)</c:where>
-                        </c:jpql>
-                    </and>
-                </condition>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select k.candidate
+                                    from itpearls_IteractionList k
+                                    where k.vacancy = :vacancy)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select l.candidate
+                                    from itpearls_IteractionList l
+                                    where @dateBefore(l.dateIteraction, :dateBefore)</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select m.candidate
+                                    from itpearls_IteractionList m
+                                    where @dateAfter(m.dateIteraction, :dateAfter)</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -51,6 +67,20 @@
                    width="AUTO"
                    visible="false"/>
         </vbox>
+        <hbox spacing="true">
+            <radioButtonGroup id="beforeAnAfterRadioButtonsGroup"
+                              orientation="horizontal"
+                              align="MIDDLE_CENTER"
+                              width="AUTO"/>
+            <label width="AUTO"
+                   value="|"
+                   stylename="h2"
+                   align="MIDDLE_CENTER"/>
+            <radioButtonGroup id="interactionsCanidatesPeriodRadioButtonGroup"
+                              align="MIDDLE_CENTER"
+                              orientation="horizontal"
+                              width="AUTO"/>
+        </hbox>
         <dataGrid id="iteractionListsTable"
                   width="100%"
                   dataContainer="jobCandidatesDc">

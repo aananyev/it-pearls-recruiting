@@ -106,6 +106,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Image candidatePic;
     @Inject
     private Image candidateFaceDefaultImage;
+    @Inject
+    private UserSessionSource userSessionSource;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -169,7 +171,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         try {
             InputStream inputStream = fileLoader.openStream(fileDescriptor);
 
-            if(fileDescriptor.getExtension().equals(EXTENSION_PDF)) {
+            if (fileDescriptor.getExtension().equals(EXTENSION_PDF)) {
 
                 textResume = parsePdfCV(inputStream);
 
@@ -280,7 +282,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
         });
 
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
+        if (!PersistenceHelper.isNew(getEditedEntity()) &&
+                (userSessionSource.getUserSession().getUser().getGroup().getName().equals(StdUserGroup.ACCOUNTING) ||
+                        userSessionSource.getUserSession().getUser().getGroup().getName().equals(StdUserGroup.MANAGEMENT))) {
             candidateCVRichTextArea.setEditable(false);
         }
 

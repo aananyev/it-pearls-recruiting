@@ -735,8 +735,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retButton.addClickListener(e -> {
             if (openPositionsTable.getSingleSelected() != null) {
                 JobCandidateSimpleBrowse jobCandidateSimpleBrowse = screens.create(JobCandidateSimpleBrowse.class);
-                jobCandidateSimpleBrowse.setOpenPosition(openPositionsTable.getSingleSelected());
-                jobCandidateSimpleBrowse.setHeader(openPositionsTable.getSingleSelected());
+                jobCandidateSimpleBrowse.setOpenPosition(entity);
+                jobCandidateSimpleBrowse.setHeader(entity);
 
                 screens.show(jobCandidateSimpleBrowse);
 
@@ -2379,7 +2379,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         Button retButton = uiComponents.create(Button.class);
         retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        retButton.setCaption(messageBundle.getMessage("msgSendedCandidates"));
+        retButton.setIconFromSet(CubaIcon.USER_CIRCLE);
         retButton.addClickListener(event1 -> {
             JobCandidateSimpleBrowse jobCandidateSimpleBrowse =
                     screens.create(JobCandidateSimpleBrowse.class);

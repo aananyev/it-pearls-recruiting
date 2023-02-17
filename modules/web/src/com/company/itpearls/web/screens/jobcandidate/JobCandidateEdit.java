@@ -17,6 +17,7 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -2942,15 +2943,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         outerBox.setWidthAuto();
         outerBox.setSpacing(false);
 
-        Button replyButton = uiComponents.create(Button.class);
-        replyButton.setWidthAuto();
-        replyButton.setAlignment(Component.Alignment.BOTTOM_RIGHT);
-        replyButton.setCaption(messageBundle.getMessage("msgReplyButton"));
-        replyButton.setDescription(messageBundle.getMessage("msgReplyButtonDesc"));
-        replyButton.addClickListener(e -> {
-            replyButtonInvoke(e);
-        });
-
         if (event.getItem().getComment() != null
                 && !event.getItem().getComment().equals("")) {
             Label name = uiComponents.create(Label.class);
@@ -3000,6 +2992,30 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             innerBox.setStyleName("toolTip");
 
+            Button replyButton = uiComponents.create(Button.class);
+            replyButton.setWidthAuto();
+            replyButton.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+            replyButton.setCaption(messageBundle.getMessage("msgReplyButton"));
+            replyButton.setDescription(messageBundle.getMessage("msgReplyButtonDesc"));
+            replyButton.addClickListener(e -> {
+                dialogs.createInputDialog(this)
+                        .withCaption(messageBundle.getMessage("msgComment"))
+                        .withParameters(
+                                InputParameter.stringParameter("comment")
+                                .withCaption(messageBundle.getMessage("msgInputComment"))
+                                .withRequired(true)
+                        )
+                        .withActions(DialogActions.OK_CANCEL)
+                        .withCloseListener(closeEvent -> {
+                            if (closeEvent
+                                    .getCloseAction()
+                                    .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                                replyButtonInvoke(e, "(" + ") Re:" + (String) closeEvent.getValue("comment"));
+                            }
+                        })
+                        .show();
+            });
+
             if (userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
                 outerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 date.setAlignment(Component.Alignment.MIDDLE_RIGHT);
@@ -3042,7 +3058,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return retBox;
     }
 
-    private void replyButtonInvoke(Button.ClickEvent e) {
+    private void replyButtonInvoke(Button.ClickEvent e, String replyStr) {
+        createComment(replyStr);
     }
 
     @Subscribe("chatMessageTextField")
@@ -3066,6 +3083,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
     public void sendCommentButtonInvoke() {
+        createComment(null);
+    }
+
+    private void createComment(String commentStr) {
+
         Iteraction iteractionComment = null;
 
         try {
@@ -3089,7 +3111,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             comment.setCurrentOpenClose(vacancyPopupPickerField.getValue() != null ?
                     vacancyPopupPickerField.getValue().getOpenClose() : false);
             comment.setRecrutier(userSession.getUser());
-            comment.setComment(chatMessageTextField.getValue());
+
+            if (commentStr == null) {
+                comment.setComment(chatMessageTextField.getValue());
+            } else {
+                comment.setComment(commentStr);
+            }
+
             comment.setRecrutierName(userSession.getUser().getName());
             comment.setCurrentPriority(0);
             comment.setIteractionType(iteractionComment);
@@ -3116,6 +3144,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withType(Notifications.NotificationType.ERROR)
                     .show();
         }
+
     }
 
     private void reloadCV() {

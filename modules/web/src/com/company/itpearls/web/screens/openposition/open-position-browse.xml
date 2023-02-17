@@ -190,6 +190,7 @@
                         resizable="true"
                         collapsible="true"
                         collapsed="false"
+                        caption=""
                         width="70px"
                         minimumWidth="50px">
                     <componentRenderer/>

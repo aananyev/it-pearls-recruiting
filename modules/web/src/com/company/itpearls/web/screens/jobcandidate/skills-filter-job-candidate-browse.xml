@@ -26,6 +26,9 @@
                 </property>
                 <property name="iteractionList"
                           view="_local">
+                    <property name="vacancy" view="_local">
+                        <property name="grade" view="_local"/>
+                    </property>
                     <property name="recrutier"
                               view="_local"/>
                 </property>
@@ -163,6 +166,21 @@
                             caption="msg://msgClearFilter"
                             description="msg://mshClearFilterDesc"
                             invoke="clearFilterButtonInvoke"/>
+                    <popupButton id="menuButton"
+                            icon="BARS"
+                            width="AUTO"
+                            height="AUTO">
+                        <actions>
+                            <action id="saveLast"
+                                    icon="DOWNLOAD"
+                                    caption="msg://msgUploadLast"
+                                    description="msg://msgUploadLast"/>
+                            <action id="loadLast"
+                                    icon="UPLOAD"
+                                    caption="msg://msgDownloadLast"
+                                    description="msg://msgDownloadLast"/>
+                        </actions>
+                    </popupButton>
                 </hbox>
             </hbox>
         </groupBox>
@@ -310,6 +328,8 @@
                       margin="true"
                       align="TOP_LEFT"
                       width="100%">
+                    <label id="lastViewedCandidateLabel"
+                           stylename="small"/>
                     <dataGrid id="jobCandidatesTable"
                               width="100%"
                               visible="true"
@@ -349,7 +369,7 @@
                             </column>
                             <column id="viewCandidateButton"
                                     editable="false"
-                                    width="120px"
+                                    width="75px"
                                     caption="msg://msgView">
                                 <componentRenderer/>
                             </column>

@@ -68,6 +68,10 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private static final String QUERY_GET_DEFAULT_VACANCY =
             "select e from itpearls_OpenPosition e " +
                     "where e.vacansyName like \'Default\'";
+    private static final String QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION =
+            "select e " +
+                    "from itpearls_SkillsFilterLastSelection e " +
+                    "where e.user = :user";
 
     private List<SkillTree> skillTreeGroup = new ArrayList<>();
     private HashMap<LinkButton, LinkButton> skillsPairAllToFilter = new HashMap<>();
@@ -173,6 +177,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             "select e " +
                     "from itpearls_Iteraction e " +
                     "where e.signPersonalReservePut = true";
+    private boolean notFilterCity = false;
+    private boolean notFilterPosition = false;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -786,12 +792,14 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         retVBox.setSpacing(true);
 
         PopupButton retButton = uiComponents.create(PopupButton.class);
-        retButton.setCaption(messageBundle.getMessage("msgActions"));
+//        retButton.setCaption(messageBundle.getMessage("msgActions"));
+        retButton.setIconFromSet(CubaIcon.BARS);
         retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         retButton.addAction(new BaseAction("openCandidateCardAction")
                 .withCaption(messageBundle.getMessage("msgOpenCard"))
                 .withHandler(actionPerformedEvent -> {
+
                     screenBuilders.editor(JobCandidate.class, this)
                             .withScreenClass(JobCandidateEdit.class)
                             .editEntity(event.getItem())
@@ -906,13 +914,17 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Subscribe("personPositionLookupPickerField")
     public void onPersonPositionLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
-        if (event.getValue() != null) {
-            jobCandidatesDl.setParameter("personPosition", event.getValue());
-        } else {
-            jobCandidatesDl.removeParameter("personPosition");
-        }
+        if (!notFilterPosition) {
+            if (event.getValue() != null) {
+                jobCandidatesDl.setParameter("personPosition", event.getValue());
+            } else {
+                jobCandidatesDl.removeParameter("personPosition");
+            }
 
-        jobCandidatesDl.load();
+            jobCandidatesDl.load();
+        } else {
+            notFilterPosition = false;
+        }
     }
 
     private JobCandidate scanJobCandidatesCVAllFromMany(JobCandidate jobCandidate,
@@ -983,15 +995,19 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Subscribe("cityLookupPickerField")
     public void onCityLookupPickerFieldValueChange(HasValue.ValueChangeEvent<City> event) {
-        if (event.getValue() != null) {
+        if (!notFilterCity) {
             if (event.getValue() != null) {
-                jobCandidatesDl.setParameter("city", event.getValue());
-            } else {
+                if (event.getValue() != null) {
+                    jobCandidatesDl.setParameter("city", event.getValue());
+                } else {
+                    jobCandidatesDl.removeParameter("city");
+                }
+
+                jobCandidatesDl.load();
             }
-
-            jobCandidatesDl.load();
+        } else {
+            notFilterCity = false;
         }
-
     }
 
     public void stopSearchProcessButtonInvoke() {
@@ -1435,7 +1451,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 + ": " + jobCandidate.getFullName()
                                 + "\nДобавить кандидата возможно только на те вакансии на которые Вы подписаны." +
                                 "\nОформите подписку на вакании в пункте меню \"Подписки\".")
-                        .withCaption(messageBundle.getMessage("msgError"))
+                        .withCaption(messageBundle.getMessage("msg://msgError"))
                         .show();
             }
         }
@@ -1537,7 +1553,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     iteractionList.setCurrentPriority(defaultPosition.getPriority());
                 } else {
                     notifications.create(Notifications.NotificationType.ERROR)
-                            .withCaption(messageBundle.getMessage("msgError"))
+                            .withCaption(messageBundle.getMessage("msg://msgError"))
                             .withDescription(messageBundle.getMessage("msgNotDefaultInteraction"))
                             .withType(Notifications.NotificationType.ERROR)
                             .show();
@@ -1572,7 +1588,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withCaption(messageBundle.getMessage("msg://msgError"))
                     .withDescription(messageBundle.getMessage("msgNotSignPersonalReserveInteractions"))
                     .withType(Notifications.NotificationType.ERROR)
                     .show();
@@ -1605,6 +1621,151 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             e.printStackTrace();
         }
     }
+
+    @Subscribe("menuButton.saveLast")
+    public void onMenuButtonSaveLast(Action.ActionPerformedEvent event) {
+
+        try {
+            List<SkillsFilterLastSelection> skillsFilterLastSelection =
+                    dataManager.load(SkillsFilterLastSelection.class)
+                            .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
+                            .parameter("user", userSession.getUser())
+                            .view("skillsFilterLastSelection-view")
+                            .list();
+
+            for (SkillsFilterLastSelection sfls : skillsFilterLastSelection) {
+                dataManager.remove(sfls);
+            }
+
+            dataManager.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        for (JobCandidate jobCandidate : jobCandidatesDc.getItems()) {
+
+            JobCandidate jcTemp = jobCandidate;
+            Boolean selected = false;
+
+            for (JobCandidate jcRemoved : removeFromTable) {
+                if (jobCandidate.equals(jcRemoved)) {
+                    jcTemp = null;
+                    break;
+                }
+            }
+
+            if (jcTemp != null) {
+                for (JobCandidate jcSelected : selectedCandidates) {
+                    if (jobCandidate.equals(jcSelected)) {
+                        selected = true;
+                        break;
+                    }
+                }
+
+                SkillsFilterLastSelection skillsFilterLastSelection =
+                        metadata.create(SkillsFilterLastSelection.class);
+
+                if (personPositionLookupPickerField.getValue() != null) {
+                    skillsFilterLastSelection.setPosition(personPositionLookupPickerField.getValue());
+                } else {
+                    skillsFilterLastSelection.setPosition(jobCandidate.getPersonPosition());
+                }
+
+                if (cityLookupPickerField.getValue() != null) {
+                    skillsFilterLastSelection.getCity();
+                }
+
+                if (selectedOpenPosition != null) {
+                    skillsFilterLastSelection.setOpenPosition(selectedOpenPosition);
+                }
+
+                skillsFilterLastSelection.setJobCandidates(jobCandidate);
+                skillsFilterLastSelection.setJobCandidateSelection(selected);
+                skillsFilterLastSelection.setUser(userSession.getUser());
+
+                dataManager.commit(skillsFilterLastSelection);
+            }
+
+        }
+    }
+
+    @Subscribe("menuButton.loadLast")
+    public void onMenuButtonLoadLast(Action.ActionPerformedEvent event) {
+        Position position = null;
+        City city = null;
+
+        List<SkillsFilterLastSelection> skillsFilterLastSelection = null;
+
+        try {
+            skillsFilterLastSelection =
+                    dataManager.load(SkillsFilterLastSelection.class)
+                            .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
+                            .parameter("user", userSession.getUser())
+                            .view("skillsFilterLastSelection-view")
+                            .list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (skillsFilterLastSelection.size() != 0) {
+
+            personPositionLookupPickerField.setValue(null);
+            cityLookupPickerField.setValue(null);
+            jobCandidatesFilered.clear();
+
+            for (SkillsFilterLastSelection sfls : skillsFilterLastSelection) {
+                jobCandidatesFilered.add(sfls.getJobCandidates());
+
+                if (personPositionLookupPickerField.getValue() == null) {
+                    if (sfls.getPosition() != null) {
+                        position = sfls.getPosition();
+                        personPositionLookupPickerField.setValue(sfls.getPosition());
+
+                        notFilterPosition = true;
+                    }
+                }
+
+                if (cityLookupPickerField.getValue() == null) {
+                    if (sfls.getCity() != null) {
+                        city = sfls.getCity();
+                        cityLookupPickerField.setValue(sfls.getCity());
+
+                        notFilterCity = true;
+                    }
+                }
+
+                if (sfls.getJobCandidateSelection()) {
+                    selectedCandidates.add(sfls.getJobCandidates());
+                }
+
+            }
+
+            jobCandidatesDl.removeParameter("personPosition");
+            jobCandidatesDl.removeParameter("city");
+            jobCandidatesDl.removeParameter("jobCandidateFiltered");
+            jobCandidatesDl.removeParameter("jobCandidateNotFiltered");
+            jobCandidatesDl.setParameter("city", city);
+            jobCandidatesDl.setParameter("position", position);
+            jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
+            jobCandidatesDl.setParameter("jobCandidateNotFiltered", removeFromTable);
+            jobCandidatesDl.load();
+
+            for (JobCandidate jobCandidate : jobCandidatesDc.getItems()) {
+                if (skillsFilterLastSelection.contains(jobCandidate)) {
+                    deleteFromSelections(jobCandidate);
+                }
+            }
+
+            jobCandidatesTable.repaint();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msg://msgError"))
+                    .withDescription("msg://msgErrorUpload")
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
 
     public void basketUnselectedCandidatesButtonInvoke() {
     }

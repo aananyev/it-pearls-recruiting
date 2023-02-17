@@ -118,5 +118,8 @@
         <entity class="com.company.itpearls.entity.PersonelReserve">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.SkillsFilterLastSelection">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

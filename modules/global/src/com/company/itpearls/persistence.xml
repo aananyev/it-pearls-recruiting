@@ -43,5 +43,6 @@
         <class>com.company.itpearls.entity.ApplicationRecruitment</class>
         <class>com.company.itpearls.entity.ApplicationRecruitmentList</class>
         <class>com.company.itpearls.entity.PersonelReserve</class>
+        <class>com.company.itpearls.entity.SkillsFilterLastSelection</class>
     </persistence-unit>
 </persistence>

@@ -12,17 +12,20 @@ import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.entity.User;
 import org.apache.commons.collections.BagUtils;
+import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @UiController("itpearls_JobCandidateSimple.browse")
 @UiDescriptor("job-candidate-simple-browse.xml")
 @LookupComponent("iteractionListsTable")
 @LoadDataBeforeShow
 public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
-
     @Inject
     private CollectionLoader<JobCandidate> jobCandidateDl;
     JobCandidate jobCandidate = null;
@@ -32,6 +35,97 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
     private Label<String> vacancyLabel;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private RadioButtonGroup interactionsCanidatesPeriodRadioButtonGroup;
+    @Inject
+    private RadioButtonGroup beforeAnAfterRadioButtonsGroup;
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        initInteractionsCanidatesPeriodCheckBoxGroup();
+        initBeforeAnAfterRadioButtonsGroup();
+    }
+
+    private void initBeforeAnAfterRadioButtonsGroup() {
+        Map<String, Integer> afterBeforeMap = new LinkedHashMap<>();
+
+        afterBeforeMap.put("До", 1);
+        afterBeforeMap.put("После", 2);
+
+        beforeAnAfterRadioButtonsGroup.setOptionsMap(afterBeforeMap);
+    }
+
+    @Subscribe("beforeAnAfterRadioButtonsGroup")
+    public void onBeforeAnAfterRadioButtonsGroupValueChange(HasValue.ValueChangeEvent event) {
+        Date currDate = new Date();
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.setTime(currDate);
+
+        if (event.getValue() != null) {
+            if (interactionsCanidatesPeriodRadioButtonGroup.getValue() != null) {
+                switch ((int) event.getValue()) {
+                    case 1:
+                        switch ((int) interactionsCanidatesPeriodRadioButtonGroup.getValue()) {
+                            case 1:
+                                gc.add(GregorianCalendar.DAY_OF_MONTH, -3);
+                                jobCandidateDl.removeParameter("dateAfter");
+                                jobCandidateDl.setParameter("dateBefore", gc.getTime());
+                                break;
+                            case 2:
+                                gc.add(GregorianCalendar.DAY_OF_MONTH, -7);
+                                jobCandidateDl.removeParameter("dateAfter");
+                                jobCandidateDl.setParameter("dateBefore", gc.getTime());
+                                break;
+                            case 3:
+                                gc.add(GregorianCalendar.MONTH, -1);
+                                jobCandidateDl.removeParameter("dateAfter");
+                                jobCandidateDl.setParameter("dateBefore", gc.getTime());
+                                break;
+                            default:
+                                break;
+                        }
+
+                        break;
+                    case 2:
+                        switch ((int) interactionsCanidatesPeriodRadioButtonGroup.getValue()) {
+                            case 1:
+                                gc.add(GregorianCalendar.DAY_OF_MONTH, -3);
+                                jobCandidateDl.removeParameter("dateBefore");
+                                jobCandidateDl.setParameter("dateAfter", gc.getTime());
+                                break;
+                            case 2:
+                                jobCandidateDl.removeParameter("dateBefore");
+                                gc.add(GregorianCalendar.DAY_OF_MONTH, -7);
+                                jobCandidateDl.setParameter("dateAfter", gc.getTime());
+                                break;
+                            case 3:
+                                jobCandidateDl.removeParameter("dateBefore");
+                                gc.add(GregorianCalendar.MONTH, -1);
+                                jobCandidateDl.setParameter("dateAfter", gc.getTime());
+                                break;
+                            default:
+                                break;
+                        }
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            jobCandidateDl.load();
+        }
+    }
+
+    private void initInteractionsCanidatesPeriodCheckBoxGroup() {
+        Map<String, Integer> onlyOpenedPositionMap = new LinkedHashMap<>();
+
+        onlyOpenedPositionMap.put("Открытые за 3 дня", 1);
+        onlyOpenedPositionMap.put("Открытые за неделю", 2);
+        onlyOpenedPositionMap.put("Открытые за месяц", 3);
+
+        interactionsCanidatesPeriodRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
+    }
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
