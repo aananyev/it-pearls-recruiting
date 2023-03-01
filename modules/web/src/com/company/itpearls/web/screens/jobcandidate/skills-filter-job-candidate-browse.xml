@@ -138,17 +138,23 @@
                       width="AUTO">
                     <popupButton id="loadFromOpenPositionPopupButton"
                                  width="AUTO"
+                                 icon="CLOUD_UPLOAD"
+                                 showActionIcons="true"
                                  align="BOTTOM_RIGHT"
                                  caption="msg://msgLoad"
                                  description="msg://msgLoadDesc">
                         <actions>
                             <action id="loadFromOpenPosition"
+                                    icon="COMPASS"
                                     caption="msg://msgLoadFromOpenPosition"/>
                             <action id="loadFromStandartDescription"
+                                    icon="DOT_CIRCLE_O"
                                     caption="msg://msgLoadFromStandartDescription"/>
                             <action id="loadFromFile"
+                                    icon="FILE_TEXT"
                                     caption="msg://msgLoadFromFile"/>
                             <action id="loadFromClipboard"
+                                    icon="CLIPBOARD"
                                     caption="msg://msgLoadFromClipboard"/>
                         </actions>
                     </popupButton>
@@ -161,15 +167,17 @@
                             invoke="openPositionViewButtonInvoke"/>
                     <button id="clearFilterButton"
                             visible="true"
+                            icon="PICKERFIELD_CLEAR"
                             align="BOTTOM_LEFT"
                             width="AUTO"
                             caption="msg://msgClearFilter"
                             description="msg://mshClearFilterDesc"
                             invoke="clearFilterButtonInvoke"/>
                     <popupButton id="menuButton"
-                            icon="BARS"
-                            width="AUTO"
-                            height="AUTO">
+                                 icon="BARS"
+                                 showActionIcons="true"
+                                 width="AUTO"
+                                 height="AUTO">
                         <actions>
                             <action id="saveLast"
                                     icon="DOWNLOAD"
@@ -177,8 +185,13 @@
                                     description="msg://msgUploadLast"/>
                             <action id="loadLast"
                                     icon="UPLOAD"
+                                    enable="false"
                                     caption="msg://msgDownloadLast"
                                     description="msg://msgDownloadLast"/>
+                            <action id="deleteLast"
+                                    icon="REMOVE_ACTION"
+                                    caption="msg://msgRemoveLast"
+                                    description="msg://msgRemoveLast"/>
                         </actions>
                     </popupButton>
                 </hbox>
@@ -394,6 +407,7 @@
                                width="AUTO"/>
                         <button id="buttonStop"
                                 align="MIDDLE_CENTER"
+                                icon="STOP"
                                 visible="false"
                                 caption="msg://msgStopFindButton"
                                 description="msg://msgStopFindButtonDesc"
@@ -442,11 +456,13 @@
                         <button id="clearSearchResultButton"
                                 width="AUTO"
                                 enable="false"
+                                icon="PICKERFIELD_CLEAR_READONLY"
                                 align="MIDDLE_RIGHT"
                                 caption="msg://msgClearSearchResult"
                                 description="msg://msgClearResultButtonDesc"
                                 invoke="clearSearchResultButtonInvoke"/>
                         <button id="stopAndCloseButton"
+                                icon="STOP"
                                 width="AUTO"
                                 enable="false"
                                 align="MIDDLE_RIGHT"
@@ -454,6 +470,7 @@
                                 description="msg://msgStopSearchDesc"
                                 invoke="stopAndCloseButtonInvoke"/>
                         <button id="startSearchProcessButton"
+                                icon="SEARCH_PLUS"
                                 width="AUTO"
                                 align="MIDDLE_RIGHT"
                                 enable="false"

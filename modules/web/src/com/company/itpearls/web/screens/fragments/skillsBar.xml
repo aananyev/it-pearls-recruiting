@@ -7,9 +7,24 @@
                   height="AUTO"
                   caption="msg://msgSkills"
                   stylename="light">
-            <flowBox id="skillsFlowBox" spacing="true"
-                     width="AUTO"
-                     height="AUTO"/>
+            <groupBox id="keySkillsFlowGroupBox"
+                      collapsable="false"
+                      visible="false"
+                      stylename="light"
+                      caption="msg://msgKeySkills">
+                <flowBox id="keySkillsFlowBox"
+                         spacing="true"
+                         width="AUTO"
+                         height="AUTO"/>
+            </groupBox>
+            <groupBox id="skillFlowGroupBox"
+                      collapsable="false"
+                      visible="false"
+                      stylename="light">
+                <flowBox id="skillsFlowBox" spacing="true"
+                         width="AUTO"
+                         height="AUTO"/>
+            </groupBox>
         </groupBox>
     </layout>
 </fragment>

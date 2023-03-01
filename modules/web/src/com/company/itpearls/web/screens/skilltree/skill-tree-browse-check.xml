@@ -25,16 +25,34 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="650"
+    <dialogMode height="700"
                 width="600"
                 forceDialog="true"
                 closeOnClickOutside="false"
                 resizable="false"/>
     <layout expand="skillTreesTable"
+            width="100%"
+            height="100%"
             spacing="true">
-        <label id="header" stylename="h3"/>
-        <label id="headerToVacancy" stylename="h4"/>
-        <label id="percent" stylename="h4"/>
+        <flowBox spacing="true">
+            <label id="header" stylename="h3"/>
+            <label id="headerToVacancy" stylename="h4"/>
+            <label id="percent" stylename="h4"/>
+        </flowBox>
+        <groupBox spacing="true"
+                  collapsable="true"
+                  caption="msg://msgChoise"
+                  width="AUTO"
+                  height="AUTO">
+            <hbox spacing="true">
+                <checkBox id="skillsFromCVonly"
+                          width="AUTO"
+                          caption="msg://msgSkillsFromJDOnly"/>
+                <checkBox id="removeBlankSkills"
+                          width="AUTO"
+                          caption="msg://mshRemoveBlank"/>
+            </hbox>
+        </groupBox>
         <treeDataGrid id="skillTreesTable"
                       width="100%"
                       dataContainer="skillTreesDc"
@@ -61,13 +79,11 @@
                           alwaysVisible="true">
             </buttonsPanel>
         </treeDataGrid>
-        <hbox spacing="true">
-        <checkBox id="skillsFromCVonly"
-                  caption="msg://msgSkillsFromJDOnly"/>
-        <checkBox id="removeBlankSkills"
-                  caption="msg://mshRemoveBlank"/>
-        </hbox>
-        <hbox id="lookupActions" spacing="true" visible="false">
+        <hbox id="lookupActions"
+              width="AUTO"
+              height="AUTO"
+              spacing="true"
+              visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>

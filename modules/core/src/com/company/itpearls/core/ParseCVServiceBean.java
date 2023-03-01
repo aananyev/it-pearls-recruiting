@@ -5,6 +5,7 @@ import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Position;
 import com.company.itpearls.entity.SkillTree;
 import com.haulmont.cuba.core.global.DataManager;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
@@ -25,6 +26,14 @@ public class ParseCVServiceBean implements ParseCVService {
     private DataManager dataManager;
     @Inject
     private PdfParserService pdfParserService;
+
+    @Override
+    public Integer countMachesSkill(String inputText, SkillTree skillTree) {
+        Integer retInt = StringUtils.countMatches(inputText.toLowerCase(),
+                skillTree.getSkillName().toLowerCase());
+
+        return retInt;
+    }
 
     @Override
     public String parseEmail(String cv) {

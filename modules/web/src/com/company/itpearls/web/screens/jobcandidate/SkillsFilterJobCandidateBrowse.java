@@ -173,12 +173,17 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private Label<String> loadFromVacancyLabel;
     @Inject
     private Button basketUnselectedCandidatesButton;
-    private String QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION =
+    private final String QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION =
             "select e " +
                     "from itpearls_Iteraction e " +
                     "where e.signPersonalReservePut = true";
     private boolean notFilterCity = false;
     private boolean notFilterPosition = false;
+    private boolean foundLastSelection = false;
+    private boolean loadLastSelectionFlag = false;
+
+    @Inject
+    private PopupButton menuButton;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -914,16 +919,18 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Subscribe("personPositionLookupPickerField")
     public void onPersonPositionLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
-        if (!notFilterPosition) {
-            if (event.getValue() != null) {
-                jobCandidatesDl.setParameter("personPosition", event.getValue());
-            } else {
-                jobCandidatesDl.removeParameter("personPosition");
-            }
+        if (!loadLastSelectionFlag) {
+            if (!notFilterPosition) {
+                if (event.getValue() != null) {
+                    jobCandidatesDl.setParameter("personPosition", event.getValue());
+                } else {
+                    jobCandidatesDl.removeParameter("personPosition");
+                }
 
-            jobCandidatesDl.load();
-        } else {
-            notFilterPosition = false;
+                jobCandidatesDl.load();
+            } else {
+                notFilterPosition = false;
+            }
         }
     }
 
@@ -995,18 +1002,20 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Subscribe("cityLookupPickerField")
     public void onCityLookupPickerFieldValueChange(HasValue.ValueChangeEvent<City> event) {
-        if (!notFilterCity) {
-            if (event.getValue() != null) {
+        if (!loadLastSelectionFlag) {
+            if (!notFilterCity) {
                 if (event.getValue() != null) {
-                    jobCandidatesDl.setParameter("city", event.getValue());
-                } else {
-                    jobCandidatesDl.removeParameter("city");
-                }
+                    if (event.getValue() != null) {
+                        jobCandidatesDl.setParameter("city", event.getValue());
+                    } else {
+                        jobCandidatesDl.removeParameter("city");
+                    }
 
-                jobCandidatesDl.load();
+                    jobCandidatesDl.load();
+                }
+            } else {
+                notFilterCity = false;
             }
-        } else {
-            notFilterCity = false;
         }
     }
 
@@ -1624,8 +1633,13 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Subscribe("menuButton.saveLast")
     public void onMenuButtonSaveLast(Action.ActionPerformedEvent event) {
+        saveLastSelection(event);
+    }
 
+    private void saveLastSelection(Action.ActionPerformedEvent event) {
         try {
+            removeAllLastSelections();
+            /*
             List<SkillsFilterLastSelection> skillsFilterLastSelection =
                     dataManager.load(SkillsFilterLastSelection.class)
                             .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
@@ -1637,7 +1651,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 dataManager.remove(sfls);
             }
 
-            dataManager.commit();
+            dataManager.commit(); */
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1671,8 +1685,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     skillsFilterLastSelection.setPosition(jobCandidate.getPersonPosition());
                 }
 
-                if (cityLookupPickerField.getValue() != null) {
-                    skillsFilterLastSelection.getCity();
+                if (cityLookupPickerField.getValue() == null) {
+                    skillsFilterLastSelection.setCity(jobCandidate.getCityOfResidence());
                 }
 
                 if (selectedOpenPosition != null) {
@@ -1686,13 +1700,51 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 dataManager.commit(skillsFilterLastSelection);
             }
 
+            foundLastSelection = true;
+            menuButton.getAction("loadLast").setEnabled(true);
+            menuButton.getAction("deleteLast").setEnabled(true);
         }
+    }
+
+    @Subscribe("menuButton.deleteLast")
+    public void onMenuButtonDeleteLast(Action.ActionPerformedEvent event) {
+        menuButton.getAction("loadLast").setEnabled(false);
+        menuButton.getAction("deleteLast").setEnabled(false);
+
+        try {
+            removeAllLastSelections();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void removeAllLastSelections() {
+        List<SkillsFilterLastSelection> skillsFilterLastSelection =
+                dataManager.load(SkillsFilterLastSelection.class)
+                        .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
+                        .parameter("user", userSession.getUser())
+                        .view("skillsFilterLastSelection-view")
+                        .list();
+
+        for (SkillsFilterLastSelection sfls : skillsFilterLastSelection) {
+            dataManager.remove(sfls);
+        }
+
+        dataManager.commit();
+        menuButton.getAction("loadLast").setEnabled(true);
+        menuButton.getAction("deleteLast").setEnabled(true);
+
     }
 
     @Subscribe("menuButton.loadLast")
     public void onMenuButtonLoadLast(Action.ActionPerformedEvent event) {
+        loadLastSelection(event);
+    }
+
+    private void loadLastSelection(Action.ActionPerformedEvent event) {
         Position position = null;
         City city = null;
+        loadLastSelectionFlag = true;
 
         List<SkillsFilterLastSelection> skillsFilterLastSelection = null;
 
@@ -1720,24 +1772,22 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     if (sfls.getPosition() != null) {
                         position = sfls.getPosition();
                         personPositionLookupPickerField.setValue(sfls.getPosition());
-
                         notFilterPosition = true;
                     }
                 }
 
-                if (cityLookupPickerField.getValue() == null) {
+/*                if (cityLookupPickerField.getValue() == null) {
                     if (sfls.getCity() != null) {
                         city = sfls.getCity();
                         cityLookupPickerField.setValue(sfls.getCity());
 
                         notFilterCity = true;
                     }
-                }
+                } */
 
                 if (sfls.getJobCandidateSelection()) {
                     selectedCandidates.add(sfls.getJobCandidates());
                 }
-
             }
 
             jobCandidatesDl.removeParameter("personPosition");
@@ -1745,7 +1795,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             jobCandidatesDl.removeParameter("jobCandidateFiltered");
             jobCandidatesDl.removeParameter("jobCandidateNotFiltered");
             jobCandidatesDl.setParameter("city", city);
-            jobCandidatesDl.setParameter("position", position);
+            jobCandidatesDl.setParameter("personPosition", position);
             jobCandidatesDl.setParameter("jobCandidateFiltered", jobCandidatesFilered);
             jobCandidatesDl.setParameter("jobCandidateNotFiltered", removeFromTable);
             jobCandidatesDl.load();
@@ -1764,6 +1814,53 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     .withType(Notifications.NotificationType.ERROR)
                     .show();
         }
+
+        loadLastSelectionFlag = false;
+    }
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if (dataManager.load(SkillsFilterLastSelection.class)
+                .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
+                .parameter("user", userSession.getUser())
+                .view("skillsFilterLastSelection-view")
+                .list().size() > 0) {
+            foundLastSelection = true;
+            menuButton.getAction("loadLast").setEnabled(true);
+            menuButton.getAction("deleteLast").setEnabled(true);
+        }
+    }
+
+
+    @Subscribe
+    public void onAfterShow1(AfterShowEvent event) {
+        if (foundLastSelection) {
+            dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                    .withType(Dialogs.MessageType.CONFIRMATION)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(messageBundle.getMessage("msgLoadSelected"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                    .withHandler(e -> {
+                                        loadLastSelection(null);
+                                    }),
+                            new DialogAction(DialogAction.Type.NO, Action.Status.NORMAL))
+                    .show();
+        }
+    }
+
+
+    @Subscribe
+    public void onBeforeClose(BeforeCloseEvent event) {
+        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                .withType(Dialogs.MessageType.CONFIRMATION)
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .withMessage(messageBundle.getMessage("msgSaveSelected"))
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                .withHandler(e -> {
+                                    saveLastSelection(null);
+                                }),
+                        new DialogAction(DialogAction.Type.NO, Action.Status.NORMAL))
+                .show();
     }
 
 

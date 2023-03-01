@@ -9,7 +9,7 @@ import java.util.List;
 public interface PdfParserService {
     String NAME = "itpearls_PdfParserService";
 
-    List <SkillTree> parseSkillTree(String inputText);
+    List<SkillTree> parseSkillTree(String inputText);
 
     String pdf2txt(String fileName) throws IOException;
 

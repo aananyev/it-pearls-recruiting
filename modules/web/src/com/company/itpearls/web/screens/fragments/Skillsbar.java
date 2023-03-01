@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.fragments;
 
+import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.SkillTree;
@@ -17,6 +18,7 @@ import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @UiController("itpearls_Skillsbar")
@@ -32,6 +34,14 @@ public class Skillsbar extends ScreenFragment {
     @Inject
     private GroupBoxLayout skillsGroupBox;
     private boolean flagVisible;
+    @Inject
+    private ParseCVService parseCVService;
+    @Inject
+    private FlowBoxLayout keySkillsFlowBox;
+    @Inject
+    private GroupBoxLayout keySkillsFlowGroupBox;
+    @Inject
+    private GroupBoxLayout skillFlowGroupBox;
 
     public void setSkillText(String skillText) {
         if (skillText != null) {
@@ -66,8 +76,16 @@ public class Skillsbar extends ScreenFragment {
     }
 
     private Boolean generateSkillLabels() {
+        Integer counterOfPub = 0;
+        Integer counterKeyOfPub = 0;
+
         if (skillText != null) {
             List<SkillTree> skillTrees = pdfParserService.parseSkillTree(skillText);
+            HashMap<SkillTree, Integer> skillCounter = new HashMap<>();
+
+            for (SkillTree skillTree : skillTrees) {
+                skillCounter.put(skillTree, parseCVService.countMachesSkill(skillText, skillTree));
+            }
 
             for (Integer i = 0; i < skillTrees.size(); i++) {
                 if (!skillTrees.get(i).getNotParsing()) {
@@ -93,17 +111,61 @@ public class Skillsbar extends ScreenFragment {
                     if (!st.getNotParsing()) {
                         if (st.getPrioritySkill() != null) {
                             if (st.getPrioritySkill().equals(i)) {
-                                Label labelSkill = uiComponents.create(Label.NAME);
-                                labelSkill.setValue(st.getSkillName());
-                                labelSkill.setStyleName(getStyleForSkillPriority(st));
-                                labelSkill.setDescription(st.getComment());
-                                labelSkill.setDescriptionAsHtml(true);
+                                if (skillCounter.get(st) > 0) {
+                                    Label labelSkill = uiComponents.create(Label.NAME);
+                                    labelSkill.setHtmlEnabled(true);
+                                    labelSkill.setDescriptionAsHtml(true);
+                                    labelSkill.setDescriptionAsHtml(true);
 
-                                skillsFlowBox.add(labelSkill);
+                                    if (skillCounter.get(st) < 2) {
+                                        String counter = st.getSkillName()
+                                                + " ("
+                                                + skillCounter.get(st)
+                                                + ")";
+
+                                        labelSkill.setValue(counter);
+                                        labelSkill.setStyleName(getStyleForSkillPriority(st));
+                                        labelSkill.setDescription(st.getComment());
+
+                                        counterOfPub++;
+                                        skillsFlowBox.add(labelSkill);
+                                    } else {
+                                        String counter = "<b>"
+                                                + st.getSkillName()
+                                                + " ("
+                                                + skillCounter.get(st)
+                                                + ")</b>";
+
+                                        labelSkill.setValue(counter);
+                                        labelSkill.setStyleName(getStyleForSkillPriority(st));
+                                        labelSkill.setDescription(st.getComment());
+
+                                        counterKeyOfPub++;
+                                        keySkillsFlowBox.add(labelSkill);
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            }
+
+            if (counterOfPub > 0) {
+                skillsFlowBox.setVisible(true);
+                skillsGroupBox.setVisible(true);
+                skillFlowGroupBox.setVisible(true);
+            }
+
+            if (counterKeyOfPub > 0) {
+                keySkillsFlowBox.setVisible(true);
+                keySkillsFlowGroupBox.setVisible(true);
+                skillsGroupBox.setVisible(true);
+            }
+
+            if (counterKeyOfPub == 0 && counterOfPub == 0) {
+                skillsGroupBox.setVisible(false);
+            } else {
+                skillsGroupBox.setVisible(true);
             }
 
             return true;

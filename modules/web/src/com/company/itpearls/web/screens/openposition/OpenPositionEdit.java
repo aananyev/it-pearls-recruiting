@@ -472,15 +472,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("openPositionRichTextArea")
     public void onOpenPositionRichTextAreaValueChange1(HasValue.ValueChangeEvent<String> event) {
-        if (openPositionRichTextArea.getValue() != null) {
-            if (openPositionText != null) {
-                if (!openPositionText.equals(Jsoup.parse(openPositionRichTextArea.getValue()).text())) {
-                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                            "Изменено описание вакансии",
-                            Jsoup.parse(openPositionRichTextArea.getValue()).text(),
-                            new Date(),
-                            userSession.getUser());
-                    openPositionText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            if (openPositionRichTextArea.getValue() != null) {
+                if (openPositionText != null) {
+                    if (!openPositionText.equals(Jsoup.parse(openPositionRichTextArea.getValue()).text())) {
+                        setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                                "Изменено описание вакансии",
+                                Jsoup.parse(openPositionRichTextArea.getValue()).text(),
+                                new Date(),
+                                userSession.getUser());
+                        openPositionText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
+                    }
                 }
             }
         }

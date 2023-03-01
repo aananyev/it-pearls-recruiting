@@ -3,11 +3,14 @@ package com.company.itpearls.core;
 import com.company.itpearls.entity.Company;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Position;
+import com.company.itpearls.entity.SkillTree;
 
 import java.util.List;
 
 public interface ParseCVService {
     String NAME = "itpearls_ParseCVService";
+
+    Integer countMachesSkill(String inputText, SkillTree skillTree);
 
     String parseEmail(String cv);
 
