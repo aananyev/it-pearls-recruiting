@@ -22,6 +22,7 @@ public class ParseCVServiceBean implements ParseCVService {
 
     static String emailPtrn = "\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*\\.\\w{2,4}";
     static String phonePtrn = "[7|8][ (-]?[\\d]{3}[ )-]?[\\d]{3}[ -]?[\\d]{2}[ -]?[\\d]{2}[\\D]";
+
     @Inject
     private DataManager dataManager;
     @Inject

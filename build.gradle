@@ -47,10 +47,10 @@ dependencies {
     appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.14.1')
     appComponent('com.haulmont.addon.dashboard:dashboard-global:3.2.3')
     appComponent('com.haulmont.addon.helium:helium-global:0.4.0')
-    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
     appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
-    appComponent("com.haulmont.fts:fts-global:$cubaVersion")
+    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
     appComponent("com.haulmont.reports:reports-global:$cubaVersion")
+    appComponent("com.haulmont.fts:fts-global:$cubaVersion")
 }
 
 def postgres = 'org.postgresql:postgresql:42.2.9'
@@ -84,6 +84,7 @@ configure(globalModule) {
         compile 'org.webjars.npm:domelementtype:2.2.0'
         compile 'com.ibm.icu:icu4j:69.1'
         compile 'org.apache.poi:poi-ooxml-lite:5.2.3'
+        compile 'net.htmlparser.jericho:jericho-html:3.4'
     }
 
     entitiesEnhancing {

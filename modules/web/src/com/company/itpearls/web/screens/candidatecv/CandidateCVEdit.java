@@ -9,11 +9,12 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.data.DataSupplier;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
+import net.htmlparser.jericho.Source;
 import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdfparser.PDFParser;
@@ -21,10 +22,10 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.POITextExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+//import org.apache.poi.xwpf.usermodel.Document;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-
 import javax.inject.Inject;
 import java.io.*;
 import java.util.*;
@@ -108,6 +109,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Image candidateFaceDefaultImage;
     @Inject
     private UserSessionSource userSessionSource;
+    @Inject
+    private FileUploadingAPI fileUploadingAPI;
+    @Inject
+    private FileUploadField fileOriginalCVField;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -175,6 +180,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
                 textResume = parsePdfCV(inputStream);
 
+/*                try {
+                    fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fileDescriptor);
+                } catch (FileStorageException e) {
+                    throw new RuntimeException("Error saving file to FileStorage", e);
+                } */
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
                 /*
 
@@ -212,10 +222,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
                 XWPFDocument doc = new XWPFDocument(inputStream);
                 POITextExtractor extractor = new XWPFWordExtractor(doc);
-                textResume = extractor.getText();
+                textResume = extractor.getText().replaceAll("\n", breakLine[0]);
 
                 if (textResume != null) {
-                    candidateCVRichTextArea.setValue(textResume);
+                    candidateCVRichTextArea.setValue(textResume.replaceAll("\n", breakLine[0]));
                 }
             }
         } catch (FileStorageException | IOException | IllegalArgumentException e) {
@@ -227,11 +237,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         if (textResume != null) {
-            candidateCVRichTextArea.setValue(textResume);
+            candidateCVRichTextArea.setValue(textResume.replaceAll("\n", breakLine[0]));
         }
-        /* File file = fileUploadingAPI.getFile(getEditedEntity().getOriginalFileCV().getId());
-        FileDescriptor a = getEditedEntity().getOriginalFileCV();
-        File b = getEditedEntity().getOr; */
     }
 
     @Subscribe("textFieldIOriginalCV")
@@ -272,7 +279,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         quoteTextArea.setValue(messageBundle.getMessage("msgSalesCV"));
-        candidateCVRichTextArea.setValue(getEditedEntity().getTextCV());
+        candidateCVRichTextArea.setValue(getEditedEntity().getTextCV() != null ?
+                getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]) : null);
 
         candidateCVRichTextArea.addValidator(value -> {
             if (value == null || value.equals("")) {
@@ -300,9 +308,31 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
+    private String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
+    final String brHtml = breakLine[0];
+    final String brTemp = "ШbrШ";
+
+    private String setBreakLine(String text) {
+        String retText = text;
+
+        for (String s : breakLine) {
+            retText = retText.replaceAll(s, brTemp);
+        }
+
+        return retText;
+    }
+
     private void setColorHighlightingCompetencies() {
         if (getEditedEntity().getTextCV() != null) {
             String htmlText = getEditedEntity().getTextCV();
+
+            Source source = new Source(setBreakLine(htmlText));
+
+            // Call fullSequentialParse manually as most of the source will be parsed.
+            source.fullSequentialParse();
+            htmlText = source.getTextExtractor().setIncludeAttributes(true).toString()
+                    .replaceAll(brTemp, brHtml);
+
             htmlText = parseCVService.colorHighlightingCompetencies(htmlText, "brown");
 
             if (candidateCVFieldOpenPosition.getValue() != null) {
@@ -315,7 +345,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             htmlText = parseCVService.colorHighlingCompany(htmlText, "green");
 //            htmlText = parseCVService.colorHighlingPositions(htmlText, "blue");
 
-            candidateCVRichTextArea.setValue(htmlText);
+            candidateCVRichTextArea.setValue(htmlText.replaceAll("\n", breakLine[0]));
         }
     }
 
@@ -688,12 +718,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             String retStr = webLoadService.getCVWebPage(textFieldIOriginalCV.getValue());
 
             if (candidateCVRichTextArea.getValue() == null) {
-                candidateCVRichTextArea.setValue(retStr + "<br><br>Ссылка: " + textFieldIOriginalCV.getValue());
+                candidateCVRichTextArea.setValue(retStr.replaceAll("\n", breakLine[0])
+                        + "<br><br>Ссылка: " + textFieldIOriginalCV.getValue());
             } else {
                 dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
                         .withMessage("Заменить старый текст резюме на новый?")
                         .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                            candidateCVRichTextArea.setValue(retStr);
+                            candidateCVRichTextArea.setValue(retStr.replaceAll("\n", breakLine[0]));
                         }), new DialogAction(DialogAction.Type.NO))
                         .show();
             }
@@ -723,10 +754,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     .replaceAll("</div>", "</div>" + break_line + break_line);
             str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
 
-            candidateCVRichTextArea.setValue(str);
+            candidateCVRichTextArea.setValue(str.replaceAll("\n", breakLine[0]));
             flagHTML = false;
         } else {
-            candidateCVRichTextArea.setValue(getEditedEntity().getTextCV());
+            candidateCVRichTextArea.setValue(getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]));
             flagHTML = true;
         }
 
@@ -755,7 +786,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             showOriginalButon.setCaption("Выделение");
             flagOriginal = true;
 
-            candidateCVRichTextArea.setValue(getEditedEntity().getTextCV());
+            candidateCVRichTextArea.setValue(getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]));
         }
     }
 }

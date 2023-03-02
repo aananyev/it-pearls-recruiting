@@ -162,19 +162,6 @@
                                         order by e.fullName
                                     </query>
                                 </suggestionPickerField>
-                                <!--                                <lookupPickerField id="candidateField"
-                                                                                   inputPrompt="msg://msgCandidateField"
-                                                                                   dataContainer="candidateCVDc"
-                                                                                   property="candidate"
-                                                                                   optionsContainer="candidatesDc"
-                                                                                   caption="msg://msgCandidate"
-                                                                                   height="50%"
-                                                                                   width="70%">
-                                                                    <actions>
-                                                                        <action id="lookup" type="picker_lookup"/>
-                                                                        <action id="open" type="picker_open"/>
-                                                                    </actions>
-                                                                </lookupPickerField> -->
                                 <lookupPickerField id="resumePositionField"
                                                    optionsContainer="resumePositionsDc"
                                                    dataContainer="candidateCVDc"
