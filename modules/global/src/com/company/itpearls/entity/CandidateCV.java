@@ -3,12 +3,14 @@ package com.company.itpearls.entity;
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.*;
 import com.haulmont.cuba.core.global.DeletePolicy;
 import com.haulmont.cuba.security.entity.User;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -94,6 +96,17 @@ public class CandidateCV extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_IMAGE_FACE")
     protected FileDescriptor fileImageFace;
+
+    @Column(name = "IMAGE_BYTE_ARRAY")
+    private byte[] imageByteArray;
+
+    public byte[] getImageByteArray() {
+        return imageByteArray;
+    }
+
+    public void setImageByteArray(byte[] imageByteArray) {
+        this.imageByteArray = imageByteArray;
+    }
 
     public String getCommentLetter() {
         return commentLetter;
@@ -221,5 +234,33 @@ public class CandidateCV extends StandardEntity {
 
     public void setFileImageFace(FileDescriptor fileImageFace) {
         this.fileImageFace = fileImageFace;
+    }
+
+    public enum SelectedCloseActionType implements EnumClass<String> {
+
+        SELECTED("Selected"),
+        DESELECTED("Deselected"),
+        UNSELECTED("Unselected"),
+        NOTSELECTED("NotSelected");
+
+        private String id;
+
+        SelectedCloseActionType(String value) {
+            this.id = value;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        @Nullable
+        public static SelectedCloseActionType fromId(String id) {
+            for (SelectedCloseActionType at : SelectedCloseActionType.values()) {
+                if (at.getId().equals(id)) {
+                    return at;
+                }
+            }
+            return null;
+        }
     }
 }

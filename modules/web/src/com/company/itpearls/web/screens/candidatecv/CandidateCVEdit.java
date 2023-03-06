@@ -4,12 +4,14 @@ import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.WebLoadService;
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.SelectedCloseAction;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
@@ -30,6 +32,7 @@ import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
 import javax.inject.Inject;
 import java.awt.image.*;
 import java.io.*;
@@ -103,19 +106,19 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private SuggestionPickerField candidateField;
     @Inject
-    private LookupPickerField<Position> resumePositionField;
-    @Inject
-    private VBoxLayout letterVbox;
-    @Inject
-    private HBoxLayout letterHBox;
-    @Inject
     private Image candidatePic;
-    @Inject
-    private Image candidateFaceDefaultImage;
     @Inject
     private UserSessionSource userSessionSource;
     @Inject
     private Screens screens;
+    @Inject
+    private FileUploadField fileImageFaceUpload;
+    @Inject
+    private FileUploadingAPI fileUploadingAPI;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private InstanceContainer<CandidateCV> candidateCVDc;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -232,20 +235,30 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     SelectRenderedImagesFromList selectRenderedImagesFromList =
                             screens.create(SelectRenderedImagesFromList.class);
                     selectRenderedImagesFromList.setRenderedImages(images);
+                    selectRenderedImagesFromList.setCandidateCV(getEditedEntity());
+
+                    selectRenderedImagesFromList.addAfterCloseListener(evnt -> {
+                        if (((SelectedCloseAction) evnt.getCloseAction()).getResult()
+                                .equals(CandidateCV.SelectedCloseActionType.SELECTED)) {
+                            Image selectedImage = selectRenderedImagesFromList
+                                    .getSelectedImage();
+
+                            FileDescriptor fd = dataManager
+                                    .commit(selectRenderedImagesFromList.getSelectedImageFileDescriptor());
+
+                            FileDescriptorResource resource = selectedImage
+                                    .createResource(FileDescriptorResource.class)
+                                    .setFileDescriptor(fd);
+
+//                            candidatePic.setSource(resource);
+
+                            candidatePic
+                                    .setSource(FileDescriptorResource.class)
+                                    .setFileDescriptor(fd);
+                        }
+                    });
+
                     selectRenderedImagesFromList.show();
-                    /*
-                    BufferedImage bufferedImage = convertRenderedImage(images.get(0));
-
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(bufferedImage, "jpg", baos);
-
-                    byte[] bytes = baos.toByteArray();
-
-                    InputStream is = new ByteArrayInputStream(bytes);
-
-                    candidatePic.setSource(StreamResource.class)
-                            .setStreamSupplier(() -> is)
-                            .setBufferSize(10240); */
                 }
 
                 setVisibleLogo();
@@ -428,13 +441,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void setVisibleLogo() {
 
-        if (candidatePic.getValueSource().getValue() == null) {
+/*        if (candidatePic.getValueSource().getValue() == null) {
             //candidatePic.setVisible(false);
             //candidateFaceDefaultImage.setVisible(true);
         } else {
             candidatePic.setVisible(true);
             candidateFaceDefaultImage.setVisible(false);
-        }
+        } */
     }
 
     private void setLetterRecommendation() {

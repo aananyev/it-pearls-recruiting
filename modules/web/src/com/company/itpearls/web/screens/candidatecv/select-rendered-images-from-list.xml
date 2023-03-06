@@ -14,7 +14,12 @@
                  height="AUTO"/>
         <hbox spacing="true"
               align="BOTTOM_RIGHT">
-            <button id="okButton" width="AUTO" caption="msg://msgOK" icon="OK"/>
+            <button id="okButton"
+                    width="AUTO"
+                    caption="msg://msgOK"
+                    invoke="okButtonInvoke"
+                    enable="false"
+                    icon="OK"/>
             <button id="cancelButton"
                     width="AUTO"
                     caption="msg://msgCancel"
