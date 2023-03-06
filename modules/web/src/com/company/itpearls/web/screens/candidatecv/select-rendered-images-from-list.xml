@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://selectRenderedImagesFromList.caption"
+        messagesPack="com.company.itpearls.web.screens">
+    <dialogMode height="AUTO"
+                width="600"
+                forceDialog="true"
+                closeOnClickOutside="false"
+                resizable="false"/>
+    <layout>
+        <flowBox id="imagesFlowBox"
+                 spacing="true"
+                 width="800px"
+                 height="AUTO"/>
+        <hbox spacing="true"
+              align="BOTTOM_RIGHT">
+            <button id="okButton" width="AUTO" caption="msg://msgOK" icon="OK"/>
+            <button id="cancelButton"
+                    width="AUTO"
+                    caption="msg://msgCancel"
+                    icon="CANCEL"
+                    invoke="cancelButton"/>
+        </hbox>
+    </layout>
+</window>

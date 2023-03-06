@@ -536,6 +536,28 @@ rating_battery_yellow_3:before {
   }
 }
 
+.image-candidate-deselect {
+    border-radius: 5px;
+    border-style: none;
+    border-color: black;
+    text-align: center;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 2px;
+}
+
+.image-candidate-select {
+    border-radius: 5px;
+    border-style: double;
+    border-color: black;
+    text-align: center;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 2px;
+}
+
 .image-candidate-face-little-image {
     border-radius: 5px;
     text-align: center;

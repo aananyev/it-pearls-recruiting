@@ -9,13 +9,10 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.data.DataSupplier;
-import com.haulmont.cuba.gui.export.FileDataProvider;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
-import com.sun.el.stream.Stream;
 import net.htmlparser.jericho.Source;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessRead;
@@ -30,13 +27,9 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.POITextExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-//import org.apache.poi.xwpf.usermodel.Document;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-
-import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.inject.Inject;
 import java.awt.image.*;
 import java.io.*;
@@ -122,13 +115,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private UserSessionSource userSessionSource;
     @Inject
-    private FileUploadingAPI fileUploadingAPI;
-    @Inject
-    private FileUploadField fileOriginalCVField;
-    @Inject
-    private Metadata metadata;
-    @Inject
-    private DataManager dataManager;
+    private Screens screens;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -183,7 +170,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public BufferedImage convertRenderedImage(RenderedImage img) {
         if (img instanceof BufferedImage) {
-            return (BufferedImage)img;
+            return (BufferedImage) img;
         }
         ColorModel cm = img.getColorModel();
         int width = img.getWidth();
@@ -192,7 +179,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
         Hashtable properties = new Hashtable();
         String[] keys = img.getPropertyNames();
-        if (keys!=null) {
+        if (keys != null) {
             for (int i = 0; i < keys.length; i++) {
                 properties.put(keys[i], img.getProperty(keys[i]));
             }
@@ -223,29 +210,30 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         UUID uuidFile = originalFileId;
         FileDescriptor fileDescriptor = originalFileCVDescriptor;
         String textResume = "";
-
+        List<RenderedImage> images = new ArrayList<>();
 
         try {
             InputStream inputStream = fileLoader.openStream(fileDescriptor);
 
             if (fileDescriptor.getExtension().equals(EXTENSION_PDF)) {
 
-               textResume = parsePdfCV(inputStream);
-
-
+                textResume = parsePdfCV(inputStream);
                 RandomAccessRead rad = new RandomAccessReadBuffer(fileLoader.openStream(fileDescriptor));
 
                 PDFParser parser = new PDFParser(rad);
                 PDFTextStripper pdfStripper = new PDFTextStripper();
                 PDDocument pdDoc = parser.parse();
-//                List<RenderedImage> images = pdfParserService.getImagesFromPDF(pdDoc);
 
-                List<RenderedImage> images = new ArrayList<>();
                 for (PDPage page : pdDoc.getPages()) {
                     images.addAll(getImagesFromResources(page.getResources()));
                 }
 
                 if (images.size() > 0) {
+                    SelectRenderedImagesFromList selectRenderedImagesFromList =
+                            screens.create(SelectRenderedImagesFromList.class);
+                    selectRenderedImagesFromList.setRenderedImages(images);
+                    selectRenderedImagesFromList.show();
+                    /*
                     BufferedImage bufferedImage = convertRenderedImage(images.get(0));
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -257,8 +245,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
                     candidatePic.setSource(StreamResource.class)
                             .setStreamSupplier(() -> is)
-                            .setBufferSize(10240);
+                            .setBufferSize(10240); */
                 }
+
                 setVisibleLogo();
 
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
