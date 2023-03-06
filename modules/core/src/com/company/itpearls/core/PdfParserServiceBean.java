@@ -4,10 +4,16 @@ import com.company.itpearls.entity.SkillTree;
 import com.haulmont.cuba.core.global.DataManager;
 import org.apache.fop.pdf.PDFDocument;
 import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.io.RandomAccessReadMemoryMappedFile;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.PDXObject;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.slf4j.Logger;
@@ -16,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.util.*;
 
@@ -25,6 +32,33 @@ public class PdfParserServiceBean implements PdfParserService {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(PdfParserServiceBean.class);
     @Inject
     private DataManager dataManager;
+
+    @Override
+    public List<RenderedImage> getImagesFromPDF(PDDocument document) throws IOException {
+        List<RenderedImage> images = new ArrayList<>();
+        for (PDPage page : document.getPages()) {
+            images.addAll(getImagesFromResources(page.getResources()));
+        }
+
+        return images;
+    }
+
+    @Override
+    public List<RenderedImage> getImagesFromResources(PDResources resources) throws IOException {
+        List<RenderedImage> images = new ArrayList<>();
+
+        for (COSName xObjectName : resources.getXObjectNames()) {
+            PDXObject xObject = resources.getXObject(xObjectName);
+
+            if (xObject instanceof PDFormXObject) {
+                images.addAll(getImagesFromResources(((PDFormXObject) xObject).getResources()));
+            } else if (xObject instanceof PDImageXObject) {
+                images.add(((PDImageXObject) xObject).getImage());
+            }
+        }
+
+        return images;
+    }
 
     @Override
     public List<SkillTree> parseSkillTree(String inputText) {

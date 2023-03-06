@@ -10,15 +10,23 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.data.DataSupplier;
+import com.haulmont.cuba.gui.export.FileDataProvider;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
+import com.sun.el.stream.Stream;
 import net.htmlparser.jericho.Source;
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.PDXObject;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.POITextExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
@@ -26,7 +34,11 @@ import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageOutputStream;
 import javax.inject.Inject;
+import java.awt.image.*;
 import java.io.*;
 import java.util.*;
 
@@ -113,6 +125,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private FileUploadingAPI fileUploadingAPI;
     @Inject
     private FileUploadField fileOriginalCVField;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -165,6 +181,42 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         originalFileId = event.getValue().getId();
     }
 
+    public BufferedImage convertRenderedImage(RenderedImage img) {
+        if (img instanceof BufferedImage) {
+            return (BufferedImage)img;
+        }
+        ColorModel cm = img.getColorModel();
+        int width = img.getWidth();
+        int height = img.getHeight();
+        WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
+        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        Hashtable properties = new Hashtable();
+        String[] keys = img.getPropertyNames();
+        if (keys!=null) {
+            for (int i = 0; i < keys.length; i++) {
+                properties.put(keys[i], img.getProperty(keys[i]));
+            }
+        }
+        BufferedImage result = new BufferedImage(cm, raster, isAlphaPremultiplied, properties);
+        img.copyData(raster);
+        return result;
+    }
+
+    public List<RenderedImage> getImagesFromResources(PDResources resources) throws IOException {
+        List<RenderedImage> images = new ArrayList<>();
+
+        for (COSName xObjectName : resources.getXObjectNames()) {
+            PDXObject xObject = resources.getXObject(xObjectName);
+
+            if (xObject instanceof PDFormXObject) {
+                images.addAll(getImagesFromResources(((PDFormXObject) xObject).getResources()));
+            } else if (xObject instanceof PDImageXObject) {
+                images.add(((PDImageXObject) xObject).getImage());
+            }
+        }
+
+        return images;
+    }
 
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
@@ -178,13 +230,37 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             if (fileDescriptor.getExtension().equals(EXTENSION_PDF)) {
 
-                textResume = parsePdfCV(inputStream);
+               textResume = parsePdfCV(inputStream);
 
-/*                try {
-                    fileUploadingAPI.putFileIntoStorage(fileOriginalCVField.getFileId(), fileDescriptor);
-                } catch (FileStorageException e) {
-                    throw new RuntimeException("Error saving file to FileStorage", e);
-                } */
+
+                RandomAccessRead rad = new RandomAccessReadBuffer(fileLoader.openStream(fileDescriptor));
+
+                PDFParser parser = new PDFParser(rad);
+                PDFTextStripper pdfStripper = new PDFTextStripper();
+                PDDocument pdDoc = parser.parse();
+//                List<RenderedImage> images = pdfParserService.getImagesFromPDF(pdDoc);
+
+                List<RenderedImage> images = new ArrayList<>();
+                for (PDPage page : pdDoc.getPages()) {
+                    images.addAll(getImagesFromResources(page.getResources()));
+                }
+
+                if (images.size() > 0) {
+                    BufferedImage bufferedImage = convertRenderedImage(images.get(0));
+
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ImageIO.write(bufferedImage, "jpg", baos);
+
+                    byte[] bytes = baos.toByteArray();
+
+                    InputStream is = new ByteArrayInputStream(bytes);
+
+                    candidatePic.setSource(StreamResource.class)
+                            .setStreamSupplier(() -> is)
+                            .setBufferSize(10240);
+                }
+                setVisibleLogo();
+
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
                 /*
 
@@ -364,8 +440,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void setVisibleLogo() {
 
         if (candidatePic.getValueSource().getValue() == null) {
-            candidatePic.setVisible(false);
-            candidateFaceDefaultImage.setVisible(true);
+            //candidatePic.setVisible(false);
+            //candidateFaceDefaultImage.setVisible(true);
         } else {
             candidatePic.setVisible(true);
             candidateFaceDefaultImage.setVisible(false);
@@ -527,74 +603,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         return parsedText;
     }
-
-/*    private String parsePdfCV(File fileName) {
-        String parsedText = "";
-
-        if (fileOriginalCVField.getFileName().endsWith(".pdf")) {
-
-            try {
-                try {
-                    RandomAccessRead rad = new RandomAccessReadMemoryMappedFile(fileName);
-                    PDFParser parser = new PDFParser(rad);
-//                    parser.parse();
-
-//                    COSDocument cosDoc = parser.getDocument();
-                    PDFTextStripper pdfStripper = new PDFTextStripper();
-                    PDDocument pdDoc = parser.parse();
-                    parsedText = pdfStripper.getText(pdDoc).replace("\n", "<br>");
-                } catch (NullPointerException e) {
-                    notifications.create(Notifications.NotificationType.ERROR)
-                            .withCaption("Ошибка загрузки файла " + fileName)
-                            .show();
-
-                    e.printStackTrace();
-                }
-
-            } catch (IOException e) {
-                notifications.create()
-                        .withType(Notifications.NotificationType.WARNING)
-                        .withCaption("ВНИМАНИЕ!")
-                        .withDescription("Ошибка расшифровки PDF резюме.\nЗагрузите PDF/DOC/DOCX для расшифровки.")
-                        .show();
-
-                e.printStackTrace();
-            }
-        } else if (fileOriginalCVField.getFileName().endsWith(".docx")) {
-            try {
-                InputStream fis = new FileInputStream(fileName);
-
-                XWPFDocument doc = new XWPFDocument(fis);
-                POITextExtractor extractor = new XWPFWordExtractor(doc);
-                parsedText = extractor.getText();
-            } catch (IOException | IncompatibleClassChangeError | NullPointerException e) {
-                notifications.create()
-                        .withType(Notifications.NotificationType.WARNING)
-                        .withCaption("ВНИМАНИЕ!")
-                        .withDescription("Ошибка расшифровки DOCX резюме.\nЗагрузите PDF для расшифровки.")
-                        .show();
-
-                e.printStackTrace();
-            }
-
-        } else if (fileOriginalCVField.getFileName().endsWith(".doc")) {
-
-            try {
-                POITextExtractor extractor = createExtractor(fileName);
-                parsedText = extractor.getText();
-            } catch (IOException | NoClassDefFoundError e) {
-                notifications.create()
-                        .withType(Notifications.NotificationType.WARNING)
-                        .withCaption("ВНИМАНИЕ!")
-                        .withDescription("Ошибка расшифровки DOC резюме.\nЗагрузите PDF для расшифровки.")
-                        .show();
-
-                e.printStackTrace();
-            }
-        }
-
-        return parsedText.replace("\n", "<br>");
-    } */
 
     @Install(to = "skillTreesTable.wikiPage", subject = "columnGenerator")
     private Object skillTreesTableWikiPageColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
