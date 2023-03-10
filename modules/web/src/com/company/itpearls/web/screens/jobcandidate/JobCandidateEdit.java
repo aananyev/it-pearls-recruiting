@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
+
     @Inject
     private DataManager dataManager;
     @Inject

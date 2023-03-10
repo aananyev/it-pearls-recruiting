@@ -50,6 +50,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
+    private FileDescriptor fileDescriptor;
 
     @Inject
     private UserSession userSession;
@@ -119,6 +120,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private DataManager dataManager;
     @Inject
     private InstanceContainer<CandidateCV> candidateCVDc;
+    @Inject
+    private Metadata metadata;
+
+    public FileDescriptor getFileDescriptor() {
+        return fileDescriptor;
+    }
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -208,6 +215,15 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         return images;
     }
 
+    @Subscribe
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        if(getEditedEntity().getCandidate().getFileImageFace() == null) {
+            if (getEditedEntity().getFileImageFace() != null) {
+                getEditedEntity().getCandidate().setFileImageFace(getEditedEntity().getFileImageFace());
+            }
+        }
+    }
+
     @Subscribe("fileOriginalCVField")
     public void onFileOriginalCVFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
         UUID uuidFile = originalFileId;
@@ -246,11 +262,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                             FileDescriptor fd = dataManager
                                     .commit(selectRenderedImagesFromList.getSelectedImageFileDescriptor());
 
+                            try {
+                                fileUploadingAPI.putFileIntoStorage(fd.getUuid(), fd);
+                            } catch (FileStorageException e) {
+                                e.printStackTrace();
+                            }
+
                             FileDescriptorResource resource = selectedImage
                                     .createResource(FileDescriptorResource.class)
                                     .setFileDescriptor(fd);
 
-//                            candidatePic.setSource(resource);
+                            getEditedEntity().setFileImageFace(fd);
 
                             candidatePic
                                     .setSource(FileDescriptorResource.class)
