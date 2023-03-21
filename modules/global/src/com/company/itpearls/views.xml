@@ -96,6 +96,7 @@
         <property name="iteractionList" view="_local">
             <property name="vacancy" view="_local">
                 <property name="owner" view="_local"/>
+                <property name="grade" view="_minimal"/>
             </property>
             <property name="candidate" view="_local">
                 <property name="personPosition" view="_local"/>

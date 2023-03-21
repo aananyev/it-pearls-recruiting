@@ -120,6 +120,10 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
                     e.setLinkOriginalCv(candidateCVsTable.getSingleSelected().getLinkOriginalCv());
                     e.setDatePost(new Date());
                 })
+                .withAfterCloseListener(ee -> {
+                    candidateCVsDl.load();
+                    candidateCVsTable.repaint();
+                })
                 .build()
                 .show();
 

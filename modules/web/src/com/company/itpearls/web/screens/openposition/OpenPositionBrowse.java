@@ -613,6 +613,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             returnData = returnData + "\n<b>Кратко: </b><i>" + openPosition.getShortDescription() + "</i><br><br>";
         }
 
+        if (openPosition.getProjectName() != null) {
+            if (openPosition.getProjectName().getProjectOwner() != null) {
+                if (openPosition.getProjectName().getProjectOwner().getSecondName() != null &&
+                        openPosition.getProjectName().getProjectOwner().getFirstName() != null) {
+                    returnData = returnData
+                            + "\n</br><b>"
+                            + messageBundle.getMessage("msgProjectOwner")
+                            + ":</b> "
+                            + openPosition.getProjectName().getProjectOwner().getSecondName()
+                            + " "
+                            + openPosition.getProjectName().getProjectOwner().getFirstName()
+                            + "<br>";
+                }
+            }
+        }
+
         if (recrutiesTasks.size() != 0) {
             returnData = returnData + "\n<b>В работе у:</b><br>";
 
@@ -2164,7 +2180,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return CubaIcon.valueOf(retStr);
-
     }
 
     @Install(to = "openPositionsTable.folder", subject = "descriptionProvider")

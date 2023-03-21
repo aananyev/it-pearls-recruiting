@@ -72,6 +72,8 @@
         <collection id="vacancyDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local">
+                <property name="grade"
+                          view="_minimal"/>
                 <property name="positionType"
                           view="_local"/>
                 <property name="owner"

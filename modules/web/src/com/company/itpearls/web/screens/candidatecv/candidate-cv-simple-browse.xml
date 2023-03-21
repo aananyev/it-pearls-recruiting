@@ -87,8 +87,10 @@
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="candidateCVsTable.create"/>
-                <button id="editBtn" action="candidateCVsTable.edit"/>
+                <button id="createBtn"
+                        action="candidateCVsTable.create"/>
+                <button id="editBtn"
+                        action="candidateCVsTable.edit"/>
                 <button id="copyCVButton"
                         invoke="copyCandidateCVButton"
                         caption="msg://msgCopyCV"

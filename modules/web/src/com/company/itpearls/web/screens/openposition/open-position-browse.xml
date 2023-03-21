@@ -185,7 +185,7 @@
                         collapsed="true"
                         width="70px"
                         minimumWidth="35px"
-                        caption=""/>
+                        caption="msg://msgPriority"/>
                 <column id="companyLogoColumn"
                         resizable="true"
                         collapsible="true"

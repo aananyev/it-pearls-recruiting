@@ -42,15 +42,15 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     private Label<String> vacancyNameLabel;
     @Inject
     private Label<String> recrutierLabel;
-
-    JobCandidate jobCandidate = null;
     @Inject
     private Label<String> candidateLabel;
     @Inject
     private Label<String> candidatePositionLabel;
     @Inject
     private Label<String> candidatePositionEnLabel;
+
     private String openPositionStr;
+    JobCandidate jobCandidate = null;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -195,6 +195,10 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 .withInitializer(iteractionList1 -> {
                     iteractionList1.setCandidate((JobCandidate) iteractionListsDl.getParameter("candidate"));
                 })
+                .withAfterCloseListener(e -> {
+                    iteractionListsDl.load();
+                    iteractionListsTable.repaint();
+                })
                 .build()
                 .show();
     }
@@ -215,6 +219,7 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
                 })
                 .withAfterCloseListener(e -> {
                     iteractionListsDl.load();
+                    iteractionListsTable.repaint();
                 })
                 .build()
                 .show();

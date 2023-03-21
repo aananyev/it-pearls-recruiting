@@ -72,12 +72,13 @@
     <layout expand="jobCandidatesTable"
             spacing="true">
         <filter id="filter"
-                applyTo="jobCandidatesTable"
+                applyTo="jobCandidatesTable" 
+                defaultMode="generic"
                 dataLoader="jobCandidatesDl">
             <properties include=".*"
                         exclude="id"
                         excludeRecursively="true"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace"/>
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
         </filter>
         <dataGrid id="jobCandidatesTable"
                   width="100%"
