@@ -37,6 +37,10 @@
               icon="TEXT_HEIGHT"/>
         <item screen="itpearls_OurCompany.browse" caption="mainMsg://msgOurCompany" icon="BUILDING_O"/>
     </menu>
+    <menu id="application-recruiting" icon="COMPASS" insertAfter="application-outstaffing">
+        <item screen="itpearls_OpenPositionRecruiting.browse" caption="mainMsg://msgOpenPositionRecruiting"
+              icon="COMPASS" openType="NEW_TAB"/>
+    </menu>
     <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>

@@ -9,8 +9,11 @@
                   class="com.company.itpearls.entity.JobCandidate">
             <view extends="_local">
                 <property name="candidateCv" view="_local">
-                    <property name="candidate" view="_local"/>
-                    <property name="resumePosition" view="_local"/>
+                    <property name="candidate" view="_local">
+                        <property name="personPosition" view="_local"/>
+                    </property>
+                    <property name="resumePosition" view="_local">
+                    </property>
                     <property name="toVacancy" view="_local">
                         <property name="grade" view="_local"/>
                         <property name="positionType" view="_local"/>
