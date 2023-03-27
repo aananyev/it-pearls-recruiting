@@ -174,10 +174,13 @@
             <columns
                     exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
                 <column id="folder"
+                        maximumWidth="100px"
                         resizable="false"
+                        collapsible="false"
+                        collapsed="false"
                         width="100px"
                         caption="msg://msgFolder">
-                    <iconRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="icon"
                         resizable="true"
@@ -192,7 +195,7 @@
                         collapsed="false"
                         caption=""
                         width="70px"
-                        minimumWidth="50px">
+                        minimumWidth="70px">
                     <componentRenderer/>
                 </column>
                 <column id="lastOpenCloseColumn"
@@ -203,13 +206,15 @@
                         resizable="true"
                         maximumWidth="70px"
                         minimumWidth="55px">
-                    <textRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="vacansyName"
                         collapsible="false"
                         property="vacansyName"
                         resizable="true"
-                        caption="msg://msgVacancy"/>
+                        caption="msg://msgVacancy">
+                    <componentRenderer/>
+                </column>
                 <column id="positionType"
                         collapsible="true"
                         collapsed="true"

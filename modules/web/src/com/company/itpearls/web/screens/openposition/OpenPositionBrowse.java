@@ -1860,12 +1860,30 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "columnGenerator")
     private Object openPositionsTableLastOpenCloseColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+
+//    @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "columnGenerator")
+//    private Object openPositionsTableLastOpenCloseColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+
+        HBoxLayout retObject = uiComponents.create(HBoxLayout.class);
+        Label label = uiComponents.create(Label.class);
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yy");
         Date lastDate = event.getItem().getLastOpenDate() != null
                 ? event.getItem().getLastOpenDate() : event.getItem().getCreateTs();
 
-        return (lastDate != null ?
+        retObject.setWidthFull();
+        retObject.setHeightFull();
+        retObject.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        label.setHeightAuto();
+        label.setWidthAuto();
+        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        label.setValue(lastDate != null ?
                 simpleDateFormat.format(lastDate) : "");
+
+        retObject.add(label);
+
+        return retObject;
     }
 
     @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "styleProvider")
@@ -2133,9 +2151,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
-    private Icons.Icon openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
+    private Object openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
         String retStr = "QUESTION_CIRCLE";
+
+        VBoxLayout retHbox = uiComponents.create(VBoxLayout.NAME);
+        Label retLabel = uiComponents.create(Label.NAME);
 
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
@@ -2179,7 +2200,44 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
         }
 
-        return CubaIcon.valueOf(retStr);
+        retLabel.setIconFromSet(CubaIcon.valueOf(retStr));
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retLabel.setWidthFull();
+        retLabel.setHeightFull();
+
+        retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retHbox.setWidthAuto();
+        retHbox.setHeightAuto();
+
+        retHbox.add(retLabel);
+//        return CubaIcon.valueOf(retStr);
+        return retHbox;
+    }
+
+    @Install(to = "openPositionsTable.vacansyName", subject = "columnGenerator")
+    private Object openPositionsTableVacansyNameColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = uiComponents.create(HBoxLayout.class);
+        Label label = uiComponents.create(Label.class);
+        String vacansyNameWidth = (int) openPositionsTable
+                .getColumn("vacansyName")
+                .getWidth() + "%";
+
+        retObject.setWidth(vacansyNameWidth);
+        retObject.setHeightFull();
+        retObject.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retObject.setStyleName("table-wordwrap");
+
+        label.setWidthAuto();
+        label.setHeightAuto();
+        label.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        label.setStyleName("table-wordwrap");
+
+        label.setValue(event.getItem().getVacansyName());
+
+
+        retObject.add(label);
+
+        return retObject;
     }
 
     @Install(to = "openPositionsTable.folder", subject = "descriptionProvider")
