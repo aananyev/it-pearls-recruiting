@@ -1024,7 +1024,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.salaryMinMax", subject = "columnGenerator")
-    private String openPositionsTableSalaryMinMaxColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+    private Object openPositionsTableSalaryMinMaxColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getSalaryMinMaxStr(event));
+        return retObject;
+    }
+
+    private String getSalaryMinMaxStr(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String retStr = "";
 
         try {
@@ -1129,6 +1134,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.cityPositionList", subject = "columnGenerator")
     private Object openPositionsTableCityPositionListColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getCityPositions(event));
+        return retObject;
+    }
+
+    private String getCityPositions(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String mainCity = "";
 
         if (event.getItem().getCityPosition() != null) {
@@ -1954,6 +1964,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.idStatistics", subject = "columnGenerator")
     private Object openPositionsTableIdStatisticsColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getIDStatistics(event));
+        return retObject;
+    }
+
+
+
+    private String getIDStatistics(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String retStr = "";
 
         GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
@@ -2018,27 +2035,46 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.numberPosition", subject = "columnGenerator")
     private Object openPositionsTableNumberPositionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
 
+        String labelStr = "";
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        Label label = uiComponents.create(Label.class);
+
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retHBox.setStyleName("table-wordwrap");
+
+        label.setHeightAuto();
+        label.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        label.setStyleName("table-wordwrap");
+
         if (event.getItem().getMore10NumberPosition() == null) {
             if (event.getItem().getNumberPosition() != null) {
                 if (event.getItem().getNumberPosition() < 10) {
-                    return event.getItem().getNumberPosition().toString();
+                    labelStr = event.getItem().getNumberPosition().toString();
                 } else {
-                    return more_10_msg;
+                    labelStr = more_10_msg;
                 }
             } else {
-                return clarification_required;
+                labelStr = clarification_required;
             }
         } else {
             if (event.getItem().getMore10NumberPosition()) {
-                return more_10_msg;
+                labelStr = more_10_msg;
             } else {
                 if (event.getItem().getNumberPosition() < 10) {
-                    return event.getItem().getNumberPosition().toString();
+                    labelStr = event.getItem().getNumberPosition().toString();
                 } else {
-                    return more_10_msg;
+                    labelStr = more_10_msg;
                 }
             }
         }
+
+        label.setValue(labelStr);
+        retHBox.add(label);
+
+        return retHBox;
+
     }
 
     @Install(to = "openPositionsTable.numberPosition", subject = "descriptionProvider")
@@ -2073,14 +2109,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.owner", subject = "columnGenerator")
     private Object openPositionsTableOwnerColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, whoOwner(event));
 
-        return whoOwner(event);
+        return retObject;
         /* return event.getItem().getOwner() != null
                 ? event.getItem().getOwner().getName()
                 : event.getItem().getCreatedBy(); */
     }
 
-    private Object whoOwner(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+    private String whoOwner(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String userName = null;
         String a, b, c, e;
 
@@ -2111,6 +2148,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.workExperience", subject = "columnGenerator")
     private Object openPositionsTableWorkExperienceColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getWorkExperience(event));
+
+        return retObject;
+    }
+
+    private String getWorkExperience(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         Set<Map.Entry<String, Integer>> entrySet = mapWorkExperience.entrySet();
         Integer desiredObject = event.getItem().getWorkExperience();
 
@@ -2201,41 +2244,58 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         retLabel.setIconFromSet(CubaIcon.valueOf(retStr));
-        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        retLabel.setWidthFull();
-        retLabel.setHeightFull();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
 
-        retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        retHbox.setWidthAuto();
-        retHbox.setHeightAuto();
+        retHbox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retHbox.setWidthFull();
+        retHbox.setHeightFull();
 
         retHbox.add(retLabel);
-//        return CubaIcon.valueOf(retStr);
         return retHbox;
     }
 
-    @Install(to = "openPositionsTable.vacansyName", subject = "columnGenerator")
-    private Object openPositionsTableVacansyNameColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        HBoxLayout retObject = uiComponents.create(HBoxLayout.class);
+    @Install(to = "openPositionsTable.positionType", subject = "columnGenerator")
+    private Object openPositionsTablePositionTypeColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event,
+                event.getItem().getPositionType().getPositionEnName()
+                        + " / "
+                        + event.getItem().getPositionType().getPositionRuName());
+        return retObject;
+    }
+
+    @Install(to = "openPositionsTable.projectName", subject = "columnGenerator")
+    private Object openPositionsTableProjectNameColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event,
+                event.getItem().getProjectName().getProjectName());
+        return retObject;
+    }
+
+    private HBoxLayout setComponentsToOpenPositionsTable(DataGrid.ColumnGeneratorEvent<OpenPosition> event,
+                                                         String dataStr) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
         Label label = uiComponents.create(Label.class);
-        String vacansyNameWidth = (int) openPositionsTable
-                .getColumn("vacansyName")
-                .getWidth() + "%";
 
-        retObject.setWidth(vacansyNameWidth);
-        retObject.setHeightFull();
-        retObject.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        retObject.setStyleName("table-wordwrap");
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retHBox.setStyleName("table-wordwrap");
 
-        label.setWidthAuto();
         label.setHeightAuto();
         label.setAlignment(Component.Alignment.MIDDLE_LEFT);
         label.setStyleName("table-wordwrap");
 
-        label.setValue(event.getItem().getVacansyName());
+        label.setValue(dataStr);
 
+        retHBox.add(label);
 
-        retObject.add(label);
+        return retHBox;
+    }
+
+    @Install(to = "openPositionsTable.vacansyName", subject = "columnGenerator")
+    private Object openPositionsTableVacansyNameColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, event.getItem().getVacansyName());
 
         return retObject;
     }
@@ -2352,6 +2412,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.lastCVSend", subject = "columnGenerator")
     private Object openPositionsTableLastCVSendColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retHBox.setStyleName("table-wordwrap");
+
         Label labelRet = uiComponents.create(Label.NAME);
         String QUERY = "select e " +
                 "from itpearls_IteractionList e " +
@@ -2364,10 +2431,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .parameter("vacancy", columnGeneratorEvent.getItem())
                 .list().size();
 
-        labelRet.setValue(countCVsend);
-        labelRet.setWidthFull();
-        labelRet.setHeightFull();
+        labelRet.setWidthAuto();
+        labelRet.setHeightAuto();
         labelRet.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        labelRet.setStyleName("table-wordwrap");
+
+        labelRet.setValue(countCVsend);
 
         switch (countCVsend) {
             case 0:
@@ -2394,7 +2463,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 break;
         }
 
-        return labelRet;
+        retHBox.add(labelRet);
+
+        return retHBox;
     }
 
     @Install(to = "openPositionsTable.projectName", subject = "styleProvider")

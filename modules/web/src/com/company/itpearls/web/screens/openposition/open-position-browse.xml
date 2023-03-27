@@ -221,39 +221,43 @@
                         resizable="true"
                         property="positionType"
                         maximumWidth="300px"
-                        caption="msg://msgPositionType"/>
+                        caption="msg://msgPositionType">
+                    <componentRenderer/>
+                </column>
                 <column id="projectName"
                         collapsible="true"
                         collapsed="true"
                         resizable="true"
                         property="projectName"
                         maximumWidth="250px"
-                        caption="msg://msgProjectName"/>
+                        caption="msg://msgProjectName">
+                    <componentRenderer/>
+                </column>
                 <column id="cityPositionList"
                         collapsed="true"
                         collapsible="true"
                         caption="msg://msgCity"
                         minimumWidth="60px"
                         width="120px">
-                    <textRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="workExperience"
                         width="65px"
                         caption="msg://msgWorkExperience">
-                    <textRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="salaryMinMax"
                         resizable="true"
                         width="120px"
                         caption="msg://msgSalaryMinMax">
-                    <textRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="numberPosition"
                         width="65px"
                         maximumWidth="85px"
                         minimumWidth="65px"
                         caption="msg://msgNumberOpenPosition">
-                    <htmlRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="description"
                         sortable="false"
@@ -322,14 +326,14 @@
                         width="70px"
                         minimumWidth="35px"
                         caption="msg://msgStat">
-                    <textRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="owner"
                         collapsed="true"
                         collapsible="true"
                         resizable="true"
                         width="120px">
-                    <textRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="candidateSendedColumn"
                         collapsed="false"
