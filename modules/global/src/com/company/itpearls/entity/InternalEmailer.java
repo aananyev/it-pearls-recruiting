@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -8,8 +9,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
-@Table(name = "ITPEARLS_EMAILER")
-@Entity(name = "itpearls_Emailer")
+@Table(name = "ITPEARLS_INTERNAL_EMAILER")
+@Entity(name = "itpearls_InternalEmailer")
+@NamePattern("from: %s to: %s (%s)|fromEmail,toEmail,dateSendEmail")
 public class InternalEmailer extends StandardEntity {
     private static final long serialVersionUID = 1989669444636246337L;
 

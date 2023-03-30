@@ -5,16 +5,16 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
-import com.company.itpearls.web.StandartPrioritySkills;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
+import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
+import com.company.itpearls.web.screens.internalemailer.InternalEmailerTemplateEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
-import com.haulmont.cuba.core.global.View;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -93,6 +93,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
     @Inject
     private PdfParserService pdfParserService;
+    @Inject
+    private Button sendEmailButton;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -535,6 +537,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             } else {
                 lastInteractionPopupButton.setEnabled(true);
             }
+
         });
 
         Integer MAX_POPULAR_INTERACLION = 5;
@@ -1171,6 +1174,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         setRatingField();
         setWithCVCheckBox();
+        setSendEmailButton();
+    }
+
+    private void setSendEmailButton() {
+        jobCandidatesTable.addSelectionListener(e -> {
+            if(jobCandidatesTable.getSingleSelected() != null) {
+                if (jobCandidatesTable.getSingleSelected().getEmail() != null) {
+                    sendEmailButton.setEnabled(true);
+                } else {
+                    sendEmailButton.setEnabled(false);
+                }
+            }
+        });
     }
 
     private void setWithCVCheckBox() {
@@ -1385,5 +1401,32 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     public void quickLoadCVButton() {
+    }
+
+    public void onSendEmail() {
+        screenBuilders.editor(InternalEmailerTemplate.class, this)
+                .newEntity()
+                .withInitializer(e -> {
+                    e.setFromEmail((ExtUser) userSession.getUser());
+                    e.setToEmail(jobCandidatesTable.getSingleSelected());
+                })
+                .build()
+                .show();
+/*        Screen screen = screens.create(InternalEmailerTemplateEdit.class)
+                .show();
+        screenBuilders.editor(InternalEmailerTemplate.class, this)
+                .withScreenClass(InternalEmailerTemplateEdit.class)
+                .newEntity()
+                .build()
+                .show();
+/*        screenBuilders.editor(InternalEmailerTemplate.class, this)
+                .withScreenClass(InternalEmailerTemplateEdit.class)
+                .newEntity()
+                .withInitializer(e -> {
+                    e.setFromEmail((ExtUser) userSession.getUser());
+                    e.setToEmail(jobCandidatesTable.getSingleSelected());
+                })
+                .build()
+                .show(); */
     }
 }

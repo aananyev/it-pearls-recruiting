@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://internalEmailTemplateEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.internalemailtemplate">
+    <data>
+        <instance id="internalEmailTemplateDc"
+                  class="com.company.itpearls.entity.InternalEmailTemplate">
+            <view extends="_local">
+                <property name="templateOpenPosition" view="_local"/>
+                <property name="templatePosition" view="_local"/>
+                <property name="templateAuthor" view="_local"/>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="templateOpenPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="_minimal">
+            <loader id="templateOpenPositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="templatePositionsDc" class="com.company.itpearls.entity.Position" view="_minimal">
+            <loader id="templatePositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_Position e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="templateAuthorsDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
+            <loader id="templateAuthorsDl">
+                <query>
+                    <![CDATA[select e from sec$User e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="internalEmailTemplateDc">
+            <column width="350px">
+                <textField id="templateNameField" property="templateName"/>
+                <textArea id="templateTextField" property="templateText" rows="5"/>
+                <lookupPickerField id="templateOpenPositionField" optionsContainer="templateOpenPositionsDc"
+                                   property="templateOpenPosition"/>
+                <lookupPickerField id="templatePositionField" optionsContainer="templatePositionsDc"
+                                   property="templatePosition"/>
+                <textField id="templateCommentField" property="templateComment"/>
+                <lookupPickerField id="templateAuthorField" optionsContainer="templateAuthorsDc"
+                                   property="templateAuthor"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

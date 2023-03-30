@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@UiController("itpearls_Emailer.edit")
+@UiController("itpearls_InternalEmailer.edit")
 @UiDescriptor("internal-emailer-edit.xml")
 @EditedEntityContainer("emailerDc")
 @LoadDataBeforeShow
@@ -92,7 +92,7 @@ public class InternalEmailerEdit extends StandardEditor<InternalEmailer> {
         setSender((ExtUser) userSession.getUser());
     }
 
-    protected void setSender(ExtUser user) {
+    private void setSender(ExtUser user) {
         String userEmail = System.getProperty(EMAIL_SMTPUSER);
         fromEmailTextAddressField.setValue(user.getName() + " \"" + user.getEmail() + "\"");
         fromEmailTextAddressField.setDescription("SMTP server: " + user.getSmtpServer() + ":" + user.getSmtpPort() + "\n" +

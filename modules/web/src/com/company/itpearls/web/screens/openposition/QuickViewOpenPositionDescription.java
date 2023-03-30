@@ -27,6 +27,7 @@ public class QuickViewOpenPositionDescription extends Screen {
     private String companyWorkConditions = "";
     private String companyDescription = "";
     private String jobDescriptionEng = "";
+    private String cvRequirement = "";
 
     @Inject
     private RichTextArea jobDesxriptionRichTextArea;
@@ -54,6 +55,10 @@ public class QuickViewOpenPositionDescription extends Screen {
     private VBoxLayout workingConditionsTab;
     @Named("jobDescriptionViewTab.companyDescriptionTab")
     private VBoxLayout companyDescriptionTab;
+    @Inject
+    private RichTextArea cvRequirementsRichTextArea;
+    @Named("jobDescriptionViewTab.cvRequirementsTab")
+    private VBoxLayout cvRequirementsTab;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -62,7 +67,13 @@ public class QuickViewOpenPositionDescription extends Screen {
         });
     }
 
+    public void setCvRequirement(String cvRequirement) {
+        this.cvRequirement = cvRequirement;
+    }
 
+    public String getCvRequirement() {
+        return cvRequirement;
+    }
 
     public void setCompanyDescription(String companyDescription) {
         this.companyDescription = companyDescription;
@@ -144,6 +155,13 @@ public class QuickViewOpenPositionDescription extends Screen {
         } else {
             companyDescriptionTab.setVisible(false);
         }
+
+        if (cvRequirement != null && !cvRequirement.equals("")) {
+            cvRequirementsRichTextArea.setValue(cvRequirement);
+            cvRequirementsTab.setVisible(true);
+        } else {
+            cvRequirementsTab.setVisible(false);
+        }
     }
 
     private Boolean setDisableCopyToClipboardButton() {
@@ -165,6 +183,9 @@ public class QuickViewOpenPositionDescription extends Screen {
                         break;
                     case "companyDescriptionTab":
                         retBool = companyDescriptionRichTextArea.getValue() != null ? true : false;
+                        break;
+                    case "cvRequirementsTab":
+                        retBool = cvRequirementsRichTextArea.getValue() != null ? true : false;
                         break;
                     default:
                         break;

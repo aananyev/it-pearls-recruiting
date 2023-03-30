@@ -151,6 +151,10 @@
                 <button id="quickLoadCV"
                         caption="msg://msgQuickLoadCV"
                         invoke="quickLoadCVButton"/>
+                <button id="sendEmailButton"
+                        caption="mainMsg://msgSendEmail"
+                        enable="false"
+                        invoke="onSendEmail"/>
             </buttonsPanel>
         </dataGrid>
         <hbox align="MIDDLE_LEFT"

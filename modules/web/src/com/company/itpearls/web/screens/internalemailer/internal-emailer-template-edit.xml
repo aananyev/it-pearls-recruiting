@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/internalemailer/internal-emailer-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.internalemailer">
+    <data>
+        <instance id="emailerDc"
+                  class="com.company.itpearls.entity.InternalEmailerTemplate">
+            <view extends="_local">
+                <property name="emailTemplate" view="_local"/>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="emailTemplateDc"
+                    class="com.company.itpearls.entity.InternalEmailTemplate">
+            <view extends="_local">
+                <property name="templateAuthor" view="_local"/>
+                <property name="templateOpenPosition" view="_local"/>
+                <property name="templatePosition" view="_local"/>
+            </view>
+            <loader id="emailTemplateDl">
+                <query>
+                    <![CDATA[select e from itpearls_InternalEmailTemplate e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <groupBox id="emailSettingGroupBox"/>
+        <lookupPickerField id="templateEmailLookupPickerField"
+                           dataContainer="emailerDc"
+                           property="emailTemplate"
+                           optionsContainer="emailTemplateDc"/>
+    </layout>
+</window>

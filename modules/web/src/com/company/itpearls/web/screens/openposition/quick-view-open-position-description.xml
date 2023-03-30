@@ -50,6 +50,13 @@
                                   editable="false"
                                   height="100%"/>
                 </tab>
+                <tab id="cvRequirementsTab"
+                     caption="msg://msgCvRequirementsTab">
+                    <richTextArea id="cvRequirementsRichTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </tab>
             </tabSheet>
             <hbox id="lookupActions"
                   spacing="true"

@@ -791,6 +791,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         openPositionsTable.getSingleSelected()
                                 .getComment() : "");
 
+                if (openPositionsTable.getSingleSelected().getTemplateLetter() != null) {
+                    quickViewOpenPositionDescription.setCvRequirement(openPositionsTable
+                            .getSingleSelected()
+                            .getTemplateLetter() != null ?
+                            openPositionsTable.getSingleSelected()
+                                    .getTemplateLetter() : "");
+                }
+
                 if (openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() != null) {
                     quickViewOpenPositionDescription.setProjectDescription(openPositionsTable
                             .getSingleSelected()
@@ -1967,7 +1975,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getIDStatistics(event));
         return retObject;
     }
-
 
 
     private String getIDStatistics(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {

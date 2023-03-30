@@ -394,10 +394,6 @@
         <property name="recrutier" view="_minimal"/>
         <property name="researcher" view="_minimal"/>
     </view>
-    <view entity="itpearls_Emailer" name="internalEmailer-view" extends="_local">
-        <property name="fromEmail" view="_minimal"/>
-        <property name="toEmail" view="_minimal"/>
-    </view>
     <view entity="itpearls_OpenPositionNews" name="openPositionNews-view" extends="_local">
         <property name="openPosition" view="_minimal">
             <property name="projectName" view="_local">
@@ -440,5 +436,23 @@
         <property name="openPosition" view="_local"/>
         <property name="jobCandidates" view="_local"/>
         <property name="user" view="_local"/>
+    </view>
+    <view entity="itpearls_InternalEmailerTemplate" name="internalEmailerTemplate-view" extends="_local">
+        <property name="emailTemplate" view="_local">
+            <property name="templateOpenPosition" view="_local"/>
+            <property name="templatePosition" view="_local"/>
+            <property name="templateAuthor" view="_local"/>
+        </property>
+        <property name="fromEmail" view="_local"/>
+        <property name="toEmail" view="_local"/>
+    </view>
+    <view entity="itpearls_InternalEmailer" name="internalEmailer-view" extends="_local">
+        <property name="fromEmail" view="_local"/>
+        <property name="toEmail" view="_local"/>
+    </view>
+    <view entity="itpearls_InternalEmailTemplate" name="internalEmailTemplate-view" extends="_local">
+        <property name="templateOpenPosition" view="_local"/>
+        <property name="templatePosition" view="_local"/>
+        <property name="templateAuthor" view="_local"/>
     </view>
 </views>

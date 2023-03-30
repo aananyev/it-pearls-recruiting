@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://internalEmailTemplateBrowse.caption"
+        focusComponent="internalEmailTemplatesTable"
+        messagesPack="com.company.itpearls.web.screens.internalemailtemplate">
+    <data readOnly="true">
+        <collection id="internalEmailTemplatesDc"
+                    class="com.company.itpearls.entity.InternalEmailTemplate">
+            <view extends="_local">
+                <property name="templateOpenPosition" view="_local"/>
+                <property name="templatePosition" view="_local"/>
+                <property name="templateAuthor" view="_local"/>
+            </view>
+            <loader id="internalEmailTemplatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_InternalEmailTemplate e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="internalEmailTemplatesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="internalEmailTemplatesTable"
+                dataLoader="internalEmailTemplatesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="internalEmailTemplatesTable"
+                    width="100%"
+                    dataContainer="internalEmailTemplatesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="templateName"/>
+                <column id="templateText"/>
+                <column id="templateOpenPosition"/>
+                <column id="templatePosition"/>
+                <column id="templateComment"/>
+                <column id="templateAuthor"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="internalEmailTemplatesTable.create"/>
+                <button id="editBtn" action="internalEmailTemplatesTable.edit"/>
+                <button id="removeBtn" action="internalEmailTemplatesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

@@ -36,7 +36,6 @@
         <class>com.company.itpearls.entity.ExtUser</class>
         <class>com.company.itpearls.entity.OpenPositionNews</class>
         <class>com.company.itpearls.entity.Interview</class>
-        <class>com.company.itpearls.entity.InternalEmailer</class>
         <class>com.company.itpearls.entity.StaffingTable</class>
         <class>com.company.itpearls.entity.Grade</class>
         <class>com.company.itpearls.entity.StaffCurrent</class>
@@ -44,5 +43,8 @@
         <class>com.company.itpearls.entity.ApplicationRecruitmentList</class>
         <class>com.company.itpearls.entity.PersonelReserve</class>
         <class>com.company.itpearls.entity.SkillsFilterLastSelection</class>
+        <class>com.company.itpearls.entity.InternalEmailTemplate</class>
+        <class>com.company.itpearls.entity.InternalEmailer</class>
+        <class>com.company.itpearls.entity.InternalEmailerTemplate</class>
     </persistence-unit>
 </persistence>

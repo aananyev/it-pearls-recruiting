@@ -834,29 +834,7 @@ create table ITPEARLS_INTERVIEW_OPEN_POSITION_LINK (
     primary key (INTERVIEW_ID, OPEN_POSITION_ID)
 )^
 -- end ITPEARLS_INTERVIEW_OPEN_POSITION_LINK
--- begin ITPEARLS_EMAILER
-create table ITPEARLS_EMAILER (
-    ID uuid,
-    VERSION integer not null,
-    CREATE_TS timestamp,
-    CREATED_BY varchar(50),
-    UPDATE_TS timestamp,
-    UPDATED_BY varchar(50),
-    DELETE_TS timestamp,
-    DELETED_BY varchar(50),
-    --
-    DRAFT_EMAIL boolean,
-    FROM_EMAIL_ID uuid not null,
-    TO_EMAIL_ID uuid not null,
-    SUBJECT_EMAIL varchar(255) not null,
-    BODY_EMAIL text not null,
-    BODY_HTML boolean,
-    DATE_CREATE_EMAIL timestamp not null,
-    DATE_SEND_EMAIL timestamp,
-    --
-    primary key (ID)
-)^
--- end ITPEARLS_EMAILER
+
 -- begin ITPEARLS_STAFFING_TABLE
 create table ITPEARLS_STAFFING_TABLE (
     ID uuid,
@@ -1008,3 +986,51 @@ create table ITPEARLS_SKILLS_FILTER_LAST_SELECTION (
     primary key (ID)
 )^
 -- end ITPEARLS_SKILLS_FILTER_LAST_SELECTION
+-- begin ITPEARLS_INTERNAL_EMAIL_TEMPLATE
+create table ITPEARLS_INTERNAL_EMAIL_TEMPLATE (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    TEMPLATE_NAME varchar(128) not null,
+    TEMPLATE_TEXT text not null,
+    TEMPLATE_OPEN_POSITION_ID uuid,
+    TEMPLATE_POSITION_ID uuid,
+    TEMPLATE_COMMENT varchar(255),
+    TEMPLATE_AUTHOR_ID uuid not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_INTERNAL_EMAIL_TEMPLATE
+-- begin ITPEARLS_INTERNAL_EMAILER
+create table ITPEARLS_INTERNAL_EMAILER (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    DTYPE varchar(31),
+    --
+    DRAFT_EMAIL boolean,
+    FROM_EMAIL_ID uuid not null,
+    TO_EMAIL_ID uuid not null,
+    SUBJECT_EMAIL varchar(255) not null,
+    BODY_EMAIL text not null,
+    BODY_HTML boolean,
+    DATE_CREATE_EMAIL timestamp not null,
+    DATE_SEND_EMAIL timestamp,
+    --
+    -- from itpearls_InternalEmailerTemplate
+    EMAIL_TEMPLATE_ID uuid,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_INTERNAL_EMAILER

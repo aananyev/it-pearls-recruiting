@@ -25,22 +25,6 @@
             </view>
             <loader/>
         </instance>
-<!--        <collection id="jobCandidateDc"
-                    class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_minimal">
-                <property name="fullName"/>
-                <property name="personPosition" view="_minimal">
-                    <property name="positionEnName"/>
-                    <property name="positionRuName"/>
-                </property>
-                <property name="email"/>
-            </view>
-            <loader id="jobCandidateDl">
-                <query>
-                    <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
-                </query>
-            </loader>
-        </collection> -->
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -49,11 +33,13 @@
                   caption="msg://msgDraftEmail"
                   dataContainer="emailerDc"
                   property="draftEmail"/>
-        <groupBox width="100%"
+        <groupBox id="emailSettingGroupBox"
+                  width="100%"
                   caption="msg://msgFromTo"
                   showAsPanel="true"
                   collapsable="true">
-            <hbox spacing="true"
+            <hbox id="emailSettingHBox"
+                  spacing="true"
                   width="100%"
                   expand="fromEmailHBox">
                 <vbox id="fromEmailHBox"
@@ -121,7 +107,6 @@
                       caption="msg://msgBodyMessage"
                       width="100%"
                       property="bodyEmail"/>
-
         <hbox id="editActions" spacing="true">
             <button id="sendAndCloseButton"
                     caption="msg://msgSendAndClose"
