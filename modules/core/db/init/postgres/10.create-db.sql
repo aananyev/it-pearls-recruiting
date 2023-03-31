@@ -998,6 +998,7 @@ create table ITPEARLS_INTERNAL_EMAIL_TEMPLATE (
     DELETED_BY varchar(50),
     --
     TEMPLATE_NAME varchar(128) not null,
+    TEMPLATE_SUBJ varchar(255),
     TEMPLATE_TEXT text not null,
     TEMPLATE_OPEN_POSITION_ID uuid,
     TEMPLATE_POSITION_ID uuid,

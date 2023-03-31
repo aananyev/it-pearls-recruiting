@@ -1,5 +1,6 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.entity.EmailKeys;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

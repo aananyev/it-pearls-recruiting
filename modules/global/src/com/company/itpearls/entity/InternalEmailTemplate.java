@@ -19,6 +19,9 @@ public class InternalEmailTemplate extends StandardEntity {
     @NotNull
     private String templateName;
 
+    @Column(name = "TEMPLATE_SUBJ")
+    private String templateSubj;
+
     @Lob
     @Column(name = "TEMPLATE_TEXT", nullable = false)
     @NotNull
@@ -42,6 +45,14 @@ public class InternalEmailTemplate extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "TEMPLATE_AUTHOR_ID")
     private User templateAuthor;
+
+    public String getTemplateSubj() {
+        return templateSubj;
+    }
+
+    public void setTemplateSubj(String templateSubj) {
+        this.templateSubj = templateSubj;
+    }
 
     public Position getTemplatePosition() {
         return templatePosition;

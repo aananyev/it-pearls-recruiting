@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://internalEmailTemplateEdit.caption"
-        focusComponent="form"
+        focusComponent="templateNameField"
         messagesPack="com.company.itpearls.web.screens.internalemailtemplate">
     <data>
         <instance id="internalEmailTemplateDc"
@@ -37,20 +37,51 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="internalEmailTemplateDc">
-            <column width="350px">
-                <textField id="templateNameField" property="templateName"/>
-                <textArea id="templateTextField" property="templateText" rows="5"/>
-                <lookupPickerField id="templateOpenPositionField" optionsContainer="templateOpenPositionsDc"
-                                   property="templateOpenPosition"/>
-                <lookupPickerField id="templatePositionField" optionsContainer="templatePositionsDc"
-                                   property="templatePosition"/>
-                <textField id="templateCommentField" property="templateComment"/>
-                <lookupPickerField id="templateAuthorField" optionsContainer="templateAuthorsDc"
-                                   property="templateAuthor"/>
-            </column>
-        </form>
+    <layout expand="textAreaHBox"
+            spacing="true">
+        <textField id="templateNameField"
+                   caption="msg://msgTemplateName"
+                   width="50%"
+                   dataContainer="internalEmailTemplateDc"
+                   property="templateName"/>
+        <lookupPickerField id="templateOpenPositionField"
+                           caption="msg://msgOpenPosition"
+                           width="50%"
+                           dataContainer="internalEmailTemplateDc"
+                           optionsContainer="templateOpenPositionsDc"
+                           property="templateOpenPosition"/>
+        <lookupPickerField id="templatePositionField"
+                           caption="msg://msgTemplatePosition"
+                           dataContainer="internalEmailTemplateDc"
+                           width="50%"
+                           optionsContainer="templatePositionsDc"
+                           property="templatePosition"/>
+        <textField id="templateCommentField"
+                   caption="msg://msgTemplateComment"
+                   dataContainer="internalEmailTemplateDc"
+                   width="50%"
+                   property="templateComment"/>
+        <lookupPickerField id="templateAuthorField"
+                           caption="msg://msgTemplateAuthor"
+                           dataContainer="internalEmailTemplateDc"
+                           width="50%"
+                           optionsContainer="templateAuthorsDc"
+                           property="templateAuthor"/>
+        <hbox id="textAreaHBox"
+              spacing="true" width="100%">
+            <richTextArea id="templateTextField"
+                          dataContainer="internalEmailTemplateDc"
+                          property="templateText"
+                          box.expandRatio="8"
+                          width="100%"
+                          height="100%"/>
+            <richTextArea id="commentKeysRichTextArea"
+                          box.expandRatio="2"
+                          stylename="borderless"
+                          width="100%"
+                          height="100%"
+                          editable="false"/>
+        </hbox>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>

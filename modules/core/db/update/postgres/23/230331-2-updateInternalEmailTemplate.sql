@@ -1,0 +1,1 @@
+alter table ITPEARLS_INTERNAL_EMAIL_TEMPLATE add column TEMPLATE_SUBJ varchar(255) ;
