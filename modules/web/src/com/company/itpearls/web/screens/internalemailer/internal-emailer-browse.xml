@@ -24,7 +24,7 @@
             </view>
             <loader id="emailersDl">
                 <query>
-                    <![CDATA[select e from itpearls_Emailer e]]>
+                    <![CDATA[select e from itpearls_InternalEmailer e]]>
                 </query>
             </loader>
         </collection>

@@ -8,8 +8,7 @@ import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
-import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
-import com.company.itpearls.web.screens.internalemailer.InternalEmailerTemplateEdit;
+import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -1405,6 +1404,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     public void onSendEmail() {
         screenBuilders.editor(InternalEmailerTemplate.class, this)
+//                .withScreenClass(InternalEmailerTemplateEdit.class)
                 .newEntity()
                 .withInitializer(e -> {
                     e.setFromEmail((ExtUser) userSession.getUser());
@@ -1412,21 +1412,5 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 })
                 .build()
                 .show();
-/*        Screen screen = screens.create(InternalEmailerTemplateEdit.class)
-                .show();
-        screenBuilders.editor(InternalEmailerTemplate.class, this)
-                .withScreenClass(InternalEmailerTemplateEdit.class)
-                .newEntity()
-                .build()
-                .show();
-/*        screenBuilders.editor(InternalEmailerTemplate.class, this)
-                .withScreenClass(InternalEmailerTemplateEdit.class)
-                .newEntity()
-                .withInitializer(e -> {
-                    e.setFromEmail((ExtUser) userSession.getUser());
-                    e.setToEmail(jobCandidatesTable.getSingleSelected());
-                })
-                .build()
-                .show(); */
     }
 }

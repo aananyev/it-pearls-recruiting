@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @UiDescriptor("internal-emailer-edit.xml")
 @EditedEntityContainer("emailerDc")
 @LoadDataBeforeShow
-public class InternalEmailerEdit extends StandardEditor<InternalEmailer> {
+public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEditor<InternalEmailer> {
     @Inject
     private UserSession userSession;
     @Inject

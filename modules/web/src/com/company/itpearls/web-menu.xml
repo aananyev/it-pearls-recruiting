@@ -54,7 +54,7 @@
         <item screen="itpearls_Company.browse" icon="BUILDING"/>
         <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
         <menu id="application-sending-messages" icon="font-icon:SEND">
-            <item screen="itpearls_Emailer.browse" caption="mainMsg://menu_config.itpearls_Emailer.browse"
+            <item screen="itpearls_InternalEmailer.browse" caption="mainMsg://menu_config.itpearls_InternalEmailer.browse"
                   icon="font-icon:MAIL_FORWARD"/>
             <item screen="itpearls_InternalEmailTemplate.browse"
                   caption="mainMsg://menu_config.itpearls_InternalEmailTemplate.browse"/>

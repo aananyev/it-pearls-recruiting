@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://internalEmailerTemplateEdit.caption"
+        extends="com/company/itpearls/web/screens/internalemailer/internal-emailer-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.internalemailertemplate">
+    <data>
+        <instance id="internalEmailerTemplateDc"
+                  class="com.company.itpearls.entity.InternalEmailerTemplate">
+            <view extends="_local">
+                <property name="emailTemplate" view="_local"/>
+                <property name="fromEmail" view="_local"/>
+                <property name="toEmail" view="_local"/>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="emailTemplatesDc" class="com.company.itpearls.entity.InternalEmailTemplate" view="_minimal">
+            <loader id="emailTemplatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_InternalEmailTemplate e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="fromEmailsDc" class="com.company.itpearls.entity.ExtUser" view="_minimal">
+            <loader id="fromEmailsDl">
+                <query>
+                    <![CDATA[select e from itpearls_ExtUser e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="toEmailsDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+            <loader id="toEmailsDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout>
+        <vbox id="subjectGroupBox">
+            <lookupPickerField id="emailTemplateField"
+                               optionsContainer="emailTemplatesDc"
+                               dataContainer="internalEmailerTemplateDc"
+                               width="100%"
+                               caption="msg://msgEmailTemplate"
+                               property="emailTemplate"/>
+        </vbox>
+    </layout>
+</window>

@@ -97,11 +97,14 @@
                 </vbox>
             </hbox>
         </groupBox>
-        <textField id="subjectEmailField"
-                   caption="msg://msgSubject"
-                   width="100%"
-                   dataContainer="emailerDc"
-                   property="subjectEmail"/>
+        <vbox id="subjectGroupBox"
+                  spacing="true">
+            <textField id="subjectEmailField"
+                       caption="msg://msgSubject"
+                       width="100%"
+                       dataContainer="emailerDc"
+                       property="subjectEmail"/>
+        </vbox>
         <richTextArea id="bodyEmailField"
                       dataContainer="emailerDc"
                       caption="msg://msgBodyMessage"

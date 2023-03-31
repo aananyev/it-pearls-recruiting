@@ -29,6 +29,13 @@
                                   editable="false"
                                   height="100%"/>
                 </tab>
+                <tab id="cvRequirementsTab"
+                     caption="msg://msgCvRequirementsTab">
+                    <richTextArea id="cvRequirementsRichTextArea"
+                                  width="100%"
+                                  editable="false"
+                                  height="100%"/>
+                </tab>
                 <tab id="projectDescriptionTab"
                      caption="msg://msgProjectDescriptionTab">
                     <richTextArea id="projectDescriptionRichTextArea"
@@ -46,13 +53,6 @@
                 <tab id="workingConditionsTab"
                      caption="msg://msgWorkingConditions">
                     <richTextArea id="companyWorkingConditionsRichTextArea"
-                                  width="100%"
-                                  editable="false"
-                                  height="100%"/>
-                </tab>
-                <tab id="cvRequirementsTab"
-                     caption="msg://msgCvRequirementsTab">
-                    <richTextArea id="cvRequirementsRichTextArea"
                                   width="100%"
                                   editable="false"
                                   height="100%"/>

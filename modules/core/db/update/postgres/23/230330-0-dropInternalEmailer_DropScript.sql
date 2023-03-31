@@ -1,0 +1,1 @@
+drop table if exists ITPEARLS_INTERNAL_EMAILER__U93217 cascade ;
