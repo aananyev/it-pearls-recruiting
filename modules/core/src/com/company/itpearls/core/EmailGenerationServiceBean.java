@@ -12,20 +12,20 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
     public HashMap<String, String> generateKeys() {
         HashMap<String, String> emailKeys = new HashMap<>();
 
-        emailKeys.put("Имя", "$first_name");
-        emailKeys.put("Отчество", "$middle_name");
-        emailKeys.put("Фамилия", "$second_name");
-        emailKeys.put("Вакансия", "$vacancy");
-        emailKeys.put("Проект", "$project");
-        emailKeys.put("Компания", "$company");
-        emailKeys.put("Департамент", "$departament");
-        emailKeys.put("Дата", "$date");
-        emailKeys.put("Время", "$time");
-        emailKeys.put("Ресерчер", "$researcher_name");
-        emailKeys.put("ОписаниеВакансии", "$job_description");
-        emailKeys.put("Позиция", "$position");
-        emailKeys.put("ЗарплатаМин", "$salary_min");
         emailKeys.put("ЗарплатаМакс", "$salary_max");
+        emailKeys.put("ЗарплатаМин", "$salary_min");
+        emailKeys.put("Вакансия", "$vacancy");
+        emailKeys.put("Время", "$time");
+        emailKeys.put("Дата", "$date");
+        emailKeys.put("Департамент", "$departament");
+        emailKeys.put("Имя", "$first_name");
+        emailKeys.put("Компания", "$company");
+        emailKeys.put("ОписаниеВакансии", "$job_description");
+        emailKeys.put("Отчество", "$middle_name");
+        emailKeys.put("Позиция", "$position");
+        emailKeys.put("Проект", "$project");
+        emailKeys.put("Ресерчер", "$researcher_name");
+        emailKeys.put("Фамилия", "$second_name");
 
         return emailKeys;
     }

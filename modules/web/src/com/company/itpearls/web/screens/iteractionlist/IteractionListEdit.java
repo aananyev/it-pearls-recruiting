@@ -7,11 +7,9 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
 import com.company.itpearls.web.StandartPriorityVacancy;
-import com.company.itpearls.web.StandartRoles;
+import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksEdit;
-import com.company.itpearls.web.widgets.Diagrams.ResearcherDiagramWidget;
 import com.haulmont.cuba.core.app.EmailService;
-import com.haulmont.cuba.core.app.ResourceService;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -24,7 +22,6 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -539,13 +536,24 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                                     bodyMessage = bodyMessage
                                                                             + "<br><br><b>Памятка для собеседования</b><br><br>"
                                                                             + newsItem.getVacancy().getMemoForInterview();
+
+                                                                    String finalBodyMessage = bodyMessage;
+                                                                    screenBuilders.editor(InternalEmailerTemplate.class, this)
+                                                                            .newEntity()
+                                                                            .withInitializer(ev -> {
+                                                                                ev.setFromEmail((ExtUser) userSession.getUser());
+                                                                                ev.setToEmail(candidateField.getValue());
+                                                                                ev.setBodyEmail(finalBodyMessage);
+                                                                            })
+                                                                            .build()
+                                                                            .show();
                                                                 }
                                                             }
                                                         }
                                                     }
                                                 }
 
-                                                EmailInfo emailInfo = EmailInfoBuilder.create()
+/*                                                EmailInfo emailInfo = EmailInfoBuilder.create()
                                                         .setAddresses(newsItem.getCandidate().getEmail())
                                                         .setCaption("IT Pearls - "
                                                                 + newsItem.getVacancy().getVacansyName()
@@ -557,7 +565,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                         .build();
 
                                                 emailInfo.setBodyContentType("text/html; charset=UTF-8");
-                                                emailService.sendEmailAsync(emailInfo);
+                                                emailService.sendEmailAsync(emailInfo); */
+
 
                                                 afterCommitEmailToCandidateSended = true;
                                             }),
@@ -1567,7 +1576,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             String retStr = commentField.getValue() != null ? commentField.getValue() : "";
 
             commentField.setValue((commentField.getValue() != null ? retStr
-                    + "\n": "")
+                    + "\n" : "")
                     + iteractionTypeField.getValue().getIterationName()
                     + ": "
                     + event.getValue());
@@ -1580,7 +1589,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             String retStr = commentField.getValue() != null ? commentField.getValue() : "";
 
             commentField.setValue((commentField.getValue() != null ? retStr
-                    + "\n": "")
+                    + "\n" : "")
                     + iteractionTypeField.getValue().getIterationName()
                     + ": "
                     + event.getValue());

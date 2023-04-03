@@ -33,6 +33,8 @@ public class ProjectBrowse extends StandardLookup<Project> {
     private MessageTools messageTools;
     @Inject
     private LookupField columnSelector;
+    @Inject
+    private CheckBox withOpenPositionCheckBox;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -66,6 +68,8 @@ public class ProjectBrowse extends StandardLookup<Project> {
     public void onBeforeShow(BeforeShowEvent event) {
         onlyOpenProjectCheckBox.setValue(false);
         setProjectClosedFilter();
+
+        withOpenPositionCheckBox.setValue(true);
     }
 
     @Install(to = "projectsTable", subject = "rowDescriptionProvider")
@@ -76,6 +80,7 @@ public class ProjectBrowse extends StandardLookup<Project> {
     private void setProjectClosedFilter() {
         if (onlyOpenProjectCheckBox.getValue()) {
             projectsDl.removeParameter("projectClosed");
+            withOpenPositionCheckBox.setValue(false);
         } else {
             projectsDl.setParameter("projectClosed", false);
         }
@@ -115,5 +120,15 @@ public class ProjectBrowse extends StandardLookup<Project> {
         }
     }
 
+    @Subscribe("withOpenPositionCheckBox")
+    public void onWithOpenPositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue()) {
+            projectsDl.setParameter("withOpenPosition", true);
+            onlyOpenProjectCheckBox.setValue(false);
+        } else {
+            projectsDl.removeParameter("withOpenPosition");
+        }
 
+        projectsDl.load();
+    }
 }

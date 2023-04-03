@@ -13,11 +13,19 @@
                     <![CDATA[select e from itpearls_Project e
                             order by e.projectIsClosed desc, e.projectName]]>
                     <condition>
+                        <and>
                         <c:jpql>
                             <c:where>
                                 e.projectIsClosed = :projectClosed
                             </c:where>
                         </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select f.projectName
+                                    from itpearls_OpenPosition f
+                                    where not (f.openClose = :withOpenPosition)
+                                        and f.projectName = e)</c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
@@ -66,8 +74,11 @@
                 <button id="removeBtn" action="projectsTable.remove"/>
             </buttonsPanel>
         </treeDataGrid>
-        <groupBox>
-            <checkBox id="onlyOpenProjectCheckBox" caption="msg://msgOnlyOpenedProject"/>
+        <groupBox orientation="horizontal">
+            <checkBox id="onlyOpenProjectCheckBox"
+                      caption="msg://msgOnlyOpenedProject"/>
+            <checkBox id="withOpenPositionCheckBox"
+                      caption="msg://msgWithOpenPosition"/>
         </groupBox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
