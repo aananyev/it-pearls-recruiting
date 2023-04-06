@@ -16,7 +16,7 @@ pg_ctl stop -D .
 echo "Архивация старой базы ..."
 rm $old_archive
 mv $new_archive $old_archive
-tar zcvf $new_archive * 
+tar zcvf $new_archive * > /dev/null
 echo "Удаление старой базы ..."
 rm -rf *
 echo "Загрузка базы с сервера ..."

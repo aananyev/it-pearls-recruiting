@@ -213,6 +213,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CollectionLoader<ProcAttachment> procAttachmentsDl;
     @Inject
     private ProcActionsFragment procActionsFragment;
+    @Inject
+    private LookupPickerField<Grade> gradeLookupPickerField;
+    @Inject
+    private CollectionContainer<Grade> gradeDc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -450,14 +454,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             "Изменены зарплатные предложение (MAX): старое "
                                     + (startSalaryMaxValue.toString().length() >= 3
-                                        ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
-                                        : "НЕ ОПРЕДЕЛЕНО")
+                                    ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                    : "НЕ ОПРЕДЕЛЕНО")
                                     + " на новое "
                                     + openPositionFieldSalaryMax.getValue(),
                             "Изменены зарплатные предложение (MAX): старое "
                                     + (startSalaryMaxValue.toString().length() >= 3
-                                        ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
-                                        : "НЕ ОПРЕДЕЛЕНО")
+                                    ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                    : "НЕ ОПРЕДЕЛЕНО")
                                     + " на новое "
                                     + openPositionFieldSalaryMax.getValue(),
                             new Date(),
@@ -1086,12 +1090,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         registrationForWorkField.setOptionsMap(rwMap);
 
-        priorityMap.put("Draft", -1);
-        priorityMap.put("Paused", 0);
-        priorityMap.put("Low", 1);
-        priorityMap.put("Normal", 2);
-        priorityMap.put("High", 3);
-        priorityMap.put("Critical", 4);
+        priorityMap.put("Draft", OpenPositionPriority.DRAFT.getId());
+        priorityMap.put("Paused", OpenPositionPriority.PAUSED.getId());
+        priorityMap.put("Low", OpenPositionPriority.LOW.getId());
+        priorityMap.put("Normal", OpenPositionPriority.NORMAL.getId());
+        priorityMap.put("High", OpenPositionPriority.HIGH.getId());
+        priorityMap.put("Critical", OpenPositionPriority.CRITICAL.getId());
 
         priorityField.setOptionsMap(priorityMap);
 
@@ -1525,7 +1529,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setInitApprovalProcess() {
         UUID entityId = getEditedEntity().getId();
-        procAttachmentsDl.setParameter("entityId",entityId);
+        procAttachmentsDl.setParameter("entityId", entityId);
         procAttachmentsDl.load();
         procActionsFragment.initializer()
                 .standard()
@@ -2051,6 +2055,37 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             signDraftLabel.setValue("");
             signDraftCheckBox.setStyleName("h2");
             priorityField.setValue(null);
+        }
+    }
+
+    @Subscribe("salaryCandidateRequestCheckBox")
+    public void onSalaryCandidateRequestCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue()) {
+            openPositionFieldSalaryMin.setEnabled(false);
+            openPositionFieldSalaryMax.setEnabled(false);
+        } else {
+            openPositionFieldSalaryMin.setEnabled(true);
+            openPositionFieldSalaryMax.setEnabled(true);
+        }
+    }
+
+    @Subscribe("gradeLookupPickerField")
+    public void onGradeLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Grade> event) {
+        boolean flag = false;
+
+        for (Grade grade : gradeDc.getItems()) {
+            if (vacansyNameField.getValue().startsWith(grade.getGradeName())) {
+                vacansyNameField.setValue(event.getValue().getGradeName()
+                        + vacansyNameField
+                        .getValue()
+                        .substring(grade.getGradeName().length()));
+                flag = true;
+                break;
+            }
+        }
+
+        if (!flag) {
+            vacansyNameField.setValue(event.getValue().getGradeName() + " " + vacansyNameField.getValue());
         }
     }
 }

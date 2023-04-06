@@ -515,7 +515,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
                             String message = preparingMessage(getEditedEntity());
 
-                            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                            screenBuilders.editor(InternalEmailer.class, this)
+                                    .withScreenClass(InternalEmailerEdit.class)
+                                    .newEntity()
+                                    .withInitializer(e -> {
+//                                        e.setFromEmail((ExtUser) userSession.getUser());
+//                                        e.setToEmail(candidateField.getValue());
+//                                        e.setBodyEmail(message);
+                                    })
+                                    .build()
+                                    .show();
+
+/*                            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
                                     .withContentMode(ContentMode.HTML)
                                     .withType(Dialogs.MessageType.CONFIRMATION)
                                     .withWidth("800px")
@@ -524,7 +535,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                             + message
                                             + "</i>")
                                     .withActions(new DialogAction(DialogAction.Type.YES,
-                                                    Action.Status.PRIMARY).withHandler(e -> {
+                                                    Action.Status.PRIMARY).withHandler(event -> {
                                                 IteractionList newsItem = getEditedEntity();
                                                 String bodyMessage = preparingMessage(newsItem);
 
@@ -537,16 +548,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                                             + "<br><br><b>Памятка для собеседования</b><br><br>"
                                                                             + newsItem.getVacancy().getMemoForInterview();
 
-                                                                    String finalBodyMessage = bodyMessage;
-                                                                    screenBuilders.editor(InternalEmailerTemplate.class, this)
-                                                                            .newEntity()
-                                                                            .withInitializer(ev -> {
-                                                                                ev.setFromEmail((ExtUser) userSession.getUser());
-                                                                                ev.setToEmail(candidateField.getValue());
-                                                                                ev.setBodyEmail(finalBodyMessage);
-                                                                            })
-                                                                            .build()
-                                                                            .show();
+
                                                                 }
                                                             }
                                                         }
@@ -565,13 +567,26 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                                         .build();
 
                                                 emailInfo.setBodyContentType("text/html; charset=UTF-8");
-                                                emailService.sendEmailAsync(emailInfo); */
+                                                emailService.sendEmailAsync(emailInfo);
 
+                                                if (bodyMessage != null) {
+                                                    String finalBodyMessage = bodyMessage;
+                                                    screenBuilders.editor(InternalEmailer.class, this)
+                                                            .withScreenClass(InternalEmailerEdit.class)
+                                                            .newEntity()
+                                                            .withInitializer(e -> {
+                                                                e.setFromEmail((ExtUser) userSession.getUser());
+                                                                e.setToEmail(candidateField.getValue());
+                                                                e.setBodyEmail(finalBodyMessage);
+                                                            })
+                                                            .build()
+                                                            .show();
+                                                }
 
                                                 afterCommitEmailToCandidateSended = true;
                                             }),
                                             new DialogAction(DialogAction.Type.NO))
-                                    .show();
+                                    .show(); */
                         }
                     }
                 }

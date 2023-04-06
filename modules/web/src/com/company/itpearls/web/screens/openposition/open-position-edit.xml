@@ -194,24 +194,34 @@
                                spacing="false"
                                height="100%"
                                width="100%">
-                        <vbox spacing="false">
-                            <hbox spacing="true"
+                        <vbox spacing="false" expand="vacancyNameHBox">
+                            <hbox id="vacancyNameHBox"
+                                    spacing="true"
                                   width="100%"
                                   expand="vacansyNameField">
+                                <textField id="vacansyIDTextField"
+                                           dataContainer="openPositionDc"
+                                           property="vacansyID"
+                                           box.expandRatio="1"
+                                           stylename="large"
+                                           width="100%"
+                                           caption="msg://msgVacansyID"/>
                                 <textField id="vacansyNameField"
                                            dataContainer="openPositionDc"
                                            property="vacansyName"
                                            caption="msg://msgVacansy"
                                            stylename="large"
+                                           box.expandRatio="8"
                                            width="100%"
                                            required="true"/>
                                 <lookupPickerField id="gradeLookupPickerField"
                                                    dataContainer="openPositionDc"
                                                    property="grade"
                                                    stylename="large"
+                                                   box.expandRatio="1"
                                                    optionsContainer="gradeDc"
-                                                   caption="msg://msgGrade"
-                                                   width="AUTO">
+                                                   width="100%"
+                                                   caption="msg://msgGrade">
                                     <actions>
                                         <action id="lookup"
                                                 type="picker_lookup"/>
@@ -457,15 +467,18 @@
                                                dataContainer="openPositionDc"
                                                property="salaryMin"
                                                caption="mainMsg://msgSalaryMin"
-                                               width="100%"
-                                               required="true"/>
+                                               width="100%"/>
                                     <textField id="openPositionFieldSalaryMax"
                                                dataContainer="openPositionDc"
                                                property="salaryMax"
                                                caption="msg://msgSalaryMax"
-                                               width="100%"
-                                               required="true"/>
-
+                                               width="100%"/>
+                                    <checkBox id="salaryCandidateRequestCheckBox"
+                                              dataContainer="openPositionDc"
+                                              align="BOTTOM_LEFT"
+                                              property="salaryCandidateRequest"
+                                              caption="msg://msgSalaryCandidateRequest"
+                                              width="AUTO"/>
                                 </hbox>
                                 <hbox id="space2Box"
                                       width="100%"
@@ -870,7 +883,7 @@
                     </vbox>
                 </tab>
                 <tab id="tabApproval"
-                     caption="msg://msgOpenPositionNews"
+                     caption="msg://msgOpenPositionApprovall"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="procActionsBox"

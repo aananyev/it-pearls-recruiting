@@ -41,6 +41,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "VACANSY_NAME", nullable = false, length = 250)
     protected String vacansyName;
 
+    @Column(name = "VACANSY_ID", length = 16)
+    private String vacansyID;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "GRADE_ID")
@@ -68,6 +71,9 @@ public class OpenPosition extends StandardEntity {
 
     @Column(name = "SALARY_FIX_LIMIT")
     protected Boolean salaryFixLimit;
+
+    @Column(name = "SALARY_CANDIDATE_REQUEST")
+    private Boolean salaryCandidateRequest;
 
     @Column(name = "SALARY_COMMENT")
     private String salaryComment;
@@ -201,6 +207,22 @@ public class OpenPosition extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
     private User owner;
+
+    public String getVacansyID() {
+        return vacansyID;
+    }
+
+    public void setVacansyID(String vacansyID) {
+        this.vacansyID = vacansyID;
+    }
+
+    public Boolean getSalaryCandidateRequest() {
+        return salaryCandidateRequest;
+    }
+
+    public void setSalaryCandidateRequest(Boolean salaryCandidateRequest) {
+        this.salaryCandidateRequest = salaryCandidateRequest;
+    }
 
     public void setPriority(Integer priority) {
         this.priority = priority;

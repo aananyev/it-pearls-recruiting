@@ -119,6 +119,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private List<User> users = new ArrayList<>();
     private static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
 
+    public final static int PRIORITY_NONE = -2;
     public final static int PRIORITY_DRAFT = -1;
     public final static int PRIORITY_PAUSED = 0;
     public final static int PRIORITY_LOW = 1;
@@ -227,10 +228,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private void initCheckBoxOnlyOpenedPosition() {
         Map<String, Integer> onlyOpenedPositionMap = new LinkedHashMap<>();
 
-        if (!getRoleService.isUserRoles(userSession.getUser(), StandartRoles.RESEARCHER)) {
-            onlyOpenedPositionMap.put("Все вакансии", 2);
-        }
-
+        onlyOpenedPositionMap.put("Все вакансии", 2);
         onlyOpenedPositionMap.put("В подписке", 1);
         onlyOpenedPositionMap.put("Не в подписке", 0);
         onlyOpenedPositionMap.put("Свободные", 3);
@@ -251,7 +249,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             reportsPopupButton.setEnabled(openPositionsTable.getSingleSelected() != null);
             buttonSubscribe.setEnabled(openPositionsTable.getSingleSelected() != null);
 
-//            buttonSubscribe.setEnabled(((Integer) subscribeRadioButtonGroup.getValue()) == 0);
             suggestCandidateButton.setVisible(((Integer) subscribeRadioButtonGroup.getValue()) == 1);
 
             switch ((Integer) subscribeRadioButtonGroup.getValue()) {
@@ -348,6 +345,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String icon = null;
 
         switch ((int) object) {
+            case PRIORITY_NONE:
+                icon = CubaIcon.MINUS.source();
+                break;
             case PRIORITY_DRAFT:
                 icon = "icons/traffic-lights_gray.png";
                 break;
@@ -365,6 +365,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 break;
             case PRIORITY_CRITICAL: //"Critical"
                 icon = "icons/traffic-lights_red.png";
+                break;
+            default:
                 break;
         }
 
@@ -1059,24 +1061,28 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         String retStr = "";
 
-        try {
-            int salMin = salaryMin.divide(BigDecimal.valueOf(1000)).intValue();
-            if (salMin != 0) {
-                retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
-                        + " т.р./"
-                        + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
-                        + " т.р.";
-            } else {
-                retStr = "До "
-                        + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
-                        + " т.р.";
+        if (openPosition.getSalaryCandidateRequest() == null || openPosition.getSalaryCandidateRequest() == false) {
+            try {
+                int salMin = salaryMin.divide(BigDecimal.valueOf(1000)).intValue();
+                if (salMin != 0) {
+                    retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
+                            + " т.р./"
+                            + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
+                            + " т.р.";
+                } else {
+                    retStr = "До "
+                            + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
+                            + " т.р.";
+                }
+            } catch (NullPointerException | StringIndexOutOfBoundsException e) {
+                retStr = "";
             }
-        } catch (NullPointerException | StringIndexOutOfBoundsException e) {
-            retStr = "";
-        }
 
-        if (salaryMax.intValue() == 0) {
-            retStr = "неопределено";
+            if (salaryMax.intValue() == 0) {
+                retStr = "неопределено";
+            }
+        } else {
+            retStr = "по запросу кандидата";
         }
 
         return retStr;
@@ -1118,7 +1124,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         try {
-            retStr = retStr + getSalaryStringCaption(openPosition);
+            retStr = retStr + getSalaryStringCaption(openPosition) +
+                    (openPosition.getOutstaffingCost() != null ?
+                            "\nПредельная ставка заказчика: " + openPosition.getOutstaffingCost() + " руб./час" : "");
         } catch (NullPointerException e) {
             retStr = "";
         }
@@ -1131,10 +1139,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private String openPositionsTableSalaryMinMaxStyleProvider(OpenPosition openPosition) {
         String retStr = "";
 
-        if (openPosition.getSalaryFixLimit() != null) {
-            if (openPosition.getSalaryFixLimit()) {
-                retStr = "salary-fix-limit";
+        if (openPosition.getSalaryCandidateRequest() != null ? !openPosition.getSalaryCandidateRequest() : true) {
+            if (openPosition.getSalaryFixLimit() != null) {
+                if (openPosition.getSalaryFixLimit()) {
+                    retStr = "salary-fix-limit";
+                }
             }
+        } else {
+            retStr = "table-wordwrap";
         }
 
         return retStr;
@@ -1402,7 +1414,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (notLowerRatingLookupField.getValue() != null) {
             if (((int) notLowerRatingLookupField.getValue()) != PRIORITY_DRAFT) {
-                setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
+                if (((int) notLowerRatingLookupField.getValue()) != PRIORITY_NONE) {
+                    setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
+                } else {
+                    openPositionsDl.removeParameter("rating");
+                }
             } else {
                 openPositionsDl.removeParameter("rating");
                 openPositionsDl.setParameter("signDraft", true);
@@ -1547,6 +1563,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setMapOfPriority() {
+        priorityMap.put("None", PRIORITY_NONE);
         priorityMap.put("Draft", PRIORITY_DRAFT);
         priorityMap.put("Paused", PRIORITY_PAUSED);
         priorityMap.put("Low", PRIORITY_LOW);
@@ -1666,6 +1683,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (priority != null) {
             switch (priority) {
+                case PRIORITY_NONE:
+                    icon = CubaIcon.MINUS.source();
+                    break;
                 case PRIORITY_DRAFT:
                     icon = "icons/traffic-lights_gray.png";
                     break;
