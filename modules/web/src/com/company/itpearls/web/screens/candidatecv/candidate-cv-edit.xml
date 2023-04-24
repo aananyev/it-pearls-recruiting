@@ -277,13 +277,13 @@
                                    align="TOP_RIGHT"
                                    height="100%"
                                    stylename="widget-border"
-                                   scaleMode="FILL"/>
+                                   scaleMode="SCALE_DOWN"/>
                             <image id="candidateFaceDefaultImage"
                                    rowspan="5"
                                    stylename="renderer-photo-150px"
                                    width="150px"
                                    align="TOP_RIGHT"
-                                   scaleMode="FILL"
+                                   scaleMode="SCALE_DOWN"
                                    visible="false">
                                 <theme path="icons/no-programmer.jpeg"/>
                             </image>

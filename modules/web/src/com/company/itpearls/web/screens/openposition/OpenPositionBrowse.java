@@ -346,7 +346,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         switch ((int) object) {
             case PRIORITY_NONE:
-                icon = CubaIcon.MINUS.source();
+                icon = CubaIcon.CANCEL.source();
                 break;
             case PRIORITY_DRAFT:
                 icon = "icons/traffic-lights_gray.png";
@@ -378,6 +378,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String returnIcon = "";
 
         switch ((int) object) {
+            case -1:
+                returnIcon = CubaIcon.CANCEL.source();
+                break;
             case 1:
                 returnIcon = "font-icon:PLUS_CIRCLE";
                 break;
@@ -401,14 +404,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String retStr = String.valueOf(remoteWork.get(openPosition.getRemoteWork()));
 
         switch (openPosition.getRemoteWork()) {
+            case -1:
+                retStr = messageBundle.getMessage("msgUndefined");
+                break;
             case 0:
-                retStr = "Работа в офисе";
+                retStr = messageBundle.getMessage("msgWorkInOffice");
                 break;
             case 1:
-                retStr = "Удаленная работа";
+                retStr = messageBundle.getMessage("msgRemoteWork");
                 break;
             case 2:
-                retStr = "Частично удаленная (офис + удаленная)";
+                retStr = messageBundle.getMessage("msgHybridWorkDesc");
                 break;
         }
 
@@ -419,9 +425,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void initRemoteWorkMap() {
-        remoteWork.put("Нет", 0);
-        remoteWork.put("Удаленная работа", 1);
-        remoteWork.put("Частично 50/50", 2);
+        remoteWork.put(messageBundle.getMessage("msgUndefined"), -1);
+        remoteWork.put(messageBundle.getMessage("msgWorkInOffice"), 0);
+        remoteWork.put(messageBundle.getMessage("msgRemoteWork"), 1);
+        remoteWork.put(messageBundle.getMessage("msgHybridWork"), 2);
     }
 
     @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
@@ -429,6 +436,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String returnIcon = "";
 
         switch (event.getItem().getRemoteWork()) {
+            case -1:
+                returnIcon = CubaIcon.CANCEL.source();
+                break;
             case 1:
                 returnIcon = "PLUS_CIRCLE";
                 break;
@@ -1046,7 +1056,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             retStr = getSalaryString(event.getItem()) +
                     (event.getItem().getSalaryComment() != null ? " \ud83d\udcc3" : "");
         } catch (NullPointerException e) {
-            retStr = "";
+            if (event.getItem().getOutstaffingCost() != null) {
+                retStr = messageBundle.getMessage("msgUndefined");
+            } else {
+                retStr = messageBundle.getMessage("msgNotPrice");
+            }
         }
 
         return retStr;
@@ -1061,7 +1075,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         String retStr = "";
 
-        if (openPosition.getSalaryCandidateRequest() == null || openPosition.getSalaryCandidateRequest() == false) {
+        if (!(openPosition.getSalaryCandidateRequest() != null
+                ? openPosition.getSalaryCandidateRequest() : false)) {
+//        if (openPosition.getSalaryCandidateRequest() == null || openPosition.getSalaryCandidateRequest() == false) {
             try {
                 int salMin = salaryMin.divide(BigDecimal.valueOf(1000)).intValue();
                 if (salMin != 0) {
@@ -1078,9 +1094,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 retStr = "";
             }
 
-            if (salaryMax.intValue() == 0) {
-                retStr = "неопределено";
+            if (openPosition.getSalaryMin() == null || openPosition.getSalaryMin().equals("")) {
+                if (openPosition.getSalaryMax() == null || openPosition.getSalaryMax().equals("")) {
+                    if (openPosition.getOutstaffingCost() != null && !openPosition.getOutstaffingCost().equals("")) {
+                        retStr = messageBundle.getMessage("msgUndefined");
+                    } else {
+                        retStr = messageBundle.getMessage("msgNotPrice");
+                    }
+                }
             }
+
+            /*if (salaryMax.intValue() == 0) {
+                retStr = "неопределено";
+            } */
         } else {
             retStr = "по запросу кандидата";
         }
@@ -1129,6 +1155,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             "\nПредельная ставка заказчика: " + openPosition.getOutstaffingCost() + " руб./час" : "");
         } catch (NullPointerException e) {
             retStr = "";
+        }
+
+        if (openPosition.getSalaryCandidateRequest() != null ? openPosition.getSalaryCandidateRequest() : false) {
+            retStr = messageBundle.getMessage("msgSalaryExpectation");
         }
 
         return retStr
@@ -1404,7 +1434,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe("remoteWorkLookupField")
     public void onRemoteWorkLookupFieldValueChange(HasValue.ValueChangeEvent event) {
-        openPositionsDl.setParameter("remoteWork", remoteWorkLookupField.getValue());
+        if ((int) event.getValue() >= 0) {
+            openPositionsDl.setParameter("remoteWork", remoteWorkLookupField.getValue());
+        } else {
+            openPositionsDl.removeParameter("remoteWork");
+        }
+
         openPositionsDl.load();
     }
 

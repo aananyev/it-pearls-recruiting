@@ -177,7 +177,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         jobCandidateCardButton.setEnabled(false);
 
         iteractionListsTable.addSelectionListener(event -> {
-            if(event.getSelected() == null) {
+            if (event.getSelected() == null) {
                 jobCandidateCardButton.setEnabled(false);
                 clipBtn.setEnabled(false);
                 itercationListButton.setEnabled(false);
@@ -215,7 +215,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         String clipboardText = "";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
-        if(iteractionListsTable.getSelected() != null) {
+        if (iteractionListsTable.getSelected() != null) {
             for (IteractionList i : iteractionListsTable.getSelected()) {
                 clipboardText = clipboardText + i.getCandidate().getFullName() + "," +
                         simpleDateFormat.format(i.getDateIteraction()) + "," +
@@ -243,8 +243,9 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             return columnGeneratorEvent.getItem().getCurrentOpenClose()
                     ? CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
         } else {
-            return columnGeneratorEvent.getItem().getVacancy().getOpenClose() ?
-                    CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE;
+            return columnGeneratorEvent.getItem().getVacancy().getOpenClose() != null ?
+                    (columnGeneratorEvent.getItem().getVacancy().getOpenClose() ?
+                            CubaIcon.MINUS_CIRCLE : CubaIcon.PLUS_CIRCLE) : CubaIcon.PLUS_CIRCLE;
         }
     }
 

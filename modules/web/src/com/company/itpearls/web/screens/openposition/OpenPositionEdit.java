@@ -217,6 +217,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private LookupPickerField<Grade> gradeLookupPickerField;
     @Inject
     private CollectionContainer<Grade> gradeDc;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -438,6 +440,36 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             new Date(),
                             userSession.getUser());
                     startSalaryMinValue = openPositionFieldSalaryMin.getValue();
+                }
+            }
+        }
+    }
+
+    private Boolean flagMinGreaterMax = false;
+
+    @Install(to = "openPositionFieldSalaryMax", subject = "validator")
+    private void openPositionFieldSalaryMaxValidator(BigDecimal bigDecimal) {
+        if (!flagMinGreaterMax) {
+            if (openPositionFieldSalaryMin.getValue() != null) {
+                if (openPositionFieldSalaryMax.getValue() != null) {
+                    if (openPositionFieldSalaryMin.getValue().compareTo(openPositionFieldSalaryMax.getValue()) > 0) {
+                        flagMinGreaterMax = !flagMinGreaterMax;
+                        throw new ValidationException(messageBundle.getMessage("msgSalaryMinGreaterMax"));
+                    }
+                }
+            }
+        }
+    }
+
+    @Install(to = "openPositionFieldSalaryMin", subject = "validator")
+    private void openPositionFieldSalaryMinValidator(BigDecimal bigDecimal) {
+        if (!flagMinGreaterMax) {
+            if (openPositionFieldSalaryMin.getValue() != null) {
+                if (openPositionFieldSalaryMax.getValue() != null) {
+                    if (openPositionFieldSalaryMin.getValue().compareTo(openPositionFieldSalaryMax.getValue()) > 0) {
+                        flagMinGreaterMax = !flagMinGreaterMax;
+                        throw new ValidationException(messageBundle.getMessage("msgSalaryMinGreaterMax"));
+                    }
                 }
             }
         }

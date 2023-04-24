@@ -423,10 +423,12 @@
                   width="AUTO">
                 <lookupField id="notLowerRatingLookupField"
                              align="MIDDLE_RIGHT"
+                             nullOptionVisible="false"
                              caption="msg://msgPriorityPosition"
                              description="msg://msgStatusNotLower"/>
                 <lookupField id="remoteWorkLookupField"
                              caption="msg://msgRemoteWork"
+                             nullOptionVisible="false"
                              align="MIDDLE_RIGHT"
                              description="msg://msgRemoteWork"/>
             </hbox>

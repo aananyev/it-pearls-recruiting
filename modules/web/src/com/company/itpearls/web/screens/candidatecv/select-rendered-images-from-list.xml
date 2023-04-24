@@ -8,6 +8,8 @@
                 closeOnClickOutside="false"
                 resizable="false"/>
     <layout>
+        <label stylename="h2"
+               value="msg://msgSelectImage"/>
         <flowBox id="imagesFlowBox"
                  spacing="true"
                  width="800px"
