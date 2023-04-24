@@ -2108,8 +2108,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         for (Grade grade : gradeDc.getItems()) {
             if (vacansyNameField.getValue().startsWith(grade.getGradeName())) {
                 vacansyNameField.setValue(event.getValue().getGradeName()
-                        + vacansyNameField
-                        .getValue()
+                        + vacansyNameField.getValue()
                         .substring(grade.getGradeName().length()));
                 flag = true;
                 break;
@@ -2119,5 +2118,89 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (!flag) {
             vacansyNameField.setValue(event.getValue().getGradeName() + " " + vacansyNameField.getValue());
         }
+    }
+
+    public void generateNameFieldButton() {
+        if (vacansyNameField.getValue() == null) {
+            vacansyNameField.setValue(generateVacancyName());
+        } else {
+            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                    .withMessage(messageBundle.getMessage("msgRenameVacancy"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        vacansyNameField.setValue(generateVacancyName());
+                    }), new DialogAction(DialogAction.Type.NO))
+                    .show();
+
+        }
+    }
+
+    private String generateVacancyName() {
+        String retStr ="";
+
+        if (gradeLookupPickerField.getValue() != null) {
+            retStr = gradeLookupPickerField.getValue().getGradeName() + " ";
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withContentMode(ContentMode.HTML)
+                    .withType(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgGenerateError")
+                            + ": "
+                            + messageBundle.getMessage("msgNotGrade"))
+                    .show();
+        }
+
+        if (positionTypeField.getValue() != null) {
+            retStr += positionTypeField.getValue().getPositionEnName()
+                    + " / "
+                    + positionTypeField.getValue().getPositionRuName();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withContentMode(ContentMode.HTML)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgGenerateError")
+                            + ": "
+                            + messageBundle.getMessage("msgNotPositionName"))
+                    .show();
+
+            return "";
+        }
+
+        if (projectNameField.getValue() != null) {
+            retStr += " (" + projectNameField.getValue().getProjectName();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withContentMode(ContentMode.HTML)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgGenerateError")
+                            + ": "
+                            + messageBundle.getMessage("msgNotProjectName"))
+                    .show();
+
+            return "";
+        }
+
+        if (cityOpenPositionField.getValue() != null) {
+            retStr += ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withContentMode(ContentMode.HTML)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgGenerateError")
+                            + ": "
+                            + messageBundle.getMessage("msgNotCity"))
+                    .show();
+
+            return "";
+        }
+
+        return retStr;
     }
 }

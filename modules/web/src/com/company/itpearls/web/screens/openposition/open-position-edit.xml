@@ -227,6 +227,13 @@
                                                 type="picker_lookup"/>
                                     </actions>
                                 </lookupPickerField>
+                                <button id="generateVacancyNameFieldButton"
+                                        caption="msg://msgGenerateName"
+                                        description="msg://msgGenerateNameDesc"
+                                        width="AUTO"
+                                        align="BOTTOM_RIGHT"
+                                        stylename="large"
+                                        invoke="generateNameFieldButton"/>
                             </hbox>
                             <hbox/>
                             <hbox id="hboxProject1"
