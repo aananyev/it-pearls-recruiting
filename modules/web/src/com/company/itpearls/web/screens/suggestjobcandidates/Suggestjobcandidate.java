@@ -1,12 +1,9 @@
-package com.company.itpearls.web.screens.openposition;
+package com.company.itpearls.web.screens.suggestjobcandidates;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
-import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
-import com.company.itpearls.web.screens.jobcandidate.IteractionListBrowse;
-import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -209,7 +206,6 @@ public class Suggestjobcandidate extends Screen {
         }
     }
 
-
     private IteractionList getLastIteraction(JobCandidate jobCandidate) {
         if (jobCandidate.getIteractionList() != null) {
             IteractionList maxIteraction = null;
@@ -218,12 +214,6 @@ public class Suggestjobcandidate extends Screen {
 
             try {
                 iteractionLists = jobCandidate.getIteractionList();
-/*                iteractionLists = dataManager.load(IteractionList.class)
-                        .query("select e from itpearls_IteractionList e where e.candidate = :candidate")
-                        .view("iteractionList-view")
-                        .cacheable(true)
-                        .parameter("candidate", jobCandidate)
-                        .list(); */
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -311,17 +301,6 @@ public class Suggestjobcandidate extends Screen {
                 .editEntity(suitableCheckDataGrid.getSingleSelected().getCandidate())
                 .build()
                 .show();
-/*        screenBuilders.editor(JobCandidate.class, this)
-                .withScreenClass(JobCandidateEdit.class)
-                .editEntity(dataManager.load(JobCandidate.class)
-                        .query("select e from itpearls_JobCandidate e where e = :candidate")
-                        .view("jobCandidate-view")
-                        .cacheable(true)
-                        .parameter("candidate", suitableCheckDataGrid.getSingleSelected().getCandidate())
-                        .one()
-                )
-                .build()
-                .show();*/
     }
 
     @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "descriptionProvider")
@@ -395,10 +374,7 @@ public class Suggestjobcandidate extends Screen {
         List<SkillTree> skillTrees = pdfParserService.parseSkillTree(suitableCheckDataGrid
                 .getSingleSelected()
                 .getTextCV());
-/*        List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(suitableCheckDataGrid
-                .getSingleSelected()
-                .getToVacancy()
-                .getComment());*/
+
         List<SkillTree> skillTreesFromJD = pdfParserService.parseSkillTree(openPosition.getComment());
 
         SkillTreeBrowseCheck s = screenBuilders.screen(this)

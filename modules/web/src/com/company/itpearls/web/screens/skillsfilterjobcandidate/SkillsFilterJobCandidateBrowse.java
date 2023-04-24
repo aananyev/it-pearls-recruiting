@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.jobcandidate;
+package com.company.itpearls.web.screens.skillsfilterjobcandidate;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
@@ -7,6 +7,7 @@ import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.OnlyTextFromFile;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.CommitContext;
@@ -1449,7 +1450,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                     + " " + personelReserveCheck.getRecruter().getName()
                                     + "\n" + messageBundle.getMessage("msgEndDateReserve")
                                     + " " + (personelReserveCheck.getEndDate() != null
-                                    ? sdf.format(personelReserveCheck.getEndDate()) : messageBundle.getMessage("msgUnlimited")))
+                                    ? sdf.format(personelReserveCheck.getEndDate())
+                                    : messageBundle.getMessage("msgUnlimited")))
                             .withType(Notifications.NotificationType.ERROR)
                             .show();
                 }
@@ -1460,7 +1462,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                                 + ": " + jobCandidate.getFullName()
                                 + "\nДобавить кандидата возможно только на те вакансии на которые Вы подписаны." +
                                 "\nОформите подписку на вакании в пункте меню \"Подписки\".")
-                        .withCaption(messageBundle.getMessage("msg://msgError"))
+                        .withCaption(messageBundle.getMessage("msgError"))
                         .show();
             }
         }
