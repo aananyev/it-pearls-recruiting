@@ -42,15 +42,6 @@
                 </query>
             </loader>
         </collection>
-<!--        <collection id="personPositionDc"
-                    class="com.company.itpearls.entity.Position"
-                    view="position-view">
-            <loader id="personPositionDl">
-                <query>
-                    <![CDATA[select e from itpearls_Position e order by e.positionRuName]]>
-                </query>
-            </loader>
-        </collection> -->
     </data>
     <dialogMode height="600"
                 width="1000"

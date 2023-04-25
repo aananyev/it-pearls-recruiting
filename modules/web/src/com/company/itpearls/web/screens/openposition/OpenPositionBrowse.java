@@ -869,33 +869,57 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private Component findSuitableButton(OpenPosition entity) {
 
-        if (dataManager.load(CandidateCV.class)
-                .query("select e from itpearls_CandidateCV e where e.resumePosition = :resumePosition")
-                .parameter("resumePosition", entity.getPositionType())
-                .cacheable(true)
-                .list().size() != 0) {
+        if (getSubscubeOpenPosition(entity)) {
 
-            Button suitableButton = uiComponents.create(Button.class);
-            suitableButton.setDescription("Подобрать резюме по вакансии");
-//            suitableButton.setCaption("Подобрать");
-            suitableButton.setIconFromSet(CubaIcon.EYE);
+            if (dataManager.load(CandidateCV.class)
+                    .query("select e from itpearls_CandidateCV e where e.resumePosition = :resumePosition")
+                    .parameter("resumePosition", entity.getPositionType())
+                    .cacheable(true)
+                    .list().size() != 0) {
 
-            suitableButton.setAction(new BaseAction("Suggestjobcandidate")
-                    .withHandler(actionPerformedEvent -> {
-                        Suggestjobcandidate suggestjobcandidate = screens.create(Suggestjobcandidate.class);
-                        suggestjobcandidate.setOpenPosition(entity);
+                Button suitableButton = uiComponents.create(Button.class);
+                suitableButton.setDescription("Подобрать резюме по вакансии");
+                suitableButton.setIconFromSet(CubaIcon.EYE);
 
-                        suggestjobcandidate.show();
-                    }));
+                suitableButton.setAction(new BaseAction("Suggestjobcandidate")
+                        .withHandler(actionPerformedEvent -> {
+                            Suggestjobcandidate suggestjobcandidate = screens.create(Suggestjobcandidate.class);
+                            suggestjobcandidate.setOpenPosition(entity);
 
-            return suitableButton;
+                            suggestjobcandidate.show();
+                        }));
+
+                return suitableButton;
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("ВНИМАНИЕ")
+                        .withDescription("Нет кандидатов в базе для выбранной вакансии")
+                        .show();
+
+                return null;
+            }
         } else {
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("ВНИМАНИЕ")
-                    .withDescription("Нет кандидатов в базе для выбранной вакансии")
-                    .show();
-
             return null;
+        }
+    }
+
+    static final String QUERY_GET_SUBSCRIBER =
+            "select e from itpearls_RecrutiesTasks e " +
+                    "where e.openPosition = :openPosition " +
+                    "and e.reacrutier = :reacrutier " +
+                    "and :current_date between e.startDate and e.endDate";
+
+    private boolean getSubscubeOpenPosition(OpenPosition entity) {
+        if (dataManager.load(RecrutiesTasks.class)
+                .query(QUERY_GET_SUBSCRIBER)
+                .parameter("openPosition", entity)
+                .parameter("reacrutier", (ExtUser) userSession.getUser())
+                .parameter("current_date", new Date())
+                .view("recrutiesTasks-view")
+                .list().size() > 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 
