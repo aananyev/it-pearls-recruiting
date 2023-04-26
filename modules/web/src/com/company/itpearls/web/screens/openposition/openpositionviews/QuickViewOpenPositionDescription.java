@@ -1,21 +1,17 @@
-package com.company.itpearls.web.screens.openposition;
+package com.company.itpearls.web.screens.openposition.openpositionviews;
 
 import com.company.itpearls.core.ParseCVService;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import com.vaadin.ui.JavaScript;
-import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 
 @UiController("itpearls_QuickViewOpenPositionDescription")

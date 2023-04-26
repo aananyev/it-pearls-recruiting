@@ -1,9 +1,8 @@
-package com.company.itpearls.web.screens.openpositionoutstaff;
+package com.company.itpearls.web.screens.openposition.openpositionoutstaff;
 
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.Grade;
 import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.StaffCurrent;
 import com.company.itpearls.entity.StaffingTable;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
@@ -12,7 +11,6 @@ import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.TreeDataGrid;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;

@@ -208,6 +208,12 @@
                         minimumWidth="55px">
                     <componentRenderer/>
                 </column>
+                <column id="vacansyID"
+                        collapsible="true"
+                        property="vacansyID"
+                        width="80px"
+                        maximumWidth="80px"
+                        caption="msg://msgID"/>
                 <column id="vacansyName"
                         collapsible="false"
                         property="vacansyName"

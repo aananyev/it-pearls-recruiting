@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.openposition;
+package com.company.itpearls.web.screens.openposition.openpositionfragments;
 
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;

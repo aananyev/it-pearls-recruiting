@@ -1,21 +1,21 @@
-package com.company.itpearls.web.screens.suggestjobcandidates;
+package com.company.itpearls.web.screens.hrmasters.suggestjobcandidates;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
-import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.data.GroupInfo;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import jdk.internal.jline.internal.Nullable;
 import org.jsoup.Jsoup;
-
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,8 +24,6 @@ import java.util.Calendar;
 @UiController("itpearls_SuggestJobCandidate")
 @UiDescriptor("SuggestJobCandidate.xml")
 public class Suggestjobcandidate extends Screen {
-    @Inject
-    private DataGrid<CandidateCV> suitableCheckDataGrid;
     @Inject
     private DataManager dataManager;
     @Inject
@@ -37,11 +35,7 @@ public class Suggestjobcandidate extends Screen {
     @Inject
     private CheckBox useLocationCheckBox;
     @Inject
-    private RichTextArea candidateCVRichTextArea;
-    @Inject
     private Label<String> vacancyNameLabel;
-    @Inject
-    private UserSession userSession;
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
@@ -52,19 +46,22 @@ public class Suggestjobcandidate extends Screen {
     private UiComponents uiComponents;
     @Inject
     private Button viewCandidateCheckSkillsButton;
-    //   @Inject
-//    private CollectionContainer<Position> personPositionDc;
-
-    private OpenPosition openPosition = null;
-    @Inject
-    private CollectionContainer<CandidateCV> candidateCVDc;
     @Inject
     private Screens screens;
     @Inject
     private Button viewIteractionListButton;
+    @Inject
+    private GroupTable<CandidateCV> suitableCheckDataGrid;
+
+    private OpenPosition openPosition = null;
+    @Inject
+    private RichTextArea candidateCVRichTextArea;
+    @Inject
+    private UserSession userSession;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+
         if (openPosition != null) {
             if (openPosition.getPositionType() != null) {
                 candidateCVDl.setParameter("resumePosition", this.openPosition.getPositionType());
@@ -84,6 +81,33 @@ public class Suggestjobcandidate extends Screen {
         setCityPosition();
         setButtoncActions();
         setJobPositionLookupPickerField();
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        setSuggestTableStyleProvider();
+    }
+
+    private void setSuggestTableStyleProvider() {
+        suitableCheckDataGrid.setStyleProvider(new GroupTable.GroupStyleProvider<CandidateCV>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public String getStyleName(GroupInfo info) {
+                Object property = info.getProperty();
+                JobCandidate jobCandidate = (JobCandidate) info.getPropertyValue(info.getProperty());
+                return setLastInteractionRowStyleName(jobCandidate);
+            }
+
+            @Override
+            public String getStyleName(CandidateCV candidateCV, @Nullable String property) {
+                return setLastInteractionRowStyleName(candidateCV.getCandidate());
+            }
+        });
+    }
+
+    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
+    private Component suitableCheckDataGridBlackRectangleColumnGenerator(CandidateCV candidateCV) {
+        return setBatteryIndicator(candidateCV);
     }
 
     private void setJobPositionLookupPickerField() {
@@ -197,8 +221,20 @@ public class Suggestjobcandidate extends Screen {
         candidateCVDl.load();
     }
 
+    @Install(to = "suitableCheckDataGrid.lastIteraction", subject = "columnGenerator")
+    private Component suitableCheckDataGridLastIteractionColumnGenerator(CandidateCV candidateCV) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        Label retLabel = uiComponents.create(Label.class);
+
+        retLabel.setValue(sdf.format(getLastIteraction(candidateCV.getCandidate()).getDateIteraction()));
+        retLabel.setDescription(getLatInteractionDesciption(candidateCV));
+        retLabel.setStyleName(setLastInteractionStyleName(candidateCV));
+
+        return retLabel;
+    }
+
     @Subscribe("suitableCheckDataGrid")
-    public void onSuitableCheckDataGridSelection(DataGrid.SelectionEvent<CandidateCV> event) {
+    public void onSuitableCheckDataGridSelection(Table.SelectionEvent<CandidateCV> event) {
         if (suitableCheckDataGrid.getSingleSelected() != null) {
             candidateCVRichTextArea.setValue(suitableCheckDataGrid
                     .getSingleSelected()
@@ -244,9 +280,53 @@ public class Suggestjobcandidate extends Screen {
         candidateCVDl.load();
     }
 
-    @Install(to = "suitableCheckDataGrid.lastIteraction", subject = "columnGenerator")
-    private String suitableCheckDataGridLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        IteractionList iteractionList = getLastIteraction(event.getItem().getCandidate());
+    private String setLastInteractionStyleName(CandidateCV candidateCV) {
+        return setLastInteractionStyleName(candidateCV.getCandidate());
+    }
+
+
+    private String setLastInteractionRowStyleName(CandidateCV candidateCV) {
+        return setLastInteractionRowStyleName(candidateCV.getCandidate());
+    }
+
+    private String setLastInteractionRowStyleName(JobCandidate jobCandidate) {
+        IteractionList iteractionList = getLastIteraction(jobCandidate);
+
+        String date = null;
+
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy").format(iteractionList.getDateIteraction());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        String retStr = "";
+
+        if (iteractionList != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(iteractionList.getDateIteraction());
+            calendar.add(Calendar.MONTH, 1);
+
+            Calendar calendar1 = Calendar.getInstance();
+
+            if (calendar.after(calendar1)) {
+                if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                    retStr = "row_table_red";
+                } else {
+                    retStr = "row_table_yellow";
+                }
+            } else {
+                retStr = "row_table_green";
+            }
+        } else {
+            retStr = "row_table_gray";
+        }
+
+        return retStr;
+    }
+
+    private String setLastInteractionStyleName(JobCandidate jobCandidate) {
+        IteractionList iteractionList = getLastIteraction(jobCandidate);
 
         String date = null;
 
@@ -278,22 +358,7 @@ public class Suggestjobcandidate extends Screen {
             retStr = "button_table_white";
         }
 
-        return
-                "<div class=\"" +
-                        retStr
-                        + "\">" +
-                        date
-                        + "</div>"
-                ;
-    }
-
-    @Install(to = "suitableCheckDataGrid.toVacancy", subject = "descriptionProvider")
-    private String suitableCheckDataGridToVacancyDescriptionProvider(CandidateCV candidateCV) {
-        if (candidateCV.getToVacancy() != null) {
-            return candidateCV.getToVacancy().getVacansyName();
-        } else {
-            return null;
-        }
+        return retStr;
     }
 
     public void viewCandidateButton() {
@@ -303,16 +368,11 @@ public class Suggestjobcandidate extends Screen {
                 .show();
     }
 
-    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "descriptionProvider")
-    private String suitableCheckDataGridBlackRectangleDescriptionProvider(CandidateCV candidateCV) {
-        return getRelevancePercent(candidateCV);
-    }
-
-    @Install(to = "suitableCheckDataGrid.blackRectangle", subject = "columnGenerator")
-    private Component suitableCheckDataGridBlackRectangleColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+    private Label setBatteryIndicator(CandidateCV item) {
         Label labelBattery = uiComponents.create(Label.NAME);
 
-        String percentStr = getRelevancePercent(event.getItem());
+        String percentStr = getRelevancePercent(item);
+        labelBattery.setDescription(percentStr);
 
         int percent = 0;
 
@@ -336,12 +396,10 @@ public class Suggestjobcandidate extends Screen {
             labelBattery.setStyleName("rating_battery_blue_5");
         }
 
-
         return labelBattery;
     }
 
-    @Install(to = "suitableCheckDataGrid.lastIteraction", subject = "descriptionProvider")
-    private String suitableCheckDataGridLastIteractionDescriptionProvider(CandidateCV candidateCV) {
+    private String getLatInteractionDesciption(CandidateCV candidateCV) {
         IteractionList iteractionList = getLastIteraction(candidateCV.getCandidate());
         String recrutierName = "";
 
@@ -398,5 +456,26 @@ public class Suggestjobcandidate extends Screen {
         iteractionListSimpleBrowse.setSelectedCandidate(suitableCheckDataGrid.getSingleSelected().getCandidate());
         screens.show(iteractionListSimpleBrowse);
 
+    }
+
+    public void stopSearchProcessButtonInvoke() {
+    }
+
+    public void putPersonelReserveButtonInvoke() {
+    }
+
+    public void basketUnselectedCandidatesButtonInvoke() {
+    }
+
+    public void deleteUnselectedCandidatesButtonInvoke() {
+    }
+
+    public void clearSearchResultButtonInvoke() {
+    }
+
+    public void stopAndCloseButtonInvoke() {
+    }
+
+    public void startSearchProcessButtonInvoke() {
     }
 }

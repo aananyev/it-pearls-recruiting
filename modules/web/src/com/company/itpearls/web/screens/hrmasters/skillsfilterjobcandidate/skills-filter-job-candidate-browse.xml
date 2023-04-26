@@ -4,7 +4,7 @@
         caption="msg://skillsFilterJobCandidateBrowse.caption"
         focusComponent="jobCandidatesTable"
         icon="FILTER"
-        messagesPack="com.company.itpearls.web.screens.jobcandidate">
+        messagesPack="com.company.itpearls.web.screens.hrmasters">
     <data readOnly="true">
         <collection id="jobCandidatesDc"
                     class="com.company.itpearls.entity.JobCandidate">

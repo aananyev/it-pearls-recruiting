@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.openpositionrecruiting;
+package com.company.itpearls.web.screens.openposition.openpositionrecruiting;
 
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;

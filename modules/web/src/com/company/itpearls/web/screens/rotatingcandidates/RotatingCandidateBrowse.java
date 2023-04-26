@@ -5,7 +5,7 @@ import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
-import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.*;

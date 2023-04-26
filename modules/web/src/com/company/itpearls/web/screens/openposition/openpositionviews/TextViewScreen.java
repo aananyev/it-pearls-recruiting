@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.openposition;
+package com.company.itpearls.web.screens.openposition.openpositionviews;
 
 import com.haulmont.cuba.gui.components.RichTextArea;
 import com.haulmont.cuba.gui.screen.Screen;

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://suggestjobcandidate.caption"
+        messagesPack="com.company.itpearls.web.screens.hrmasters">
+    <data readOnly="true">
+        <collection id="candidateCVDc"
+                    class="com.company.itpearls.entity.CandidateCV">
+            <view extends="_local">
+                <property name="candidate"
+                          view="jobCandidate-view">
+                    <property name="cityOfResidence"
+                              view="_local"/>
+                    <property name="iteractionList"
+                              view="_local">
+                        <property name="candidate" view="_local"/>
+                        <property name="recrutier"
+                                  view="_local"/>
+                        <property name="iteractionType"
+                                  view="_local"/>
+                    </property>
+                </property>
+                <property name="resumePosition"
+                          view="_local"/>
+                <property name="toVacancy"
+                          view="_local">
+                </property>
+            </view>
+            <loader id="candidateCVDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.resumePosition = :resumePosition</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.candidate.cityOfResidence = :cityOfResidence</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="1000"
+                forceDialog="false"/>
+    <layout spacing="true" expand="suitableCheckVBox">
+        <vbox id="suitableCheckVBox"
+              width="100%"
+              align="TOP_CENTER"
+              spacing="true"
+              expand="gridAndAreaBox"
+              height="AUTO">
+            <hbox id="suitableCheckHBox"
+                  width="AUTO"
+                  height="AUTO"
+                  spacing="true"
+                  align="TOP_CENTER">
+                <label id="vacancyNameLabel"
+                       align="MIDDLE_LEFT"
+                       stylename="h3"/>
+                <label id="positionNameLabel"
+                       align="MIDDLE_LEFT"
+                       stylename="h3"/>
+                <label id="cityOfResidenceLabel"
+                       align="MIDDLE_LEFT"
+                       stylename="h3"/>
+            </hbox>
+            <hbox spacing="true"
+                  expand="jobPositionLookupPickerField"
+                  height="AUTO"
+                  width="100%">
+                <lookupPickerField id="jobPositionLookupPickerField"
+                                   align="MIDDLE_LEFT"
+                                   width="100%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="clear" type="picker_clear"/>
+                    </actions>
+                </lookupPickerField>
+                <button id="rescanButton"
+                        caption="msg://msgRescan"
+                        description="msg://msgRescanButton"
+                        invoke="rescanSuitable"/>
+            </hbox>
+            <vbox id="gridAndAreaBox"
+                  width="100%"
+                  spacing="true"
+                  expand="candidateCVRichTextArea"
+                  height="100%">
+                <groupTable id="suitableCheckDataGrid"
+                            box.expandRatio="1"
+                            reorderingAllowed="false"
+                            textSelectionEnabled="true"
+                            dataContainer="candidateCVDc"
+                            width="100%"
+                            height="100%">
+                    <columns>
+                        <group>
+                            <column id="candidate.fullName"
+                                    sort="ASCENDING"
+                                    width="180px"/>
+                        </group>
+                        <column id="resumePosition"
+                                caption="msg://msgPosition"
+                                width="250px"/>
+                        <column id="toVacancy"
+                                width="470px"/>
+                        <column id="candidate.cityOfResidence"
+                                width="120px"/>
+                        <column id="blackRectangle"
+                                width="100px"
+                                caption="msg://msgPercentOfRelevance">
+                        </column>
+                        <column id="lastIteraction"
+                                width="100px"
+                                caption="msg://msgLastIteraction">
+                        </column>
+                    </columns>
+                </groupTable>
+                <richTextArea id="candidateCVRichTextArea"
+                              box.expandRatio="1"
+                              width="100%"
+                              editable="false"
+                              height="100%"/>
+            </vbox>
+            <hbox spacing="true"
+                  width="100%">
+                <checkBox id="useLocationCheckBox"
+                          align="MIDDLE_LEFT"
+                          caption="msg://msgUseLocation"/>
+
+                <button id="viewCandidateButton"
+                        caption="msg://msgViewCandidate"
+                        enable="false"
+                        invoke="viewCandidateButton"/>
+                <button id="viewCandidateCVButton"
+                        caption="msg://msgViewCandidateCV"
+                        enable="false"
+                        invoke="viewCandidateCVButton"/>
+                <button id="viewCandidateCheckSkillsButton"
+                        caption="msg://msgCheckSkills"
+                        enable="false"
+                        invoke="viewCandidateCheckSkillsButton"/>
+                <button id="viewIteractionListButton"
+                        caption="msg://mshIteractionList"
+                        enable="false"
+                        invoke="viewIteractionListButton"/>
+            </hbox>
+        </vbox>
+        <hbox id="progressBarHBox"
+              spacing="true"
+              visible="false"
+              expand="filterProgressbar"
+              width="100%">
+            <progressBar id="filterProgressbar"
+                         align="MIDDLE_CENTER"/>
+            <label id="progressLabel"
+                   align="MIDDLE_CENTER"
+                   width="AUTO"/>
+            <label id="foundLabel"
+                   align="MIDDLE_CENTER"
+                   width="AUTO"/>
+            <button id="buttonStop"
+                    align="MIDDLE_CENTER"
+                    icon="STOP"
+                    visible="false"
+                    caption="msg://msgStopFindButton"
+                    description="msg://msgStopFindButtonDesc"
+                    width="AUTO"
+                    invoke="stopSearchProcessButtonInvoke"/>
+        </hbox>
+        <hbox id="searchFilterHBox"
+              spacing="true"
+              margin="true"
+              align="MIDDLE_RIGHT"
+              width="100%"
+              expand="selectCandidateForWorkHBox"
+              height="AUTO">
+            <hbox id="selectCandidateForWorkHBox"
+                  width="100%"
+                  spacing="true"
+                  align="MIDDLE_LEFT">
+                <hbox spacing="true" visible="false">
+                    <label id="counterSelectedCandidatesLabel"
+                           value="msg://msgCounterCandidates"
+                           width="AUTO"
+                           align="MIDDLE_LEFT"
+                           visible="true"/>
+                    <button id="putPersonelReserveButton"
+                            description="msg://msgPutPersonelReserve"
+                            align="MIDDLE_LEFT"
+                            enable="false"
+                            icon="SHOPPING_BASKET"
+                            invoke="putPersonelReserveButtonInvoke"/>
+                    <button id="basketUnselectedCandidatesButton"
+                            width="AUTO"
+                            align="MIDDLE_LEFT"
+                            description="msg://msgBasketUnselectedCandidates"
+                            icon="BAN"
+                            enable="false"
+                            invoke="basketUnselectedCandidatesButtonInvoke"/>
+                    <button id="deleteUnselectedCandidatesButton"
+                            width="AUTO"
+                            align="MIDDLE_LEFT"
+                            description="msg://msgDeleteUnselectedCandidates"
+                            icon="REMOVE"
+                            enable="false"
+                            invoke="deleteUnselectedCandidatesButtonInvoke"/>
+                </hbox>
+            </hbox>
+            <button id="clearSearchResultButton"
+                    width="AUTO"
+                    enable="false"
+                    icon="PICKERFIELD_CLEAR_READONLY"
+                    align="MIDDLE_RIGHT"
+                    caption="msg://msgClearSearchResult"
+                    description="msg://msgClearResultButtonDesc"
+                    invoke="clearSearchResultButtonInvoke"/>
+            <button id="stopAndCloseButton"
+                    icon="STOP"
+                    width="AUTO"
+                    enable="false"
+                    align="MIDDLE_RIGHT"
+                    caption="msg://msgStopSearch"
+                    description="msg://msgStopSearchDesc"
+                    invoke="stopAndCloseButtonInvoke"/>
+            <button id="startSearchProcessButton"
+                    icon="SEARCH_PLUS"
+                    width="AUTO"
+                    align="MIDDLE_RIGHT"
+                    enable="false"
+                    caption="msg://msgSearch"
+                    description="msg://msgSearchDesc"
+                    invoke="startSearchProcessButtonInvoke"/>
+            <button id="closeButton"
+                    align="MIDDLE_RIGHT"
+                    caption="msg://msgClose"
+                    invoke="closeButton"/>
+        </hbox>
+        <hbox id="lookupActions"
+              spacing="true"
+              visible="false"
+              align="TOP_RIGHT">
+
+        </hbox>
+    </layout>
+</window>

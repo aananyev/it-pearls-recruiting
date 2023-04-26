@@ -1,10 +1,9 @@
-package com.company.itpearls.web.screens.iteractionlist;
+package com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse;
 
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.LookupField;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;

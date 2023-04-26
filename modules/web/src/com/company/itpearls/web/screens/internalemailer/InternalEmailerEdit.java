@@ -54,32 +54,24 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     private RichTextArea bodyEmailField;
     @Inject
     private TextField<String> fromEmailTextAddressField;
+    @Inject
+    private PickerField<ExtUser> fromEmailField;
+    @Inject
+    private SuggestionPickerField<JobCandidate> toEmailField;
+    @Inject
+    private MessageBundle messageBundle;
 
-    private static String EMAIL_FROMADDRESS = "cuba.email.fromAddress";
-    private static String EMAIL_SMTPHOST = "cuba.email.smtpHost";
-    private static String EMAIL_SMTPPORT = "cuba.email.smtpPort";
-    private static String EMAIL_SMTPUSER = "cuba.email.smtpUser";
-    private static String EMAIL_SMTPPASSWORD = "cuba.email.smtpPassword";
+    private static final String EMAIL_FROMADDRESS = "cuba.email.fromAddress";
+    private static final String EMAIL_SMTPHOST = "cuba.email.smtpHost";
+    private static final String EMAIL_SMTPPORT = "cuba.email.smtpPort";
+    private static final String EMAIL_SMTPUSER = "cuba.email.smtpUser";
+    private static final String EMAIL_SMTPPASSWORD = "cuba.email.smtpPassword";
 
     private String cuba_email_fromAddress = "";
     private String cuba_email_smtpHost = "";
     private String cuba_email_smtpPort = "";
     private String cuba_email_smtpUser = "";
     private String cuba_email_smtpPassword = "";
-    @Inject
-    private PickerField<ExtUser> fromEmailField;
-    @Inject
-    private SuggestionPickerField<JobCandidate> toEmailField;
-//    @Inject
-//    private CollectionLoader<JobCandidate> jobCandidateDl;
-//    @Inject
-//    private CollectionContainer<JobCandidate> jobCandidateDc;
-    @Inject
-    private MetadataTools metadataTools;
-    @Inject
-    private Metadata metadata;
-    @Inject
-    private InstanceContainer<InternalEmailer> emailerDc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -114,10 +106,11 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     public void onToEmailFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
         if (event.getValue().getEmail() != null) {
             sendAndCloseButton.setEnabled(true);
-            sendAndCloseButton.setDescription("Отослать сообщение кандидату по адресу: " + event.getValue().getEmail());
+            sendAndCloseButton.setDescription(messageBundle.getMessage("msgSendMessageToCandidate")
+                    + event.getValue().getEmail());
         } else {
             sendAndCloseButton.setEnabled(false);
-            sendAndCloseButton.setDescription("Невозможно послать email: У кандидата нет адреса электронной почты в карточке.");
+            sendAndCloseButton.setDescription(messageBundle.getMessage("msgNotPossibleSendEmail"));
         }
     }
 
@@ -143,20 +136,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                 ).show();
     }
 
-    @Subscribe
-    public void onInit(InitEvent event) {
-        InternalEmailer internalEmailer = metadata.create(InternalEmailer.class);
-        emailerDc.setItem(internalEmailer);
-//        jobCandidateDl.load();
-
-/*        List<JobCandidate> jobCandidateList = new ArrayList<>(jobCandidateDc.getItems());
-        toEmailField.setSearchExecutor((searchString, searchParams) ->
-                jobCandidateList.stream()
-                        .filter(jobCandidate ->
-                                StringUtils.containsIgnoreCase(metadataTools.getInstanceName(jobCandidate), searchString))
-                        .collect(Collectors.toList())); */
-    }
-
     private void sendByEmailDefault() {
         InternalEmailer newsItem = getEditedEntity();
 
@@ -172,14 +151,14 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             emailService.sendEmail(emailInfo);
             notifications.create()
                     .withType(Notifications.NotificationType.WARNING)
-                    .withCaption("СООБЩЕНИЕ")
+                    .withCaption(messageBundle.getMessage("msgInfo"))
                     .withDescription("Письмо адресату " + toEmailField.getValue().getEmail() + " отослано успешно.")
                     .show();
         } catch (EmailException e) {
             draftEmailField.setValue(true);
             notifications.create()
                     .withType(Notifications.NotificationType.ERROR)
-                    .withCaption("ОШИБКА")
+                    .withCaption(messageBundle.getMessage("msgError"))
                     .withDescription("Письмо не отправлено: " + e.getCause())
                     .show();
 

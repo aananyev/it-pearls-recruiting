@@ -477,7 +477,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     @Subscribe
-    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+    public void onBeforeClose1(BeforeCloseEvent event) {
         if (afterCommitSign) {
             if (iteractionTypeField.getValue() != null) {
                 if (iteractionTypeField.getValue().getNumber() != null) {
@@ -517,11 +517,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
                             screenBuilders.editor(InternalEmailer.class, this)
                                     .withScreenClass(InternalEmailerEdit.class)
+                                    .withOpenMode(OpenMode.DIALOG)
                                     .newEntity()
                                     .withInitializer(e -> {
 //                                        e.setFromEmail((ExtUser) userSession.getUser());
-//                                        e.setToEmail(candidateField.getValue());
-//                                        e.setBodyEmail(message);
+                                        ((InternalEmailer)e).setToEmail(candidateField.getValue());
+                                        ((InternalEmailer)e).setBodyEmail(message);
                                     })
                                     .build()
                                     .show();

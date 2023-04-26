@@ -5,8 +5,10 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
+import com.company.itpearls.web.screens.openposition.openpositionfragments.OpenPositionDetailScreenFragment;
+import com.company.itpearls.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
-import com.company.itpearls.web.screens.suggestjobcandidates.Suggestjobcandidate;
+import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -770,7 +772,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             } else {
                 notifications.create(Notifications.NotificationType.WARNING)
-                        .withCaption("ВНИМАНИЕ")
+                        .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription("Кандидатов отправленных заказчику на какую вакансию Вы хотите посмотреть?")
                         .show();
             }
@@ -786,7 +788,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             openPositionsTable.setDetailsVisible(op, false);
         }
     }
-
 
     private Component createViewDescriptionButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
@@ -857,11 +858,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             } else {
                 notifications.create(Notifications.NotificationType.WARNING)
-                        .withCaption("ВНИМАНИЕ")
+                        .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription("Куакую вакансию вы хотите просмотреть?")
                         .show();
             }
-
         });
 
         return retButton;
@@ -892,7 +892,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 return suitableButton;
             } else {
                 notifications.create(Notifications.NotificationType.WARNING)
-                        .withCaption("ВНИМАНИЕ")
+                        .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription("Нет кандидатов в базе для выбранной вакансии")
                         .show();
 
@@ -948,8 +948,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retButton.setIcon(!entity.getOpenClose() ? CubaIcon.REMOVE_ACTION.iconName() : CubaIcon.ADD_ACTION.iconName());
 
-        retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
-        retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
+        retButton.setCaption(!entity.getOpenClose()
+                ? messageBundle.getMessage("msgClose")
+                : messageBundle.getMessage("msgOpen"));
+        retButton.setDescription(!entity.getOpenClose()
+                ? messageBundle.getMessage("msgCloseVacancy")
+                : messageBundle.getMessage("msgOpenVacancy"));
 
         retButton.addClickListener(e -> {
             openCloseButtonClickListener(entity, retButton);
@@ -962,7 +966,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (!openCloseChildVacancy(entity)) {
             entity.setOpenClose(!entity.getOpenClose());
 
-            retButton.setCaption(!entity.getOpenClose() ? "Закрыть" : "Открыть");
+            retButton.setCaption(!entity.getOpenClose()
+                    ? messageBundle.getMessage("msgClose")
+                    : messageBundle.getMessage("msgOpen"));
             retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
 
             if (entity.getOpenClose() || entity.getOpenClose() == null) {
@@ -1027,8 +1033,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             openPositionsDl.load();
         } else {
             notifications.create(Notifications.NotificationType.WARNING)
-                    .withDescription("Невозможно закрыть вакансию верхнего уровня без закрытия вакансий входящих в ее группу")
-                    .withCaption("ВНИМАНИЕ")
+                    .withDescription(
+                            messageBundle.getMessage("msgCanNotCloseWithout"))
+                    .withCaption(messageBundle.getMessage("msgWarning"))
                     .show();
         }
     }
@@ -1050,8 +1057,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             dialogs.createOptionDialog()
                     .withType(Dialogs.MessageType.WARNING)
                     .withContentMode(ContentMode.HTML)
-                    .withCaption("ВНИМАНИЕ")
-                    .withMessage((event.getOpenClose() ? "Открыть" : "Закрыть") +
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage((event.getOpenClose()
+                            ? messageBundle.getMessage("msgOpen")
+                            : messageBundle.getMessage("msgClose")) +
                             " вакансии группы?<br><ul>" + magPos + "</ul>")
                     .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                         for (OpenPosition a : openPositions) {
@@ -1061,7 +1070,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         flagDialog.set(true);
                     }), new DialogAction(DialogAction.Type.NO))
                     .show();
-
         }
 
         return flagDialog.get();
@@ -1106,13 +1114,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 int salMin = salaryMin.divide(BigDecimal.valueOf(1000)).intValue();
                 if (salMin != 0) {
                     retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
-                            + " т.р./"
+                            + messageBundle.getMessage("msgThausendRubles") + "/"
                             + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
-                            + " т.р.";
+                            + messageBundle.getMessage("msgThausendRubles");;
                 } else {
                     retStr = "До "
                             + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
-                            + " т.р.";
+                            + messageBundle.getMessage("msgThausendRubles");
                 }
             } catch (NullPointerException | StringIndexOutOfBoundsException e) {
                 retStr = "";
@@ -1128,11 +1136,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }
             }
 
-            /*if (salaryMax.intValue() == 0) {
-                retStr = "неопределено";
-            } */
         } else {
-            retStr = "по запросу кандидата";
+            retStr = messageBundle.getMessage("msgAtRequestOfCandidate");
         }
 
         return retStr;

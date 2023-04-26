@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.openposition.openpositionviews.TextViewScreen;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -8,7 +9,6 @@ import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;

@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.skillsfilterjobcandidate;
+package com.company.itpearls.web.screens.hrmasters.skillsfilterjobcandidate;
 
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
@@ -6,7 +6,7 @@ import com.company.itpearls.web.StandartPrioritySkills;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.OnlyTextFromFile;
 import com.company.itpearls.web.screens.fragments.Onlytext;
-import com.company.itpearls.web.screens.iteractionlist.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;

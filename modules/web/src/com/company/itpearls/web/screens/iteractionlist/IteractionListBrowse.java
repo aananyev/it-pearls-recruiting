@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.iteractionlist;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
+import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;

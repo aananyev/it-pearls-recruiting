@@ -187,9 +187,29 @@
     @include date_iteraction_button(green);
 }
 
-
 .button_table_gray {
     @include date_iteraction_button(gray);
+}
+
+.row_table_green {
+    color: green;
+}
+
+.row_table_red {
+    color: red;
+}
+
+.row_table_yellow {
+    color: yellow;
+}
+
+.row_table_gray {
+    color: gray;
+}
+
+
+.row_table_orange {
+    color: orange;
 }
 
 @mixin ratingfield($primary-stylename: ratingfield) {
@@ -381,8 +401,12 @@
     @include rating_battery_round(orange);
 }
 
+.rating_battery_teal_3 {
+    @include rating_battery_round(teal);
+}
+
 .rating_battery_yellow_3 {
-    @include rating_battery_round(#FFD700);
+    @include rating_battery_round(yellow);
 }
 
 .rating_battery_green_4 {

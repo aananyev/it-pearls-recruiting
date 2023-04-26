@@ -1,8 +1,9 @@
-package com.company.itpearls.web.screens.iteractionlist;
+package com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse;
 
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
