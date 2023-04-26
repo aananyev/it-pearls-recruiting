@@ -23,6 +23,7 @@
                 <entry key="itpearls_IteractionService" value="com.company.itpearls.core.IteractionService"/>
                 <entry key="itpearls_WebLoadService" value="com.company.itpearls.core.WebLoadService"/>
                 <entry key="itpearls_InteractionService" value="com.company.itpearls.core.InteractionService"/>
+                <entry key="itpearls_StrSimpleService" value="com.company.itpearls.core.StrSimpleService"/>
             </map>
         </property>
     </bean>

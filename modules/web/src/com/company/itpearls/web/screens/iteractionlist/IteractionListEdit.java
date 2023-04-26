@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.iteractionlist;
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.core.StarsAndOtherService;
+import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
@@ -129,6 +130,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private SuggestionPickerField<JobCandidate> candidateField;
     @Inject
     private LinkButton alternativeVacancyLinkButton;
+    @Inject
+    private StrSimpleService strSimpleService;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -521,8 +524,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                     .newEntity()
                                     .withInitializer(e -> {
 //                                        e.setFromEmail((ExtUser) userSession.getUser());
-                                        ((InternalEmailer)e).setToEmail(candidateField.getValue());
-                                        ((InternalEmailer)e).setBodyEmail(message);
+                                        ((InternalEmailer) e).setToEmail(candidateField.getValue());
+                                        ((InternalEmailer) e).setBodyEmail(message);
                                     })
                                     .build()
                                     .show();
@@ -602,56 +605,93 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            retStr = retStr.replace(emailKeys.get(EmailKeys.DATE),
-                    simpleDateFormat.format(newsItem.getAddDate()).toString());
+            retStr = strSimpleService.replaceAll(retStr, emailKeys.get(EmailKeys.DATE.getId()),
+                    simpleDateFormat.format(newsItem.getAddDate()));
 
             SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("hh:mm");
-            retStr = retStr.replace(emailKeys.get(EmailKeys.TIME),
-                    simpleDateFormat1.format(newsItem.getAddDate()).toString());
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.TIME.getId()),
+                    simpleDateFormat1.format(newsItem.getAddDate()));
 
-            if (newsItem.getCandidate().getFirstName() != null)
-                retStr = retStr.replace(emailKeys.get(EmailKeys.FIRST_NAME), newsItem.getCandidate().getFirstName());
-            if (newsItem.getCandidate().getMiddleName() != null)
-                retStr = retStr.replace(emailKeys.get(EmailKeys.MIDDLE_NAME), newsItem.getCandidate().getMiddleName());
-            if (newsItem.getCandidate().getSecondName() != null)
-                retStr = retStr.replace(emailKeys.get(EmailKeys.SECOND_NAME), newsItem.getCandidate().getSecondName());
-            if (newsItem.getVacancy().getVacansyName() != null)
-                retStr = retStr.replace(emailKeys.get(EmailKeys.VACANCY), newsItem.getVacancy().getVacansyName());
-            if (newsItem.getVacancy().getProjectName() != null)
-                if (newsItem.getVacancy().getProjectName().getProjectName() != null)
-                    retStr = retStr.replace(emailKeys.get(EmailKeys.PROJECT), newsItem.getVacancy().getProjectName().getProjectName());
-            if (newsItem.getVacancy() != null)
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.FIRST_NAME.getId()),
+                    newsItem.getCandidate().getFirstName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.MIDDLE_NAME.getId()),
+                    newsItem.getCandidate().getMiddleName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.SECOND_NAME.getId()),
+                    newsItem.getCandidate().getSecondName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.PROJECT.getId()),
+                    newsItem.getVacancy().getProjectName().getProjectName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.COMPANY.getId()),
+                    newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
+                    newsItem.getVacancy().getProjectName().getProjectDepartment().getDepartamentRuName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.PROJECT.getId()),
+                    newsItem.getVacancy().getProjectName().getProjectName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()),
+                    newsItem.getRecrutier().getName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()),
+                    newsItem.getVacancy().getComment());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.POSITION.getId()),
+                    newsItem.getVacancy().getPositionType().getPositionEnName());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.SALARY_MIN.getId()),
+                    newsItem.getVacancy().getSalaryMin().toString());
+
+            retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.SALARY_MAX.getId()),
+                    newsItem.getVacancy().getSalaryMax().toString());
+
+/*            if (newsItem.getVacancy() != null)
                 if (newsItem.getVacancy().getProjectName() != null)
                     if (newsItem.getVacancy().getProjectName().getProjectDepartment() != null)
                         if (newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName() != null)
                             if (newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName() != null)
-                                retStr = retStr.replace(emailKeys.get(EmailKeys.COMPANY), newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName());
-            if (newsItem.getVacancy().getProjectName() != null)
+                                retStr = retStr.replaceAll(emailKeys.get(EmailKeys.COMPANY.getId()), newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName()); */
+/*            if (newsItem.getVacancy().getProjectName() != null)
                 if (newsItem.getVacancy().getProjectName().getProjectName() != null)
-                    retStr = retStr.replace(emailKeys.get(EmailKeys.DEPARTAMENT), newsItem.getVacancy().getProjectName().getProjectName());
-            if (newsItem.getRecrutier() != null)
+                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.DEPARTAMENT.getId()), newsItem.getVacancy().getProjectName().getProjectName()); */
+/*            if (newsItem.getRecrutier() != null)
                 if (newsItem.getRecrutier().getName() != null)
-                    retStr = retStr.replace(emailKeys.get(EmailKeys.RESEARCHER_NAME), newsItem.getRecrutier().getName());
-            if (newsItem.getVacancy() != null)
+                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()), newsItem.getRecrutier().getName()); */
+/*            if (newsItem.getVacancy() != null)
                 if (newsItem.getVacancy().getComment() != null)
-                    retStr = retStr.replace(emailKeys.get(EmailKeys.JOB_DESCRIPTION), newsItem.getVacancy().getComment());
-            if (newsItem.getVacancy().getPositionType() != null)
+                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()), newsItem.getVacancy().getComment()); */
+/*            if (newsItem.getVacancy().getPositionType() != null)
                 if (newsItem.getVacancy().getPositionType().getPositionEnName() != null)
-                    retStr = retStr.replace(emailKeys.get(EmailKeys.POSITION),
-                            newsItem.getVacancy().getPositionType().getPositionEnName());
-            if (newsItem.getVacancy().getSalaryMin() != null)
-                retStr = retStr.replace(emailKeys.get(EmailKeys.SALARY_MIN),
-                        newsItem.getVacancy().getSalaryMin().toString());
-            if (newsItem.getVacancy().getSalaryMax() != null)
-                retStr = retStr.replace(emailKeys.get(EmailKeys.SALARY_MAX),
-                        newsItem.getVacancy().getSalaryMax().toString());
+                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.POSITION.getId()),
+                            newsItem.getVacancy().getPositionType().getPositionEnName()); */
+/*            if (newsItem.getVacancy().getSalaryMin() != null)
+                retStr = retStr.replaceAll(emailKeys.get(EmailKeys.SALARY_MIN.getId()),
+                        newsItem.getVacancy().getSalaryMin().toString()); */
+/*            if (newsItem.getVacancy().getSalaryMax() != null)
+                retStr = retStr.replaceAll(emailKeys.get(EmailKeys.SALARY_MAX.getId()),
+                        newsItem.getVacancy().getSalaryMax().toString()); */
 
         } catch (NullPointerException e) {
             log.error("Error", e);
+        } finally {
+            return retStr;
         }
-
-        return retStr;
-
     }
 
     Boolean deleteTwiceEvent = true;

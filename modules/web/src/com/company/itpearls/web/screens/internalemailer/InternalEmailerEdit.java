@@ -198,4 +198,13 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         cuba_email_smtpUser = AppContext.getProperty(EMAIL_SMTPUSER);
         cuba_email_smtpPassword = AppContext.getProperty(EMAIL_SMTPPASSWORD);
     }
+
+    @Install(to = "toEmailField", subject = "optionCaptionProvider")
+    private String toEmailFieldOptionCaptionProvider(JobCandidate jobCandidate) {
+        if (jobCandidate.getEmail() != null) {
+            return jobCandidate.getEmail();
+        } else {
+            return null;
+        }
+    }
 }
