@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        class="com.company.itpearls.web.screens.extsettingswindow.ExtSettingsWindow"
+        caption="msg://msgSettings"
+        messagesPack="com.company.itpearls.web.screens.extsettingswindow">
+    <dsContext>
+        <datasource id="userDs" class="com.haulmont.cuba.security.entity.User" view="extUser-view">
+            <groupDatasource id="rolesDs" property="userRoles"/>
+            <collectionDatasource id="substitutionsDs" property="substitutions"/>
+        </datasource>
+    </dsContext>
+    <layout expand="settingsTabSheet">
+        <tabSheet id="settingsTabSheet"
+                  width="100%"
+                  stylename="framed">
+            <tab id="msgInterface"
+                 caption="msg://msgInterface">
+                <vbox spacing="true" margin="true">
+                    <grid id="grid" spacing="true" width="100%">
+                        <columns>
+                            <column flex="0"/>
+                            <column flex="1"/>
+                        </columns>
+                        <rows>
+                            <row>
+                                <label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT"/>
+                                <optionsGroup id="modeOptions"/>
+                            </row>
+                            <row>
+                                <label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT"/>
+                                <lookupField id="appThemeField" required="true"
+                                             width="theme://cuba.web.settings-window.appThemeField.width"
+                                             requiredMessage="msg://mainWindowThemeMsg"/>
+                            </row>
+                            <row>
+                                <label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT"/>
+                                <lookupField id="appLangField"
+                                             width="theme://cuba.web.settings-window.appLocaleField.width"/>
+                            </row>
+                            <row>
+                                <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone"
+                                       align="MIDDLE_LEFT"/>
+                                <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneAutoField">
+                                    <lookupField id="timeZoneLookup"
+                                                 width="theme://cuba.web.settings-window.timeZoneField.width"/>
+                                    <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
+                                </hbox>
+                            </row>
+                            <row>
+                                <label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT"/>
+                                <lookupField id="defaultScreenField"
+                                             description="msg://defaultScreenDescription"
+                                             newOptionAllowed="false"
+                                             nullName="msg://noDefaultScreen"
+                                             width="theme://cuba.web.settings-window.defaultScreenField.width"/>
+                            </row>
+                            <row>
+                                <button id="changePasswordBtn" icon="icons/change-pass.png"/>
+                            </row>
+                            <row>
+                                <button id="resetScreenSettingsBtn" icon="icons/trash.png" stylename="danger"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </vbox>
+            </tab>
+            <tab id="mailAccessTab" caption="msg://msgEmailSettings">
+                <vbox spacing="true" margin="true">
+                    <grid id="propertiesEmailGrid" width="100%" spacing="true">
+                        <columns>
+                            <column id="fieldGroupLeftColumn" flex="1"/>
+                            <column id="fieldGroupRightColumn" flex="3"/>
+                            <column id="fieldRequiredPasswordColumn" flex="1"/>
+                            <column id="fieldGroupPasswordCloumn" flex="3"/>
+                        </columns>
+                        <rows>
+                            <row id="propertiesEmailRow">
+                                <fieldGroup id="emailFieldGroupLeft" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="smtpServer" caption="SMTP server"/>
+                                        <field id="pop3Server" caption="POP3 server"/>
+                                        <field id="imapServer" caption="IMAP server"/>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="emailFieldGroupRight" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="smtpPort" caption="SMTP port">
+                                            <validator
+                                                    class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </field>
+                                        <field id="pop3Port" caption="POP3 port">
+                                            <validator
+                                                    class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </field>
+                                        <field id="imapPort" caption="IMAP port">
+                                            <validator
+                                                    class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </field>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="emailFieldPasswordRequired" datasource="userDs" width="AUTO">
+                                    <column width="30px">
+                                        <field id="smtpPasswordRequired"/>
+                                        <field id="pop3PasswordRequired"/>
+                                        <field id="imapPasswordRequired"/>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="emailFieldGroupPasswords" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="smtpPassword" caption="SMTP password">
+                                        </field>
+                                        <field id="pop3Password" caption="POP3 password">
+                                        </field>
+                                        <field id="imapPassword" caption="IMAP password">
+                                        </field>
+                                    </column>
+                                </fieldGroup>
+                            </row>
+                        </rows>
+                    </grid>
+                </vbox>
+            </tab>
+        </tabSheet>
+        <vbox id="buttons" margin="true;false;false;false">
+            <buttonsPanel>
+                <button id="okBtn" icon="icons/ok.png"/>
+                <button id="cancelBtn" icon="icons/cancel.png"/>
+            </buttonsPanel>
+        </vbox>
+    </layout>
+</window>

@@ -3,4 +3,5 @@
     <screen id="sec$User.browse" template="com/company/itpearls/web/screens/extuser/ext-user-browse.xml"/>
     <screen id="sec$User.lookup" template="com/company/itpearls/web/screens/extuser/ext-user-browse.xml"/>
     <screen id="sec$User.edit" template="com/company/itpearls/web/screens/extuser/ext-user-edit.xml"/>
+    <screen id="settings" template="/com/company/itpearls/web/screens/extsettingswindow/ext-settings-window.xml"/>
 </screen-config>
