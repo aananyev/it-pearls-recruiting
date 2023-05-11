@@ -455,4 +455,8 @@
         <property name="templatePosition" view="_local"/>
         <property name="templateAuthor" view="_local"/>
     </view>
+    <view entity="itpearls_UserSettings" name="userSettings-view" extends="_local">
+        <property name="user" view="_local"/>
+        <property name="fileImageFace" view="_local"/>
+    </view>
 </views>

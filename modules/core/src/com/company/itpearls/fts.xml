@@ -127,5 +127,8 @@
         <entity class="com.company.itpearls.entity.InternalEmailerTemplate">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.UserSettings">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

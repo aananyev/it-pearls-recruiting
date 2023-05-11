@@ -10,10 +10,55 @@
                         view="extUser-view">
             </datasource>
         </dsContext> -->
+    <dsContext>
+        <datasource id="userSettingsDs"
+                    view="userSettings-view"
+                    class="com.company.itpearls.entity.UserSettings"
+                    allowCommit="true">
+        </datasource>
+    </dsContext>
     <layout expand="settingsTabSheet">
         <tabSheet id="settingsTabSheet"
                   width="100%"
                   stylename="framed">
+            <tab id="msgMyInfo"
+                 caption="msg://msgMyInfo">
+                <vbox id="dropZone"
+                      spacing="true"
+                      width="200px"
+                      height="266px"
+                      align="BOTTOM_RIGHT"
+                      expand="picVBox"
+                      stylename="dropzone-container">
+                    <vbox id="picVBox">
+                        <image id="userPic"
+                               datasource="userSettingsDs"
+                               property="fileImageFace"
+                               width="100%"
+                               height="100%"
+                               visible="true"
+                               align="TOP_RIGHT"
+                               stylename="widget-border"
+                               scaleMode="FILL"/>
+                        <image id="defaultPic"
+                               width="100%"
+                               visible="false"
+                               align="TOP_RIGHT"
+                               stylename="widget-border"
+                               scaleMode="FILL">
+                            <theme path="icons/no-programmer.jpeg"/>
+                        </image>
+                    </vbox>
+                    <upload id="fileImageFaceUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            datasource="userSettingsDs"
+                            align="BOTTOM_CENTER"
+                            showFileName="false"
+                            dropZone="dropZone"
+                            showClearButton="true"
+                            property="fileImageFace"/>
+                </vbox>
+            </tab>
             <tab id="msgInterface"
                  caption="msg://msgInterface">
                 <vbox spacing="true" margin="true">
@@ -71,35 +116,70 @@
                         <columns count="4"/>
                         <rows>
                             <row>
-                                <textField id="smtpServer" caption="SMTP server"/>
-                                <textField id="pop3Server" caption="POP3 server"/>
-                                <textField id="imapServer" caption="IMAP server"/>
+                                <textField id="smtpServer"
+                                           datasource="userSettingsDs"
+                                           property="smtpServer"
+                                           caption="SMTP server"/>
+                                <textField id="pop3Server"
+                                           datasource="userSettingsDs"
+                                           property="pop3Server"
+                                           caption="POP3 server"/>
+                                <textField id="imapServer"
+                                           datasource="userSettingsDs"
+                                           property="imapServer"
+                                           caption="IMAP server"/>
                             </row>
                             <row>
-                                <textField id="smtpPort" caption="SMTP port">
+                                <textField id="smtpPort"
+                                           datasource="userSettingsDs"
+                                           property="smtpPort"
+                                           caption="SMTP port">
                                     <validator
                                             class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                 </textField>
-                                <textField id="pop3Port" caption="POP3 port">
+                                <textField id="pop3Port"
+                                           datasource="userSettingsDs"
+                                           property="pop3Port"
+                                           caption="POP3 port">
                                     <validator
                                             class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                 </textField>
-                                <textField id="imapPort" caption="IMAP port">
+                                <textField id="imapPort"
+                                           datasource="userSettingsDs"
+                                           property="imapPort"
+                                           caption="IMAP port">
                                     <validator
                                             class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                 </textField>
                             </row>
                             <row>
-                                <checkBox id="smtpPasswordRequired"/>
-                                <checkBox id="pop3PasswordRequired"/>
-                                <checkBox id="imapPasswordRequired"/>
+                                <checkBox id="smtpPasswordRequired"
+                                          datasource="userSettingsDs" property="smtpPasswordRequired"
+                                          caption="msg://msgSMTPPasswordRequired"/>
+                                <checkBox id="pop3PasswordRequired"
+                                          datasource="userSettingsDs"
+                                          property="pop3PasswordRequired"
+                                          caption="msg://msgPop3PasswordRequired"/>
+                                <checkBox id="imapPasswordRequired"
+                                          datasource="userSettingsDs"
+                                          property="imapPasswordRequired"
+                                          caption="msg://msgImapPasswordRequired"/>
                             </row>
                             <row>
-                                <textField id="smtpPassword" caption="SMTP password">
+                                <textField id="smtpPassword"
+                                           datasource="userSettingsDs"
+                                           property="smtpPassword"
+                                           caption="SMTP password">
                                 </textField>
-                                <textField id="pop3Password" caption="POP3 password">
+                                <textField id="pop3Password"
+                                           datasource="userSettingsDs"
+                                           property="pop3Password"
+                                           caption="POP3 password">
                                 </textField>
-                                <textField id="imapPassword" caption="IMAP password">
+                                <textField id="imapPassword"
+                                           datasource="userSettingsDs"
+                                           property="imapPassword"
+                                           caption="IMAP password">
                                 </textField>
                             </row>
                         </rows>

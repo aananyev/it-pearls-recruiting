@@ -4,13 +4,16 @@ import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.Grade;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.StaffingTable;
+import com.company.itpearls.web.screens.openposition.openpositionfragments.OpenPositionOutstaffDetailScreenFragment;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Fragments;
 import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.TreeDataGrid;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.screen.Install;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
@@ -38,6 +41,10 @@ public class OpenPositionOutstaffBrowse extends OpenPositionBrowse {
     private Notifications notifications;
     @Inject
     private Events events;
+    @Inject
+    private Fragments fragments;
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
@@ -103,5 +110,18 @@ public class OpenPositionOutstaffBrowse extends OpenPositionBrowse {
         }
 
         return true;
+    }
+
+    @Install(to = "openPositionsTable", subject = "detailsGenerator")
+    protected Component openPositionsTableDetailsGenerator(OpenPosition entity) {
+
+        OpenPositionOutstaffDetailScreenFragment openPositionDetailScreenFragment =
+                fragments.create(this, OpenPositionOutstaffDetailScreenFragment.class);
+
+        openPositionDetailScreenFragment.setOpenPosition(entity);
+        openPositionDetailScreenFragment.setLabels();
+        openPositionDetailScreenFragment.setDefaultCompanyLogo();
+
+        return super.detailsGenerator(entity, openPositionDetailScreenFragment);
     }
 }

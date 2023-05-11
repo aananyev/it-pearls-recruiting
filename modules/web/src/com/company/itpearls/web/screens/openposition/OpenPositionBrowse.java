@@ -684,7 +684,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Fragments fragments;
 
     @Install(to = "openPositionsTable", subject = "detailsGenerator")
-    private Component openPositionsTableDetailsGenerator(OpenPosition entity) {
+    protected Component openPositionsTableDetailsGenerator(OpenPosition entity) {
 
         OpenPositionDetailScreenFragment openPositionDetailScreenFragment =
                 fragments.create(this, OpenPositionDetailScreenFragment.class);
@@ -693,7 +693,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionDetailScreenFragment.setLabels();
         openPositionDetailScreenFragment.setDefaultCompanyLogo();
 
-        GroupBoxLayout mainLayout = uiComponents.create(GroupBoxLayout.NAME);
+        GroupBoxLayout mainLayout = detailsGenerator(entity, openPositionDetailScreenFragment);
+
+        return mainLayout;
+    }
+
+    protected GroupBoxLayout detailsGenerator(OpenPosition entity, OpenPositionDetailScreenFragment openPositionDetailScreenFragment) {
+        GroupBoxLayout mainLayout = uiComponents.create(GroupBoxLayout.class);
+
         mainLayout.setWidth("100%");
 
         HBoxLayout titleBox = uiComponents.create(HBoxLayout.NAME);
@@ -752,6 +759,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         closeAllAnoterDetailsScreenFragments();
+
 
         return mainLayout;
     }

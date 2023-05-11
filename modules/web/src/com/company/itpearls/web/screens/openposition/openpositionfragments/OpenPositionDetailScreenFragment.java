@@ -32,7 +32,7 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
         }
     }
 
-    private OpenPosition openPosition = null;
+    protected OpenPosition openPosition = null;
     @Inject
     private Label<String> needExeciseLabel;
     @Inject

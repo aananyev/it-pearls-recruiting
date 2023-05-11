@@ -3,7 +3,6 @@
         class="com.haulmont.cuba.gui.app.security.user.edit.UserEditor"
         messagesPack="com.haulmont.cuba.gui.app.security.user.edit"
         focusComponent="fieldGroupLeft">
-
     <companions>
         <web class="com.haulmont.cuba.web.app.ui.security.user.UserEditorCompanion"/>
     </companions>
@@ -64,7 +63,7 @@
                           spacing="true"
                           width="200px"
                           height="266px"
-                          align="BOTTOM_RIGHT"
+                          align="TOP_LEFT"
                           expand="picVBox"
                           stylename="dropzone-container">
                         <vbox id="picVBox">

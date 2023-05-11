@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/openposition/openpositionfragments/open-position-detail-screen-fragment.xml"
+        messagesPack="com.company.itpearls.web.screens.openposition.openpositionfragments">
+    <layout>
+        <hbox id="mainHBox">
+            <vbox id="mainDetailFragmentVBox">
+                <groupBox id="projectCompanyHBox">
+                    <grid id="projectCompanyFieldGroup">
+                        <rows>
+                            <row/>
+                            <row/>
+                            <row/>
+                            <row/>
+                            <row>
+                                <label/>
+                                <label/>
+                                    <label id="outstaffingCostLabel"
+                                           value="msg://msgOutstaffingCost"
+                                           align="BOTTOM_LEFT"
+                                           stylename="bold"/>
+                                    <label id="outstaffingCostValueLabel"
+                                           align="BOTTOM_LEFT"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </groupBox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>
