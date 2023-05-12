@@ -33,12 +33,37 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="secondName" property="secondName" caption="msg://msgSecondName"/>
-                <column id="firstName" property="firstName" caption="msg://msgFirstName"/>
-                <column id="middleName" property="middleName" caption="msg://msgMiddleName"/>
-                <column id="personPosition" property="personPosition" caption="msg://msgPersonPosition"/>
-                <column id="positionCountry" property="positionCountry" caption="msg://msgPositionCountry"/>
-                <column id="cityOfResidence" property="cityOfResidence" caption="msg://msgCityOfResidence"/>
+                <column id="personPicColumn"
+                        caption=""
+                        resizable="true"
+                        collapsible="true"
+                        collapsed="false"
+                        width="70px"
+                        minimumWidth="50px">
+                    <componentRenderer/>
+                </column>
+                <column id="secondName"
+                        property="secondName"
+                        sortable="true"
+                        sort="ASCENDING"
+                        caption="msg://msgSecondName"/>
+                <column id="firstName"
+                        property="firstName"
+                        sortable="true"
+                        sort="ASCENDING"
+                        caption="msg://msgFirstName"/>
+                <column id="middleName"
+                        property="middleName"
+                        caption="msg://msgMiddleName"/>
+                <column id="personPosition"
+                        property="personPosition"
+                        caption="msg://msgPersonPosition"/>
+                <column id="positionCountry"
+                        property="positionCountry"
+                        caption="msg://msgPositionCountry"/>
+                <column id="cityOfResidence"
+                        property="cityOfResidence"
+                        caption="msg://msgCityOfResidence"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
