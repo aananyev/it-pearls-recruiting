@@ -738,6 +738,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    @Subscribe("fileImageFaceUpload")
+    public void onFileImageFaceUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
+        candidatePic.setVisible(false);
+        candidateDefaultPic.setVisible(true);
+    }
+
     @Subscribe("candidatePic")
     public void onCandidatePicSourceChange(ResourceView.SourceChangeEvent event) {
         setCandidatePicImage();

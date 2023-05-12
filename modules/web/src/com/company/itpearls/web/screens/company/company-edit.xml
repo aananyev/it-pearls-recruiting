@@ -170,16 +170,28 @@
                           width="200px"
                           height="266px"
                           align="TOP_RIGHT"
-                          expand="companyLogoFileImage"
+                          expand="picVBox"
                           stylename="dropzone-container">
-                        <image id="companyLogoFileImage"
-                               dataContainer="companyDc"
-                               property="fileCompanyLogo"
-                               width="100%"
-                               align="TOP_RIGHT"
-                               height="100%"
-                               stylename="widget-border"
-                               scaleMode="FILL"/>
+                        <vbox id="picVBox">
+                            <image id="companyLogoFileImage"
+                                   dataContainer="companyDc"
+                                   property="fileCompanyLogo"
+                                   width="100%"
+                                   visible="true"
+                                   align="TOP_RIGHT"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <image id="companyDefaultLogoFileImage"
+                                   width="100%"
+                                   visible="false"
+                                   align="TOP_RIGHT"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL">
+                                <theme path="icons/no-company.png"/>
+                            </image>
+                        </vbox>
                         <upload id="companyLogoFileUpload"
                                 fileStoragePutMode="IMMEDIATE"
                                 dataContainer="companyDc"

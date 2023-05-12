@@ -9,10 +9,12 @@
                   class="com.company.itpearls.entity.Project">
             <view>
                 <property name="openPosition" view="_local">
-                    <property name="positionType" view="_minimal"/>
+                    <property name="positionType" view="_local"/>
                 </property>
                 <property name="projectDepartment" view="_local">
-                    <property name="companyName" view="_local"/>
+                    <property name="companyName" view="_local">
+                        <property name="fileCompanyLogo" view="_local"/>
+                    </property>
                 </property>
                 <property name="projectOwner" view="_local"/>
                 <property name="projectTree" view="_local"/>

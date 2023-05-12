@@ -57,11 +57,12 @@
                     <textField id="telegramNameField" property="telegramName" caption="mainMsg://msgTelegram"/>
                     <textField id="wiberNameField" property="wiberName" caption="mainMsg://msgViber"/>
                     <textField id="watsupNameField" property="watsupName" caption="mainMsg://msgWhatsApp"/>
-                    <lookupPickerField id="positionCityField" property="cityOfResidence" caption="msg://msgCityOfResidence"
-                                 optionsContainer="positionCityDc">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
+                    <lookupPickerField id="positionCityField" property="cityOfResidence"
+                                       caption="msg://msgCityOfResidence"
+                                       optionsContainer="positionCityDc">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
                     </lookupPickerField>
                     <lookupPickerField id="positionCountryField" optionsContainer="positionCountriesDc"
                                        property="positionCountry" caption="mainMsg://msgCountry">
@@ -82,16 +83,28 @@
                   width="200px"
                   height="266px"
                   align="TOP_RIGHT"
-                  expand="peoplePic"
+                  expand="picVBox"
                   stylename="dropzone-container">
-                <image id="peoplePic"
-                       dataContainer="personDc"
-                       property="fileImageFace"
-                       width="100%"
-                       align="TOP_RIGHT"
-                       height="100%"
-                       stylename="widget-border"
-                       scaleMode="FILL"/>
+                <vbox id="picVBox">
+                    <image id="peoplePic"
+                           dataContainer="personDc"
+                           property="fileImageFace"
+                           width="100%"
+                           height="100%"
+                           align="TOP_RIGHT"
+                           visible="true"
+                           stylename="widget-border"
+                           scaleMode="SCALE_DOWN"/>
+                    <image id="defaultPeoplePic"
+                           width="100%"
+                           height="100%"
+                           visible="false"
+                           align="TOP_RIGHT"
+                           stylename="widget-border"
+                           scaleMode="FILL">
+                        <theme path="icons/no-programmer.jpeg"/>
+                    </image>
+                </vbox>
                 <upload id="fileImageFaceUpload"
                         fileStoragePutMode="IMMEDIATE"
                         dataContainer="personDc"
