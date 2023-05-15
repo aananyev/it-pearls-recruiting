@@ -273,7 +273,7 @@
                         collapsible="true"
                         collapsed="true"
                         caption="msg://msgCVDescription">
-                    <iconRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="testExserice"
                         collapsed="true"
@@ -283,7 +283,7 @@
                         collapsible="true"
                         maximumWidth="65px"
                         minimumWidth="45px">
-                    <iconRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="remoteWork"
                         property="remoteWork"
@@ -294,7 +294,7 @@
                         maximumWidth="65px"
                         minimumWidth="45px"
                         caption="msg://msgRemoteWork">
-                    <iconRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="queryQuestion"
                         collapsed="true"
@@ -304,7 +304,7 @@
                         collapsible="true"
                         maximumWidth="65px"
                         minimumWidth="45px">
-                    <iconRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="memoForCandidateColumn"
                         collapsed="true"
@@ -314,7 +314,7 @@
                         resizable="true"
                         maximumWidth="65px"
                         minimumWidth="45px">
-                    <iconRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="lastCVSend"
                         resizable="true"

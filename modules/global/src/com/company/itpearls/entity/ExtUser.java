@@ -2,10 +2,12 @@ package com.company.itpearls.entity;
 
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.annotation.Extends;
+import com.haulmont.cuba.core.entity.annotation.PublishEntityChangedEvents;
 import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 
+@PublishEntityChangedEvents
 @Entity(name = "itpearls_ExtUser")
 @Extends(User.class)
 public class ExtUser extends User {

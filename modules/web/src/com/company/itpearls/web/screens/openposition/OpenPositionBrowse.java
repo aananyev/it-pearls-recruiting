@@ -433,8 +433,35 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         remoteWork.put(messageBundle.getMessage("msgHybridWork"), 2);
     }
 
+    private static final String ICON_STYLE = "icon-label";
+    private static final String VBOX_STYLE = "vbox-icon";
+
     @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
-    private Icons.Icon openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+    private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retHbox = setPlusMinusIcon(setRemoteWorkIcon(event));
+        return retHbox;
+    }
+
+    private HBoxLayout setPlusMinusIcon(Icons.Icon setRemoteWorkIcon) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        Label label = uiComponents.create(Label.class);
+
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retHBox.setStyleName("table-wordwrap");
+
+        label.setHeightAuto();
+        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        label.setStyleName("table-wordwrap");
+        label.setIconFromSet(setRemoteWorkIcon);
+
+        retHBox.add(label);
+
+        return retHBox;
+    }
+
+    private Icons.Icon setRemoteWorkIcon(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = "";
 
         switch (event.getItem().getRemoteWork()) {
@@ -470,7 +497,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         } else
             returnIcon = "MINUS_CIRCLE";
 
-        return CubaIcon.valueOf(returnIcon);
+        return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
     @Install(to = "openPositionsTable.testExserice", subject = "descriptionProvider")
@@ -482,7 +509,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.description", subject = "columnGenerator")
-    private Icons.Icon openPositionsTableDescriptionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+    private Object openPositionsTableDescriptionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = "";
 
         if (event.getItem().getComment() != null) {
@@ -494,7 +521,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         } else
             returnIcon = "FILE";
 
-        return CubaIcon.valueOf(returnIcon);
+        return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
     @Install(to = "openPositionsTable.description", subject = "descriptionProvider")
@@ -1870,7 +1897,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 break;
         }
 
-        return CubaIcon.valueOf(returnIcon);
+        return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
     private int getQueryQuestion(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -2047,17 +2074,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "columnGenerator")
     private Object openPositionsTableMemoForCandidateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        Object returnIcon = CubaIcon.MINUS_CIRCLE;
+        String returnIcon = CubaIcon.MINUS_CIRCLE.iconName();
 
         if (event.getItem().getMemoForInterview() != null) {
             if (event.getItem().getMemoForInterview().equals("")) {
-                returnIcon = CubaIcon.MINUS_CIRCLE;
+                returnIcon = CubaIcon.MINUS_CIRCLE.iconName();
             } else {
-                returnIcon = CubaIcon.PLUS_CIRCLE;
+                returnIcon = CubaIcon.PLUS_CIRCLE.iconName();
             }
         }
 
-        return returnIcon;
+        return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
     Integer montOfStat = 3;
@@ -2171,6 +2198,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         label.setValue(labelStr);
         retHBox.add(label);
+        retHBox.expand(label);
 
         return retHBox;
 
