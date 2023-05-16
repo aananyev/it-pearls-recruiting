@@ -7,6 +7,7 @@
               icon="CALENDAR"/>
         <item screen="itpearls_WeekInterviewCalendar"
               icon="CALENDAR"/>
+        <item screen="itpearls_LoadFromFileScreen" caption="mainMsg://menu_config.itpearls_LoadFromFileScreen"/>
     </menu>
     <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
         <item screen="itpearls_OpenPositionMaster.browse"

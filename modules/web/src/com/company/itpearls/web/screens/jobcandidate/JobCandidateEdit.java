@@ -21,6 +21,7 @@ import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.ValueSource;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -3169,5 +3170,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         jobCandidateDl.load();
         jobCandidateIteractionListTable.repaint();
+    }
+
+    public void setFirstNameField(List<String> suggestFirstNames) {
+        firstNameField.setValueSource((ValueSource<String>) suggestFirstNames);
     }
 }

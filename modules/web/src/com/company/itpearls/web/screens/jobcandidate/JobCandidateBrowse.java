@@ -1,15 +1,18 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.core.InteractionService;
+import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
+import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.loadfromfilescreen.LoadFromFileScreen;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -23,6 +26,7 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.io.*;
@@ -30,6 +34,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
+import java.util.stream.Collectors;
 
 @UiController("itpearls_JobCandidate.browse")
 @UiDescriptor("job-candidate-browse.xml")
@@ -93,6 +98,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private PdfParserService pdfParserService;
     @Inject
     private Button sendEmailButton;
+    @Inject
+    private ParseCVService parseCVService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1177,7 +1184,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private void setSendEmailButton() {
         jobCandidatesTable.addSelectionListener(e -> {
-            if(jobCandidatesTable.getSingleSelected() != null) {
+            if (jobCandidatesTable.getSingleSelected() != null) {
                 if (jobCandidatesTable.getSingleSelected().getEmail() != null) {
                     sendEmailButton.setEnabled(true);
                 } else {
@@ -1412,4 +1419,77 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .build()
                 .show();
     }
+
+    @Subscribe("quickLoadCV.loadFromPdf")
+    public void onQuickLoadCVLoadFromPdf(Action.ActionPerformedEvent event) {
+        Screen screen = screenBuilders.screen(this)
+                .withScreenClass(LoadFromFileScreen.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+
+        screen.show();
+
+    }
+
+    @Subscribe("quickLoadCV.loadFromClipboard")
+    public void onQuickLoadCVLoadFromClipboard(Action.ActionPerformedEvent event) {
+        Screen screen = screenBuilders.screen(this)
+                .withScreenClass(Onlytext.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        screen.addAfterCloseListener(afterCloseEvent -> {
+            Screen jobCandidateEdit = screenBuilders.editor(JobCandidate.class, this)
+                    .withOpenMode(OpenMode.NEW_TAB)
+                    .withScreenClass(JobCandidateEdit.class)
+                    .withInitializer(e -> {
+
+                        if (!((Onlytext) screen).getCancel()) {
+                            String textCV = ((Onlytext) screen).getResultText();
+                            // нашел ФИО
+                            if (!textCV.equals("") || textCV != null) {
+                                e.setFirstName(parseCVService
+                                        .parseFirstName(textCV));
+                                e.setMiddleName(parseCVService
+                                        .parseMiddleName(textCV));
+                                e.setSecondName(parseCVService
+                                        .parseSecondName(textCV));
+                                e.setEmail(parseCVService
+                                        .parseEmail(textCV));
+                                e.setPhone(parseCVService
+                                        .parsePhone(textCV));
+
+                                e.setBirdhDate(parseCVService
+                                        .parseDate(textCV));
+
+                                e.setCurrentCompany(parseCVService.parseCompany(textCV));
+                                e.setCityOfResidence(parseCVService.parseCity(textCV));
+//                                e.setPersonPosition(parseCVService.parsePositions(textCV).get(0));
+                            }
+                        }
+
+                    })
+                    .newEntity()
+                    .build();
+
+            jobCandidateEdit.addAfterShowListener(eventJobCandidateEdit ->
+                    ((SuggestionField<Object>) eventJobCandidateEdit
+                            .getSource()
+                            .getWindow()
+                            .getComponentNN("firstNameField"))
+                            .setSearchExecutor((searchString, searchParams) ->
+                                    parseCVService.getFirstNameList(
+                                            ((Onlytext) screen).getResultText())
+                                            .stream()
+                                            .filter(str ->
+                                                    StringUtils
+                                                            .containsAnyIgnoreCase(str, searchString))
+                                            .collect(Collectors.toList())));
+
+        jobCandidateEdit.show();
+    });
+
+        screen.show();
+}
 }

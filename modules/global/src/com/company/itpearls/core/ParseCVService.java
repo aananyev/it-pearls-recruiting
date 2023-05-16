@@ -1,14 +1,24 @@
 package com.company.itpearls.core;
 
-import com.company.itpearls.entity.Company;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.Position;
-import com.company.itpearls.entity.SkillTree;
+import com.company.itpearls.entity.*;
 
+import java.util.Date;
 import java.util.List;
 
 public interface ParseCVService {
     String NAME = "itpearls_ParseCVService";
+
+    Date parseDate(String cv);
+
+    Date parseDate(StringBuffer cv);
+
+    List<String> getFirstNameList(String cv);
+
+    String parseFirstName(String cv);
+
+    String parseMiddleName(String cv);
+
+    String parseSecondName(String cv);
 
     Integer countMachesSkill(String inputText, SkillTree skillTree);
 
@@ -17,6 +27,8 @@ public interface ParseCVService {
     String parsePhone(String cv);
 
     List<String> extractUrls(String input);
+
+    City parseCity(String textCV);
 
     Company parseCompany(String textCV);
 

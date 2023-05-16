@@ -72,7 +72,7 @@
     <layout expand="jobCandidatesTable"
             spacing="true">
         <filter id="filter"
-                applyTo="jobCandidatesTable" 
+                applyTo="jobCandidatesTable"
                 defaultMode="generic"
                 dataLoader="jobCandidatesDl">
             <properties include=".*"
@@ -148,9 +148,27 @@
                         action="jobCandidatesTable.excel"
                         visible="false"
                         enable="false"/>
-                <button id="quickLoadCV"
-                        caption="msg://msgQuickLoadCV"
-                        invoke="quickLoadCVButton"/>
+                <popupButton id="quickLoadCV"
+                             width="AUTO"
+                             icon="CLOUD_UPLOAD"
+                             showActionIcons="true"
+                             align="BOTTOM_RIGHT"
+                             caption="msg://msgQuickLoadCV">
+                    <actions>
+                        <action id="loadFromPdf"
+                                icon="FILE_PDF_O"
+                                enable="false"
+                                caption="msg://msgLoadFromPDF"/>
+                        <action id="loadFromWord"
+                                icon="FILE_WORD_O"
+                                enable="false"
+                                caption="msg://msgLoadFromWord"/>
+                        <action id="loadFromClipboard"
+                                icon="CLIPBOARD"
+                                enable="true"
+                                caption="msg://msgLoadFromClipboard"/>
+                    </actions>
+                </popupButton>
                 <button id="sendEmailButton"
                         caption="mainMsg://msgSendEmail"
                         enable="false"

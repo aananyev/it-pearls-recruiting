@@ -1,10 +1,11 @@
 package com.company.itpearls.core;
 
-import com.company.itpearls.entity.Company;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.Position;
-import com.company.itpearls.entity.SkillTree;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
+import com.mdimension.jchronic.Chronic;
+import com.mdimension.jchronic.Options;
+import com.mdimension.jchronic.tags.Pointer;
+import com.mdimension.jchronic.utils.Span;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,20 +14,189 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.springframework.context.i18n.LocaleContextHolder.getTimeZone;
 
 @Service(ParseCVService.NAME)
 public class ParseCVServiceBean implements ParseCVService {
 
     static String emailPtrn = "\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*\\.\\w{2,4}";
     static String phonePtrn = "[7|8][ (-]?[\\d]{3}[ )-]?[\\d]{3}[ -]?[\\d]{2}[ -]?[\\d]{2}[\\D]";
+    static final Integer MIN_NAME_LENGTH = 3;
+    static final String QUERY_GET_FIRST_NAMES =
+            "select distinct e.firstName " +
+                    "from itpearls_JobCandidate e " +
+                    "where not e.firstName like ''" +
+                    "order by e.firstName";
 
     @Inject
     private DataManager dataManager;
     @Inject
     private PdfParserService pdfParserService;
+
+    @Override
+    public Date parseDate(String cv) {
+        return getDateFromText(new StringBuffer(cv));
+    }
+
+    @Override
+    public Date parseDate(StringBuffer cv) {
+        return getDateFromText(cv);
+    }
+
+    public Calendar detectDate(String input) {
+        Options opt = new Options(Pointer.PointerType.PAST);
+        opt.setNow(Calendar.getInstance(getTimeZone()));
+        Span date = Chronic.parse(input, opt);
+
+        if (date == null) {
+            return null;
+        } else {
+            return date.getBeginCalendar();
+        }
+    }
+
+    private Date getDateFromText(StringBuffer text) {
+        Calendar retCalendar = detectDate(text.toString());
+        return retCalendar != null ? retCalendar.getTime() : null;
+    }
+
+    @Override
+    public List<String> getFirstNameList(String cv) {
+        List<String> retStrList = new ArrayList<>();
+
+        List<String> firstNameList = dataManager.loadValue(QUERY_GET_FIRST_NAMES, String.class)
+                .list();
+
+        for (String fn : firstNameList) {
+            if (!fn.equals("")) {
+                if (fn.length() >= MIN_NAME_LENGTH) {
+                    if (Jsoup.parse(cv).text().toLowerCase().contains(fn.toLowerCase())) {
+                        retStrList.add(fn);
+                    }
+                }
+            }
+        }
+
+        return retStrList;
+    }
+
+    @Override
+    public String parseFirstName(String cv) {
+        StringBuffer retSb = new StringBuffer();
+
+        List<String> firstName = dataManager.loadValue(QUERY_GET_FIRST_NAMES, String.class)
+                .list();
+
+        for (String fn : firstName) {
+            if (!fn.equals("")) {
+                StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
+
+                if (fn.length() >= MIN_NAME_LENGTH) {
+                    // с начала строки и до пробела
+                    if (cvLoverCase.toString().contains("\n" + fn.toLowerCase() + " ")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                    // с пробела и до пробела
+                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + " ")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                    // с пробела и до конца строки
+                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + "\n")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return retSb.equals("") ? null : retSb.toString();
+    }
+
+    @Override
+    public String parseMiddleName(String cv) {
+        StringBuffer retSb = new StringBuffer();
+        String QUERY_GET_MIDDLE_NAMES =
+                "select distinct e.middleName " +
+                        "from itpearls_JobCandidate e " +
+                        "where not e.middleName like ''" +
+                        "order by e.middleName";
+
+        List<String> middleName = dataManager.loadValue(QUERY_GET_MIDDLE_NAMES, String.class)
+                .list();
+
+        for (String fn : middleName) {
+            if (!fn.equals("")) {
+                StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
+
+                if (fn.length() >= MIN_NAME_LENGTH) {
+                    // с начала строки и до пробела
+                    if (cvLoverCase.toString().contains("\n" + fn.toLowerCase() + " ")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                    // с пробела и до пробела
+                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + " ")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                    // с пробела и до конца строки
+                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + "\n")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return retSb.equals(null) ? null : retSb.toString();
+    }
+
+    @Override
+    public String parseSecondName(String cv) {
+        StringBuffer retSb = new StringBuffer();
+        String QUERY_GET_SECOND_NAMES =
+                "select distinct e.secondName " +
+                        "from itpearls_JobCandidate e " +
+                        "where not e.secondName like ''" +
+                        "order by e.secondName";
+
+        List<String> secondName = dataManager.loadValue(QUERY_GET_SECOND_NAMES, String.class)
+                .list();
+
+        for (String fn : secondName) {
+            if (!fn.equals("")) {
+                StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
+
+                if (fn.length() >= 4) {
+                    // с начала строки и до пробела
+                    if (cvLoverCase.toString().contains("\n" + fn.toLowerCase() + " ")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                    // с пробела и до пробела
+                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + " ")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                    // с пробела и до конца строки
+                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + "\n")) {
+                        retSb.append(fn);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return retSb.equals(null) ? null : retSb.toString();
+    }
 
     @Override
     public Integer countMachesSkill(String inputText, SkillTree skillTree) {
@@ -174,13 +344,33 @@ public class ParseCVServiceBean implements ParseCVService {
         return parseCompaniesPriv(textCV);
     }
 
+    @Override
+    public City parseCity(String textCV) {
+        List<City> cities = dataManager.load(City.class).list();
+        City retCity = null;
+
+        if (textCV != null) {
+            for (City city : cities) {
+                if (city != null) {
+                    if (city.getCityRuName() != null) {
+                        if (textCV.toLowerCase().contains(city.getCityRuName().toLowerCase())) {
+                            retCity = city;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return retCity;
+    }
 
     @Override
     public Company parseCompany(String textCV) {
         List<Company> companies = dataManager.load(Company.class).list();
         Company retCompany = null;
 
-        if(textCV != null) {
+        if (textCV != null) {
             for (Company company : companies) {
                 if (company != null) {
                     if (company.getComanyName() != null) {

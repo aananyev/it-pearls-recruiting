@@ -432,7 +432,7 @@
                                        align="MIDDLE_LEFT"
                                        visible="true"/>
                                 <button id="putPersonelReserveButton"
-                                        description="msg://msgputPersonelReserve"
+                                        description="msg://msgPutPersonelReserve"
                                         align="MIDDLE_LEFT"
                                         enable="false"
                                         icon="SHOPPING_BASKET"

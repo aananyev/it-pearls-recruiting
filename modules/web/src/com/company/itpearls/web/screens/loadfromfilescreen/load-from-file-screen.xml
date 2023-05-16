@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://loadFromFileScreen.caption"
+        messagesPack="com.company.itpearls.web.screens">
+    <layout>
+        <upload id="loadFromPdf"
+                enable="true"
+                caption="msg://msgLoadFromPDF"
+                visible="true"
+                icon="FILE_PDF_O"
+                required="true"
+                width="AUTO"/>
+    </layout>
+</window>

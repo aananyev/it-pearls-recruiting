@@ -85,6 +85,7 @@ configure(globalModule) {
         compile 'com.ibm.icu:icu4j:69.1'
         compile 'org.apache.poi:poi-ooxml-lite:5.2.3'
         compile 'net.htmlparser.jericho:jericho-html:3.4'
+        compile 'com.rubiconproject.oss:jchronic:0.2.8'
     }
 
     entitiesEnhancing {
