@@ -12,13 +12,21 @@ public interface ParseCVService {
 
     Date parseDate(StringBuffer cv);
 
+    List<String> getMiddleNameList(String cv);
+
+    List<String> getSecondNameList(String cv);
+
     List<String> getFirstNameList(String cv);
+
+    List<String> getListName(List<String> firstNameList, String cv);
 
     String parseFirstName(String cv);
 
     String parseMiddleName(String cv);
 
     String parseSecondName(String cv);
+
+    StringBuffer getNamesFromText(List<String> secondName, String cv);
 
     Integer countMachesSkill(String inputText, SkillTree skillTree);
 

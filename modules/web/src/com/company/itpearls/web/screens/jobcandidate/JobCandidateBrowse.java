@@ -16,6 +16,7 @@ import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.Iter
 import com.company.itpearls.web.screens.loadfromfilescreen.LoadFromFileScreen;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -101,6 +102,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Button sendEmailButton;
     @Inject
     private ParseCVService parseCVService;
+    @Inject
+    private DataContext dataContext;
+    @Inject
+    private Metadata metadata;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1445,7 +1450,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .withOpenMode(OpenMode.NEW_TAB)
                     .withScreenClass(JobCandidateEdit.class)
                     .withInitializer(e -> {
-
                         if (!((Onlytext) screen).getCancel()) {
                             String textCV = ((Onlytext) screen).getResultText();
                             // нашел ФИО
@@ -1467,30 +1471,64 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 e.setCurrentCompany(parseCVService.parseCompany(textCV));
                                 e.setCityOfResidence(parseCVService.parseCity(textCV));
                                 e.setPersonPosition(((OnlyTextPersonPosition) screen).getPersonPosition());
+
+                                CandidateCV candidateCV = metadata.create(CandidateCV.class);
+                                candidateCV.setResumePosition(e.getPersonPosition());
+                                candidateCV.setTextCV(((OnlyTextPersonPosition) screen).getResultText());
+                                candidateCV.setOwner(userSession.getUser());
+                                candidateCV.setCandidate(e);
+                                candidateCV.setDatePost(new Date());
+
+                                List<CandidateCV> candidateCVS = new ArrayList<>();
+                                candidateCVS.add(candidateCV);
+                                dataContext.merge(candidateCV);
+                                e.setCandidateCv(candidateCVS);
+
+                                Screen candidateCVEdit = screenBuilders.editor(CandidateCV.class, this)
+                                        .withScreenClass(CandidateCVEdit.class)
+                                        .withAddFirst(true)
+                                        .editEntity(candidateCV)
+                                        .withOpenMode(OpenMode.DIALOG)
+                                        .build();
+
+                                candidateCVEdit.show();
                             }
                         }
-
                     })
                     .newEntity()
                     .build();
 
-            jobCandidateEdit.addAfterShowListener(eventJobCandidateEdit ->
-                    ((SuggestionField<Object>) eventJobCandidateEdit
-                            .getSource()
-                            .getWindow()
-                            .getComponentNN("firstNameField"))
-                            .setSearchExecutor((searchString, searchParams) ->
-                                    parseCVService.getFirstNameList(
-                                            ((Onlytext) screen).getResultText())
-                                            .stream()
-                                            .filter(str ->
-                                                    StringUtils
-                                                            .containsAnyIgnoreCase(str, searchString))
-                                            .collect(Collectors.toList())));
+            jobCandidateEdit.addAfterShowListener(eventJobCandidateEdit -> {
+                ((SuggestionField<Object>) eventJobCandidateEdit
+                        .getSource()
+                        .getWindow()
+                        .getComponentNN("firstNameField"))
+                        .setSearchExecutor((searchString, searchParams) ->
+                                parseCVService.getFirstNameList(
+                                        ((Onlytext) screen).getResultText())
+                                        .stream()
+                                        .filter(str ->
+                                                StringUtils
+                                                        .containsAnyIgnoreCase(str, searchString))
+                                        .collect(Collectors.toList()));
 
-        jobCandidateEdit.show();
-    });
+                ((SuggestionField<Object>) eventJobCandidateEdit
+                        .getSource()
+                        .getWindow()
+                        .getComponentNN("secondNameField"))
+                        .setSearchExecutor((searchString, searchParams) ->
+                                parseCVService.getSecondNameList(
+                                        ((Onlytext) screen).getResultText())
+                                        .stream()
+                                        .filter(str ->
+                                                StringUtils
+                                                        .containsAnyIgnoreCase(str, searchString))
+                                        .collect(Collectors.toList()));
+            });
+
+            jobCandidateEdit.show();
+        });
 
         screen.show();
-}
+    }
 }

@@ -11,6 +11,7 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
@@ -122,6 +123,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private InstanceContainer<CandidateCV> candidateCVDc;
     @Inject
     private Metadata metadata;
+    @Inject
+    private DataContext dataContext;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -820,5 +823,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             candidateCVRichTextArea.setValue(getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]));
         }
+    }
+
+    public void setParentDataContext(DataContext parentDataContext) {
+        dataContext.setParent(parentDataContext);
     }
 }

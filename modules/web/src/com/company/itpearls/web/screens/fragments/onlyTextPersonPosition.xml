@@ -19,15 +19,17 @@
     </data>
     <layout>
         <suggestionPickerField id="personPositionField"
-                         width="100%"
-                         minSearchStringLength="1"
-                         caption="msg://msgPersonPosition"
-                         editable="true"
-                         align="TOP_LEFT"
+                               width="100%"
+                               minSearchStringLength="1"
+                               caption="msg://msgPersonPosition"
+                               editable="true"
+                               asyncSearchDelayMs="300"
+                               suggestionsLimit="3"
+                               align="TOP_LEFT"
                                metaClass="itpearls_Position"
-                         ext:index="0"
-                         required="true"
-                         inputPrompt="msg://msgPressEnter">
+                               ext:index="0"
+                               required="true"
+                               inputPrompt="msg://msgPressEnter">
             <actions>
                 <action id="lookup" type="picker_lookup"/>
                 <action id="open" type="picker_open"/>

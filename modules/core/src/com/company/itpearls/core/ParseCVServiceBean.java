@@ -25,7 +25,9 @@ import static org.springframework.context.i18n.LocaleContextHolder.getTimeZone;
 @Service(ParseCVService.NAME)
 public class ParseCVServiceBean implements ParseCVService {
 
-    static String emailPtrn = "\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*\\.\\w{2,4}";
+    static String emailPtrn = "/(\\+7|8)[- _]*\\(?[- _]*(\\d{3}[- _]*\\)?([- _]*\\d){7}|\\d\\d[- _]*\\d\\d[- _]*\\)?([- _]*\\d){6})/g\n";
+    static String allCountryRegex =
+            "^(\\+\\d{1,3}( )?)?((\\(\\d{1,3}\\))|\\d{1,3})[- .]?\\d{3,4}[- .]?\\d{4}$";
     static String phonePtrn = "[7|8][ (-]?[\\d]{3}[ )-]?[\\d]{3}[ -]?[\\d]{2}[ -]?[\\d]{2}[\\D]";
     static final Integer MIN_NAME_LENGTH = 3;
     static final String QUERY_GET_FIRST_NAMES =
@@ -33,6 +35,16 @@ public class ParseCVServiceBean implements ParseCVService {
                     "from itpearls_JobCandidate e " +
                     "where not e.firstName like ''" +
                     "order by e.firstName";
+    static final String QUERY_GET_SECOND_NAMES =
+            "select distinct e.secondName " +
+                    "from itpearls_JobCandidate e " +
+                    "where not e.secondName like ''" +
+                    "order by e.secondName";
+    static final String QUERY_GET_MIDDLE_NAMES =
+            "select distinct e.middleName " +
+                    "from itpearls_JobCandidate e " +
+                    "where not e.middleName like ''" +
+                    "order by e.middleName";
 
     @Inject
     private DataManager dataManager;
@@ -66,18 +78,66 @@ public class ParseCVServiceBean implements ParseCVService {
         return retCalendar != null ? retCalendar.getTime() : null;
     }
 
+
+    @Override
+    public List<String> getMiddleNameList(String cv) {
+
+        List<String> middleNameList = dataManager.loadValue(QUERY_GET_MIDDLE_NAMES, String.class)
+                .list();
+
+        List<String> retStrList = getListName(middleNameList, cv);
+
+        return retStrList;
+    }
+
+    @Override
+    public List<String> getSecondNameList(String cv) {
+
+        List<String> secondNameList = dataManager.loadValue(QUERY_GET_SECOND_NAMES, String.class)
+                .list();
+
+        List<String> retStrList = getListName(secondNameList, cv);
+
+        return retStrList;
+    }
+
     @Override
     public List<String> getFirstNameList(String cv) {
-        List<String> retStrList = new ArrayList<>();
 
         List<String> firstNameList = dataManager.loadValue(QUERY_GET_FIRST_NAMES, String.class)
                 .list();
 
+        List<String> retStrList = getListName(firstNameList, cv);
+
+        return retStrList;
+    }
+
+    @Override
+    public List<String> getListName(List<String> firstNameList, String cv) {
+        List<String> retStrList = new ArrayList<>();
+
         for (String fn : firstNameList) {
             if (!fn.equals("")) {
                 if (fn.length() >= MIN_NAME_LENGTH) {
-                    if (Jsoup.parse(cv).text().toLowerCase().contains(fn.toLowerCase())) {
-                        retStrList.add(fn);
+                    if (!fn.equals("")) {
+                        StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
+
+                        if (fn.length() >= MIN_NAME_LENGTH) {
+                            // с начала строки и до пробела
+                            if (cvLoverCase.toString().contains("\n" + fn.toLowerCase() + " ")) {
+                                break;
+                            }
+                            // с пробела и до пробела
+                            if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + " ")) {
+                                retStrList.add(fn);
+                                break;
+                            }
+                            // с пробела и до конца строки
+                            if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + "\n")) {
+                                retStrList.add(fn);
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -88,51 +148,43 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parseFirstName(String cv) {
-        StringBuffer retSb = new StringBuffer();
 
         List<String> firstName = dataManager.loadValue(QUERY_GET_FIRST_NAMES, String.class)
                 .list();
-
-        for (String fn : firstName) {
-            if (!fn.equals("")) {
-                StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
-
-                if (fn.length() >= MIN_NAME_LENGTH) {
-                    // с начала строки и до пробела
-                    if (cvLoverCase.toString().contains("\n" + fn.toLowerCase() + " ")) {
-                        retSb.append(fn);
-                        break;
-                    }
-                    // с пробела и до пробела
-                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + " ")) {
-                        retSb.append(fn);
-                        break;
-                    }
-                    // с пробела и до конца строки
-                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + "\n")) {
-                        retSb.append(fn);
-                        break;
-                    }
-                }
-            }
-        }
+        StringBuffer retSb = new StringBuffer(getNamesFromText(firstName, cv));
 
         return retSb.equals("") ? null : retSb.toString();
     }
 
     @Override
     public String parseMiddleName(String cv) {
-        StringBuffer retSb = new StringBuffer();
-        String QUERY_GET_MIDDLE_NAMES =
-                "select distinct e.middleName " +
-                        "from itpearls_JobCandidate e " +
-                        "where not e.middleName like ''" +
-                        "order by e.middleName";
 
         List<String> middleName = dataManager.loadValue(QUERY_GET_MIDDLE_NAMES, String.class)
                 .list();
 
-        for (String fn : middleName) {
+        StringBuffer retSb = new StringBuffer(getNamesFromText(middleName, cv));
+
+        return retSb.equals(null) ? null : retSb.toString();
+    }
+
+    @Override
+    public String parseSecondName(String cv) {
+
+        List<String> secondName = dataManager
+                .loadValue(QUERY_GET_SECOND_NAMES, String.class)
+                .list();
+
+        StringBuffer retSb = new StringBuffer(getNamesFromText(secondName, cv));
+
+
+        return retSb.equals(null) ? null : retSb.toString();
+    }
+
+    @Override
+    public StringBuffer getNamesFromText(List<String> secondName, String cv) {
+        StringBuffer retSb = new StringBuffer();
+
+        for (String fn : secondName) {
             if (!fn.equals("")) {
                 StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
 
@@ -156,46 +208,7 @@ public class ParseCVServiceBean implements ParseCVService {
             }
         }
 
-        return retSb.equals(null) ? null : retSb.toString();
-    }
-
-    @Override
-    public String parseSecondName(String cv) {
-        StringBuffer retSb = new StringBuffer();
-        String QUERY_GET_SECOND_NAMES =
-                "select distinct e.secondName " +
-                        "from itpearls_JobCandidate e " +
-                        "where not e.secondName like ''" +
-                        "order by e.secondName";
-
-        List<String> secondName = dataManager.loadValue(QUERY_GET_SECOND_NAMES, String.class)
-                .list();
-
-        for (String fn : secondName) {
-            if (!fn.equals("")) {
-                StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
-
-                if (fn.length() >= 4) {
-                    // с начала строки и до пробела
-                    if (cvLoverCase.toString().contains("\n" + fn.toLowerCase() + " ")) {
-                        retSb.append(fn);
-                        break;
-                    }
-                    // с пробела и до пробела
-                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + " ")) {
-                        retSb.append(fn);
-                        break;
-                    }
-                    // с пробела и до конца строки
-                    if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + "\n")) {
-                        retSb.append(fn);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return retSb.equals(null) ? null : retSb.toString();
+        return retSb;
     }
 
     @Override
@@ -228,7 +241,7 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parsePhone(String cv) {
-        return deleteSystemChar(getDataModel(cv, phonePtrn));
+        return deleteSystemChar(getDataModel(cv, allCountryRegex));
     }
 
     private String getDataModel(String onStr, String pattern) {
@@ -301,14 +314,22 @@ public class ParseCVServiceBean implements ParseCVService {
     }
 
     private List<Company> parseCompaniesPriv(String textCV) {
-        List<Company> companies = dataManager.load(Company.class).list();
+        List<Company> companies = dataManager
+                .load(Company.class)
+                .list();
         List<Company> retCompanies = new ArrayList<>();
 
         for (Company company : companies) {
             if (company != null) {
                 if (company.getComanyName() != null) {
-                    if (textCV.contains(company.getComanyName())) {
+                    if (textCV.toLowerCase().contains(company.getComanyName().toLowerCase())) {
                         retCompanies.add(company);
+                    }
+
+                    if (company.getCompanyShortName() != null) {
+                        if (textCV.toLowerCase().contains(company.getCompanyShortName().toLowerCase())) {
+                            retCompanies.add(company);
+                        }
                     }
                 }
             }
@@ -375,6 +396,13 @@ public class ParseCVServiceBean implements ParseCVService {
                 if (company != null) {
                     if (company.getComanyName() != null) {
                         if (textCV.contains(company.getComanyName())) {
+                            retCompany = company;
+                            break;
+                        }
+                    }
+
+                    if (company.getCompanyShortName() != null) {
+                        if (textCV.contains(company.getCompanyShortName())) {
                             retCompany = company;
                             break;
                         }
