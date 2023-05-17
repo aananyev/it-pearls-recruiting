@@ -8,6 +8,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
+import com.company.itpearls.web.screens.fragments.OnlyTextPersonPosition;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
@@ -1435,7 +1436,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Subscribe("quickLoadCV.loadFromClipboard")
     public void onQuickLoadCVLoadFromClipboard(Action.ActionPerformedEvent event) {
         Screen screen = screenBuilders.screen(this)
-                .withScreenClass(Onlytext.class)
+                .withScreenClass(OnlyTextPersonPosition.class)
                 .withOpenMode(OpenMode.DIALOG)
                 .build();
 
@@ -1465,7 +1466,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
                                 e.setCurrentCompany(parseCVService.parseCompany(textCV));
                                 e.setCityOfResidence(parseCVService.parseCity(textCV));
-//                                e.setPersonPosition(parseCVService.parsePositions(textCV).get(0));
+                                e.setPersonPosition(((OnlyTextPersonPosition) screen).getPersonPosition());
                             }
                         }
 
