@@ -18,6 +18,10 @@ public interface ParseCVService {
 
     List<String> getFirstNameList(String cv);
 
+    String parseSkype(String cv);
+
+    String parseTelegram(String cv);
+
     List<String> getListName(List<String> firstNameList, String cv);
 
     String parseFirstName(String cv);

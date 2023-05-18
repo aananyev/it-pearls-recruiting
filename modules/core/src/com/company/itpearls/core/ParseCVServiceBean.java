@@ -110,12 +110,55 @@ public class ParseCVServiceBean implements ParseCVService {
     }
 
     @Override
+    public String parseSkype(String cv) {
+        String retStr = null;
+        final String skypePattern = "Skype:";
+
+        Pattern skype = Pattern.compile(skypePattern + "\\s*" + ".*?\\s");
+        Matcher skypeMatcher = skype.matcher(Jsoup.parse(cv).text());
+
+        if (skypeMatcher.find()) {
+            StringBuffer skypeBuffer = new StringBuffer(skypeMatcher.group());
+
+            retStr = skypeBuffer
+                    .toString()
+                    .substring(skypePattern.length())
+                    .trim();
+        }
+
+        return retStr;
+    }
+
+    @Override
+    public String parseTelegram(String cv) {
+        String retStr = null;
+        final String telegramPattern = "Telegram:";
+
+        Pattern telegram = Pattern.compile(telegramPattern + "\\s*" + ".*?\\s");
+        Matcher telegramMatcher = telegram.matcher(Jsoup.parse(cv).text());
+
+        if (telegramMatcher.find()) {
+            StringBuffer telegramBuffer = new StringBuffer(telegramMatcher.group());
+
+            retStr = telegramBuffer
+                    .toString()
+                    .substring(
+                            telegramPattern
+                                    .length() +
+                                    (telegramBuffer
+                                            .toString()
+                                            .substring(
+                                                    telegramPattern
+                                                            .length() + 1,
+                                                    telegramPattern.length() + 2).equals(" ") ? 1 : 0));
+        }
+
+        return retStr;
+    }
+
+    @Override
     public List<String> getListName(List<String> nameList, String cv) {
         Set<String> retStrSet = new HashSet<>();
-//        Pattern startLine  = Pattern.compile("^\\S+\\s", Pattern.CASE_INSENSITIVE);
-//        Pattern endLine = Pattern.compile("\\s\\S+$", Pattern.CASE_INSENSITIVE);
-//        Pattern middleLine = Pattern.compile("\\s\\S+\\s", Pattern.CASE_INSENSITIVE);
-
         for (String fn : nameList) {
             if (!fn.equals("")) {
                 if (fn.length() >= MIN_NAME_LENGTH) {
@@ -141,7 +184,7 @@ public class ParseCVServiceBean implements ParseCVService {
                                             endString.toString().length() - 1));
                         }
 
-                        Pattern startLine  = Pattern.compile("^" + fn + "\\s",
+                        Pattern startLine = Pattern.compile("^" + fn + "\\s",
                                 Pattern.CASE_INSENSITIVE);
                         Matcher startLineMathcer = startLine.matcher(cv);
 
@@ -268,7 +311,7 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parsePhone(String cv) {
-        return deleteSystemChar(getDataModel(cv, phonePtrn));
+        return getDataModel(deleteSystemChar(cv), phonePtrn);
     }
 
     private String getDataModel(String onStr, String pattern) {

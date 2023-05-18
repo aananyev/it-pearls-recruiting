@@ -1481,6 +1481,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 e.setCityOfResidence(parseCVService.parseCity(textCV));
                                 e.setPersonPosition(((OnlyTextPersonPosition) screenOnlytext)
                                         .getPersonPosition());
+                                e.setTelegramName(parseCVService.parseTelegram(textCV));
+                                e.setSkypeName(parseCVService.parseSkype(textCV));
 
                                 CandidateCV candidateCV = metadata.create(CandidateCV.class);
                                 candidateCV.setResumePosition(e.getPersonPosition());
@@ -1535,15 +1537,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withType(Notifications.NotificationType.HUMANIZED)
                     .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withDescription("Найдено несколько вариантов имен: ".concat(names.toString()))
+                    .withDescription(messageBundle.getMessage("msgSeveralVariantsFirstNames")
+                            .concat(names.toString())
+                            .concat("\n")
+                            .concat(messageBundle.getMessage("msgAddedFirst")))
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .show();
+
+            e.setFirstName(namesList.get(0));
         } else {
             if (namesList.size() == 0) {
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withType(Notifications.NotificationType.HUMANIZED)
                         .withCaption(messageBundle.getMessage("msgWarning"))
-                        .withDescription("Не найдено ни одного имени в резюме. Заполните поле вручную")
+                        .withDescription(messageBundle.getMessage("msgNotFoundFirstName"))
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
                         .show();
             } else {
@@ -1552,6 +1559,45 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
+
+    private void selectMiddleNames(String textCV, JobCandidate e) {
+        List<String> namesList = parseCVService.getMiddleNameList(textCV);
+        StringBuffer names = new StringBuffer();
+
+        if (namesList.size() > 1) {
+            for (String name : namesList) {
+
+                if (names.length() != 0) {
+                    names.append(", ");
+                }
+
+                names.append(name);
+            }
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgSeveralVariantsMiddleNames")
+                            .concat(names.toString())
+                            .concat("\n")
+                            .concat(messageBundle.getMessage("msgAddedFirst")))
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .show();
+
+            e.setMiddleName(namesList.get(0));
+        } else {
+            if (namesList.size() == 0) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withType(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription(messageBundle.getMessage("msgNotFoundMiddleName"))
+                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                        .show();
+            } else {
+                e.setMiddleName(namesList.get(0));
+            }
+        }
+    }
 
     private void selectSecondNames(String textCV, JobCandidate e) {
         List<String> namesList = parseCVService.getSecondNameList(textCV);
@@ -1570,15 +1616,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withType(Notifications.NotificationType.HUMANIZED)
                     .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withDescription("Найдено несколько вариантов фамилий: ".concat(names.toString()))
+                    .withDescription(messageBundle.getMessage("msgSeveralVariantsSecondNames")
+                            .concat(names.toString())
+                            .concat("\n")
+                            .concat(messageBundle.getMessage("msgAddedFirst")))
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .show();
+
+            e.setSecondName(namesList.get(0));
         } else {
             if (namesList.size() == 0) {
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withType(Notifications.NotificationType.HUMANIZED)
                         .withCaption(messageBundle.getMessage("msgWarning"))
-                        .withDescription("Не найдено ни одной фамилии в резюме. Заполните поле вручную")
+                        .withDescription(messageBundle.getMessage("msgNotFoundSecondName"))
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
                         .show();
             } else {
