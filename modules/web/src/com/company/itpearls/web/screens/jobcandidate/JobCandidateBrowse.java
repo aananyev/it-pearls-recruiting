@@ -106,6 +106,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private DataContext dataContext;
     @Inject
     private Metadata metadata;
+    private CandidateCVEdit candidateCVEdit;
+    private OnlyTextPersonPosition screenOnlytext;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1440,26 +1444,31 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe("quickLoadCV.loadFromClipboard")
     public void onQuickLoadCVLoadFromClipboard(Action.ActionPerformedEvent event) {
-        Screen screen = screenBuilders.screen(this)
+        screenOnlytext = screenBuilders.screen(this)
                 .withScreenClass(OnlyTextPersonPosition.class)
                 .withOpenMode(OpenMode.DIALOG)
                 .build();
 
-        screen.addAfterCloseListener(afterCloseEvent -> {
+        screenOnlytext.addAfterCloseListener(afterCloseEvent -> {
+
             Screen jobCandidateEdit = screenBuilders.editor(JobCandidate.class, this)
                     .withOpenMode(OpenMode.NEW_TAB)
                     .withScreenClass(JobCandidateEdit.class)
                     .withInitializer(e -> {
-                        if (!((Onlytext) screen).getCancel()) {
-                            String textCV = ((Onlytext) screen).getResultText();
+                        if (!((OnlyTextPersonPosition) screenOnlytext).getCancel()) {
+                            String textCV = ((OnlyTextPersonPosition) screenOnlytext).getResultText();
                             // нашел ФИО
                             if (!textCV.equals("") || textCV != null) {
-                                e.setFirstName(parseCVService
-                                        .parseFirstName(textCV));
+                                selectFirstNames(textCV, e);
+
+//                                e.setFirstName(parseCVService
+//                                        .parseFirstName(textCV));
                                 e.setMiddleName(parseCVService
                                         .parseMiddleName(textCV));
-                                e.setSecondName(parseCVService
-                                        .parseSecondName(textCV));
+
+                                selectSecondNames(textCV, e);
+//                                e.setSecondName(parseCVService
+//                                        .parseSecondName(textCV));
                                 e.setEmail(parseCVService
                                         .parseEmail(textCV));
                                 e.setPhone(parseCVService
@@ -1470,11 +1479,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
                                 e.setCurrentCompany(parseCVService.parseCompany(textCV));
                                 e.setCityOfResidence(parseCVService.parseCity(textCV));
-                                e.setPersonPosition(((OnlyTextPersonPosition) screen).getPersonPosition());
+                                e.setPersonPosition(((OnlyTextPersonPosition) screenOnlytext)
+                                        .getPersonPosition());
 
                                 CandidateCV candidateCV = metadata.create(CandidateCV.class);
                                 candidateCV.setResumePosition(e.getPersonPosition());
-                                candidateCV.setTextCV(((OnlyTextPersonPosition) screen).getResultText());
+                                candidateCV.setTextCV(((OnlyTextPersonPosition) screenOnlytext).getResultText());
                                 candidateCV.setOwner(userSession.getUser());
                                 candidateCV.setCandidate(e);
                                 candidateCV.setDatePost(new Date());
@@ -1484,14 +1494,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 dataContext.merge(candidateCV);
                                 e.setCandidateCv(candidateCVS);
 
-                                Screen candidateCVEdit = screenBuilders.editor(CandidateCV.class, this)
+                                candidateCVEdit = screenBuilders.editor(CandidateCV.class, this)
                                         .withScreenClass(CandidateCVEdit.class)
                                         .withAddFirst(true)
                                         .editEntity(candidateCV)
                                         .withOpenMode(OpenMode.DIALOG)
                                         .build();
 
-                                candidateCVEdit.show();
                             }
                         }
                     })
@@ -1499,36 +1508,124 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .build();
 
             jobCandidateEdit.addAfterShowListener(eventJobCandidateEdit -> {
-                ((SuggestionField<Object>) eventJobCandidateEdit
-                        .getSource()
-                        .getWindow()
-                        .getComponentNN("firstNameField"))
-                        .setSearchExecutor((searchString, searchParams) ->
-                                parseCVService.getFirstNameList(
-                                        ((Onlytext) screen).getResultText())
-                                        .stream()
-                                        .filter(str ->
-                                                StringUtils
-                                                        .containsAnyIgnoreCase(str, searchString))
-                                        .collect(Collectors.toList()));
-
-                ((SuggestionField<Object>) eventJobCandidateEdit
-                        .getSource()
-                        .getWindow()
-                        .getComponentNN("secondNameField"))
-                        .setSearchExecutor((searchString, searchParams) ->
-                                parseCVService.getSecondNameList(
-                                        ((Onlytext) screen).getResultText())
-                                        .stream()
-                                        .filter(str ->
-                                                StringUtils
-                                                        .containsAnyIgnoreCase(str, searchString))
-                                        .collect(Collectors.toList()));
+                updateSuggestionFieldsScreenQuickLoadedJobCandidates(eventJobCandidateEdit);
+                openScreenCVQuickLoadedCandidate(eventJobCandidateEdit, candidateCVEdit);
             });
 
             jobCandidateEdit.show();
         });
 
-        screen.show();
+        screenOnlytext.show();
+    }
+
+    private void selectFirstNames(String textCV, JobCandidate e) {
+        List<String> namesList = parseCVService.getFirstNameList(textCV);
+        StringBuffer names = new StringBuffer();
+
+        if (namesList.size() > 1) {
+            for (String name : namesList) {
+
+                if (names.length() != 0) {
+                    names.append(", ");
+                }
+
+                names.append(name);
+            }
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription("Найдено несколько вариантов имен: ".concat(names.toString()))
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .show();
+        } else {
+            if (namesList.size() == 0) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withType(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription("Не найдено ни одного имени в резюме. Заполните поле вручную")
+                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                        .show();
+            } else {
+                e.setFirstName(namesList.get(0));
+            }
+        }
+    }
+
+
+    private void selectSecondNames(String textCV, JobCandidate e) {
+        List<String> namesList = parseCVService.getSecondNameList(textCV);
+        StringBuffer names = new StringBuffer();
+
+        if (namesList.size() > 1) {
+            for (String name : namesList) {
+
+                if (names.length() != 0) {
+                    names.append(", ");
+                }
+
+                names.append(name);
+            }
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription("Найдено несколько вариантов фамилий: ".concat(names.toString()))
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .show();
+        } else {
+            if (namesList.size() == 0) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withType(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription("Не найдено ни одной фамилии в резюме. Заполните поле вручную")
+                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                        .show();
+            } else {
+                e.setSecondName(namesList.get(0));
+            }
+        }
+    }
+
+    private void updateSuggestionFieldsScreenQuickLoadedJobCandidates(AfterShowEvent eventJobCandidateEdit) {
+        ((SuggestionField<Object>) eventJobCandidateEdit
+                .getSource()
+                .getWindow()
+                .getComponentNN("firstNameField"))
+                .setSearchExecutor((searchString, searchParams) ->
+                        parseCVService.getFirstNameList(
+                                ((Onlytext) screenOnlytext).getResultText())
+                                .stream()
+                                .filter(str ->
+                                        StringUtils
+                                                .containsAnyIgnoreCase(str, searchString))
+                                .collect(Collectors.toList()));
+
+        ((SuggestionField<Object>) eventJobCandidateEdit
+                .getSource()
+                .getWindow()
+                .getComponentNN("secondNameField"))
+                .setSearchExecutor((searchString, searchParams) ->
+                        parseCVService.getSecondNameList(
+                                ((Onlytext) screenOnlytext).getResultText())
+                                .stream()
+                                .filter(str ->
+                                        StringUtils
+                                                .containsAnyIgnoreCase(str, searchString))
+                                .collect(Collectors.toList()));
+    }
+
+    private void openScreenCVQuickLoadedCandidate(AfterShowEvent eventJobCandidateEdit,
+                                                  CandidateCVEdit candidateCVEdit) {
+        DataContext dataContext = UiControllerUtils.getScreenData(eventJobCandidateEdit
+                .getSource()
+                .getWindow()
+                .getFrame()
+                .getFrameOwner())
+                .getDataContext();
+        DataContext parentDataContext = dataContext.getParent();
+
+        candidateCVEdit.setParentDataContext(dataContext);
+        candidateCVEdit.show();
     }
 }

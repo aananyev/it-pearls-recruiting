@@ -7,8 +7,12 @@
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
-                <property name="projectName" view="_minimal">
-                    <property name="projectDepartment" view="_minimal"/>
+                <property name="projectName" view="_local">
+                    <property name="projectDepartment" view="_local">
+                        <property name="companyName" view="_local">
+                            <property name="companyOwnership" view="_local"/>
+                        </property>
+                    </property>
                 </property>
             </view>
             <loader id="openPositionsDl"

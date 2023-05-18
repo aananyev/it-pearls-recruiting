@@ -13,10 +13,7 @@ import org.jsoup.safety.Whitelist;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -113,36 +110,66 @@ public class ParseCVServiceBean implements ParseCVService {
     }
 
     @Override
-    public List<String> getListName(List<String> firstNameList, String cv) {
-        List<String> retStrList = new ArrayList<>();
+    public List<String> getListName(List<String> nameList, String cv) {
+        Set<String> retStrSet = new HashSet<>();
+//        Pattern startLine  = Pattern.compile("^\\S+\\s", Pattern.CASE_INSENSITIVE);
+//        Pattern endLine = Pattern.compile("\\s\\S+$", Pattern.CASE_INSENSITIVE);
+//        Pattern middleLine = Pattern.compile("\\s\\S+\\s", Pattern.CASE_INSENSITIVE);
 
-        for (String fn : firstNameList) {
+        for (String fn : nameList) {
             if (!fn.equals("")) {
                 if (fn.length() >= MIN_NAME_LENGTH) {
                     if (!fn.equals("")) {
-                        StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
+                        Pattern startHTMLSymbol = Pattern.compile("[>;]" + fn,
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher startHTMLSymbolMatcher = startHTMLSymbol.matcher(cv);
 
-                        if (fn.length() >= MIN_NAME_LENGTH) {
-                            // с начала строки и до пробела
-                            if (cvLoverCase.toString().contains("\n" + fn.toLowerCase() + " ")) {
-                                break;
-                            }
-                            // с пробела и до пробела
-                            if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + " ")) {
-                                retStrList.add(fn);
-                                break;
-                            }
-                            // с пробела и до конца строки
-                            if (cvLoverCase.toString().contains(" " + fn.toLowerCase() + "\n")) {
-                                retStrList.add(fn);
-                                break;
-                            }
+                        if (startHTMLSymbolMatcher.find()) {
+                            retStrSet.add(startHTMLSymbolMatcher.group().substring(1));
+                        }
+
+                        Pattern endHTMLSymbol = Pattern.compile(fn + "[<]",
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher endHTMLSymbolMatcher = endHTMLSymbol.matcher(cv);
+
+                        if (endHTMLSymbolMatcher.find()) {
+                            StringBuffer endString = new StringBuffer(endHTMLSymbolMatcher.group());
+
+                            retStrSet.add(endString
+                                    .toString()
+                                    .substring(0,
+                                            endString.toString().length() - 1));
+                        }
+
+                        Pattern startLine  = Pattern.compile("^" + fn + "\\s",
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher startLineMathcer = startLine.matcher(cv);
+
+                        if (startLineMathcer.find()) {
+                            retStrSet.add(startLineMathcer.group().trim());
+                        }
+
+                        Pattern endLine = Pattern.compile("\\s" + fn + "$",
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher endLineMatcher = endLine.matcher(cv);
+
+                        if (endLineMatcher.find()) {
+                            retStrSet.add(endLineMatcher.group());
+                        }
+
+                        Pattern middleLine = Pattern.compile("\\s" + fn + "\\s",
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher middleLineMatcher = middleLine.matcher(cv);
+
+                        if (middleLineMatcher.find()) {
+                            retStrSet.add(middleLineMatcher.group().trim());
                         }
                     }
                 }
             }
         }
 
+        List<String> retStrList = new ArrayList<>(retStrSet);
         return retStrList;
     }
 
@@ -241,7 +268,7 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parsePhone(String cv) {
-        return deleteSystemChar(getDataModel(cv, allCountryRegex));
+        return deleteSystemChar(getDataModel(cv, phonePtrn));
     }
 
     private String getDataModel(String onStr, String pattern) {

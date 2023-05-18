@@ -8,52 +8,57 @@ CWD=$(pwd)
 
 LOG=$CWD/$BACKUPBASELOG
 
-echo "Переход в каталог базы $postgre_database" 
+echo "\033[37mПереход в каталог базы $postgre_database ... \c" 
 cd $postgre_database
 if [ $? -eq 0 ]; then
-    	echo OK
+    	echo "\033[32mOK"
 else
-    	echo "Нет каталога базы PostgreSQL " $postgre_database
+    	echo "\033[31mНет каталога базы PostgreSQL " $postgre_database
     	echo FAIL
 	exit 1
 fi
 
-echo "Остановка локальной базы ..."
+echo "\033[37mОстановка локальной базы ... \c"
 pg_ctl stop -D . >> $LOG
 if [ $? -eq 0 ]; then 
-	echo "OK"
+	echo "\033[32mOK"
 else
-	echo Failure, exit status: $?
+	echo "\033[31mFailure, exit status: $?"
 fi
 
-echo "Архивация старой базы ..."
+echo "\033[37mАрхивация старой базы ... \c"
 rm $old_archive
 mv $new_archive $old_archive
-tar zcvf $new_archive * 1 2 >> $LOG 
+tar zcvf $new_archive * 1>>$LOG 2>> $LOG 
 if [ $? -eq 0 ]; then
-	echo "OK"
+	echo "\033[32mOK"
 else
-	echo Failure, exit status: $?
+	echo "\033[31mFailure, exit status: $?"
 	exit 1
 fi
 
-echo "Удаление старой базы ..."
+echo "\033[37mУдаление старой базы ... \c"
 rm -rf *
-echo "Загрузка базы с сервера ..."
+if [ $? -eq 0 ]; then
+        echo "\033[32mOK"
+else
+        echo "\033[31mFailure, exit status: $?"
+fi
+echo "\033[37mЗагрузка базы с сервера ... \c"
 pg_basebackup -P -h hr.it-pearls.ru -D . -U replica 
 if [ $? -eq 0 ]; then
-	echo "OK"
+	echo "\033[32mOK"
 else
-	echo Failure, exit status: $?
+	echo "\033[31mFailure, exit status: $?"
 	exit 1
 fi
 
-echo "Запуск базы ..."
+echo "\033[37mЗапуск базы ... \c"
 pg_ctl start -D . >> $LOG 
 if [ $? -eq 0 ]; then
-	echo "OK"
+	echo "\033[32mOK"
 else
-	echo Failure, exit status: $?
+	echo "\033[31mFailure, exit status: $?"
 	exit 1
 fi
 
