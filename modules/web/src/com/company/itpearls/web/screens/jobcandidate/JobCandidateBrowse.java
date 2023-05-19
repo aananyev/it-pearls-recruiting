@@ -638,7 +638,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 } else {
                                     notifications.create(Notifications.NotificationType.WARNING)
                                             .withDescription("ВНИМАНИЕ!")
-                                            .withCaption("Нужно выделить строку в таблице для добавления взаимодействия!")
+                                            .withCaption(messageBundle.getMessage("msgNeedSelectRow"))
                                             .show();
                                 }
 
@@ -685,7 +685,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Component getLastCVtoClipboard(JobCandidate entity) {
         Button getLastLetterButton = uiComponents.create(Button.class);
-        getLastLetterButton.setDescription("Получить последнее сопроводительное письмо");
+        getLastLetterButton.setDescription(messageBundle.getMessage("msgGelLastLetter"));
         getLastLetterButton.setIconFromSet(CubaIcon.TABLET);
 
         getLastLetterButton.setAction(new BaseAction("candidateCV")
@@ -698,7 +698,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Component getLastLetterToClipboard(JobCandidate entity) {
         Button getLastResumeButton = uiComponents.create(Button.class);
-        getLastResumeButton.setDescription("Получить последнее резюме");
+        getLastResumeButton.setDescription(messageBundle.getMessage("msgGetLastCV"));
         getLastResumeButton.setIconFromSet(CubaIcon.GET_POCKET);
 
         getLastResumeButton.setAction(new BaseAction("candidateCV")
@@ -739,7 +739,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             screenCV.show();
                         } catch (NullPointerException e) {
                             notifications.create(Notifications.NotificationType.ERROR)
-                                    .withCaption("ОШИБКА")
+                                    .withCaption(messageBundle.getMessage("msgError"))
                                     .withDescription("Не могу открыть форму резюме для редактирования.\n" +
                                             "Зайдите в карточку кандидата " +
                                             "и продолжите редактирование резюме во вкладке \"Резюме кандидата\"")
@@ -750,7 +750,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
                     } else {
                         dialogs.createOptionDialog()
-                                .withCaption("Внимание")
+                                .withCaption(messageBundle.getMessage("msgWarning"))
                                 .withMessage("У кандидата нет ни одного резюме.\nСоздать резюме?")
                                 .withActions(
                                         new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
@@ -1460,29 +1460,25 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             // нашел ФИО
                             if (!textCV.equals("") || textCV != null) {
                                 selectFirstNames(textCV, e);
-
-//                                e.setFirstName(parseCVService
-//                                        .parseFirstName(textCV));
-                                e.setMiddleName(parseCVService
-                                        .parseMiddleName(textCV));
-
+                                selectMiddleNames(textCV, e);
                                 selectSecondNames(textCV, e);
-//                                e.setSecondName(parseCVService
-//                                        .parseSecondName(textCV));
+
                                 e.setEmail(parseCVService
                                         .parseEmail(textCV));
                                 e.setPhone(parseCVService
                                         .parsePhone(textCV));
-
                                 e.setBirdhDate(parseCVService
                                         .parseDate(textCV));
-
-                                e.setCurrentCompany(parseCVService.parseCompany(textCV));
-                                e.setCityOfResidence(parseCVService.parseCity(textCV));
+                                e.setCurrentCompany(parseCVService
+                                        .parseCompany(textCV));
+                                e.setCityOfResidence(parseCVService
+                                        .parseCity(textCV));
                                 e.setPersonPosition(((OnlyTextPersonPosition) screenOnlytext)
                                         .getPersonPosition());
-                                e.setTelegramName(parseCVService.parseTelegram(textCV));
-                                e.setSkypeName(parseCVService.parseSkype(textCV));
+                                e.setTelegramName(parseCVService
+                                        .parseTelegram(textCV));
+                                e.setSkypeName(parseCVService
+                                        .parseSkype(textCV));
 
                                 CandidateCV candidateCV = metadata.create(CandidateCV.class);
                                 candidateCV.setResumePosition(e.getPersonPosition());
@@ -1534,9 +1530,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 names.append(name);
             }
 
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withType(Notifications.NotificationType.HUMANIZED)
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withType(Notifications.NotificationType.TRAY)
                     .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withHideDelayMs(5000)
                     .withDescription(messageBundle.getMessage("msgSeveralVariantsFirstNames")
                             .concat(names.toString())
                             .concat("\n")
@@ -1547,8 +1544,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             e.setFirstName(namesList.get(0));
         } else {
             if (namesList.size() == 0) {
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withType(Notifications.NotificationType.HUMANIZED)
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withType(Notifications.NotificationType.TRAY)
+                        .withHideDelayMs(5000)
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription(messageBundle.getMessage("msgNotFoundFirstName"))
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -1574,8 +1572,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 names.append(name);
             }
 
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withType(Notifications.NotificationType.HUMANIZED)
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withType(Notifications.NotificationType.TRAY)
+                    .withHideDelayMs(5000)
                     .withCaption(messageBundle.getMessage("msgWarning"))
                     .withDescription(messageBundle.getMessage("msgSeveralVariantsMiddleNames")
                             .concat(names.toString())
@@ -1587,11 +1586,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             e.setMiddleName(namesList.get(0));
         } else {
             if (namesList.size() == 0) {
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withType(Notifications.NotificationType.HUMANIZED)
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withType(Notifications.NotificationType.TRAY)
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription(messageBundle.getMessage("msgNotFoundMiddleName"))
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                        .withHideDelayMs(5000)
                         .show();
             } else {
                 e.setMiddleName(namesList.get(0));
@@ -1613,9 +1613,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 names.append(name);
             }
 
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withType(Notifications.NotificationType.HUMANIZED)
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withType(Notifications.NotificationType.TRAY)
                     .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withHideDelayMs(5000)
                     .withDescription(messageBundle.getMessage("msgSeveralVariantsSecondNames")
                             .concat(names.toString())
                             .concat("\n")
@@ -1626,8 +1627,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             e.setSecondName(namesList.get(0));
         } else {
             if (namesList.size() == 0) {
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withType(Notifications.NotificationType.HUMANIZED)
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withType(Notifications.NotificationType.TRAY)
+                        .withHideDelayMs(5000)
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription(messageBundle.getMessage("msgNotFoundSecondName"))
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -1674,7 +1676,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .getFrame()
                 .getFrameOwner())
                 .getDataContext();
-        DataContext parentDataContext = dataContext.getParent();
 
         candidateCVEdit.setParentDataContext(dataContext);
         candidateCVEdit.show();

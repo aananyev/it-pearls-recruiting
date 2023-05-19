@@ -872,13 +872,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         candidateField.addValueChangeListener(e -> {
         });
-
-/*        if (getEditedEntity().getEndDateIteraction() == null) {
-            if (getEditedEntity().getDateIteraction() != null) {
-                getEditedEntity().setEndDateIteraction(gregorianCalendar.getTime());
-            }
-        }*/
-
     }
 
     private boolean yourCandidate() {

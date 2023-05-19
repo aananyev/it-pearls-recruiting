@@ -306,7 +306,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     @Subscribe("checkBoxFlag")
     public void onCheckBoxFlagValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         checkBoxCallDialog.setValue(!checkBoxFlag.getValue());
-
+        radioButtonAddType.setEnabled(checkBoxFlag.getValue());
         radioButtonAddType.setRequired(checkBoxFlag.getValue());
         textFieldCaption.setRequired(checkBoxFlag.getValue());
 
@@ -315,7 +315,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     protected void setDisableElements() {
         textFieldCaption.setEditable(checkBoxFlag.getValue());
-//        textFieldDBFieldName.setEditable( checkBoxFlag.getValue() );
         radioButtonAddType.setEditable(checkBoxFlag.getValue());
     }
 

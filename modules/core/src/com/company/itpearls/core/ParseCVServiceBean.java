@@ -16,13 +16,15 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.springframework.context.i18n.LocaleContextHolder.getTimeZone;
 
 @Service(ParseCVService.NAME)
 public class ParseCVServiceBean implements ParseCVService {
 
-    static String emailPtrn = "/(\\+7|8)[- _]*\\(?[- _]*(\\d{3}[- _]*\\)?([- _]*\\d){7}|\\d\\d[- _]*\\d\\d[- _]*\\)?([- _]*\\d){6})/g\n";
+    //    static String emailPtrn = "/(\\+7|8)[- _]*\\(?[- _]*(\\d{3}[- _]*\\)?([- _]*\\d){7}|\\d\\d[- _]*\\d\\d[- _]*\\)?([- _]*\\d){6})/g\n";
+    static String emailPtrn = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])\n";
     static String allCountryRegex =
             "^(\\+\\d{1,3}( )?)?((\\(\\d{1,3}\\))|\\d{1,3})[- .]?\\d{3,4}[- .]?\\d{4}$";
     static String phonePtrn = "[7|8][ (-]?[\\d]{3}[ )-]?[\\d]{3}[ -]?[\\d]{2}[ -]?[\\d]{2}[\\D]";
@@ -82,7 +84,7 @@ public class ParseCVServiceBean implements ParseCVService {
         List<String> middleNameList = dataManager.loadValue(QUERY_GET_MIDDLE_NAMES, String.class)
                 .list();
 
-        List<String> retStrList = getListName(middleNameList, cv);
+        List<String> retStrList = getLastNamesWithPositions(middleNameList, cv);
 
         return retStrList;
     }
@@ -93,7 +95,7 @@ public class ParseCVServiceBean implements ParseCVService {
         List<String> secondNameList = dataManager.loadValue(QUERY_GET_SECOND_NAMES, String.class)
                 .list();
 
-        List<String> retStrList = getListName(secondNameList, cv);
+        List<String> retStrList = getLastNamesWithPositions(secondNameList, cv);
 
         return retStrList;
     }
@@ -104,15 +106,20 @@ public class ParseCVServiceBean implements ParseCVService {
         List<String> firstNameList = dataManager.loadValue(QUERY_GET_FIRST_NAMES, String.class)
                 .list();
 
-        List<String> retStrList = getListName(firstNameList, cv);
+        List<String> retStrList = getLastNamesWithPositions(firstNameList, cv);
 
         return retStrList;
     }
 
     @Override
     public String parseSkype(String cv) {
-        String retStr = null;
         final String skypePattern = "Skype:";
+        return parseContacts(cv, skypePattern);
+    }
+
+    private String parseContacts(String cv, String contactPattern) {
+        String retStr = null;
+        String skypePattern = contactPattern;
 
         Pattern skype = Pattern.compile(skypePattern + "\\s*" + ".*?\\s");
         Matcher skypeMatcher = skype.matcher(Jsoup.parse(cv).text());
@@ -127,43 +134,130 @@ public class ParseCVServiceBean implements ParseCVService {
         }
 
         return retStr;
+
     }
 
     @Override
     public String parseTelegram(String cv) {
-        String retStr = null;
         final String telegramPattern = "Telegram:";
+        return parseContacts(cv, telegramPattern);
+    }
 
-        Pattern telegram = Pattern.compile(telegramPattern + "\\s*" + ".*?\\s");
-        Matcher telegramMatcher = telegram.matcher(Jsoup.parse(cv).text());
+    public List<String> getLastNamesWithPositions(List<String> nameList, String cv) {
+        HashMap<String, Integer> namePosition = new HashMap<>();
 
-        if (telegramMatcher.find()) {
-            StringBuffer telegramBuffer = new StringBuffer(telegramMatcher.group());
+        for (String fn : nameList) {
+            if (!fn.equals("")) {
+                if (fn.length() >= MIN_NAME_LENGTH) {
+                    if (!fn.equals("")) {
 
-            retStr = telegramBuffer
-                    .toString()
-                    .substring(
-                            telegramPattern
-                                    .length() +
-                                    (telegramBuffer
+                        StringBuffer parseString = new StringBuffer(deleteSystemChar(fn));
+
+                        Pattern startHTMLSymbol = Pattern.compile(new StringBuilder()
+                                        .append("[;>]")
+                                        .append(parseString.toString())
+                                        .toString(),
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher startHTMLSymbolMatcher = startHTMLSymbol.matcher(cv);
+
+                        if (startHTMLSymbolMatcher.find()) {
+                            namePosition.put(startHTMLSymbolMatcher.group().substring(1),
+                                    startHTMLSymbolMatcher.start());
+                        }
+
+                        Pattern endHTMLSymbol = Pattern.compile(parseString.toString() + "[<]",
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher endHTMLSymbolMatcher = endHTMLSymbol.matcher(cv);
+
+                        if (endHTMLSymbolMatcher.find()) {
+                            StringBuffer endString = new StringBuffer(endHTMLSymbolMatcher.group());
+
+                            namePosition.put(endString
                                             .toString()
-                                            .substring(
-                                                    telegramPattern
-                                                            .length() + 1,
-                                                    telegramPattern.length() + 2).equals(" ") ? 1 : 0));
+                                            .substring(0,
+                                                    endString.toString().length() - 1),
+                                    endHTMLSymbolMatcher.start());
+                        }
+
+                        Pattern startLine = Pattern.compile("^" + parseString.toString() + "\\s",
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher startLineMathcer = startLine.matcher(cv);
+
+                        if (startLineMathcer.find()) {
+                            namePosition.put(startLineMathcer.group().trim(),
+                                    startLineMathcer.start());
+                        }
+
+                        Pattern endLine = Pattern.compile("\\s" + parseString.toString() + "$",
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher endLineMatcher = endLine.matcher(cv);
+
+                        if (endLineMatcher.find()) {
+                            namePosition.put(endLineMatcher.group(),
+                                    endLineMatcher.start());
+                        }
+
+                        Pattern middleLine = Pattern.compile("\\s" + parseString.toString() + "\\s",
+                                Pattern.CASE_INSENSITIVE);
+                        Matcher middleLineMatcher = middleLine.matcher(cv);
+
+                        if (middleLineMatcher.find()) {
+                            namePosition.put(middleLineMatcher.group().trim(),
+                                    middleLineMatcher.start());
+                        }
+                    }
+                }
+            }
         }
 
-        return retStr;
+        Map<String, Integer> sortedMap = namePosition.entrySet().stream()
+                .sorted(Comparator.comparingInt(e -> e.getValue()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> {
+                            throw new AssertionError();
+                        },
+                        LinkedHashMap::new
+                ));
+
+        List<String> retStrList = new ArrayList<>();
+        HashMap<String, Integer> retHashMap = new HashMap<>();
+
+        Map.Entry<String,Integer> entry = sortedMap.entrySet().iterator().next();
+        String firstElement = entry.getKey();
+
+        sortedMap.remove(entry);
+
+        Set<String> retStrSet = new HashSet<>();
+
+        for (Map.Entry<String, Integer> e : sortedMap.entrySet()) {
+            retStrSet.add(e.getKey());
+        }
+
+        retStrList.add(firstElement);
+        retStrList.addAll(retStrSet);
+
+        return retStrList;
+
+
     }
 
     @Override
     public List<String> getListName(List<String> nameList, String cv) {
         Set<String> retStrSet = new HashSet<>();
+
         for (String fn : nameList) {
             if (!fn.equals("")) {
                 if (fn.length() >= MIN_NAME_LENGTH) {
                     if (!fn.equals("")) {
-                        Pattern startHTMLSymbol = Pattern.compile("[>;]" + fn,
+
+                        StringBuffer parseString = new StringBuffer(deleteSystemChar(fn));
+
+                        Pattern startHTMLSymbol = Pattern.compile(new StringBuilder()
+                                        .append("[;>]")
+                                        .append(parseString.toString())
+                                        .toString(),
                                 Pattern.CASE_INSENSITIVE);
                         Matcher startHTMLSymbolMatcher = startHTMLSymbol.matcher(cv);
 
@@ -171,7 +265,7 @@ public class ParseCVServiceBean implements ParseCVService {
                             retStrSet.add(startHTMLSymbolMatcher.group().substring(1));
                         }
 
-                        Pattern endHTMLSymbol = Pattern.compile(fn + "[<]",
+                        Pattern endHTMLSymbol = Pattern.compile(parseString.toString() + "[<]",
                                 Pattern.CASE_INSENSITIVE);
                         Matcher endHTMLSymbolMatcher = endHTMLSymbol.matcher(cv);
 
@@ -184,7 +278,7 @@ public class ParseCVServiceBean implements ParseCVService {
                                             endString.toString().length() - 1));
                         }
 
-                        Pattern startLine = Pattern.compile("^" + fn + "\\s",
+                        Pattern startLine = Pattern.compile("^" + parseString.toString() + "\\s",
                                 Pattern.CASE_INSENSITIVE);
                         Matcher startLineMathcer = startLine.matcher(cv);
 
@@ -192,7 +286,7 @@ public class ParseCVServiceBean implements ParseCVService {
                             retStrSet.add(startLineMathcer.group().trim());
                         }
 
-                        Pattern endLine = Pattern.compile("\\s" + fn + "$",
+                        Pattern endLine = Pattern.compile("\\s" + parseString.toString() + "$",
                                 Pattern.CASE_INSENSITIVE);
                         Matcher endLineMatcher = endLine.matcher(cv);
 
@@ -200,7 +294,7 @@ public class ParseCVServiceBean implements ParseCVService {
                             retStrSet.add(endLineMatcher.group());
                         }
 
-                        Pattern middleLine = Pattern.compile("\\s" + fn + "\\s",
+                        Pattern middleLine = Pattern.compile("\\s" + parseString.toString() + "\\s",
                                 Pattern.CASE_INSENSITIVE);
                         Matcher middleLineMatcher = middleLine.matcher(cv);
 
