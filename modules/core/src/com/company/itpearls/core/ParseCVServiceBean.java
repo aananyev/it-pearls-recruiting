@@ -154,28 +154,33 @@ public class ParseCVServiceBean implements ParseCVService {
                         StringBuffer parseString = new StringBuffer(deleteSystemChar(fn));
 
                         Pattern startHTMLSymbol = Pattern.compile(new StringBuilder()
-                                        .append("[;>]")
+                                        .append("[;>\"]")
                                         .append(parseString.toString())
+                                        .append("[\\s<&]")
                                         .toString(),
                                 Pattern.CASE_INSENSITIVE);
                         Matcher startHTMLSymbolMatcher = startHTMLSymbol.matcher(cv);
 
                         if (startHTMLSymbolMatcher.find()) {
-                            namePosition.put(startHTMLSymbolMatcher.group().substring(1),
+                            StringBuffer startString = new StringBuffer(startHTMLSymbolMatcher
+                                    .group()
+                                    .substring(1, startHTMLSymbolMatcher.group().length() - 1));
+
+                            namePosition.put(startString.toString(),
                                     startHTMLSymbolMatcher.start());
                         }
 
-                        Pattern endHTMLSymbol = Pattern.compile(parseString.toString() + "[<]",
+                        Pattern endHTMLSymbol = Pattern.compile("[\\s>;\"]"
+                                        + parseString.toString() + "[<&]",
                                 Pattern.CASE_INSENSITIVE);
                         Matcher endHTMLSymbolMatcher = endHTMLSymbol.matcher(cv);
 
                         if (endHTMLSymbolMatcher.find()) {
-                            StringBuffer endString = new StringBuffer(endHTMLSymbolMatcher.group());
+                            StringBuffer endString = new StringBuffer(endHTMLSymbolMatcher
+                                    .group()
+                                    .substring(1, endHTMLSymbolMatcher.group().length() - 1));
 
-                            namePosition.put(endString
-                                            .toString()
-                                            .substring(0,
-                                                    endString.toString().length() - 1),
+                            namePosition.put(endString.toString(),
                                     endHTMLSymbolMatcher.start());
                         }
 
@@ -188,7 +193,7 @@ public class ParseCVServiceBean implements ParseCVService {
                                     startLineMathcer.start());
                         }
 
-                        Pattern endLine = Pattern.compile("\\s" + parseString.toString() + "$",
+                        Pattern endLine = Pattern.compile("\\s" + parseString.toString() + "[$]",
                                 Pattern.CASE_INSENSITIVE);
                         Matcher endLineMatcher = endLine.matcher(cv);
 
@@ -224,7 +229,7 @@ public class ParseCVServiceBean implements ParseCVService {
         List<String> retStrList = new ArrayList<>();
         HashMap<String, Integer> retHashMap = new HashMap<>();
 
-        Map.Entry<String,Integer> entry = sortedMap.entrySet().iterator().next();
+        Map.Entry<String, Integer> entry = sortedMap.entrySet().iterator().next();
         String firstElement = entry.getKey();
 
         sortedMap.remove(entry);
@@ -232,7 +237,9 @@ public class ParseCVServiceBean implements ParseCVService {
         Set<String> retStrSet = new HashSet<>();
 
         for (Map.Entry<String, Integer> e : sortedMap.entrySet()) {
-            retStrSet.add(e.getKey());
+            if (!e.equals(entry)) {
+                retStrSet.add(e.getKey());
+            }
         }
 
         retStrList.add(firstElement);

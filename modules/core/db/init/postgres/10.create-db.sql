@@ -443,6 +443,7 @@ create table ITPEARLS_OPEN_POSITION (
     DELETED_BY varchar(50),
     --
     OPEN_CLOSE boolean,
+    RATING integer,
     SIGN_DRAFT boolean,
     LAST_OPEN_DATE date,
     VACANSY_NAME varchar(250) not null,
@@ -454,6 +455,7 @@ create table ITPEARLS_OPEN_POSITION (
     COMMAND_CANDIDATE integer not null,
     SALARY_MIN decimal(19, 2),
     SALARY_MAX decimal(19, 2),
+    SALARY_IE decimal(19, 2),
     SALARY_FIX_LIMIT boolean,
     SALARY_CANDIDATE_REQUEST boolean,
     SALARY_COMMENT varchar(255),

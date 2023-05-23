@@ -30,6 +30,9 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "OPEN_CLOSE")
     protected Boolean openClose = false;
 
+    @Column(name = "RATING")
+    private Integer rating;
+
     @Column(name = "SIGN_DRAFT")
     private Boolean signDraft;
 
@@ -68,6 +71,9 @@ public class OpenPosition extends StandardEntity {
 
     @Column(name = "SALARY_MAX")
     protected BigDecimal salaryMax;
+
+    @Column(name = "SALARY_IE")
+    private BigDecimal salaryIE;
 
     @Column(name = "SALARY_FIX_LIMIT")
     protected Boolean salaryFixLimit;
@@ -207,6 +213,22 @@ public class OpenPosition extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
     private User owner;
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public BigDecimal getSalaryIE() {
+        return salaryIE;
+    }
+
+    public void setSalaryIE(BigDecimal salaryIE) {
+        this.salaryIE = salaryIE;
+    }
 
     public String getVacansyID() {
         return vacansyID;

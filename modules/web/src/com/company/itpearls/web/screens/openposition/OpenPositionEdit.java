@@ -2152,9 +2152,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         if (positionTypeField.getValue() != null) {
-            retStr += positionTypeField.getValue().getPositionEnName()
+            retStr += positionTypeField.getValue().getPositionRuName()
                     + " / "
-                    + positionTypeField.getValue().getPositionRuName();
+                    + positionTypeField.getValue().getPositionEnName();
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)

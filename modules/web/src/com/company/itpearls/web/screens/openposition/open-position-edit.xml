@@ -480,6 +480,11 @@
                                                property="salaryMax"
                                                caption="msg://msgSalaryMax"
                                                width="100%"/>
+                                    <textField id="openPositionFieldSalaryIE"
+                                               dataContainer="openPositionDc"
+                                               property="salaryIE"
+                                               caption="msg://msgSalaryIE"
+                                               width="100%"/>
                                     <checkBox id="salaryCandidateRequestCheckBox"
                                               dataContainer="openPositionDc"
                                               align="BOTTOM_LEFT"

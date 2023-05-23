@@ -26,10 +26,11 @@ else
 	echo "\033[31mFailure, exit status: $?"
 fi
 
-echo "\033[37mАрхивация старой базы ... \c"
+echo "\033[37mАрхивация старой базы ... "
 rm $old_archive
 mv $new_archive $old_archive
-tar zcvf $new_archive * 1>>$LOG 2>> $LOG 
+# tar zcvf $new_archive * 1>>$LOG 2>> $LOG 
+tar czf - * | (pv -p --timer --rate --bytes > $new_archive)
 if [ $? -eq 0 ]; then
 	echo "\033[32mOK"
 else
@@ -44,7 +45,7 @@ if [ $? -eq 0 ]; then
 else
         echo "\033[31mFailure, exit status: $?"
 fi
-echo "\033[37mЗагрузка базы с сервера ... \c"
+echo "\033[37mЗагрузка базы с сервера ... "
 pg_basebackup -P -h hr.it-pearls.ru -D . -U replica 
 if [ $? -eq 0 ]; then
 	echo "\033[32mOK"
