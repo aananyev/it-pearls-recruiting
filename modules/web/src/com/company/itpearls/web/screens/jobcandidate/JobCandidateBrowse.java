@@ -1534,6 +1534,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .withType(Notifications.NotificationType.TRAY)
                     .withCaption(messageBundle.getMessage("msgWarning"))
                     .withHideDelayMs(15000)
+                    .withStyleName("create-jobcandidate-warning")
                     .withDescription(messageBundle.getMessage("msgSeveralVariantsFirstNames")
                             .concat(names.toString())
                             .concat("\n")
@@ -1547,6 +1548,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withType(Notifications.NotificationType.TRAY)
                         .withHideDelayMs(15000)
+                        .withStyleName("create-jobcandidate-warning")
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription(messageBundle.getMessage("msgNotFoundFirstName"))
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -1575,6 +1577,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             notifications.create(Notifications.NotificationType.TRAY)
                     .withType(Notifications.NotificationType.TRAY)
                     .withHideDelayMs(15000)
+                    .withStyleName("create-jobcandidate-warning")
                     .withCaption(messageBundle.getMessage("msgWarning"))
                     .withDescription(messageBundle.getMessage("msgSeveralVariantsMiddleNames")
                             .concat(names.toString())
@@ -1588,10 +1591,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             if (namesList.size() == 0) {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withType(Notifications.NotificationType.TRAY)
+                        .withStyleName("create-jobcandidate-warning")
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription(messageBundle.getMessage("msgNotFoundMiddleName"))
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                        .withHideDelayMs(5000)
+                        .withHideDelayMs(15000)
                         .show();
             } else {
                 e.setMiddleName(namesList.get(0));
@@ -1616,7 +1620,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             notifications.create(Notifications.NotificationType.TRAY)
                     .withType(Notifications.NotificationType.TRAY)
                     .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withHideDelayMs(5000)
+                    .withStyleName("create-jobcandidate-warning")
+                    .withHideDelayMs(15000)
                     .withDescription(messageBundle.getMessage("msgSeveralVariantsSecondNames")
                             .concat(names.toString())
                             .concat("\n")
@@ -1629,7 +1634,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             if (namesList.size() == 0) {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withType(Notifications.NotificationType.TRAY)
-                        .withHideDelayMs(5000)
+                        .withStyleName("create-jobcandidate-warning")
+                        .withHideDelayMs(15000)
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription(messageBundle.getMessage("msgNotFoundSecondName"))
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)

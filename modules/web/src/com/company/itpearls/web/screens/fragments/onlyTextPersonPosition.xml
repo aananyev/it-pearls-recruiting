@@ -20,13 +20,14 @@
     <layout>
         <suggestionPickerField id="personPositionField"
                                width="100%"
+                               property="positionRuName"
+                               metaClass="itpearls_Position"
                                minSearchStringLength="1"
                                caption="msg://msgPersonPosition"
                                editable="true"
                                asyncSearchDelayMs="300"
-                               suggestionsLimit="3"
+                               suggestionsLimit="7"
                                align="TOP_LEFT"
-                               metaClass="itpearls_Position"
                                ext:index="0"
                                required="true"
                                inputPrompt="msg://msgPressEnter">

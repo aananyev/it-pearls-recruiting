@@ -1,6 +1,8 @@
 package com.company.itpearls.web.screens.fragments;
 
 import com.company.itpearls.entity.Position;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.MetadataTools;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
@@ -8,6 +10,8 @@ import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.SuggestionField;
 import com.haulmont.cuba.gui.components.SuggestionPickerField;
 import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,11 +28,13 @@ public class OnlyTextPersonPosition extends Onlytext {
     @Inject
     private MessageBundle messageBundle;
     @Inject
-    private SuggestionPickerField<Position> personPositionField;
-    @Inject
     private MetadataTools metadataTools;
     @Inject
     private CollectionContainer<Position> personPositionsDc;
+    @Inject
+    private SuggestionPickerField<Position> personPositionField;
+    @Inject
+    private CollectionLoader<Position> personPositionsLc;
 
     public Position getPersonPosition() {
         return personPositionField.getValue();
@@ -53,13 +59,15 @@ public class OnlyTextPersonPosition extends Onlytext {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        List<Position> position = new ArrayList<>(personPositionsDc.getItems());
+        personPositionsLc.load();
+
+        List<Position> positions = new ArrayList<>(personPositionsDc.getItems());
 
         personPositionField.setSearchExecutor((searchString, searchParams) ->
-                position.stream()
+                positions.stream()
                         .filter(pos ->
                                 StringUtils.containsIgnoreCase(metadataTools.getInstanceName(pos),
-                                                searchString))
+                                        searchString))
                         .collect(Collectors.toList()));
 
     }
