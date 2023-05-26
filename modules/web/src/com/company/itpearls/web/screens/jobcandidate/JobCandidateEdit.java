@@ -248,6 +248,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private GridLayout dictionatysTavlesHBox;
     @Inject
     private GroupBoxLayout lastProjects;
+    @Inject
+    private Label<String> fullNameField;
+    @Inject
+    private Label<String> emailLabel;
+    @Inject
+    private Label<String> phoneLabel;
+    @Inject
+    private Label<String> mobilePhoneLabel;
+    @Inject
+    private Label<String> skypuLabel;
+    @Inject
+    private Label<String> telegramLabel;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -3174,5 +3186,74 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public void setFirstNameField(List<String> suggestFirstNames) {
         firstNameField.setValueSource((ValueSource<String>) suggestFirstNames);
+    }
+
+    @Subscribe("firstNameField")
+    public void onFirstNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            setFullNameCandidate();
+        }
+
+        StringBuffer fullName = new StringBuffer();
+
+        fullName.append(event.getValue())
+                .append(" ")
+                .append(secondNameField.getValue());
+
+        iteractionListLabelCandidate.setValue(fullName.toString());
+        fullNameField.setValue(fullName.toString());
+    }
+
+    @Subscribe("secondNameField")
+    public void onSecondNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            setFullNameCandidate();
+        }
+
+        StringBuffer fullName = new StringBuffer();
+
+        fullName.append(firstNameField.getValue())
+                .append(" ")
+                .append(event.getValue());
+
+        iteractionListLabelCandidate.setValue(fullName.toString());
+        fullNameField.setValue(fullName.toString());
+    }
+
+    @Subscribe("emailField")
+    public void onEmailFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            emailLabel.setValue(event.getValue());
+        }
+    }
+
+    @Subscribe("phoneLabel")
+    public void onPhoneLabelValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            phoneLabel.setValue(event.getValue());
+        }
+    }
+
+    @Subscribe("mobilePhoneField")
+    public void onMobilePhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            mobilePhoneLabel.setValue(event.getValue());
+        }
+    }
+
+    @Subscribe("skypeNameField")
+    public void onSkypeNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            skypuLabel.setValue(event.getValue());
+        }
+
+    }
+
+    @Subscribe("telegramNameField")
+    public void onTelegramNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            telegramLabel.setValue(event.getValue());
+        }
+
     }
 }

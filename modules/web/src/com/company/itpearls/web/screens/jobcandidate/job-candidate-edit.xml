@@ -198,9 +198,7 @@
                     <row>
                         <label id="iteractionListLabelCandidate"
                                stylename="h2"
-                               align="MIDDLE_LEFT"
-                               dataContainer="jobCandidateDc"
-                               property="fullName"/>
+                               align="MIDDLE_LEFT"/>
                         <label stylename="h1"
                                align="MIDDLE_LEFT"
                                value="|"/>
@@ -247,9 +245,7 @@
                         <label id="emailLabel"
                                description="msg://msgEmail"
                                stylename="h4"
-                               align="MIDDLE_LEFT"
-                               dataContainer="jobCandidateDc"
-                               property="email"/>
+                               align="MIDDLE_LEFT"/>
                         <label id="phoneLabel"
                                description="msg://msgPhone"
                                stylename="h4"
@@ -258,19 +254,13 @@
                                property="phone"/>
                         <label id="mobilePhoneLabel"
                                description="msg://msgMobilePhone"
-                               stylename="h4"
-                               dataContainer="jobCandidateDc"
-                               property="mobilePhone"/>
+                               stylename="h4"/>
                         <label id="skypuLabel"
                                description="msg://msgSkype"
                                stylename="h4"
-                               align="MIDDLE_LEFT"
-                               dataContainer="jobCandidateDc"
-                               property="skypeName"/>
+                               align="MIDDLE_LEFT"/>
                         <label id="telegramLabel"
                                description="msg://msgTelegram"
-                               dataContainer="jobCandidateDc"
-                               property="telegramName"
                                stylename="h4"
                                align="MIDDLE_LEFT"/>
                     </row>
@@ -305,9 +295,7 @@
                                        value="msg://msgFIO"
                                        stylename="h3"
                                        htmlEnabled="true"/>
-                                <label id="jobTitle"
-                                       dataContainer="jobCandidateDc"
-                                       property="fullName"
+                                <label id="fullNameField"
                                        stylename="h3"/>
                                 <label value=", " stylename="h3" htmlEnabled="true"/>
                                 <label id="currentCompanyLabel"
@@ -673,7 +661,8 @@
                                                property="email"
                                                width="100%"
                                                caption="msg://msgEmail"
-                                               required="true"/>
+                                               required="true">
+                                    </textField>
                                     <textField id="telegramNameField"
                                                dataContainer="jobCandidateDc"
                                                property="telegramName"

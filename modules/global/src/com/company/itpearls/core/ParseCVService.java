@@ -40,6 +40,8 @@ public interface ParseCVService {
 
     List<String> extractUrls(String input);
 
+    String parseCityStr(String textCV);
+
     City parseCity(String textCV);
 
     Company parseCompany(String textCV);

@@ -36,6 +36,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @UiController("itpearls_JobCandidate.browse")
@@ -1446,14 +1447,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     public void onQuickLoadCVLoadFromClipboard(Action.ActionPerformedEvent event) {
         screenOnlytext = screenBuilders.screen(this)
                 .withScreenClass(OnlyTextPersonPosition.class)
-                .withOpenMode(OpenMode.DIALOG)
+                .withOpenMode(OpenMode.NEW_TAB)
                 .build();
+
+        AtomicReference<JobCandidate> loadedJobCandidate = null;
 
         screenOnlytext.addAfterCloseListener(afterCloseEvent -> {
 
             Screen jobCandidateEdit = screenBuilders.editor(JobCandidate.class, this)
                     .withOpenMode(OpenMode.NEW_TAB)
                     .withScreenClass(JobCandidateEdit.class)
+                    .withAfterCloseListener(eventAfterClose -> {
+                        // тут бы установить на вновь сделанную строку курсор
+                    })
                     .withInitializer(e -> {
                         if (!((OnlyTextPersonPosition) screenOnlytext).getCancel()) {
                             String textCV = ((OnlyTextPersonPosition) screenOnlytext).getResultText();
@@ -1491,6 +1497,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 candidateCVS.add(candidateCV);
                                 dataContext.merge(candidateCV);
                                 e.setCandidateCv(candidateCVS);
+                                dataContext.merge(e);
 
                                 candidateCVEdit = screenBuilders.editor(CandidateCV.class, this)
                                         .withScreenClass(CandidateCVEdit.class)
@@ -1629,7 +1636,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .show();
 
-            e.setSecondName(namesList.get(0));
+            StringBuffer buff = new StringBuffer(namesList.get(0));
+            e.setSecondName(buff.toString());
         } else {
             if (namesList.size() == 0) {
                 notifications.create(Notifications.NotificationType.TRAY)
@@ -1641,7 +1649,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
                         .show();
             } else {
-                e.setSecondName(namesList.get(0));
+                StringBuffer buff = new StringBuffer(namesList.get(0));
+                e.setSecondName(buff.toString());
             }
         }
     }

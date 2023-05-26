@@ -46,6 +46,11 @@ public class ParseCVServiceBean implements ParseCVService {
                     "from itpearls_JobCandidate e " +
                     "where not e.middleName like ''" +
                     "order by e.middleName";
+    static final String QUERY_GET_CITY =
+            "select distinct e.cityOfResidence.cityRuName " +
+                    "from itpearls_JobCandidate e " +
+                    "where not e.cityOfResidence.cityRuName like ''" +
+                    "order by e.cityOfResidence.cityRuName";
 
     @Inject
     private DataManager dataManager;
@@ -217,39 +222,51 @@ public class ParseCVServiceBean implements ParseCVService {
             }
         }
 
-        Map<String, Integer> sortedMap = namePosition.entrySet().stream()
-                .sorted(Comparator.comparingInt(e -> e.getValue()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (a, b) -> {
-                            throw new AssertionError();
-                        },
-                        LinkedHashMap::new
-                ));
-
         List<String> retStrList = new ArrayList<>();
-        HashMap<String, Integer> retHashMap = new HashMap<>();
 
-        Map.Entry<String, Integer> entry = sortedMap.entrySet().iterator().next();
-        String firstElement = entry.getKey();
+        if (namePosition.size() > 1) {
 
-        sortedMap.remove(entry);
+            Map<String, Integer> sortedMap = namePosition.entrySet().stream()
+                    .sorted(Comparator.comparingInt(e -> e.getValue()))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (a, b) -> {
+                                throw new AssertionError();
+                            },
+                            LinkedHashMap::new
+                    ));
 
-        Set<String> retStrSet = new HashSet<>();
+            HashMap<String, Integer> retHashMap = new HashMap<>();
 
-        for (Map.Entry<String, Integer> e : sortedMap.entrySet()) {
-            if (!e.equals(entry)) {
-                retStrSet.add(e.getKey());
+            Map.Entry<String, Integer> entry = sortedMap.entrySet().iterator().next();
+
+            String firstElement = entry.getKey();
+
+            sortedMap.remove(entry);
+
+            Set<String> retStrSet = new HashSet<>();
+
+            for (Map.Entry<String, Integer> e : sortedMap.entrySet()) {
+                if (!e.equals(entry)) {
+                    retStrSet.add(e.getKey());
+                }
+            }
+
+            retStrList.add(firstElement);
+
+            try {
+                retStrList.addAll(retStrSet);
+            } catch (NoSuchElementException e) {
+            }
+        } else {
+            try {
+                retStrList.add(namePosition.entrySet().stream().iterator().next().getKey());
+            } catch (NoSuchElementException e) {
             }
         }
 
-        retStrList.add(firstElement);
-        retStrList.addAll(retStrSet);
-
         return retStrList;
-
-
     }
 
     @Override
@@ -536,6 +553,20 @@ public class ParseCVServiceBean implements ParseCVService {
     @Override
     public List<Company> parseCompanies(String textCV) {
         return parseCompaniesPriv(textCV);
+    }
+
+    @Override
+    public String parseCityStr(String textCV) {
+        List<City> cities = dataManager.load(City.class).list();
+        City retCity = null;
+
+        List<String> city = dataManager
+                .loadValue(QUERY_GET_CITY, String.class)
+                .list();
+
+        StringBuffer retSb = new StringBuffer(getNamesFromText(city, textCV));
+
+        return retSb.equals(null) ? null : retSb.toString();
     }
 
     @Override
