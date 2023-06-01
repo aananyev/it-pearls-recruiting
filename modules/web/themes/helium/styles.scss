@@ -1,14 +1,14 @@
-@import "havana-defaults";
-@import "com.company.itpearls/havana-ext-defaults";
+@import "helium-defaults";
+@import "com.company.itpearls/helium-ext-defaults";
 @import "app-components";
-@import "com.company.itpearls/havana-ext";
+@import "com.company.itpearls/helium-ext";
 @import url('https://fonts.googleapis.com/css2?familyhalo=Antonio&family=Kanit&family=Teko:wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap');
 
-.havana {
+.helium {
   // include auto-generated app components SCSS
   @include app_components;
 
-  @include com_company_itpearls-havana-ext;
+  @include com_company_itpearls-helium-ext;
 }

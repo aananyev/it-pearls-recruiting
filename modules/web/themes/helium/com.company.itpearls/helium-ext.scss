@@ -484,7 +484,7 @@ rating_battery_yellow_3:before {
     box-shadow: 0 0 0 2px red, 0 0 13px #333; Параметры теней */
 }
 
-.statistic_label_candidate_blue:havana {
+.statistic_label_candidate_blue:hover {
         border-color: blue;
 }
 
@@ -518,7 +518,7 @@ rating_battery_yellow_3:before {
     box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
 }
 
-@mixin com_company_itpearls-havana-ext {
+@mixin com_company_itpearls-helium-ext {
 
 .rating_box {
         font_size: x-large;

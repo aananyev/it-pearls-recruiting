@@ -28,18 +28,18 @@ else
 fi
 
 echo "\033[37mОстановка локальной базы ... \c"
-pg_ctl stop -D . >> $LOG
+pg_ctl stop -D . >> $LOG 2>/dev/null
 if [ $? -eq 0 ]; then 
 	echo "\033[32mOK"
 else
-	echo "\033[31mFailure, exit status: $?"
+	echo "\033[31mБаза данных не запущена: $?"
 fi
 
 echo "\033[37mАрхивация старой базы ... "
 rm $old_archive
 mv $new_archive $old_archive
 # tar zcvf $new_archive * 1>>$LOG 2>> $LOG 
-tar czf - * | (pv -p --timer --rate --bytes > $new_archive)
+tar czf - * | (pv -p --timer --rate --bytes > $new_archive) 
 if [ $? -eq 0 ]; then
 	echo "\033[32mOK"
 else
@@ -72,9 +72,9 @@ else
 	exit 1
 fi
 
-echo "\033[37mКопирование файлов из хранилища в локальное ... \c"
+echo "\033[37mКопирование файлов из хранилища в локальное ... "
 # scp -c -v root@hr.it-pearls.ru:/opt/app_home/fileStorage/* /opt/app_home/
-rsync -avrltD --ignore-existing root@hr.it-pearls.ru:/opt/app_home/fileStorage /opt/app_home/ | pv -lep -s 5
+rsync -avrltD --stats --ignore-existing root@hr.it-pearls.ru:/opt/app_home/fileStorage /opt/app_home/ | pv --timer -lep -s 5 > /dev/null
 
 if [ $? -eq 0 ]; then
         echo "\033[32mOK"
