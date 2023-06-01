@@ -24,11 +24,11 @@ public class IteractionCheckCandidate extends StandardLookup<IteractionList> {
 
     @Subscribe("lookupFieldCheckCandidate")
     public void onLookupFieldCheckCandidateValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
-        if(lookupFieldCheckCandidate.getValue().getFullName().equals("")) {
+        if (lookupFieldCheckCandidate.getValue().getFullName().equals("")) {
             iteractionListsDl.removeParameter("name");
             iteractionListsTable.setVisible(false);
         } else {
-            iteractionListsTable.setVisible( true );
+            iteractionListsTable.setVisible(true);
             iteractionListsDl.setParameter("name", lookupFieldCheckCandidate.getValue());
         }
 
@@ -37,7 +37,7 @@ public class IteractionCheckCandidate extends StandardLookup<IteractionList> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        iteractionListsTable.setVisible( false );
+        iteractionListsTable.setVisible(false);
     }
 
     @Install(to = "lookupFieldCheckCandidate", subject = "optionIconProvider")
@@ -48,6 +48,9 @@ public class IteractionCheckCandidate extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable", subject = "iconProvider")
     private String iteractionListsTableIconProvider(IteractionList iteractionList) {
-        return iteractionList.getIteractionType().getPic();
+        if (iteractionList.getIteractionType() != null)
+            return iteractionList.getIteractionType().getPic();
+        else
+            return null;
     }
 }
