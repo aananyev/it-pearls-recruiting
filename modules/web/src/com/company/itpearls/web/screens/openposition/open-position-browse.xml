@@ -213,7 +213,9 @@
                         property="vacansyID"
                         width="80px"
                         maximumWidth="80px"
-                        caption="msg://msgID"/>
+                        caption="msg://msgID">
+                    <componentRenderer/>
+                </column>
                 <column id="vacansyName"
                         collapsible="false"
                         property="vacansyName"

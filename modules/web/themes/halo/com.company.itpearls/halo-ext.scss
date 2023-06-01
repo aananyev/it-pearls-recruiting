@@ -704,6 +704,15 @@ rating_battery_yellow_3:before {
     margin: 0px 10px 0px 0px;
 }
 
+
+.label_table_black {
+    color: black; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
 .label_table_green {
     color: green; /* Цвет текста */
     padding: 5px; /* Поля вокруг текста */

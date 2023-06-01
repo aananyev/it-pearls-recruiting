@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
@@ -12,6 +13,7 @@ import javax.validation.constraints.NotNull;
 
 @Table(name = "ITPEARLS_USER_SETTINGS")
 @Entity(name = "itpearls_UserSettings")
+@NamePattern("%s|user")
 public class UserSettings extends StandardEntity {
     private static final long serialVersionUID = -294638674422970184L;
 

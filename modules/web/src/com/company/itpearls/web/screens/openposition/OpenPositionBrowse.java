@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
+
     @Inject
     private MessageBundle messageBundle;
 
@@ -2371,13 +2372,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         retLabel.setIconFromSet(CubaIcon.valueOf(retStr));
-        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
         retLabel.setWidthAuto();
         retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
+        retHbox.setWidth("100px");
+        retHbox.setHeight("60px");
         retHbox.setAlignment(Component.Alignment.MIDDLE_LEFT);
-        retHbox.setWidthFull();
-        retHbox.setHeightFull();
 
         retHbox.add(retLabel);
         return retHbox;
@@ -2682,6 +2683,34 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         hBoxLayout.add(retButton);
         return hBoxLayout;
+    }
+
+    private HBoxLayout setCenteredCell(String value, String style) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retHBox.setStyleName("table-wordwrap");
+
+        Label labelRet = uiComponents.create(Label.NAME);
+
+        labelRet.setWidthAuto();
+        labelRet.setHeightAuto();
+        labelRet.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        labelRet.setStyleName("table-wordwrap");
+
+        labelRet.setValue(value);
+        labelRet.setStyleName(style);
+
+        retHBox.add(labelRet);
+
+        return retHBox;
+    }
+
+    @Install(to = "openPositionsTable.vacansyID", subject = "columnGenerator")
+    private Object openPositionsTableVacansyIDColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        return setCenteredCell(event.getItem().getVacansyID(), "label_table_black");
     }
 }
 

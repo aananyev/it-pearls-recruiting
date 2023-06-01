@@ -1,5 +1,6 @@
 package com.company.itpearls.web.widgets.reports;
 
+import com.company.itpearls.entity.ExtUser;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.cuba.core.global.DataManager;
@@ -34,7 +35,7 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
     protected Date endDate;
 
     private List<String> listIteractionForCheck = new ArrayList<String>();
-    private List<User> reaearchers = new ArrayList<>();
+    private List<ExtUser> reaearchers = new ArrayList<>();
 
     private String ITRKT_NEW_CONTACT = "Новый контакт";
     private String ITRKT_POPOSE_JOB = "Предложение работы";
@@ -76,14 +77,14 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
     }
 
     private void getResearchersList() {
-        LoadContext<User> loadContext = LoadContext.create(User.class)
-                .setQuery(LoadContext.createQuery("select e from sec$User e " +
+        LoadContext<ExtUser> loadContext = LoadContext.create(ExtUser.class)
+                .setQuery(LoadContext.createQuery("select e from itpearls_ExtUser e " +
                         "where e.active=true and " +
                         "e.name not like \'Anonymous\' and " +
                         "e.name not like \'%Test%\' and " +
                         "e.name not like \'Administrator\' " +
                         "order by e.name"))
-                .setView("user-view");
+                .setView("extUser-view");
 
         reaearchers = dataManager.loadList(loadContext);
 

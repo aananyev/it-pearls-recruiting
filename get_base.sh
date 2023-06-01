@@ -8,6 +8,15 @@ CWD=$(pwd)
 
 LOG=$CWD/$BACKUPBASELOG
 
+echo "*******************************************************"
+echo "*******************************************************"
+echo "**                                                   **"
+echo "**                   HuntTech                        **"
+echo "**       Загрузка базы из основной площадки          **"
+echo "**                                                   **"
+echo "*******************************************************"
+echo "*******************************************************"
+
 echo "\033[37mПереход в каталог базы $postgre_database ... \c" 
 cd $postgre_database
 if [ $? -eq 0 ]; then
@@ -61,6 +70,17 @@ if [ $? -eq 0 ]; then
 else
 	echo "\033[31mFailure, exit status: $?"
 	exit 1
+fi
+
+echo "\033[37mКопирование файлов из хранилища в локальное ... \c"
+# scp -c -v root@hr.it-pearls.ru:/opt/app_home/fileStorage/* /opt/app_home/
+rsync -avrltD --ignore-existing root@hr.it-pearls.ru:/opt/app_home/fileStorage /opt/app_home/ | pv -lep -s 5
+
+if [ $? -eq 0 ]; then
+        echo "\033[32mOK"
+else
+        echo "\033[31mFailure, exit status: $?"
+        exit 1
 fi
 
 cd $CWD

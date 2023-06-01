@@ -1,8 +1,5 @@
 package com.company.itpearls.web.screens.extuser;
 
-import com.company.itpearls.entity.ExtUser;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 

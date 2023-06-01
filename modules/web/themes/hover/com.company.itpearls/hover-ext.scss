@@ -1,5 +1,873 @@
 /* Define your theme modifications inside next mixin */
+
+@mixin date_iteraction_button($color) {
+    background: $color;
+    font_size: large;
+    font-family: 'Teko', sans-serif;
+    color: white;
+    border-radius: 4px;
+    padding: 3px;
+}
+
+.circle {
+  width: 45px;
+  height: 45px;
+  border: 2px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-20px {
+  width: 20px;
+  height: 20px;
+  border: 1px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.circle-30px {
+  width: 30px;
+  height: 30px;
+  border: 1px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-50px {
+  width: 50px;
+  height: 50px;
+  border: 1px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-no-border-50px {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-no-border-20px {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-no-border-20px {
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-no-border-50px {
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.h2-red {
+    color: red;
+    font-size: $v-font-size--h2;
+    font-weight: bold;
+}
+
+.h2-gray {
+    color: gray;
+    font-size: $v-font-size--h2;
+    font-weight: bold;
+}
+
+
+.h1-red {
+    color: red;
+    font-size: $v-font-size--h1;
+    font-weight: bold;
+}
+
+.h1-gray {
+    color: gray;
+    font-size: $v-font-size--h1;
+    font-weight: bold;
+}
+
+.h3-red {
+    color: red;
+    font-size: $v-font-size--h3;
+    font-weight: bold;
+}
+
+.h3-gray {
+    color: gray;
+    font-size: $v-font-size--h3;
+    font-weight: bold;
+}
+
+.h3-green {
+    color: green;
+    font-size: $v-font-size--h3;
+    font-weight: bold;
+}
+
+.h3-red {
+    color: red;
+    font-size: $v-font-size--h3;
+    font-weight: bold;
+}
+
+.h3-blue {
+    color: blue;
+    font-size: $v-font-size--h3;
+    font-weight: bold;
+}
+
+.h3-orange {
+    color: orange;
+    font-size: $v-font-size--h3;
+    font-weight: bold;
+}
+
+.open-position-lookup-field-black {
+    color: green;
+}
+
+.open-position-lookup-field-gray {
+    color: red;
+}
+
+.last_status_widget {
+    font-family: 'Roboto Condensed', sans-serif;
+    src: local('Roboto Condensed'), local('Roboto-Condensed'),
+        url(https://fonts.google.com/share?selection.family=Roboto%20Condensed:wght@300);
+}
+
+.button_table_black {
+        @include date_iteraction_button(black);
+}
+
+.button_table_white {
+        @include date_iteraction_button(white);
+}
+
+.button_table_red {
+    @include date_iteraction_button(red);
+}
+
+.button_table_yellow {
+    @include date_iteraction_button(orange);
+}
+
+.button_table_orange {
+    @include date_iteraction_button(orange);
+}
+
+.button_table_blue {
+    @include date_iteraction_button(blue);
+}
+
+.button_table_green {
+    @include date_iteraction_button(green);
+}
+
+.button_table_gray {
+    @include date_iteraction_button(gray);
+}
+
+.row_table_green {
+    color: green;
+}
+
+.row_table_red {
+    color: red;
+}
+
+.row_table_yellow {
+    color: yellow;
+}
+
+.row_table_gray {
+    color: gray;
+}
+
+
+.row_table_orange {
+    color: orange;
+}
+
+@mixin ratingfield($primary-stylename: ratingfield) {
+  .#{$primary-stylename}-star {
+  font-family: FontAwesome;
+  font-size: $v-font-size--h2;
+  padding-right: round($v-unit-size/4);
+  cursor: pointer;
+
+  &:after {
+      content: '\f006'; // 'fa-star-o'
+  }
+}
+
+.#{$primary-stylename}-star-selected {
+  &:after {
+     content: '\f005'; // 'fa-star'
+  }
+}
+
+  .#{$primary-stylename} .#{$primary-stylename}-star:last-child {
+    padding-right: 0;
+  }
+
+  .#{$primary-stylename}.v-disabled .#{$primary-stylename}-star {
+    cursor: default;
+  }
+}
+
+.quote-border {
+        border-radius: 5px;
+        box-shadow: 0 0 0 5px gray, 0 0 10px blue;
+        font-family: 'Yanone Kaffeesatz', sans-serif;
+        font-size: medium;
+        font-weight: bold;
+        text-align: center;
+        word-wrap: break-word;
+        padding:10px;
+        margin: 10px;
+        white-space: normal;
+        background-color: white;
+}
+
+.circletag {
+    display: block;
+    width: 20px;
+    height: 20px;
+    background: #E6E7ED;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    background-image: url(no.png);
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+}
+
+.round-photo {
+    border-radius: 12px; /* Радиус скругления */
+    box-shadow: 0 0 0 2px green, 0 0 13px #333; /* Параметры теней */
+    border: 1px solid gray;
+    width: 20px;
+    height: 20px;
+}
+
+.round-photo-150px {
+    border-radius: 50px; /* Радиус скругления */
+    box-shadow: 0 0 0 3px green, 0 0 13px #333; /* Параметры теней */
+}
+
+@mixin star{content: '&#x2605';}
+@mixin star_fill{content: '&#x2606';}
+
+.rating_star_1 {
+    content: '&#x2605';
+    content: '&#x2606';
+    content: '&#x2606';
+    content: '&#x2606';
+    content: '&#x2606';
+    font_size: large;
+    color: red;
+}
+
+.rating_star_2 {
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2606';
+    content: '&#x2606';
+    content: '&#x2606';
+    font_size: large;
+    color: orange;
+}
+
+.rating_star_3 {
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2606';
+    content: '&#x2606';
+    font_size: large;
+    color: yellow;
+}
+
+.rating_star_4 {
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2606';
+    font_size: large;
+    color: green;
+}
+
+.rating_star_5 {
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    content: '&#x2605';
+    font_size: large;
+    color: blue;
+}
+
+@mixin rating_round($color_p) {
+    font-family: 'Kanit', sans-serif;
+    font-size: large;
+    font-weight: bold;
+    text-align: center;
+/*    font-family: bold; */
+    width: 20px;
+    height: 20px;
+    border: 1px solid;
+    border-radius: 10px;
+    line-height: 17px;
+    color: $color_p;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
+}
+
+@mixin rating_battery_round($color_p) {
+    font-size: large;
+    font-weight: bold;
+    font-family: bold;
+    margin: -5px -5px -5px -5px;
+    padding: -5px -5px -5px -5px;
+    top: 50%;
+    height: 20px;
+    border: 1px solid;
+    border-radius: 2px;
+    color: $color_p;
+}
+
+@mixin rating_candidate_round($color_p) {
+    font-family: 'Antonio', sans-serif;
+    font-size: large;
+    font-weight: bold;
+    text-align: center;
+/*    font-family: bold; */
+    width: 50px;
+    height: 50px;
+    border: 1px solid;
+    border-radius: 25px;
+    line-height: 17px;
+    color: $color_p;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
+}
+
+
+@mixin rating_statistic_label($color_p) {
+    font-family: 'Antonio', sans-serif;
+    font-size: medium;
+    font-weight: bold;
+    text-align: center;
+/*    font-family: bold; */
+    border: 1px solid;
+    border-radius: 5px;
+    line-height: 17px;
+    color: $color_p;
+    padding: 5px;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333; /* Параметры теней */
+}
+
+.rating_battery_grey_0 {
+    @include rating_battery_round(grey);
+}
+
+.rating_battery_red_1 {
+    @include rating_battery_round(red);
+}
+
+.rating_battery_orange_2 {
+    @include rating_battery_round(orange);
+}
+
+.rating_battery_teal_3 {
+    @include rating_battery_round(teal);
+}
+
+.rating_battery_yellow_3 {
+    @include rating_battery_round(yellow);
+}
+
+.rating_battery_green_4 {
+    @include rating_battery_round(green);
+}
+
+.rating_battery_blue_5 {
+    @include rating_battery_round(blue);
+}
+
+
+.rating_battery_grey_0:before {
+    content: '\25AE\25AF\25AF\25AF\25AF';
+}
+
+.rating_battery_red_1:before {
+    content: '\25AE\25AF\25AF\25AF\25AF';
+}
+
+.rating_battery_orange_2:before {
+    content: '\25AE\25AE\25AF\25AF\25AF';
+}
+
+rating_battery_yellow_3:before {
+    content: '\25AE\25AE\25AE\25AF\25AF';
+}
+
+.rating_battery_green_4:before {
+    content: "\25AE\25AE\25AE\25AE\25AF";
+}
+
+.rating_battery_blue_5:before {
+    content: "\25AE\25AE\25AE\25AE\25AE";
+}
+
+.rating_red_1 {
+    @include rating_round(red);
+/*    color: red;
+    box-shadow: 0 0 0 2px red, 0 0 13px #333; Параметры теней */
+}
+
+.rating_orange_2 {
+    @include rating_round(orange);
+/*    color: orange;
+    box-shadow: 0 0 0 2px orange, 0 0 13px #333; Параметры теней */
+}
+
+.rating_yellow_3 {
+    @include rating_round(yellow);
+/*    color: yellow;
+    box-shadow: 0 0 0 2px yellow, 0 0 13px #333; Параметры теней */
+}
+
+.rating_green_4 {
+    @include rating_round(green);
+/*    color: green;
+    box-shadow: 0 0 0 2px green, 0 0 13px #333; Параметры теней */
+}
+
+.rating_blue_5 {
+    @include rating_round(blue);
+/*    color: blue;
+    box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
+}
+
+.rating_gray_6 {
+    @include rating_round(gray);
+/*    color: blue;
+    box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
+}
+
+.statistic_label_candidate_blue {
+    @include rating_statistic_label(blue);
+/*    color: red;
+    box-shadow: 0 0 0 2px red, 0 0 13px #333; Параметры теней */
+}
+
+.statistic_label_candidate_blue:hover {
+        border-color: blue;
+}
+
+.rating_candidate_red_1 {
+    @include rating_candidate_round(red);
+/*    color: red;
+    box-shadow: 0 0 0 2px red, 0 0 13px #333; Параметры теней */
+}
+
+.rating_candidate_orange_2 {
+    @include rating_candidate_round(orange);
+/*    color: orange;
+    box-shadow: 0 0 0 2px orange, 0 0 13px #333; Параметры теней */
+}
+
+.rating_candidate_yellow_3 {
+    @include rating_candidate_round(yellow);
+/*    color: yellow;
+    box-shadow: 0 0 0 2px yellow, 0 0 13px #333; Параметры теней */
+}
+
+.rating_candidate_green_4 {
+    @include rating_candidate_round(green);
+/*    color: green;
+    box-shadow: 0 0 0 2px green, 0 0 13px #333; Параметры теней */
+}
+
+.rating_candidate_blue_5 {
+    @include rating_candidate_round(blue);
+/*    color: blue;
+    box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
+}
+
 @mixin com_company_itpearls-hover-ext {
+
+.rating_box {
+        font_size: x-large;
+        font-weight: bold;
+        text-align: center;
+        font-family: bold;
+}
+
+.salary-fix-limit {
+    color: red;
+}
+
+.vacancy-filed-close-gray {
+    color: gray;
+}
+
+.vacancy-filed-close-black {
+    color: black;
+}
+.c-login-layout-it-pearls .c-login-layout {
+    background: #ffab00;
+}
+
+.v-loading-indicator {
+  $spinner-size: 64px;
+
+  @include valo-spinner($size: $spinner-size, $thickness: 4px);
+
+  background: transparent;
+  z-index: 100;
+
+  $offset: ceil($spinner-size/2);
+  top: calc(50% - $offset);
+  left: calc(50% - $offset);
+
+  &[style*="none"] {
+    @include transition(none);
+    width: $spinner-size !important;
+  }
+}
+
+.image-candidate-deselect {
+    border-radius: 5px;
+    border-style: none;
+    border-color: black;
+    text-align: center;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 2px;
+}
+
+.image-candidate-select {
+    border-radius: 5px;
+    border-style: double;
+    border-color: black;
+    text-align: center;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 2px;
+}
+
+.image-candidate-face-little-image {
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 1px;
+}
+
+.label_button_blue {
+    background: blue; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+.label_button_green {
+    background: green; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: normal;
+    margin: 0px 10px 0px 0px;
+    font-size: small;
+}
+
+.label_button_gray {
+    background: grey; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: normal;
+    margin: 0px 10px 0px 0px;
+    font-size: small;
+}
+
+.label_button_red {
+    background: red; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+.label_button_orange {
+    background: orange; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+
+.label_button_yellow {
+    background: yellow; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+
+.label_button_brown {
+    background: brown; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+
+.label_table_red {
+        color: red; /* Цвет текста */
+        padding: 5px; /* Поля вокруг текста */
+        border-radius: 5px;
+        text-weight: bold;
+        margin: 0px 10px 0px 0px;
+}
+
+.label_table_brown {
+    color: brown; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_table_gray {
+    color: gray; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_table_orange {
+    color: orange; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_table_blue {
+    color: blue; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+
+.label_table_black {
+    color: black; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.label_table_green {
+    color: green; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    text-weight: bold;
+    margin: 0px 10px 0px 0px;
+}
+
+.table_row_gray {
+    color: gray;
+    text-color: gray;
+}
+
+.table_row_black {
+    color: black;
+    text-color: black;
+}
+
+.transition-blue {
+    animation-name: blink;
+    animation-timing-function: linear;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+
+    background: blue; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.transition-green {
+    animation-name: blink;
+    animation-timing-function: linear;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+
+    background: green; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.transition-grey {
+    animation-name: blink;
+    animation-timing-function: linear;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+
+    background: grey; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+.transition-red {
+    animation-name: blink;
+    animation-timing-function: linear;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+
+    background: red; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+
+.table-wordwrap-100 {
+   white-space: pre-wrap;      /* CSS3 */
+   white-space: -moz-pre-wrap; /* Firefox */
+   white-space: -pre-wrap;     /* Opera <7 */
+   white-space: -o-pre-wrap;   /* Opera 7 */
+   word-wrap: break-word;      /* IE */
+}
+
+.table-wordwrap {
+   white-space: pre-wrap;      /* CSS3 */
+   white-space: -moz-pre-wrap; /* Firefox */
+   white-space: -pre-wrap;     /* Opera <7 */
+   white-space: -o-pre-wrap;   /* Opera 7 */
+   word-wrap: break-word;      /* IE */
+   line-height: 150%;
+}
+
+.table-row-not-visibe {
+    text-color: gray;
+    text-decoration: line-through;
+}
+
+
+.table-row-visibe {
+    text-color: black;
+    text-decoration: normal;
+}
+
+.transition-orange {
+    animation-name: blink;
+    animation-timing-function: linear;
+    animation-duration: 7s;
+    animation-iteration-count: infinite;
+
+    background: orange; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+}
+
+
+.job-candidate-fragment-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+}
+
+.job-candidate-fragment-label-bold {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: bold;
+        text-transform: uppercase;
+}
+
+.label-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.label-cute-text {
+    white-space: nowrap; /* Отменяем перенос текста */
+    overflow: hidden; /* Обрезаем содержимое */
+    padding: 1px; /* Поля */
+    position: relative; /* Относительное позиционирование */
+    max-width: 250px;
+}
+
+.label-cute-text::after {
+    content: ''; /* Выводим элемент */
+    position: absolute; /* Абсолютное позиционирование */
+    right: 0; top: 0; /* Положение элемента */
+    width: 20px; /* Ширина градиента*/
+    height: 100%; /* Высота родителя */
+    /* Градиент */
+    background: -moz-linear-gradient(left, rgba(255,204,0, 0.2), 0 100%);
+    background: -webkit-linear-gradient(left, rgba(255,204,0, 0.2), 0 100%);
+    background: -o-linear-gradient(left, rgba(255,204,0, 0.2), 0 100%);
+    background: -ms-linear-gradient(left, rgba(255,204,0, 0.2), 0 100%);
+    background: linear-gradient(to right, rgba(255,204,0, 0.2), 0 100%);
+}
 
 .text-field-title-form {
         font-size: medium;
@@ -8,8 +876,23 @@
         padding: 5px;
 }
 
+.candidate-card-rotating {
+        font-size: medium;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        padding: 10px;
+}
+
 .pic-center {
     text-align: center;
+    margin: 0 auto;
+}
+
+.pic-center-large-blue {
+    color: green;
+    text-align: center;
+    text-color: green;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -29,10 +912,132 @@
      margin: 0 auto;
 }
 
+.pic-center-medium-grey {
+    color: grey;
+    text-align: center;
+     text-color: grey;
+     font-size: medium;
+     margin: 0 auto;
+}
+
+.pic-center-small-grey {
+    color: grey;
+    text-align: center;
+     text-color: grey;
+     font-size: small;
+     margin: 0 auto;
+}
+
+
+.pic-center-medium-red {
+    color: red;
+    text-align: center;
+    text-color: red;
+    font-size: medium;
+    margin: 0 auto;
+}
+
+.pic-center-small-red {
+    color: red;
+    text-align: center;
+    text-color: red;
+    font-size: small;
+    margin: 0 auto;
+}
+
+.pic-center-small-orange {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: small;
+    margin: 0 auto;
+}
+
+.pic-center-large-grey {
+    color: grey;
+    text-align: center;
+     text-color: grey;
+     font-size: large;
+     margin: 0 auto;
+}
+
+.pic-center-medium-orange {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: medium;
+    margin: 0 auto;
+}
+
+.pic-center-medium-yellow {
+    color: yellow;
+    text-align: center;
+    text-color: yellow;
+    font-size: medium;
+    margin: 0 auto;
+}
+
+.pic-center-small-yellow {
+    color: yellow;
+    text-align: center;
+    text-color: yellow;
+    font-size: small;
+    margin: 0 auto;
+}
+
+.pic-center-medium-green {
+    color: green;
+    text-align: center;
+     text-color: green;
+     font-size: medium;
+     margin: 0 auto;
+}
+
+.pic-center-small-green {
+    color: green;
+    text-align: center;
+     text-color: green;
+     font-size: small;
+     margin: 0 auto;
+}
+
 .pic-center-large-red {
     color: red;
     text-align: center;
     text-color: red;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large-green {
+    color: green;
+    text-align: center;
+    text-color: green;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large-yellow {
+    color: yellow;
+    text-align: center;
+    text-color: yellow;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large-orange {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: large;
+    margin: 0 auto;
+}
+
+
+.pic-center-large-gray {
+    color: gray;
+    text-align: center;
+    text-color: gray;
     font-size: large;
     margin: 0 auto;
 }
@@ -48,9 +1053,43 @@
     margin: 0 auto;
 }
 
-.open-position-pic-center-large {
-    font-size: large;
+.open-position-pic-center-large-orange {
+    color: orange;
     text-align: center;
+    text-color: orange;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-red {
+    color: red;
+    text-align: center;
+    text-color: red;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-yellow {
+    color: yellow;
+    text-align: center;
+    text-color: yellow;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-blue {
+    color: blue;
+    text-align: center;
+    text-color: blue;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-gray {
+    color: gray;
+    text-align: center;
+    text-color: gray;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -62,12 +1101,84 @@
     margin: 0 auto;
 }
 
-.open-position-pic-center-large-yellow {
+.open-position-pic-center-large-lime {
+    color: lime;
+    text-align: center;
+    text-color: green;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-x-large-orange {
     color: orange;
     text-align: center;
-     text-color: orange;
-     font-size: large;
-     margin: 0 auto;
+    text-color: orange;
+    font-size: 2em;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-x-large-red {
+    color: red;
+    text-align: center;
+    text-color: red;
+    font-size: 2em;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-x-large-yellow {
+    color: yellow;
+    text-align: center;
+    text-color: yellow;
+    font-size: 2em;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-x-large-blue {
+    color: blue;
+    text-align: center;
+    text-color: blue;
+    font-size: 2em;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-x-large-gray {
+    color: gray;
+    text-align: center;
+    text-color: gray;
+    font-size: 2em;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-x-large-green {
+    color: green;
+    text-align: center;
+    text-color: green;
+    font-size: 2em;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-x-large-lime {
+    color: lime;
+    text-align: center;
+    text-color: green;
+    font-size: 2em;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-yellow {
+    color: #dde002;
+    text-align: center;
+    text-color: orange;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large-orange {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: large;
+    margin: 0 auto;
 }
 
 .open-position-pic-center-large-red {
@@ -78,4 +1189,359 @@
     margin: 0 auto;
 }
 
+.open-position-pic-center-large-maroon {
+    color: maroon;
+    text-align: center;
+    text-color: red;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.open-position-pic-center-large {
+    font-size: large;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.open-position-job-recruitier {
+    color: black;
+    font-weight: bold;
+}
+
+.open-position-empty-recruitier {
+    color: black;
+    font-weight: normal;
+}
+
+.open-position-close-position {
+    color: 9c9c9c;
+    font-style: italic;
+    font-weight: normal;
+}
+
+.open-position-normal-recruitier {
+    color: black;
+    font-weight: normal;
+}
+
+.open-position-internal-project {
+     color: brown;
+     font-weight: normal;
+}
+
+.open-position-draft {
+     color: grey;
+     font-weight: normal;
+}
+
+.open-position-job-command {
+    color: black;
+    font-size: large;
+    font-weight: italic;
+}
+
+.open-position-notification-open {
+    color: black;
+    font-size: large;
+    font-weight: bold;
+    background-color: #98FB98;
+    border: 2px solid #FF1493;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
+}
+
+.open-position-notification-close {
+    color: black;
+    font-size: large;
+    font-weight: bold;
+    background-color: #FFC0CB;
+    border: 2px solid #008000;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
+}
+
+
+.create-jobcandidate-warning {
+    color: black;
+    font-size: large;
+    font-weight: bold;
+    background-color: #ffadad;
+    border: 2px solid #f00;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
+}
+
+.personal-reserve-notification-close {
+    color: black;
+    font-size: large;
+    font-weight: bold;
+    background-color: #FFC0CB;
+    border: 2px solid #008000;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
+}
+
+.notification-for-me {
+    color: black;
+    background-color: pink;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
+}
+
+.open-position-internal-project-job-recrutier {
+    color: brown;
+    font-weight: bold;
+}
+
+.recrutier-tasks-gray {
+    color: grey;
+    text-decoration: line-through;
+}
+
+.recrutier-tasks-normal {
+    color: black;
+}
+
+.widget-table-item-title {
+    white-space: pre-line;
+}
+
+.widget-table-item-value {
+    white-space: pre-line;
+    margin-left: auto;
+    margin-right: auto;
+    font-decoration: italic;
+}
+
+.widget-table-value {
+    font-style: italic;
+    background: #878787;
+}
+
+.widget-border {
+    padding: 5px;
+    border: 2px solid #7a7b7e;
+    border-radius: 6px;
+    box-shadow: 0 0 5px grey;
+}
+
+.widget-title {
+    font-weight: bold;
+    padding: 2px;
+    background: #2c6b9e;
+    color: #ffffff;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.widget-table-header {
+    white-space: pre-line;
+    font-weight: bold;
+    text-decoration: underline;
+    background: #bea6ff;
+}
+
+.label_type1 {
+    color: red;
+    background-color: yellow;
+    line-height: 1.5;
+    margin: 5px;
+}
+
+.widget-mountly-interview-table-1 {
+    white-space: pre-line;
+    background: #ababab;
+}
+
+.widget-mountly-interview-table-2 {
+    white-space: pre-line;
+    background: #9c9c9c;
+}
+
+.widget-border-line {
+    border: 1px solid #7a7b7e;
+    border-radius: 6px;
+}
+
+.highlighting-competence-red {
+    border: 1px solid red;
+    padding: 3px;
+    white-space: nowrap;
+    height: 20px;
+}
+
+.v-caption-shift-field {
+    white-space: pre;
+}
+.v-calendar-event.event-red {
+  background-color: #f4c8c8;
+  color: #e00000;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-red, .v-calendar-event-event-red:before {
+  color: #e00000;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-red .v-calendar-event-content {
+  background-color: #f4c8c8;
+}
+
+.v-calendar-event.event-green {
+  background-color: #c8f4c9;
+  color: #037516;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-green, .v-calendar-event-event-green:before {
+  color: #037516;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-green .v-calendar-event-content {
+  background-color: #c8f4c9;
+}
+
+.v-calendar-event.event-blue {
+  background-color: #c8daf4;
+  color: #0300e0;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-blue, .v-calendar-event-event-blue:before {
+  color: #0300e0;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-blue .v-calendar-event-content {
+  background-color: #c8daf4;
+}
+
+.v-calendar-event.event-yellow {
+  background-color: #f4efc8;
+  color: #5f5c41;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-yellow, .v-calendar-event-event-yellow:before {
+  color: #5f5c41;
+}
+
+.v-calendar-week-wrapper .v-calendar-event-event-yellow .v-calendar-event-content {
+  background-color: #f4efc8;
+}
+
+.v-calendar-header-week .v-calendar-back, .v-calendar-header-week .v-calendar-next {
+  display: none;
+}
+
+.toolTip {
+    background-color: #ffffff;
+    border: 1px solid #73a7f0;
+    margin-left: 32px;
+    position: relative;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    box-shadow: 0px 0px 8px -1px black;
+    -moz-box-shadow: 0px 0px 8px -1px black;
+    -webkit-box-shadow: 0px 0px 8px -1px black;
+}
+
+.toolTip p {
+    padding:10px;
+}
+
+.tailDate {
+    font-size: xx-small;
+}
+
+.tailName {
+    font-size: normal;
+    font-weight: bold;
+}
+
+.tailVacancy {
+    font-size:x-small;
+    font-style:italic;
+}
+
+.tailShadow {
+    width: 4px;
+    height: 4px;
+    position: absolute;
+    top: 16px;
+    left: -8px;
+    z-index: -10;
+    box-shadow: 0px 0px 8px 1px black;
+    -moz-box-shadow: 0px 0px 8px 1px black;
+    -webkit-box-shadow: 0px 0px 8px 1px black;
+}
+
+.tailMyMessage {
+        background-color: ffb259;
+}
+
+.tailOtherMessage {
+    background-color: c4c6ff;
+}
+
+.tail1 {
+    width: 0px;
+    height: 0px;
+    border: 10px solid;
+    border-color: transparent #73a7f0 transparent transparent;
+    position:absolute;
+    top: 8px;
+    left: -20px;
+}
+
+.tail2 {
+    width: 0px;
+    height: 0px;
+    border: 10px solid;
+    border-color: transparent #ffffff transparent transparent;
+    position:absolute;
+    left: -18px;
+    top: 8px;
+}
+
+.chat__header {
+  text-align: center;
+}
+
+.chat__item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.chat__person-avatar {
+  border-radius: 50%;
+}
+
+.chat__messages {
+  margin-left: 10px;
+}
+
+.chat__message {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.chat__message-content {
+  border-radius: 5px;
+  padding: 7px;
+  background-color: #ccc;
+  display: inline-block;
+
+  margin-left: 5px;
+}
+
+.chat__item--responder {
+  flex-direction: row-reverse;
+}
+
+  .chat__item--responder .chat__message {
+    flex-direction: row-reverse;
+  }
+
+  .chat__item--responder .chat__message-content {
+    margin-left: 0;
+    margin-right: 5px;
+  }
 }

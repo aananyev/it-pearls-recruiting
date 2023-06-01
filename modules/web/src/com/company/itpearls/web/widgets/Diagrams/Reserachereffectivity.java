@@ -1,5 +1,6 @@
 package com.company.itpearls.web.widgets.Diagrams;
 
+import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.IteractionList;
 import com.google.common.collect.ImmutableMap;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
@@ -97,11 +98,11 @@ public class Reserachereffectivity extends ScreenFragment {
                     "order by e.recrutier.name";
         }
 
-        String usersList = "select f from sec$user f where ";
+        String usersList = "select f from itpearls_ExtUser f where ";
 
-        List<User> users = dataManager.load(User.class).view("user-view").list();
+        List<ExtUser> users = dataManager.load(ExtUser.class).view("extUser-view").list();
 
-        for (User a : users) {
+        for (ExtUser a : users) {
             if(a.getGroup() != null) {
                 if (a.getGroup().getName().equals(RESEARCHER)
                         || a.getGroup().getName().equals(RESEARCHER_INTERN)
@@ -217,7 +218,7 @@ public class Reserachereffectivity extends ScreenFragment {
         countIteractionChart.setTitles(titles);
     }
 
-    public Boolean checkUserRoles(User user, String role) {
+    public Boolean checkUserRoles(ExtUser user, String role) {
         Role s = dataManager.load(Role.class)
                 .query("select e from sec$Role e where e.name like :roleName")
                 .parameter("roleName", role)

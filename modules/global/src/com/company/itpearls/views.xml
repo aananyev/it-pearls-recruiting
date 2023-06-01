@@ -361,9 +361,6 @@
         <property name="iteraction" view="_local"/>
         <property name="iteractionRequirement" view="_local"/>
     </view>
-    <view entity="sec$User" name="user-view" extends="_local">
-        <property name="group" view="_minimal"/>
-    </view>
     <view entity="itpearls_LaborAgreement" name="laborAgreement-view" extends="_local">
         <property name="laborAgreementType" view="_minimal"/>
         <property name="openPositions" view="_minimal"/>

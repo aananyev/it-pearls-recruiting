@@ -2,17 +2,15 @@ package com.company.itpearls.web.screens.extsettingswindow;
 
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.UserSettings;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.config.MenuItem;
 import com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow;
-
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +26,6 @@ public class ExtSettingsWindow extends SettingsWindow {
     private CheckBox smtpPasswordRequired;
     @Inject
     private TextField<String> smtpPassword;
-    private ExtUser currentUser;
     @Inject
     private TextField<String> imapServer;
     @Inject
@@ -52,27 +49,37 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Inject
     private DataManager dataManager;
 
-    UserSettings userSettings;
-    final String QUERY_GET_USER_SETTINGS = "select e from UserSettings e where e.user = :currentUser";
+    private ExtUser currentUser;
+    private UserSettings userSettings;
+    private final String QUERY_GET_USER_SETTINGS
+            = "select e from itpearls_UserSettings e where e.user = :currentUser";
 
     @Override
     public void init(Map<String, Object> params) {
         currentUser = (ExtUser) userSessionSource.getUserSession().getUser();
         userSettings = getUserSettingsEntity(currentUser);
         setEmailSettings();
+
         super.init(params);
     }
 
     private UserSettings getUserSettingsEntity(ExtUser currentUser) {
+        UserSettings currentUserSetting;
 
+        try {
+            currentUserSetting = dataManager.load(UserSettings.class)
+                    .query(QUERY_GET_USER_SETTINGS)
+                    .parameter("currentUser", currentUser)
+                    .view("userSettings-view")
+                    .one();
+        } catch (IllegalStateException e) {
+            currentUserSetting = createNewUserSetting();
+            currentUserSetting.setUser((ExtUser) userSession.getUser());
+            dataManager.commit(currentUserSetting);
+        }
 
-        return dataManager.load(UserSettings.class)
-                .query(QUERY_GET_USER_SETTINGS)
-                .parameter("currentUser", currentUser)
-                .view("userSettings-view")
-                .one();
+        return currentUserSetting;
     }
-
 
     private void setEmailSettings() {
         if (smtpServer.getValue() == null )
@@ -137,29 +144,36 @@ public class ExtSettingsWindow extends SettingsWindow {
         return super.collectPermittedScreens(menuItems);
     }
 
-    @Override
-    protected void commit() {
-
+    UserSettings createNewUserSetting() {
         UserSettings userSettingsNew = metadata.create(UserSettings.class);
 
         userSettingsNew.setUser((ExtUser) userSession.getUser());
         userSettingsNew.setSmtpServer(smtpServer.getValue());
-        userSettingsNew.setSmtpPort(Integer.parseInt(smtpPort.getValue()));
+        userSettingsNew.setSmtpPort(smtpPort.getValue() != null ?
+                Integer.parseInt(smtpPort.getValue()) : 0);
         userSettingsNew.setSmtpPasswordRequired(smtpPasswordRequired.getValue());
         userSettingsNew.setSmtpPassword(smtpPassword.getValue());
 
         userSettingsNew.setPop3Server(pop3Server.getValue());
-        userSettingsNew.setPop3Port(Integer.parseInt(pop3Port.getValue()));
+        userSettingsNew.setPop3Port(pop3Port.getValue() != null ?
+                Integer.parseInt(pop3Port.getValue()) : 0);
         userSettingsNew.setPop3PasswordRequired(pop3PasswordRequired.getValue());
         userSettingsNew.setPop3Password(pop3Password.getValue());
 
         userSettingsNew.setImapServer(imapServer.getValue());
-        userSettingsNew.setImapPort(Integer.parseInt(imapPort.getValue()));
+        userSettingsNew.setImapPort(imapPort.getValue() != null ?
+                Integer.parseInt(imapPort.getValue()) : 0);
         userSettingsNew.setImapPasswordRequired(imapPasswordRequired.getValue());
         userSettingsNew.setImapPassword(imapPassword.getValue());
 
-        CommitContext commitContext = new CommitContext(userSettingsNew, userSettings);
-        dataManager.commit(commitContext);
+        return userSettingsNew;
+    }
+
+    @Override
+    protected void commit() {
+
+        // CommitContext commitContext = new CommitContext(userSettingsNew, userSettings);
+        // dataManager.commit(commitContext);
 
         super.commit();
     }
