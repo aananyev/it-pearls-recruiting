@@ -106,17 +106,21 @@
                   spacing="true"
                   caption="msg://msgUrgentlyPositios"
                   description="msg://msgUrgentlyPositios">
-            <hbox spacing="true">
+            <hbox spacing="true"
+                  height="100%">
                 <button id="clearUrgentPos"
                         caption="msg://msgClear"
                         align="MIDDLE_LEFT"
+                        height="AUTO"
                         description="msg://msgClearDescription"
                         invoke="clearUrgentFilter"/>
                 <scrollBox id="urgentlyBox"
+                           height="100%"
                            orientation="horizontal"
                            contentMaxHeight="100%"
                            contentMaxWidth="100%">
-                    <hbox id="urgentlyHBox"/>
+                    <hbox id="urgentlyHBox"
+                          height="100%"/>
                 </scrollBox>
             </hbox>
         </groupBox>

@@ -27,10 +27,11 @@
                       spacing="true"
                       width="200px"
                       height="266px"
-                      align="BOTTOM_RIGHT"
+                      align="TOP_RIGHT"
+                      margin="true"
                       expand="picVBox"
                       stylename="dropzone-container">
-                    <vbox id="picVBox">
+                    <vbox id="picVBox" align="TOP_RIGHT" spacing="true">
                         <image id="userPic"
                                datasource="userSettingsDs"
                                property="fileImageFace"
@@ -69,31 +70,44 @@
                         </columns>
                         <rows>
                             <row>
-                                <label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT"/>
+                                <label id="mainWindowLabel"
+                                       value="msg://mainWindowMode"
+                                       align="MIDDLE_LEFT"/>
                                 <optionsGroup id="modeOptions"/>
                             </row>
                             <row>
-                                <label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT"/>
-                                <lookupField id="appThemeField" required="true"
+                                <label id="visualThemeLabel"
+                                       value="msg://mainWindowTheme"
+                                       align="MIDDLE_LEFT"/>
+                                <lookupField id="appThemeField"
+                                             required="true"
                                              width="theme://cuba.web.settings-window.appThemeField.width"
                                              requiredMessage="msg://mainWindowThemeMsg"/>
                             </row>
                             <row>
-                                <label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT"/>
+                                <label id="languageLabel"
+                                       value="msg://mainWindowLang"
+                                       align="MIDDLE_LEFT"/>
                                 <lookupField id="appLangField"
                                              width="theme://cuba.web.settings-window.appLocaleField.width"/>
                             </row>
                             <row>
                                 <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone"
                                        align="MIDDLE_LEFT"/>
-                                <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneAutoField">
+                                <hbox id="timeZoneBox"
+                                      spacing="true"
+                                      width="100%"
+                                      expand="timeZoneAutoField">
                                     <lookupField id="timeZoneLookup"
                                                  width="theme://cuba.web.settings-window.timeZoneField.width"/>
-                                    <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
+                                    <checkBox id="timeZoneAutoField"
+                                              align="MIDDLE_LEFT"/>
                                 </hbox>
                             </row>
                             <row>
-                                <label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT"/>
+                                <label id="defaultScreenLabel"
+                                       value="msg://defaultScreen"
+                                       align="MIDDLE_LEFT"/>
                                 <lookupField id="defaultScreenField"
                                              description="msg://defaultScreenDescription"
                                              newOptionAllowed="false"
@@ -117,36 +131,27 @@
                         <rows>
                             <row>
                                 <textField id="smtpServer"
-                                           datasource="userSettingsDs"
-                                           property="smtpServer"
                                            caption="SMTP server"/>
                                 <textField id="pop3Server"
-                                           datasource="userSettingsDs"
-                                           property="pop3Server"
                                            caption="POP3 server"/>
                                 <textField id="imapServer"
-                                           datasource="userSettingsDs"
-                                           property="imapServer"
                                            caption="IMAP server"/>
                             </row>
                             <row>
                                 <textField id="smtpPort"
-                                           datasource="userSettingsDs"
-                                           property="smtpPort"
+                                           datatype="int"
                                            caption="SMTP port">
                                     <validator
                                             class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                 </textField>
                                 <textField id="pop3Port"
-                                           datasource="userSettingsDs"
-                                           property="pop3Port"
+                                           datatype="int"
                                            caption="POP3 port">
                                     <validator
                                             class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                 </textField>
                                 <textField id="imapPort"
-                                           datasource="userSettingsDs"
-                                           property="imapPort"
+                                           datatype="int"
                                            caption="IMAP port">
                                     <validator
                                             class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
@@ -154,31 +159,20 @@
                             </row>
                             <row>
                                 <checkBox id="smtpPasswordRequired"
-                                          datasource="userSettingsDs" property="smtpPasswordRequired"
                                           caption="msg://msgSMTPPasswordRequired"/>
                                 <checkBox id="pop3PasswordRequired"
-                                          datasource="userSettingsDs"
-                                          property="pop3PasswordRequired"
                                           caption="msg://msgPop3PasswordRequired"/>
                                 <checkBox id="imapPasswordRequired"
-                                          datasource="userSettingsDs"
-                                          property="imapPasswordRequired"
                                           caption="msg://msgImapPasswordRequired"/>
                             </row>
                             <row>
                                 <textField id="smtpPassword"
-                                           datasource="userSettingsDs"
-                                           property="smtpPassword"
                                            caption="SMTP password">
                                 </textField>
                                 <textField id="pop3Password"
-                                           datasource="userSettingsDs"
-                                           property="pop3Password"
                                            caption="POP3 password">
                                 </textField>
                                 <textField id="imapPassword"
-                                           datasource="userSettingsDs"
-                                           property="imapPassword"
                                            caption="IMAP password">
                                 </textField>
                             </row>
