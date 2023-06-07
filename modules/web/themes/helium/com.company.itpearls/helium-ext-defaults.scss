@@ -3,7 +3,18 @@ $v-textfield-border-radius: 6px;
 $v-border-radius: 6px;
 $v-font-size: 14px;
 
-$cuba-app-menubar-padding-top: 8px;
-$cuba-app-menubar-padding-bottom: 8px;
+$cuba-app-menubar-padding-top: 5px;
+$cuba-app-menubar-padding-bottom: 5px;
 $cuba-menubar-submenu-padding: 1px;
+$v-layout-margin-top: 5px;
+$v-layout-margin-left: 5px;
+$v-layout-margin-right: 5px;
+$v-layout-margin-bottom: 5px;
 
+$v-layout-spacing-vertical: 5px;
+$v-layout-spacing-horizontal: 5px;
+
+/* animation for elements is enabled by default */
+$v-animations-enabled: true;
+/* popup window animation is disabled by default */
+$v-window-animations-enabled: true;

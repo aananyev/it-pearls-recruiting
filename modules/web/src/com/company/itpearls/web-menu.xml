@@ -18,6 +18,21 @@
               caption="mainMsg://menu_config.itpearls_SkillsFilterJobCandidate.browse" icon="SEARCH"/>
         <item screen="itpearls_PersonelReserve.browse" caption="mainMsg://menu_config.itpearls_PersonelReserve.browse"
               icon="EXPEDITEDSSL"/>
+        <menu id="application-sending-messages" icon="font-icon:SEND">
+            <item screen="itpearls_InternalEmailer.browse"
+                  caption="mainMsg://menu_config.itpearls_InternalEmailer.browse" icon="font-icon:MAIL_FORWARD"/>
+            <item screen="itpearls_InternalEmailTemplate.browse"
+                  caption="mainMsg://menu_config.itpearls_InternalEmailTemplate.browse"/>
+        </menu>
+    </menu>
+    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
+        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
+              icon="font-icon:ADDRESS_BOOK_O"/>
+        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
+              icon="GROUP"/>
+        <item screen="itpearls_ApplicationRecruitment.browse"
+              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
+        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
     </menu>
     <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
         <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
@@ -32,15 +47,6 @@
         <item screen="itpearls_OpenPositionRecruiting.browse" caption="mainMsg://msgOpenPositionRecruiting"
               icon="COMPASS" openType="NEW_TAB"/>
     </menu>
-    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
-        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
-              icon="font-icon:ADDRESS_BOOK_O"/>
-        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
-              icon="GROUP"/>
-        <item screen="itpearls_ApplicationRecruitment.browse"
-              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
-        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
-    </menu>
     <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>
@@ -53,12 +59,6 @@
         <item screen="itpearls_CompanyDepartament.browse" icon="GROUP"/>
         <item screen="itpearls_Company.browse" icon="BUILDING"/>
         <item screen="itpearls_CompanyGroup.browse" icon="BUILDING_O"/>
-        <menu id="application-sending-messages" icon="font-icon:SEND">
-            <item screen="itpearls_InternalEmailer.browse" caption="mainMsg://menu_config.itpearls_InternalEmailer.browse"
-                  icon="font-icon:MAIL_FORWARD"/>
-            <item screen="itpearls_InternalEmailTemplate.browse"
-                  caption="mainMsg://menu_config.itpearls_InternalEmailTemplate.browse"/>
-        </menu>
     </menu>
     <menu id="application-researching" icon="BOLT" insertAfter="application-project">
         <item screen="itpearls_RecrutiesTasks.browse" icon="CLONE"/>

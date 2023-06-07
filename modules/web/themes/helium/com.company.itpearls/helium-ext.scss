@@ -591,76 +591,92 @@ rating_battery_yellow_3:before {
     margin: 1px;
 }
 
+.label_button_mostpopular_green {
+    background: green; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    border-radius: 15px;
+    text-weight: normal;
+    margin: 0px 10px 0px 0px;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
 .label_button_blue {
     background: blue; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 20px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 10px; /* Поля вокруг текста */
+    border-radius: 15px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 16px;
+    font-size: 12px;
 }
 
 .label_button_green {
     background: green; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 20px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 10px; /* Поля вокруг текста */
+    border-radius: 15px;
     text-weight: normal;
     margin: 0px 10px 0px 0px;
-    font-size: 16px;
+    font-size: 12px;
+    vertical-align: middle;
 }
 
 .label_button_gray {
     background: grey; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 20px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 10px; /* Поля вокруг текста */
+    border-radius: 15px;
     text-weight: normal;
     margin: 0px 10px 0px 0px;
-    font-size: 16px;
+    font-size: 12px;
+    vertical-align: middle;
 }
 
 .label_button_red {
     background: red; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 20px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 10px; /* Поля вокруг текста */
+    border-radius: 15px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 16px;
+    font-size: 12px;
+    vertical-align: middle;
 }
 
 .label_button_orange {
     background: orange; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 20px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 10px; /* Поля вокруг текста */
+    border-radius: 15px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 16px;
+    font-size: 12px;
+    vertical-align: middle;
 }
 
 
 .label_button_yellow {
     background: yellow; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 20px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 10px; /* Поля вокруг текста */
+    border-radius: 15px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 16px;
+    font-size: 12px;
+    vertical-align: middle;
 }
 
 
 .label_button_brown {
     background: brown; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 20px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 10px; /* Поля вокруг текста */
+    border-radius: 15px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 16px;
+    font-size: 12px;
+    vertical-align: middle;
 }
 
 

@@ -219,6 +219,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CollectionContainer<Grade> gradeDc;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private TextField<BigDecimal> openPositionFieldSalaryIE;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -2095,9 +2097,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (event.getValue()) {
             openPositionFieldSalaryMin.setEnabled(false);
             openPositionFieldSalaryMax.setEnabled(false);
+            openPositionFieldSalaryIE.setEnabled(false);
         } else {
             openPositionFieldSalaryMin.setEnabled(true);
             openPositionFieldSalaryMax.setEnabled(true);
+            openPositionFieldSalaryIE.setEnabled(true);
         }
     }
 

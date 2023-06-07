@@ -18,6 +18,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.gui.util.OperationResult;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.slf4j.Logger;
@@ -109,8 +110,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private Logger log;
     @Inject
-    private HBoxLayout mostPopularHbox;
-    @Inject
     private Label<String> currentPriorityLabel;
 
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
@@ -132,6 +131,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private LinkButton alternativeVacancyLinkButton;
     @Inject
     private StrSimpleService strSimpleService;
+    @Inject
+    private HBoxLayout mostPopularHbox;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -278,18 +279,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null)
                     if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null)
                         if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName().getCompanyShortName() != null) {
-                            String labetText = "<h3><b>" +
+                            String labetText = "<h4><b>" +
                                     vacancyFiels.getValue()
                                             .getProjectName()
                                             .getProjectDepartment()
                                             .getCompanyName()
                                             .getCompanyShortName() +
-                                    "</b>/ " +
+                                    "</b> / " +
                                     vacancyFiels.getValue()
                                             .getProjectName()
                                             .getProjectDepartment()
                                             .getDepartamentRuName() +
-                                    "</h3>";
+                                    "</h4>";
 
                             companyLabel.setValue(labetText);
 
@@ -495,11 +496,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
 
             if (!afterCommitSendMessage) {
-                sendMessages();
+                if (event.getCloseAction().equals(WINDOW_COMMIT_AND_CLOSE_ACTION)){
+                    sendMessages();
+                }
             }
 
             if (!afterCommitEmailToCandidateSended) {
-                sendMessagesToCandidate();
+                if (event.getCloseAction().equals(WINDOW_COMMIT_AND_CLOSE_ACTION)) {
+                    sendMessagesToCandidate();
+                }
             }
 
             afterCommitSign = false;
@@ -1001,22 +1006,49 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private void setMostPopularIteraction() {
         int maxCount = 5;
+
         mostPopular = getMostPolularIteraction(userSession.getUser(), maxCount);
 
         if (maxCount > mostPopular.size())
             maxCount = mostPopular.size();
 
         for (int i = 0; i < maxCount; i++) {
+            HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+            VBoxLayout numberHBox = uiComponents.create(VBoxLayout.class);
+
+            retHBox.setWidth("100%");
+            retHBox.setHeightFull();
+            retHBox.setSpacing(true);
+            retHBox.setStyleName("label_button_mostpopular_green");
+
+            Label numberLabel = uiComponents.create(Label.class);
+            numberLabel.setValue((i+1) + ".");
+            numberLabel.setWidthAuto();
+            numberLabel.setStyleName("label_button_mostpopular_green");
+            numberLabel.setHtmlEnabled(true);
+
             LinkButton mostPopularLabel = uiComponents.create(LinkButton.NAME);
-            mostPopularLabel.setCaption(mostPopular.get(i).getIterationName() + " (" + i + ")");
-            mostPopularLabel.setStyleName("label_button_green");
+            mostPopularLabel.setCaption(mostPopular.get(i).getIterationName() + "<div style=\"overflow:hidden;>\"(" + i + ")</div>");
+//            mostPopularLabel.setCaption(mostPopular.get(i).getIterationName() + "<p style=\"color:green\">(" + i + ")</p>");
+//            mostPopularLabel.setCaption(mostPopular.get(i).getIterationName());
+            mostPopularLabel.setStyleName("label_button_mostpopular_green");
+            mostPopularLabel.setCaptionAsHtml(true);
+            mostPopularLabel.setWidthAuto();
+            mostPopularLabel.setHeightAuto();
+            mostPopularLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
             mostPopularLabel.addClickListener(e -> {
-                String mostPopNumber = e.getSource().getCaption().substring(e.getSource().getCaption().length() - 2, e.getSource().getCaption().length() - 1);
+                String mostPopNumber = e.getSource().getCaption().substring(
+                        e.getSource().getCaption().length() - 8,
+                        e.getSource().getCaption().length() - 7);
 
                 iteractionTypeField.setValue(mostPopular.get(Integer.parseInt(mostPopNumber)));
             });
 
-            mostPopularHbox.add(mostPopularLabel);
+            retHBox.add(numberLabel);
+            retHBox.add(mostPopularLabel);
+            retHBox.expand(mostPopularLabel);
+
+            mostPopularHbox.add(retHBox);
         }
     }
 

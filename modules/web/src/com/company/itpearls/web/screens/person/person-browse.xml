@@ -50,7 +50,6 @@
                 <column id="firstName"
                         property="firstName"
                         sortable="true"
-                        sort="ASCENDING"
                         caption="msg://msgFirstName"/>
                 <column id="middleName"
                         property="middleName"

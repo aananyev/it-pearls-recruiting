@@ -3,6 +3,7 @@ old_archive=../it-pearls-basebackup-old.tgz
 new_archive=../it-pearls-basebackup.tgz
 postgre_database=/usr/local/var/postgresql@11
 BACKUPBASELOG=backupbase.log
+db_server=hr.it-pearls.ru
 
 CWD=$(pwd)
 
@@ -36,8 +37,8 @@ else
 fi
 
 echo "\033[37mАрхивация старой базы ... "
-rm $old_archive
-mv $new_archive $old_archive
+rm $old_archive 2>>$LOG 1>/dev/null
+mv $new_archive $old_archive 2>>$LOG 1>/dev/null
 # tar zcvf $new_archive * 1>>$LOG 2>> $LOG 
 tar czf - * | (pv -p --timer --rate --bytes > $new_archive) 
 if [ $? -eq 0 ]; then
@@ -55,11 +56,33 @@ else
         echo "\033[31mFailure, exit status: $?"
 fi
 echo "\033[37mЗагрузка базы с сервера ... "
-pg_basebackup -P -h hr.it-pearls.ru -D . -U replica 
+pg_basebackup -P -h $db_server -D . -U replica  2>>$LOG
 if [ $? -eq 0 ]; then
 	echo "\033[32mOK"
 else
-	echo "\033[31mFailure, exit status: $?"
+	echo "\033[31mОшибка загрузки базы: $? Проверьте интернет или настройки сервера баз данных $db_server"
+	echo "\033[37mВосстановить базу из архива $new_archive ...\c"
+	tar xvf $new_archive 1>/dev/null 2>$LOG
+
+	if [ $? -eq 0 ]; then
+		echo "\033[32mOK"
+
+		echo "\033[37mЗапуск старой базы ...\c"
+		pg_ctl start -D . >> $LOG
+
+                if [ $? -eq 0 ]; then
+                        echo "\033[32mOK"
+                fi
+
+		echo "\033[37mВосстановить исходные архивы ...\c"
+		rm $new_archive
+		mv $old_archive $new_archive
+		if [ $? -eq 0 ]; then
+			echo "\033[32mOK"
+		fi
+	fi
+
+	cd $CWD
 	exit 1
 fi
 

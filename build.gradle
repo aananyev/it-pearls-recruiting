@@ -48,9 +48,9 @@ dependencies {
     appComponent('com.haulmont.addon.dashboard:dashboard-global:3.2.3')
     appComponent('com.haulmont.addon.helium:helium-global:0.4.0')
     appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
-    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
-    appComponent("com.haulmont.reports:reports-global:$cubaVersion")
     appComponent("com.haulmont.fts:fts-global:$cubaVersion")
+    appComponent("com.haulmont.reports:reports-global:$cubaVersion")
+    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
 }
 
 def postgres = 'org.postgresql:postgresql:42.2.9'
@@ -87,6 +87,7 @@ configure(globalModule) {
         compile 'net.htmlparser.jericho:jericho-html:3.4'
         compile 'com.rubiconproject.oss:jchronic:0.2.8'
         compile 'ru.yaal.project.hhapi:HhJavaApi:0.2.6'
+        compile 'jakarta.mail:jakarta.mail-api:2.1.2'
     }
 
     entitiesEnhancing {

@@ -117,8 +117,8 @@
                 modal="true"
                 width="1000"/>
     <layout expand="iteractionListTabSheeet"
-            spacing="true">
-        <groupBox spacing="true"
+            spacing="false">
+        <groupBox spacing="false"
                   collapsable="true"
                   stylename="light"
                   caption="msg://msgHeaderIteraction">
@@ -145,36 +145,34 @@
                     <hbox width="AUTO"
                           spacing="true"
                           height="AUTO">
-                        <label stylename="h3"
+                        <label stylename="h4"
                                width="AUTO"
                                height="AUTO"
                                value="msg://msgCompanyDepartament"/>
-                        <label stylename="h3"
+                        <label stylename="h4"
                                width="AUTO"
                                height="AUTO"
                                value=": "/>
                         <label id="companyLabel"
                                width="AUTO"
                                height="AUTO"
-                               align="MIDDLE_LEFT"
                                htmlEnabled="true"/>
                     </hbox>
                     <hbox spacing="true"
                           width="AUTO"
                           height="AUTO">
-                        <label stylename="h3"
+                        <label stylename="h4"
                                width="AUTO"
                                height="AUTO"
                                value="msg://msgProject"/>
-                        <label stylename="h3"
+                        <label stylename="h4"
                                width="AUTO"
                                height="AUTO"
                                value=": "/>
                         <label id="projectLabel"
                                width="AUTO"
                                height="AUTO"
-                               align="MIDDLE_LEFT"
-                               stylename="h3"/>
+                               stylename="h4"/>
                     </hbox>
                 </vbox>
                 <label id="ratingLabel"
@@ -185,7 +183,9 @@
                        align="MIDDLE_RIGHT"/>
                 <hbox id="labelHBox"
                       width="100%">
-                    <image id="ratingImage" scaleMode="FILL"
+                    <image id="ratingImage"
+                           scaleMode="FILL"
+                           visible="false"
                            width="50px"
                            align="MIDDLE_RIGHT"
                            height="50px"/>
@@ -197,205 +197,193 @@
                   stylename="light"
                   collapsable="true">
             <hbox id="mostPopularHbox"
-                  width="AUTO"
+                  width="100%"
                   spacing="true"
                   align="MIDDLE_CENTER"/>
         </groupBox>
-        <tabSheet id="iteractionListTabSheeet"
-                  width="100%"
-                  stylename="framed">
-            <tab id="iteractionListTab"
-                 caption="msg://msgIteractionList"
-                 margin="true,true,true,true"
-                 icon="REORDER"
-                 expand="commentField"
-                 spacing="true">
-                <grid id="gridIterationData"
-                      spacing="true"
-                      width="100%">
-                    <columns count="2"/>
-                    <rows>
-                        <row id="rating">
-                            <vbox>
-                                <hbox spacing="true">
-                                    <label value="msg://msgStatusOfVacansy"
-                                           width="AUTO"
-                                           align="MIDDLE_LEFT"
-                                           stylename="h3"/>
-                                    <label id="statusOfVacansyLabel"
-                                           width="AUTO"
-                                           align="MIDDLE_LEFT"
-                                           stylename="h3"/>
-                                    <linkButton id="alternativeVacancyLinkButton"
-                                                visible="false"
-                                                descriptionAsHtml="true"
-                                                description="msg://msgAlarmAlternativeVacancy"
-                                                stylename="huge"
-                                                icon="WARNING"/>
-                                </hbox>
-                                <hbox spacing="true">
-                                    <label value="msg://msgPriority"
-                                           width="AUTO"
-                                           align="MIDDLE_LEFT"
-                                           stylename="h3"/>
-                                    <image id="trafficLighterImage"
-                                           width="AUTO"
-                                           align="MIDDLE_CENTER"
-                                           height="AUTO"/>
-                                    <label id="currentPriorityLabel"
-                                           stylename="h3"
-                                           align="MIDDLE_CENTER"
-                                           width="AUTO"/>
-                                </hbox>
-                                <hbox id="outstaffingCostHBox"
-                                      spacing="true"
-                                      visible="false">
-                                    <label value="msg://msgOutstaffCost"
-                                           width="AUTO"
-                                           align="MIDDLE_LEFT"
-                                           stylename="h3"/>
-                                    <label dataContainer="iteractionListDc"
-                                           stylename="h3"
-                                           align="MIDDLE_CENTER"
-                                           property="vacancy.outstaffingCost"/>
-                                    <label value="msg://msgRubPerHour"
-                                           width="AUTO"
-                                           align="MIDDLE_LEFT"
-                                           stylename="h3"/>
-                                </hbox>
-                            </vbox>
-                            <lookupField id="ratingField"
-                                         required="true"
-                                         align="MIDDLE_RIGHT"
-                                         caption="msg://msgRating"
-                                         dataContainer="iteractionListDc"
-                                         property="rating"
-                                         description="msg://msgRatingDecription"
-                                         width="50%"/>
-                        </row>
-                        <row id="row">
-                            <suggestionPickerField id="candidateField"
-                                                   inputPrompt="mainMsg://msgStartInput"
-                                                   minSearchStringLength="3"
-                                                   rowspan="1"
-                                                   colspan="1"
-                                                   caption="msg://msgCandidate"
+            <tabSheet id="iteractionListTabSheeet"
+                      width="100%"
+                      height="100%"
+                      stylename="framed">
+                <tab id="iteractionListTab"
+                     caption="msg://msgIteractionList"
+                     margin="true,true,true,true"
+                     icon="REORDER"
+                     spacing="true">
+                    <scrollBox orientation="vertical"
+                               width="100%"
+                               height="100%">
+                    <grid id="gridIterationData"
+                          spacing="true"
+                          width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row id="rating">
+                                <vbox>
+                                    <hbox spacing="true">
+                                        <label value="msg://msgStatusOfVacansy"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                        <label id="statusOfVacansyLabel"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                        <linkButton id="alternativeVacancyLinkButton"
+                                                    visible="false"
+                                                    descriptionAsHtml="true"
+                                                    description="msg://msgAlarmAlternativeVacancy"
+                                                    stylename="huge"
+                                                    icon="WARNING"/>
+                                    </hbox>
+                                    <hbox spacing="true">
+                                        <label value="msg://msgPriority"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                        <image id="trafficLighterImage"
+                                               width="AUTO"
+                                               align="MIDDLE_CENTER"
+                                               height="AUTO"/>
+                                        <label id="currentPriorityLabel"
+                                               stylename="h3"
+                                               align="MIDDLE_CENTER"
+                                               width="AUTO"/>
+                                    </hbox>
+                                    <hbox id="outstaffingCostHBox"
+                                          spacing="true"
+                                          visible="false">
+                                        <label value="msg://msgOutstaffCost"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                        <label dataContainer="iteractionListDc"
+                                               stylename="h3"
+                                               align="MIDDLE_CENTER"
+                                               property="vacancy.outstaffingCost"/>
+                                        <label value="msg://msgRubPerHour"
+                                               width="AUTO"
+                                               align="MIDDLE_LEFT"
+                                               stylename="h3"/>
+                                    </hbox>
+                                </vbox>
+                                <lookupField id="ratingField"
+                                             required="true"
+                                             align="MIDDLE_RIGHT"
+                                             caption="msg://msgRating"
+                                             dataContainer="iteractionListDc"
+                                             property="rating"
+                                             description="msg://msgRatingDecription"
+                                             width="50%"/>
+                            </row>
+                            <row id="row">
+                                <suggestionPickerField id="candidateField"
+                                                       inputPrompt="mainMsg://msgStartInput"
+                                                       minSearchStringLength="3"
+                                                       rowspan="1"
+                                                       colspan="1"
+                                                       caption="msg://msgCandidate"
+                                                       width="100%"
+                                                       required="true"
+                                                       dataContainer="iteractionListDc"
+                                                       property="candidate">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open"/>
+                                    </actions>
+                                    <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        select e
+                                        from itpearls_JobCandidate e
+                                        where lower(e.fullName) like lower(:searchString) escape '\'
+                                        and e.middleName not like '(не использовать)'
+                                        and not e.blockCandidate = true
+                                        order by e.secondName, e.firstName
+                                    </query>
+                                </suggestionPickerField>
+                                <lookupPickerField id="vacancyFiels"
+                                                   caption="mainMsg://msgVacancy"
+                                                   dataContainer="iteractionListDc"
+                                                   optionsContainer="vacancyDc"
+                                                   property="vacancy" width="100%">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                        <action id="open"
+                                                type="picker_open"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                            <row>
+                                <hbox id="mostPopularIteractionHBox"/>
+                            </row>
+                            <row>
+                                <lookupPickerField id="iteractionTypeField"
+                                                   optionsContainer="iteractionTypesDc"
+                                                   caption="msg://msgIteractionType"
                                                    width="100%"
                                                    required="true"
                                                    dataContainer="iteractionListDc"
-                                                   property="candidate">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                    <action id="open" type="picker_open"/>
-                                </actions>
-                                <query entityClass="com.company.itpearls.entity.JobCandidate"
-                                       escapeValueForLike="true"
-                                       searchStringFormat="%$searchString%">
-                                    select e
-                                    from itpearls_JobCandidate e
-                                    where lower(e.fullName) like lower(:searchString) escape '\'
-                                    and e.middleName not like '(не использовать)'
-                                    and not e.blockCandidate = true
-                                    order by e.secondName, e.firstName
-                                </query>
-                            </suggestionPickerField>
-                            <!--                                <lookupPickerField id="candidateField"
-                                                                               optionsContainer="candidatesDc"
-                                                                               rowspan="1"
-                                                                               colspan="1"
-                                                                               caption="msg://msgCandidate"
-                                                                               width="100%"
-                                                                               dataContainer="iteractionListDc"
-                                                                               property="candidate"
-                                                                               required="true">
-                                                                <actions>
-                                                                    <action id="lookup"
-                                                                            type="picker_lookup"/>
-                                                                    <action id="open"
-                                                                            type="picker_open"/>
-                                                                </actions>
-                                                            </lookupPickerField> -->
-                            <lookupPickerField id="vacancyFiels"
-                                               caption="mainMsg://msgVacancy"
-                                               dataContainer="iteractionListDc"
-                                               optionsContainer="vacancyDc"
-                                               property="vacancy" width="100%">
-                                <actions>
-                                    <action id="lookup"
-                                            type="picker_lookup"/>
-                                    <action id="open"
-                                            type="picker_open"/>
-                                </actions>
-                            </lookupPickerField>
-                        </row>
-                        <row>
-                            <hbox id="mostPopularIteractionHBox"/>
-                        </row>
-                        <row>
-                            <lookupPickerField id="iteractionTypeField"
-                                               optionsContainer="iteractionTypesDc"
-                                               caption="msg://msgIteractionType"
-                                               width="100%"
-                                               required="true"
-                                               dataContainer="iteractionListDc"
-                                               property="iteractionType"
-                                               colspan="1">
-                                <actions>
-                                    <action id="lookup"
-                                            type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                            <buttonsPanel id="buttonsPanelCallAction"
-                                          width="100%"
-                                          align="BOTTOM_CENTER">
-                                <vbox>
-                                    <button id="buttonCallAction"
-                                            invoke="callActionEntity"
-                                            align="BOTTOM_CENTER"
-                                            width="100%"/>
-                                    <textField id="addString"
-                                               dataContainer="iteractionListDc"
-                                               property="addString"
-                                               width="100%"/>
-                                    <dateField id="addDate" dataContainer="iteractionListDc"
-                                               property="addDate"
-                                               width="100%"/>
-                                    <textField id="addInteger"
-                                               dataContainer="iteractionListDc"
-                                               property="addInteger"
-                                               width="100%"/>
-                                </vbox>
-                            </buttonsPanel>
-                        </row>
-                        <row>
-                            <textField id="communicationMethodField"
-                                       width="100%"
-                                       caption="msg://msgCommunicationMethod"
-                                       dataContainer="iteractionListDc"
-                                       property="communicationMethod"/>
-                            <lookupPickerField id="recrutierField"
-                                               caption="msg://msgRecrutier"
-                                               width="100%"
-                                               dataContainer="iteractionListDc"
-                                               property="recrutier"
-                                               optionsContainer="usersDc">
-                                <actions>
-                                    <action id="lookup"
-                                            type="picker_lookup"/>
-                                </actions>
-                            </lookupPickerField>
-                        </row>
-                    </rows>
-                </grid>
-                <textArea id="commentField"
-                          property="comment"
-                          rows="3"
-                          width="100%"
-                          dataContainer="iteractionListDc"
-                          caption="msg://msgComment"
-                          height="150pt"/>
-            </tab>
-        </tabSheet>
+                                                   property="iteractionType"
+                                                   colspan="1">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <buttonsPanel id="buttonsPanelCallAction"
+                                              width="100%"
+                                              align="BOTTOM_CENTER">
+                                    <vbox>
+                                        <button id="buttonCallAction"
+                                                invoke="callActionEntity"
+                                                align="BOTTOM_CENTER"
+                                                width="100%"/>
+                                        <textField id="addString"
+                                                   dataContainer="iteractionListDc"
+                                                   property="addString"
+                                                   width="100%"/>
+                                        <dateField id="addDate" dataContainer="iteractionListDc"
+                                                   property="addDate"
+                                                   width="100%"/>
+                                        <textField id="addInteger"
+                                                   dataContainer="iteractionListDc"
+                                                   property="addInteger"
+                                                   width="100%"/>
+                                    </vbox>
+                                </buttonsPanel>
+                            </row>
+                            <row>
+                                <textField id="communicationMethodField"
+                                           width="100%"
+                                           caption="msg://msgCommunicationMethod"
+                                           dataContainer="iteractionListDc"
+                                           property="communicationMethod"/>
+                                <lookupPickerField id="recrutierField"
+                                                   caption="msg://msgRecrutier"
+                                                   width="100%"
+                                                   dataContainer="iteractionListDc"
+                                                   property="recrutier"
+                                                   optionsContainer="usersDc">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </row>
+                        </rows>
+                    </grid>
+                    <textArea id="commentField"
+                              property="comment"
+                              rows="5"
+                              width="100%"
+                              dataContainer="iteractionListDc"
+                              caption="msg://msgComment"
+                              height="100%"/>
+                    </scrollBox>
+                </tab>
+            </tabSheet>
         <hbox id="editActions"
               spacing="true"
               align="BOTTOM_RIGHT">

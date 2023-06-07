@@ -1193,7 +1193,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     + " т.р./"
                     + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
                     + " т.р.";
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | StringIndexOutOfBoundsException e) {
             retStr = "";
         }
 

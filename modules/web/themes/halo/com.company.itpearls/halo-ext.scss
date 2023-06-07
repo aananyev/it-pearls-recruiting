@@ -601,11 +601,21 @@ rating_battery_yellow_3:before {
     font-size: small;
 }
 
+
+.label_button_mostpopular_green {
+    background: green; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    border-radius: 10px;
+    text-weight: normal;
+    margin: 0px 10px 0px 0px;
+    font-size: small;
+}
+
 .label_button_green {
     background: green; /* Цвет фона */
     color: #fff; /* Цвет текста */
     padding: 5px; /* Поля вокруг текста */
-    border-radius: 5px;
+    border-radius: 10px;
     text-weight: normal;
     margin: 0px 10px 0px 0px;
     font-size: small;

@@ -8,7 +8,9 @@
                   class="com.company.itpearls.entity.CompanyDepartament">
             <view extends="_local">
                 <property name="projectOfDepartment" view="_local"/>
-                <property name="companyName" view="_local"/>
+                <property name="companyName" view="_local">
+                    <property name="fileCompanyLogo" view="_local"/>
+                </property>
                 <property name="departamentDirector" view="_local">
                     <property name="personPosition" view="_local"/>
                 </property>
