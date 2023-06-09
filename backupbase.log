@@ -5120,3 +5120,75 @@ server started
 2023-06-09 13:01:43.075 +04 [15909] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-06-09 13:01:43.186 +04 [15911] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-06-09 13:01:43.254 +04 [15913] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:11:44.823 +04 [17672] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:11:44.858 +04 [17674] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:11:45.431 +04 [17676] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:11:45.729 +04 [17678] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:11:45.829 +04 [17680] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:28:27.088 +04 [18063] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:28:27.121 +04 [18065] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:28:27.437 +04 [18067] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:28:27.660 +04 [18069] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:28:27.801 +04 [18071] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:31:18.211 +04 [18301] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:31:18.238 +04 [18303] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:31:18.436 +04 [18305] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:31:18.521 +04 [18307] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:31:18.606 +04 [18309] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:35:18.315 +04 [18502] LOG:  unexpected EOF on client connection with an open transaction
+2023-06-09 14:35:27.910 +04 [18531] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:35:27.937 +04 [18533] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:35:28.183 +04 [18535] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:35:28.309 +04 [18537] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:35:28.413 +04 [18539] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:38:13.134 +04 [18717] LOG:  unexpected EOF on client connection with an open transaction
+2023-06-09 14:38:21.568 +04 [18739] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:38:21.595 +04 [18741] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:38:21.839 +04 [18743] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:38:21.954 +04 [18745] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:38:22.053 +04 [18747] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:44:32.582 +04 [18998] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:44:32.635 +04 [19000] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:44:32.979 +04 [19002] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:44:33.286 +04 [19004] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:44:33.477 +04 [19006] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:50:25.762 +04 [19255] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:50:25.809 +04 [19257] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:50:26.119 +04 [19259] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:50:26.520 +04 [19261] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:50:26.608 +04 [19263] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:51:12.935 +04 [19307] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:51:12.965 +04 [19309] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:51:13.198 +04 [19311] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:51:13.259 +04 [19313] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:51:13.324 +04 [19315] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:53:52.034 +04 [19564] ERROR:  duplicate key value violates unique constraint "itpearls_social_network_ur_ls_pkey"
+2023-06-09 14:53:52.034 +04 [19564] DETAIL:  Key (id)=(599ee86c-f06e-747b-926e-91cf7355fefa) already exists.
+2023-06-09 14:53:52.034 +04 [19564] STATEMENT:  INSERT INTO ITPEARLS_SOCIAL_NETWORK_UR_LS (ID, CREATE_TS, CREATED_BY, DELETE_TS, DELETED_BY, NETWORK_NAME, NETWORK_URLS, UPDATE_TS, UPDATED_BY, VERSION, SOCIAL_NETWORK_URL_ID, JOB_CANDIDATE_ID) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+2023-06-09 14:53:52.045 +04 [19564] ERROR:  current transaction is aborted, commands ignored until end of transaction block
+2023-06-09 14:53:52.045 +04 [19564] STATEMENT:  SELECT 1
+2023-06-09 14:54:36.457 +04 [19683] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:54:36.494 +04 [19685] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:54:36.752 +04 [19688] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:54:37.134 +04 [19690] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:54:37.258 +04 [19692] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:58:19.776 +04 [19930] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:58:19.802 +04 [19932] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:58:20.053 +04 [19934] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:58:20.150 +04 [19936] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 14:58:20.224 +04 [19938] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:01:18.061 +04 [20129] ERROR:  duplicate key value violates unique constraint "itpearls_social_network_ur_ls_pkey"
+2023-06-09 15:01:18.061 +04 [20129] DETAIL:  Key (id)=(52e33c3f-13f3-61e3-8474-357f5f3c28d5) already exists.
+2023-06-09 15:01:18.061 +04 [20129] STATEMENT:  INSERT INTO ITPEARLS_SOCIAL_NETWORK_UR_LS (ID, CREATE_TS, CREATED_BY, DELETE_TS, DELETED_BY, NETWORK_NAME, NETWORK_URLS, UPDATE_TS, UPDATED_BY, VERSION, SOCIAL_NETWORK_URL_ID, JOB_CANDIDATE_ID) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+2023-06-09 15:01:18.069 +04 [20129] ERROR:  current transaction is aborted, commands ignored until end of transaction block
+2023-06-09 15:01:18.069 +04 [20129] STATEMENT:  SELECT 1
+2023-06-09 15:06:01.652 +04 [20200] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:06:01.683 +04 [20202] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:06:02.064 +04 [20204] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:06:02.167 +04 [20206] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:06:02.328 +04 [20208] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:13:14.166 +04 [20548] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:13:14.202 +04 [20550] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:13:14.430 +04 [20552] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:13:14.557 +04 [20554] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 15:13:14.681 +04 [20556] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

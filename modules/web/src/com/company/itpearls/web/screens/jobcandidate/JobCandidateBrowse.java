@@ -1480,8 +1480,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                         .parseTelegram(textCV));
                                 e.setSkypeName(parseCVService
                                         .parseSkype(textCV));
-                                initSocialNeiworkTable(e);
-                                setSocialNetworkList(e, ((OnlyTextPersonPosition) screenOnlytext).getResultText());
+//                                initSocialNeiworkTable(e);
+                                addSocialNetworkList(e, ((OnlyTextPersonPosition) screenOnlytext).getResultText());
 
                                 CandidateCV candidateCV = metadata.create(CandidateCV.class);
                                 candidateCV.setResumePosition(e.getPersonPosition());
@@ -1514,6 +1514,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 openScreenCVQuickLoadedCandidate(eventJobCandidateEdit, candidateCVEdit);
             });
 
+            ((JobCandidateEdit) jobCandidateEdit).repaintSocialNetworksTable();
 
             jobCandidateEdit.show();
         });
@@ -1541,6 +1542,53 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             dataContext.merge(networks);
 
             jobCandidatesDl.load();
+        }
+    }
+
+    private void addSocialNetworkList(JobCandidate e, String resultText) {
+        Set<String> socialNetworks = parseCVService.scanSocialNetworksFromCVs(resultText);
+        List<SocialNetworkType> socialNetworkTypes = dataManager.load(SocialNetworkType.class)
+                .view("socialNetworkType-view")
+                .list();
+
+        for (String network : socialNetworks) {
+            URI uriCandidate = null;
+            URI uriNetworTypes = null;
+            SocialNetworkType realSocialNetwork = null;
+
+            try {
+                uriCandidate = new URI(network);
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+
+            for (SocialNetworkType socialNetworkType : socialNetworkTypes) {
+                try {
+                    uriNetworTypes = new URI(socialNetworkType.getSocialNetworkURL());
+                } catch (URISyntaxException uriSyntaxException) {
+                    uriSyntaxException.printStackTrace();
+                }
+
+                if (uriNetworTypes.getHost().equals(uriCandidate.getHost())) {
+                    realSocialNetwork = socialNetworkType;
+                    break;
+                }
+            }
+
+
+            if (realSocialNetwork != null) {
+                SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
+                socialNetworkURLs.setJobCandidate(e);
+                socialNetworkURLs.setSocialNetworkURL(realSocialNetwork);
+                socialNetworkURLs.setNetworkURLS(network);
+
+                if (e.getSocialNetwork() == null) {
+                    e.setSocialNetwork(new ArrayList<>());
+                }
+
+                // dataContext.merge(socialNetworkURLs);
+                e.getSocialNetwork().add(socialNetworkURLs);
+            }
         }
     }
 
@@ -1584,7 +1632,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 .withStyleName("create-jobcandidate-warning")
                                 .withDescription(messageBundle
                                         .getMessage("msgAdditionalSocialNetwork")
-                                + network)
+                                        + network)
                                 .show();
 
                     }

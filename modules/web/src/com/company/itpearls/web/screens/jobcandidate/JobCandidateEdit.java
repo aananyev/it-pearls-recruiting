@@ -731,10 +731,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setAddSocialNetworkButtonEnable() {
-        if (getEditedEntity().getSocialNetwork().size() == 0) {
-            addSocialNetworkListsButton.setEnabled(true);
+        if (getEditedEntity().getSocialNetwork() != null) {
+            if (getEditedEntity().getSocialNetwork().size() == 0) {
+                addSocialNetworkListsButton.setEnabled(true);
+            } else {
+                addSocialNetworkListsButton.setEnabled(false);
+            }
         } else {
-            addSocialNetworkListsButton.setEnabled(false);
+            addSocialNetworkListsButton.setEnabled(true);
         }
     }
 
@@ -1356,6 +1360,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 candidateInitialized = true;
             }
         }
+    }
+
+    public void repaintSocialNetworksTable() {
+        socialNetworkTable.repaint();
     }
 
     private void initTabInteractions() {
