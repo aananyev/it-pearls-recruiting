@@ -1,16 +1,64 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.entity.CandidateCV;
 import com.haulmont.cuba.core.global.DataManager;
+import org.jsoup.Jsoup;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service(ResumeRecognitionService.NAME)
 public class ResumeRecognitionServiceBean implements ResumeRecognitionService {
 
     @Inject
     private DataManager dataManager;
+    @Inject
+    private ParseCVService parseCVService;
+    @Inject
+    private Logger log;
+
+    @Override
+    public Set<String> scanSocialNetworksFromCVs(CandidateCV candidateCV) {
+        Set<String> newSocial = new HashSet<>();
+
+        try {
+            List<String> urls = parseCVService
+                    .extractUrls(Jsoup.parse(candidateCV.getTextCV())
+                            .text());
+            Set<String> setUrls = new HashSet<>(urls);
+
+            urls.clear();
+            newSocial.addAll(setUrls);
+        } catch (NullPointerException e) {
+            log.error("Error", e);
+        }
+
+        return newSocial;
+    }
+
+
+    @Override
+    public Set<String> scanSocialNetworksFromCVs(String candidateCV) {
+        Set<String> newSocial = new HashSet<>();
+
+        try {
+            List<String> urls = parseCVService
+                    .extractUrls(Jsoup.parse(candidateCV)
+                            .text());
+            Set<String> setUrls = new HashSet<>(urls);
+
+            urls.clear();
+            newSocial.addAll(setUrls);
+        } catch (NullPointerException e) {
+            log.error("Error", e);
+        }
+
+        return newSocial;
+    }
 
     @Override
     public String parseFirstName(String cvText) {

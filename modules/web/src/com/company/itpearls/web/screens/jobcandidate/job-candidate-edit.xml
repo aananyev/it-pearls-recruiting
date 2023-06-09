@@ -738,6 +738,7 @@
                 <hbox id="socialNetworkTableHbox"
                       width="100%"
                       height="AUTO"
+                      spacing="true"
                       stylename="borderless"
                       margin="false,false,false,false"
                       expand="socialNetworkTable">
@@ -761,6 +762,29 @@
                             </column> <!-- <componentRenderer/> -->
                         </columns>
                     </dataGrid>
+                    <vbox spacing="true"
+                          width="AUTO"
+                          height="AUTO">
+                        <button id="addSocialNetworkListsButton"
+                                visible="false"
+                                enable="false"
+                                width="100%"
+                                caption="msg://msgAddSocialNetworks"
+                                description="msg://msgAddSocialNetworksDesc"
+                                invoke="addSocialNetworksListsInvoke"/>
+                        <button id="addMissingSocialNetworkListsButton"
+                                width="100%"
+                                enable="true"
+                                caption="msg://msgAddMissingSocialNetrorkButton"
+                                description="msg://msgAddMissingSocialNetrorkButtonDesc"
+                                invoke="addMissingSocialNetworksListsInvoke"/>
+                        <button id="removeEmptySocialNetworkListsButton"
+                                width="100%"
+                                enable="true"
+                                caption="msg://removeEmptySocialNetworkListsButton"
+                                description="msg://removeEmptySocialNetworkListsButtonDesc"
+                                invoke="removeEmptySocialNetworkListsButton"/>
+                    </vbox>
                 </hbox>
             </tab>
             <!--

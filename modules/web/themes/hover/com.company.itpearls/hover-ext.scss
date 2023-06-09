@@ -604,7 +604,10 @@ rating_battery_yellow_3:before {
 
 .label_button_mostpopular_green {
     background: green; /* Цвет фона */
-    color: #fff; /* Цвет текста */
+    color: #fff; /* Цвет текста0 */
+    padding: 5px;
+    margin: 5px;
+    border-color: #51ff00;
     border-radius: 5px;
     text-weight: normal;
     margin: 0px 10px 0px 0px;

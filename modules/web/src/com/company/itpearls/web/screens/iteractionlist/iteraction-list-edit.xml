@@ -376,7 +376,7 @@
                     </grid>
                     <textArea id="commentField"
                               property="comment"
-                              rows="5"
+                              rows="4"
                               width="100%"
                               dataContainer="iteractionListDc"
                               caption="msg://msgComment"

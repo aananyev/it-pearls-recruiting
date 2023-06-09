@@ -23,7 +23,7 @@ public class SocialNetworkURLs extends StandardEntity {
     @Column(name = "NETWORK_URLS", length = 80)
     protected String networkURLS;
 
-    @OnDelete(DeletePolicy.DENY)
+    @OnDelete(DeletePolicy.UNLINK)
     @Composition
     @JoinColumn(name = "JOB_CANDIDATE_ID")
     @OneToOne(fetch = FetchType.LAZY)
@@ -31,7 +31,7 @@ public class SocialNetworkURLs extends StandardEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SOCIAL_NETWORK_URL_ID")
-    @OnDelete(DeletePolicy.DENY)
+    @OnDelete(DeletePolicy.UNLINK)
     @Composition
     protected SocialNetworkType socialNetworkURL;
 

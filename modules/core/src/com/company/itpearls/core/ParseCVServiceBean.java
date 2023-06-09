@@ -56,6 +56,8 @@ public class ParseCVServiceBean implements ParseCVService {
     private DataManager dataManager;
     @Inject
     private PdfParserService pdfParserService;
+    @Inject
+    private ResumeRecognitionService resumeRecognitionService;
 
     @Override
     public Date parseDate(String cv) {
@@ -743,5 +745,16 @@ public class ParseCVServiceBean implements ParseCVService {
         String s = text.replaceAll("\n", "<br>");
 
         return s;
+    }
+
+    @Override
+    public Set<String> scanSocialNetworksFromCVs(CandidateCV candidateCV) {
+        return resumeRecognitionService.scanSocialNetworksFromCVs(candidateCV);
+    }
+
+
+    @Override
+    public Set<String> scanSocialNetworksFromCVs(String candidateCV) {
+        return resumeRecognitionService.scanSocialNetworksFromCVs(candidateCV);
     }
 }

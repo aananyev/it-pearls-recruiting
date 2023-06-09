@@ -4,6 +4,7 @@ import com.company.itpearls.entity.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public interface ParseCVService {
     String NAME = "itpearls_ParseCVService";
@@ -64,4 +65,8 @@ public interface ParseCVService {
     String br2nl(String html);
 
     String nl2br(String html);
+
+    Set<String> scanSocialNetworksFromCVs(CandidateCV candidateCV);
+
+    Set<String> scanSocialNetworksFromCVs(String candidateCV);
 }

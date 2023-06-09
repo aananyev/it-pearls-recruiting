@@ -242,7 +242,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataGrid<IteractionList> jobCandidateCommentsDataGrid;
     @Inject
     private CollectionLoader<IteractionList> interactionCommentDl;
-    @Inject
     private CollectionContainer<OpenPosition> suggestOpenPositionDc;
     @Inject
     private GridLayout dictionatysTavlesHBox;
@@ -260,6 +259,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> skypuLabel;
     @Inject
     private Label<String> telegramLabel;
+    @Inject
+    private Button addSocialNetworkListsButton;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -696,15 +697,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setStatus(0);
         }
-//        enableDisableContacts();
 
-        // проверить в названии должности (не использовать)
-//        priorityCommenicationMethodRadioButtonInit();
-/*        workStatusRadioButtonInit();
-
-        if (blockCandidateCheckBox.getValue() == null) {
-            blockCandidateCheckBox.setValue(false);
-        } */
+        setSaveRecordOfViewCandidate();
 
         setSocialNetworkTable();
         enableDisableContacts();
@@ -721,6 +715,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setSuggestOpenPositionTable();
         setLastProjectOfCandidate();
         setCandidatePicImage();
+        setAddSocialNetworkButtonEnable();
 
         lastIteraction = getLastIteraction();
 
@@ -733,6 +728,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 //        setLaborAgreement();
         setLastProjectTable();
+    }
+
+    private void setAddSocialNetworkButtonEnable() {
+        if (getEditedEntity().getSocialNetwork().size() == 0) {
+            addSocialNetworkListsButton.setEnabled(true);
+        } else {
+            addSocialNetworkListsButton.setEnabled(false);
+        }
+    }
+
+    private void setSaveRecordOfViewCandidate() {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            /* TODO надо сделать лог доступа к карточке. Кто создал, кто изменил, кто просмотртел */
+        }
     }
 
     private void initInteractionCommentDl() {
@@ -1240,7 +1249,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         tabContactInfoInitialized = true;
     }
 
-    private void initSocialNeiworkTable() {
+    public void initSocialNeiworkTable() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (!initSocialNetworkURLs) {
                 List<SocialNetworkURLs> socialNetworkURLs = new ArrayList<>();
@@ -1250,14 +1259,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                 int endCount = socialNetworkTypes.size();
                 for (int i = 0; i < endCount; i++) {
-                    SocialNetworkURLs sn = metadata.create(SocialNetworkURLs.class);
-                    sn.setSocialNetworkURL(socialNetworkTypes.get(i));
-                    jobCandidateSocialNetworksDc.getMutableItems().add(sn);
+                    Boolean flag = true;
+                    if (getEditedEntity().getSocialNetwork() != null) {
+                        for (SocialNetworkURLs sn : getEditedEntity().getSocialNetwork()) {
+                            if (socialNetworkTypes.get(i).equals(sn.getSocialNetworkURL())) {
+                                flag = false;
+                            }
+                        }
+                    }
+
+                    if (flag) {
+                        SocialNetworkURLs sn = metadata.create(SocialNetworkURLs.class);
+                        sn.setSocialNetworkURL(socialNetworkTypes.get(i));
+                        jobCandidateSocialNetworksDc.getMutableItems().add(sn);
+                    }
                 }
 
                 dataContext.merge(jobCandidateSocialNetworksDc.getMutableItems());
 
-                initSocialNetworkURLs = false;
+                initSocialNetworkURLs = true;
             }
         }
     }
@@ -3022,8 +3042,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .withCaption(messageBundle.getMessage("msgComment"))
                         .withParameters(
                                 InputParameter.stringParameter("comment")
-                                .withCaption(messageBundle.getMessage("msgInputComment"))
-                                .withRequired(true)
+                                        .withCaption(messageBundle.getMessage("msgInputComment"))
+                                        .withRequired(true)
                         )
                         .withActions(DialogActions.OK_CANCEL)
                         .withCloseListener(closeEvent -> {
@@ -3255,5 +3275,67 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             telegramLabel.setValue(event.getValue());
         }
 
+    }
+
+    public void addSocialNetworksListsInvoke() {
+        if (getEditedEntity().getSocialNetwork().size() == 0) {
+            initSocialNeiworkTable();
+            addSocialNetworkListsButton.setEnabled(false);
+        }
+    }
+
+    public void addMissingSocialNetworksListsInvoke() {
+        List<SocialNetworkType> socialNetworkTypes = dataManager
+                .load(SocialNetworkType.class)
+                .list();
+
+        for (SocialNetworkType socialNetworkType : socialNetworkTypes) {
+            Boolean flag = true;
+
+            for (SocialNetworkURLs socialNetworkURLs : getEditedEntity().getSocialNetwork()) {
+                if (socialNetworkURLs.getSocialNetworkURL().equals(socialNetworkType)) {
+                    flag = false;
+                }
+            }
+
+            if (flag) {
+                SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
+                socialNetworkURLs.setJobCandidate(getEditedEntity());
+                socialNetworkURLs.setSocialNetworkURL(socialNetworkType);
+                socialNetworkURLs.setNetworkName(socialNetworkType.getSocialNetwork());
+
+                getEditedEntity().getSocialNetwork().add(socialNetworkURLs);
+                dataContext.merge(socialNetworkURLs);
+            }
+        }
+
+        socialNetworkTable.repaint();
+
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .withDescription(messageBundle.getMessage("msgAddMissingSocialNetwork"))
+                .withHideDelayMs(15000)
+                .withPosition(Notifications.Position.MIDDLE_CENTER)
+                .show();
+    }
+
+    public void removeEmptySocialNetworkListsButton() {
+        for (SocialNetworkURLs s : getEditedEntity().getSocialNetwork()) {
+            if (s.getNetworkURLS() == null) {
+                dataManager.remove(s);
+            } else {
+                if (s.getNetworkURLS().equals("")) {
+                    dataManager.remove(s);
+                }
+            }
+        }
+
+        socialNetworkTable.repaint();
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .withDescription(messageBundle.getMessage("msgRemoveEmptySocialNetwork"))
+                .withHideDelayMs(15000)
+                .withPosition(Notifications.Position.MIDDLE_CENTER)
+                .show();
     }
 }

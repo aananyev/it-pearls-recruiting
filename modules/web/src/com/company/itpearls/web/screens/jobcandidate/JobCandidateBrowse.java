@@ -29,10 +29,13 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
@@ -44,9 +47,6 @@ import java.util.stream.Collectors;
 @LookupComponent("jobCandidatesTable")
 @LoadDataBeforeShow
 public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
-
-    private static final String RECRUTIER_GROUP = "Хантинг";
-    private static final String RESEARCHER_GROUP = "Ресерчинг";
 
     @Inject
     private CheckBox checkBoxShowOnlyMy;
@@ -66,7 +66,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private DataGrid<JobCandidate> jobCandidatesTable;
     @Inject
     private DataManager dataManager;
-    private String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
+    private final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
     @Inject
     private UiComponents uiComponents;
 
@@ -97,8 +97,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private UserSessionSource userSessionSource;
     private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
-    @Inject
-    private PdfParserService pdfParserService;
     @Inject
     private Button sendEmailButton;
     @Inject
@@ -366,9 +364,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return retStr;
     }
-
-    JobCanidateDetailScreenFragment jobCanidateDetailScreenFragmentOld = null;
-    Fragment oldFragment = null;
 
     @Install(to = "jobCandidatesTable", subject = "detailsGenerator")
     private Component jobCandidatesTableDetailsGenerator(JobCandidate entity) throws IOException, ClassNotFoundException {
@@ -1485,6 +1480,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                         .parseTelegram(textCV));
                                 e.setSkypeName(parseCVService
                                         .parseSkype(textCV));
+                                initSocialNeiworkTable(e);
+                                setSocialNetworkList(e, ((OnlyTextPersonPosition) screenOnlytext).getResultText());
 
                                 CandidateCV candidateCV = metadata.create(CandidateCV.class);
                                 candidateCV.setResumePosition(e.getPersonPosition());
@@ -1517,10 +1514,83 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 openScreenCVQuickLoadedCandidate(eventJobCandidateEdit, candidateCVEdit);
             });
 
+
             jobCandidateEdit.show();
         });
 
         screenOnlytext.show();
+    }
+
+    private void initSocialNeiworkTable(JobCandidate e) {
+        if (e.getSocialNetwork() == null) {
+            List<SocialNetworkType> socialNetworkTypes = dataManager.load(SocialNetworkType.class)
+                    .view("socialNetworkType-view")
+                    .list();
+
+            List<SocialNetworkURLs> networks = new ArrayList<>();
+
+            for (SocialNetworkType socialNetworkType : socialNetworkTypes) {
+                SocialNetworkURLs sn = metadata.create(SocialNetworkURLs.class);
+                sn.setSocialNetworkURL(socialNetworkType);
+                sn.setJobCandidate(e);
+                sn.setNetworkName(socialNetworkType.getSocialNetwork());
+                networks.add(sn);
+            }
+
+            e.setSocialNetwork(networks);
+            dataContext.merge(networks);
+
+            jobCandidatesDl.load();
+        }
+    }
+
+    private void setSocialNetworkList(JobCandidate e, String resultText) {
+        Set<String> socialNetworks = parseCVService.scanSocialNetworksFromCVs(resultText);
+        List<SocialNetworkType> socialNetworkTypes = dataManager.load(SocialNetworkType.class)
+                .view("socialNetworkType-view")
+                .list();
+
+        for (String network : socialNetworks) {
+            for (SocialNetworkURLs networkURL : e.getSocialNetwork()) {
+                URI uriCandidate = null;
+                URI uriNetworTypes = null;
+
+                try {
+                    uriNetworTypes = new URI(networkURL
+                            .getSocialNetworkURL()
+                            .getSocialNetworkURL());
+                } catch (URISyntaxException uriSyntaxException) {
+                    uriSyntaxException.printStackTrace();
+                }
+
+                try {
+                    uriCandidate = new URI(network);
+                } catch (URISyntaxException uriSyntaxException) {
+                    uriSyntaxException.printStackTrace();
+                }
+
+                String hostCandidateFromCV = uriCandidate.getHost();
+                String hostNetworkTypes = uriNetworTypes.getHost();
+
+                if (hostCandidateFromCV.equals(hostNetworkTypes)) {
+                    if (networkURL.getSocialNetworkURL() != null || !networkURL.getSocialNetworkURL().equals("")) {
+                        networkURL.setNetworkURLS(network);
+                        networkURL.setJobCandidate(e);
+                        networkURL.setNetworkName(hostNetworkTypes);
+                    } else {
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                                .withHideDelayMs(15000)
+                                .withStyleName("create-jobcandidate-warning")
+                                .withDescription(messageBundle
+                                        .getMessage("msgAdditionalSocialNetwork")
+                                + network)
+                                .show();
+
+                    }
+                }
+            }
+        }
     }
 
     private void selectFirstNames(String textCV, JobCandidate e) {
