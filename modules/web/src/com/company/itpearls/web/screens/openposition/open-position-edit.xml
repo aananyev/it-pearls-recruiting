@@ -536,6 +536,10 @@
                                        property="outstaffingCost"
                                        caption="msg://msgOutstaffingCost"
                                        description="msg://msgOutstaffingCostDescription"/>
+                            <button id="setSalaryFieldButton"
+                                    caption="msg://msgSetSalary"
+                                    description="msg://msgSetSalaryDesc"
+                                    invoke="setSalaryFieldButtonInvoke"/>
                         </hbox>
                         <dataGrid id="laborAgreementDataGrid"
                                   width="100%"

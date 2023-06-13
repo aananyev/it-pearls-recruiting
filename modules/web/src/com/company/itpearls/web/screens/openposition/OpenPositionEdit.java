@@ -38,6 +38,7 @@ import java.util.*;
 @EditedEntityContainer("openPositionDc")
 @LoadDataBeforeShow
 public class OpenPositionEdit extends StandardEditor<OpenPosition> {
+    private static final String QUERY_OUTSTAFF_RATES = "select e from itpearls_OutstaffingRates e where e.rate = :rate";
     @Inject
     private LookupPickerField<City> cityOpenPositionField;
     @Inject
@@ -221,6 +222,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private MessageBundle messageBundle;
     @Inject
     private TextField<BigDecimal> openPositionFieldSalaryIE;
+    @Inject
+    private TextField<String> vacansyIDTextField;
+    @Inject
+    private TextField<BigDecimal> outstaffingCostTextField;
+    @Inject
+    private TextField<String> salaryCommentTextFiels;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -929,7 +936,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (dublicateOpenPosition != null && PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()
-                    .withCaption("ВНИМАНИЕ!")
+                    .withCaption(messageBundle.getMessage("msgWarning"))
                     .withMessage("Вакансия " + vacansyNameField.getValue() + "\n" + "уже есть в базе.\n" +
                             "\nОткрыта ранее: " + dublicateOpenPosition.getCreatedBy() +
                             "\nСтатус: " + (dublicateOpenPosition.getOpenClose() ? "Закрыта" : "Открыта" +
@@ -943,6 +950,37 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .show();
 
             event.preventCommit();
+        }
+
+        if(checkDublicatePositionID()) {
+            dialogs.createOptionDialog()
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(messageBundle.getMessage("msgDublicateVacancyID"))
+                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
+                        event.resume();
+                        // вернуться и не закомитить
+                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
+                        // закончить
+                    }))
+                    .show();
+
+            event.preventCommit();
+        }
+    }
+
+    private boolean checkDublicatePositionID() {
+        final String QUERY_CHECK_VACANCY_ID
+                = "select e from itpearls_OpenPosition e where e.vacansyID like :vacansyID";
+
+        if (dataManager.load(OpenPosition.class)
+        .query(QUERY_CHECK_VACANCY_ID)
+        .parameter("vacancyID", vacansyIDTextField.getValue())
+        .view("openPosition-view")
+        .list()
+        .size() > 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -2206,5 +2244,42 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         return retStr;
+    }
+
+    public void setSalaryFieldButtonInvoke() {
+        OutstaffingRates outstaffingRates = dataManager.load(OutstaffingRates.class)
+                .query(QUERY_OUTSTAFF_RATES)
+                .parameter("rate", outstaffingCostTextField.getValue())
+                .one();
+
+        if (outstaffingRates != null) {
+            String commentSalary = messageBundle.getMessage("msgMarginalRate")
+                    + outstaffingCostTextField.getValue() + " \n"
+                    + messageBundle.getMessage("msgMinSalary")
+                    + outstaffingRates.getMinSalary() + " \n"
+                    + messageBundle.getMessage("msgMaxSalary")
+                    + outstaffingRates.getMaxSalary() + " \n"
+                    + messageBundle.getMessage("msgSalaryIE") + ": "
+                    + outstaffingRates.getMaxIESalary();
+
+            openPositionFieldSalaryMin.setValue(outstaffingRates.getMinSalary());
+            openPositionFieldSalaryMax.setValue(outstaffingRates.getMaxSalary());
+            openPositionFieldSalaryIE.setValue(outstaffingRates.getMaxIESalary());
+            salaryCommentTextFiels.setValue(commentSalary);
+
+            notifications.create(Notifications.NotificationType.SYSTEM)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgSetSalaryToForm")
+                            + " "
+                            + commentSalary)
+                    .show();
+
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgNotRate")
+                            + outstaffingCostTextField.getValue())
+                    .show();
+        }
     }
 }

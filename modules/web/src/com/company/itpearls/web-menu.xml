@@ -77,6 +77,9 @@
         <item screen="itpearls_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="FACEBOOK_OFFICIAL"/>
         <item screen="itpearls_Grade.browse" caption="mainMsg://menu_config.itpearls_Grade.browse"/>
+        <item screen="itpearls_Currency.browse" caption="mainMsg://menu_config.itpearls_Currency.browse"/>
+        <item screen="itpearls_OutstaffingRates.browse"
+              caption="mainMsg://menu_config.itpearls_OutstaffingRates.browse"/>
     </menu>
     <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-hadbook">
         <item bean="itpearls_MemoForCandidatesBean" beanMethod="runReport" caption="mainMsg://msgMemoForCandidates"

@@ -130,5 +130,11 @@
         <entity class="com.company.itpearls.entity.UserSettings">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.OutstaffingRates">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.Currency">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

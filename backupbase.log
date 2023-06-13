@@ -5192,3 +5192,1065 @@ server started
 2023-06-09 15:13:14.430 +04 [20552] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-06-09 15:13:14.557 +04 [20554] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-06-09 15:13:14.681 +04 [20556] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down....2023-06-09 15:29:20.006 +04 [79612] LOG:  received fast shutdown request
+2023-06-09 15:29:20.007 +04 [79612] LOG:  aborting any active transactions
+2023-06-09 15:29:20.008 +04 [20672] FATAL:  terminating connection due to administrator command
+2023-06-09 15:29:20.008 +04 [20766] FATAL:  terminating connection due to administrator command
+2023-06-09 15:29:20.015 +04 [79612] LOG:  background worker "logical replication launcher" (PID 79623) exited with exit code 1
+2023-06-09 15:29:20.033 +04 [79618] LOG:  shutting down
+2023-06-09 15:29:20.077 +04 [79612] LOG:  database system is shut down
+ done
+server stopped
+waiting for checkpoint
+      0/3433661 kB (0%), 0/1 tablespace
+    237/3433661 kB (0%), 0/1 tablespace
+   7242/3433661 kB (0%), 0/1 tablespace
+  17757/3433661 kB (0%), 0/1 tablespace
+  26074/3433661 kB (0%), 0/1 tablespace
+  35314/3433661 kB (1%), 0/1 tablespace
+  45053/3433661 kB (1%), 0/1 tablespace
+  55494/3433661 kB (1%), 0/1 tablespace
+  64642/3433661 kB (1%), 0/1 tablespace
+  73992/3433661 kB (2%), 0/1 tablespace
+  83400/3433661 kB (2%), 0/1 tablespace
+  93402/3433661 kB (2%), 0/1 tablespace
+ 101370/3433661 kB (2%), 0/1 tablespace
+ 108890/3433661 kB (3%), 0/1 tablespace
+ 115066/3433661 kB (3%), 0/1 tablespace
+ 121946/3433661 kB (3%), 0/1 tablespace
+ 128474/3433661 kB (3%), 0/1 tablespace
+ 135066/3433661 kB (3%), 0/1 tablespace
+ 142458/3433661 kB (4%), 0/1 tablespace
+ 149237/3433661 kB (4%), 0/1 tablespace
+ 155893/3433661 kB (4%), 0/1 tablespace
+ 162933/3433661 kB (4%), 0/1 tablespace
+ 169493/3433661 kB (4%), 0/1 tablespace
+ 176501/3433661 kB (5%), 0/1 tablespace
+ 184597/3433661 kB (5%), 0/1 tablespace
+ 191989/3433661 kB (5%), 0/1 tablespace
+ 200085/3433661 kB (5%), 0/1 tablespace
+ 207925/3433661 kB (6%), 0/1 tablespace
+ 215573/3433661 kB (6%), 0/1 tablespace
+ 222741/3433661 kB (6%), 0/1 tablespace
+ 230261/3433661 kB (6%), 0/1 tablespace
+ 236885/3433661 kB (6%), 0/1 tablespace
+ 243381/3433661 kB (7%), 0/1 tablespace
+ 249557/3433661 kB (7%), 0/1 tablespace
+ 255349/3433661 kB (7%), 0/1 tablespace
+ 261109/3433661 kB (7%), 0/1 tablespace
+ 266997/3433661 kB (7%), 0/1 tablespace
+ 273173/3433661 kB (7%), 0/1 tablespace
+ 279157/3433661 kB (8%), 0/1 tablespace
+ 286133/3433661 kB (8%), 0/1 tablespace
+ 293013/3433661 kB (8%), 0/1 tablespace
+ 300469/3433661 kB (8%), 0/1 tablespace
+ 308117/3433661 kB (8%), 0/1 tablespace
+ 315829/3433661 kB (9%), 0/1 tablespace
+ 321813/3433661 kB (9%), 0/1 tablespace
+ 327541/3433661 kB (9%), 0/1 tablespace
+ 333525/3433661 kB (9%), 0/1 tablespace
+ 339989/3433661 kB (9%), 0/1 tablespace
+ 346485/3433661 kB (10%), 0/1 tablespace
+ 353141/3433661 kB (10%), 0/1 tablespace
+ 359957/3433661 kB (10%), 0/1 tablespace
+ 366613/3433661 kB (10%), 0/1 tablespace
+ 373845/3433661 kB (10%), 0/1 tablespace
+ 381397/3433661 kB (11%), 0/1 tablespace
+ 389397/3433661 kB (11%), 0/1 tablespace
+ 396981/3433661 kB (11%), 0/1 tablespace
+ 402869/3433661 kB (11%), 0/1 tablespace
+ 408629/3433661 kB (11%), 0/1 tablespace
+ 415445/3433661 kB (12%), 0/1 tablespace
+ 421781/3433661 kB (12%), 0/1 tablespace
+ 428565/3433661 kB (12%), 0/1 tablespace
+ 435669/3433661 kB (12%), 0/1 tablespace
+ 442613/3433661 kB (12%), 0/1 tablespace
+ 449301/3433661 kB (13%), 0/1 tablespace
+ 455797/3433661 kB (13%), 0/1 tablespace
+ 463029/3433661 kB (13%), 0/1 tablespace
+ 469781/3433661 kB (13%), 0/1 tablespace
+ 476661/3433661 kB (13%), 0/1 tablespace
+ 483573/3433661 kB (14%), 0/1 tablespace
+ 491189/3433661 kB (14%), 0/1 tablespace
+ 497941/3433661 kB (14%), 0/1 tablespace
+ 504789/3433661 kB (14%), 0/1 tablespace
+ 512085/3433661 kB (14%), 0/1 tablespace
+ 518165/3433661 kB (15%), 0/1 tablespace
+ 523605/3433661 kB (15%), 0/1 tablespace
+ 529685/3433661 kB (15%), 0/1 tablespace
+ 536181/3433661 kB (15%), 0/1 tablespace
+ 543125/3433661 kB (15%), 0/1 tablespace
+ 550901/3433661 kB (16%), 0/1 tablespace
+ 558293/3433661 kB (16%), 0/1 tablespace
+ 566101/3433661 kB (16%), 0/1 tablespace
+ 573205/3433661 kB (16%), 0/1 tablespace
+ 578997/3433661 kB (16%), 0/1 tablespace
+ 585781/3433661 kB (17%), 0/1 tablespace
+ 591925/3433661 kB (17%), 0/1 tablespace
+ 598965/3433661 kB (17%), 0/1 tablespace
+ 606485/3433661 kB (17%), 0/1 tablespace
+ 614005/3433661 kB (17%), 0/1 tablespace
+ 621941/3433661 kB (18%), 0/1 tablespace
+ 629269/3433661 kB (18%), 0/1 tablespace
+ 637333/3433661 kB (18%), 0/1 tablespace
+ 644501/3433661 kB (18%), 0/1 tablespace
+ 651285/3433661 kB (18%), 0/1 tablespace
+ 657557/3433661 kB (19%), 0/1 tablespace
+ 664135/3433661 kB (19%), 0/1 tablespace
+ 670855/3433661 kB (19%), 0/1 tablespace
+ 676711/3433661 kB (19%), 0/1 tablespace
+ 682631/3433661 kB (19%), 0/1 tablespace
+ 688263/3433661 kB (20%), 0/1 tablespace
+ 694087/3433661 kB (20%), 0/1 tablespace
+ 698215/3433661 kB (20%), 0/1 tablespace
+ 702279/3433661 kB (20%), 0/1 tablespace
+ 707143/3433661 kB (20%), 0/1 tablespace
+ 712871/3433661 kB (20%), 0/1 tablespace
+ 718631/3433661 kB (20%), 0/1 tablespace
+ 724871/3433661 kB (21%), 0/1 tablespace
+ 731015/3433661 kB (21%), 0/1 tablespace
+ 736839/3433661 kB (21%), 0/1 tablespace
+ 743335/3433661 kB (21%), 0/1 tablespace
+ 749895/3433661 kB (21%), 0/1 tablespace
+ 756135/3433661 kB (22%), 0/1 tablespace
+ 763143/3433661 kB (22%), 0/1 tablespace
+ 768935/3433661 kB (22%), 0/1 tablespace
+ 775367/3433661 kB (22%), 0/1 tablespace
+ 781959/3433661 kB (22%), 0/1 tablespace
+ 789031/3433661 kB (22%), 0/1 tablespace
+ 795783/3433661 kB (23%), 0/1 tablespace
+ 802631/3433661 kB (23%), 0/1 tablespace
+ 810215/3433661 kB (23%), 0/1 tablespace
+ 817511/3433661 kB (23%), 0/1 tablespace
+ 825543/3433661 kB (24%), 0/1 tablespace
+ 833191/3433661 kB (24%), 0/1 tablespace
+ 841383/3433661 kB (24%), 0/1 tablespace
+ 848487/3433661 kB (24%), 0/1 tablespace
+ 855207/3433661 kB (24%), 0/1 tablespace
+ 863207/3433661 kB (25%), 0/1 tablespace
+ 870663/3433661 kB (25%), 0/1 tablespace
+ 877767/3433661 kB (25%), 0/1 tablespace
+ 885607/3433661 kB (25%), 0/1 tablespace
+ 893479/3433661 kB (26%), 0/1 tablespace
+ 901191/3433661 kB (26%), 0/1 tablespace
+ 908711/3433661 kB (26%), 0/1 tablespace
+ 915271/3433661 kB (26%), 0/1 tablespace
+ 922087/3433661 kB (26%), 0/1 tablespace
+ 929671/3433661 kB (27%), 0/1 tablespace
+ 937191/3433661 kB (27%), 0/1 tablespace
+ 944327/3433661 kB (27%), 0/1 tablespace
+ 951175/3433661 kB (27%), 0/1 tablespace
+ 957031/3433661 kB (27%), 0/1 tablespace
+ 963847/3433661 kB (28%), 0/1 tablespace
+ 969703/3433661 kB (28%), 0/1 tablespace
+ 976103/3433661 kB (28%), 0/1 tablespace
+ 982343/3433661 kB (28%), 0/1 tablespace
+ 987047/3433661 kB (28%), 0/1 tablespace
+ 992359/3433661 kB (28%), 0/1 tablespace
+ 997159/3433661 kB (29%), 0/1 tablespace
+1002791/3433661 kB (29%), 0/1 tablespace
+1008135/3433661 kB (29%), 0/1 tablespace
+1014791/3433661 kB (29%), 0/1 tablespace
+1021255/3433661 kB (29%), 0/1 tablespace
+1027879/3433661 kB (29%), 0/1 tablespace
+1035047/3433661 kB (30%), 0/1 tablespace
+1041223/3433661 kB (30%), 0/1 tablespace
+1048359/3433661 kB (30%), 0/1 tablespace
+1055495/3433661 kB (30%), 0/1 tablespace
+1062535/3433661 kB (30%), 0/1 tablespace
+1069735/3433661 kB (31%), 0/1 tablespace
+1076807/3433661 kB (31%), 0/1 tablespace
+1084327/3433661 kB (31%), 0/1 tablespace
+1092167/3433661 kB (31%), 0/1 tablespace
+1100359/3433661 kB (32%), 0/1 tablespace
+1107463/3433661 kB (32%), 0/1 tablespace
+1115175/3433661 kB (32%), 0/1 tablespace
+1122887/3433661 kB (32%), 0/1 tablespace
+1130407/3433661 kB (32%), 0/1 tablespace
+1138023/3433661 kB (33%), 0/1 tablespace
+1146629/3433661 kB (33%), 0/1 tablespace
+1154743/3433661 kB (33%), 0/1 tablespace
+1161756/3433661 kB (33%), 0/1 tablespace
+1168219/3433661 kB (34%), 0/1 tablespace
+1174363/3433661 kB (34%), 0/1 tablespace
+1181689/3433661 kB (34%), 0/1 tablespace
+1188315/3433661 kB (34%), 0/1 tablespace
+1195446/3433661 kB (34%), 0/1 tablespace
+1202806/3433661 kB (35%), 0/1 tablespace
+1210582/3433661 kB (35%), 0/1 tablespace
+1218358/3433661 kB (35%), 0/1 tablespace
+1226166/3433661 kB (35%), 0/1 tablespace
+1234358/3433661 kB (35%), 0/1 tablespace
+1242454/3433661 kB (36%), 0/1 tablespace
+1249270/3433661 kB (36%), 0/1 tablespace
+1256310/3433661 kB (36%), 0/1 tablespace
+1262870/3433661 kB (36%), 0/1 tablespace
+1269142/3433661 kB (36%), 0/1 tablespace
+1275638/3433661 kB (37%), 0/1 tablespace
+1281814/3433661 kB (37%), 0/1 tablespace
+1287478/3433661 kB (37%), 0/1 tablespace
+1294102/3433661 kB (37%), 0/1 tablespace
+1300982/3433661 kB (37%), 0/1 tablespace
+1308054/3433661 kB (38%), 0/1 tablespace
+1315318/3433661 kB (38%), 0/1 tablespace
+1322966/3433661 kB (38%), 0/1 tablespace
+1330742/3433661 kB (38%), 0/1 tablespace
+1337174/3433661 kB (38%), 0/1 tablespace
+1344310/3433661 kB (39%), 0/1 tablespace
+1351510/3433661 kB (39%), 0/1 tablespace
+1359702/3433661 kB (39%), 0/1 tablespace
+1367190/3433661 kB (39%), 0/1 tablespace
+1375510/3433661 kB (40%), 0/1 tablespace
+1383638/3433661 kB (40%), 0/1 tablespace
+1391126/3433661 kB (40%), 0/1 tablespace
+1396950/3433661 kB (40%), 0/1 tablespace
+1403478/3433661 kB (40%), 0/1 tablespace
+1410230/3433661 kB (41%), 0/1 tablespace
+1417302/3433661 kB (41%), 0/1 tablespace
+1423350/3433661 kB (41%), 0/1 tablespace
+1429558/3433661 kB (41%), 0/1 tablespace
+1435254/3433661 kB (41%), 0/1 tablespace
+1441846/3433661 kB (41%), 0/1 tablespace
+1448790/3433661 kB (42%), 0/1 tablespace
+1455894/3433661 kB (42%), 0/1 tablespace
+1462870/3433661 kB (42%), 0/1 tablespace
+1470134/3433661 kB (42%), 0/1 tablespace
+1477238/3433661 kB (43%), 0/1 tablespace
+1485366/3433661 kB (43%), 0/1 tablespace
+1492694/3433661 kB (43%), 0/1 tablespace
+1499350/3433661 kB (43%), 0/1 tablespace
+1505206/3433661 kB (43%), 0/1 tablespace
+1512342/3433661 kB (44%), 0/1 tablespace
+1519446/3433661 kB (44%), 0/1 tablespace
+1527222/3433661 kB (44%), 0/1 tablespace
+1533590/3433661 kB (44%), 0/1 tablespace
+1539990/3433661 kB (44%), 0/1 tablespace
+1546710/3433661 kB (45%), 0/1 tablespace
+1553654/3433661 kB (45%), 0/1 tablespace
+1559446/3433661 kB (45%), 0/1 tablespace
+1567062/3433661 kB (45%), 0/1 tablespace
+1574966/3433661 kB (45%), 0/1 tablespace
+1582902/3433661 kB (46%), 0/1 tablespace
+1591094/3433661 kB (46%), 0/1 tablespace
+1598102/3433661 kB (46%), 0/1 tablespace
+1604982/3433661 kB (46%), 0/1 tablespace
+1612534/3433661 kB (46%), 0/1 tablespace
+1621206/3433661 kB (47%), 0/1 tablespace
+1630006/3433661 kB (47%), 0/1 tablespace
+1637526/3433661 kB (47%), 0/1 tablespace
+1644825/3433661 kB (47%), 0/1 tablespace
+1650809/3433661 kB (48%), 0/1 tablespace
+1657241/3433661 kB (48%), 0/1 tablespace
+1663574/3433661 kB (48%), 0/1 tablespace
+1669872/3433661 kB (48%), 0/1 tablespace
+1676798/3433661 kB (48%), 0/1 tablespace
+1684198/3433661 kB (49%), 0/1 tablespace
+1691238/3433661 kB (49%), 0/1 tablespace
+1698950/3433661 kB (49%), 0/1 tablespace
+1706714/3433661 kB (49%), 0/1 tablespace
+1714138/3433661 kB (49%), 0/1 tablespace
+1721690/3433661 kB (50%), 0/1 tablespace
+1729626/3433661 kB (50%), 0/1 tablespace
+1738010/3433661 kB (50%), 0/1 tablespace
+1746042/3433661 kB (50%), 0/1 tablespace
+1754234/3433661 kB (51%), 0/1 tablespace
+1761594/3433661 kB (51%), 0/1 tablespace
+1767930/3433661 kB (51%), 0/1 tablespace
+1774650/3433661 kB (51%), 0/1 tablespace
+1781562/3433661 kB (51%), 0/1 tablespace
+1788794/3433661 kB (52%), 0/1 tablespace
+1795834/3433661 kB (52%), 0/1 tablespace
+1802490/3433661 kB (52%), 0/1 tablespace
+1809402/3433661 kB (52%), 0/1 tablespace
+1816570/3433661 kB (52%), 0/1 tablespace
+1824250/3433661 kB (53%), 0/1 tablespace
+1831898/3433661 kB (53%), 0/1 tablespace
+1839418/3433661 kB (53%), 0/1 tablespace
+1847802/3433661 kB (53%), 0/1 tablespace
+1855898/3433661 kB (54%), 0/1 tablespace
+1864282/3433661 kB (54%), 0/1 tablespace
+1871162/3433661 kB (54%), 0/1 tablespace
+1878298/3433661 kB (54%), 0/1 tablespace
+1884250/3433661 kB (54%), 0/1 tablespace
+1890618/3433661 kB (55%), 0/1 tablespace
+1897594/3433661 kB (55%), 0/1 tablespace
+1904730/3433661 kB (55%), 0/1 tablespace
+1911898/3433661 kB (55%), 0/1 tablespace
+1920058/3433661 kB (55%), 0/1 tablespace
+1927834/3433661 kB (56%), 0/1 tablespace
+1935258/3433661 kB (56%), 0/1 tablespace
+1942842/3433661 kB (56%), 0/1 tablespace
+1950554/3433661 kB (56%), 0/1 tablespace
+1957274/3433661 kB (57%), 0/1 tablespace
+1964826/3433661 kB (57%), 0/1 tablespace
+1973690/3433661 kB (57%), 0/1 tablespace
+1981498/3433661 kB (57%), 0/1 tablespace
+1988666/3433661 kB (57%), 0/1 tablespace
+1996314/3433661 kB (58%), 0/1 tablespace
+2003930/3433661 kB (58%), 0/1 tablespace
+2011738/3433661 kB (58%), 0/1 tablespace
+2018490/3433661 kB (58%), 0/1 tablespace
+2024154/3433661 kB (58%), 0/1 tablespace
+2030426/3433661 kB (59%), 0/1 tablespace
+2036986/3433661 kB (59%), 0/1 tablespace
+2044378/3433661 kB (59%), 0/1 tablespace
+2052410/3433661 kB (59%), 0/1 tablespace
+2060538/3433661 kB (60%), 0/1 tablespace
+2067482/3433661 kB (60%), 0/1 tablespace
+2073786/3433661 kB (60%), 0/1 tablespace
+2081690/3433661 kB (60%), 0/1 tablespace
+2088602/3433661 kB (60%), 0/1 tablespace
+2095098/3433661 kB (61%), 0/1 tablespace
+2100058/3433661 kB (61%), 0/1 tablespace
+2105882/3433661 kB (61%), 0/1 tablespace
+2112026/3433661 kB (61%), 0/1 tablespace
+2118682/3433661 kB (61%), 0/1 tablespace
+2125338/3433661 kB (61%), 0/1 tablespace
+2132506/3433661 kB (62%), 0/1 tablespace
+2140378/3433661 kB (62%), 0/1 tablespace
+2148122/3433661 kB (62%), 0/1 tablespace
+2155962/3433661 kB (62%), 0/1 tablespace
+2163642/3433661 kB (63%), 0/1 tablespace
+2171322/3433661 kB (63%), 0/1 tablespace
+2178266/3433661 kB (63%), 0/1 tablespace
+2185882/3433661 kB (63%), 0/1 tablespace
+2194458/3433661 kB (63%), 0/1 tablespace
+2202042/3433661 kB (64%), 0/1 tablespace
+2208858/3433661 kB (64%), 0/1 tablespace
+2216666/3433661 kB (64%), 0/1 tablespace
+2224634/3433661 kB (64%), 0/1 tablespace
+2232666/3433661 kB (65%), 0/1 tablespace
+2241530/3433661 kB (65%), 0/1 tablespace
+2250266/3433661 kB (65%), 0/1 tablespace
+2257754/3433661 kB (65%), 0/1 tablespace
+2266426/3433661 kB (66%), 0/1 tablespace
+2275002/3433661 kB (66%), 0/1 tablespace
+2283514/3433661 kB (66%), 0/1 tablespace
+2291002/3433661 kB (66%), 0/1 tablespace
+2297978/3433661 kB (66%), 0/1 tablespace
+2306010/3433661 kB (67%), 0/1 tablespace
+2312826/3433661 kB (67%), 0/1 tablespace
+2319642/3433661 kB (67%), 0/1 tablespace
+2325786/3433661 kB (67%), 0/1 tablespace
+2331162/3433661 kB (67%), 0/1 tablespace
+2337594/3433661 kB (68%), 0/1 tablespace
+2343930/3433661 kB (68%), 0/1 tablespace
+2350426/3433661 kB (68%), 0/1 tablespace
+2356858/3433661 kB (68%), 0/1 tablespace
+2364250/3433661 kB (68%), 0/1 tablespace
+2372314/3433661 kB (69%), 0/1 tablespace
+2380506/3433661 kB (69%), 0/1 tablespace
+2388570/3433661 kB (69%), 0/1 tablespace
+2396410/3433661 kB (69%), 0/1 tablespace
+2403930/3433661 kB (70%), 0/1 tablespace
+2411482/3433661 kB (70%), 0/1 tablespace
+2419738/3433661 kB (70%), 0/1 tablespace
+2428762/3433661 kB (70%), 0/1 tablespace
+2437530/3433661 kB (70%), 0/1 tablespace
+2444154/3433661 kB (71%), 0/1 tablespace
+2450906/3433661 kB (71%), 0/1 tablespace
+2458874/3433661 kB (71%), 0/1 tablespace
+2466938/3433661 kB (71%), 0/1 tablespace
+2475994/3433661 kB (72%), 0/1 tablespace
+2482842/3433661 kB (72%), 0/1 tablespace
+2490106/3433661 kB (72%), 0/1 tablespace
+2497690/3433661 kB (72%), 0/1 tablespace
+2505914/3433661 kB (72%), 0/1 tablespace
+2514042/3433661 kB (73%), 0/1 tablespace
+2521626/3433661 kB (73%), 0/1 tablespace
+2529114/3433661 kB (73%), 0/1 tablespace
+2536154/3433661 kB (73%), 0/1 tablespace
+2542842/3433661 kB (74%), 0/1 tablespace
+2550522/3433661 kB (74%), 0/1 tablespace
+2559034/3433661 kB (74%), 0/1 tablespace
+2567802/3433661 kB (74%), 0/1 tablespace
+2575290/3433661 kB (75%), 0/1 tablespace
+2583130/3433661 kB (75%), 0/1 tablespace
+2591098/3433661 kB (75%), 0/1 tablespace
+2597338/3433661 kB (75%), 0/1 tablespace
+2603546/3433661 kB (75%), 0/1 tablespace
+2609818/3433661 kB (76%), 0/1 tablespace
+2616634/3433661 kB (76%), 0/1 tablespace
+2623610/3433661 kB (76%), 0/1 tablespace
+2631098/3433661 kB (76%), 0/1 tablespace
+2638554/3433661 kB (76%), 0/1 tablespace
+2644922/3433661 kB (77%), 0/1 tablespace
+2651706/3433661 kB (77%), 0/1 tablespace
+2658746/3433661 kB (77%), 0/1 tablespace
+2666394/3433661 kB (77%), 0/1 tablespace
+2674426/3433661 kB (77%), 0/1 tablespace
+2682650/3433661 kB (78%), 0/1 tablespace
+2690714/3433661 kB (78%), 0/1 tablespace
+2698906/3433661 kB (78%), 0/1 tablespace
+2706650/3433661 kB (78%), 0/1 tablespace
+2714170/3433661 kB (79%), 0/1 tablespace
+2722202/3433661 kB (79%), 0/1 tablespace
+2730682/3433661 kB (79%), 0/1 tablespace
+2738170/3433661 kB (79%), 0/1 tablespace
+2746010/3433661 kB (79%), 0/1 tablespace
+2752381/3433661 kB (80%), 0/1 tablespace
+2758344/3433661 kB (80%), 0/1 tablespace
+2765169/3433661 kB (80%), 0/1 tablespace
+2772465/3433661 kB (80%), 0/1 tablespace
+2778353/3433661 kB (80%), 0/1 tablespace
+2785329/3433661 kB (81%), 0/1 tablespace
+2792767/3433661 kB (81%), 0/1 tablespace
+2800319/3433661 kB (81%), 0/1 tablespace
+2807487/3433661 kB (81%), 0/1 tablespace
+2815167/3433661 kB (81%), 0/1 tablespace
+2823295/3433661 kB (82%), 0/1 tablespace
+2831423/3433661 kB (82%), 0/1 tablespace
+2840159/3433661 kB (82%), 0/1 tablespace
+2849119/3433661 kB (82%), 0/1 tablespace
+2855679/3433661 kB (83%), 0/1 tablespace
+2861855/3433661 kB (83%), 0/1 tablespace
+2868607/3433661 kB (83%), 0/1 tablespace
+2875647/3433661 kB (83%), 0/1 tablespace
+2882975/3433661 kB (83%), 0/1 tablespace
+2890431/3433661 kB (84%), 0/1 tablespace
+2898687/3433661 kB (84%), 0/1 tablespace
+2906783/3433661 kB (84%), 0/1 tablespace
+2913567/3433661 kB (84%), 0/1 tablespace
+2920991/3433661 kB (85%), 0/1 tablespace
+2928895/3433661 kB (85%), 0/1 tablespace
+2936543/3433661 kB (85%), 0/1 tablespace
+2943839/3433661 kB (85%), 0/1 tablespace
+2951423/3433661 kB (85%), 0/1 tablespace
+2959007/3433661 kB (86%), 0/1 tablespace
+2966527/3433661 kB (86%), 0/1 tablespace
+2974783/3433661 kB (86%), 0/1 tablespace
+2982687/3433661 kB (86%), 0/1 tablespace
+2989311/3433661 kB (87%), 0/1 tablespace
+2996415/3433661 kB (87%), 0/1 tablespace
+3004031/3433661 kB (87%), 0/1 tablespace
+3012415/3433661 kB (87%), 0/1 tablespace
+3020639/3433661 kB (87%), 0/1 tablespace
+3028383/3433661 kB (88%), 0/1 tablespace
+3036767/3433661 kB (88%), 0/1 tablespace
+3044831/3433661 kB (88%), 0/1 tablespace
+3052447/3433661 kB (88%), 0/1 tablespace
+3060927/3433661 kB (89%), 0/1 tablespace
+3067967/3433661 kB (89%), 0/1 tablespace
+3075231/3433661 kB (89%), 0/1 tablespace
+3082879/3433661 kB (89%), 0/1 tablespace
+3090303/3433661 kB (90%), 0/1 tablespace
+3098527/3433661 kB (90%), 0/1 tablespace
+3105407/3433661 kB (90%), 0/1 tablespace
+3111967/3433661 kB (90%), 0/1 tablespace
+3119071/3433661 kB (90%), 0/1 tablespace
+3126143/3433661 kB (91%), 0/1 tablespace
+3132991/3433661 kB (91%), 0/1 tablespace
+3141215/3433661 kB (91%), 0/1 tablespace
+3148959/3433661 kB (91%), 0/1 tablespace
+3156799/3433661 kB (91%), 0/1 tablespace
+3165215/3433661 kB (92%), 0/1 tablespace
+3173567/3433661 kB (92%), 0/1 tablespace
+3181375/3433661 kB (92%), 0/1 tablespace
+3189215/3433661 kB (92%), 0/1 tablespace
+3197087/3433661 kB (93%), 0/1 tablespace
+3205823/3433661 kB (93%), 0/1 tablespace
+3214047/3433661 kB (93%), 0/1 tablespace
+3221567/3433661 kB (93%), 0/1 tablespace
+3228543/3433661 kB (94%), 0/1 tablespace
+3236095/3433661 kB (94%), 0/1 tablespace
+3243647/3433661 kB (94%), 0/1 tablespace
+3251359/3433661 kB (94%), 0/1 tablespace
+3259583/3433661 kB (94%), 0/1 tablespace
+3267615/3433661 kB (95%), 0/1 tablespace
+3274975/3433661 kB (95%), 0/1 tablespace
+3282751/3433661 kB (95%), 0/1 tablespace
+3291199/3433661 kB (95%), 0/1 tablespace
+3299583/3433661 kB (96%), 0/1 tablespace
+3307423/3433661 kB (96%), 0/1 tablespace
+3315071/3433661 kB (96%), 0/1 tablespace
+3322591/3433661 kB (96%), 0/1 tablespace
+3330815/3433661 kB (97%), 0/1 tablespace
+3338943/3433661 kB (97%), 0/1 tablespace
+3347231/3433661 kB (97%), 0/1 tablespace
+3354111/3433661 kB (97%), 0/1 tablespace
+3361279/3433661 kB (97%), 0/1 tablespace
+3367615/3433661 kB (98%), 0/1 tablespace
+3374663/3433661 kB (98%), 0/1 tablespace
+3381279/3433661 kB (98%), 0/1 tablespace
+3387965/3433661 kB (98%), 0/1 tablespace
+3395015/3433661 kB (98%), 0/1 tablespace
+3402444/3433661 kB (99%), 0/1 tablespace
+3410588/3433661 kB (99%), 0/1 tablespace
+3418828/3433661 kB (99%), 0/1 tablespace
+3426483/3433661 kB (99%), 0/1 tablespace
+3433671/3433671 kB (100%), 0/1 tablespace
+3433671/3433671 kB (100%), 0/1 tablespace
+3433671/3433671 kB (100%), 1/1 tablespace
+waiting for server to start....2023-06-09 15:38:31.937 +04 [21051] LOG:  listening on IPv6 address "::1", port 5432
+2023-06-09 15:38:31.937 +04 [21051] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2023-06-09 15:38:31.938 +04 [21051] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2023-06-09 15:38:31.956 +04 [21052] LOG:  database system was interrupted; last known up at 2023-06-09 15:35:35 +04
+2023-06-09 15:38:31.996 +04 [21053] FATAL:  the database system is starting up
+2023-06-09 15:38:32.015 +04 [21054] FATAL:  the database system is starting up
+2023-06-09 15:38:32.026 +04 [21055] FATAL:  the database system is starting up
+2023-06-09 15:38:32.037 +04 [21056] FATAL:  the database system is starting up
+2023-06-09 15:38:32.472 +04 [21052] LOG:  redo starts at 27/6000028
+2023-06-09 15:38:32.481 +04 [21052] LOG:  consistent recovery state reached at 27/6065FB8
+2023-06-09 15:38:32.481 +04 [21052] LOG:  redo done at 27/6065FB8
+2023-06-09 15:38:32.481 +04 [21052] LOG:  last completed transaction was at log time 2023-06-09 15:38:30.418071+04
+2023-06-09 15:38:32.554 +04 [21051] LOG:  database system is ready to accept connections
+ done
+server started
+2023-06-09 15:44:51.492 +04 [21142] FATAL:  role "alekseyananyev" does not exist
+2023-06-09 15:46:15.365 +04 [21149] ERROR:  relation "itpearls_job_candidate" does not exist at character 15
+2023-06-09 15:46:15.365 +04 [21149] STATEMENT:  select * from itpearls_job_candidate where first_name in (select middle_name from itpearls_job_candidate);
+2023-06-09 15:47:13.880 +04 [21172] ERROR:  column "secona_name" does not exist at character 24
+2023-06-09 15:47:13.880 +04 [21172] HINT:  Perhaps you meant to reference the column "itpearls_job_candidate.second_name".
+2023-06-09 15:47:13.880 +04 [21172] STATEMENT:  select id, first_name, secona_name, middle_name  from itpearls_job_candidate where first_name in (select middle_name from itpearls_job_candidate);
+2023-06-09 18:11:14.164 +04 [23559] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 18:11:14.215 +04 [23561] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 18:11:14.543 +04 [23567] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 18:11:15.068 +04 [23569] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-09 18:11:15.231 +04 [23571] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down....2023-06-13 10:56:58.294 +04 [21051] LOG:  received fast shutdown request
+2023-06-13 10:56:58.296 +04 [21051] LOG:  aborting any active transactions
+2023-06-13 10:56:58.297 +04 [23704] FATAL:  terminating connection due to administrator command
+2023-06-13 10:56:58.298 +04 [23706] FATAL:  terminating connection due to administrator command
+2023-06-13 10:56:58.301 +04 [21051] LOG:  background worker "logical replication launcher" (PID 21062) exited with exit code 1
+2023-06-13 10:56:58.310 +04 [21057] LOG:  shutting down
+2023-06-13 10:56:58.368 +04 [21051] LOG:  database system is shut down
+ done
+server stopped
+waiting for checkpoint
+      0/3447094 kB (0%), 0/1 tablespace
+   4119/3447094 kB (0%), 0/1 tablespace
+  12764/3447094 kB (0%), 0/1 tablespace
+  22163/3447094 kB (0%), 0/1 tablespace
+  31059/3447094 kB (0%), 0/1 tablespace
+  39649/3447094 kB (1%), 0/1 tablespace
+  48651/3447094 kB (1%), 0/1 tablespace
+  58238/3447094 kB (1%), 0/1 tablespace
+  67094/3447094 kB (1%), 0/1 tablespace
+  75792/3447094 kB (2%), 0/1 tablespace
+  83792/3447094 kB (2%), 0/1 tablespace
+  92834/3447094 kB (2%), 0/1 tablespace
+ 100906/3447094 kB (2%), 0/1 tablespace
+ 107978/3447094 kB (3%), 0/1 tablespace
+ 115498/3447094 kB (3%), 0/1 tablespace
+ 123562/3447094 kB (3%), 0/1 tablespace
+ 131338/3447094 kB (3%), 0/1 tablespace
+ 139594/3447094 kB (4%), 0/1 tablespace
+ 144362/3447094 kB (4%), 0/1 tablespace
+ 150917/3447094 kB (4%), 0/1 tablespace
+ 158533/3447094 kB (4%), 0/1 tablespace
+ 166405/3447094 kB (4%), 0/1 tablespace
+ 174405/3447094 kB (5%), 0/1 tablespace
+ 182693/3447094 kB (5%), 0/1 tablespace
+ 191173/3447094 kB (5%), 0/1 tablespace
+ 200037/3447094 kB (5%), 0/1 tablespace
+ 208581/3447094 kB (6%), 0/1 tablespace
+ 217381/3447094 kB (6%), 0/1 tablespace
+ 225701/3447094 kB (6%), 0/1 tablespace
+ 233637/3447094 kB (6%), 0/1 tablespace
+ 241413/3447094 kB (7%), 0/1 tablespace
+ 249861/3447094 kB (7%), 0/1 tablespace
+ 258533/3447094 kB (7%), 0/1 tablespace
+ 265989/3447094 kB (7%), 0/1 tablespace
+ 273957/3447094 kB (7%), 0/1 tablespace
+ 281253/3447094 kB (8%), 0/1 tablespace
+ 288837/3447094 kB (8%), 0/1 tablespace
+ 297381/3447094 kB (8%), 0/1 tablespace
+ 305829/3447094 kB (8%), 0/1 tablespace
+ 314149/3447094 kB (9%), 0/1 tablespace
+ 320581/3447094 kB (9%), 0/1 tablespace
+ 326917/3447094 kB (9%), 0/1 tablespace
+ 333701/3447094 kB (9%), 0/1 tablespace
+ 340709/3447094 kB (9%), 0/1 tablespace
+ 348005/3447094 kB (10%), 0/1 tablespace
+ 355589/3447094 kB (10%), 0/1 tablespace
+ 363013/3447094 kB (10%), 0/1 tablespace
+ 371557/3447094 kB (10%), 0/1 tablespace
+ 380165/3447094 kB (11%), 0/1 tablespace
+ 389317/3447094 kB (11%), 0/1 tablespace
+ 397189/3447094 kB (11%), 0/1 tablespace
+ 404805/3447094 kB (11%), 0/1 tablespace
+ 413253/3447094 kB (11%), 0/1 tablespace
+ 420549/3447094 kB (12%), 0/1 tablespace
+ 427877/3447094 kB (12%), 0/1 tablespace
+ 435685/3447094 kB (12%), 0/1 tablespace
+ 443141/3447094 kB (12%), 0/1 tablespace
+ 451621/3447094 kB (13%), 0/1 tablespace
+ 459781/3447094 kB (13%), 0/1 tablespace
+ 468325/3447094 kB (13%), 0/1 tablespace
+ 475717/3447094 kB (13%), 0/1 tablespace
+ 483653/3447094 kB (14%), 0/1 tablespace
+ 492261/3447094 kB (14%), 0/1 tablespace
+ 500805/3447094 kB (14%), 0/1 tablespace
+ 508101/3447094 kB (14%), 0/1 tablespace
+ 514629/3447094 kB (14%), 0/1 tablespace
+ 519685/3447094 kB (15%), 0/1 tablespace
+ 525253/3447094 kB (15%), 0/1 tablespace
+ 531941/3447094 kB (15%), 0/1 tablespace
+ 538917/3447094 kB (15%), 0/1 tablespace
+ 546149/3447094 kB (15%), 0/1 tablespace
+ 553733/3447094 kB (16%), 0/1 tablespace
+ 561893/3447094 kB (16%), 0/1 tablespace
+ 570085/3447094 kB (16%), 0/1 tablespace
+ 578885/3447094 kB (16%), 0/1 tablespace
+ 587333/3447094 kB (17%), 0/1 tablespace
+ 594405/3447094 kB (17%), 0/1 tablespace
+ 602437/3447094 kB (17%), 0/1 tablespace
+ 609157/3447094 kB (17%), 0/1 tablespace
+ 616613/3447094 kB (17%), 0/1 tablespace
+ 623973/3447094 kB (18%), 0/1 tablespace
+ 630629/3447094 kB (18%), 0/1 tablespace
+ 637413/3447094 kB (18%), 0/1 tablespace
+ 644869/3447094 kB (18%), 0/1 tablespace
+ 652709/3447094 kB (18%), 0/1 tablespace
+ 660229/3447094 kB (19%), 0/1 tablespace
+ 668023/3447094 kB (19%), 0/1 tablespace
+ 675959/3447094 kB (19%), 0/1 tablespace
+ 683895/3447094 kB (19%), 0/1 tablespace
+ 692055/3447094 kB (20%), 0/1 tablespace
+ 700823/3447094 kB (20%), 0/1 tablespace
+ 707703/3447094 kB (20%), 0/1 tablespace
+ 715895/3447094 kB (20%), 0/1 tablespace
+ 723959/3447094 kB (21%), 0/1 tablespace
+ 732375/3447094 kB (21%), 0/1 tablespace
+ 740695/3447094 kB (21%), 0/1 tablespace
+ 748471/3447094 kB (21%), 0/1 tablespace
+ 756279/3447094 kB (21%), 0/1 tablespace
+ 764503/3447094 kB (22%), 0/1 tablespace
+ 771671/3447094 kB (22%), 0/1 tablespace
+ 778103/3447094 kB (22%), 0/1 tablespace
+ 783831/3447094 kB (22%), 0/1 tablespace
+ 790679/3447094 kB (22%), 0/1 tablespace
+ 796823/3447094 kB (23%), 0/1 tablespace
+ 804023/3447094 kB (23%), 0/1 tablespace
+ 811671/3447094 kB (23%), 0/1 tablespace
+ 819351/3447094 kB (23%), 0/1 tablespace
+ 827511/3447094 kB (24%), 0/1 tablespace
+ 835607/3447094 kB (24%), 0/1 tablespace
+ 843447/3447094 kB (24%), 0/1 tablespace
+ 850903/3447094 kB (24%), 0/1 tablespace
+ 859127/3447094 kB (24%), 0/1 tablespace
+ 865559/3447094 kB (25%), 0/1 tablespace
+ 871127/3447094 kB (25%), 0/1 tablespace
+ 877239/3447094 kB (25%), 0/1 tablespace
+ 882615/3447094 kB (25%), 0/1 tablespace
+ 888055/3447094 kB (25%), 0/1 tablespace
+ 894359/3447094 kB (25%), 0/1 tablespace
+ 900983/3447094 kB (26%), 0/1 tablespace
+ 907735/3447094 kB (26%), 0/1 tablespace
+ 914455/3447094 kB (26%), 0/1 tablespace
+ 921783/3447094 kB (26%), 0/1 tablespace
+ 929271/3447094 kB (26%), 0/1 tablespace
+ 936727/3447094 kB (27%), 0/1 tablespace
+ 943735/3447094 kB (27%), 0/1 tablespace
+ 951543/3447094 kB (27%), 0/1 tablespace
+ 958839/3447094 kB (27%), 0/1 tablespace
+ 965783/3447094 kB (28%), 0/1 tablespace
+ 973815/3447094 kB (28%), 0/1 tablespace
+ 981559/3447094 kB (28%), 0/1 tablespace
+ 989143/3447094 kB (28%), 0/1 tablespace
+ 997495/3447094 kB (28%), 0/1 tablespace
+1005687/3447094 kB (29%), 0/1 tablespace
+1012887/3447094 kB (29%), 0/1 tablespace
+1021079/3447094 kB (29%), 0/1 tablespace
+1028631/3447094 kB (29%), 0/1 tablespace
+1034775/3447094 kB (30%), 0/1 tablespace
+1042039/3447094 kB (30%), 0/1 tablespace
+1049335/3447094 kB (30%), 0/1 tablespace
+1056919/3447094 kB (30%), 0/1 tablespace
+1065079/3447094 kB (30%), 0/1 tablespace
+1072215/3447094 kB (31%), 0/1 tablespace
+1080791/3447094 kB (31%), 0/1 tablespace
+1088919/3447094 kB (31%), 0/1 tablespace
+1095351/3447094 kB (31%), 0/1 tablespace
+1101815/3447094 kB (31%), 0/1 tablespace
+1107447/3447094 kB (32%), 0/1 tablespace
+1113847/3447094 kB (32%), 0/1 tablespace
+1120663/3447094 kB (32%), 0/1 tablespace
+1127895/3447094 kB (32%), 0/1 tablespace
+1134135/3447094 kB (32%), 0/1 tablespace
+1142071/3447094 kB (33%), 0/1 tablespace
+1150039/3447094 kB (33%), 0/1 tablespace
+1157946/3447094 kB (33%), 0/1 tablespace
+1165329/3447094 kB (33%), 0/1 tablespace
+1173258/3447094 kB (34%), 0/1 tablespace
+1181187/3447094 kB (34%), 0/1 tablespace
+1190273/3447094 kB (34%), 0/1 tablespace
+1197283/3447094 kB (34%), 0/1 tablespace
+1204558/3447094 kB (34%), 0/1 tablespace
+1209262/3447094 kB (35%), 0/1 tablespace
+1214094/3447094 kB (35%), 0/1 tablespace
+1219598/3447094 kB (35%), 0/1 tablespace
+1225326/3447094 kB (35%), 0/1 tablespace
+1231214/3447094 kB (35%), 0/1 tablespace
+1237966/3447094 kB (35%), 0/1 tablespace
+1244494/3447094 kB (36%), 0/1 tablespace
+1251502/3447094 kB (36%), 0/1 tablespace
+1259406/3447094 kB (36%), 0/1 tablespace
+1267438/3447094 kB (36%), 0/1 tablespace
+1275758/3447094 kB (37%), 0/1 tablespace
+1283854/3447094 kB (37%), 0/1 tablespace
+1291662/3447094 kB (37%), 0/1 tablespace
+1299726/3447094 kB (37%), 0/1 tablespace
+1308078/3447094 kB (37%), 0/1 tablespace
+1315790/3447094 kB (38%), 0/1 tablespace
+1322702/3447094 kB (38%), 0/1 tablespace
+1329870/3447094 kB (38%), 0/1 tablespace
+1337198/3447094 kB (38%), 0/1 tablespace
+1345358/3447094 kB (39%), 0/1 tablespace
+1353294/3447094 kB (39%), 0/1 tablespace
+1360462/3447094 kB (39%), 0/1 tablespace
+1367886/3447094 kB (39%), 0/1 tablespace
+1376078/3447094 kB (39%), 0/1 tablespace
+1384782/3447094 kB (40%), 0/1 tablespace
+1393198/3447094 kB (40%), 0/1 tablespace
+1401166/3447094 kB (40%), 0/1 tablespace
+1410190/3447094 kB (40%), 0/1 tablespace
+1418510/3447094 kB (41%), 0/1 tablespace
+1426606/3447094 kB (41%), 0/1 tablespace
+1434958/3447094 kB (41%), 0/1 tablespace
+1443278/3447094 kB (41%), 0/1 tablespace
+1450926/3447094 kB (42%), 0/1 tablespace
+1458510/3447094 kB (42%), 0/1 tablespace
+1466158/3447094 kB (42%), 0/1 tablespace
+1474382/3447094 kB (42%), 0/1 tablespace
+1482318/3447094 kB (43%), 0/1 tablespace
+1491022/3447094 kB (43%), 0/1 tablespace
+1499758/3447094 kB (43%), 0/1 tablespace
+1507598/3447094 kB (43%), 0/1 tablespace
+1515598/3447094 kB (43%), 0/1 tablespace
+1521934/3447094 kB (44%), 0/1 tablespace
+1529230/3447094 kB (44%), 0/1 tablespace
+1537102/3447094 kB (44%), 0/1 tablespace
+1544846/3447094 kB (44%), 0/1 tablespace
+1551598/3447094 kB (45%), 0/1 tablespace
+1558542/3447094 kB (45%), 0/1 tablespace
+1566318/3447094 kB (45%), 0/1 tablespace
+1574606/3447094 kB (45%), 0/1 tablespace
+1582702/3447094 kB (45%), 0/1 tablespace
+1589326/3447094 kB (46%), 0/1 tablespace
+1597390/3447094 kB (46%), 0/1 tablespace
+1605038/3447094 kB (46%), 0/1 tablespace
+1611086/3447094 kB (46%), 0/1 tablespace
+1618478/3447094 kB (46%), 0/1 tablespace
+1624398/3447094 kB (47%), 0/1 tablespace
+1630254/3447094 kB (47%), 0/1 tablespace
+1637134/3447094 kB (47%), 0/1 tablespace
+1643918/3447094 kB (47%), 0/1 tablespace
+1651566/3447094 kB (47%), 0/1 tablespace
+1658521/3447094 kB (48%), 0/1 tablespace
+1664985/3447094 kB (48%), 0/1 tablespace
+1672473/3447094 kB (48%), 0/1 tablespace
+1680052/3447094 kB (48%), 0/1 tablespace
+1687838/3447094 kB (48%), 0/1 tablespace
+1695366/3447094 kB (49%), 0/1 tablespace
+1702886/3447094 kB (49%), 0/1 tablespace
+1710502/3447094 kB (49%), 0/1 tablespace
+1718458/3447094 kB (49%), 0/1 tablespace
+1727642/3447094 kB (50%), 0/1 tablespace
+1735354/3447094 kB (50%), 0/1 tablespace
+1743834/3447094 kB (50%), 0/1 tablespace
+1752602/3447094 kB (50%), 0/1 tablespace
+1760442/3447094 kB (51%), 0/1 tablespace
+1768186/3447094 kB (51%), 0/1 tablespace
+1775642/3447094 kB (51%), 0/1 tablespace
+1783450/3447094 kB (51%), 0/1 tablespace
+1791930/3447094 kB (51%), 0/1 tablespace
+1799226/3447094 kB (52%), 0/1 tablespace
+1806810/3447094 kB (52%), 0/1 tablespace
+1814490/3447094 kB (52%), 0/1 tablespace
+1823098/3447094 kB (52%), 0/1 tablespace
+1830906/3447094 kB (53%), 0/1 tablespace
+1839354/3447094 kB (53%), 0/1 tablespace
+1847674/3447094 kB (53%), 0/1 tablespace
+1856026/3447094 kB (53%), 0/1 tablespace
+1864538/3447094 kB (54%), 0/1 tablespace
+1872218/3447094 kB (54%), 0/1 tablespace
+1880730/3447094 kB (54%), 0/1 tablespace
+1889402/3447094 kB (54%), 0/1 tablespace
+1895418/3447094 kB (54%), 0/1 tablespace
+1901274/3447094 kB (55%), 0/1 tablespace
+1907834/3447094 kB (55%), 0/1 tablespace
+1914650/3447094 kB (55%), 0/1 tablespace
+1921978/3447094 kB (55%), 0/1 tablespace
+1928602/3447094 kB (55%), 0/1 tablespace
+1935898/3447094 kB (56%), 0/1 tablespace
+1943290/3447094 kB (56%), 0/1 tablespace
+1951002/3447094 kB (56%), 0/1 tablespace
+1958874/3447094 kB (56%), 0/1 tablespace
+1966522/3447094 kB (57%), 0/1 tablespace
+1973722/3447094 kB (57%), 0/1 tablespace
+1981914/3447094 kB (57%), 0/1 tablespace
+1989466/3447094 kB (57%), 0/1 tablespace
+1996986/3447094 kB (57%), 0/1 tablespace
+2005018/3447094 kB (58%), 0/1 tablespace
+2012314/3447094 kB (58%), 0/1 tablespace
+2020314/3447094 kB (58%), 0/1 tablespace
+2029210/3447094 kB (58%), 0/1 tablespace
+2037754/3447094 kB (59%), 0/1 tablespace
+2045786/3447094 kB (59%), 0/1 tablespace
+2053146/3447094 kB (59%), 0/1 tablespace
+2061434/3447094 kB (59%), 0/1 tablespace
+2070138/3447094 kB (60%), 0/1 tablespace
+2077626/3447094 kB (60%), 0/1 tablespace
+2085210/3447094 kB (60%), 0/1 tablespace
+2092826/3447094 kB (60%), 0/1 tablespace
+2100954/3447094 kB (60%), 0/1 tablespace
+2105466/3447094 kB (61%), 0/1 tablespace
+2112954/3447094 kB (61%), 0/1 tablespace
+2120890/3447094 kB (61%), 0/1 tablespace
+2129210/3447094 kB (61%), 0/1 tablespace
+2136890/3447094 kB (61%), 0/1 tablespace
+2144922/3447094 kB (62%), 0/1 tablespace
+2153722/3447094 kB (62%), 0/1 tablespace
+2162138/3447094 kB (62%), 0/1 tablespace
+2169530/3447094 kB (62%), 0/1 tablespace
+2177114/3447094 kB (63%), 0/1 tablespace
+2185114/3447094 kB (63%), 0/1 tablespace
+2193370/3447094 kB (63%), 0/1 tablespace
+2200602/3447094 kB (63%), 0/1 tablespace
+2208570/3447094 kB (64%), 0/1 tablespace
+2217114/3447094 kB (64%), 0/1 tablespace
+2224410/3447094 kB (64%), 0/1 tablespace
+2232922/3447094 kB (64%), 0/1 tablespace
+2241658/3447094 kB (65%), 0/1 tablespace
+2250330/3447094 kB (65%), 0/1 tablespace
+2258362/3447094 kB (65%), 0/1 tablespace
+2266234/3447094 kB (65%), 0/1 tablespace
+2274298/3447094 kB (65%), 0/1 tablespace
+2282202/3447094 kB (66%), 0/1 tablespace
+2290042/3447094 kB (66%), 0/1 tablespace
+2298298/3447094 kB (66%), 0/1 tablespace
+2305050/3447094 kB (66%), 0/1 tablespace
+2312794/3447094 kB (67%), 0/1 tablespace
+2320698/3447094 kB (67%), 0/1 tablespace
+2328058/3447094 kB (67%), 0/1 tablespace
+2335706/3447094 kB (67%), 0/1 tablespace
+2342874/3447094 kB (67%), 0/1 tablespace
+2350842/3447094 kB (68%), 0/1 tablespace
+2357914/3447094 kB (68%), 0/1 tablespace
+2365018/3447094 kB (68%), 0/1 tablespace
+2372826/3447094 kB (68%), 0/1 tablespace
+2381338/3447094 kB (69%), 0/1 tablespace
+2388922/3447094 kB (69%), 0/1 tablespace
+2396058/3447094 kB (69%), 0/1 tablespace
+2404186/3447094 kB (69%), 0/1 tablespace
+2413306/3447094 kB (70%), 0/1 tablespace
+2421658/3447094 kB (70%), 0/1 tablespace
+2429466/3447094 kB (70%), 0/1 tablespace
+2436954/3447094 kB (70%), 0/1 tablespace
+2444634/3447094 kB (70%), 0/1 tablespace
+2452506/3447094 kB (71%), 0/1 tablespace
+2458682/3447094 kB (71%), 0/1 tablespace
+2465466/3447094 kB (71%), 0/1 tablespace
+2473018/3447094 kB (71%), 0/1 tablespace
+2480250/3447094 kB (71%), 0/1 tablespace
+2488122/3447094 kB (72%), 0/1 tablespace
+2496026/3447094 kB (72%), 0/1 tablespace
+2503194/3447094 kB (72%), 0/1 tablespace
+2510586/3447094 kB (72%), 0/1 tablespace
+2518586/3447094 kB (73%), 0/1 tablespace
+2525818/3447094 kB (73%), 0/1 tablespace
+2533562/3447094 kB (73%), 0/1 tablespace
+2542330/3447094 kB (73%), 0/1 tablespace
+2550714/3447094 kB (73%), 0/1 tablespace
+2558746/3447094 kB (74%), 0/1 tablespace
+2565786/3447094 kB (74%), 0/1 tablespace
+2573850/3447094 kB (74%), 0/1 tablespace
+2582650/3447094 kB (74%), 0/1 tablespace
+2591002/3447094 kB (75%), 0/1 tablespace
+2599034/3447094 kB (75%), 0/1 tablespace
+2607386/3447094 kB (75%), 0/1 tablespace
+2615866/3447094 kB (75%), 0/1 tablespace
+2624346/3447094 kB (76%), 0/1 tablespace
+2631994/3447094 kB (76%), 0/1 tablespace
+2639386/3447094 kB (76%), 0/1 tablespace
+2647418/3447094 kB (76%), 0/1 tablespace
+2656122/3447094 kB (77%), 0/1 tablespace
+2664666/3447094 kB (77%), 0/1 tablespace
+2670106/3447094 kB (77%), 0/1 tablespace
+2677306/3447094 kB (77%), 0/1 tablespace
+2685114/3447094 kB (77%), 0/1 tablespace
+2693562/3447094 kB (78%), 0/1 tablespace
+2700250/3447094 kB (78%), 0/1 tablespace
+2707674/3447094 kB (78%), 0/1 tablespace
+2714906/3447094 kB (78%), 0/1 tablespace
+2722458/3447094 kB (78%), 0/1 tablespace
+2730426/3447094 kB (79%), 0/1 tablespace
+2739130/3447094 kB (79%), 0/1 tablespace
+2748090/3447094 kB (79%), 0/1 tablespace
+2755738/3447094 kB (79%), 0/1 tablespace
+2763483/3447094 kB (80%), 0/1 tablespace
+2771048/3447094 kB (80%), 0/1 tablespace
+2779057/3447094 kB (80%), 0/1 tablespace
+2787249/3447094 kB (80%), 0/1 tablespace
+2794417/3447094 kB (81%), 0/1 tablespace
+2802291/3447094 kB (81%), 0/1 tablespace
+2810111/3447094 kB (81%), 0/1 tablespace
+2818079/3447094 kB (81%), 0/1 tablespace
+2824831/3447094 kB (81%), 0/1 tablespace
+2833407/3447094 kB (82%), 0/1 tablespace
+2840767/3447094 kB (82%), 0/1 tablespace
+2848639/3447094 kB (82%), 0/1 tablespace
+2856831/3447094 kB (82%), 0/1 tablespace
+2864575/3447094 kB (83%), 0/1 tablespace
+2871807/3447094 kB (83%), 0/1 tablespace
+2879647/3447094 kB (83%), 0/1 tablespace
+2887647/3447094 kB (83%), 0/1 tablespace
+2895839/3447094 kB (84%), 0/1 tablespace
+2902495/3447094 kB (84%), 0/1 tablespace
+2910175/3447094 kB (84%), 0/1 tablespace
+2918847/3447094 kB (84%), 0/1 tablespace
+2928159/3447094 kB (84%), 0/1 tablespace
+2935199/3447094 kB (85%), 0/1 tablespace
+2943775/3447094 kB (85%), 0/1 tablespace
+2951903/3447094 kB (85%), 0/1 tablespace
+2959967/3447094 kB (85%), 0/1 tablespace
+2966879/3447094 kB (86%), 0/1 tablespace
+2974079/3447094 kB (86%), 0/1 tablespace
+2980095/3447094 kB (86%), 0/1 tablespace
+2987135/3447094 kB (86%), 0/1 tablespace
+2994335/3447094 kB (86%), 0/1 tablespace
+3001631/3447094 kB (87%), 0/1 tablespace
+3009247/3447094 kB (87%), 0/1 tablespace
+3017471/3447094 kB (87%), 0/1 tablespace
+3024095/3447094 kB (87%), 0/1 tablespace
+3033151/3447094 kB (87%), 0/1 tablespace
+3042271/3447094 kB (88%), 0/1 tablespace
+3050015/3447094 kB (88%), 0/1 tablespace
+3057599/3447094 kB (88%), 0/1 tablespace
+3065919/3447094 kB (88%), 0/1 tablespace
+3073567/3447094 kB (89%), 0/1 tablespace
+3081023/3447094 kB (89%), 0/1 tablespace
+3088959/3447094 kB (89%), 0/1 tablespace
+3096703/3447094 kB (89%), 0/1 tablespace
+3103839/3447094 kB (90%), 0/1 tablespace
+3110975/3447094 kB (90%), 0/1 tablespace
+3118399/3447094 kB (90%), 0/1 tablespace
+3126015/3447094 kB (90%), 0/1 tablespace
+3133183/3447094 kB (90%), 0/1 tablespace
+3141727/3447094 kB (91%), 0/1 tablespace
+3149535/3447094 kB (91%), 0/1 tablespace
+3157919/3447094 kB (91%), 0/1 tablespace
+3166111/3447094 kB (91%), 0/1 tablespace
+3174623/3447094 kB (92%), 0/1 tablespace
+3182143/3447094 kB (92%), 0/1 tablespace
+3190527/3447094 kB (92%), 0/1 tablespace
+3198975/3447094 kB (92%), 0/1 tablespace
+3207135/3447094 kB (93%), 0/1 tablespace
+3214335/3447094 kB (93%), 0/1 tablespace
+3220415/3447094 kB (93%), 0/1 tablespace
+3225471/3447094 kB (93%), 0/1 tablespace
+3231519/3447094 kB (93%), 0/1 tablespace
+3238207/3447094 kB (93%), 0/1 tablespace
+3245439/3447094 kB (94%), 0/1 tablespace
+3251935/3447094 kB (94%), 0/1 tablespace
+3258559/3447094 kB (94%), 0/1 tablespace
+3265567/3447094 kB (94%), 0/1 tablespace
+3273439/3447094 kB (94%), 0/1 tablespace
+3280799/3447094 kB (95%), 0/1 tablespace
+3288479/3447094 kB (95%), 0/1 tablespace
+3296735/3447094 kB (95%), 0/1 tablespace
+3304799/3447094 kB (95%), 0/1 tablespace
+3311839/3447094 kB (96%), 0/1 tablespace
+3319583/3447094 kB (96%), 0/1 tablespace
+3327167/3447094 kB (96%), 0/1 tablespace
+3335455/3447094 kB (96%), 0/1 tablespace
+3343071/3447094 kB (96%), 0/1 tablespace
+3352031/3447094 kB (97%), 0/1 tablespace
+3361055/3447094 kB (97%), 0/1 tablespace
+3368895/3447094 kB (97%), 0/1 tablespace
+3376479/3447094 kB (97%), 0/1 tablespace
+3384982/3447094 kB (98%), 0/1 tablespace
+3394158/3447094 kB (98%), 0/1 tablespace
+3402669/3447094 kB (98%), 0/1 tablespace
+3409837/3447094 kB (98%), 0/1 tablespace
+3417248/3447094 kB (99%), 0/1 tablespace
+3425295/3447094 kB (99%), 0/1 tablespace
+3433599/3447094 kB (99%), 0/1 tablespace
+3441839/3447094 kB (99%), 0/1 tablespace
+3447103/3447103 kB (100%), 0/1 tablespace
+3447103/3447103 kB (100%), 1/1 tablespace
+waiting for server to start....2023-06-13 11:06:06.344 +04 [1090] LOG:  listening on IPv6 address "::1", port 5432
+2023-06-13 11:06:06.345 +04 [1090] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2023-06-13 11:06:06.345 +04 [1090] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2023-06-13 11:06:06.359 +04 [1091] LOG:  database system was interrupted; last known up at 2023-06-13 11:03:37 +04
+2023-06-13 11:06:06.886 +04 [1091] LOG:  redo starts at 27/1B000028
+2023-06-13 11:06:06.902 +04 [1091] LOG:  consistent recovery state reached at 27/1B0B3960
+2023-06-13 11:06:06.902 +04 [1091] LOG:  redo done at 27/1B0B3960
+2023-06-13 11:06:06.902 +04 [1091] LOG:  last completed transaction was at log time 2023-06-13 11:06:04.400578+04
+2023-06-13 11:06:06.919 +04 [1092] FATAL:  the database system is starting up
+2023-06-13 11:06:06.957 +04 [1093] FATAL:  the database system is starting up
+2023-06-13 11:06:06.990 +04 [1090] LOG:  database system is ready to accept connections
+ done
+server started
+2023-06-13 12:21:01.757 +04 [2042] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 12:21:02.002 +04 [2044] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 12:21:03.852 +04 [2046] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 12:21:06.489 +04 [2048] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 12:21:06.971 +04 [2050] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 15:43:20.023 +04 [4746] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 15:43:20.129 +04 [4748] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 15:43:20.594 +04 [4750] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 15:43:21.647 +04 [4752] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 15:43:21.874 +04 [4754] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 18:35:45.318 +04 [7927] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 18:35:45.427 +04 [7929] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 18:35:46.277 +04 [7931] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 18:35:47.701 +04 [7934] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 18:35:48.051 +04 [7936] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:38.681 +04 [9624] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:38.784 +04 [9626] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:39.132 +04 [9628] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:39.577 +04 [9630] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:39.740 +04 [9632] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:42.388 +04 [9635] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:42.466 +04 [9637] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:43.284 +04 [9640] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:46.657 +04 [9643] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:46.739 +04 [9645] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 19:34:46.811 +04 [9647] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:01:12.010 +04 [10387] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:01:12.138 +04 [10389] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:01:16.128 +04 [10394] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:01:17.138 +04 [10396] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:01:17.370 +04 [10398] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:06:32.436 +04 [10684] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:06:32.518 +04 [10686] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:06:32.891 +04 [10688] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:06:33.271 +04 [10690] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:06:33.439 +04 [10692] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:15:41.132 +04 [11031] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:15:41.232 +04 [11033] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:15:41.586 +04 [11035] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:15:41.950 +04 [11037] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:15:42.112 +04 [11039] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:22:39.667 +04 [11334] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:22:39.760 +04 [11336] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:22:40.089 +04 [11338] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:22:40.510 +04 [11340] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:22:40.694 +04 [11342] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:26:04.894 +04 [11560] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:26:04.977 +04 [11562] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:26:05.259 +04 [11564] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:26:05.607 +04 [11566] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:26:05.792 +04 [11568] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:55:41.259 +04 [12134] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:55:41.387 +04 [12136] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:55:41.725 +04 [12138] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:55:42.211 +04 [12140] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 20:55:42.410 +04 [12142] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:08:37.905 +04 [12457] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:08:38.022 +04 [12459] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:08:38.316 +04 [12461] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:08:38.947 +04 [12463] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:08:39.290 +04 [12465] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:25:13.678 +04 [13006] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:25:13.782 +04 [13008] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:25:14.164 +04 [13010] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:25:14.296 +04 [13012] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:25:14.465 +04 [13014] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:39:36.282 +04 [13438] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:39:36.395 +04 [13440] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:39:36.763 +04 [13442] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:39:37.251 +04 [13444] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-06-13 21:39:37.467 +04 [13446] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

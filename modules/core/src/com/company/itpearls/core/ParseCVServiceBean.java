@@ -23,7 +23,8 @@ import static org.springframework.context.i18n.LocaleContextHolder.getTimeZone;
 @Service(ParseCVService.NAME)
 public class ParseCVServiceBean implements ParseCVService {
 
-        static String phonePtrn = "/(\\+7|\\+9|8)[- _]*\\(?[- _]*(\\d{3}[- _]*\\)?([- _]*\\d){7}|\\d\\d[- _]*\\d\\d[- _]*\\)?([- _]*\\d){6})/g\n";
+    static String phonePtrn = "(\\+7|\\+9|8)\\d{10}";
+    // static String phonePtrn = "/(\\+7|\\+9|8)[- _]*\\(?[- _]*(\\d{3}[- _]*\\)?([- _]*\\d){7}|\\d\\d[- _]*\\d\\d[- _]*\\)?([- _]*\\d){6})/g\n";
     //static String emailPtrn = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])\n";
     static final String emailPtrn = "\\w+?\\.?\\w+?\\.?\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}";
     //static final String emailPtrn = "\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$/;";
@@ -433,7 +434,11 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parsePhone(String cv) {
-        return getDataModel(deleteSystemChar(cv), phonePtrn);
+        String outStr = Jsoup.parse(deleteSystemChar(cv)).text();
+        String parsePhone = getDataModel(outStr,
+                phonePtrn);
+
+        return parsePhone;
     }
 
     private String getDataModel(String onStr, String pattern) {
