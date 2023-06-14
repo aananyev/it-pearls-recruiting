@@ -932,45 +932,48 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        OpenPosition dublicateOpenPosition = checkDublicateOpenPosition(event);
 
-        if (dublicateOpenPosition != null && PersistenceHelper.isNew(getEditedEntity())) {
-            dialogs.createOptionDialog()
-                    .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withMessage("Вакансия " + vacansyNameField.getValue() + "\n" + "уже есть в базе.\n" +
-                            "\nОткрыта ранее: " + dublicateOpenPosition.getCreatedBy() +
-                            "\nСтатус: " + (dublicateOpenPosition.getOpenClose() ? "Закрыта" : "Открыта" +
-                            "\nПродолжить сохранение?"))
-                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
-                        event.resume();
-                        // вернуться и не закомитить
-                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
-                        // закончить
-                    }))
-                    .show();
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            OpenPosition dublicateOpenPosition = checkDublicateOpenPosition(event);
 
-            event.preventCommit();
-        }
+            if (dublicateOpenPosition != null) {
+                dialogs.createOptionDialog()
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withMessage("Вакансия " + vacansyNameField.getValue() + "\n" + "уже есть в базе.\n" +
+                                "\nОткрыта ранее: " + dublicateOpenPosition.getCreatedBy() +
+                                "\nСтатус: " + (dublicateOpenPosition.getOpenClose() ? "Закрыта" : "Открыта" +
+                                "\nПродолжить сохранение?"))
+                        .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
+                            event.resume();
+                            // вернуться и не закомитить
+                        }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
+                            // закончить
+                        }))
+                        .show();
 
-        if(checkDublicatePositionID()) {
-            dialogs.createOptionDialog()
-                    .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withMessage(messageBundle.getMessage("msgDublicateVacancyID"))
-                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
-                        event.resume();
-                        // вернуться и не закомитить
-                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
-                        // закончить
-                    }))
-                    .show();
+                event.preventCommit();
+            }
 
-            event.preventCommit();
+            if (checkDublicatePositionID()) {
+                dialogs.createOptionDialog()
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withMessage(messageBundle.getMessage("msgDublicateVacancyID"))
+                        .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
+                            event.resume();
+                            // вернуться и не закомитить
+                        }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
+                            // закончить
+                        }))
+                        .show();
+
+                event.preventCommit();
+            }
         }
     }
 
     private boolean checkDublicatePositionID() {
         final String QUERY_CHECK_VACANCY_ID
-                = "select e from itpearls_OpenPosition e where e.vacansyID like :vacansyID";
+                = "select e from itpearls_OpenPosition e where e.vacansyID like :vacancyID";
 
         if (dataManager.load(OpenPosition.class)
         .query(QUERY_CHECK_VACANCY_ID)

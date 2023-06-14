@@ -93,11 +93,21 @@
                     <![CDATA[select e from itpearls_OpenPosition e
                                 order by e.openClose, e.vacansyName]]>
                     <condition>
-                        <c:jpql>
-                            <c:where>
-                                e.companyDepartament = :departament
-                            </c:where>
-                        </c:jpql>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.companyDepartament = :departament
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
@@ -201,18 +211,18 @@
                   spacing="true"
                   align="MIDDLE_CENTER"/>
         </groupBox>
-            <tabSheet id="iteractionListTabSheeet"
-                      width="100%"
-                      height="100%"
-                      stylename="framed">
-                <tab id="iteractionListTab"
-                     caption="msg://msgIteractionList"
-                     margin="true,true,true,true"
-                     icon="REORDER"
-                     spacing="true">
-                    <scrollBox orientation="vertical"
-                               width="100%"
-                               height="100%">
+        <tabSheet id="iteractionListTabSheeet"
+                  width="100%"
+                  height="100%"
+                  stylename="framed">
+            <tab id="iteractionListTab"
+                 caption="msg://msgIteractionList"
+                 margin="true,true,true,true"
+                 icon="REORDER"
+                 spacing="true">
+                <scrollBox orientation="vertical"
+                           width="100%"
+                           height="100%">
                     <grid id="gridIterationData"
                           spacing="true"
                           width="100%">
@@ -302,18 +312,26 @@
                                         order by e.secondName, e.firstName
                                     </query>
                                 </suggestionPickerField>
-                                <lookupPickerField id="vacancyFiels"
-                                                   caption="mainMsg://msgVacancy"
-                                                   dataContainer="iteractionListDc"
-                                                   optionsContainer="vacancyDc"
-                                                   property="vacancy" width="100%">
-                                    <actions>
-                                        <action id="lookup"
-                                                type="picker_lookup"/>
-                                        <action id="open"
-                                                type="picker_open"/>
-                                    </actions>
-                                </lookupPickerField>
+                                <vbox spacing="true">
+                                    <lookupPickerField id="vacancyFiels"
+                                                       caption="mainMsg://msgVacancy"
+                                                       dataContainer="iteractionListDc"
+                                                       optionsContainer="vacancyDc"
+                                                       property="vacancy"
+                                                       width="100%">
+                                        <actions>
+                                            <action id="lookup"
+                                                    type="picker_lookup"/>
+                                            <action id="open"
+                                                    type="picker_open"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                    <checkBox id="onlyMySubscribeCheckBox"
+                                              align="TOP_RIGHT"
+                                              width="AUTO"
+                                              description="msg://msgOnlyMySebscribeDec"
+                                              caption="msg://msgOnlyMySubscribe"/>
+                                </vbox>
                             </row>
                             <row>
                                 <hbox id="mostPopularIteractionHBox"/>
@@ -381,9 +399,9 @@
                               dataContainer="iteractionListDc"
                               caption="msg://msgComment"
                               height="100%"/>
-                    </scrollBox>
-                </tab>
-            </tabSheet>
+                </scrollBox>
+            </tab>
+        </tabSheet>
         <hbox id="editActions"
               spacing="true"
               align="BOTTOM_RIGHT">

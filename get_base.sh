@@ -56,7 +56,7 @@ else
         echo "\033[31mFailure, exit status: $?"
 fi
 echo "\033[37mЗагрузка базы с сервера ... "
-pg_basebackup -P -h $db_server -D . -U replica  2>>$LOG
+pg_basebackup -P -h $db_server -D . -U replica  >>$LOG
 if [ $? -eq 0 ]; then
 	echo "\033[32mOK"
 else

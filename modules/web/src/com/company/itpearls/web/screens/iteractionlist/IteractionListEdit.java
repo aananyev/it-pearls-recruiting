@@ -133,6 +133,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private StrSimpleService strSimpleService;
     @Inject
     private HBoxLayout mostPopularHbox;
+    @Inject
+    private CheckBox onlyMySubscribeCheckBox;
+    @Inject
+    private CollectionContainer<OpenPosition> vacancyDc;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -989,6 +993,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         // запомнить текущий проект
         candidate = candidateField.getValue();
 
+        setOnlyMySubscribeCheckBox();
+
         changeField();
 
         if (parentCandidate != null) {
@@ -1002,6 +1008,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         } else {
             dateIteractionField.setEditable(false);
         }
+    }
+
+    private void setOnlyMySubscribeCheckBox() {
+        onlyMySubscribeCheckBox.setValue(true);
+        openPositionsDl.setParameter("subscriber", userSession.getUser());
+        openPositionsDl.load();
+
+        onlyMySubscribeCheckBox.addValueChangeListener(e -> {
+            if (e.getValue()) {
+                openPositionsDl.setParameter("subscriber", userSession.getUser());
+
+            } else {
+                openPositionsDl.removeParameter("subscriber");
+            }
+
+            openPositionsDl.load();
+        });
     }
 
     private void setMostPopularIteraction() {

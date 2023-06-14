@@ -537,6 +537,8 @@
                                        caption="msg://msgOutstaffingCost"
                                        description="msg://msgOutstaffingCostDescription"/>
                             <button id="setSalaryFieldButton"
+                                    align="BOTTOM_LEFT"
+                                    width="AUTO"
                                     caption="msg://msgSetSalary"
                                     description="msg://msgSetSalaryDesc"
                                     invoke="setSalaryFieldButtonInvoke"/>

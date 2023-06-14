@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.Column;
@@ -9,6 +10,7 @@ import javax.validation.constraints.NotNull;
 
 @Table(name = "ITPEARLS_CURRENCY")
 @Entity(name = "itpearls_Currency")
+@NamePattern("%s|currencyLongName")
 public class Currency extends StandardEntity {
     private static final long serialVersionUID = 9098961481898121009L;
 

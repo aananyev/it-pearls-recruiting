@@ -456,4 +456,8 @@
         <property name="user" view="_local"/>
         <property name="fileImageFace" view="_local"/>
     </view>
+    <view entity="itpearls_Currency" name="currency-view" extends="_local"/>
+    <view entity="itpearls_OutstaffingRates" name="outstaffingRates-view" extends="_local">
+        <property name="currency" view="_local"/>
+    </view>
 </views>
