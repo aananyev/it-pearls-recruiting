@@ -137,6 +137,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private CheckBox onlyMySubscribeCheckBox;
     @Inject
     private CollectionContainer<OpenPosition> vacancyDc;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -500,7 +502,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
 
             if (!afterCommitSendMessage) {
-                if (event.getCloseAction().equals(WINDOW_COMMIT_AND_CLOSE_ACTION)){
+                if (event.getCloseAction().equals(WINDOW_COMMIT_AND_CLOSE_ACTION)) {
                     sendMessages();
                 }
             }
@@ -1015,15 +1017,35 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         openPositionsDl.setParameter("subscriber", userSession.getUser());
         openPositionsDl.load();
 
+        if (vacancyDc.getItems().size() == 0) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withHideDelayMs(10000)
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+        }
+
         onlyMySubscribeCheckBox.addValueChangeListener(e -> {
             if (e.getValue()) {
                 openPositionsDl.setParameter("subscriber", userSession.getUser());
+                openPositionsDl.load();
 
+                if (vacancyDc.getItems().size() == 0) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption(messageBundle.getMessage("msgWarning"))
+                            .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))
+                            .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                            .withHideDelayMs(10000)
+                            .withType(Notifications.NotificationType.WARNING)
+                            .show();
+                }
             } else {
                 openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.load();
             }
 
-            openPositionsDl.load();
         });
     }
 
@@ -1045,7 +1067,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             retHBox.setStyleName("label_button_mostpopular_green");
 
             Label numberLabel = uiComponents.create(Label.class);
-            numberLabel.setValue((i+1) + ".");
+            numberLabel.setValue((i + 1) + ".");
             numberLabel.setWidthAuto();
             numberLabel.setStyleName("label_button_mostpopular_green");
             numberLabel.setHtmlEnabled(true);

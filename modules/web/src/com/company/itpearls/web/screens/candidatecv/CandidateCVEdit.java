@@ -11,6 +11,8 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -125,6 +127,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Metadata metadata;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private CheckBox onlyMySubscribeCheckBox;
+    @Inject
+    private CollectionLoader<OpenPosition> openPositionsDl;
+    @Inject
+    private CollectionContainer<OpenPosition> openPositionsDc;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -366,8 +374,48 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
+    private void setOnlyMySubscribeCheckBox() {
+        onlyMySubscribeCheckBox.setValue(true);
+        openPositionsDl.setParameter("subscriber", userSession.getUser());
+        openPositionsDl.load();
+
+        if (openPositionsDc.getItems().size() == 0) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withHideDelayMs(10000)
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+        }
+
+        onlyMySubscribeCheckBox.addValueChangeListener(e -> {
+            if (e.getValue()) {
+                openPositionsDl.setParameter("subscriber", userSession.getUser());
+                openPositionsDl.load();
+
+                if (openPositionsDc.getItems().size() == 0) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption(messageBundle.getMessage("msgWarning"))
+                            .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))
+                            .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                            .withHideDelayMs(10000)
+                            .withType(Notifications.NotificationType.WARNING)
+                            .show();
+                }
+            } else {
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.load();
+            }
+
+        });
+    }
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        setOnlyMySubscribeCheckBox();
+
+
         if (textFieldIOriginalCV.getValue() != null) {
             originalCVLink.setUrl(textFieldIOriginalCV.getValue());
             originalCVLink.setVisible(true);

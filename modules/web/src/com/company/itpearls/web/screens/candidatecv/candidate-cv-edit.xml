@@ -19,6 +19,16 @@
                     cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                where k.reacrutier = :subscriber
+                                and k.closed = false
+                                and current_date between k.startDate and k.endDate)
+                            </c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -181,19 +191,26 @@
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
                                 </lookupPickerField>
-                                <lookupPickerField id="candidateCVFieldOpenPosition"
-                                                   dataContainer="candidateCVDc"
-                                                   optionsContainer="openPositionsDc"
-                                                   property="toVacancy"
-                                                   caption="mainMsg://msgVacancy"
-                                                   width="70%">
-                                    <actions>
-                                        <action id="lookup"
-                                                type="picker_lookup"/>
-                                        <action id="open"
-                                                type="picker_open"/>
-                                    </actions>
-                                </lookupPickerField>
+                                <vbox width="70%" spacing="true">
+                                    <lookupPickerField id="candidateCVFieldOpenPosition"
+                                                       dataContainer="candidateCVDc"
+                                                       optionsContainer="openPositionsDc"
+                                                       property="toVacancy"
+                                                       caption="mainMsg://msgVacancy"
+                                                       width="100%">
+                                        <actions>
+                                            <action id="lookup"
+                                                    type="picker_lookup"/>
+                                            <action id="open"
+                                                    type="picker_open"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                    <checkBox id="onlyMySubscribeCheckBox"
+                                              align="TOP_RIGHT"
+                                              width="AUTO"
+                                              description="msg://msgOnlyMySebscribeDec"
+                                              caption="msg://msgOnlyMySubscribe"/>
+                                </vbox>
                             </vbox>
                             <lookupField id="СandidateCVField"
                                          dataContainer="candidateCVDc"
@@ -201,6 +218,7 @@
                                          caption="mainMsg://msgOwner"
                                          property="owner"
                                          width="70%"/>
+
                             <vbox expand="fileOriginalCVField"
                                   width="70%"
                                   spacing="true">
