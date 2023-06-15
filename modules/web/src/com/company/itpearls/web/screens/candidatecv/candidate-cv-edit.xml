@@ -36,6 +36,9 @@
                   class="com.company.itpearls.entity.CandidateCV">
             <view extends="candidateCV-view">
                 <property name="toVacancy" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectDepartment" view="_local"/>
+                    </property>
                     <property name="grade" view="_local"/>
                 </property>
                 <property name="candidate" view="_local">

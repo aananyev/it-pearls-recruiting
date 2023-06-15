@@ -434,11 +434,16 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parsePhone(String cv) {
-        String outStr = Jsoup.parse(deleteSystemChar(cv)).text();
-        String parsePhone = getDataModel(outStr,
-                phonePtrn);
+        String outStr;
+        if (cv != null) {
+            outStr = Jsoup.parse(deleteSystemChar(cv)).text();
+            String parsePhone = getDataModel(outStr,
+                    phonePtrn);
 
-        return parsePhone;
+            return parsePhone;
+        } else {
+            return null;
+        }
     }
 
     private String getDataModel(String onStr, String pattern) {

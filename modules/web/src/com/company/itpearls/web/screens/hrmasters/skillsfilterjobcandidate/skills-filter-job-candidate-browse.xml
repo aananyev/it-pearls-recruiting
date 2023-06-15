@@ -232,6 +232,12 @@
                            width="100%"
                            align="TOP_CENTER"
                            stylename="large"/>
+                    <checkBox id="onlyFreeCandidatesCheckBox"
+                              width="AUTO"
+                              caption="msg://msgOnlyFreeCandidates"
+                              description="msg://msgOnlyFreeCandidatesDesc"
+                              align="MIDDLE_RIGHT"
+                              icon="font-icon:HAND_PEACE_O"/>
                     <radioButtonGroup id="filterMethodRadioButtonGroup"
                                       width="AUTO"
                                       caption="msg://msgSearchMethod"

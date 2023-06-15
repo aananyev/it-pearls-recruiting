@@ -2268,46 +2268,43 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // Social
         if (newSocial.size() != 0) {
             for (String sFromCV : newSocial) {
+                String socialOld = null;
+                String aSocialOld = null;
+
                 for (SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
-                    String socialOld = social.getNetworkURLS();
-                    String aSocialOld = social.getSocialNetworkURL().getSocialNetworkURL();
-                    String hostCandidateFromCV = "";
-                    String hostSocialFromCandidate = "";
+                    if (social.getSocialNetworkURL() != null) {
+                        socialOld = social.getNetworkURLS();
+                        if (social.getSocialNetworkURL().getSocialNetworkURL() != null)
+                            aSocialOld = social.getSocialNetworkURL().getSocialNetworkURL();
+                    }
+                }
 
-                    try {
-                        URI uriCandidate = new URI(sFromCV);
-                        URI uriSocial = new URI(aSocialOld);
+                String hostCandidateFromCV = "";
+                String hostSocialFromCandidate = "";
 
-                        hostCandidateFromCV = uriCandidate.getHost();
-                        hostSocialFromCandidate = uriSocial.getHost();
+                try {
+                    URI uriCandidate = new URI(sFromCV);
+                    URI uriSocial = new URI(aSocialOld != null ? aSocialOld : null);
 
-                        if (hostCandidateFromCV != null && hostSocialFromCandidate != null) {
-                            if (hostCandidateFromCV.equals(hostSocialFromCandidate)) {
+                    hostCandidateFromCV = uriCandidate != null ? uriCandidate.getHost() : null;
+                    hostSocialFromCandidate = uriSocial != null ? uriSocial.getHost() : null;
 
+                    if (hostCandidateFromCV != null && hostSocialFromCandidate != null) {
+                        if (hostCandidateFromCV.equals(hostSocialFromCandidate)) {
 
-                                if (hostCandidateFromCV != null) {
-                                    String messageSN = "";
+                            if (hostCandidateFromCV != null) {
+                                String messageSN = "";
 
-                                    if (socialOld != null) {
-                                        // убрать новая - старая
-                                        URI uriOld = new URI(socialOld);
-                                        String a = uriOld.getRawPath();
-                                        if (!sFromCV.equals(socialOld)) {
-                                            flag = true;
-                                            messageSN = "Ссылка на социальную сеть старая "
-                                                    + socialOld
-                                                    + " новая "
-                                                    + sFromCV + " ";
-
-                                            List<String> urls = new ArrayList<>();
-                                            urls.add(messageSN);
-                                            urls.add(socialOld);
-                                            urls.add(sFromCV);
-
-                                            messageSocial.put(hostSocialFromCandidate, urls);
-                                        }
-                                    } else {
-                                        messageSN = "Добавить новую ссылку: " + sFromCV + "? ";
+                                if (socialOld != null) {
+                                    // убрать новая - старая
+                                    URI uriOld = new URI(socialOld);
+                                    String a = uriOld.getRawPath();
+                                    if (!sFromCV.equals(socialOld)) {
+                                        flag = true;
+                                        messageSN = "Ссылка на социальную сеть старая "
+                                                + socialOld
+                                                + " новая "
+                                                + sFromCV + " ";
 
                                         List<String> urls = new ArrayList<>();
                                         urls.add(messageSN);
@@ -2316,12 +2313,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                                         messageSocial.put(hostSocialFromCandidate, urls);
                                     }
+                                } else {
+                                    messageSN = "Добавить новую ссылку: " + sFromCV + "? ";
+
+                                    List<String> urls = new ArrayList<>();
+                                    urls.add(messageSN);
+                                    urls.add(socialOld);
+                                    urls.add(sFromCV);
+
+                                    messageSocial.put(hostSocialFromCandidate, urls);
                                 }
                             }
                         }
-                    } catch (URISyntaxException e) {
-                        log.error("Error", e);
                     }
+                } catch (URISyntaxException e) {
+                    log.error("Error", e);
                 }
             }
         }
@@ -2395,6 +2401,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                     if (entry.getValue()) {
                                         social.setNetworkURLS(messageSocial.get(entry.getKey()).get(2));
                                     }
+                                } else {
+                                    SocialNetworkURLs socialNetworkURL = metadata.create(SocialNetworkURLs.class);
+                                    socialNetworkURL.setNetworkURLS(messageSocial.get(entry.getKey()).get(2));
+                                    socialNetworkURL.setSocialNetworkURL(getSocialNetworkType(entry.getKey()));
+                                    socialNetworkURL.setJobCandidate(getEditedEntity());
+                                    socialNetworkURL.setNetworkName(socialNetworkURL.getSocialNetworkURL().getSocialNetwork());
+
+                                    getEditedEntity().getSocialNetwork().add(socialNetworkURL);
                                 }
                             }
                         }
@@ -2404,7 +2418,31 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             dialog.show();
         }
+    }
 
+    private SocialNetworkType getSocialNetworkType(String key) {
+        SocialNetworkType realSocialNetwork = null;
+        URI uriNetworTypes = null;
+        URI uriCandidate = null;
+
+        List<SocialNetworkType> socialNetworkTypes = dataManager.load(SocialNetworkType.class)
+                .view("socialNetworkType-view")
+                .list();
+
+        for (SocialNetworkType socialNetworkType : socialNetworkTypes) {
+            try {
+                uriNetworTypes = new URI(socialNetworkType.getSocialNetworkURL());
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+
+            if (uriNetworTypes.getHost().equals(uriCandidate.getHost())) {
+                realSocialNetwork = socialNetworkType;
+                break;
+            }
+        }
+
+        return realSocialNetwork;
     }
 
     public void scanContactsFromCV() {
