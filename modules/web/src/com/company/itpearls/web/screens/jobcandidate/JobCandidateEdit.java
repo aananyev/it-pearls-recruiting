@@ -52,6 +52,10 @@ import java.util.stream.Collectors;
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
+    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK
+            = "select e " +
+            "from itpearls_SocialNetworkType e " +
+            "where e.socialNetwork = :other";
     @Inject
     private DataManager dataManager;
     @Inject
@@ -2219,7 +2223,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                           String newPhone,
                                           Company newCompany,
                                           Set<String> newSocial) {
-        String message = "В резюме есть новые контактные данные кандидата. Заменить на новые?";
+//        String message = "В резюме есть новые контактные данные кандидата. Заменить на новые?";
+        String message = messageBundle.getMessage("msgNewSontacts");
         String messageEmail = null,
                 messagePhone = null,
                 messageCompany = null;
@@ -2268,7 +2273,31 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // Social
         if (newSocial.size() != 0) {
             for (String sFromCV : newSocial) {
-                String socialOld = null;
+                Boolean flagSFromCV = false;
+
+                for (SocialNetworkURLs urLs : getEditedEntity().getSocialNetwork()) {
+                    if (urLs.getNetworkURLS() != null) {
+                        if (urLs.getNetworkURLS().equals(sFromCV)) {
+                            flagSFromCV = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!flagSFromCV) {
+                    String messageSN = messageBundle.getMessage("msgAddNewSocialNetwork")
+                            + " "
+                            + sFromCV
+                            + "? ";
+
+                    List<String> urls = new ArrayList<>();
+                    urls.add(messageSN);
+                    urls.add(sFromCV);
+
+                    messageSocial.put(sFromCV, urls);
+                }
+
+                /* String socialOld = null;
                 String aSocialOld = null;
 
                 for (SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
@@ -2328,7 +2357,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     }
                 } catch (URISyntaxException e) {
                     log.error("Error", e);
-                }
+                }*/
             }
         }
 
@@ -2395,7 +2424,34 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             getSocial.put(entry.getKey(), closeEvent.getValue(entry.getKey()));
                         }
 
-                        for (SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
+
+                        for (Map.Entry<String, Boolean> entry : getSocial.entrySet()) {
+                            SocialNetworkType socialNetworkType = getSocialNetworkType(entry.getKey());
+
+                            if (socialNetworkType != null) {
+                                SocialNetworkURLs socialNetworkURL = metadata.create(SocialNetworkURLs.class);
+
+                                socialNetworkURL.setNetworkURLS(entry.getKey());
+                                socialNetworkURL.setSocialNetworkURL(socialNetworkType);
+                                socialNetworkURL.setJobCandidate(getEditedEntity());
+                                socialNetworkURL.setNetworkName(socialNetworkURL.getSocialNetworkURL().getSocialNetwork());
+
+                                getEditedEntity().getSocialNetwork().add(socialNetworkURL);
+                            } else {
+                                notifications.create(Notifications.NotificationType.ERROR)
+                                        .withType(Notifications.NotificationType.ERROR)
+                                        .withHideDelayMs(15000)
+                                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                                        .withCaption(messageBundle.getMessage("msgError"))
+                                        .withDescription(messageBundle
+                                                .getMessage("msgNotFoundOtherSoclNetworkType")
+                                                + " "
+                                                + messageSocial.get(entry.getKey()).get(2))
+                                        .show();
+                            }
+                        }
+
+/*                        for (SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
                             for (Map.Entry<String, Boolean> entry : getSocial.entrySet()) {
                                 if (social.getSocialNetworkURL().getSocialNetworkURL().contains(entry.getKey())) {
                                     if (entry.getValue()) {
@@ -2411,7 +2467,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                     getEditedEntity().getSocialNetwork().add(socialNetworkURL);
                                 }
                             }
-                        }
+                        } */
                     }
                 }
             });
@@ -2429,20 +2485,42 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .view("socialNetworkType-view")
                 .list();
 
+        try {
+            uriCandidate = new URI(key);
+        } catch (URISyntaxException uriSyntaxException) {
+            uriSyntaxException.printStackTrace();
+        }
+
+        Boolean flag = false;
+
         for (SocialNetworkType socialNetworkType : socialNetworkTypes) {
             try {
                 uriNetworTypes = new URI(socialNetworkType.getSocialNetworkURL());
             } catch (URISyntaxException uriSyntaxException) {
                 uriSyntaxException.printStackTrace();
+                continue;
             }
 
-            if (uriNetworTypes.getHost().equals(uriCandidate.getHost())) {
-                realSocialNetwork = socialNetworkType;
-                break;
+            if (uriNetworTypes.getHost() != null) {
+                if (uriNetworTypes.getHost().equals(uriCandidate.getHost())) {
+                    realSocialNetwork = socialNetworkType;
+                    flag = true;
+                    break;
+                }
             }
         }
 
-        return realSocialNetwork;
+        if (flag) {
+            return realSocialNetwork;
+        } else {
+            SocialNetworkType socialNetworkType = dataManager.load(SocialNetworkType.class)
+                    .query(QUERY_GET_OTHER_SOCIAL_NETWORK)
+                    .parameter("other", "Other")
+                    .view("socialNetworkType-view")
+                    .one();
+
+            return socialNetworkType;
+        }
     }
 
     public void scanContactsFromCV() {
