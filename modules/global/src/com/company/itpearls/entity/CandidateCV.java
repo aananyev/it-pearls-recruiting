@@ -100,6 +100,17 @@ public class CandidateCV extends StandardEntity {
     @Column(name = "IMAGE_BYTE_ARRAY")
     private byte[] imageByteArray;
 
+    @Column(name = "CONTACT_INFO_CHECKED")
+    private Boolean contactInfoChecked;
+
+    public Boolean getContactInfoChecked() {
+        return contactInfoChecked;
+    }
+
+    public void setContactInfoChecked(Boolean contactInfoChecked) {
+        this.contactInfoChecked = contactInfoChecked;
+    }
+
     public byte[] getImageByteArray() {
         return imageByteArray;
     }

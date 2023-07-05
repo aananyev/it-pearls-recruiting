@@ -2187,36 +2187,48 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String newPhone = null,
                 newEmail = null;
         Company newCompany = null;
+        Boolean scanContacts = false;
 
         Set<String> newSocial = new HashSet<>();
 
         for (CandidateCV candidateCV : jobCandidateCandidateCvsDc.getItems()) {
-            try {
-                String email = parseCVService.parseEmail(candidateCV.getTextCV());
+            candidateCV.setContactInfoChecked(
+                    candidateCV.getContactInfoChecked() == null ? false : candidateCV.getContactInfoChecked()
+            );
 
-                if (email != null) {
-                    newEmail = email;
+            if (candidateCV.getContactInfoChecked() != true) {
+                try {
+                    String email = parseCVService.parseEmail(candidateCV.getTextCV());
+
+                    if (email != null) {
+                        newEmail = email;
+                    }
+
+                    String phone = parseCVService.parsePhone(candidateCV.getTextCV());
+
+                    if (phone != null) {
+                        newPhone = phone;
+                    }
+
+                    List<String> urls = parseCVService
+                            .extractUrls(Jsoup.parse(candidateCV.getTextCV())
+                                    .text());
+                    Set<String> setUrls = new HashSet<>(urls);
+
+                    urls.clear();
+                    newSocial.addAll(setUrls);
+                } catch (NullPointerException e) {
+                    log.error("Error", e);
                 }
 
-                String phone = parseCVService.parsePhone(candidateCV.getTextCV());
-
-                if (phone != null) {
-                    newPhone = phone;
-                }
-
-                List<String> urls = parseCVService
-                        .extractUrls(Jsoup.parse(candidateCV.getTextCV())
-                                .text());
-                Set<String> setUrls = new HashSet<>(urls);
-
-                urls.clear();
-                newSocial.addAll(setUrls);
-            } catch (NullPointerException e) {
-                log.error("Error", e);
+                candidateCV.setContactInfoChecked(true);
+                scanContacts = true;
             }
         }
 
-        makeDialogNewEmailPhone1(newEmail, newPhone, newCompany, newSocial);
+        if (scanContacts) {
+            makeDialogNewEmailPhone1(newEmail, newPhone, newCompany, newSocial);
+        }
     }
 
     private void makeDialogNewEmailPhone1(String newEmail,
@@ -2244,7 +2256,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabContactInfo();
         }
 
-        parseCVService.normalizePhoneStr(phoneField.getValue());
+        oldPhone = parseCVService.normalizePhoneStr(phoneField.getValue());
 
         Boolean flag = false;
 
@@ -2255,17 +2267,29 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                 flag = true;
 
-            } else {
             }
+        }
 
-            if (newPhone != null) {
-                if (oldPhone == null && newPhone != null) {
-                    messagePhone = "Добавить телефон в карточку "
-                            + newPhoneNew + "? ";
+        if (newPhone != null) {
+            if (oldPhone == null && newPhone != null) {
+/*                    messagePhone = "Добавить телефон в карточку "
+                            + newPhoneNew + "? ";*/
+                messagePhone = messageBundle.getMessage("msgAddPhone") + " "
+                        + newPhone + "? ";
+
+                flag = true;
+            } else {
+                if (!oldPhone.equals(newPhone)) {
+                    messagePhone = messageBundle.getMessage("msgReplacePhone")
+                            + " "
+                            + oldPhone
+                            + " "
+                            + messageBundle.getMessage("msgTo")
+                            + " "
+                            + newPhone
+                            + "? ";
 
                     flag = true;
-                } else {
-
                 }
             }
         }
@@ -2378,7 +2402,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
             if (newPhone != null) {
-                if (!StringUtils.equals(newPhone, oldPhone)) {
+                if (!StringUtils.equals(parseCVService.normalizePhoneStr(newPhone),
+                        parseCVService.normalizePhoneStr(oldPhone))) {
                     dialog.withParameter(InputParameter.booleanParameter("newPhone")
                             .withCaption(messagePhone).withRequired(true));
                 }
@@ -2597,11 +2622,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         if (newPhone != null) {
-            if (newPhone.equals(phoneField.getValue())) {
+            if (parseCVService.normalizePhoneStr(newPhone)
+                    .equals(parseCVService.normalizePhoneStr(phoneField.getValue()))) {
                 message = message
-                        + "<i> - телефон старый </i>"
+/*                        + "<i> - телефон старый </i>"
                         + "<b>" + phoneField.getValue() + "</b>"
                         + " новый "
+                        + "<b>" + newPhone + "</b>"
+                        + "</i><br>";*/
+                        + messageBundle.getMessage("msgOldPhone")
+                        + "<b>" + phoneField.getValue() + "</b>"
+                        + " " + messageBundle.getMessage("msgNew") + " "
                         + "<b>" + newPhone + "</b>"
                         + "</i><br>";
 
@@ -2617,8 +2648,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withType(Dialogs.MessageType.WARNING)
                     .withWidth("600px")
                     .withMessage(message
-                            + "<br><br>"
-                            + "<b>Заменить в карточке кандидата?</b>")
+                            + messageBundle.getMessage("msgReplaseCandidateCard"))
+/*                            + "<br><br>"
+                            + "<b>Заменить в карточке кандидата?</b>")*/
                     .withContentMode(ContentMode.HTML)
                     .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
                         phoneField.setValue(finalNewPhone);
@@ -2632,6 +2664,31 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .NotificationType.WARNING)
                         .withCaption("Не найдено новой контактной информации в резюме кандидата")
                         .show();
+            }
+        }
+    }
+
+    @Subscribe("phoneField")
+    public void onPhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            if (!phoneField
+                    .getValue()
+                    .equals(parseCVService.normalizePhoneStr(phoneField.getValue()))) {
+                phoneField
+                        .setValue(parseCVService.normalizePhoneStr(phoneField.getValue()));
+            }
+        }
+    }
+
+
+    @Subscribe("mobilePhoneField")
+    public void onMobilePhoneFieldValueChange1(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            if (!mobilePhoneField
+                    .getValue()
+                    .equals(parseCVService.normalizePhoneStr(mobilePhoneField.getValue()))) {
+                mobilePhoneField
+                        .setValue(parseCVService.normalizePhoneStr(mobilePhoneField.getValue()));
             }
         }
     }

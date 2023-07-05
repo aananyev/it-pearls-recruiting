@@ -1152,7 +1152,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
                             + messageBundle.getMessage("msgThausendRubles") + "/"
                             + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
-                            + messageBundle.getMessage("msgThausendRubles");;
+                            + messageBundle.getMessage("msgThausendRubles");
+                    ;
                 } else {
                     retStr = "До "
                             + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
@@ -2387,9 +2388,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.positionType", subject = "columnGenerator")
     private Object openPositionsTablePositionTypeColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event,
-                event.getItem().getPositionType().getPositionEnName()
+                event.getItem().getPositionType().getPositionEnName() != null
+                        ? event.getItem().getPositionType().getPositionEnName()
+                        : messageBundle.getMessage("msgNotNamePosition")
                         + " / "
-                        + event.getItem().getPositionType().getPositionRuName());
+                        + event.getItem().getPositionType().getPositionRuName() != null ?
+                        event.getItem().getPositionType().getPositionRuName()
+                        : messageBundle.getMessage("msgNotNamePosition"));
         return retObject;
     }
 

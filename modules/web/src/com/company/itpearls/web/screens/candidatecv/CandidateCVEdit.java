@@ -133,6 +133,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private CollectionLoader<OpenPosition> openPositionsDl;
     @Inject
     private CollectionContainer<OpenPosition> openPositionsDc;
+    private StringBuffer textResumeStringBuffer = null;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -415,6 +416,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onBeforeShow(BeforeShowEvent event) {
         setOnlyMySubscribeCheckBox();
 
+/*        if (candidateCVRichTextArea.getValue() != null) {
+            textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
+        } */
+
 
         if (textFieldIOriginalCV.getValue() != null) {
             originalCVLink.setUrl(textFieldIOriginalCV.getValue());
@@ -456,6 +461,19 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+        } else {
+            if (candidateCVRichTextArea.getValue() != null) {
+                StringBuffer newTextResume = new StringBuffer(candidateCVRichTextArea.getValue());
+                if (textResumeStringBuffer.compareTo(newTextResume) != 0) {
+                    getEditedEntity().setContactInfoChecked(false);
+
+                    if (candidateCVRichTextArea.getValue() != null) {
+                        getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+                    }
+                }
+            } else {
+                getEditedEntity().setContactInfoChecked(false);
+            }
         }
     }
 
@@ -649,6 +667,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             getEditedEntity().setDatePost(new Date());
 
             getEditedEntity().setOwner(userSession.getUser());
+        } else {
+            if (candidateCVRichTextArea.getValue() != null) {
+                textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
+            }
         }
     }
 

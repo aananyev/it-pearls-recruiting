@@ -123,7 +123,7 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parseSkype(String cv) {
-        final String skypePattern = "Skype:";
+        final String skypePattern = "[Ss]kype:[\\s]?";
         return parseContacts(cv, skypePattern);
     }
 
@@ -149,7 +149,7 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parseTelegram(String cv) {
-        final String telegramPattern = "Telegram:";
+        final String telegramPattern = "[Tt]elegram:[\\s]?";
         return parseContacts(cv, telegramPattern);
     }
 

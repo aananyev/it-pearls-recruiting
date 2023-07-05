@@ -134,6 +134,7 @@ create table ITPEARLS_CANDIDATE_CV (
     DATE_POST date not null,
     FILE_IMAGE_FACE uuid,
     IMAGE_BYTE_ARRAY bytea,
+    CONTACT_INFO_CHECKED boolean,
     --
     primary key (ID)
 )^

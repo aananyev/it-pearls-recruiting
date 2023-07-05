@@ -325,6 +325,13 @@
             <property name="startDate"/>
             <property name="endDate"/>
         </property>
+        <property name="grade" view="_local"/>
+        <property name="cityPosition" view="_local"/>
+        <property name="cities" view="_local"/>
+        <property name="positionType" view="_local"/>
+        <property name="owner" view="_local"/>
+        <property name="laborAgreement" view="_local"/>
+        <property name="skillsList" view="_local"/>
     </view>
     <view entity="itpearls_SomeFiles" name="someFiles-view" extends="_local">
         <property name="fileDescriptor" view="_minimal">

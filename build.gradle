@@ -47,10 +47,10 @@ dependencies {
     appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.14.1')
     appComponent('com.haulmont.addon.dashboard:dashboard-global:3.2.3')
     appComponent('com.haulmont.addon.helium:helium-global:0.4.0')
-    appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
     appComponent("com.haulmont.fts:fts-global:$cubaVersion")
     appComponent("com.haulmont.reports:reports-global:$cubaVersion")
     appComponent("com.haulmont.charts:charts-global:$cubaVersion")
+    appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
 }
 
 def postgres = 'org.postgresql:postgresql:42.2.9'
