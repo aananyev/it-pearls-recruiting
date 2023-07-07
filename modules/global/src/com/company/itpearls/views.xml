@@ -60,6 +60,12 @@
                 <property name="companyName" view="_local"/>
             </property>
         </property>
+        <property name="openPositionComments" view="_local">
+            <property name="user" view="_local">
+                <property name="fileImageFace" view="_local"/>
+            </property>
+            <property name="openPosition" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" view="_local"/>

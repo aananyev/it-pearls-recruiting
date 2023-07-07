@@ -49,10 +49,10 @@
                 <column id="rating">
                     <componentRenderer/>
                 </column>
-                <column id="user"
-                        property="user"/>
                 <column id="dateComment"
                         property="dateComment"/>
+                <column id="user"
+                        property="user"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

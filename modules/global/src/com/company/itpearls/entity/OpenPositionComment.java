@@ -5,7 +5,6 @@ import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
 import com.haulmont.cuba.core.global.DeletePolicy;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -30,14 +29,22 @@ public class OpenPositionComment extends StandardEntity {
     @Column(name = "COMMENT_")
     private String comment;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "USER_ID")
-    private User user;
+    @NotNull
+    private ExtUser user;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "DATE_")
     private Date dateComment;
+
+    public void setUser(ExtUser user) {
+        this.user = user;
+    }
+
+    public ExtUser getUser() {
+        return user;
+    }
 
     public void setRating(Integer rating) {
         this.rating = rating;
@@ -53,14 +60,6 @@ public class OpenPositionComment extends StandardEntity {
 
     public void setDateComment(Date dateComment) {
         this.dateComment = dateComment;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public String getComment() {

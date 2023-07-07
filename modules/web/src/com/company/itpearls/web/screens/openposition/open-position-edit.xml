@@ -9,6 +9,11 @@
         <instance id="openPositionDc"
                   class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
+                <property name="openPositionComments" view="_local">
+                    <property name="user" view="_local">
+                        <property name="fileImageFace" view="_local"/>
+                    </property>
+                </property>
                 <property name="grade" view="_local"/>
                 <property name="laborAgreement" view="_minimal"/>
                 <property name="projectName" view="_minimal">
@@ -29,6 +34,8 @@
                         property="skillsList"/>
             <collection id="laborAgreementDc"
                         property="laborAgreement"/>
+            <collection id="commentsOpenPositionDc"
+                        property="openPositionComments"/>
         </instance>
         <collection id="procAttachmentsDc"
                     class="com.haulmont.bpm.entity.ProcAttachment"
@@ -915,6 +922,16 @@
                                   screen="bpm_ProcActionsFragment"/>
                     </groupBox>
 
+                </tab>
+                <tab id="commentsTab"
+                     caption="msg://msgComments"
+                     margin="true,true,true,true"
+                     spacing="true"
+                     expand="commentsScrollBox"
+                     icon="STAR_O">
+                    <scrollBox id="commentsScrollBox"
+                               width="100%"
+                               height="100%"/>
                 </tab>
             </tabSheet>
         </vbox>

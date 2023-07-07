@@ -813,7 +813,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .withInitializer(e -> {
                         e.setOpenPosition(openPositionsTable.getSingleSelected() != null
                                 ? openPositionsTable.getSingleSelected() : null);
-                        e.setUser(userSession.getUser());
+                        e.setUser((ExtUser) userSession.getUser());
                     })
                     .withOpenMode(OpenMode.DIALOG)
                     .newEntity()
@@ -2759,7 +2759,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .withInitializer(e -> {
                     e.setOpenPosition(openPositionsTable.getSingleSelected() != null
                             ? openPositionsTable.getSingleSelected() : null);
-                    e.setUser(userSession.getUser());
+                    e.setUser((ExtUser) userSession.getUser());
                 })
                 .withOpenMode(OpenMode.DIALOG)
                 .newEntity()

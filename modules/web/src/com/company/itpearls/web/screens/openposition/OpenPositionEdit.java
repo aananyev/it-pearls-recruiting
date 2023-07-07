@@ -11,6 +11,9 @@ import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.builders.EditorBuilder;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -228,6 +231,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TextField<BigDecimal> outstaffingCostTextField;
     @Inject
     private TextField<String> salaryCommentTextFiels;
+    @Inject
+    private CollectionPropertyContainer<OpenPositionComment> commentsOpenPositionDc;
+    @Inject
+    private ScrollBoxLayout commentsScrollBox;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -252,6 +259,149 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         whiIsThisGuyDisable(event);
         setOpenPositionNews(event);
         setOpenCloseStart();
+        setCommentsOpenPositionScroll();
+    }
+
+    private void setCommentsOpenPositionScroll() {
+        for (OpenPositionComment openPositionComment : getEditedEntity().getOpenPositionComments()) {
+            if (openPositionComment.getComment() != null) {
+               VBoxLayout commentBox = getCommentBox(openPositionComment);
+               commentsScrollBox.add(commentBox);
+            }
+        }
+    }
+
+    private VBoxLayout getCommentBox(OpenPositionComment openPositionComment) {
+        VBoxLayout retBox = uiComponents.create(VBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setSpacing(false);
+        retBox.setMargin(false);
+        retBox.setHeight("100px");
+
+        HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
+        innerBox.setMargin(true);
+        innerBox.setWidthAuto();
+        innerBox.setSpacing(true);
+
+        VBoxLayout outerBox = uiComponents.create(VBoxLayout.class);
+        outerBox.setMargin(false);
+        outerBox.setWidthAuto();
+        outerBox.setSpacing(false);
+
+        if (openPositionComment.getComment() != null
+                && !openPositionComment.getComment().equals("")) {
+            Label name = uiComponents.create(Label.class);
+
+            if (openPositionComment.getUser() != null) {
+                name.setValue(openPositionComment.getUser().getName() != null
+                        ? openPositionComment.getUser().getName() :
+                        (openPositionComment.getUser().getName() != null ? openPositionComment.getUser().getName() : ""));
+            }
+            name.setStyleName("tailName");
+
+            Label vacancy = uiComponents.create(Label.class);
+            vacancy.setValue(openPositionComment.getOpenPosition() != null &&
+                    !openPositionComment.getOpenPosition().getVacansyName().equals("Default")
+                    ? openPositionComment.getOpenPosition().getVacansyName() : "");
+            vacancy.setStyleName("tailVacancy");
+
+            Label text = uiComponents.create(Label.class);
+            text.setValue(openPositionComment.getComment() != null ?
+                    openPositionComment.getComment().replaceAll("\n\n", "\n") : "");
+            text.addStyleName("table-wordwrap");
+
+            Label date = uiComponents.create(Label.class);
+            date.setValue(openPositionComment.getDateComment() != null ?
+                    openPositionComment.getDateComment() : "");
+            date.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+            date.setStyleName("tailDate");
+
+            Image image = uiComponents.create(Image.class);
+
+            if (openPositionComment.getUser() != null) {
+                if (((ExtUser) openPositionComment.getUser()).getFileImageFace() != null) {
+                    image.setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(((ExtUser) openPositionComment.getUser()).getFileImageFace());
+                } else {
+                    image.setSource(ThemeResource.class)
+                            .setPath("icons/no-programmer.jpeg");
+                }
+            } else {
+                image.setSource(ThemeResource.class)
+                        .setPath("icons/no-programmer.jpeg");
+            }
+
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("50px");
+            image.setHeight("50px");
+            image.setStyleName("circle-50px");
+
+            innerBox.setStyleName("toolTip");
+
+            Button replyButton = uiComponents.create(Button.class);
+            replyButton.setWidthAuto();
+            replyButton.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+            replyButton.setCaption(messageBundle.getMessage("msgReplyButton"));
+            replyButton.setDescription(messageBundle.getMessage("msgReplyButtonDesc"));
+            replyButton.addClickListener(e -> { /*
+                dialogs.createInputDialog(this)
+                        .withCaption(messageBundle.getMessage("msgComment"))
+                        .withParameters(
+                                InputParameter.stringParameter("comment")
+                                        .withCaption(messageBundle.getMessage("msgInputComment"))
+                                        .withRequired(true)
+                        )
+                        .withActions(DialogActions.OK_CANCEL)
+                        .withCloseListener(closeEvent -> {
+                            if (closeEvent
+                                    .getCloseAction()
+                                    .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                                replyButtonInvoke(e, "(" + ") Re:" + (String) closeEvent.getValue("comment"));
+                            }
+                        })
+                        .show();*/
+            });
+
+            if (userSession.getUser().getLogin().equals(openPositionComment.getCreatedBy())) {
+                outerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                date.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                vacancy.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                text.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                name.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                innerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                innerBox.addStyleName("tailMyMessage");
+            } else {
+                outerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                date.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                vacancy.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                text.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                name.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                innerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                innerBox.addStyleName("tailOtherMessage");
+            }
+
+            outerBox.add(name);
+            if (!vacancy.getValue().equals("")) {
+                outerBox.add(vacancy);
+            }
+
+            outerBox.add(text);
+            outerBox.add(date);
+            outerBox.add(replyButton);
+
+            if (!userSession.getUser().getLogin().equals(openPositionComment.getCreatedBy())) {
+                innerBox.add(image);
+            }
+
+            innerBox.add(outerBox);
+            if (userSession.getUser().getLogin().equals(openPositionComment.getCreatedBy())) {
+                innerBox.add(image);
+            }
+
+            retBox.add(innerBox);
+        }
+
+        return retBox;
     }
 
     private void setCommentToVacancy() {

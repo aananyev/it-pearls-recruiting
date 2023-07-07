@@ -209,10 +209,23 @@ public class OpenPosition extends StandardEntity {
     @Composition
     private List<LaborAgreement> laborAgreement;
 
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "openPosition")
+    private List<OpenPositionComment> openPositionComments;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
     private User owner;
+
+    public List<OpenPositionComment> getOpenPositionComments() {
+        return openPositionComments;
+    }
+
+    public void setOpenPositionComments(List<OpenPositionComment> openPositionComments) {
+        this.openPositionComments = openPositionComments;
+    }
 
     public Integer getRating() {
         return rating;
