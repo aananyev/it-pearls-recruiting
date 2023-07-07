@@ -2538,11 +2538,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (flag) {
             return realSocialNetwork;
         } else {
-            SocialNetworkType socialNetworkType = dataManager.load(SocialNetworkType.class)
-                    .query(QUERY_GET_OTHER_SOCIAL_NETWORK)
-                    .parameter("other", "Other")
-                    .view("socialNetworkType-view")
-                    .one();
+            SocialNetworkType socialNetworkType = null;
+
+            try {
+                socialNetworkType = dataManager.load(SocialNetworkType.class)
+                        .query(QUERY_GET_OTHER_SOCIAL_NETWORK)
+                        .parameter("other", "Other")
+                        .view("socialNetworkType-view")
+                        .one();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
 
             return socialNetworkType;
         }

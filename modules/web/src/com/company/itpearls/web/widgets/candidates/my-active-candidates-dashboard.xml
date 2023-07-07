@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+    xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data>
+        <collection id="iteractionListsDc"
+                    class="com.company.itpearls.entity.IteractionList">
+            <view extends="_local">
+                <property name="candidate"
+                          view="_local">
+                    <property name="socialNetwork"
+                              view="_local"/>
+                    <property name="cityOfResidence"
+                              view="_local"/>
+                    <property name="candidateCv"
+                              view="_local">
+                        <property name="toVacancy"
+                                  view="_local">
+                            <property name="projectName" view="_local"/>
+                        </property>
+                        <property name="resumePosition"
+                                  view="_local"/>
+                    </property>
+                    <property name="personPosition"
+                              view="_local"/>
+                    <property name="positionList"
+                              view="_local">
+                        <property name="positionList"
+                                  view="_local"/>
+                    </property>
+                    <property name="fileImageFace"
+                              view="_base"/>
+                    <property name="iteractionList"
+                              view="_local">
+                        <property name="recrutier"
+                                  view="_local"/>
+                        <property name="vacancy"
+                                  view="_local">
+                            <property name="projectName"
+                                      view="_local"/>
+                        </property>
+                        <property name="iteractionType"
+                                  view="_local">
+                            <property name="iteractionTree"
+                                      view="_local"/>
+                        </property>
+                    </property>
+                </property>
+                <property name="iteractionType"
+                          view="_local">
+                    <property name="iteractionTree"
+                              view="_local"/>
+                </property>
+                <property name="recrutier"
+                          view="_local"/>
+                <property name="vacancy"
+                          view="_local">
+                    <property name="projectName"
+                              view="_local"/>
+                </property>
+            </view>
+            <loader id="iteractionListsDl"
+                    cacheable="true">
+                <query><![CDATA[select e
+                    from itpearls_IteractionList e
+                    order by e.candidate.fullName ]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.createdBy like :recrutier
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select g from itpearls_IteractionList g
+                                    where e.candidate.id = g.candidate.id
+                                    and e.vacancy.id = g.vacancy.id
+                                    and g.iteractionType.signEndCase = :endCase)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>@between(e.dateIteraction, now - :daysBetween, now, day)</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select h
+                                    from itpearls_IteractionList h
+                                    where h.candidate.fullName like '%:candidate%')
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.candidate.personPosition = :personPosition)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <scrollBox id="candidatesScrollBox"
+                   spacing="true"
+                   orientation="vertical"/>
+    </layout>
+</fragment>

@@ -1,12 +1,14 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.openposition.openpositionfragments.OpenPositionDetailScreenFragment;
 import com.company.itpearls.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
+import com.company.itpearls.web.screens.openpositioncomment.OpenPositionCommentEdit;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
@@ -44,6 +46,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private Button setRatingButton;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
 
     @Install(to = "openPositionsTable.companyLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -743,11 +749,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Component closeButton = createCloseButton(entity);
         Component editButton = createEditButton(entity);
         Component priorityField = createPriorityField(entity);
+        Component commentButton = createCommentButton(entity);
         Component openCloseButton = createOpenCloseButton(entity);
         Component viewDescriptionButton = createViewDescriptionButton(entity);
         Component sendedCandidatesButton = createSendedCandidatesButton(entity);
 
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
+        commentButton.setAlignment(Component.Alignment.TOP_RIGHT);
         openCloseButton.setAlignment(Component.Alignment.TOP_RIGHT);
         editButton.setAlignment(Component.Alignment.TOP_RIGHT);
         priorityField.setAlignment(Component.Alignment.TOP_RIGHT);
@@ -759,6 +767,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         buttonsHBox.add(editButton);
         buttonsHBox.add(viewDescriptionButton);
         buttonsHBox.add(sendedCandidatesButton);
+        buttonsHBox.add(commentButton);
 
         if (suitableButton != null)
             buttonsHBox.add(suitableButton);
@@ -790,6 +799,29 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
         return mainLayout;
+    }
+
+    private Component createCommentButton(OpenPosition entity) {
+        Button retButton = uiComponents.create(Button.class);
+        retButton.setIcon(CubaIcon.STAR_O.source());
+        retButton.setDescription(messageBundle.getMessage("msgComment"));
+        retButton.setEnabled(true);
+
+        retButton.addClickListener(addClickListenerEvent -> {
+            screenBuilders.editor(OpenPositionComment.class, this)
+                    .withScreenClass(OpenPositionCommentEdit.class)
+                    .withInitializer(e -> {
+                        e.setOpenPosition(openPositionsTable.getSingleSelected() != null
+                                ? openPositionsTable.getSingleSelected() : null);
+                        e.setUser(userSession.getUser());
+                    })
+                    .withOpenMode(OpenMode.DIALOG)
+                    .newEntity()
+                    .build()
+                    .show();
+        });
+
+        return retButton;
     }
 
     private Component createSendedCandidatesButton(OpenPosition entity) {
@@ -1473,10 +1505,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (e.getSelected() == null) {
                 buttonSubscribe.setEnabled(false);
                 reportsPopupButton.setEnabled(false);
+                setRatingButton.setEnabled(false);
 
                 openCloseButton.setEnabled(false);
                 openCloseButton.setIconFromSet(CubaIcon.CLOSE);
                 openCloseButton.setCaption("Открыть / Закрыть");
+            } else {
+                setRatingButton.setEnabled(true);
             }
         });
 
@@ -2716,6 +2751,43 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.vacansyID", subject = "columnGenerator")
     private Object openPositionsTableVacansyIDColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         return setCenteredCell(event.getItem().getVacansyID(), "label_table_black");
+    }
+
+    public void setRatingComment() {
+        screenBuilders.editor(OpenPositionComment.class, this)
+                .withScreenClass(OpenPositionCommentEdit.class)
+                .withInitializer(e -> {
+                    e.setOpenPosition(openPositionsTable.getSingleSelected() != null
+                            ? openPositionsTable.getSingleSelected() : null);
+                    e.setUser(userSession.getUser());
+                })
+                .withOpenMode(OpenMode.DIALOG)
+                .newEntity()
+                .build()
+                .show();
+    }
+
+    @Install(to = "openPositionsTable.rating", subject = "columnGenerator")
+    private Object openPositionsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        return avgRating(event.getItem());
+    }
+
+    private String avgRating(OpenPosition openPosition) {
+        BigDecimal avgRating = null;
+
+        final String QUERY_AVERAGE_RATING =
+                "select avg(e.rating) from itpearls_OpenPositionComment e where e.openPosition = :openPosition";
+
+        avgRating = dataManager.loadValue(QUERY_AVERAGE_RATING, BigDecimal.class)
+                .parameter("openPosition", openPosition)
+                .one();
+
+        if (avgRating != null) {
+            int avgRatingInt = Integer.valueOf(avgRating.intValue()) + 1;
+
+            return starsAndOtherService.setStars(avgRatingInt);
+        } else
+            return "";
     }
 }
 

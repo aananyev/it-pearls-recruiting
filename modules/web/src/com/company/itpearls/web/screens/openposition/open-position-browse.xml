@@ -193,6 +193,12 @@
                         width="70px"
                         minimumWidth="35px"
                         caption="msg://msgPriority"/>
+                <column id="rating"
+                        minimumWidth="85px"
+                        maximumWidth="85px"
+                        caption="msg://msgRating">
+                    <htmlRenderer nullRepresentation="null"/>
+                </column>
                 <column id="companyLogoColumn"
                         resizable="true"
                         collapsible="true"
@@ -402,6 +408,12 @@
                                 caption="msg://msgGetMemoForCandidate"/>
                     </actions>
                 </popupButton>
+                <button id="setRatingButton"
+                        icon="STAR_O"
+                        enable="false"
+                        caption="msg://msgOpenPositionComment"
+                        description="msg://msgSetRating"
+                        invoke="setRatingComment"/>
             </buttonsPanel>
         </treeDataGrid>
         <hbox spacing="true"

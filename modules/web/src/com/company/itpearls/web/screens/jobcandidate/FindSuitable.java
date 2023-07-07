@@ -206,7 +206,7 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
         } else if (percent < 45) {
             labelBattery.setStyleName("rating_battery_orange_2");
         } else if (percent < 60) {
-            labelBattery.setStyleName("rating_battery_yellow_3");
+            labelBattery.setStyleName("rating_battery_teal_3");
         } else if (percent < 85) {
             labelBattery.setStyleName("rating_battery_green_4");
         } else {

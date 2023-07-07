@@ -25,15 +25,6 @@
                   caption="mainMsg://menu_config.itpearls_InternalEmailTemplate.browse"/>
         </menu>
     </menu>
-    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
-        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
-              icon="font-icon:ADDRESS_BOOK_O"/>
-        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
-              icon="GROUP"/>
-        <item screen="itpearls_ApplicationRecruitment.browse"
-              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
-        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
-    </menu>
     <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
         <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
               icon="COMPASS"/>
@@ -46,6 +37,15 @@
     <menu id="application-recruiting" icon="COMPASS" insertAfter="application-outstaffing">
         <item screen="itpearls_OpenPositionRecruiting.browse" caption="mainMsg://msgOpenPositionRecruiting"
               icon="COMPASS" openType="NEW_TAB"/>
+    </menu>
+    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
+        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
+              icon="font-icon:ADDRESS_BOOK_O"/>
+        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
+              icon="GROUP"/>
+        <item screen="itpearls_ApplicationRecruitment.browse"
+              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
+        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
     </menu>
     <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
@@ -76,10 +76,11 @@
         <item screen="itpearls_FileType.browse" icon="FILE_TEXT_O"/>
         <item screen="itpearls_SocialNetworkType.browse" description="mainMsg://default.description"
               icon="FACEBOOK_OFFICIAL"/>
-        <item screen="itpearls_Grade.browse" caption="mainMsg://menu_config.itpearls_Grade.browse"/>
-        <item screen="itpearls_Currency.browse" caption="mainMsg://menu_config.itpearls_Currency.browse"/>
-        <item screen="itpearls_OutstaffingRates.browse"
-              caption="mainMsg://menu_config.itpearls_OutstaffingRates.browse"/>
+        <item screen="itpearls_Grade.browse" caption="mainMsg://menu_config.itpearls_Grade.browse"
+              icon="font-icon:LEVEL_UP"/>
+        <item screen="itpearls_Currency.browse" caption="mainMsg://menu_config.itpearls_Currency.browse" icon="DOLLAR"/>
+        <item screen="itpearls_OutstaffingRates.browse" caption="mainMsg://menu_config.itpearls_OutstaffingRates.browse"
+              icon="RUBLE"/>
     </menu>
     <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-hadbook">
         <item bean="itpearls_MemoForCandidatesBean" beanMethod="runReport" caption="mainMsg://msgMemoForCandidates"

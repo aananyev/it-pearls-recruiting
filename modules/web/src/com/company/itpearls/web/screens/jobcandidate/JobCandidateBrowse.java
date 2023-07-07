@@ -224,10 +224,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     Calendar calendar1 = Calendar.getInstance();
 
                     if (calendar.after(calendar1)) {
-                        if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
-                            retStr = "button_table_red";
-                        } else {
-                            retStr = "button_table_yellow";
+                        if (iteractionList.getRecrutier() != null) {
+                            if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                                retStr = "button_table_red";
+                            } else {
+                                retStr = "button_table_yellow";
+                            }
                         }
                     } else {
                         retStr = "button_table_green";

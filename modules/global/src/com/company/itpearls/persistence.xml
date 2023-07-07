@@ -49,5 +49,6 @@
         <class>com.company.itpearls.entity.UserSettings</class>
         <class>com.company.itpearls.entity.OutstaffingRates</class>
         <class>com.company.itpearls.entity.Currency</class>
+        <class>com.company.itpearls.entity.OpenPositionComment</class>
     </persistence-unit>
 </persistence>

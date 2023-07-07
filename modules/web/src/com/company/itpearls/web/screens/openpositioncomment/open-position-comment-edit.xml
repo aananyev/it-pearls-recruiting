@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://openPositionCommentEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.openpositioncomment">
+    <data>
+        <instance id="openPositionCommentDc"
+                  class="com.company.itpearls.entity.OpenPositionComment">
+            <view extends="_local">
+                <property name="openPosition" view="_local">
+                    <property name="grade" view="_local"/>
+                    <property name="cityPosition" view="_local"/>
+                    <property name="cities" view="_local"/>
+                    <property name="positionType" view="_local"/>
+                    <property name="projectName" view="_local"/>
+                    <property name="skillsList" view="_local"/>
+                    <property name="parentOpenPosition" view="_minimal"/>
+                </property>
+                <property name="user" view="_local"/>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="_minimal">
+            <loader id="openPositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <label id="ratingLabel"
+               stylename="h1"
+               width="AUTO"
+               visible="false"
+               height="AUTO"
+               align="MIDDLE_RIGHT"/>
+        <form id="form" dataContainer="openPositionCommentDc">
+            <column width="350px">
+                <lookupPickerField id="openPositionField" optionsContainer="openPositionsDc" property="openPosition"/>
+                <lookupField id="ratingField"
+                             required="true"
+                             align="MIDDLE_RIGHT"
+                             caption="msg://msgRating"
+                             dataContainer="openPositionCommentDc"
+                             property="rating"
+                             description="msg://msgRatingDecription"
+                             width="50%"/>
+                <textArea id="commentField" property="comment" height="100%" width="100%"/>
+                <pickerField id="userField" property="user">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="clear" type="picker_clear"/>
+                    </actions>
+                </pickerField>
+                <dateField id="dateCommentField" property="dateComment"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

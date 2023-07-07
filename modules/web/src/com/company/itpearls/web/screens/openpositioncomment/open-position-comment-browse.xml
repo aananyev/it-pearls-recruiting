@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://openPositionCommentBrowse.caption"
+        focusComponent="openPositionCommentsTable"
+        messagesPack="com.company.itpearls.web.screens.openpositioncomment">
+    <data readOnly="true">
+        <collection id="openPositionCommentsDc"
+                    class="com.company.itpearls.entity.OpenPositionComment">
+            <view extends="_local">
+                <property name="openPosition" view="_local">
+                    <property name="grade" view="_local"/>
+                    <property name="cityPosition" view="_local"/>
+                    <property name="cities" view="_local"/>
+                    <property name="positionType" view="_local"/>
+                    <property name="projectName" view="_local"/>
+                    <property name="skillsList" view="_local"/>
+                    <property name="parentOpenPosition" view="_minimal"/>
+                </property>
+                <property name="user" view="_local"/>
+            </view>
+            <loader id="openPositionCommentsDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPositionComment e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="openPositionCommentsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="openPositionCommentsTable"
+                dataLoader="openPositionCommentsDl">
+            <properties include=".*"/>
+        </filter>
+        <dataGrid id="openPositionCommentsTable"
+                    width="100%"
+                    dataContainer="openPositionCommentsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="openPosition"
+                        property="openPosition"/>
+                <column id="rating">
+                    <componentRenderer/>
+                </column>
+                <column id="user"
+                        property="user"/>
+                <column id="dateComment"
+                        property="dateComment"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="openPositionCommentsTable.create"/>
+                <button id="editBtn" action="openPositionCommentsTable.edit"/>
+                <button id="removeBtn" action="openPositionCommentsTable.remove"/>
+            </buttonsPanel>
+        </dataGrid>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

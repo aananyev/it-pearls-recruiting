@@ -467,4 +467,8 @@
     <view entity="itpearls_OutstaffingRates" name="outstaffingRates-view" extends="_local">
         <property name="currency" view="_local"/>
     </view>
+    <view entity="itpearls_OpenPositionComment" name="openPositionComment-view" extends="_local">
+        <property name="openPosition" view="_local"/>
+        <property name="user" view="_local"/>
+    </view>
 </views>

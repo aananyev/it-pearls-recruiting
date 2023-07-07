@@ -1557,4 +1557,25 @@ rating_battery_yellow_3:before {
     margin-left: 0;
     margin-right: 5px;
   }
+
+  .text-block-gradient-red {
+      background: red; /* Цвет фона */
+      color: #fff; /* Цвет текста */
+      padding: 5px; /* Поля вокруг текста */
+      border-radius: 5px;
+      margin: 0px 10px 0px 0px;
+      text-weight: normal;
+      font-size: small;
+      background: -webkit-linear-gradient(left, #000, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      border-style: solid;
+      border-color: white;
+      border-radius: 5px;
+      white-space: nowrap;      /* CSS3 */
+      word-wrap: normal;      /* IE */
+      overflow-wrap: normal;
+      font-weight: bold;
+      font-color: red;
+  }
 }
