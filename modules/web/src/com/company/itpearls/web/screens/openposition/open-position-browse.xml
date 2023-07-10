@@ -197,7 +197,7 @@
                         minimumWidth="85px"
                         maximumWidth="85px"
                         caption="msg://msgRating">
-                    <htmlRenderer nullRepresentation="null"/>
+                    <componentRenderer/>
                 </column>
                 <column id="companyLogoColumn"
                         resizable="true"

@@ -6,4 +6,6 @@ public interface StarsAndOtherService {
     String setStars(int stars);
 
     String setBlackRectangle(int blackRenctangle);
+
+    String noneStars();
 }

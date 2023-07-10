@@ -1,7 +1,9 @@
 package com.company.itpearls.web.screens.openpositioncomment;
 
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.OpenPosition;
+import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -30,6 +32,10 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
     private PickerField<User> userField;
     @Inject
     private DateField<Date> dateCommentField;
+    @Inject
+    private Events events;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -99,5 +105,13 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
 //            ratingField.setStyleName(rating_style);
             ratingLabel.setStyleName(rating_style);
         });
+    }
+
+    @Subscribe
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+        events.publish(new UiNotificationEvent(this,
+                messageBundle.getMessage("msgPublishOpenPositionComment")
+                        + ":"
+                        + getEditedEntity().getOpenPosition().getVacansyName()));
     }
 }

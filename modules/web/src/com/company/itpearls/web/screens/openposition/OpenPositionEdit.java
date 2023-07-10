@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.core.PdfParserService;
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.position.PositionEdit;
@@ -235,6 +236,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CollectionPropertyContainer<OpenPositionComment> commentsOpenPositionDc;
     @Inject
     private ScrollBoxLayout commentsScrollBox;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private Messages messages;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -265,8 +270,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void setCommentsOpenPositionScroll() {
         for (OpenPositionComment openPositionComment : getEditedEntity().getOpenPositionComments()) {
             if (openPositionComment.getComment() != null) {
-               VBoxLayout commentBox = getCommentBox(openPositionComment);
-               commentsScrollBox.add(commentBox);
+                VBoxLayout commentBox = getCommentBox(openPositionComment);
+                commentsScrollBox.add(commentBox);
             }
         }
     }
@@ -275,6 +280,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         VBoxLayout retBox = uiComponents.create(VBoxLayout.class);
         retBox.setWidthFull();
         retBox.setSpacing(false);
+        retBox.setMargin(true);
         retBox.setMargin(false);
         retBox.setHeight("100px");
 
@@ -299,16 +305,26 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
             name.setStyleName("tailName");
 
-            Label vacancy = uiComponents.create(Label.class);
-            vacancy.setValue(openPositionComment.getOpenPosition() != null &&
-                    !openPositionComment.getOpenPosition().getVacansyName().equals("Default")
-                    ? openPositionComment.getOpenPosition().getVacansyName() : "");
-            vacancy.setStyleName("tailVacancy");
+            HBoxLayout starsAndCommentHBox = uiComponents.create(HBoxLayout.class);
+            starsAndCommentHBox.setWidthAuto();
+            starsAndCommentHBox.setSpacing(true);
+
+            Label stars = uiComponents.create(Label.class);
+            stars.addStyleName("table-wordwrap");
+
+            if (openPositionComment.getRating() != null) {
+                stars.setValue(starsAndOtherService.setStars(openPositionComment.getRating() + 1));
+            } else {
+                stars.setValue(starsAndOtherService.noneStars());
+            }
 
             Label text = uiComponents.create(Label.class);
             text.setValue(openPositionComment.getComment() != null ?
                     openPositionComment.getComment().replaceAll("\n\n", "\n") : "");
             text.addStyleName("table-wordwrap");
+
+            starsAndCommentHBox.add(stars);
+            starsAndCommentHBox.add(text);
 
             Label date = uiComponents.create(Label.class);
             date.setValue(openPositionComment.getDateComment() != null ?
@@ -343,7 +359,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             replyButton.setAlignment(Component.Alignment.BOTTOM_RIGHT);
             replyButton.setCaption(messageBundle.getMessage("msgReplyButton"));
             replyButton.setDescription(messageBundle.getMessage("msgReplyButtonDesc"));
-            replyButton.addClickListener(e -> { /*
+            replyButton.addClickListener(e -> {
                 dialogs.createInputDialog(this)
                         .withCaption(messageBundle.getMessage("msgComment"))
                         .withParameters(
@@ -356,16 +372,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             if (closeEvent
                                     .getCloseAction()
                                     .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
-                                replyButtonInvoke(e, "(" + ") Re:" + (String) closeEvent.getValue("comment"));
+                                replyButtonInvoke(e, "("
+                                        + name.getValue()
+                                        + ") Re:"
+                                        + (String) closeEvent.getValue("comment"));
                             }
                         })
-                        .show();*/
+                        .show();
             });
 
             if (userSession.getUser().getLogin().equals(openPositionComment.getCreatedBy())) {
                 outerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 date.setAlignment(Component.Alignment.MIDDLE_RIGHT);
-                vacancy.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                // vacancy.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 text.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 name.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 innerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
@@ -373,7 +392,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             } else {
                 outerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 date.setAlignment(Component.Alignment.MIDDLE_LEFT);
-                vacancy.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                // vacancy.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 text.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 name.setAlignment(Component.Alignment.MIDDLE_LEFT);
                 innerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
@@ -381,11 +400,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
 
             outerBox.add(name);
-            if (!vacancy.getValue().equals("")) {
+            /* if (!vacancy.getValue().equals("")) {
                 outerBox.add(vacancy);
-            }
+            } */
 
-            outerBox.add(text);
+            outerBox.add(starsAndCommentHBox);
             outerBox.add(date);
             outerBox.add(replyButton);
 
@@ -402,6 +421,41 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         return retBox;
+    }
+
+
+    private void replyButtonInvoke(Button.ClickEvent e, String replyStr) {
+        createComment(replyStr);
+
+        events.publish(new UiNotificationEvent(this,
+                messageBundle.getMessage("msgPublishOpenPositionComment")
+                        + ":"
+                        + getEditedEntity().getVacansyName()));
+    }
+
+
+    private void createComment(String commentStr) {
+
+        OpenPositionComment comment = metadata.create(OpenPositionComment.class);
+        comment.setOpenPosition(getEditedEntity());
+        comment.setDateComment(new Date());
+        comment.setUser((ExtUser) userSession.getUser());
+
+        if (commentStr != null) {
+            comment.setComment(commentStr);
+
+            List<OpenPositionComment> openPositionComments = getEditedEntity().getOpenPositionComments();
+            openPositionComments.add(comment);
+
+            dataContext.merge(comment);
+
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgDoNotCommentMessage"))
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
     }
 
     private void setCommentToVacancy() {
@@ -1126,11 +1180,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 = "select e from itpearls_OpenPosition e where e.vacansyID like :vacancyID";
 
         if (dataManager.load(OpenPosition.class)
-        .query(QUERY_CHECK_VACANCY_ID)
-        .parameter("vacancyID", vacansyIDTextField.getValue())
-        .view("openPosition-view")
-        .list()
-        .size() > 0) {
+                .query(QUERY_CHECK_VACANCY_ID)
+                .parameter("vacancyID", vacansyIDTextField.getValue())
+                .view("openPosition-view")
+                .list()
+                .size() > 0) {
             return true;
         } else {
             return false;
@@ -2330,7 +2384,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private String generateVacancyName() {
-        String retStr ="";
+        String retStr = "";
 
         if (gradeLookupPickerField.getValue() != null) {
             retStr = gradeLookupPickerField.getValue().getGradeName() + " ";

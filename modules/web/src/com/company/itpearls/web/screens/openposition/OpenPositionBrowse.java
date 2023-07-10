@@ -2761,6 +2761,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             ? openPositionsTable.getSingleSelected() : null);
                     e.setUser((ExtUser) userSession.getUser());
                 })
+                .withAfterCloseListener(e1 -> {
+                    OpenPosition selected = openPositionsTable.getSingleSelected();
+                    openPositionsTable.repaint();
+                    openPositionsTable.setSelected(selected);
+                })
                 .withOpenMode(OpenMode.DIALOG)
                 .newEntity()
                 .build()
@@ -2772,11 +2777,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return avgRating(event.getItem());
     }
 
-    private String avgRating(OpenPosition openPosition) {
+    private Object avgRating(OpenPosition openPosition) {
         BigDecimal avgRating = null;
 
         final String QUERY_AVERAGE_RATING =
-                "select avg(e.rating) from itpearls_OpenPositionComment e where e.openPosition = :openPosition";
+                "select avg(e.rating) from itpearls_OpenPositionComment e " +
+                        "where e.openPosition = :openPosition and not e.rating is null";
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        Label starLabel = uiComponents.create(Label.class);
 
         avgRating = dataManager.loadValue(QUERY_AVERAGE_RATING, BigDecimal.class)
                 .parameter("openPosition", openPosition)
@@ -2785,9 +2796,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (avgRating != null) {
             int avgRatingInt = Integer.valueOf(avgRating.intValue()) + 1;
 
-            return starsAndOtherService.setStars(avgRatingInt);
-        } else
-            return "";
+            starLabel.setValue(starsAndOtherService.setStars(avgRatingInt));
+            starLabel.setDescription(messageBundle.getMessage("msgAvgRating") + ":" + avgRatingInt);
+
+        } else {
+            starLabel.setDescription(messageBundle.getMessage("msgNotAvgRating"));
+        }
+
+        starLabel.setWidthAuto();
+        starLabel.setHeightAuto();
+        starLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        retBox.add(starLabel);
+
+        return retBox;
     }
 }
 
