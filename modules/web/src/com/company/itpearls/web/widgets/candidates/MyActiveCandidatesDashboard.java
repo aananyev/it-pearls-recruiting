@@ -37,6 +37,10 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     @Inject
     private DataManager dataManager;
 
+    Set<OpenPosition> caseClosedOpenPosition;
+    Set<OpenPosition> processedOpenPosition;
+    Set<OpenPosition> opportunityOpenPosition;
+
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         initInteractionListDataContainer();
@@ -69,9 +73,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                         .show();
             });
 
-            Set<OpenPosition> caseClosedOpenPosition = getCaseClosedOpenPosition(jobCandidate);
+            caseClosedOpenPosition = getCaseClosedOpenPosition(jobCandidate);
 //            Set<OpenPosition> processedOpenPosition = getProcessedOpenPosition(jobCandidate);
-//            Set<OpenPosition> opportunityOpenPosition = getOpportunityOpenPosition(jobCandidate);
+            opportunityOpenPosition = getOpportunityOpenPosition(jobCandidate);
 
             hBoxLayout.add(candidateLinkButton);
 
@@ -92,10 +96,55 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                 scrollBoxLayout.add(retLinkButton);
             }
 
+            for (OpenPosition openPosition : opportunityOpenPosition) {
+                LinkButton retLinkButton = uiComponents.create(LinkButton.class);
+
+                if (openPosition.getProjectName().getProjectName().length() > 20) {
+                    retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
+                } else {
+                    retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
+                }
+                retLinkButton.setDescription(openPosition.getVacansyName());
+                retLinkButton.setWidthAuto();
+                retLinkButton.setStyleName("text-block-gradient-green");
+                retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
+                scrollBoxLayout.add(retLinkButton);
+            }
+
             hBoxLayout.add(scrollBoxLayout);
 
             candidatesScrollBox.add(hBoxLayout);
         }
+    }
+
+    private Set<OpenPosition> getOpportunityOpenPosition(JobCandidate jobCandidate) {
+        String QUERY_OPPORTUNITY = "select e from itpearls_OpenPosition e " +
+                "where e.positionType = :positionType and not e.openClose = true";
+
+        List<OpenPosition> opportunityOpenPosition = dataManager.load(OpenPosition.class)
+                .query(QUERY_OPPORTUNITY)
+                .parameter("positionType", jobCandidate.getPersonPosition())
+                .view("openPosition-view")
+                .list();
+
+        Set<OpenPosition> retOpenPosition = new HashSet<>();
+
+        for (OpenPosition openPosition : opportunityOpenPosition) {
+            Boolean flag = false;
+            for (OpenPosition ccOP : caseClosedOpenPosition ) {
+                if (openPosition.equals(ccOP)) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (!flag) {
+                retOpenPosition.add(openPosition);
+            }
+        }
+
+        return retOpenPosition;
     }
 
     private Set<OpenPosition> getCaseClosedOpenPosition(JobCandidate jobCandidate) {
