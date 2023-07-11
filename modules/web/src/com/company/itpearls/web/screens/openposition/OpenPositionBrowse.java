@@ -9,6 +9,7 @@ import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.openposition.openpositionfragments.OpenPositionDetailScreenFragment;
 import com.company.itpearls.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.openpositioncomment.OpenPositionCommentEdit;
+import com.company.itpearls.web.screens.openpositioncomment.OpenPositionCommentsView;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
@@ -750,6 +751,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Component editButton = createEditButton(entity);
         Component priorityField = createPriorityField(entity);
         Component commentButton = createCommentButton(entity);
+        Component viewCommentButton = createViewCommentButton(entity);
         Component openCloseButton = createOpenCloseButton(entity);
         Component viewDescriptionButton = createViewDescriptionButton(entity);
         Component sendedCandidatesButton = createSendedCandidatesButton(entity);
@@ -768,6 +770,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         buttonsHBox.add(viewDescriptionButton);
         buttonsHBox.add(sendedCandidatesButton);
         buttonsHBox.add(commentButton);
+        buttonsHBox.add(viewCommentButton);
 
         if (suitableButton != null)
             buttonsHBox.add(suitableButton);
@@ -799,6 +802,21 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
         return mainLayout;
+    }
+
+    private Component createViewCommentButton(OpenPosition entity) {
+        Button retButton = uiComponents.create(Button.class);
+        retButton.setIcon(CubaIcon.STAR.source());
+        retButton.setDescription(messageBundle.getMessage("msgComment"));
+        retButton.setEnabled(true);
+
+        retButton.addClickListener(addClickListenerEvent -> {
+            Screen screen = screens.create(OpenPositionCommentsView.class);
+            ((OpenPositionCommentsView) screen).setOpenPosition(openPositionsTable.getSingleSelected());
+            screen.show();
+        });
+
+        return retButton;
     }
 
     private Component createCommentButton(OpenPosition entity) {

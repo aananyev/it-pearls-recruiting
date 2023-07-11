@@ -264,18 +264,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         whiIsThisGuyDisable(event);
         setOpenPositionNews(event);
         setOpenCloseStart();
-        setCommentsOpenPositionScroll();
-        setCommentOpenPositionScrollIteractionList();
+        setCommentsOpenPositionScroll(getEditedEntity(), commentsScrollBox);
+        setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
     }
 
-    private void setCommentOpenPositionScrollIteractionList() {
+    private void setCommentOpenPositionScrollIteractionList(OpenPosition editedEntity, ScrollBoxLayout commentsScrollBox) {
         final String QUERY_OPEN_POSITION_INTERACTIONS =
                 "select e from itpearls_IteractionList e " +
                         "where e.vacancy = :vacancy and e.iteractionType.signFeedback = true";
         List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
                 .query(QUERY_OPEN_POSITION_INTERACTIONS)
                 .view("iteractionList-view")
-                .parameter("vacancy", getEditedEntity())
+                .parameter("vacancy", editedEntity)
                 .list();
 
         if (iteractionLists.size() > 0) {
@@ -283,19 +283,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 if (iteractionList.getComment() != null) {
                     if (!iteractionList.getComment().equals("")) {
                         VBoxLayout commentBox = getCommentBox(iteractionList);
-                        commentsScrollBox.add(commentBox);
+                        this.commentsScrollBox.add(commentsScrollBox);
                     }
                 }
             }
         }
     }
 
-    private void setCommentsOpenPositionScroll() {
-        if (getEditedEntity().getOpenPositionComments() != null) {
-            for (OpenPositionComment openPositionComment : getEditedEntity().getOpenPositionComments()) {
+    public void setCommentsOpenPositionScroll(OpenPosition editedEntity, ScrollBoxLayout commentsScrollBox) {
+        if (editedEntity.getOpenPositionComments() != null) {
+            for (OpenPositionComment openPositionComment : editedEntity.getOpenPositionComments()) {
                 if (openPositionComment.getComment() != null) {
                     VBoxLayout commentBox = getCommentBox(openPositionComment);
-                    commentsScrollBox.add(commentBox);
+                    this.commentsScrollBox.add(commentsScrollBox);
                 }
             }
         }
