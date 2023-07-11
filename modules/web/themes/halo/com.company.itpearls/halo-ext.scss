@@ -1587,4 +1587,20 @@ rating_battery_yellow_3:before {
           display: inline-block;
           margin-left: 5px;
     }
+
+
+    .text-block-gradient-yellow {
+          font-weight: bold;
+          background: linear-gradient(45deg, yellow 33%, pink 66%);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          border: 2px solid yellow;
+          border-radius: 5px;
+          border-color: yellow;
+          padding: 7px;
+          background-color: #ccc;
+          display: inline-block;
+          margin-left: 5px;
+    }
 }

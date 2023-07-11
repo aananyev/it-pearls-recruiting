@@ -220,6 +220,7 @@
         </property>
         <property name="recrutier" view="_local">
             <property name="group" view="_local"/>
+            <property name="fileImageFace" view="_local"/>
         </property>
         <property name="candidate" view="_local">
             <property name="personPosition" view="_local"/>

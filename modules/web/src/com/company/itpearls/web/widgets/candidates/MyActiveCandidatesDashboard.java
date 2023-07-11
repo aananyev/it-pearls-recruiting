@@ -14,9 +14,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @UiController("itpearls_MyActiveCandidatesDashboard")
 @UiDescriptor("my-active-candidates-dashboard.xml")
@@ -36,19 +34,63 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private ScreenBuilders screenBuilders;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private RadioButtonGroup candidateRadioButtonGroup;
 
-    Set<OpenPosition> caseClosedOpenPosition;
-    Set<OpenPosition> processedOpenPosition;
-    Set<OpenPosition> opportunityOpenPosition;
+    private Set<OpenPosition> caseClosedOpenPosition;
+    private Set<OpenPosition> processedOpenPosition;
+    private Set<OpenPosition> opportunityOpenPosition;
+    private Set<OpenPosition> wasOrNowOpenPosition = new HashSet<>();
+    private ScrollBoxLayout scrollBoxLayout;
+    private Boolean generatedWidget = false;
+    private int candidatesCount = 0;
+    @Inject
+    private Label<String> notCandidatesLabel;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         initInteractionListDataContainer();
+        initRadioButton();
         initCandidatesList();
+        initNoCandidatesLabel();
+    }
+
+    private void initRadioButton() {
+        Map<String, Integer> onlyOpenedPositionMap = new LinkedHashMap<>();
+
+        onlyOpenedPositionMap.put("за 3 дня", 0);
+        onlyOpenedPositionMap.put("за неделю", 1);
+        onlyOpenedPositionMap.put("за месяц", 2);
+
+        candidateRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
+        candidateRadioButtonGroup.setValue(1);
+
+        candidateRadioButtonGroup.addValueChangeListener(e -> {
+            int period = 0;
+
+            switch ((int) candidateRadioButtonGroup.getValue()) {
+                case 0:
+                    period = 3;
+                    break;
+                case 1:
+                    period = 7;
+                    break;
+                case 2:
+                    period = 30;
+                    break;
+                default:
+                    period = 3;
+                    break;
+            }
+
+            reinitInteractionListDataContainer(period);
+        });
+
     }
 
     private void initCandidatesList() {
         Set<JobCandidate> jobCandidateSet = new HashSet<>();
+        candidatesCount = jobCandidateSet.size();
 
         for (IteractionList interactionList : iteractionListsDc.getItems()) {
             jobCandidateSet.add(interactionList.getCandidate());
@@ -74,48 +116,81 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             });
 
             caseClosedOpenPosition = getCaseClosedOpenPosition(jobCandidate);
-//            Set<OpenPosition> processedOpenPosition = getProcessedOpenPosition(jobCandidate);
+            processedOpenPosition = getProcessedOpenPosition(jobCandidate);
+
+            wasOrNowOpenPosition.addAll(caseClosedOpenPosition);
+            wasOrNowOpenPosition.addAll(processedOpenPosition);
+
             opportunityOpenPosition = getOpportunityOpenPosition(jobCandidate);
 
             hBoxLayout.add(candidateLinkButton);
 
-            ScrollBoxLayout scrollBoxLayout = uiComponents.create(ScrollBoxLayout.class);
+            scrollBoxLayout = uiComponents.create(ScrollBoxLayout.class);
             scrollBoxLayout.setWidthAuto();
             scrollBoxLayout.setSpacing(true);
             scrollBoxLayout.setOrientation(HasOrientation.Orientation.HORIZONTAL);
             scrollBoxLayout.setScrollBarPolicy(ScrollBoxLayout.ScrollBarPolicy.HORIZONTAL);
 
-            for (OpenPosition openPosition : caseClosedOpenPosition) {
-                LinkButton retLinkButton = uiComponents.create(LinkButton.class);
-                retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
-                retLinkButton.setDescription(openPosition.getVacansyName());
-                retLinkButton.setWidthAuto();
-                retLinkButton.setStyleName("text-block-gradient-red");
-                retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
-
-                scrollBoxLayout.add(retLinkButton);
-            }
-
-            for (OpenPosition openPosition : opportunityOpenPosition) {
-                LinkButton retLinkButton = uiComponents.create(LinkButton.class);
-
-                if (openPosition.getProjectName().getProjectName().length() > 20) {
-                    retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
-                } else {
-                    retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
-                }
-                retLinkButton.setDescription(openPosition.getVacansyName());
-                retLinkButton.setWidthAuto();
-                retLinkButton.setStyleName("text-block-gradient-green");
-                retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
-
-                scrollBoxLayout.add(retLinkButton);
-            }
+            createLabels(opportunityOpenPosition, "text-block-gradient-green");
+            createLabels(processedOpenPosition, "text-block-gradient-yellow");
+            createLabels(caseClosedOpenPosition, "text-block-gradient-red");
 
             hBoxLayout.add(scrollBoxLayout);
 
             candidatesScrollBox.add(hBoxLayout);
         }
+
+        generatedWidget = true;
+    }
+
+    private void createLabels(Set<OpenPosition> openPositions, String style) {
+        for (OpenPosition openPosition : openPositions) {
+            LinkButton retLinkButton = uiComponents.create(LinkButton.class);
+            if (openPosition.getProjectName().getProjectName().length() > 20) {
+                retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
+            } else {
+                retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
+            }
+            retLinkButton.setDescription(openPosition.getVacansyName());
+            retLinkButton.setWidthAuto();
+            retLinkButton.setStyleName(style);
+            retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
+            scrollBoxLayout.add(retLinkButton);
+        }
+    }
+
+    private Set<OpenPosition> getProcessedOpenPosition(JobCandidate jobCandidate) {
+        String QUERY_CASE_OPEN_POSITION
+                = "select e "
+                + "from itpearls_IteractionList e "
+                + "where not (e.iteractionType.signEndCase = true) "
+                + "and e.candidate = :candidate "
+                + "and not (e.vacancy.openClose = true)";
+        //+ "and not (e.vacancy.projectName.defaultProject = true)";
+
+        List<IteractionList> caseClosedInteraction = dataManager.load(IteractionList.class)
+                .query(QUERY_CASE_OPEN_POSITION)
+                .parameter("candidate", jobCandidate)
+                .view("iteractionList-view")
+                .list();
+
+        Set<OpenPosition> retOpenPosition = new HashSet<>();
+
+        for (IteractionList iteractionList : caseClosedInteraction) {
+            Boolean flag = false;
+            for (OpenPosition op : caseClosedOpenPosition) {
+                if (op.equals(iteractionList.getVacancy())) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (!flag)
+                retOpenPosition.add(iteractionList.getVacancy());
+        }
+
+        return retOpenPosition;
     }
 
     private Set<OpenPosition> getOpportunityOpenPosition(JobCandidate jobCandidate) {
@@ -132,7 +207,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
         for (OpenPosition openPosition : opportunityOpenPosition) {
             Boolean flag = false;
-            for (OpenPosition ccOP : caseClosedOpenPosition ) {
+            for (OpenPosition ccOP : wasOrNowOpenPosition) {
                 if (openPosition.equals(ccOP)) {
                     flag = true;
                     break;
@@ -166,6 +241,52 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         }
 
         return retOpenPosition;
+    }
+
+    @Subscribe("candidateRadioButtonGroup")
+    public void onCandidateRadioButtonGroupValueChange(HasValue.ValueChangeEvent event) {
+        reinitInteractionListDataContainer((int) event.getValue());
+    }
+
+    private void reinitInteractionListDataContainer(int daysBetween) {
+        if (generatedWidget) {
+            iteractionListsDl.setParameter("daysBetween", daysBetween); // 7 дней
+            iteractionListsDl.load();
+
+            clearCandidatesList();
+            initCandidatesList();
+            initNoCandidatesLabel();
+        }
+    }
+
+    private void initNoCandidatesLabel() {
+        notCandidatesLabel.setVisible(iteractionListsDc.getItems().size() == 0);
+    }
+
+    private void clearCandidatesList() {
+        if (caseClosedOpenPosition != null) {
+            if (caseClosedOpenPosition.size() > 0)
+                caseClosedOpenPosition.clear();
+        }
+
+        if (processedOpenPosition != null) {
+            if (processedOpenPosition.size() > 0)
+                processedOpenPosition.clear();
+        }
+
+        if (opportunityOpenPosition != null) {
+            if (opportunityOpenPosition.size() > 0)
+                opportunityOpenPosition.clear();
+        }
+
+        if (wasOrNowOpenPosition != null) {
+            if (wasOrNowOpenPosition.size() > 0)
+                wasOrNowOpenPosition.clear();
+        }
+
+        candidatesScrollBox.removeAll();
+
+        generatedWidget = false;
     }
 
     private void initInteractionListDataContainer() {

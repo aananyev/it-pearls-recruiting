@@ -928,7 +928,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             iteractionList.setCandidate(getEditedEntity());
             iteractionList.setDateIteraction(new Date());
-            iteractionList.setRecrutier(userSession.getUser());
+            iteractionList.setRecrutier((ExtUser) userSession.getUser());
             iteractionList.setRecrutierName(userSession.getUser().getName());
             iteractionList.setRating(4);
 
@@ -3337,7 +3337,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             comment.setDateIteraction(new Date());
             comment.setCurrentOpenClose(vacancyPopupPickerField.getValue() != null ?
                     vacancyPopupPickerField.getValue().getOpenClose() : false);
-            comment.setRecrutier(userSession.getUser());
+            comment.setRecrutier((ExtUser) userSession.getUser());
 
             if (commentStr == null) {
                 comment.setComment(chatMessageTextField.getValue());

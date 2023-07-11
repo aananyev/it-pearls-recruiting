@@ -99,8 +99,19 @@
         </collection>
     </data>
     <layout>
+        <radioButtonGroup id="candidateRadioButtonGroup"
+                          caption="msg://msgCandidateFilter"
+                          width="AUTO"
+                          align="MIDDLE_LEFT"
+                          orientation="horizontal"/>
         <scrollBox id="candidatesScrollBox"
                    spacing="true"
-                   orientation="vertical"/>
+                   orientation="vertical">
+            <label id="notCandidatesLabel"
+                   align="MIDDLE_CENTER"
+                   stylename="h1"
+                   value="msg://msgNoCandidates"
+                   visible="false"/>
+        </scrollBox>
     </layout>
 </fragment>

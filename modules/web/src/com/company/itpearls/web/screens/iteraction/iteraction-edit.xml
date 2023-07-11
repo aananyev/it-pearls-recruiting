@@ -82,6 +82,10 @@ order by e.number]]>
                     <vbox id="signsVBox"
                           height="AUTO"
                           width="AUTO">
+                        <checkBox id="signFeedbackCheckBox"
+                                  caption="msg://msgSignFeedBack"
+                                  dataContainer="iteractionDc"
+                                  property="signFeedback"/>
                         <checkBox id="signOurInterviewAssignedCheckBox"
                                   caption="msg://msgOurInterviewAssigned"
                                   dataContainer="iteractionDc"

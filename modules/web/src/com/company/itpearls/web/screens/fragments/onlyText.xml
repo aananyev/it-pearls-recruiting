@@ -27,6 +27,7 @@
                         width="AUTO"
                         caption="msg://msgOK"
                         align="MIDDLE_RIGHT"
+                        enable="false"
                         icon="DIALOG_OK"
                         invoke="okButtonInvoke"/>
                 <button id="cancelButton"

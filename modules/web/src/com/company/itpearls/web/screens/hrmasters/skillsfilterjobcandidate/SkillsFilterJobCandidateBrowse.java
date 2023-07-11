@@ -1572,7 +1572,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             }
 
             iteractionList.setRecrutierName(userSession.getUser().getName());
-            iteractionList.setRecrutier(userSession.getUser());
+            iteractionList.setRecrutier((ExtUser) userSession.getUser());
             iteractionList.setNumberIteraction(getCountIteraction());
             iteractionList.setIteractionType(interactionType);
 

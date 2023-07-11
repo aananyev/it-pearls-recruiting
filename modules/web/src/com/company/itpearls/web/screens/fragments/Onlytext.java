@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.fragments;
 
+import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.RichTextArea;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -15,9 +17,25 @@ import java.io.IOException;
 @UiDescriptor("onlyText.xml")
 public class Onlytext extends Screen {
     @Inject
+    private Button okButton;
+    @Inject
     private RichTextArea textRichTextArea;
+
     private String resultText;
     private Boolean cancel;
+
+    @Subscribe("textRichTextArea")
+    public void onTextRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (event.getValue() != null) {
+            if (!event.getValue().equals("")) {
+                okButton.setEnabled(true);
+            } else {
+                okButton.setEnabled(false);
+            }
+        } else {
+            okButton.setEnabled(false);
+        }
+    }
 
     public void okButtonInvoke() {
         cancel = false;
@@ -53,6 +71,21 @@ public class Onlytext extends Screen {
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
        resultText = textRichTextArea.getValue();
+    }
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        textRichTextArea.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                if (!e.getValue().equals("")) {
+                    okButton.setEnabled(true);
+                } else {
+                    okButton.setEnabled(false);
+                }
+            } else {
+                okButton.setEnabled(false);
+            }
+        });
     }
 
     public String getResultText() {

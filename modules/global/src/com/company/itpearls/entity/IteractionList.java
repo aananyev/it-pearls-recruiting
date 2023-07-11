@@ -4,7 +4,6 @@ import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -58,10 +57,10 @@ public class IteractionList extends StandardEntity {
     protected String comment;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECRUTIER_ID")
-    protected User recrutier;
+    @NotNull
+    protected ExtUser recrutier;
 
     @Column(name = "RECRUTIER_NAME", length = 80)
     protected String recrutierName;
@@ -92,6 +91,14 @@ public class IteractionList extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CHAIN_INTERACTION_ID")
     private IteractionList chainInteraction;
+
+    public void setRecrutier(ExtUser recrutier) {
+        this.recrutier = recrutier;
+    }
+
+    public ExtUser getRecrutier() {
+        return recrutier;
+    }
 
     public Boolean getCurrentOpenClose() {
         return currentOpenClose;
@@ -187,14 +194,6 @@ public class IteractionList extends StandardEntity {
 
     public void setCommunicationMethod(String communicationMethod) {
         this.communicationMethod = communicationMethod;
-    }
-
-    public User getRecrutier() {
-        return recrutier;
-    }
-
-    public void setRecrutier(User recrutier) {
-        this.recrutier = recrutier;
     }
 
     public Iteraction getIteractionType() {

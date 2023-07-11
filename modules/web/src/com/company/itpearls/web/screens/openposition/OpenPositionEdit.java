@@ -265,15 +265,195 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setOpenPositionNews(event);
         setOpenCloseStart();
         setCommentsOpenPositionScroll();
+        setCommentOpenPositionScrollIteractionList();
+    }
+
+    private void setCommentOpenPositionScrollIteractionList() {
+        final String QUERY_OPEN_POSITION_INTERACTIONS =
+                "select e from itpearls_IteractionList e " +
+                        "where e.vacancy = :vacancy and e.iteractionType.signFeedback = true";
+        List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
+                .query(QUERY_OPEN_POSITION_INTERACTIONS)
+                .view("iteractionList-view")
+                .parameter("vacancy", getEditedEntity())
+                .list();
+
+        if (iteractionLists.size() > 0) {
+            for (IteractionList iteractionList : iteractionLists) {
+                if (iteractionList.getComment() != null) {
+                    if (!iteractionList.getComment().equals("")) {
+                        VBoxLayout commentBox = getCommentBox(iteractionList);
+                        commentsScrollBox.add(commentBox);
+                    }
+                }
+            }
+        }
     }
 
     private void setCommentsOpenPositionScroll() {
-        for (OpenPositionComment openPositionComment : getEditedEntity().getOpenPositionComments()) {
-            if (openPositionComment.getComment() != null) {
-                VBoxLayout commentBox = getCommentBox(openPositionComment);
-                commentsScrollBox.add(commentBox);
+        if (getEditedEntity().getOpenPositionComments() != null) {
+            for (OpenPositionComment openPositionComment : getEditedEntity().getOpenPositionComments()) {
+                if (openPositionComment.getComment() != null) {
+                    VBoxLayout commentBox = getCommentBox(openPositionComment);
+                    commentsScrollBox.add(commentBox);
+                }
             }
         }
+    }
+
+
+    private VBoxLayout getCommentBox(IteractionList iteractionList) {
+        VBoxLayout retBox = uiComponents.create(VBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setSpacing(false);
+        retBox.setMargin(true);
+        retBox.setMargin(false);
+//        retBox.setHeight("100px");
+
+        HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
+        innerBox.setMargin(true);
+        innerBox.setWidthAuto();
+        innerBox.setSpacing(true);
+
+        VBoxLayout outerBox = uiComponents.create(VBoxLayout.class);
+        outerBox.setMargin(false);
+        outerBox.setWidthAuto();
+        outerBox.setSpacing(false);
+
+        if (iteractionList.getComment() != null
+                && !iteractionList.getComment().equals("")) {
+            Label name = uiComponents.create(Label.class);
+
+            if (iteractionList.getRecrutier() != null) {
+                name.setValue(iteractionList.getRecrutier().getName() != null
+                        ? iteractionList.getRecrutier().getName() :
+                        (iteractionList.getRecrutier().getName() != null
+                                ? iteractionList.getRecrutier().getName() : ""));
+            }
+            name.setStyleName("tailName");
+
+            HBoxLayout starsAndCommentHBox = uiComponents.create(HBoxLayout.class);
+            starsAndCommentHBox.setWidthAuto();
+            starsAndCommentHBox.setSpacing(true);
+            Label candidateName = uiComponents.create(Label.class);
+            candidateName.addStyleName("table-wordwrap");
+            candidateName.setValue(iteractionList.getCandidate().getFullName()
+                    + " / "
+                    + iteractionList.getCandidate().getPersonPosition().getPositionRuName());
+
+            Label stars = uiComponents.create(Label.class);
+            stars.addStyleName("table-wordwrap");
+
+            if (iteractionList.getRating() != null) {
+                stars.setValue(starsAndOtherService.setStars(iteractionList.getRating() + 1));
+            } else {
+                stars.setValue(starsAndOtherService.noneStars());
+            }
+
+            Label text = uiComponents.create(Label.class);
+            text.setValue(iteractionList.getComment() != null ?
+                    iteractionList.getComment().replaceAll("\n\n", "\n") : "");
+            text.addStyleName("table-wordwrap");
+
+            starsAndCommentHBox.add(stars);
+            starsAndCommentHBox.add(text);
+
+            Label date = uiComponents.create(Label.class);
+            date.setValue(iteractionList.getDateIteraction() != null ?
+                    iteractionList.getDateIteraction() : "");
+            date.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+            date.setStyleName("tailDate");
+
+            Image image = uiComponents.create(Image.class);
+
+            if (iteractionList.getRecrutier() != null) {
+                if (((ExtUser) iteractionList.getRecrutier()).getFileImageFace() != null) {
+                    image.setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(((ExtUser) iteractionList.getRecrutier()).getFileImageFace());
+                } else {
+                    image.setSource(ThemeResource.class)
+                            .setPath("icons/no-programmer.jpeg");
+                }
+            } else {
+                image.setSource(ThemeResource.class)
+                        .setPath("icons/no-programmer.jpeg");
+            }
+
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("50px");
+            image.setHeight("50px");
+            image.setStyleName("circle-50px");
+
+            innerBox.setStyleName("toolTip");
+
+            Button replyButton = uiComponents.create(Button.class);
+            replyButton.setWidthAuto();
+            replyButton.setAlignment(Component.Alignment.BOTTOM_RIGHT);
+            replyButton.setCaption(messageBundle.getMessage("msgReplyButton"));
+            replyButton.setDescription(messageBundle.getMessage("msgReplyButtonDesc"));
+            replyButton.addClickListener(e -> {
+                dialogs.createInputDialog(this)
+                        .withCaption(messageBundle.getMessage("msgComment"))
+                        .withParameters(
+                                InputParameter.stringParameter("comment")
+                                        .withCaption(messageBundle.getMessage("msgInputComment"))
+                                        .withRequired(true)
+                        )
+                        .withActions(DialogActions.OK_CANCEL)
+                        .withCloseListener(closeEvent -> {
+                            if (closeEvent
+                                    .getCloseAction()
+                                    .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                                replyButtonInvoke(e, "("
+                                        + name.getValue()
+                                        + ") Re:"
+                                        + (String) closeEvent.getValue("comment"));
+                            }
+                        })
+                        .show();
+            });
+
+            if (userSession.getUser().getLogin().equals(iteractionList.getCreatedBy())) {
+                outerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                date.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                // vacancy.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                text.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                name.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                innerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+                innerBox.addStyleName("tailMyMessage");
+            } else {
+                outerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                date.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                // vacancy.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                text.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                name.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                innerBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                innerBox.addStyleName("tailOtherMessage");
+            }
+
+            outerBox.add(name);
+            /* if (!vacancy.getValue().equals("")) {
+                outerBox.add(vacancy);
+            } */
+
+            outerBox.add(candidateName);
+            outerBox.add(starsAndCommentHBox);
+            outerBox.add(date);
+            outerBox.add(replyButton);
+
+            if (!userSession.getUser().getLogin().equals(iteractionList.getCreatedBy())) {
+                innerBox.add(image);
+            }
+
+            innerBox.add(outerBox);
+            if (userSession.getUser().getLogin().equals(iteractionList.getCreatedBy())) {
+                innerBox.add(image);
+            }
+
+            retBox.add(innerBox);
+        }
+
+        return retBox;
     }
 
     private VBoxLayout getCommentBox(OpenPositionComment openPositionComment) {
@@ -282,7 +462,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         retBox.setSpacing(false);
         retBox.setMargin(true);
         retBox.setMargin(false);
-        retBox.setHeight("100px");
+//        retBox.setHeight("100px");
 
         HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
         innerBox.setMargin(true);

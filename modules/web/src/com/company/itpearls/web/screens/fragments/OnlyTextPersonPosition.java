@@ -69,7 +69,6 @@ public class OnlyTextPersonPosition extends Onlytext {
                                 StringUtils.containsIgnoreCase(metadataTools.getInstanceName(pos),
                                         searchString))
                         .collect(Collectors.toList()));
-
     }
 
     @Subscribe("cancelButton")

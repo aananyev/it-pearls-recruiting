@@ -2,7 +2,6 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.ParseCVService;
-import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
@@ -1461,50 +1460,52 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                         if (!((OnlyTextPersonPosition) screenOnlytext).getCancel()) {
                             String textCV = ((OnlyTextPersonPosition) screenOnlytext).getResultText();
                             // нашел ФИО
-                            if (!textCV.equals("") || textCV != null) {
-                                selectFirstNames(textCV, e);
-                                selectMiddleNames(textCV, e);
-                                selectSecondNames(textCV, e);
+                            if (textCV != null) {
+                                if (!textCV.equals("")) {
+                                    selectFirstNames(textCV, e);
+                                    selectMiddleNames(textCV, e);
+                                    selectSecondNames(textCV, e);
 
-                                e.setEmail(parseCVService
-                                        .parseEmail(textCV));
-                                e.setPhone(parseCVService
-                                        .parsePhone(textCV));
-                                e.setBirdhDate(parseCVService
-                                        .parseDate(textCV));
-                                e.setCurrentCompany(parseCVService
-                                        .parseCompany(textCV));
-                                e.setCityOfResidence(parseCVService
-                                        .parseCity(textCV));
-                                e.setPersonPosition(((OnlyTextPersonPosition) screenOnlytext)
-                                        .getPersonPosition());
-                                e.setTelegramName(parseCVService
-                                        .parseTelegram(textCV));
-                                e.setSkypeName(parseCVService
-                                        .parseSkype(textCV));
+                                    e.setEmail(parseCVService
+                                            .parseEmail(textCV));
+                                    e.setPhone(parseCVService
+                                            .parsePhone(textCV));
+                                    e.setBirdhDate(parseCVService
+                                            .parseDate(textCV));
+                                    e.setCurrentCompany(parseCVService
+                                            .parseCompany(textCV));
+                                    e.setCityOfResidence(parseCVService
+                                            .parseCity(textCV));
+                                    e.setPersonPosition(((OnlyTextPersonPosition) screenOnlytext)
+                                            .getPersonPosition());
+                                    e.setTelegramName(parseCVService
+                                            .parseTelegram(textCV));
+                                    e.setSkypeName(parseCVService
+                                            .parseSkype(textCV));
 //                                initSocialNeiworkTable(e);
-                                addSocialNetworkList(e, ((OnlyTextPersonPosition) screenOnlytext).getResultText());
+                                    addSocialNetworkList(e, ((OnlyTextPersonPosition) screenOnlytext).getResultText());
 
-                                CandidateCV candidateCV = metadata.create(CandidateCV.class);
-                                candidateCV.setResumePosition(e.getPersonPosition());
-                                candidateCV.setTextCV(((OnlyTextPersonPosition) screenOnlytext).getResultText());
-                                candidateCV.setOwner(userSession.getUser());
-                                candidateCV.setCandidate(e);
-                                candidateCV.setDatePost(new Date());
+                                    CandidateCV candidateCV = metadata.create(CandidateCV.class);
+                                    candidateCV.setResumePosition(e.getPersonPosition());
+                                    candidateCV.setTextCV(((OnlyTextPersonPosition) screenOnlytext).getResultText());
+                                    candidateCV.setOwner(userSession.getUser());
+                                    candidateCV.setCandidate(e);
+                                    candidateCV.setDatePost(new Date());
 
-                                List<CandidateCV> candidateCVS = new ArrayList<>();
-                                candidateCVS.add(candidateCV);
-                                dataContext.merge(candidateCV);
-                                e.setCandidateCv(candidateCVS);
-                                dataContext.merge(e);
+                                    List<CandidateCV> candidateCVS = new ArrayList<>();
+                                    candidateCVS.add(candidateCV);
+                                    dataContext.merge(candidateCV);
+                                    e.setCandidateCv(candidateCVS);
+                                    dataContext.merge(e);
 
-                                candidateCVEdit = screenBuilders.editor(CandidateCV.class, this)
-                                        .withScreenClass(CandidateCVEdit.class)
-                                        .withAddFirst(true)
-                                        .editEntity(candidateCV)
-                                        .withOpenMode(OpenMode.DIALOG)
-                                        .build();
+                                    candidateCVEdit = screenBuilders.editor(CandidateCV.class, this)
+                                            .withScreenClass(CandidateCVEdit.class)
+                                            .withAddFirst(true)
+                                            .editEntity(candidateCV)
+                                            .withOpenMode(OpenMode.DIALOG)
+                                            .build();
 
+                                }
                             }
                         }
                     })
