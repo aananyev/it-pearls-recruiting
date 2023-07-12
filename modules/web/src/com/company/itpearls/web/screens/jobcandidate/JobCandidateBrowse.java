@@ -65,11 +65,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private DataGrid<JobCandidate> jobCandidatesTable;
     @Inject
     private DataManager dataManager;
-    private final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
     @Inject
     private UiComponents uiComponents;
-
-    private List<IteractionList> iteractionList = new ArrayList<>();
     @Inject
     private Fragments fragments;
     @Inject
@@ -80,13 +77,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Notifications notifications;
     @Inject
     private Dialogs dialogs;
-
-    private CollectionContainer<IteractionList> iteractionListDc;
-    private CollectionLoader<IteractionList> iteractionListDl;
-    private CollectionContainer<CandidateCV> candidateCVDc;
-    private CollectionLoader<CandidateCV> candidateCVDl;
-    @Inject
-    private StarsAndOtherService starsAndOtherService;
     @Inject
     private LookupField ratingFieldNotLower;
     @Inject
@@ -95,7 +85,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private InteractionService interactionService;
     @Inject
     private UserSessionSource userSessionSource;
-    private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
     @Inject
     private Button sendEmailButton;
     @Inject
@@ -104,10 +93,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private DataContext dataContext;
     @Inject
     private Metadata metadata;
-    private CandidateCVEdit candidateCVEdit;
-    private OnlyTextPersonPosition screenOnlytext;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
+
+    private final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
+    private CollectionContainer<IteractionList> iteractionListDc;
+    private CollectionLoader<IteractionList> iteractionListDl;
+    private CollectionContainer<CandidateCV> candidateCVDc;
+    private CollectionLoader<CandidateCV> candidateCVDl;
+    private List<IteractionList> iteractionList = new ArrayList<>();
+    private CandidateCVEdit candidateCVEdit;
+    private OnlyTextPersonPosition screenOnlytext;
+    private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

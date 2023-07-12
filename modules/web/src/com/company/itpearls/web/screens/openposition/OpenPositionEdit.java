@@ -283,7 +283,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 if (iteractionList.getComment() != null) {
                     if (!iteractionList.getComment().equals("")) {
                         VBoxLayout commentBox = getCommentBox(iteractionList);
-                        this.commentsScrollBox.add(commentsScrollBox);
+                        commentsScrollBox.add(commentBox);
                     }
                 }
             }
@@ -295,7 +295,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             for (OpenPositionComment openPositionComment : editedEntity.getOpenPositionComments()) {
                 if (openPositionComment.getComment() != null) {
                     VBoxLayout commentBox = getCommentBox(openPositionComment);
-                    this.commentsScrollBox.add(commentsScrollBox);
+                    commentsScrollBox.add(commentBox);
                 }
             }
         }

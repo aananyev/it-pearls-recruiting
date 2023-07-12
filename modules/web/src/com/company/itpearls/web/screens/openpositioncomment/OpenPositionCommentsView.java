@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 @UiController("itpearls_OpenPositionCommentsView")
-@DialogMode(forceDialog = true, width = "800px", height = "600px")
+@DialogMode(forceDialog = true, width = "1000px", height = "800px")
 @UiDescriptor("OpenPositionCommentsView.xml")
 public class OpenPositionCommentsView extends Screen {
     private OpenPosition openPosition = null;
@@ -51,8 +51,8 @@ public class OpenPositionCommentsView extends Screen {
 
     public void setOpenPosition(OpenPosition openPosition) {
         this.openPosition = openPosition;
-        setCommentOpenPositionScrollIteractionList(this.openPosition, commentsScrollBox);
         setCommentsOpenPositionScroll(this.openPosition, commentsScrollBox);
+        setCommentOpenPositionScrollIteractionList(this.openPosition, commentsScrollBox);
     }
 
     public void setCommentOpenPositionScrollIteractionList(OpenPosition editedEntity, ScrollBoxLayout commentsScrollBox) {
@@ -82,7 +82,7 @@ public class OpenPositionCommentsView extends Screen {
             for (OpenPositionComment openPositionComment : editedEntity.getOpenPositionComments()) {
                 if (openPositionComment.getComment() != null) {
                     VBoxLayout commentBox = getCommentBox(openPositionComment);
-                    commentsScrollBox.add(commentsScrollBox);
+                    commentsScrollBox.add(commentBox);
                 }
             }
         }

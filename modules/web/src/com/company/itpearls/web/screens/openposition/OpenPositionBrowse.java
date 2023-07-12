@@ -120,7 +120,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private String ROLE_MANAGER = "Manager";
     private String ROLE_RESEARCHER = "Researcher";
+
     private static final String MANAGEMENT_GROUP = "Менеджмент";
+    private static final String ACCOUNTING_GROUP = "Аккаунтинг";
     private static final String HUNTING_GROUP = "Хантинг";
     private String ROLE_ADMINISTRATOR = "Administrators";
     private Map<String, Integer> remoteWork = new LinkedHashMap<>();
@@ -249,11 +251,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
-        if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP)) {
-            subscribeRadioButtonGroup.setValue(2);
-        } else {
-            subscribeRadioButtonGroup.setValue(1);
-        }
 
         subscribeRadioButtonGroup.addValueChangeListener(e -> {
             reportsPopupButton.setEnabled(openPositionsTable.getSingleSelected() != null);
@@ -328,6 +325,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     break;
                 default:
                     break;
+            }
+
+            if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
+                    userSession.getUser().getGroup().getName().equals(ACCOUNTING_GROUP)) {
+                subscribeRadioButtonGroup.setValue(2);
+            } else {
+                subscribeRadioButtonGroup.setValue(1);
             }
 
             openPositionsDl.load();
