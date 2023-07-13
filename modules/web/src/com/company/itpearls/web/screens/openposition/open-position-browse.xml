@@ -14,6 +14,7 @@
                 <property name="cityPosition" view="_local"/>
                 <property name="positionType" view="_local"/>
                 <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
                     <property name="projectOwner" view="_local"/>
                     <property name="projectDepartment" view="_local">
                         <property name="companyName" view="_local">
@@ -125,6 +126,8 @@
             </hbox>
         </groupBox>
         <filter id="filter"
+                collapsable="true"
+                collapsed="true"
                 applyTo="openPositionsTable"
                 dataLoader="openPositionsDl">
             <properties include=".*"
@@ -202,8 +205,17 @@
                 <column id="companyLogoColumn"
                         resizable="true"
                         collapsible="true"
+                        collapsed="true"
+                        caption="msg://msgCompany"
+                        width="70px"
+                        minimumWidth="70px">
+                    <componentRenderer/>
+                </column>
+                <column id="projectLogoColumn"
+                        resizable="true"
+                        collapsible="true"
                         collapsed="false"
-                        caption=""
+                        caption="msg://msgProject"
                         width="70px"
                         minimumWidth="70px">
                     <componentRenderer/>

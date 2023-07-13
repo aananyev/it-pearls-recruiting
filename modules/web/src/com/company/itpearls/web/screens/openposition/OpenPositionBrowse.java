@@ -52,6 +52,43 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private StarsAndOtherService starsAndOtherService;
 
+    @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
+    private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        Image image = uiComponents.create(Image.class);
+        image.setDescriptionAsHtml(true);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("50px");
+        image.setHeight("50px");
+        image.setStyleName("icon-no-border-50px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem().getProjectName() != null) {
+            if (event.getItem().getProjectName().getProjectDescription() != null) {
+                image.setDescription("<h4>"
+                        + event.getItem().getProjectName().getProjectName()
+                        + "</h4><br><br>"
+                        + event.getItem().getProjectName().getProjectDescription());
+            }
+
+            if (event.getItem().getProjectName().getProjectLogo() != null) {
+                image.setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(event
+                                .getItem()
+                                .getProjectName()
+                                .getProjectLogo());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        }
+
+        retBox.add(image);
+        return retBox;
+    }
+
     @Install(to = "openPositionsTable.companyLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);

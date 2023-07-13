@@ -34,6 +34,7 @@
         <property name="projectTree" view="_minimal">
             <property name="projectTree" view="_minimal"/>
         </property>
+        <property name="projectLogo" view="_local"/>
     </view>
     <view entity="itpearls_Person" name="person-view" extends="_local">
         <property name="positionCountry" view="_minimal"/>

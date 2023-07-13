@@ -52,6 +52,15 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="projectLogoColumn"
+                        resizable="true"
+                        collapsible="true"
+                        collapsed="false"
+                        caption=""
+                        width="70px"
+                        minimumWidth="50px">
+                    <componentRenderer/>
+                </column>
                 <column id="projectIsClosed" caption="msg://msgProjectIsClosed" property="projectIsClosed"/>
                 <column id="projectName" caption="msg://msgProjectName" property="projectName"/>
                 <column id="startProjectDate" caption="msg://msgProjectStartDate" property="startProjectDate"/>

@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.project;
 import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.core.global.MessageTools;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
 @LoadDataBeforeShow
 public class ProjectBrowse extends StandardLookup<Project> {
     @Inject
+    private UiComponents uiComponents;
+    @Inject
     private CheckBox onlyOpenProjectCheckBox;
     @Inject
     private CollectionLoader<Project> projectsDl;
@@ -35,6 +38,37 @@ public class ProjectBrowse extends StandardLookup<Project> {
     private LookupField columnSelector;
     @Inject
     private CheckBox withOpenPositionCheckBox;
+
+    @Install(to = "projectsTable.projectLogoColumn", subject = "columnGenerator")
+    private Object projectsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        Image image = uiComponents.create(Image.class);
+        image.setDescriptionAsHtml(true);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("20px");
+        image.setHeight("20px");
+        image.setStyleName("icon-no-border-20px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        image.setDescription("<h4>"
+                + event.getItem().getProjectName()
+                + "</h4><br><br>"
+                + event.getItem().getProjectDescription());
+
+        if (event.getItem().getProjectLogo() != null) {
+            image.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(event
+                            .getItem()
+                            .getProjectLogo());
+        } else {
+            image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+
+        retBox.add(image);
+        return retBox;
+    }
 
     @Subscribe
     public void onInit(InitEvent event) {
