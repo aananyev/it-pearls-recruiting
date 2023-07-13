@@ -2,6 +2,7 @@ package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -22,6 +23,10 @@ public class Project extends StandardEntity {
 
     @Column(name = "PROJECT_NAME", length = 160)
     protected String projectName;
+
+    @JoinColumn(name = "PROJECT_LOGO_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private FileDescriptor projectLogo;
 
     @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "PROJECT_TREE_ID")
@@ -71,6 +76,14 @@ public class Project extends StandardEntity {
 
     @Column(name = "CHAT_FOR_CV")
     private String chatForCV;
+
+    public FileDescriptor getProjectLogo() {
+        return projectLogo;
+    }
+
+    public void setProjectLogo(FileDescriptor projectLogo) {
+        this.projectLogo = projectLogo;
+    }
 
     public Boolean getDefaultProject() {
         return defaultProject;

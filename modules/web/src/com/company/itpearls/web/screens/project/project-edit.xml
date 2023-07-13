@@ -20,6 +20,7 @@
                 <property name="projectTree" view="_local"/>
                 <property name="generalChat"/>
                 <property name="chatForCV"/>
+                <property name="projectLogo" view="_local"/>
             </view>
             <loader/>
             <collection id="projectOpenPositionsDc" property="openPosition"/>
@@ -61,98 +62,136 @@
                  margin="true,true,true,true"
                  spacing="true"
                  id="tabProject">
-                <vbox spacing="true">
-                    <checkBox id="checkBoxProjectIsClosed"
-                              dataContainer="projectDc"
-                              property="projectIsClosed"
-                              caption="msg://msgProjectIsClosed"/>
-                    <checkBox id="defaultProjectCheckBox"
-                              dataContainer="projectDc"
-                              property="defaultProject"
-                              caption="msg://msgDefault"/>
-                    <lookupPickerField id="highLevelProjectLookupPickerField"
-                                       dataContainer="projectDc"
-                                       property="projectTree"
-                                       caption="msg://msgProjectTree"
-                                       optionsContainer="projectTreeDc"
-                                       width="50%"/>
-                    <textField id="projectNameField"
-                               dataContainer="projectDc"
-                               property="projectName"
-                               caption="msg://msgProjectName"
-                               width="50%"
-                               required="true"/>
-                    <hbox width="50%">
-                        <dateField id="startProjectDateField"
+                <hbox spacing="true" width="100%" height="100%" expand="mainProjectVBox">
+                    <vbox id="mainProjectVBox" spacing="true">
+                        <checkBox id="checkBoxProjectIsClosed"
+                                  dataContainer="projectDc"
+                                  property="projectIsClosed"
+                                  caption="msg://msgProjectIsClosed"/>
+                        <checkBox id="defaultProjectCheckBox"
+                                  dataContainer="projectDc"
+                                  property="defaultProject"
+                                  caption="msg://msgDefault"/>
+                        <lookupPickerField id="highLevelProjectLookupPickerField"
+                                           dataContainer="projectDc"
+                                           property="projectTree"
+                                           caption="msg://msgProjectTree"
+                                           optionsContainer="projectTreeDc"
+                                           width="50%"/>
+                        <textField id="projectNameField"
                                    dataContainer="projectDc"
-                                   property="startProjectDate"
-                                   caption="msg://msgProjectStartDate"
-                                   width="AUTO"/>
-                        <dateField id="endProjectDateField"
-                                   dataContainer="projectDc"
-                                   property="endProjectDate"
-                                   caption="msg://msgProjectEndDate"
-                                   width="AUTO"/>
-                    </hbox>
-                    <lookupPickerField id="projectDepartmentField"
-                                       optionsContainer="projectDepartmentsDc"
+                                   property="projectName"
+                                   caption="msg://msgProjectName"
+                                   width="50%"
+                                   required="true"/>
+                        <hbox width="50%">
+                            <dateField id="startProjectDateField"
                                        dataContainer="projectDc"
-                                       property="projectDepartment"
-                                       required="true"
-                                       caption="msg://msgProjectDepartament"
-                                       width="50%">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="projectOwnerField"
-                                       required="true"
-                                       optionsContainer="projectOwnersDc"
+                                       property="startProjectDate"
+                                       caption="msg://msgProjectStartDate"
+                                       width="AUTO"/>
+                            <dateField id="endProjectDateField"
                                        dataContainer="projectDc"
-                                       property="projectOwner"
-                                       caption="msg://msgProjectOwner"
-                                       width="50%">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <hbox spacing="true"
-                          width="100%"
-                          expand="generalChatTextField">
-                        <textField id="generalChatTextField"
+                                       property="endProjectDate"
+                                       caption="msg://msgProjectEndDate"
+                                       width="AUTO"/>
+                        </hbox>
+                        <lookupPickerField id="projectDepartmentField"
+                                           optionsContainer="projectDepartmentsDc"
+                                           dataContainer="projectDc"
+                                           property="projectDepartment"
+                                           required="true"
+                                           caption="msg://msgProjectDepartament"
+                                           width="50%">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupPickerField id="projectOwnerField"
+                                           required="true"
+                                           optionsContainer="projectOwnersDc"
+                                           dataContainer="projectDc"
+                                           property="projectOwner"
+                                           caption="msg://msgProjectOwner"
+                                           width="50%">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                            </actions>
+                        </lookupPickerField>
+                        <hbox spacing="true"
+                              width="100%"
+                              expand="generalChatTextField">
+                            <textField id="generalChatTextField"
+                                       dataContainer="projectDc"
+                                       property="generalChat"
+                                       caption="msg://msgGeneralChat"
+                                       description="msg://msgGeneralChatDescription"
+                                       width="100%"
+                                       inputPrompt="msg://msgChatImputPrompt"/>
+                            <link id="generalChatLink"
+                                  icon="font-icon:FILE_WORD_O"
+                                  align="BOTTOM_LEFT"
+                                  target="_blank"
+                                  width="AUTO"
+                                  caption="msg://msgGoTo"
+                                  description="msg://msgGoTo"/>
+                        </hbox>
+                        <hbox spacing="true"
+                              expand="chatForCVTextField"
+                              width="100%">
+                            <textField id="chatForCVTextField"
+                                       dataContainer="projectDc"
+                                       property="chatForCV"
+                                       caption="msg://msgChatForCV"
+                                       description="msg://msgChatForCVDescription"
+                                       width="100%"
+                                       inputPrompt="msg://msgChatImputPrompt"/>
+                            <link id="chatForCVLink"
+                                  icon="font-icon:FILE_WORD_O"
+                                  align="BOTTOM_LEFT"
+                                  target="_blank"
+                                  width="AUTO"
+                                  caption="msg://msgGoTo"
+                                  description="msg://msgGoTo"/>
+                        </hbox>
+                    </vbox>
+                    <vbox id="dropZone"
+                          spacing="true"
+                          width="200px"
+                          height="266px"
+                          align="TOP_RIGHT"
+                          expand="picVBox"
+                          stylename="dropzone-container">
+                        <vbox id="picVBox">
+                            <image id="projectLogoFileImage"
                                    dataContainer="projectDc"
-                                   property="generalChat"
-                                   caption="msg://msgGeneralChat"
-                                   description="msg://msgGeneralChatDescription"
+                                   property="projectLogo"
                                    width="100%"
-                                   inputPrompt="msg://msgChatImputPrompt"/>
-                        <link id="generalChatLink"
-                              icon="font-icon:FILE_WORD_O"
-                              align="BOTTOM_LEFT"
-                              target="_blank"
-                              width="AUTO"
-                              caption="msg://msgGoTo"
-                              description="msg://msgGoTo"/>
-                    </hbox>
-                    <hbox spacing="true"
-                          expand="chatForCVTextField"
-                          width="100%">
-                        <textField id="chatForCVTextField"
-                                   dataContainer="projectDc"
-                                   property="chatForCV"
-                                   caption="msg://msgChatForCV"
-                                   description="msg://msgChatForCVDescription"
+                                   visible="true"
+                                   align="TOP_RIGHT"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <image id="projectDefaultLogoFileImage"
                                    width="100%"
-                                   inputPrompt="msg://msgChatImputPrompt"/>
-                        <link id="chatForCVLink"
-                              icon="font-icon:FILE_WORD_O"
-                              align="BOTTOM_LEFT"
-                              target="_blank"
-                              width="AUTO"
-                              caption="msg://msgGoTo"
-                              description="msg://msgGoTo"/>
-                    </hbox>
-                </vbox>
+                                   visible="false"
+                                   align="TOP_RIGHT"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL">
+                                <theme path="icons/no-company.png"/>
+                            </image>
+                        </vbox>
+                        <upload id="projectLogoFileUpload"
+                                fileStoragePutMode="IMMEDIATE"
+                                dataContainer="projectDc"
+                                align="BOTTOM_CENTER"
+                                showFileName="false"
+                                dropZone="dropZone"
+                                showClearButton="true"
+                                property="projectLogo"/>
+                    </vbox>
+                </hbox>
             </tab>
             <tab id="tabProjectDescription"
                  margin="true,true,true,true"

@@ -26,6 +26,53 @@ import java.util.List;
 @LoadDataBeforeShow
 public class ProjectEdit extends StandardEditor<Project> {
     @Inject
+    private Image projectDefaultLogoFileImage;
+    @Inject
+    private Image projectLogoFileImage;
+    @Inject
+    private FileUploadField projectLogoFileUpload;
+
+    @Subscribe("projectLogoFileUpload")
+    public void onProjectLogoFileUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
+        setProjectPicImage();
+
+    }
+
+    @Subscribe
+    public void onBeforeShow1(BeforeShowEvent event) {
+        setProjectPicImage();
+    }
+
+
+    private void setProjectPicImage() {
+        if (getEditedEntity().getProjectLogo() == null) {
+            projectDefaultLogoFileImage.setVisible(true);
+            projectLogoFileImage.setVisible(false);
+        } else {
+            projectDefaultLogoFileImage.setVisible(false);
+            projectLogoFileImage.setVisible(true);
+        }
+    }
+
+    @Subscribe("projectLogoFileUpload")
+    public void onProjectLogoFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        try {
+            projectLogoFileImage.setVisible(true);
+            projectDefaultLogoFileImage.setVisible(false);
+
+            FileDescriptorResource fileDescriptorResource =
+                    projectLogoFileImage.createResource(FileDescriptorResource.class)
+                            .setFileDescriptor(
+                                    projectLogoFileUpload.getFileDescriptor());
+
+            projectLogoFileImage.setSource(fileDescriptorResource);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Inject
     private DateField<Date> startProjectDateField;
     @Inject
     private CheckBox checkBoxProjectIsClosed;

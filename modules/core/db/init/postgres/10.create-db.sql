@@ -272,6 +272,7 @@ create table ITPEARLS_PROJECT (
     DELETED_BY varchar(50),
     --
     PROJECT_NAME varchar(160),
+    PROJECT_LOGO_ID uuid,
     PROJECT_TREE_ID uuid,
     PROJECT_IS_CLOSED boolean,
     DEFAULT_PROJECT boolean,
