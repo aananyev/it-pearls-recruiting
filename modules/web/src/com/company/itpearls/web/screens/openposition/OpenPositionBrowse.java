@@ -1021,6 +1021,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .query("select e from itpearls_CandidateCV e where e.resumePosition = :resumePosition")
                     .parameter("resumePosition", entity.getPositionType())
                     .cacheable(true)
+                    .view("candidateCV-view")
                     .list().size() != 0) {
 
                 Button suitableButton = uiComponents.create(Button.class);
@@ -1115,7 +1116,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             retButton.setCaption(!entity.getOpenClose()
                     ? messageBundle.getMessage("msgClose")
                     : messageBundle.getMessage("msgOpen"));
-            retButton.setDescription(!entity.getOpenClose() ? "Закрыть вакансию" : "Открыть вакансию");
+            retButton.setDescription(!entity.getOpenClose()
+                    ? messageBundle.getMessage("msgCloseVacamcy") : messageBundle.getMessage("msgOpenVacancy"));
 
             if (entity.getOpenClose() || entity.getOpenClose() == null) {
                 events.publish(new UiNotificationEvent(this, "Закрыта вакансия: "
@@ -1190,6 +1192,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_SELECT_COMMAND)
                 .parameter("parentOpenPosition", event)
+                .view("openPosition-view")
                 .list();
 
         String magPos = "";
@@ -1490,7 +1493,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsTable.setDetailsVisible(entity, false);
                     openPositionsTable.repaint();
                     openPositionsTable.setSelected(entity);
-
                 })
                 .withCaption("");
         closeButton.setAction(closeAction);
@@ -2449,6 +2451,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
                 .parameter("parentOpenPosition", columnGeneratorEvent.getItem())
+                .view("openPosition-view")
                 .list().size() > 0) {
             retStr = "FOLDER";
         } else {
@@ -2557,6 +2560,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
                 .parameter("parentOpenPosition", openPosition)
+                .view("openPosition-view")
                 .list().size() > 0) {
             retStr = null;
         } else {
@@ -2611,6 +2615,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
                 .parameter("parentOpenPosition", openPosition)
+                .view("openPosition-view")
                 .list().size() > 0) {
             retStr = "open-position-pic-center-large-gray";
         } else {

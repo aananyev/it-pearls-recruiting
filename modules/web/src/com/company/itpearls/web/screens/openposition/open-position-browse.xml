@@ -8,9 +8,12 @@
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
+                <property name="owner" view="_local"/>
                 <property name="grade" view="_local"/>
                 <property name="candidates" view="_local"/>
-                <property name="parentOpenPosition" view="_local"/>
+                <property name="parentOpenPosition" view="_local">
+                    <property name="owner" view="_local"/>
+                </property>
                 <property name="cityPosition" view="_local"/>
                 <property name="positionType" view="_local"/>
                 <property name="projectName" view="_local">

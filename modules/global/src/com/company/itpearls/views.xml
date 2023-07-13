@@ -216,6 +216,7 @@
             <property name="positionType" view="_local"/>
             <property name="projectName" view="_local"/>
             <property name="grade" view="_local"/>
+            <property name="owner" view="_local"/>
         </property>
         <property name="iteractionType" view="_local">
         </property>

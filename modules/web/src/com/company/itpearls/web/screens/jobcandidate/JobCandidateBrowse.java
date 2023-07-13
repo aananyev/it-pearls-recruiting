@@ -661,6 +661,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .query("select e from itpearls_CandidateCV e where e.candidate = :candidate")
                 .cacheable(true)
                 .parameter("candidate", entity)
+                .view("candidateCV-view")
                 .list().size() != 0) {
             Button suitableButton = uiComponents.create(Button.class);
             suitableButton.setDescription("Подобрать вакансию по резюме");
