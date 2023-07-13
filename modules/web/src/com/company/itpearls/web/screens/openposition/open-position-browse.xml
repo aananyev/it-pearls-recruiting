@@ -172,7 +172,7 @@
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
-                <action id="excel" type="excel"/>
+                <action id="excel" type="excel" visible="false"/>
                 <action id="list" type="listPrintForm"/>
             </actions>
             <columns
@@ -384,6 +384,7 @@
                 <button id="groupSubscribe"
                         caption="msg://msgGroupSubscribe"
                         visible="false"
+                        enable="false"
                         invoke="groupSubscribe"
                         icon="BELL_O"/>
                 <button id="buttonExcel"
@@ -395,6 +396,7 @@
                         caption="msg://msgSuggestCandidates"
                         icon="EYE"
                         enable="false"
+                        visible="false"
                         invoke="suggestCandidateButton"/>
                 <popupButton id="reportsPopupButton"
                              icon="FILE_TEXT"
@@ -408,12 +410,22 @@
                                 caption="msg://msgGetMemoForCandidate"/>
                     </actions>
                 </popupButton>
-                <button id="setRatingButton"
-                        icon="STAR_O"
-                        enable="false"
-                        caption="msg://msgOpenPositionComment"
-                        description="msg://msgSetRating"
-                        invoke="setRatingComment"/>
+                <popupButton id="setRatingButton"
+                             caption="msg://msgOpenPositionComment"
+                             icon="font-icon:COMMENT"
+                             enable="false">
+                    <actions>
+                        <action id="setRatingComment"
+                                caption="msg://msgOpenPositionComment"
+                                icon="STAR_O"
+                                invoke="setRatingComment"
+                                description="msg://msgSetRating"/>
+                        <action id="viewRatingComment"
+                                icon="VIEW_ACTION"
+                                invoke="openPositionCommentViewInvoke"
+                                caption="msg://msgViewOpenPositionComment"/>
+                    </actions>
+                </popupButton>
             </buttonsPanel>
         </treeDataGrid>
         <hbox spacing="true"

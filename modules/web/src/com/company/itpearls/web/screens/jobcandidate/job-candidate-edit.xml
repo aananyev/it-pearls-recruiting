@@ -22,6 +22,7 @@
                                 <property name="companyName" view="_local"/>
                             </property>
                         </property>
+                        <property name="owner" view="_local"/>
                     </property>
                     <property name="someFiles" view="_local">
                         <property name="fileOwner" view="_local"/>

@@ -48,7 +48,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private MessageBundle messageBundle;
     @Inject
-    private Button setRatingButton;
+    private PopupButton setRatingButton;
     @Inject
     private StarsAndOtherService starsAndOtherService;
 
@@ -251,99 +251,105 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
 
-
         subscribeRadioButtonGroup.addValueChangeListener(e -> {
-            reportsPopupButton.setEnabled(openPositionsTable.getSingleSelected() != null);
-            buttonSubscribe.setEnabled(openPositionsTable.getSingleSelected() != null);
-
-            suggestCandidateButton.setVisible(((Integer) subscribeRadioButtonGroup.getValue()) == 1);
-
-            switch ((Integer) subscribeRadioButtonGroup.getValue()) {
-                case 1:
-                    openPositionsDl.setParameter("subscriber", userSession.getUser());
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.removeParameter("priority");
-                    checkBoxOnlyNotPaused.setValue(true);
-                    break;
-                case 0:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.setParameter("notsubscriber", userSession.getUser());
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.removeParameter("priority");
-                    checkBoxOnlyNotPaused.setValue(true);
-                    break;
-                case 2:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.removeParameter("priority");
-                    checkBoxOnlyNotPaused.setValue(false);
-                    break;
-                case 3:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.setParameter("freesubscriber", false);
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.removeParameter("priority");
-                    checkBoxOnlyNotPaused.setValue(true);
-                    break;
-                case 4:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.setParameter("newOpenPosition", 3);
-                    openPositionsDl.removeParameter("priority");
-                    checkBoxOnlyNotPaused.setValue(true);
-                    break;
-                case 5:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.setParameter("newOpenPosition", 7);
-                    openPositionsDl.removeParameter("priority");
-                    checkBoxOnlyNotPaused.setValue(true);
-                    break;
-                case 6:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.setParameter("newOpenPosition", 30);
-                    openPositionsDl.removeParameter("priority");
-                    checkBoxOnlyNotPaused.setValue(true);
-                    break;
-                case 7:
-                    openPositionsDl.removeParameter("subscriber");
-                    openPositionsDl.removeParameter("notsubscriber");
-                    openPositionsDl.removeParameter("freesubscriber");
-                    openPositionsDl.removeParameter("newOpenPosition");
-                    openPositionsDl.setParameter("priority", 0);
-                    checkBoxOnlyNotPaused.setValue(false);
-                    break;
-                default:
-                    break;
-            }
-
-            if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
-                    userSession.getUser().getGroup().getName().equals(ACCOUNTING_GROUP)) {
-                subscribeRadioButtonGroup.setValue(2);
-            } else {
-                subscribeRadioButtonGroup.setValue(1);
-            }
-
-            openPositionsDl.load();
+            setOpenPositionBrowseFilter();
         });
+
+        if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
+                userSession.getUser().getGroup().getName().equals(ACCOUNTING_GROUP)) {
+            subscribeRadioButtonGroup.setValue(2);
+        } else {
+            subscribeRadioButtonGroup.setValue(1);
+        }
+
+        setOpenPositionBrowseFilter();
+        openPositionsTable.repaint();
+    }
+
+    private void setOpenPositionBrowseFilter() {
+        reportsPopupButton.setEnabled(openPositionsTable.getSingleSelected() != null);
+        buttonSubscribe.setEnabled(openPositionsTable.getSingleSelected() != null);
+
+        suggestCandidateButton.setVisible(((Integer) subscribeRadioButtonGroup.getValue()) == 1);
+
+        switch ((Integer) subscribeRadioButtonGroup.getValue()) {
+            case 1:
+                openPositionsDl.setParameter("subscriber", userSession.getUser());
+                openPositionsDl.removeParameter("notsubscriber");
+                openPositionsDl.removeParameter("freesubscriber");
+                openPositionsDl.removeParameter("newOpenPosition");
+                openPositionsDl.removeParameter("priority");
+                checkBoxOnlyNotPaused.setValue(true);
+                break;
+            case 0:
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.setParameter("notsubscriber", userSession.getUser());
+                openPositionsDl.removeParameter("freesubscriber");
+                openPositionsDl.removeParameter("newOpenPosition");
+                openPositionsDl.removeParameter("priority");
+                checkBoxOnlyNotPaused.setValue(true);
+                break;
+            case 2:
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.removeParameter("notsubscriber");
+                openPositionsDl.removeParameter("freesubscriber");
+                openPositionsDl.removeParameter("newOpenPosition");
+                openPositionsDl.removeParameter("priority");
+                checkBoxOnlyNotPaused.setValue(false);
+                break;
+            case 3:
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.removeParameter("notsubscriber");
+                openPositionsDl.setParameter("freesubscriber", false);
+                openPositionsDl.removeParameter("newOpenPosition");
+                openPositionsDl.removeParameter("priority");
+                checkBoxOnlyNotPaused.setValue(true);
+                break;
+            case 4:
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.removeParameter("notsubscriber");
+                openPositionsDl.removeParameter("freesubscriber");
+                openPositionsDl.setParameter("newOpenPosition", 3);
+                openPositionsDl.removeParameter("priority");
+                checkBoxOnlyNotPaused.setValue(true);
+                break;
+            case 5:
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.removeParameter("notsubscriber");
+                openPositionsDl.removeParameter("freesubscriber");
+                openPositionsDl.setParameter("newOpenPosition", 7);
+                openPositionsDl.removeParameter("priority");
+                checkBoxOnlyNotPaused.setValue(true);
+                break;
+            case 6:
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.removeParameter("notsubscriber");
+                openPositionsDl.removeParameter("freesubscriber");
+                openPositionsDl.setParameter("newOpenPosition", 30);
+                openPositionsDl.removeParameter("priority");
+                checkBoxOnlyNotPaused.setValue(true);
+                break;
+            case 7:
+                openPositionsDl.removeParameter("subscriber");
+                openPositionsDl.removeParameter("notsubscriber");
+                openPositionsDl.removeParameter("freesubscriber");
+                openPositionsDl.removeParameter("newOpenPosition");
+                openPositionsDl.setParameter("priority", 0);
+                checkBoxOnlyNotPaused.setValue(false);
+                break;
+            default:
+                break;
+        }
+
+        openPositionsDl.load();
     }
 
     private void initGroupSubscribeButton() {
         if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
                 userSession.getUser().getGroup().getName().equals(HUNTING_GROUP)) {
-            groupSubscribe.setVisible(true);
+            groupSubscribe.setEnabled(true);
         } else {
-            groupSubscribe.setVisible(false);
+            groupSubscribe.setEnabled(false);
         }
     }
 
@@ -755,7 +761,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Component editButton = createEditButton(entity);
         Component priorityField = createPriorityField(entity);
         Component commentButton = createCommentButton(entity);
-        Component viewCommentButton = createViewCommentButton(entity);
+//        Component viewCommentButton = createViewCommentButton(entity);
         Component openCloseButton = createOpenCloseButton(entity);
         Component viewDescriptionButton = createViewDescriptionButton(entity);
         Component sendedCandidatesButton = createSendedCandidatesButton(entity);
@@ -774,7 +780,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         buttonsHBox.add(viewDescriptionButton);
         buttonsHBox.add(sendedCandidatesButton);
         buttonsHBox.add(commentButton);
-        buttonsHBox.add(viewCommentButton);
+//        buttonsHBox.add(viewCommentButton);
 
         if (suitableButton != null)
             buttonsHBox.add(suitableButton);
@@ -815,21 +821,34 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retButton.setEnabled(true);
 
         retButton.addClickListener(addClickListenerEvent -> {
-            Screen screen = screens.create(OpenPositionCommentsView.class);
-            ((OpenPositionCommentsView) screen).setOpenPosition(openPositionsTable.getSingleSelected());
-            screen.show();
+            openPositionCommentViewInvoke();
         });
 
         return retButton;
     }
 
+    public void openPositionCommentViewInvoke() {
+        Screen screen = screens.create(OpenPositionCommentsView.class);
+        ((OpenPositionCommentsView) screen).setOpenPosition(openPositionsTable.getSingleSelected());
+        screen.show();
+    }
+
     private Component createCommentButton(OpenPosition entity) {
-        Button retButton = uiComponents.create(Button.class);
-        retButton.setIcon(CubaIcon.STAR_O.source());
+        PopupButton retButton = uiComponents.create(PopupButton.class);
+        retButton.setIcon(CubaIcon.COMMENT.source());
         retButton.setDescription(messageBundle.getMessage("msgComment"));
         retButton.setEnabled(true);
 
-        retButton.addClickListener(addClickListenerEvent -> {
+        retButton.addAction(new BaseAction("setRatingComment")
+                .withCaption(messageBundle.getMessage("msgOpenPositionComment"))
+                .withIcon(CubaIcon.STAR_O.source())
+                .withHandler(actionPerformedEvent -> setRatingComment()));
+        retButton.addAction(new BaseAction("viewRatingComment")
+                .withCaption(messageBundle.getMessage("msgViewOpenPositionComment"))
+                .withIcon(CubaIcon.VIEW_ACTION.source())
+                .withHandler(actionPerformedEvent -> openPositionCommentViewInvoke()));
+
+        /* retButton.addClickListener(addClickListenerEvent -> {
             screenBuilders.editor(OpenPositionComment.class, this)
                     .withScreenClass(OpenPositionCommentEdit.class)
                     .withInitializer(e -> {
@@ -841,7 +860,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .newEntity()
                     .build()
                     .show();
-        });
+        }); */
 
         return retButton;
     }
@@ -1496,9 +1515,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe
+    public void onAfterShow1(AfterShowEvent event) {
+        initCheckBoxOnlyOpenedPosition();
+    }
+
+    @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         checkBoxOnlyOpenedPosition.setValue(true); // только открытые позиции
-        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
+        buttonExcel.setEnabled(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
 
         setInternalProjectFilter();
         setSubcribersFilter();
@@ -1514,8 +1538,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         clearUrgentFilter();
         setButtonsEnableDisable();
-
-        initCheckBoxOnlyOpenedPosition();
     }
 
     private void setButtonsEnableDisable() {
