@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
-    xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
     <data>
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList">
@@ -99,19 +99,29 @@
         </collection>
     </data>
     <layout>
-        <radioButtonGroup id="candidateRadioButtonGroup"
-                          caption="msg://msgCandidateFilter"
-                          width="AUTO"
-                          align="MIDDLE_LEFT"
-                          orientation="horizontal"/>
+        <hbox spacing="true">
+            <radioButtonGroup id="candidateRadioButtonGroup"
+                              caption="msg://msgCandidateFilter"
+                              width="AUTO"
+                              align="BOTTOM_LEFT"
+                              orientation="horizontal"/>
+            <checkBox id="excludeCheckBox"
+                      caption="msg://msgExclude"
+                      width="AUTO"
+                      height="AUTO"
+                      align="BOTTOM_LEFT"
+                      description="msg://msgExcludeDesc"/>
+        </hbox>
         <scrollBox id="candidatesScrollBox"
                    spacing="true"
+                   width="100%"
+                   height="AUTO"
                    orientation="vertical">
-            <label id="notCandidatesLabel"
-                   align="MIDDLE_CENTER"
-                   stylename="h1"
-                   value="msg://msgNoCandidates"
-                   visible="false"/>
         </scrollBox>
+        <label id="notCandidatesLabel"
+               align="MIDDLE_CENTER"
+               stylename="h1"
+               value="msg://msgNoCandidates"
+               visible="false"/>
     </layout>
 </fragment>

@@ -8,6 +8,8 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -46,13 +48,27 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private int candidatesCount = 0;
     @Inject
     private Label<String> notCandidatesLabel;
+    @Inject
+    private MessageBundle messageBundle;
+    @Inject
+    private CheckBox excludeCheckBox;
+
+    final static String QUERY_EXCLUDE_CANDIDATES = "select e from itpearls_OpenPosition e " +
+            "where e.positionType = :positionType and not e.openClose = true " +
+            "and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
+        excludeCheckBox.setValue(false);
         initInteractionListDataContainer();
         initRadioButton();
         initCandidatesList();
         initNoCandidatesLabel();
+    }
+
+    @Subscribe("excludeCheckBox")
+    public void onExcludeCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        reinitInteractionListDataContainer(getPeriodRadioButton());
     }
 
     private void initRadioButton() {
@@ -66,26 +82,31 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         candidateRadioButtonGroup.setValue(1);
 
         candidateRadioButtonGroup.addValueChangeListener(e -> {
-            int period = 0;
-
-            switch ((int) candidateRadioButtonGroup.getValue()) {
-                case 0:
-                    period = 3;
-                    break;
-                case 1:
-                    period = 7;
-                    break;
-                case 2:
-                    period = 30;
-                    break;
-                default:
-                    period = 3;
-                    break;
-            }
-
-            reinitInteractionListDataContainer(period);
+            reinitInteractionListDataContainer(getPeriodRadioButton());
+            initNoCandidatesLabel();
         });
 
+    }
+
+    int getPeriodRadioButton() {
+        int period = 0;
+
+        switch ((int) candidateRadioButtonGroup.getValue()) {
+            case 0:
+                period = 3;
+                break;
+            case 1:
+                period = 7;
+                break;
+            case 2:
+                period = 30;
+                break;
+            default:
+                period = 3;
+                break;
+        }
+
+        return period;
     }
 
     private void initCandidatesList() {
@@ -93,7 +114,20 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         candidatesCount = jobCandidateSet.size();
 
         for (IteractionList interactionList : iteractionListsDc.getItems()) {
-            jobCandidateSet.add(interactionList.getCandidate());
+            if (excludeCheckBox.getValue()) {
+                List<OpenPosition> whatToOfferCandidate = dataManager.load(OpenPosition.class)
+                        .query(QUERY_EXCLUDE_CANDIDATES)
+                        .parameter("positionType", interactionList.getCandidate().getPersonPosition())
+                        .parameter("candidate", interactionList.getCandidate())
+                        .view("openPosition-view")
+                        .list();
+
+                if (whatToOfferCandidate.size() > 0) {
+                    jobCandidateSet.add(interactionList.getCandidate());
+                }
+            } else {
+                jobCandidateSet.add(interactionList.getCandidate());
+            }
         }
 
         for (JobCandidate jobCandidate : jobCandidateSet) {
@@ -115,6 +149,15 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                         .show();
             });
 
+            PopupButton candidateActioButton = uiComponents.create(PopupButton.class);
+            candidateActioButton.setIconFromSet(CubaIcon.ADD_ACTION);
+            candidateActioButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            candidateActioButton.addAction(new BaseAction("closeAllProcesses")
+                    .withCaption(messageBundle.getMessage("msgCloseAllProcesses"))
+                    .withDescription(messageBundle.getMessage("msgCloseAllProcessesDescription"))
+                    .withHandler(actionPerformedEvent -> closeAllProcesses()));
+
             caseClosedOpenPosition = getCaseClosedOpenPosition(jobCandidate);
             processedOpenPosition = getProcessedOpenPosition(jobCandidate);
 
@@ -124,6 +167,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             opportunityOpenPosition = getOpportunityOpenPosition(jobCandidate);
 
             hBoxLayout.add(candidateLinkButton);
+            // hBoxLayout.add(candidateActioButton);
 
             scrollBoxLayout = uiComponents.create(ScrollBoxLayout.class);
             scrollBoxLayout.setWidthAuto();
@@ -131,9 +175,12 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             scrollBoxLayout.setOrientation(HasOrientation.Orientation.HORIZONTAL);
             scrollBoxLayout.setScrollBarPolicy(ScrollBoxLayout.ScrollBarPolicy.HORIZONTAL);
 
-            createLabels(opportunityOpenPosition, "text-block-gradient-green");
-            createLabels(processedOpenPosition, "text-block-gradient-yellow");
-            createLabels(caseClosedOpenPosition, "text-block-gradient-red");
+            createLabels(opportunityOpenPosition, "text-block-gradient-green",
+                    messageBundle.getMessage("msgCanSendCandidate"));
+            createLabels(processedOpenPosition, "text-block-gradient-yellow",
+                    messageBundle.getMessage("msgCandidateIsWork"));
+            createLabels(caseClosedOpenPosition, "text-block-gradient-red",
+                    messageBundle.getMessage("msgCandidateisEndProcess"));
 
             hBoxLayout.add(scrollBoxLayout);
 
@@ -143,7 +190,10 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         generatedWidget = true;
     }
 
-    private void createLabels(Set<OpenPosition> openPositions, String style) {
+    private void closeAllProcesses() {
+    }
+
+    private void createLabels(Set<OpenPosition> openPositions, String style, String description) {
         for (OpenPosition openPosition : openPositions) {
             LinkButton retLinkButton = uiComponents.create(LinkButton.class);
             if (openPosition.getProjectName().getProjectName().length() > 20) {
@@ -151,7 +201,8 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             } else {
                 retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
             }
-            retLinkButton.setDescription(openPosition.getVacansyName());
+
+            retLinkButton.setDescription(description + "\n\n" + openPosition.getVacansyName());
             retLinkButton.setWidthAuto();
             retLinkButton.setStyleName(style);
             retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
@@ -255,8 +306,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
             clearCandidatesList();
             initCandidatesList();
-            initNoCandidatesLabel();
         }
+
+        initNoCandidatesLabel();
     }
 
     private void initNoCandidatesLabel() {
