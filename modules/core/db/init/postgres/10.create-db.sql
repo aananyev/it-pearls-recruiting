@@ -155,6 +155,7 @@ create table ITPEARLS_COMPANY (
     COMPANY_OWNERSHIP_ID uuid,
     COMANY_NAME varchar(80) not null,
     COMPANY_SHORT_NAME varchar(80),
+    COMPANY_GROUP_ID uuid,
     COMPANY_DIRECTOR_ID uuid,
     CITY_OF_COMPANY_ID uuid,
     REGION_OF_COMPANY_ID uuid,
@@ -708,6 +709,7 @@ create table ITPEARLS_LABOR_AGEEMENT_TYPE (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    EMPLOYEE_ORCOMPANY boolean,
     NAME_AGREEMENT varchar(80) not null,
     COMMENT_ text,
     --
@@ -726,11 +728,12 @@ create table ITPEARLS_LABOR_AGREEMENT (
     DELETED_BY varchar(50),
     --
     PERHAPS boolean,
-    ADDITIONAL_LABOR_AGREEMENT_ID uuid,
     EMPLOYEE_OR_CUSTOMER integer not null,
     JOB_CANDIDATE_ID uuid,
     LEGAL_ENTITY_EMPLOYEE_ID uuid,
     CONTRACTOR_COMPANY_ID uuid,
+    ADDITIONAL_LABOR_AGREEMENT_ID uuid,
+    LEGAL_ENTITY_FROM_ID uuid,
     AGREEMENT_NAME varchar(255) not null,
     AGREEMENT_NUMBER varchar(48) not null,
     AGREEMENT_DATE date not null,

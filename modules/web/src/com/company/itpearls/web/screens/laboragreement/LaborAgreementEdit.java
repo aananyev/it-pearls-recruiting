@@ -22,15 +22,13 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
     @Inject
     private DateField<Date> laborAgreementEndDateField;
     @Inject
-    private RadioButtonGroup<Integer> employeeOrCustomerRadioButtonGroup;
-    @Inject
     private LookupPickerField<Company> customerCompanyLookupPickerField;
     @Inject
     private LookupPickerField<Company> legalEntityEmployeeLookupPickerField;
     @Inject
-    private LookupPickerField<JobCandidate> jobCandidateLookupPickerField;
-    @Inject
     private CollectionLoader<LaborAgreement> additionalAgreementDl;
+    @Inject
+    private SuggestionPickerField<JobCandidate> candidateField;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -54,10 +52,10 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
             }
         });
 
-        setEmployeeOrCustomerCheckBox();
+        // setEmployeeOrCustomerCheckBox();
     }
 
-    private void setEmployeeOrCustomerCheckBox() {
+    /* private void setEmployeeOrCustomerCheckBox() {
         Map<String, Integer> employeeOrCustomerMap = new LinkedHashMap<>();
         employeeOrCustomerMap.put("Сотрудником", 1);
         employeeOrCustomerMap.put("Клиентом", 2);
@@ -69,17 +67,22 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
     public void onEmployeeOrCustomerRadioButtonGroupValueChange(HasValue.ValueChangeEvent<Integer> event) {
         switch (event.getValue()) {
             case 1:
+                // компания иили сотрудник
+                candidateField.setVisible(true);
                 customerCompanyLookupPickerField.setVisible(false);
+
                 legalEntityEmployeeLookupPickerField.setVisible(true);
-                jobCandidateLookupPickerField.setVisible(true);
                 break;
             case 2:
+                // компания иили сотрудник
+                candidateField.setVisible(false);
                 customerCompanyLookupPickerField.setVisible(true);
+
                 legalEntityEmployeeLookupPickerField.setVisible(false);
-                jobCandidateLookupPickerField.setVisible(false);
+
                 break;
             default:
                 break;
         }
-    }
+    } */
 }

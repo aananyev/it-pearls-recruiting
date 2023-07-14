@@ -172,6 +172,7 @@
         <property name="countryOfCompany" view="_minimal"/>
         <property name="fileCompanyLogo" view="_minimal"/>
         <property name="companyDirector" view="_minimal"/>
+        <property name="companyGroup" view="_local"/>
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="resumePosition" view="_minimal"/>
@@ -378,10 +379,28 @@
         <property name="iteractionRequirement" view="_local"/>
     </view>
     <view entity="itpearls_LaborAgreement" name="laborAgreement-view" extends="_local">
-        <property name="laborAgreementType" view="_minimal"/>
-        <property name="openPositions" view="_minimal"/>
+        <property name="laborAgreementType" view="_local"/>
+        <property name="openPositions" view="_local">
+            <property name="grade" view="_local"/>
+            <property name="cityPosition" view="_local"/>
+            <property name="cities" view="_local"/>
+            <property name="positionType" view="_local"/>
+            <property name="projectName" view="_local">
+                <property name="projectLogo" view="_local"/>
+                <property name="projectTree" view="_local"/>
+            </property>
+        </property>
         <property name="company" view="company-view"/>
-        <property name="jobCandidate" view="_minimal"/>
+        <property name="jobCandidate" view="_local">
+            <property name="personPosition" view="_local"/>
+            <property name="currentCompany" view="_local"/>
+            <property name="cityOfResidence" view="_local"/>
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="additionalLaborAgreement" view="_local"/>
+        <property name="legalEntityEmployee" view="_local"/>
+        <property name="customerCompany" view="_local"/>
+        <property name="legalEntityFrom" view="_local"/>
     </view>
     <view entity="itpearls_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
     <view entity="itpearls_ExtUser" name="extUser-view" extends="_local">
@@ -479,5 +498,8 @@
     <view entity="itpearls_OpenPositionComment" name="openPositionComment-view" extends="_local">
         <property name="openPosition" view="_local"/>
         <property name="user" view="_local"/>
+    </view>
+    <view entity="itpearls_CompanyGroup" name="companyGroup-view" extends="_local">
+        <property name="company" view="_local"/>
     </view>
 </views>

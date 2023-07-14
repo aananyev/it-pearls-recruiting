@@ -36,15 +36,19 @@ order by e.comanyName]]>
             <properties include=".*"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
-        <dataGrid id="companiesTable"
-                  width="100%"
-                  dataContainer="companiesDc">
+        <treeDataGrid id="companiesTable"
+                      width="100%"
+                      hierarchyProperty="companyGroup"
+                      hierarchyColumn="companyGroup"
+                      dataContainer="companiesDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="companyGroup"
+                        property="companyGroup"/>
                 <column id="companyLogoColumn"
                         resizable="true"
                         collapsible="true"
@@ -86,7 +90,7 @@ order by e.comanyName]]>
                 <button id="editBtn" action="companiesTable.edit"/>
                 <button id="removeBtn" action="companiesTable.remove"/>
             </buttonsPanel>
-        </dataGrid>
+        </treeDataGrid>
         <hbox spacing="true">
             <checkBox id="checkBoxOnlyLegalEntity"
                       caption="msg://msgOnlyOurLegalEntity"/>

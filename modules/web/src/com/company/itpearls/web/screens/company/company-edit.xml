@@ -8,6 +8,7 @@
                   class="com.company.itpearls.entity.Company">
             <view extends="_local">
                 <property name="comanyName"/>
+                <property name="companyGroup" view="_local"/>
                 <property name="cityOfCompany" view="_local">
                     <property name="cityRegion" view="_local">
                         <property name="regionCountry" view="_local"/>
@@ -43,6 +44,9 @@
                 </query>
             </loader>
         </collection>
+        <collection id="companyGroupDc"
+                    class="com.company.itpearls.entity.CompanyGroup"
+                    view="companyGroup-view"/>
         <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="city-view">
             <loader id="cityOfCompaniesLc">
                 <query>
@@ -115,6 +119,12 @@
                                    width="100%"
                                    property="companyShortName"
                                    caption="mainMsg://msgCountryShortName"/>
+                        <lookupPickerField id="companyGroupLookupPickerField"
+                                           dataContainer="companyDc"
+                                           property="companyGroup"
+                                           optionsContainer="companyGroupDc"
+                                           width="100%"
+                                           caption="msg://msgCompanyGroup"/>
                         <lookupPickerField id="companyDirectorField"
                                            dataContainer="companyDc"
                                            optionsContainer="companyDirectorsDc"

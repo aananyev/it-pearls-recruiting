@@ -1,0 +1,1 @@
+alter table ITPEARLS_LABOR_AGREEMENT add column LEGAL_ENTITY_FROM_ID uuid ;

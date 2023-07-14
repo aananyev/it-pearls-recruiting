@@ -1,13 +1,12 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @NamePattern("%s|companyRuGroupName")
 @Table(name = "ITPEARLS_COMPANY_GROUP", indexes = {
@@ -20,6 +19,18 @@ public class CompanyGroup extends StandardEntity {
     @NotNull
     @Column(name = "COMPANY_RU_GROUP_NAME", nullable = false, unique = true, length = 80)
     protected String companyRuGroupName;
+
+    @Composition
+    @OneToMany(mappedBy = "companyGroup")
+    private List<Company> company;
+
+    public List<Company> getCompany() {
+        return company;
+    }
+
+    public void setCompany(List<Company> company) {
+        this.company = company;
+    }
 
     public String getCompanyRuGroupName() {
         return companyRuGroupName;

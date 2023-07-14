@@ -14,6 +14,9 @@ import javax.validation.constraints.NotNull;
 public class LaborAgeementType extends StandardEntity {
     private static final long serialVersionUID = -9202105476505288640L;
 
+    @Column(name = "EMPLOYEE_ORCOMPANY")
+    private Boolean employeeOrcompany;
+
     @Column(name = "NAME_AGREEMENT", nullable = false, length = 80)
     @NotNull
     private String nameAgreement;
@@ -21,6 +24,14 @@ public class LaborAgeementType extends StandardEntity {
     @Lob
     @Column(name = "COMMENT_")
     private String comment;
+
+    public Boolean getEmployeeOrcompany() {
+        return employeeOrcompany;
+    }
+
+    public void setEmployeeOrcompany(Boolean employeeOrcompany) {
+        this.employeeOrcompany = employeeOrcompany;
+    }
 
     public String getComment() {
         return comment;

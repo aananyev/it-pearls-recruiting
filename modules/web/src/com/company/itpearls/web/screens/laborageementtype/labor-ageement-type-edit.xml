@@ -13,6 +13,13 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
+        <radioButtonGroup id="employeeOrCustomerRadioButtonGroup"
+                          dataContainer="laborAgeementTypeDc"
+                          property="employeeOrcompany"
+                          required="true"
+                          orientation="horizontal"
+                          caption="msg://msgEmployeeOrCompany"
+                          description="msg://msgEmployeeOrCompanyDescription"/>
         <form id="form" dataContainer="laborAgeementTypeDc">
             <column width="350px">
                 <textField id="nameAgreementField"

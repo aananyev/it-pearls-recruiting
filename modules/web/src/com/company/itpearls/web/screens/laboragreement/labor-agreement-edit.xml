@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://laborAgreementEdit.caption"
-        focusComponent="jobCandidateLookupPickerField"
+        focusComponent="candidateField"
         messagesPack="com.company.itpearls.web.screens.laboragreement">
     <data>
         <instance id="laborAgreementDc"
@@ -21,15 +21,6 @@
                             <c:where>e.additionalLaborAgreement = :additionalLaborAgreement</c:where>
                         </c:jpql>
                     </condition>
-                </query>
-            </loader>
-        </collection>
-        <collection id="jobCandidateDc"
-                    class="com.company.itpearls.entity.JobCandidate"
-                    view="jobCandidate-view">
-            <loader id="jobCandidateDl">
-                <query>
-                    <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
                 </query>
             </loader>
         </collection>
@@ -67,13 +58,19 @@
             width="100%"
             height="100%"
             spacing="true">
-        <radioButtonGroup id="employeeOrCustomerRadioButtonGroup"
+        <lookupPickerField id="laborAgreementTypeField"
+                           width="100%"
+                           dataContainer="laborAgreementDc"
+                           optionsContainer="laborAgreementTypesDc"
+                           caption="msg://msgLaborAgreementType"
+                           property="laborAgreementType"/>
+        <!-- <radioButtonGroup id="employeeOrCustomerRadioButtonGroup"
                           required="true"
                           orientation="horizontal"
                           dataContainer="laborAgreementDc"
                           property="employeeOrCustomer"
                           caption="msg://msgEmployeeOrCustomerCaption"
-                          description="msg://msgEmployeeOrCustomerDescription"/>
+                          description="msg://msgEmployeeOrCustomerDescription"/> -->
         <tabSheet id="laborAgreementTabSheet"
                   width="100%"
                   height="100%"
@@ -121,21 +118,81 @@
                                    caption="msg://msgLaborEndDate"
                                    width="AUTO"/>
                     </hbox>
-                    <lookupPickerField id="jobCandidateLookupPickerField"
-                                       width="100%"
-                                       dataContainer="laborAgreementDc"
-                                       optionsContainer="jobCandidateDc"
-                                       caption="msg://msgJobCandidate"
-                                       property="jobCandidate"/>
-                    <lookupPickerField id="companyField"
-                                       width="100%"
-                                       dataContainer="laborAgreementDc"
-                                       optionsContainer="companiesDc"
-                                       caption="msg://msgCompany"
-                                       property="company"/>
+                    <suggestionPickerField id="candidateField"
+                                           inputPrompt="mainMsg://msgStartInput"
+                                           minSearchStringLength="3"
+                                           rowspan="1"
+                                           colspan="1"
+                                           caption="msg://msgCandidate"
+                                           width="100%"
+                                           required="true"
+                                           dataContainer="laborAgreementDc"
+                                           property="jobCandidate">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                        </actions>
+                        <query entityClass="com.company.itpearls.entity.JobCandidate"
+                               escapeValueForLike="true"
+                               searchStringFormat="%$searchString%">
+                            select e
+                            from itpearls_JobCandidate e
+                            where lower(e.fullName) like lower(:searchString) escape '\'
+                            and e.middleName not like '(не использовать)'
+                            and not e.blockCandidate = true
+                            order by e.secondName, e.firstName
+                        </query>
+                    </suggestionPickerField>
+                    <suggestionPickerField id="companyField"
+                                           inputPrompt="msg://msgStartInput"
+                                           minSearchStringLength="3"
+                                           width="100%"
+                                           rowspan="1"
+                                           colspan="1"
+                                           caption="msg://msgAgreementWithCompany"
+                                           dataContainer="laborAgreementDc"
+                                           property="customerCompany">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                        </actions>
+                        <query entityClass="com.company.itpearls.entity.Company"
+                               escapeValueForLike="true"
+                               searchStringFormat="%$searchString%">
+                            select e
+                            from itpearls_Company e
+                            where lower(e.comanyName) like lower(:searchString) escape '\'
+                            and e.comanyName not like '%(не использовать)'
+                            order by e.comanyName, e.companyShortName
+                        </query>
+                    </suggestionPickerField>
+                    <suggestionPickerField id="companyFromSuggestPickerField"
+                                           inputPrompt="msg://msgStartInput"
+                                           minSearchStringLength="3"
+                                           width="100%"
+                                           rowspan="1"
+                                           colspan="1"
+                                           caption="msg://msgLegalEntityFrom"
+                                           dataContainer="laborAgreementDc"
+                                           property="legalEntityFrom">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                        </actions>
+                        <query entityClass="com.company.itpearls.entity.Company"
+                               escapeValueForLike="true"
+                               searchStringFormat="%$searchString%">
+                            select e
+                            from itpearls_Company e
+                            where lower(e.comanyName) like lower(:searchString) escape '\'
+                            and e.comanyName not like '%(не использовать)'
+                            and e.ourLegalEntity = true
+                            order by e.comanyName, e.companyShortName
+                        </query>
+                    </suggestionPickerField>
                     <lookupPickerField id="legalEntityEmployeeLookupPickerField"
                                        width="100%"
-                                       visible="false"
+                                       visible="true"
                                        dataContainer="laborAgreementDc"
                                        optionsContainer="companiesDc"
                                        property="legalEntityEmployee"
@@ -143,18 +200,13 @@
                                        description="msg://msgLegalEntityEmployeeDescription"/>
                     <lookupPickerField id="customerCompanyLookupPickerField"
                                        width="100%"
-                                       visible="false"
+                                       visible="true"
                                        dataContainer="laborAgreementDc"
                                        optionsContainer="companiesDc"
                                        property="customerCompany"
                                        caption="msg://msgCustomerCompanyCaption"
                                        description="msg://msgCustomerCompanyDescription"/>
-                    <lookupPickerField id="laborAgreementTypeField"
-                                       width="100%"
-                                       dataContainer="laborAgreementDc"
-                                       optionsContainer="laborAgreementTypesDc"
-                                       caption="msg://msgLaborAgreementType"
-                                       property="laborAgreementType"/>
+
                     <richTextArea id="commentField"
                                   width="100%"
                                   height="100%"

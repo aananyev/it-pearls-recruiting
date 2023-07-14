@@ -49,7 +49,9 @@
                 </property>
                 <property name="laborAgreement" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
-                <property name="currentCompany" view="_local"/>
+                <property name="currentCompany" view="_local">
+                    <property name="companyGroup" view="_local"/>
+                </property>
                 <property name="fileImageFace" view="_local"/>
                 <property name="positionList" view="_local">
                     <property name="positionList" view="_local"/>

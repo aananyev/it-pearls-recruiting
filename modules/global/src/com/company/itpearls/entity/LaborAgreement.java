@@ -23,12 +23,6 @@ public class LaborAgreement extends StandardEntity {
     @Column(name = "PERHAPS")
     private Boolean perhaps;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
-    @OnDelete(DeletePolicy.CASCADE)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ADDITIONAL_LABOR_AGREEMENT_ID")
-    private LaborAgreement additionalLaborAgreement;
-
     @Column(name = "EMPLOYEE_OR_CUSTOMER", nullable = false)
     @NotNull
     private Integer employeeOrCustomer;
@@ -47,6 +41,17 @@ public class LaborAgreement extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CONTRACTOR_COMPANY_ID")
     private Company customerCompany;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
+    @OnDelete(DeletePolicy.CASCADE)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADDITIONAL_LABOR_AGREEMENT_ID")
+    private LaborAgreement additionalLaborAgreement;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "LEGAL_ENTITY_FROM_ID")
+    private Company legalEntityFrom;
 
     @Column(name = "AGREEMENT_NAME", nullable = false)
     @NotNull
@@ -99,6 +104,14 @@ public class LaborAgreement extends StandardEntity {
     @Lob
     @Column(name = "AGREEMENT_TEXT")
     private String agreementText;
+
+    public Company getLegalEntityFrom() {
+        return legalEntityFrom;
+    }
+
+    public void setLegalEntityFrom(Company legalEntityFrom) {
+        this.legalEntityFrom = legalEntityFrom;
+    }
 
     public LaborAgreement getAdditionalLaborAgreement() {
         return additionalLaborAgreement;

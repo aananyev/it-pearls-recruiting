@@ -10,7 +10,7 @@
             <view extends="_local"/>
             <loader id="laborAgeementTypesDl">
                 <query>
-                    <![CDATA[select e from itpearls_LaborAgeementType e]]>
+                    <![CDATA[select e from itpearls_LaborAgeementType e order by e.nameAgreement]]>
                 </query>
             </loader>
         </collection>
@@ -34,6 +34,8 @@
             </actions>
             <columns>
                 <column id="nameAgreement"/>
+                <column id="employeeOrcompany"
+                        generator="employeeOrcompanyGenerator"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

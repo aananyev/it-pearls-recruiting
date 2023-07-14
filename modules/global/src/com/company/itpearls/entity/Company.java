@@ -7,6 +7,7 @@ import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
 import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
@@ -39,6 +40,12 @@ public class Company extends StandardEntity {
 
     @Column(name = "COMPANY_SHORT_NAME", length = 80)
     protected String companyShortName;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @OnDeleteInverse(DeletePolicy.CASCADE)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMPANY_GROUP_ID")
+    private CompanyGroup companyGroup;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -80,6 +87,14 @@ public class Company extends StandardEntity {
     @Lob
     @Column(name = "WORKING_CONDITIONS")
     private String workingConditions;
+
+    public CompanyGroup getCompanyGroup() {
+        return companyGroup;
+    }
+
+    public void setCompanyGroup(CompanyGroup companyGroup) {
+        this.companyGroup = companyGroup;
+    }
 
     public Boolean getOurLegalEntity() {
         return ourLegalEntity;

@@ -167,6 +167,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             opportunityOpenPosition = getOpportunityOpenPosition(jobCandidate);
 
             hBoxLayout.add(candidateLinkButton);
+            // /* TO-DO как то доработать чтоб была кнопка удалить из рассмотрения */
             // hBoxLayout.add(candidateActioButton);
 
             scrollBoxLayout = uiComponents.create(ScrollBoxLayout.class);

@@ -35,7 +35,7 @@
             </actions>
             <columns>
                 <column id="perhaps" width="40px"/>
-                <column id="agreementName"/>
+                <column id="jobCandidate"/>
                 <column id="agreementNumber"/>
                 <column id="company"/>
                 <column id="laborAgreementType"/>
