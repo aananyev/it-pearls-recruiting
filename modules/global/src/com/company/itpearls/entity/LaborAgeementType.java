@@ -15,7 +15,7 @@ public class LaborAgeementType extends StandardEntity {
     private static final long serialVersionUID = -9202105476505288640L;
 
     @Column(name = "EMPLOYEE_ORCOMPANY")
-    private Boolean employeeOrcompany;
+    private Integer employeeOrcompany;
 
     @Column(name = "NAME_AGREEMENT", nullable = false, length = 80)
     @NotNull
@@ -25,12 +25,12 @@ public class LaborAgeementType extends StandardEntity {
     @Column(name = "COMMENT_")
     private String comment;
 
-    public Boolean getEmployeeOrcompany() {
-        return employeeOrcompany;
+    public void setEmployeeOrcompany(Integer employeeOrcompany) {
+        this.employeeOrcompany = employeeOrcompany;
     }
 
-    public void setEmployeeOrcompany(Boolean employeeOrcompany) {
-        this.employeeOrcompany = employeeOrcompany;
+    public Integer getEmployeeOrcompany() {
+        return employeeOrcompany;
     }
 
     public String getComment() {

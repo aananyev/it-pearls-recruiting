@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.laborageementtype;
 
+import com.company.itpearls.web.screens.laboragreement.AgreementType;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Component;
@@ -24,10 +25,10 @@ public class LaborAgeementTypeBrowse extends StandardLookup<LaborAgeementType> {
         String msgEmployeeOrCompany;
 
         if (entity.getEmployeeOrcompany() != null) {
-            if (entity.getEmployeeOrcompany()) {
-                msgEmployeeOrCompany = messageBundle.getMessage("msgAgreementCompany");
+            if (entity.getEmployeeOrcompany() == AgreementType.COMPANY) {
+                msgEmployeeOrCompany = messageBundle.getMessage(AgreementType.MSG_COMPANY);
             } else {
-                msgEmployeeOrCompany = messageBundle.getMessage("msgAgreementEmployee");
+                msgEmployeeOrCompany = messageBundle.getMessage(AgreementType.MSG_EMPLOYEE);
             }
         } else {
             msgEmployeeOrCompany = messageBundle.getMessage("Undefined");

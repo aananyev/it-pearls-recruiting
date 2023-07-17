@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.laboragreement;
 
 import com.company.itpearls.entity.Company;
 import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.entity.LaborAgeementType;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -22,13 +23,29 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
     @Inject
     private DateField<Date> laborAgreementEndDateField;
     @Inject
-    private LookupPickerField<Company> customerCompanyLookupPickerField;
-    @Inject
-    private LookupPickerField<Company> legalEntityEmployeeLookupPickerField;
-    @Inject
     private CollectionLoader<LaborAgreement> additionalAgreementDl;
     @Inject
     private SuggestionPickerField<JobCandidate> candidateField;
+    @Inject
+    private SuggestionPickerField<Company> companyField;
+    @Inject
+    private LookupPickerField<LaborAgeementType> laborAgreementTypeField;
+    @Inject
+    private Button commitAndCloseBtn;
+    @Inject
+    private TextField<String> laborNammeTextField;
+    @Inject
+    private RichTextArea commentField;
+    @Inject
+    private SuggestionPickerField<Company> companyFromSuggestPickerField;
+    @Inject
+    private HBoxLayout agreementsHeaderHBox;
+    @Inject
+    private GroupBoxLayout candidateCompanyGroupBox;
+    @Inject
+    private GroupBoxLayout legalAgreementGroupBox;
+    @Inject
+    private GroupBoxLayout legalAgreementCommentGroupBox;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -52,7 +69,74 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
             }
         });
 
-        // setEmployeeOrCustomerCheckBox();
+        laborAgreementTypeField.addValueChangeListener(e -> setVisibilityFields());
+    }
+
+    @Subscribe("laborAgreementTypeField")
+    public void onLaborAgreementTypeFieldValueChange(HasValue.ValueChangeEvent<LaborAgeementType> event) {
+        setVisibilityFields();
+    }
+
+    private void setVisibilityFields() {
+        if (laborAgreementTypeField.getValue() != null) {
+            if (laborAgreementTypeField.getValue().getEmployeeOrcompany() != null) {
+                if (laborAgreementTypeField.getValue().getEmployeeOrcompany() == AgreementType.EPLOYEE) {
+                    candidateCompanyGroupBox.setEnabled(true);
+                    candidateField.setVisible(true);
+                    candidateField.setRequired(true);
+                    companyField.setVisible(false);
+                    companyField.setRequired(false);
+                    commitAndCloseBtn.setEnabled(true);
+                    laborNammeTextField.setEnabled(true);
+                    commentField.setEnabled(true);
+                    commentField.setEnabled(true);
+                    companyFromSuggestPickerField.setEnabled(true);
+                    agreementsHeaderHBox.setEnabled(true);
+                    legalAgreementGroupBox.setEnabled(true);
+                    legalAgreementCommentGroupBox.setEnabled(true);
+                } else {
+                    candidateCompanyGroupBox.setEnabled(true);
+                    candidateField.setVisible(false);
+                    candidateField.setRequired(false);
+                    companyField.setVisible(true);
+                    companyField.setRequired(true);
+                    commitAndCloseBtn.setEnabled(true);
+                    laborNammeTextField.setEnabled(true);
+                    commentField.setEnabled(true);
+                    companyFromSuggestPickerField.setEnabled(true);
+                    agreementsHeaderHBox.setEnabled(true);
+                    legalAgreementGroupBox.setEnabled(true);
+                    legalAgreementCommentGroupBox.setEnabled(true);
+                }
+            } else {
+                candidateCompanyGroupBox.setEnabled(false);
+                candidateField.setVisible(true);
+                candidateField.setVisible(true);
+                candidateField.setRequired(false);
+                companyField.setVisible(true);
+                companyField.setRequired(false);
+                commitAndCloseBtn.setEnabled(false);
+                laborNammeTextField.setEnabled(false);
+                commentField.setEnabled(false);
+                companyFromSuggestPickerField.setEnabled(false);
+                agreementsHeaderHBox.setEnabled(false);
+                legalAgreementGroupBox.setEnabled(false);
+                legalAgreementCommentGroupBox.setEnabled(false);
+            }
+        } else {
+            candidateCompanyGroupBox.setEnabled(false);
+            candidateField.setVisible(true);
+            candidateField.setRequired(false);
+            companyField.setVisible(true);
+            companyField.setRequired(false);
+            commitAndCloseBtn.setEnabled(false);
+            laborNammeTextField.setEnabled(false);
+            commentField.setEnabled(false);
+            companyFromSuggestPickerField.setEnabled(false);
+            agreementsHeaderHBox.setEnabled(false);
+            legalAgreementGroupBox.setEnabled(false);
+            legalAgreementCommentGroupBox.setEnabled(false);
+        }
     }
 
     /* private void setEmployeeOrCustomerCheckBox() {
@@ -85,4 +169,6 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
                 break;
         }
     } */
+
+
 }

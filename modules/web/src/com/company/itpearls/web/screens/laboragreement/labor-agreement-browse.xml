@@ -12,6 +12,13 @@
                 <query>
                     <![CDATA[select e from itpearls_LaborAgreement e
                     where e.additionalLaborAgreement is null]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.laborAgreementType = :laborAgreementType</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -25,6 +32,8 @@
                 dataLoader="laborAgreementsDl">
             <properties include=".*"/>
         </filter>
+        <radioButtonGroup id="employeeOrCompanyRadioButton"
+                          orientation="horizontal"/>
         <groupTable id="laborAgreementsTable"
                     width="100%"
                     dataContainer="laborAgreementsDc">

@@ -1,0 +1,1 @@
+alter table ITPEARLS_LABOR_AGEEMENT_TYPE drop column EMPLOYEE_ORCOMPANY__U32589 cascade ;

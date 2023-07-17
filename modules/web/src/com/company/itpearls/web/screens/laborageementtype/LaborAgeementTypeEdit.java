@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.laborageementtype;
 
+import com.company.itpearls.web.screens.laboragreement.AgreementType;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.RadioButtonGroup;
@@ -17,11 +18,16 @@ import java.util.Map;
 public class LaborAgeementTypeEdit extends StandardEditor<LaborAgeementType> {
     @Inject
     private RadioButtonGroup employeeOrCustomerRadioButtonGroup;
+    @Inject
+    private MessageBundle messageBundle;
 
     private void setEmployeeOrCustomerCheckBox() {
-        Map<String, Boolean> employeeOrCustomerMap = new LinkedHashMap<>();
-        employeeOrCustomerMap.put("Сотрудником", false);
-        employeeOrCustomerMap.put("Клиентом", true);
+        Map<String, Integer> employeeOrCustomerMap = new LinkedHashMap<>();
+        
+        employeeOrCustomerMap.put(messageBundle.getMessage(AgreementType.MSG_EMPLOYEE),
+                AgreementType.EPLOYEE);
+        employeeOrCustomerMap.put(messageBundle.getMessage(AgreementType.MSG_COMPANY),
+                AgreementType.COMPANY);
 
         employeeOrCustomerRadioButtonGroup.setOptionsMap(employeeOrCustomerMap);
     }

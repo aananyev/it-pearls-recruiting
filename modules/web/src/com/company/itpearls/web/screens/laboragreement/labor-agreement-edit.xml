@@ -59,7 +59,9 @@
             height="100%"
             spacing="true">
         <lookupPickerField id="laborAgreementTypeField"
-                           width="100%"
+                           required="true"
+                           nullOptionVisible="false"
+                           width="AUTO"
                            dataContainer="laborAgreementDc"
                            optionsContainer="laborAgreementTypesDc"
                            caption="msg://msgLaborAgreementType"
@@ -83,12 +85,14 @@
                 <vbox id="agreementMainVBox"
                       spacing="true"
                       width="100%"
-                      expand="commentField"
+                      expand="legalAgreementCommentGroupBox"
                       height="100%">
                     <checkBox id="perhapsCheckBox"
                               dataContainer="laborAgreementDc"
+                              visible="false"
                               property="perhaps"/>
-                    <hbox spacing="true"
+                    <hbox id="agreementsHeaderHBox"
+                          spacing="true"
                           width="100%"
                           expand="laborNammeTextField">
                         <textField id="laborNammeTextField"
@@ -118,101 +122,102 @@
                                    caption="msg://msgLaborEndDate"
                                    width="AUTO"/>
                     </hbox>
-                    <suggestionPickerField id="candidateField"
-                                           inputPrompt="mainMsg://msgStartInput"
-                                           minSearchStringLength="3"
-                                           rowspan="1"
-                                           colspan="1"
-                                           caption="msg://msgCandidate"
-                                           width="100%"
-                                           required="true"
-                                           dataContainer="laborAgreementDc"
-                                           property="jobCandidate">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="open" type="picker_open"/>
-                        </actions>
-                        <query entityClass="com.company.itpearls.entity.JobCandidate"
-                               escapeValueForLike="true"
-                               searchStringFormat="%$searchString%">
-                            select e
-                            from itpearls_JobCandidate e
-                            where lower(e.fullName) like lower(:searchString) escape '\'
-                            and e.middleName not like '(не использовать)'
-                            and not e.blockCandidate = true
-                            order by e.secondName, e.firstName
-                        </query>
-                    </suggestionPickerField>
-                    <suggestionPickerField id="companyField"
-                                           inputPrompt="msg://msgStartInput"
-                                           minSearchStringLength="3"
-                                           width="100%"
-                                           rowspan="1"
-                                           colspan="1"
-                                           caption="msg://msgAgreementWithCompany"
-                                           dataContainer="laborAgreementDc"
-                                           property="customerCompany">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="open" type="picker_open"/>
-                        </actions>
-                        <query entityClass="com.company.itpearls.entity.Company"
-                               escapeValueForLike="true"
-                               searchStringFormat="%$searchString%">
-                            select e
-                            from itpearls_Company e
-                            where lower(e.comanyName) like lower(:searchString) escape '\'
-                            and e.comanyName not like '%(не использовать)'
-                            order by e.comanyName, e.companyShortName
-                        </query>
-                    </suggestionPickerField>
-                    <suggestionPickerField id="companyFromSuggestPickerField"
-                                           inputPrompt="msg://msgStartInput"
-                                           minSearchStringLength="3"
-                                           width="100%"
-                                           rowspan="1"
-                                           colspan="1"
-                                           caption="msg://msgLegalEntityFrom"
-                                           dataContainer="laborAgreementDc"
-                                           property="legalEntityFrom">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="open" type="picker_open"/>
-                        </actions>
-                        <query entityClass="com.company.itpearls.entity.Company"
-                               escapeValueForLike="true"
-                               searchStringFormat="%$searchString%">
-                            select e
-                            from itpearls_Company e
-                            where lower(e.comanyName) like lower(:searchString) escape '\'
-                            and e.comanyName not like '%(не использовать)'
-                            and e.ourLegalEntity = true
-                            order by e.comanyName, e.companyShortName
-                        </query>
-                    </suggestionPickerField>
-                    <lookupPickerField id="legalEntityEmployeeLookupPickerField"
-                                       width="100%"
-                                       visible="true"
-                                       dataContainer="laborAgreementDc"
-                                       optionsContainer="companiesDc"
-                                       property="legalEntityEmployee"
-                                       caption="msg://msgLegalEntityEmployeeCaption"
-                                       description="msg://msgLegalEntityEmployeeDescription"/>
-                    <lookupPickerField id="customerCompanyLookupPickerField"
-                                       width="100%"
-                                       visible="true"
-                                       dataContainer="laborAgreementDc"
-                                       optionsContainer="companiesDc"
-                                       property="customerCompany"
-                                       caption="msg://msgCustomerCompanyCaption"
-                                       description="msg://msgCustomerCompanyDescription"/>
-
-                    <richTextArea id="commentField"
-                                  width="100%"
-                                  height="100%"
-                                  dataContainer="laborAgreementDc"
-                                  caption="msg://msgCommentCaption"
-                                  property="comment"/>
+                    <groupBox id="candidateCompanyGroupBox"
+                              width="100%"
+                              height="AUTO"
+                              spacing="true"
+                              stylename="light">
+                        <suggestionPickerField id="candidateField"
+                                               inputPrompt="mainMsg://msgStartInput"
+                                               minSearchStringLength="3"
+                                               rowspan="1"
+                                               colspan="1"
+                                               caption="msg://msgAgreementWithEmployee"
+                                               width="100%"
+                                               required="true"
+                                               dataContainer="laborAgreementDc"
+                                               property="jobCandidate">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                            </actions>
+                            <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                   escapeValueForLike="true"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from itpearls_JobCandidate e
+                                where lower(e.fullName) like lower(:searchString) escape '\'
+                                and e.middleName not like '(не использовать)'
+                                and not e.blockCandidate = true
+                                order by e.secondName, e.firstName
+                            </query>
+                        </suggestionPickerField>
+                        <suggestionPickerField id="companyField"
+                                               inputPrompt="msg://msgStartInput"
+                                               minSearchStringLength="3"
+                                               width="100%"
+                                               rowspan="1"
+                                               colspan="1"
+                                               caption="msg://msgAgreementWithCompany"
+                                               dataContainer="laborAgreementDc"
+                                               property="customerCompany">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                            </actions>
+                            <query entityClass="com.company.itpearls.entity.Company"
+                                   escapeValueForLike="true"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from itpearls_Company e
+                                where lower(e.comanyName) like lower(:searchString) escape '\'
+                                and e.comanyName not like '%(не использовать)'
+                                order by e.comanyName, e.companyShortName
+                            </query>
+                        </suggestionPickerField>
+                    </groupBox>
+                    <groupBox id="legalAgreementGroupBox"
+                              width="100%"
+                              height="AUTO"
+                              spacing="true"
+                              stylename="light">
+                        <suggestionPickerField id="companyFromSuggestPickerField"
+                                               inputPrompt="msg://msgStartInput"
+                                               minSearchStringLength="3"
+                                               width="100%"
+                                               rowspan="1"
+                                               colspan="1"
+                                               caption="msg://msgLegalEntityFrom"
+                                               dataContainer="laborAgreementDc"
+                                               property="legalEntityFrom">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                            </actions>
+                            <query entityClass="com.company.itpearls.entity.Company"
+                                   escapeValueForLike="true"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from itpearls_Company e
+                                where lower(e.comanyName) like lower(:searchString) escape '\'
+                                and e.comanyName not like '%(не использовать)'
+                                order by e.comanyName, e.companyShortName
+                            </query>
+                        </suggestionPickerField>
+                    </groupBox>
+                    <groupBox id="legalAgreementCommentGroupBox"
+                              width="100%"
+                              height="AUTO"
+                              spacing="true"
+                              expand="commentField"
+                              stylename="light">
+                        <richTextArea id="commentField"
+                                      width="100%"
+                                      height="100%"
+                                      dataContainer="laborAgreementDc"
+                                      caption="msg://msgCommentCaption"
+                                      property="comment"/>
+                    </groupBox>
                 </vbox>
             </tab>
             <tab id="agreementTextTab"

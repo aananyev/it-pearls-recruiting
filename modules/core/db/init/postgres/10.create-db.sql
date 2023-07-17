@@ -709,7 +709,7 @@ create table ITPEARLS_LABOR_AGEEMENT_TYPE (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    EMPLOYEE_ORCOMPANY boolean,
+    EMPLOYEE_ORCOMPANY integer,
     NAME_AGREEMENT varchar(80) not null,
     COMMENT_ text,
     --
