@@ -33,7 +33,7 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
     @Inject
     private Button commitAndCloseBtn;
     @Inject
-    private TextField<String> laborNammeTextField;
+    private TextField<String> laborNameTextField;
     @Inject
     private RichTextArea commentField;
     @Inject
@@ -46,6 +46,14 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
     private GroupBoxLayout legalAgreementGroupBox;
     @Inject
     private GroupBoxLayout legalAgreementCommentGroupBox;
+    @Inject
+    private CheckBox agreementClosedCheckBox;
+    @Inject
+    private DateField<Date> leborAgreementDateField;
+    @Inject
+    private DateField<Date> laborAgreementDateField;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -69,6 +77,18 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
             }
         });
 
+        laborAgreementEndDateField.addValidator(value -> {
+            if (laborAgreementDateField.getValue() != null) {
+                if (laborAgreementDateField.getValue().after(value)) {
+                    throw new ValidationException(messageBundle.getMessage("msgAgreementEndDateError"));
+                }
+            }
+
+            if (value == null && parpetualAgreementCheckBox.getValue() == false) {
+                throw new ValidationException(messageBundle.getMessage("msgNeedAddEndDateAgreement"));
+            }
+        });
+
         laborAgreementTypeField.addValueChangeListener(e -> setVisibilityFields());
     }
 
@@ -87,7 +107,7 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
                     companyField.setVisible(false);
                     companyField.setRequired(false);
                     commitAndCloseBtn.setEnabled(true);
-                    laborNammeTextField.setEnabled(true);
+                    laborNameTextField.setEnabled(true);
                     commentField.setEnabled(true);
                     commentField.setEnabled(true);
                     companyFromSuggestPickerField.setEnabled(true);
@@ -101,7 +121,7 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
                     companyField.setVisible(true);
                     companyField.setRequired(true);
                     commitAndCloseBtn.setEnabled(true);
-                    laborNammeTextField.setEnabled(true);
+                    laborNameTextField.setEnabled(true);
                     commentField.setEnabled(true);
                     companyFromSuggestPickerField.setEnabled(true);
                     agreementsHeaderHBox.setEnabled(true);
@@ -116,7 +136,7 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
                 companyField.setVisible(true);
                 companyField.setRequired(false);
                 commitAndCloseBtn.setEnabled(false);
-                laborNammeTextField.setEnabled(false);
+                laborNameTextField.setEnabled(false);
                 commentField.setEnabled(false);
                 companyFromSuggestPickerField.setEnabled(false);
                 agreementsHeaderHBox.setEnabled(false);
@@ -130,12 +150,24 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
             companyField.setVisible(true);
             companyField.setRequired(false);
             commitAndCloseBtn.setEnabled(false);
-            laborNammeTextField.setEnabled(false);
+            laborNameTextField.setEnabled(false);
             commentField.setEnabled(false);
             companyFromSuggestPickerField.setEnabled(false);
             agreementsHeaderHBox.setEnabled(false);
             legalAgreementGroupBox.setEnabled(false);
             legalAgreementCommentGroupBox.setEnabled(false);
+        }
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        if (agreementClosedCheckBox.getValue() == null) {
+            agreementClosedCheckBox.setValue(false);
+        }
+
+        if (parpetualAgreementCheckBox.getValue() == null) {
+            parpetualAgreementCheckBox.setValue(false);
+            laborAgreementEndDateField.setValue(null);
         }
     }
 
@@ -169,6 +201,8 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
                 break;
         }
     } */
+
+
 
 
 }

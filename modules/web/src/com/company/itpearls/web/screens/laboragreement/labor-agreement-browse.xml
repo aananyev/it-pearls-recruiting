@@ -43,7 +43,10 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="perhaps" width="40px"/>
+                <column id="perhaps"
+                        width="40px"
+                        generator="perhapsColumnGenerator">
+                </column>
                 <column id="jobCandidate"/>
                 <column id="agreementNumber"/>
                 <column id="company"/>

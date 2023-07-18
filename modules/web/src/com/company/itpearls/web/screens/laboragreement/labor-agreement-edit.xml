@@ -73,6 +73,14 @@
                           property="employeeOrCustomer"
                           caption="msg://msgEmployeeOrCustomerCaption"
                           description="msg://msgEmployeeOrCustomerDescription"/> -->
+        <checkBox id="agreementClosedCheckBox"
+                  visible="true"
+                  width="AUTO"
+                  dataContainer="laborAgreementDc"
+                  property="closed"
+                  icon="CLOSE"
+                  caption="msg://msgAgreementClosed"
+                  description="msg://msgAgreementClosedDesc"/>
         <tabSheet id="laborAgreementTabSheet"
                   width="100%"
                   height="100%"
@@ -94,8 +102,8 @@
                     <hbox id="agreementsHeaderHBox"
                           spacing="true"
                           width="100%"
-                          expand="laborNammeTextField">
-                        <textField id="laborNammeTextField"
+                          expand="laborNameTextField">
+                        <textField id="laborNameTextField"
                                    dataContainer="laborAgreementDc"
                                    property="agreementName"
                                    caption="msg://msgLaborAgreementName"
@@ -105,7 +113,7 @@
                                    property="agreementNumber"
                                    caption="msg://msgLaborAgreementNumber"
                                    width="AUTO"/>
-                        <dateField id="leborAgreementDateField"
+                        <dateField id="laborAgreementDateField"
                                    dataContainer="laborAgreementDc"
                                    property="agreementDate"
                                    caption="msg://msgLaborAgreementDate"
@@ -254,7 +262,8 @@
                         <action id="remove" type="remove"/>
                     </actions>
                     <columns>
-                        <column id="agreementDate" property="agreementDate"/>
+                        <column id="agreementDate"
+                                property="agreementDate"/>
                         <column id="rate" property="rate"/>
                     </columns>
                     <rowsCount/>

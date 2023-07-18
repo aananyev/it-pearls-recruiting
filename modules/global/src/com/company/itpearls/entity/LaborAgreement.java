@@ -23,6 +23,9 @@ public class LaborAgreement extends StandardEntity {
     @Column(name = "PERHAPS")
     private Boolean perhaps;
 
+    @Column(name = "CLOSED")
+    private Boolean closed;
+
     @Column(name = "EMPLOYEE_OR_CUSTOMER", nullable = false)
     @NotNull
     private Integer employeeOrCustomer;
@@ -104,6 +107,14 @@ public class LaborAgreement extends StandardEntity {
     @Lob
     @Column(name = "AGREEMENT_TEXT")
     private String agreementText;
+
+    public Boolean getClosed() {
+        return closed;
+    }
+
+    public void setClosed(Boolean closed) {
+        this.closed = closed;
+    }
 
     public Company getLegalEntityFrom() {
         return legalEntityFrom;

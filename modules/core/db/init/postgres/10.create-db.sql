@@ -728,6 +728,7 @@ create table ITPEARLS_LABOR_AGREEMENT (
     DELETED_BY varchar(50),
     --
     PERHAPS boolean,
+    CLOSED boolean,
     EMPLOYEE_OR_CUSTOMER integer not null,
     JOB_CANDIDATE_ID uuid,
     LEGAL_ENTITY_EMPLOYEE_ID uuid,
