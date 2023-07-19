@@ -78,7 +78,6 @@
                   width="AUTO"
                   dataContainer="laborAgreementDc"
                   property="closed"
-                  icon="CLOSE"
                   caption="msg://msgAgreementClosed"
                   description="msg://msgAgreementClosedDesc"/>
         <tabSheet id="laborAgreementTabSheet"
@@ -262,13 +261,25 @@
                         <action id="remove" type="remove"/>
                     </actions>
                     <columns>
+                        <column id="active" caption="msg://msgActive">
+                            <componentRenderer/>
+                        </column>
+                        <column id="agreementName"
+                                property="agreementName"/>
+                        <column id="rate"
+                                property="rate"/>
                         <column id="agreementDate"
                                 property="agreementDate"/>
-                        <column id="rate" property="rate"/>
+                        <column id="agreementEndDate">
+                            <componentRenderer/>
+                        </column>
                     </columns>
                     <rowsCount/>
                     <buttonsPanel id="buttonsPanel"
                                   alwaysVisible="true">
+                        <button id="addNewAdditionalAgreement"
+                                caption="msg://msgNewAddidtionalAgreement"
+                                invoke="newAdditionalAgreement"/>
                         <button id="editBtn" action="additionalAgreementDataGrid.edit"/>
                         <button id="removeBtn" action="additionalAgreementDataGrid.remove"/>
                     </buttonsPanel>

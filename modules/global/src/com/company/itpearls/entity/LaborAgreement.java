@@ -30,6 +30,9 @@ public class LaborAgreement extends StandardEntity {
     @NotNull
     private Integer employeeOrCustomer;
 
+    @Column(name = "ADDITIONAL_AGREEMENT")
+    private Boolean additionalAgreement;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_CANDIDATE_ID")
@@ -82,9 +85,8 @@ public class LaborAgreement extends StandardEntity {
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @OnDelete(DeletePolicy.CASCADE)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_ID")
-    @NotNull
     private Company company;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
@@ -107,6 +109,14 @@ public class LaborAgreement extends StandardEntity {
     @Lob
     @Column(name = "AGREEMENT_TEXT")
     private String agreementText;
+
+    public Boolean getAdditionalAgreement() {
+        return additionalAgreement;
+    }
+
+    public void setAdditionalAgreement(Boolean additionalAgreement) {
+        this.additionalAgreement = additionalAgreement;
+    }
 
     public Boolean getClosed() {
         return closed;

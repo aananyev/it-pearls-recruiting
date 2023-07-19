@@ -1,0 +1,1 @@
+alter table ITPEARLS_LABOR_AGREEMENT add column ADDITIONAL_AGREEMENT boolean ;
