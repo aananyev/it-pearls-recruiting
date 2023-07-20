@@ -1,6 +1,8 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -109,6 +111,31 @@ public class LaborAgreement extends StandardEntity {
     @Lob
     @Column(name = "AGREEMENT_TEXT")
     private String agreementText;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FILE_AGREEMENT_ID")
+    private FileDescriptor fileAgreement;
+
+    @OneToMany(mappedBy = "laborAgreement")
+    @OnDelete(DeletePolicy.CASCADE)
+    @Composition
+    private List<SomeFilesAgreement> someFilesAgreement;
+
+    public void setSomeFilesAgreement(List<SomeFilesAgreement> someFilesAgreement) {
+        this.someFilesAgreement = someFilesAgreement;
+    }
+
+    public List<SomeFilesAgreement> getSomeFilesAgreement() {
+        return someFilesAgreement;
+    }
+
+    public FileDescriptor getFileAgreement() {
+        return fileAgreement;
+    }
+
+    public void setFileAgreement(FileDescriptor fileAgreement) {
+        this.fileAgreement = fileAgreement;
+    }
 
     public Boolean getAdditionalAgreement() {
         return additionalAgreement;

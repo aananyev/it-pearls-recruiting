@@ -50,5 +50,6 @@
         <class>com.company.itpearls.entity.OutstaffingRates</class>
         <class>com.company.itpearls.entity.Currency</class>
         <class>com.company.itpearls.entity.OpenPositionComment</class>
+        <class>com.company.itpearls.entity.SomeFilesAgreement</class>
     </persistence-unit>
 </persistence>

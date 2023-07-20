@@ -7,8 +7,15 @@
     <data>
         <instance id="laborAgreementDc"
                   class="com.company.itpearls.entity.LaborAgreement">
-            <view extends="laborAgreement-view"/>
+            <view extends="laborAgreement-view">
+                <property name="someFilesAgreement" view="_local">
+                    <property name="fileType" view="_local"/>
+                    <property name="fileDescriptor" view="_local"/>
+                    <property name="fileOwner" view="_local"/>
+                </property>
+            </view>
             <loader/>
+            <collection id="someFilesAgreementDc" property="someFilesAgreement"/>
         </instance>
         <collection id="additionalAgreementDc"
                     class="com.company.itpearls.entity.LaborAgreement">
@@ -235,6 +242,15 @@
                 <richTextArea id="agreementTextRichTextArea"
                               width="100%"
                               height="100%"/>
+                <upload id="fileAgreementFileUpload"
+                        property="fileAgreement"
+                        showFileName="true"
+                        align="TOP_RIGHT"
+                        width="AUTO"
+                        description="msg://msgOriginalCV"
+                        dataContainer="laborAgreementDc"
+                        fileStoragePutMode="IMMEDIATE"
+                        showClearButton="true"/>
             </tab>
             <tab id="financeTab"
                  spacing="true"
@@ -284,6 +300,40 @@
                         <button id="removeBtn" action="additionalAgreementDataGrid.remove"/>
                     </buttonsPanel>
                 </dataGrid>
+            </tab>
+            <tab id="tabFiles"
+                 caption="mainMsg://msgFiles"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="someFilesVbox">
+                <vbox id="someFilesVbox"
+                      spacing="true"
+                      expand="someFilesTable"
+                      width="100%">
+                    <table id="someFilesTable"
+                           height="300px"
+                           width="100%"
+                           dataContainer="someFilesAgreementDc">
+                        <columns>
+                            <column id="fileDescription"/>
+                            <column id="fileType.nameFileType"/>
+                            <column id="fileDescriptor.size"/>
+                            <column id="fileOwner.name"
+                                    caption="mainMsg://msgOwner"/>
+                        </columns>
+                        <buttonsPanel>
+                            <button action="someFilesTable.create"/>
+                            <button action="someFilesTable.edit"/>
+                            <button action="someFilesTable.remove"/>
+                        </buttonsPanel>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action type="create" id="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                    </table>
+                </vbox>
             </tab>
         </tabSheet>
         <hbox id="editActions"

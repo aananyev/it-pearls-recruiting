@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/somefiles/some-files-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.somefiles">
+    <layout>
+        <textField id="fileDescriptionField"
+                   property="fileDescription"
+                   dataContainer="someFilesDc"
+                   required="false"
+                   width="100%"/>
+        <form id="form"
+              dataContainer="someFilesDc"
+              width="100%">
+            <column width="100%">
+                <lookupPickerField id="fileTypeField"
+                                   optionsContainer="fileTypesDc"
+                                   property="fileType"
+                                   required="true"
+                                   width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
+                <upload id="fileDescriptorField"
+                        fileStoragePutMode="MANUAL"
+                        dataContainer="someFilesDc"
+                        property="fileDescriptor"
+                        width="100%"
+                        showFileName="true"/>
+                <textField id="fileLinkField"
+                           property="fileLink"
+                           width="100%"
+                           caption="msg://msgFileLink"/>
+            </column>
+        </form>
+        <textArea id="fileCommentField"
+                  property="fileComment"
+                  dataContainer="someFilesDc"
+                  rows="5"
+                  height="50%"
+                  width="100%"/>
+        <lookupPickerField id="fileOwnerField"
+                           dataContainer="someFilesDc"
+                           optionsContainer="fileOwnersDc"
+                           property="fileOwner"
+                           required="true" width="50%">
+            <actions>
+                <action id="lookup"
+                        type="picker_lookup"/>
+            </actions>
+        </lookupPickerField>
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT" width="100%">
+            <button action="windowCommitAndClose" align="BOTTOM_RIGHT"/>
+            <button action="windowClose" align="BOTTOM_RIGHT"/>
+        </hbox>
+    </layout>
+</window>

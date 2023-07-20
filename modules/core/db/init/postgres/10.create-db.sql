@@ -605,6 +605,7 @@ create table ITPEARLS_SOME_FILES (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    DTYPE varchar(31),
     --
     FILE_DESCRIPTION varchar(80) not null,
     FILE_DESCRIPTOR_ID uuid,
@@ -613,6 +614,9 @@ create table ITPEARLS_SOME_FILES (
     FILE_OWNER_ID uuid not null,
     FILE_TYPE_ID uuid not null,
     CANDIDATE_CV_ID uuid,
+    --
+    -- from itpearls_SomeFilesAgreement
+    LABOR_AGREEMENT_ID uuid,
     --
     primary key (ID)
 )^
@@ -746,6 +750,7 @@ create table ITPEARLS_LABOR_AGREEMENT (
     LABOR_AGREEMENT_TYPE_ID uuid not null,
     COMMENT_ text,
     AGREEMENT_TEXT text,
+    FILE_AGREEMENT_ID uuid,
     --
     primary key (ID)
 )^

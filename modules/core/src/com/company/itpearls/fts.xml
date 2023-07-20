@@ -139,5 +139,8 @@
         <entity class="com.company.itpearls.entity.OpenPositionComment">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.SomeFilesAgreement">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

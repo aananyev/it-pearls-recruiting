@@ -401,6 +401,8 @@
         <property name="legalEntityEmployee" view="_local"/>
         <property name="customerCompany" view="_local"/>
         <property name="legalEntityFrom" view="_local"/>
+        <property name="fileAgreement" view="_local"/>
+        <property name="someFilesAgreement" view="_local"/>
     </view>
     <view entity="itpearls_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
     <view entity="itpearls_ExtUser" name="extUser-view" extends="_local">
@@ -501,5 +503,11 @@
     </view>
     <view entity="itpearls_CompanyGroup" name="companyGroup-view" extends="_local">
         <property name="company" view="_local"/>
+    </view>
+    <view entity="itpearls_SomeFilesAgreement" name="someFilesAgreement-view" extends="_local">
+        <property name="laborAgreement" view="_local"/>
+        <property name="fileDescriptor" view="_local"/>
+        <property name="fileOwner" view="_local"/>
+        <property name="fileType" view="_local"/>
     </view>
 </views>

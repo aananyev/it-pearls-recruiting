@@ -29,6 +29,11 @@
             <view>
                 <property name="projectTree" view="_local"/>
                 <property name="projectName"/>
+                <property name="projectDepartment" view="_local">
+                    <property name="companyName" view="_local">
+                        <property name="fileCompanyLogo" view="_local"/>
+                    </property>
+                </property>
             </view>
             <loader id="projectTreeDl">
                 <query><![CDATA[select e from itpearls_Project e
@@ -37,14 +42,23 @@
                         order by e.projectName]]></query>
             </loader>
         </collection>
-        <collection id="projectDepartmentsDc" class="com.company.itpearls.entity.CompanyDepartament" view="_minimal">
+        <collection id="projectDepartmentsDc"
+                    class="com.company.itpearls.entity.CompanyDepartament"
+                    view="_local">
+            <view extends="_local">
+                <property name="companyName" view="_local">
+                    <property name="fileCompanyLogo" view="_local"/>
+                </property>
+            </view>
             <loader id="projectDepartmentsLc">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
                                         where e.departamentRuName not like '%(не использовать)'
                                         order by e.departamentRuName]]></query>
             </loader>
         </collection>
-        <collection id="projectOwnersDc" class="com.company.itpearls.entity.Person" view="person-view">
+        <collection id="projectOwnersDc"
+                    class="com.company.itpearls.entity.Person"
+                    view="person-view">
             <loader id="projectOwnersLc">
                 <query><![CDATA[select e from itpearls_Person e
                                         order by e.secondName, e.firstName]]></query>
