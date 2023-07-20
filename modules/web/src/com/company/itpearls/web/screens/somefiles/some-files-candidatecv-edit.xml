@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/somefiles/some-files-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.somefiles">
+    <data>
+        <instance id="someFilesDc"
+                  class="com.company.itpearls.entity.SomeFilesCandidateCV"
+                  view="someFilesCandidateCV-view">
+            <loader/>
+        </instance>
+    </data>
+    <layout>
+<!--        <suggestionPickerField id="candidateCVSuggestPickerField"
+                               inputPrompt="mainMsg://msgStartInput"
+                               minSearchStringLength="3"
+                               rowspan="1"
+                               colspan="1"
+                               caption="msg://msgCandidate"
+                               width="100%"
+                               required="true"
+                               dataContainer="someFilesDc"
+                               property="candidateCV">
+            <actions>
+                <action id="lookup" type="picker_lookup"/>
+                <action id="open" type="picker_open"/>
+            </actions>
+            <query entityClass="com.company.itpearls.entity.CandidateCV"
+                   escapeValueForLike="true"
+                   searchStringFormat="%$searchString%">
+                select e
+                from itpearls_CandidateCV e
+                where lower(e.candidate.fullName) like lower(:searchString) escape '\'
+                and e.candidate.middleName not like '(не использовать)'
+                and not e.candidate.blockCandidate = true
+                order by e.candidate.secondName, e.candidate.firstName
+            </query>
+        </suggestionPickerField> -->
+    </layout>
+</window>

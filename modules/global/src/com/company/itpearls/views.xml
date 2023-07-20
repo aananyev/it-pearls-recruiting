@@ -186,7 +186,10 @@
         </property>
         <property name="originalFileCV" view="_minimal">
         </property>
-        <property name="someFiles" view="_minimal">
+        <property name="someFiles" view="_local">
+            <property name="candidateCV" view="_local">
+                <property name="candidate" view="_local"/>
+            </property>
         </property>
         <property name="fileImageFace" view="_minimal"/>
         <property name="skillTree" view="_minimal">
@@ -349,8 +352,6 @@
         </property>
         <property name="fileOwner" view="_minimal"/>
         <property name="fileType" view="_minimal"/>
-        <property name="candidateCV" view="_minimal">
-        </property>
     </view>
     <view entity="itpearls_FileType" name="fileType-view" extends="_local"/>
     <view entity="itpearls_SocialNetworkType" name="socialNetworkType-view" extends="_local"/>
@@ -506,6 +507,12 @@
     </view>
     <view entity="itpearls_SomeFilesAgreement" name="someFilesAgreement-view" extends="_local">
         <property name="laborAgreement" view="_local"/>
+        <property name="fileDescriptor" view="_local"/>
+        <property name="fileOwner" view="_local"/>
+        <property name="fileType" view="_local"/>
+    </view>
+    <view entity="itpearls_SomeFilesCandidateCV" name="someFilesCandidateCV-view" extends="_local">
+        <property name="candidateCV" view="_local"/>
         <property name="fileDescriptor" view="_local"/>
         <property name="fileOwner" view="_local"/>
         <property name="fileType" view="_local"/>

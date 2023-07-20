@@ -23,21 +23,6 @@
                 </query>
             </loader>
         </collection>
-        <collection id="candidateCVsDc" class="com.company.itpearls.entity.CandidateCV">
-            <view extends="_local">
-                <property name="candidate" fetch="JOIN" view="_local">
-                    <property name="personPosition" fetch="JOIN" view="_local"/>
-                </property>
-                <property name="resumePosition" fetch="JOIN" view="_local"/>
-                <property name="owner" fetch="JOIN" view="_local"/>
-                <property name="originalFileCV" fetch="BATCH" view="_local"/>
-            </view>
-            <loader id="candidateCVsLc">
-                <query>
-                    <![CDATA[select e from itpearls_CandidateCV e]]>
-                </query>
-            </loader>
-        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -56,14 +41,6 @@
                                    optionsContainer="fileTypesDc"
                                    property="fileType"
                                    required="true"
-                                   width="50%">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="candidateCVField"
-                                   optionsContainer="candidateCVsDc"
-                                   property="candidateCV"
                                    width="50%">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>

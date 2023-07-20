@@ -4107,3 +4107,62 @@ server started
 2023-07-20 14:45:10.242 +04 [96562] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-07-20 14:45:10.406 +04 [96564] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-07-20 14:45:10.459 +04 [96566] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:28:59.289 +04 [98991] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:28:59.303 +04 [98993] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:00.131 +04 [98996] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:00.302 +04 [98998] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:02.908 +04 [99002] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:09.067 +04 [99004] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:09.077 +04 [99006] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:09.085 +04 [99008] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:09.135 +04 [99010] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:25.617 +04 [99033] ERROR:  column "candidate_cv_id" contains null values
+2023-07-20 16:29:25.617 +04 [99033] STATEMENT:  -- update ITPEARLS_SOME_FILES set CANDIDATE_CV_ID = <default_value> where CANDIDATE_CV_ID is null ;
+	alter table ITPEARLS_SOME_FILES alter column CANDIDATE_CV_ID set not null 
+2023-07-20 16:29:57.133 +04 [99037] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:57.142 +04 [99039] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:59.102 +04 [99043] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:29:59.183 +04 [99045] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:30:00.722 +04 [99048] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:30:02.542 +04 [99052] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:30:02.547 +04 [99054] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:30:02.553 +04 [99056] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:30:02.628 +04 [99058] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:48:34.680 +04 [99700] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:48:34.939 +04 [99706] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:48:47.135 +04 [99729] ERROR:  column "candidate_cv_id" contains null values
+2023-07-20 16:48:47.135 +04 [99729] STATEMENT:  -- update ITPEARLS_SOME_FILES set CANDIDATE_CV_ID = <default_value> where CANDIDATE_CV_ID is null ;
+	alter table ITPEARLS_SOME_FILES alter column CANDIDATE_CV_ID set not null 
+2023-07-20 16:49:01.050 +04 [99738] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:49:01.073 +04 [99740] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:49:08.067 +04 [99744] ERROR:  column "candidate_cv_id" contains null values
+2023-07-20 16:49:08.067 +04 [99744] STATEMENT:  -- update ITPEARLS_SOME_FILES set CANDIDATE_CV_ID = <default_value> where CANDIDATE_CV_ID is null ;
+	alter table ITPEARLS_SOME_FILES alter column CANDIDATE_CV_ID set not null 
+2023-07-20 16:50:42.420 +04 [99912] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:50:42.432 +04 [99914] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:56:48.311 +04 [354] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 16:56:48.334 +04 [356] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:14:42.350 +04 [1008] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:14:42.379 +04 [1011] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:28.682 +04 [1139] ERROR:  column "candidate_cv_id" contains null values
+2023-07-20 17:15:28.682 +04 [1139] STATEMENT:  -- update ITPEARLS_SOME_FILES set CANDIDATE_CV_ID = <default_value> where CANDIDATE_CV_ID is null ;
+	alter table ITPEARLS_SOME_FILES alter column CANDIDATE_CV_ID set not null 
+2023-07-20 17:15:36.983 +04 [1205] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:36.995 +04 [1207] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:38.726 +04 [1210] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:38.862 +04 [1212] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:42.197 +04 [1215] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:44.975 +04 [1217] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:44.983 +04 [1219] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:44.991 +04 [1221] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:15:45.147 +04 [1223] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:16:09.798 +04 [1253] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:16:09.811 +04 [1255] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:16:10.067 +04 [1258] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:16:10.269 +04 [1260] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:16:10.323 +04 [1262] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:25:40.423 +04 [1710] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:25:40.438 +04 [1712] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:25:40.751 +04 [1714] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:25:41.028 +04 [1716] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-07-20 17:25:41.162 +04 [1718] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

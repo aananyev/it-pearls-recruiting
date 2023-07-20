@@ -36,7 +36,6 @@
                 <column id="fileDescription"/>
                 <column id="fileOwner"/>
                 <column id="fileType"/>
-                <column id="candidateCV"/>
                 <column id="fileDescriptor.size"/>
             </columns>
             <rowsCount/>

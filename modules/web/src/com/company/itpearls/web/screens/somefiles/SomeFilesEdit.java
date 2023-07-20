@@ -29,8 +29,6 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
     @Inject
     private LookupPickerField<FileType> fileTypeField;
     @Inject
-    private LookupPickerField<CandidateCV> candidateCVField;
-    @Inject
     private DataContext dataContext;
     @Inject
     private FileUploadField fileDescriptorField;
@@ -82,33 +80,7 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
         }
     }
 
-    @Subscribe("fileTypeField")
-    public void onFileTypeFieldValueChange(HasValue.ValueChangeEvent<FileType> event) {
-        if (fileDescriptionField.getValue() == null) {
-            fileDescriptionField.setValue(fileTypeField.getValue().getNameFileType());
-        } else {
-            if (candidateCVField.getValue() != null) {
-                if (fileDescriptionField.getValue().equals(candidateCVField.getValue().getCandidate().getFullName())) {
-                    fileDescriptionField.setValue(fileTypeField.getValue().getNameFileType() + " / " +
-                            fileDescriptionField.getValue());
-                }
-            }
-        }
-    }
 
-    @Subscribe("candidateCVField")
-    public void onCandidateCVFieldValueChange(HasValue.ValueChangeEvent<CandidateCV> event) {
-        if (fileDescriptionField.getValue() == null) {
-            fileDescriptionField.setValue(candidateCVField.getValue().getCandidate().getFullName());
-        } else {
-            if (fileDescriptionField.getValue() != null) {
-                if (fileDescriptionField.getValue().equals(fileTypeField.getValue().getNameFileType())) {
-                    fileDescriptionField.setValue(fileDescriptionField.getValue() + " / " +
-                            candidateCVField.getValue().getCandidate().getFullName());
-                }
-            }
-        }
-    }
 
     public void setParentDataContext(DataContext parentDataContext) {
         dataContext.setParent(parentDataContext);

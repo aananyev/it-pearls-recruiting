@@ -51,5 +51,6 @@
         <class>com.company.itpearls.entity.Currency</class>
         <class>com.company.itpearls.entity.OpenPositionComment</class>
         <class>com.company.itpearls.entity.SomeFilesAgreement</class>
+        <class>com.company.itpearls.entity.SomeFilesCandidateCV</class>
     </persistence-unit>
 </persistence>

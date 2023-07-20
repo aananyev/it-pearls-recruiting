@@ -84,7 +84,7 @@ public class CandidateCV extends StandardEntity {
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "candidateCV")
-    protected List<SomeFiles> someFiles;
+    protected List<SomeFilesCandidateCV> someFiles;
 
 
     @Composition
@@ -102,6 +102,14 @@ public class CandidateCV extends StandardEntity {
 
     @Column(name = "CONTACT_INFO_CHECKED")
     private Boolean contactInfoChecked;
+
+    public void setSomeFiles(List<SomeFilesCandidateCV> someFiles) {
+        this.someFiles = someFiles;
+    }
+
+    public List<SomeFilesCandidateCV> getSomeFiles() {
+        return someFiles;
+    }
 
     public Boolean getContactInfoChecked() {
         return contactInfoChecked;
@@ -125,14 +133,6 @@ public class CandidateCV extends StandardEntity {
 
     public void setCommentLetter(String commentLetter) {
         this.commentLetter = commentLetter;
-    }
-
-    public List<SomeFiles> getSomeFiles() {
-        return someFiles;
-    }
-
-    public void setSomeFiles(List<SomeFiles> someFiles) {
-        this.someFiles = someFiles;
     }
 
     public OpenPosition getToVacancy() {

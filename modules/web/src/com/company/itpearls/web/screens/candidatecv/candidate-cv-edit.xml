@@ -45,9 +45,8 @@
                     <property name="fileImageFace" view="_local"/>
                     <property name="personPosition" view="_local"/>
                 </property>
-                <property name="someFiles" view="_minimal">
+                <property name="someFiles" view="_local">
                     <property name="fileType" view="_minimal"/>
-                    <property name="candidateCV" view="_minimal"/>
                     <property name="fileDescriptor" view="_minimal"/>
                     <property name="fileOwner" view="_minimal"/>
                 </property>
@@ -374,41 +373,6 @@
                     </hbox>
                 </vbox>
             </tab>
-            <tab id="tabFiles"
-                 caption="mainMsg://msgFiles"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 expand="someFilesVbox">
-                <vbox id="someFilesVbox"
-                      spacing="true"
-                      expand="someFilesTable"
-                      width="100%">
-                    <table id="someFilesTable"
-                           height="300px"
-                           width="100%"
-                           dataContainer="someFilesesDc">
-                        <columns>
-                            <column id="fileDescription"/>
-                            <column id="fileType.nameFileType"/>
-                            <column id="fileComment"/>
-                            <column id="candidateCV"/>
-                            <column id="fileDescriptor.size"/>
-                            <column id="fileOwner.name" caption="mainMsg://msgOwner"/>
-                        </columns>
-                        <buttonsPanel>
-                            <button action="someFilesTable.create"/>
-                            <button action="someFilesTable.edit"/>
-                            <button action="someFilesTable.remove"/>
-                        </buttonsPanel>
-                        <actions>
-                            <action id="add" type="add"/>
-                            <action type="create" id="create"/>
-                            <action id="edit" type="edit"/>
-                            <action id="remove" type="remove"/>
-                        </actions>
-                    </table>
-                </vbox>
-            </tab>
             <tab id="tabLetter"
                  caption="msg://msgLetter"
                  margin="true,true,true,true"
@@ -504,6 +468,40 @@
                         </columns>
                         <rowsCount/>
                     </treeDataGrid>
+                </vbox>
+            </tab>
+            <tab id="tabFiles"
+                 caption="mainMsg://msgFiles"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="someFilesVbox">
+                <vbox id="someFilesVbox"
+                      spacing="true"
+                      expand="someFilesTable"
+                      width="100%">
+                    <table id="someFilesTable"
+                           height="300px"
+                           width="100%"
+                           dataContainer="someFilesesDc">
+                        <columns>
+                            <column id="fileDescription"/>
+                            <column id="fileType.nameFileType"/>
+                            <column id="fileComment"/>
+                            <column id="fileDescriptor.size"/>
+                            <column id="fileOwner.name" caption="mainMsg://msgOwner"/>
+                        </columns>
+                        <buttonsPanel>
+                            <button action="someFilesTable.create"/>
+                            <button action="someFilesTable.edit"/>
+                            <button action="someFilesTable.remove"/>
+                        </buttonsPanel>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action type="create" id="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                    </table>
                 </vbox>
             </tab>
         </tabSheet>

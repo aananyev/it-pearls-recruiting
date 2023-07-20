@@ -613,7 +613,9 @@ create table ITPEARLS_SOME_FILES (
     FILE_COMMENT text,
     FILE_OWNER_ID uuid not null,
     FILE_TYPE_ID uuid not null,
-    CANDIDATE_CV_ID uuid,
+    --
+    -- from itpearls_SomeFilesCandidateCV
+    CANDIDATE_CV_ID uuid not null,
     --
     -- from itpearls_SomeFilesAgreement
     LABOR_AGREEMENT_ID uuid,
