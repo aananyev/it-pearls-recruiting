@@ -134,6 +134,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private CollectionContainer<OpenPosition> openPositionsDc;
     private StringBuffer textResumeStringBuffer = null;
+    @Inject
+    private Image candidateFaceDefaultImage;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -295,7 +297,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     selectRenderedImagesFromList.show();
                 }
 
-                setVisibleLogo();
+//                setVisibleLogo();
 
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
                 /*
@@ -454,7 +456,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         setCVRecommendation();
         setLetterRecommendation();
-        setVisibleLogo();
+//        setVisibleLogo();
+        setCandidatePicImage();
     }
 
     @Subscribe
@@ -530,15 +533,30 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         cvResomandation.setValue(text);
     }
 
-    public void setVisibleLogo() {
+/*    public void setVisibleLogo() {
 
-/*        if (candidatePic.getValueSource().getValue() == null) {
+        if (candidatePic.getValueSource().getValue() == null) {
             //candidatePic.setVisible(false);
             //candidateFaceDefaultImage.setVisible(true);
         } else {
             candidatePic.setVisible(true);
             candidateFaceDefaultImage.setVisible(false);
-        } */
+        }
+    } */
+
+    private void setCandidatePicImage() {
+        if (getEditedEntity().getFileImageFace() == null) {
+            candidateFaceDefaultImage.setVisible(true);
+            candidatePic.setVisible(false);
+        } else {
+            candidateFaceDefaultImage.setVisible(false);
+            candidatePic.setVisible(true);
+        }
+    }
+
+    @Subscribe("candidatePic")
+    public void onCandidatePicSourceChange(ResourceView.SourceChangeEvent event) {
+        setCandidatePicImage();
     }
 
     private void setLetterRecommendation() {
