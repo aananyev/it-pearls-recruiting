@@ -232,6 +232,8 @@ create table ITPEARLS_ITERACTION (
     SIGN_PERSONAL_RESERVE_REMOVE boolean,
     SIGN_END_CASE boolean,
     SIGN_FEEDBACK boolean,
+    SIGN_START_PROJECT boolean,
+    SIGN_END_PROJECT boolean,
     OUTSTAFFING_SIGN boolean not null,
     NOTIFICATION_NEED_SEND boolean,
     NOTIFICATION_TYPE integer,

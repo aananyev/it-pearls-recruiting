@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://jobCandidateInProjectBrowse.caption"
+        focusComponent="jobCandidatesTable"
+        messagesPack="com.company.itpearls.web.screens.jobcandidate">
+    <data readOnly="true">
+        <collection id="jobCandidatesDc"
+                    class="com.company.itpearls.entity.JobCandidate">
+            <view extends="_local">
+                <property name="iteractionList" view="_local">
+                    <property name="vacancy" view="_local">
+                        <property name="projectName" view="_local"/>
+                    </property>
+                </property>
+                <property name="personPosition" view="_local"/>
+            </view>
+            <loader id="jobCandidatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e in (select f.candidate from itpearls_IteractionList f where f.candidate = e
+                                    and f.iteractionType.signStartProject = true)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="jobCandidatesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="jobCandidatesTable"
+                dataLoader="jobCandidatesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="jobCandidatesTable"
+                    width="100%"
+                    dataContainer="jobCandidatesDc">
+            <actions/>
+            <columns>
+                <column id="fullName"/>
+                <column id="personPosition"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

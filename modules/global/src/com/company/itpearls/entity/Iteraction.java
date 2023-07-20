@@ -125,6 +125,12 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_FEEDBACK")
     private Boolean signFeedback;
 
+    @Column(name = "SIGN_START_PROJECT")
+    private Boolean signStartProject;
+
+    @Column(name = "SIGN_END_PROJECT")
+    private Boolean signEndProject;
+
     @Column(name = "OUTSTAFFING_SIGN", nullable = false)
     protected Boolean outstaffingSign = false;
 
@@ -145,6 +151,22 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public Boolean getSignEndProject() {
+        return signEndProject;
+    }
+
+    public void setSignEndProject(Boolean signEndProject) {
+        this.signEndProject = signEndProject;
+    }
+
+    public Boolean getSignStartProject() {
+        return signStartProject;
+    }
+
+    public void setSignStartProject(Boolean signStartProject) {
+        this.signStartProject = signStartProject;
+    }
 
     public Boolean getSignFeedback() {
         return signFeedback;
