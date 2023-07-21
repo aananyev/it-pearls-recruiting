@@ -137,9 +137,6 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
     private String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
-    final String brHtml = breakLine[0];
-    final String brTemp = "ШbrШ";
-
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -153,7 +150,6 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
 
     @Subscribe("fileAgreementFileUpload")
     public void onFileAgreementFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        UUID uuidFile = originalFileId;
         FileDescriptor fileDescriptor = originalFileCVDescriptor;
         String textAgreement = "";
 
@@ -167,8 +163,6 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
                         .withDescription("Функция загрузки ." + EXTENSION_DOC + " пока не реализована.")
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .show();
-
-
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOCX)) {
 
                 XWPFDocument doc = new XWPFDocument(inputStream);
@@ -177,20 +171,23 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
             }
         } catch (FileStorageException | IOException | IllegalArgumentException e) {
             notifications.create(Notifications.NotificationType.ERROR)
-                    .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
+                    .withDescription(messageBundle.getMessage("msgErrorRecognition")
+                            + " " + fileDescriptor.getName())
                     .show();
 
             throw new RuntimeException(e);
         }
 
         if (textAgreement != null) {
-            if (agreementTextRichTextArea.getValue() != null) {
+            if (agreementTextRichTextArea.getValue() != null
+                    && !agreementTextRichTextArea.getValue().equals("")) {
                 String finalTextAgreement = textAgreement;
                 dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
                         .withMessage(messageBundle.getMessage("msgReplaceTextAgreement"))
                         .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
                                         .withHandler(e -> {
-                                            agreementTextRichTextArea.setValue(finalTextAgreement.replaceAll("\n", breakLine[0]));
+                                            agreementTextRichTextArea.setValue(
+                                                    finalTextAgreement.replaceAll("\n", breakLine[0]));
                                         }),
                                 new DialogAction(DialogAction.Type.NO))
                         .show();
