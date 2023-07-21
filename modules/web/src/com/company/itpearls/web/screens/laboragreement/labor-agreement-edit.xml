@@ -240,6 +240,8 @@
                  caption="msg://msgAgreementText"
                  expand="agreementTextRichTextArea">
                 <richTextArea id="agreementTextRichTextArea"
+                              dataContainer="laborAgreementDc"
+                              property="agreementText"
                               width="100%"
                               height="100%"/>
                 <upload id="fileAgreementFileUpload"

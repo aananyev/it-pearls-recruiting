@@ -89,7 +89,9 @@
             <property name="toVacancy" view="_minimal"/>
             <property name="owner" view="_minimal"/>
             <property name="fileCV" view="_minimal"/>
-            <property name="someFiles" view="_minimal"/>
+            <property name="someFiles" view="_local">
+                <property name="candidateCV" view="_local"/>
+            </property>
             <property name="fileImageFace" view="_minimal"/>
         </property>
         <property name="skillTree" view="_local"/>

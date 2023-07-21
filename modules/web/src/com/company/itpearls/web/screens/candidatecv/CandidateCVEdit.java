@@ -49,7 +49,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     private static final String NEED_LETTER_NOTIFICATION = "НЕОБХОДИМО ЗАПОЛНИТЬ ШАБЛОН В СОПРОВОДИТЕЛЬНОМ ПИСЬМЕ " +
             "ПО ТРЕБОВАНИЮ ЗАКАЗЧИКА";
-    private static final String WARNING_CAPTION = "ВНИМАНИЕ";
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
@@ -150,7 +149,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                         if (!e.getValue().getTemplateLetter().equals("")) {
                             notifications.create(Notifications.NotificationType.WARNING)
                                     .withDescription(NEED_LETTER_NOTIFICATION)
-                                    .withCaption(WARNING_CAPTION)
+                                    .withCaption(messageBundle.getMessage("msgWarning"))
                                     .withType(Notifications.NotificationType.WARNING)
                                     .show();
 
@@ -328,7 +327,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                  */
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withDescription("Функция загрузки ." + EXTENSION_DOC + " пока не реализована.")
-                        .withCaption(WARNING_CAPTION)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
                         .show();
 
 

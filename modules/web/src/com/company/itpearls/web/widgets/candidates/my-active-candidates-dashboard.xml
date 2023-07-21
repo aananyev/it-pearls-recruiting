@@ -98,8 +98,11 @@
             </loader>
         </collection>
     </data>
-    <layout>
-        <hbox spacing="true">
+    <layout spacing="false"
+            expand="candidatesScrollBox">
+        <hbox spacing="true"
+              width="AUTO"
+              height="AUTO">
             <radioButtonGroup id="candidateRadioButtonGroup"
                               caption="msg://msgCandidateFilter"
                               width="AUTO"
@@ -115,6 +118,7 @@
         <scrollBox id="candidatesScrollBox"
                    spacing="true"
                    width="100%"
+                   align="TOP_LEFT"
                    height="AUTO"
                    orientation="vertical">
         </scrollBox>

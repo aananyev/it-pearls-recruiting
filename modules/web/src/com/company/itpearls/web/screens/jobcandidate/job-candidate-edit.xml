@@ -28,6 +28,7 @@
                         <property name="fileOwner" view="_local"/>
                         <property name="fileDescriptor" view="_local"/>
                         <property name="fileType" view="_local"/>
+                        <property name="candidateCV" view="_local"/>
                     </property>
                     <property name="fileImageFace" view="_local"/>
                 </property>

@@ -64,6 +64,11 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         initRadioButton();
         initCandidatesList();
         initNoCandidatesLabel();
+        initCheckBox();
+    }
+
+    private void initCheckBox() {
+        excludeCheckBox.setValue(true);
     }
 
     @Subscribe("excludeCheckBox")

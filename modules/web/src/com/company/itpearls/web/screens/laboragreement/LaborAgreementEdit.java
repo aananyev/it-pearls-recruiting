@@ -1,20 +1,34 @@
 package com.company.itpearls.web.screens.laboragreement;
 
-import com.company.itpearls.entity.Company;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.LaborAgeementType;
+import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.SelectedCloseAction;
+import com.company.itpearls.web.screens.candidatecv.SelectRenderedImagesFromList;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.core.global.FileStorageException;
+import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.LaborAgreement;
+import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.extractor.POITextExtractor;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import javax.inject.Inject;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.awt.image.RenderedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 @UiController("itpearls_LaborAgreement.edit")
 @UiDescriptor("labor-agreement-edit.xml")
@@ -61,11 +75,19 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
     private DataGrid<LaborAgreement> additionalAgreementDataGrid;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private FileLoader fileLoader;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private RichTextArea agreementTextRichTextArea;
+    @Inject
+    private Dialogs dialogs;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        if(parpetualAgreementCheckBox.getValue() != null) {
-                laborAgreementEndDateField.setEnabled(!parpetualAgreementCheckBox.getValue());
+        if (parpetualAgreementCheckBox.getValue() != null) {
+            laborAgreementEndDateField.setEnabled(!parpetualAgreementCheckBox.getValue());
         }
 
         setAdditionalLaborAgreementDataGrid();
@@ -104,6 +126,95 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
     @Subscribe("laborAgreementTypeField")
     public void onLaborAgreementTypeFieldValueChange(HasValue.ValueChangeEvent<LaborAgeementType> event) {
         setVisibilityFields();
+        getEditedEntity().setEmployeeOrCustomer(event.getValue().getEmployeeOrcompany());
+    }
+
+
+    private UUID originalFileId;
+    private FileDescriptor originalFileCVDescriptor;
+    private FileDescriptor fileDescriptor;
+    private static final String EXTENSION_PDF = "pdf";
+    private static final String EXTENSION_DOC = "doc";
+    private static final String EXTENSION_DOCX = "docx";
+    private String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
+    final String brHtml = breakLine[0];
+    final String brTemp = "ШbrШ";
+
+
+    public FileDescriptor getFileDescriptor() {
+        return fileDescriptor;
+    }
+
+    @Subscribe("fileAgreementFileUpload")
+    public void onFileAgreementFileUploadValueChange(HasValue.ValueChangeEvent<FileDescriptor> event) {
+        originalFileCVDescriptor = event.getValue();
+        originalFileId = event.getValue().getId();
+    }
+
+    @Subscribe("fileAgreementFileUpload")
+    public void onFileAgreementFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        UUID uuidFile = originalFileId;
+        FileDescriptor fileDescriptor = originalFileCVDescriptor;
+        String textAgreement = "";
+
+        try {
+            InputStream inputStream = fileLoader.openStream(fileDescriptor);
+
+            if (fileDescriptor.getExtension().equals(EXTENSION_PDF)) {
+                textAgreement = parsePdfCV(inputStream);
+            } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withDescription("Функция загрузки ." + EXTENSION_DOC + " пока не реализована.")
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .show();
+
+
+            } else if (fileDescriptor.getExtension().equals(EXTENSION_DOCX)) {
+
+                XWPFDocument doc = new XWPFDocument(inputStream);
+                POITextExtractor extractor = new XWPFWordExtractor(doc);
+                textAgreement = extractor.getText().replaceAll("\n", breakLine[0]);
+            }
+        } catch (FileStorageException | IOException | IllegalArgumentException e) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
+                    .show();
+
+            throw new RuntimeException(e);
+        }
+
+        if (textAgreement != null) {
+            if (agreementTextRichTextArea.getValue() != null) {
+                String finalTextAgreement = textAgreement;
+                dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                        .withMessage(messageBundle.getMessage("msgReplaceTextAgreement"))
+                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                        .withHandler(e -> {
+                                            agreementTextRichTextArea.setValue(finalTextAgreement.replaceAll("\n", breakLine[0]));
+                                        }),
+                                new DialogAction(DialogAction.Type.NO))
+                        .show();
+            }
+        }
+    }
+
+    private String parsePdfCV(InputStream inputStream) {
+        String parsedText = "";
+
+        try {
+            RandomAccessRead rad = new RandomAccessReadBuffer(inputStream);
+
+            PDFParser parser = new PDFParser(rad);
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            PDDocument pdDoc = parser.parse();
+            parsedText = pdfStripper.getText(pdDoc).replace("\n", "<br>");
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return null;
+        }
+
+        return parsedText;
     }
 
     private void setVisibilityFields() {
@@ -321,8 +432,6 @@ public class LaborAgreementEdit extends StandardEditor<LaborAgreement> {
                 break;
         }
     } */
-
-
 
 
 }
