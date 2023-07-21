@@ -12,6 +12,7 @@
                     <property name="vacancy" view="_local">
                         <property name="projectName" view="_local"/>
                     </property>
+                    <property name="iteractionType" view="_local"/>
                 </property>
                 <property name="personPosition" view="_local"/>
             </view>
@@ -23,6 +24,16 @@
                             <c:jpql>
                                 <c:where>e in (select f.candidate from itpearls_IteractionList f where f.candidate = e
                                     and f.iteractionType.signStartProject = true)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>not e in (select g.candidate from itpearls_IteractionList g where g.candidate = e
+                                    and g.iteractionType.signEndProject = true)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select k.candidate from itpearls_IteractionList k where k.candidate = e
+                                    and k.vacancy.registrationForWork = 0)
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -46,7 +57,8 @@
             <actions/>
             <columns>
                 <column id="fullName"/>
-                <column id="personPosition"/>
+                <column id="personPosition" collapsed="true"/>
+                <column id="project" generator="projectColumnGenerator" collapsed="false"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

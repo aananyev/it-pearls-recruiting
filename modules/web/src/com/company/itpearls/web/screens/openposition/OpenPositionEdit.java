@@ -15,7 +15,6 @@ import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
-import com.haulmont.cuba.gui.builders.EditorBuilder;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
@@ -24,10 +23,8 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import com.vaadin.server.FontAwesome;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
-import sun.font.TrueTypeFont;
 
 import javax.inject.Inject;
 import javax.inject.Named;
