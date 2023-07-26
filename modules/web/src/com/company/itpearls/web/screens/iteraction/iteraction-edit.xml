@@ -82,6 +82,10 @@ order by e.number]]>
                     <vbox id="signsVBox"
                           height="AUTO"
                           width="AUTO">
+                        <checkBox id="signEndProcessVacancyClosedCheckBox"
+                                  dataContainer="iteractionDc"
+                                  property="signEndProcessVacancyClosed"
+                                  caption="msg://msgSignEndProcessVacancyClosed"/>
                         <checkBox id="signStartProject"
                                   caption="msg://msgSignStartProject"
                                   dataContainer="iteractionDc"

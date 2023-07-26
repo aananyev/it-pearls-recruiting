@@ -131,6 +131,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_END_PROJECT")
     private Boolean signEndProject;
 
+    @Column(name = "SIGN_END_PROCESS_VACANCY_CLOSED")
+    private Boolean signEndProcessVacancyClosed;
+
     @Column(name = "OUTSTAFFING_SIGN", nullable = false)
     protected Boolean outstaffingSign = false;
 
@@ -151,6 +154,14 @@ public class Iteraction extends StandardEntity {
 
     @Column(name = "STATISTICS_")
     private Boolean statistics;
+
+    public Boolean getSignEndProcessVacancyClosed() {
+        return signEndProcessVacancyClosed;
+    }
+
+    public void setSignEndProcessVacancyClosed(Boolean signEndProcessVacancyClosed) {
+        this.signEndProcessVacancyClosed = signEndProcessVacancyClosed;
+    }
 
     public Boolean getSignEndProject() {
         return signEndProject;

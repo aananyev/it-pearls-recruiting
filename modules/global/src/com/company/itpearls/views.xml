@@ -113,6 +113,7 @@
             <property name="recrutier" view="_local">
                 <property name="group" view="_local"/>
             </property>
+            <property name="iteractionType" view="_local"/>
         </property>
     </view>
     <view entity="itpearls_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
