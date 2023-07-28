@@ -38,8 +38,6 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     @Inject
     private DataManager dataManager;
     @Inject
-    private CollectionContainer<IteractionList> iteractionListsDc;
-    @Inject
     private Label<String> vacancyNameLabel;
     @Inject
     private Label<String> recrutierLabel;

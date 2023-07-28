@@ -12,7 +12,7 @@
                 <property name="iteractionList" view="_local">
                     <property name="recrutier" view="_local">
                         <property name="group" view="_local"/>
-                    </property>
+                    </property>)
                     <property name="iteractionType" view="_local"/>
                     <property name="vacancy" view="_local">
                         <property name="owner" view="_local"/>

@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.SendNotificationsService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
@@ -54,6 +55,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private StarsAndOtherService starsAndOtherService;
     @Inject
     private Metadata metadata;
+    @Inject
+    private SendNotificationsService sendNotificationsService;
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -1106,6 +1109,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 : messageBundle.getMessage("msgOpenVacancy"));
 
         retButton.addClickListener(e -> {
+            removeCandidatesWithConsideration();
             openCloseButtonClickListener(entity, retButton);
         });
 
@@ -2665,11 +2669,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (openPositionsTable.getSingleSelected() != null) {
             removeCandidatesWithConsideration();
             openCloseButtonClickListener(openPositionsTable.getSingleSelected(), openCloseButton);
+            openPositionsTable.repaint();
         }
     }
 
     private void removeCandidatesWithConsideration() {
-        if (!openPositionsTable.getSingleSelected().getOpenClose()) {
+        OpenPosition closeVacancy = openPositionsTable.getSingleSelected();
+
+        if (!closeVacancy.getOpenClose()) {
             final String QUERY_CANDIDATES_FROM_CONSIDERATION = "select e from itpearls_JobCandidate e " +
                     "where e.iteractionList in (" +
                     "select f from itpearls_IteractionList f " +
@@ -2677,7 +2684,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
                     .query(QUERY_CANDIDATES_FROM_CONSIDERATION)
-                    .parameter("vacancy", openPositionsTable.getSingleSelected())
+                    .parameter("vacancy", closeVacancy)
                     .view("jobCandidate-view")
                     .list();
 
@@ -2688,7 +2695,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 Boolean endCase = false;
 
                 for (IteractionList il : jc.getIteractionList()) {
-                    if (il.getVacancy().equals(openPositionsTable.getSingleSelected())) {
+                    if (il.getVacancy().equals(closeVacancy)) {
                         if (!sendCV) {
                             if (il.getIteractionType().getSignSendToClient() != null) {
                                 if (il.getIteractionType().getSignSendToClient()) {
@@ -2717,73 +2724,78 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     messageBundle.getMessage("msgDialogMessageCandidateConsideration"));
             dialogMessage.append(" ");
 
-            for (JobCandidate jc : jobCandidatesNotEnded) {
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withType(Notifications.NotificationType.TRAY)
-                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                        .withCaption(jc.getFullName())
-                        .withDescription("В рассмотрении сейчас на вакансии "
-                                + openPositionsTable.getSingleSelected().getVacansyName())
-                        .show();
-                dialogMessage.append(jc.getFullName());
-                dialogMessage.append(", ");
-            }
+            if (jobCandidatesNotEnded.size() > 0) {
+                for (JobCandidate jc : jobCandidatesNotEnded) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withType(Notifications.NotificationType.TRAY)
+                            .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                            .withCaption(jc.getFullName())
+                            .withHideDelayMs(15000)
+                            .withDescription(messageBundle.getMessage("msgInConsideration") + " "
+                                    + closeVacancy.getVacansyName())
+                            .show();
+                    dialogMessage.append(jc.getFullName());
+                    dialogMessage.append(", ");
+                }
 
-            dialogMessage.delete(dialogMessage.length() - 2, dialogMessage.length());
-            dialogMessage.append(".");
-            dialogMessage.append(messageBundle.getMessage("msgDeleteFromConsideration"));
+                dialogMessage.delete(dialogMessage.length() - 2, dialogMessage.length());
+                dialogMessage.append(". ");
+                dialogMessage.append(messageBundle.getMessage("msgDeleteFromConsideration"));
 
-            dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
-                    .withMessage(dialogMessage.toString())
-                    .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withType(Dialogs.MessageType.CONFIRMATION)
-                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                    .withHandler(e -> {
-                                        BigDecimal iteractionMaxNumber = dataManager
-                                                .loadValue("select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
-                                                .one();
-
-                                        for (JobCandidate jc : jobCandidatesNotEnded) {
-                                            IteractionList iteractionList = metadata.create(IteractionList.class);
-
-                                            iteractionList.setVacancy(openPositionsTable.getSingleSelected());
-                                            iteractionList.setCandidate(jc);
-                                            iteractionList.setDateIteraction(new Date());
-                                            iteractionList.setRating(4);
-                                            iteractionList.setComment(messageBundle.getMessage("msgVacancyCloded"));
-                                            iteractionList.setRecrutierName(userSession.getUser().getName());
-                                            iteractionList.setRecrutier((ExtUser) userSession.getUser());
-                                            iteractionMaxNumber.add(BigDecimal.ONE);
-                                            iteractionList.setNumberIteraction(iteractionMaxNumber);
-
+                dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                        .withMessage(dialogMessage.toString())
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withType(Dialogs.MessageType.CONFIRMATION)
+                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                        .withHandler(e -> {
                                             Iteraction iteractionSignEndProcessVacancyClosed = null;
+
+                                            BigDecimal iteractionMaxNumber = dataManager
+                                                    .loadValue("select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
+                                                    .one();
 
                                             try {
                                                 iteractionSignEndProcessVacancyClosed = dataManager.load(Iteraction.class)
                                                         .query("select e from itpearls_Iteraction e where e.signEndProcessVacancyClosed = true")
                                                         .one();
-                                            } catch (NoResultException exception) {
-                                                exception.printStackTrace();
-                                            }
-
-                                            if (iteractionSignEndProcessVacancyClosed == null) {
+                                            } catch (IllegalStateException exception) {
                                                 notifications.create(Notifications.NotificationType.ERROR)
                                                         .withCaption(messageBundle.getMessage("msgError"))
                                                         .withDescription(messageBundle.getMessage("msgDoNotSignEndProcessVacancyClosed"))
                                                         .withType(Notifications.NotificationType.ERROR)
                                                         .show();
 
-                                                break;
+                                                exception.printStackTrace();
                                             }
 
-                                            iteractionList.setIteractionType(iteractionSignEndProcessVacancyClosed);
+                                            if (iteractionSignEndProcessVacancyClosed != null) {
 
-                                            jc.getIteractionList().add(iteractionList);
-                                            dataManager.commit(jc);
-                                        }
-                                    }),
-                            new DialogAction(DialogAction.Type.NO))
-                    .show();
+                                                for (JobCandidate jc : jobCandidatesNotEnded) {
+                                                    IteractionList iteractionList = metadata.create(IteractionList.class);
+
+                                                    iteractionList.setVacancy(closeVacancy);
+                                                    iteractionList.setCandidate(jc);
+                                                    iteractionList.setDateIteraction(new Date());
+                                                    iteractionList.setRating(4);
+                                                    iteractionList.setComment(messageBundle.getMessage("msgVacancyCloded"));
+                                                    iteractionList.setRecrutierName(userSession.getUser().getName());
+                                                    iteractionList.setRecrutier((ExtUser) userSession.getUser());
+                                                    iteractionMaxNumber.add(BigDecimal.ONE);
+                                                    iteractionList.setNumberIteraction(iteractionMaxNumber);
+                                                    iteractionList.setIteractionType(iteractionSignEndProcessVacancyClosed);
+
+                                                    jc.getIteractionList().add(iteractionList);
+                                                    dataManager.commit(jc);
+                                                }
+
+                                                sendNotificationsService.SendEmail(
+                                                        messageBundle.getMessage("msgEmailSubjCloseOfVacancy"),
+                                                        dialogMessage.toString());
+                                            }
+                                        }),
+                                new DialogAction(DialogAction.Type.NO))
+                        .show();
+            }
         }
     }
 
