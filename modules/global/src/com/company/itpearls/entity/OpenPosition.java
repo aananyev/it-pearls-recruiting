@@ -219,6 +219,19 @@ public class OpenPosition extends StandardEntity {
     @JoinColumn(name = "OWNER_ID")
     private User owner;
 
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "openPosition")
+    private List<SomeFilesOpenPosition> someFiles;
+
+    public List<SomeFilesOpenPosition> getSomeFiles() {
+        return someFiles;
+    }
+
+    public void setSomeFiles(List<SomeFilesOpenPosition> someFiles) {
+        this.someFiles = someFiles;
+    }
+
     public List<OpenPositionComment> getOpenPositionComments() {
         return openPositionComments;
     }

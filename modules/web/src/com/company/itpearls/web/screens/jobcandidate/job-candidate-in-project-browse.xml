@@ -27,11 +27,6 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>not e in (select g.candidate from itpearls_IteractionList g where g.candidate = e
-                                    and g.iteractionType.signEndProject = true)
-                                </c:where>
-                            </c:jpql>
-                            <c:jpql>
                                 <c:where>e in (select k.candidate from itpearls_IteractionList k where k.candidate = e
                                     and k.vacancy.registrationForWork = 0)
                                 </c:where>
@@ -51,6 +46,9 @@
                 dataLoader="jobCandidatesDl">
             <properties include=".*"/>
         </filter>
+        <radioButtonGroup id="selectTypeOfWorksRadioButton"
+                          orientation="horizontal"
+                          caption="msg://msgSelectTypeOfWorks"/>
         <groupTable id="jobCandidatesTable"
                     width="100%"
                     dataContainer="jobCandidatesDc">

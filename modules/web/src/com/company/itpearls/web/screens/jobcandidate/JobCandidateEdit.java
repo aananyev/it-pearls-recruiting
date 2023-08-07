@@ -628,6 +628,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onAfterClose(AfterCloseEvent event) {
         // чтоб после закрытия не возникало
         jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
+            jobCandidateCandidateCvTable.repaint();
         });
     }
 
@@ -825,6 +826,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onBeforeClose1(BeforeCloseEvent event) {
         // удалить листенер изменения, чтобы  не пугало сообщение о ненадйенности новых контактов в резюмехе
         jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
+            jobCandidateCandidateCvTable.repaint();
         });
     }
 
@@ -2463,16 +2465,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                                 getEditedEntity().getSocialNetwork().add(socialNetworkURL);
                             } else {
-                                notifications.create(Notifications.NotificationType.ERROR)
-                                        .withType(Notifications.NotificationType.ERROR)
-                                        .withHideDelayMs(15000)
-                                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                                        .withCaption(messageBundle.getMessage("msgError"))
-                                        .withDescription(messageBundle
-                                                .getMessage("msgNotFoundOtherSoclNetworkType")
-                                                + " "
-                                                + messageSocial.get(entry.getKey()).get(2))
-                                        .show();
+                                String messageSoc = "";
+                                try {
+                                        messageSoc = messageSocial.get(entry.getKey()).get(2);
+                                } catch (IndexOutOfBoundsException e) {
+                                    e.getStackTrace();
+                                } finally {
+                                    notifications.create(Notifications.NotificationType.ERROR)
+                                            .withType(Notifications.NotificationType.ERROR)
+                                            .withHideDelayMs(15000)
+                                            .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                                            .withCaption(messageBundle.getMessage("msgError"))
+                                            .withDescription(messageBundle
+                                                    .getMessage("msgNotFoundOtherSoclNetworkType")
+                                                    + " "
+                                                    + messageSoc)
+                                            .show();
+                                }
                             }
                         }
 

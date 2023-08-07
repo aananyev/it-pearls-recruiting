@@ -145,5 +145,8 @@
         <entity class="com.company.itpearls.entity.SomeFilesCandidateCV">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.SomeFilesOpenPosition">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

@@ -520,4 +520,9 @@
         <property name="fileOwner" view="_local"/>
         <property name="fileType" view="_local"/>
     </view>
+    <view entity="itpearls_SomeFilesOpenPosition" name="someFilesOpenPosition-view" extends="_local">
+        <property name="openPosition" view="_local"/>
+        <property name="fileDescriptor" view="_local"/>
+        <property name="fileOwner" view="_local"/>
+    </view>
 </views>

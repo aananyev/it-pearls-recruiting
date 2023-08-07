@@ -36,6 +36,44 @@ else
 	echo "\033[31mБаза данных не запущена: $?"
 fi
 
+echo "\033[37mУдаление старой базы ... \c"
+rm -rf *
+if [ $? -eq 0 ]; then
+        echo "\033[32mOK"
+else
+        echo "\033[31mFailure, exit status: $?"
+fi
+
+echo "\033[37mЗагрузка базы с сервера ... "
+pg_basebackup -P -h $db_server -D . -U replica  >>$LOG
+if [ $? -eq 0 ]; then
+        echo "\033[32mOK"
+else
+        echo "\033[37mВосстановить базу из архива $new_archive ...\c"
+        tar xvf $new_archive 1>/dev/null 2>$LOG
+
+        if [ $? -eq 0 ]; then
+                echo "\033[32mOK"
+
+                echo "\033[37mЗапуск старой базы ...\c"
+                pg_ctl start -D . >> $LOG
+
+                if [ $? -eq 0 ]; then
+                        echo "\033[32mOK"
+                fi
+
+                echo "\033[37mВосстановить исходные архивы ...\c"
+                rm $new_archive
+                mv $old_archive $new_archive
+                if [ $? -eq 0 ]; then
+                        echo "\033[32mOK"
+                fi
+        fi
+
+        cd $CWD
+        exit 1
+fi
+
 echo "\033[37mАрхивация старой базы ... "
 rm $old_archive 2>>$LOG 1>/dev/null
 mv $new_archive $old_archive 2>>$LOG 1>/dev/null
@@ -45,44 +83,6 @@ if [ $? -eq 0 ]; then
 	echo "\033[32mOK"
 else
 	echo "\033[31mFailure, exit status: $?"
-	exit 1
-fi
-
-echo "\033[37mУдаление старой базы ... \c"
-rm -rf *
-if [ $? -eq 0 ]; then
-        echo "\033[32mOK"
-else
-        echo "\033[31mFailure, exit status: $?"
-fi
-echo "\033[37mЗагрузка базы с сервера ... "
-pg_basebackup -P -h $db_server -D . -U replica  >>$LOG
-if [ $? -eq 0 ]; then
-	echo "\033[32mOK"
-else
-	echo "\033[31mОшибка загрузки базы: $? Проверьте интернет или настройки сервера баз данных $db_server"
-	echo "\033[37mВосстановить базу из архива $new_archive ...\c"
-	tar xvf $new_archive 1>/dev/null 2>$LOG
-
-	if [ $? -eq 0 ]; then
-		echo "\033[32mOK"
-
-		echo "\033[37mЗапуск старой базы ...\c"
-		pg_ctl start -D . >> $LOG
-
-                if [ $? -eq 0 ]; then
-                        echo "\033[32mOK"
-                fi
-
-		echo "\033[37mВосстановить исходные архивы ...\c"
-		rm $new_archive
-		mv $old_archive $new_archive
-		if [ $? -eq 0 ]; then
-			echo "\033[32mOK"
-		fi
-	fi
-
-	cd $CWD
 	exit 1
 fi
 
