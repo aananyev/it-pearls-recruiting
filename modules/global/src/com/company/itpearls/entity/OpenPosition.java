@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-@NamePattern("%s|vacansyName")
+@NamePattern("%s %s|vacansyID,vacansyName")
 @Table(name = "ITPEARLS_OPEN_POSITION", indexes = {
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_OPEN_CLOSE", columnList = "OPEN_CLOSE"),
         @Index(name = "IDX_ITPEARLS_OPEN_POSITION_PRIORITY", columnList = "PRIORITY"),

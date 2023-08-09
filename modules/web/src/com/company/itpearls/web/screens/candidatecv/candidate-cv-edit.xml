@@ -57,20 +57,6 @@
             <collection id="skillTreesDc"
                         property="skillTree"/>
         </instance>
-        <!--        <collection id="candidatesDc"
-                            class="com.company.itpearls.entity.JobCandidate">
-                    <view extends="_local">
-                        <property name="fullName"/>
-                        <property name="personPosition"
-                                  view="_local"/>
-                    </view>
-                    <loader id="candidatesLc"
-                            cacheable="true">
-                        <query>
-                            <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
-                        </query>
-                    </loader>
-                </collection> -->
         <collection id="resumePositionsDc"
                     class="com.company.itpearls.entity.Position"
                     view="_local">

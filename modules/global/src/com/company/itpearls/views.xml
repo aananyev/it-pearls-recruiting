@@ -524,5 +524,6 @@
         <property name="openPosition" view="_local"/>
         <property name="fileDescriptor" view="_local"/>
         <property name="fileOwner" view="_local"/>
+        <property name="fileType" view="_local"/>
     </view>
 </views>

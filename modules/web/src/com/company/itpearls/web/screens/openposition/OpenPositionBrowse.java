@@ -2282,7 +2282,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retStr;
     }
 
-    String more_10_msg = "<font color=red>>10</font>";
+    String more_10_msg = "<font color=red>10</font>";
     String clarification_required = "<font color=blue>???</font>";
 
     @Install(to = "openPositionsTable.numberPosition", subject = "columnGenerator")
@@ -2300,6 +2300,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         label.setHeightAuto();
         label.setAlignment(Component.Alignment.MIDDLE_LEFT);
         label.setStyleName("table-wordwrap");
+        label.setHtmlEnabled(true);
 
         if (event.getItem().getMore10NumberPosition() == null) {
             if (event.getItem().getNumberPosition() != null) {

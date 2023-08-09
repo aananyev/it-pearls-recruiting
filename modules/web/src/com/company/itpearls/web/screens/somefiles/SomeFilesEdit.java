@@ -41,7 +41,7 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
 
     @Subscribe("fileDescriptorField")
     public void onFileDescriptorFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        File file = fileUploadingAPI.getFile(fileDescriptorField.getFileId());
+        /* File file = fileUploadingAPI.getFile(fileDescriptorField.getFileId());
 
         if (file != null) {
             notifications.create()
@@ -61,7 +61,7 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
 
         notifications.create()
                 .withCaption("Загружен файл: " + fileDescriptorField.getFileName())
-                .show();
+                .show(); */
 
     }
 
@@ -79,8 +79,6 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
             getEditedEntity().setFileOwner(userSessionSource.getUserSession().getUser());
         }
     }
-
-
 
     public void setParentDataContext(DataContext parentDataContext) {
         dataContext.setParent(parentDataContext);

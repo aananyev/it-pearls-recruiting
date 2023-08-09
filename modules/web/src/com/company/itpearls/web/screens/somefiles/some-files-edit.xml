@@ -47,7 +47,7 @@
                     </actions>
                 </lookupPickerField>
                 <upload id="fileDescriptorField"
-                        fileStoragePutMode="MANUAL"
+                        fileStoragePutMode="IMMEDIATE"
                         dataContainer="someFilesDc"
                         property="fileDescriptor"
                         width="100%"
