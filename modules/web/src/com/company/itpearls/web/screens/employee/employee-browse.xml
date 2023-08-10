@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://employeeBrowse.caption"
+        focusComponent="employeesTable"
+        messagesPack="com.company.itpearls.web.screens.employee">
+    <data readOnly="true">
+        <collection id="employeesDc"
+                    class="com.company.itpearls.entity.Employee">
+            <view extends="_local">
+                <property name="jobCandidate" view="_local">
+                    <property name="personPosition" view="_local"/>
+                    <property name="iteractionList" view="_local"/>
+                    <property name="laborAgreement" view="_local">
+                        <property name="jobCandidate" view="_local"/>
+                        <property name="legalEntityEmployee" view="_local"/>
+                        <property name="customerCompany" view="_local"/>
+                        <property name="additionalLaborAgreement" view="_local"/>
+                        <property name="legalEntityFrom" view="_local"/>
+                        <property name="company" view="_local"/>
+                        <property name="laborAgreementType" view="_local"/>
+                        <property name="openPositions" view="_local"/>
+                        <property name="fileAgreement" view="_local"/>
+                        <property name="someFilesAgreement" view="_local"/>
+                    </property>
+                </property>
+                <property name="openPosition" view="_local"/>
+                <property name="workStatus" view="_local"/>
+                <property name="laborAgreement" view="_local">
+                    <property name="jobCandidate" view="_local"/>
+                    <property name="legalEntityEmployee" view="_local"/>
+                    <property name="customerCompany" view="_local"/>
+                    <property name="additionalLaborAgreement" view="_local"/>
+                    <property name="legalEntityFrom" view="_local"/>
+                    <property name="company" view="_local"/>
+                    <property name="laborAgreementType" view="_local"/>
+                </property>
+            </view>
+            <loader id="employeesDl">
+                <query>
+                    <![CDATA[select e from itpearls_Employee e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="employeesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="employeesTable"
+                dataLoader="employeesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupBox stylename="light"
+                  caption="msg://msgFilter"
+                  width="100%"
+                  collapsable="true"
+                  spacing="true"
+                  height="AUTO"
+                  orientation="vertical">
+            <radioButtonGroup id="recrutingOrAutstaffingRadioButtonGroup"
+                              orientation="horizontal"
+                              caption="msg://msgrecrutingOrAutstaffingRadioButtonGroup"/>
+            <radioButtonGroup id="selectTypeOfWorksRadioButton"
+                              orientation="horizontal"
+                              caption="msg://msgSelectTypeOfWorks"/>
+        </groupBox>
+        <groupTable id="employeesTable"
+                    width="100%"
+                    dataContainer="employeesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="jobCandidate"/>
+                <column id="workStatus"/>
+                <column id="openPosition"/>
+                <column id="employeeDate"/>
+                <column id="dissmisalDate"/>
+                <column id="outstaffingCost"/>
+                <column id="salary"/>
+                <column id="laborAgreement"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="employeesTable.create"/>
+                <button id="editBtn" action="employeesTable.edit"/>
+                <button id="removeBtn" action="employeesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

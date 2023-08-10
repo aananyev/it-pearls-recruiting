@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://employeeEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.employee">
+    <data>
+        <instance id="employeeDc"
+                  class="com.company.itpearls.entity.Employee">
+            <view extends="_local">
+                <property name="jobCandidate" view="_local">
+                    <property name="iteractionList" view="_local"/>
+                    <property name="laborAgreement" view="_local">
+                        <property name="jobCandidate" view="_local"/>
+                        <property name="legalEntityEmployee" view="_local"/>
+                        <property name="customerCompany" view="_local"/>
+                        <property name="additionalLaborAgreement" view="_local"/>
+                        <property name="legalEntityFrom" view="_local"/>
+                        <property name="company" view="_local"/>
+                        <property name="laborAgreementType" view="_local"/>
+                        <property name="openPositions" view="_local"/>
+                        <property name="fileAgreement" view="_local"/>
+                        <property name="someFilesAgreement" view="_local"/>
+                    </property>
+                </property>
+                <property name="openPosition" view="_local"/>
+                <property name="laborAgreement" view="_local">
+                    <property name="jobCandidate" view="_local"/>
+                    <property name="legalEntityEmployee" view="_local"/>
+                    <property name="customerCompany" view="_local"/>
+                    <property name="additionalLaborAgreement" view="_local"/>
+                    <property name="legalEntityFrom" view="_local"/>
+                    <property name="company" view="_local"/>
+                    <property name="laborAgreementType" view="_local"/>
+                </property>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+            <loader id="jobCandidatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="_minimal">
+            <loader id="openPositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="laborAgreementsDc" class="com.company.itpearls.entity.LaborAgreement" view="_minimal">
+            <loader id="laborAgreementsDl">
+                <query>
+                    <![CDATA[select e from itpearls_LaborAgreement e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="employeeDc">
+            <column width="350px">
+                <lookupPickerField id="jobCandidateField" optionsContainer="jobCandidatesDc" property="jobCandidate"/>
+                <lookupPickerField id="openPositionField" optionsContainer="openPositionsDc" property="openPosition"/>
+                <dateField id="employeeDateField" property="employeeDate"/>
+                <dateField id="dissmisalDateField" property="dissmisalDate"/>
+                <textField id="outstaffingCostField" property="outstaffingCost"/>
+                <textField id="salaryField" property="salary"/>
+                <lookupPickerField id="laborAgreementField" optionsContainer="laborAgreementsDc"
+                                   property="laborAgreement"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>
