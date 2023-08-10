@@ -202,11 +202,8 @@
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">
-            <property name="number"/>
-            <property name="iterationName"/>
             <property name="mandatoryIteraction"/>
             <property name="iteractionTree" view="_minimal">
-                <property name="number"/>
             </property>
             <property name="pic"/>
             <property name="callButtonText"/>
@@ -217,6 +214,7 @@
             <property name="addField"/>
             <property name="addCaption"/>
         </property>
+        <property name="workStatus" view="employeeWorkStatus-view"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
         <property name="vacancy" view="_local">
@@ -226,6 +224,9 @@
             <property name="owner" view="_local"/>
         </property>
         <property name="iteractionType" view="_local">
+            <property name="workStatus" view="_minimal">
+                <property name="workStatusName"/>
+            </property>
         </property>
         <property name="recrutier" view="_local">
             <property name="group" view="_local"/>
@@ -526,4 +527,11 @@
         <property name="fileOwner" view="_local"/>
         <property name="fileType" view="_local"/>
     </view>
+    <view entity="itpearls_Employee" name="employee-view" extends="_base">
+        <property name="jobCandidate" view="_base"/>
+        <property name="openPosition" view="_base"/>
+        <property name="laborAgreement" view="_base"/>
+        <property name="workStatus" view="_base"/>
+    </view>
+    <view entity="itpearls_EmployeeWorkStatus" name="employeeWorkStatus-view" extends="_base"/>
 </views>

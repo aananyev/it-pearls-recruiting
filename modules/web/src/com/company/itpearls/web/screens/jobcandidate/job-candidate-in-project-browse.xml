@@ -2,61 +2,57 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://jobCandidateInProjectBrowse.caption"
-        focusComponent="jobCandidatesTable"
+        focusComponent="employeeTable"
         messagesPack="com.company.itpearls.web.screens.jobcandidate">
     <data readOnly="true">
-        <collection id="jobCandidatesDc"
-                    class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_local">
-                <property name="iteractionList" view="_local">
-                    <property name="vacancy" view="_local">
-                        <property name="projectName" view="_local"/>
-                    </property>
-                    <property name="iteractionType" view="_local"/>
-                </property>
-                <property name="personPosition" view="_local"/>
+        <collection id="employeeDc"
+                    class="com.company.itpearls.entity.Employee">
+            <view extends="employee-view">
             </view>
-            <loader id="jobCandidatesDl">
+            <loader id="employeeDl">
                 <query>
-                    <![CDATA[select e from itpearls_JobCandidate e order by e.fullName]]>
-                    <condition>
-                        <and>
-                            <c:jpql>
-                                <c:where>e in (select f.candidate from itpearls_IteractionList f where f.candidate = e
-                                    and f.iteractionType.signStartProject = true)
-                                </c:where>
-                            </c:jpql>
-                            <c:jpql>
-                                <c:where>e in (select k.candidate from itpearls_IteractionList k where k.candidate = e
-                                    and k.vacancy.registrationForWork = 0)
-                                </c:where>
-                            </c:jpql>
-                        </and>
-                    </condition>
+                    <![CDATA[select e from itpearls_Employee e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="jobCandidatesTable"
+    <layout expand="employeeTable"
             spacing="true">
         <filter id="filter"
-                applyTo="jobCandidatesTable"
-                dataLoader="jobCandidatesDl">
+                applyTo="employeeTable"
+                dataLoader="employeeDl">
             <properties include=".*"/>
         </filter>
-        <radioButtonGroup id="selectTypeOfWorksRadioButton"
-                          orientation="horizontal"
-                          caption="msg://msgSelectTypeOfWorks"/>
-        <groupTable id="jobCandidatesTable"
+        <groupBox stylename="light"
+                  caption="msg://msgFilter"
+                  width="100%"
+                  collapsable="true"
+                  spacing="true"
+                  height="AUTO"
+                  orientation="vertical">
+            <radioButtonGroup id="recrutingOrAutstaffingRadioButtonGroup"
+                              orientation="horizontal"
+                              caption="msg://msgrecrutingOrAutstaffingRadioButtonGroup"/>
+            <radioButtonGroup id="selectTypeOfWorksRadioButton"
+                              orientation="horizontal"
+                              caption="msg://msgSelectTypeOfWorks"/>
+        </groupBox>
+        <groupTable id="employeeTable"
                     width="100%"
-                    dataContainer="jobCandidatesDc">
+                    dataContainer="employeeDc">
             <actions/>
             <columns>
-                <column id="fullName"/>
-                <column id="personPosition" collapsed="true"/>
-                <column id="project" generator="projectColumnGenerator" collapsed="false"/>
+                <column id="jobCandidate.fullName"/>
+                <column id="jobCandidate.personPosition.positionRuName"
+                        collapsed="false"/>
+                <column id="project"
+                        generator="projectColumnGenerator"
+                        collapsed="false"/>
+                <column id="employeeDate"
+                        caption="msg://msgDateOfEmployment"/>
+                <column id="dissmisalDate"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

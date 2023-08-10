@@ -155,6 +155,19 @@ public class Iteraction extends StandardEntity {
     @Column(name = "STATISTICS_")
     private Boolean statistics;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "WORK_STATUS_ID")
+    private EmployeeWorkStatus workStatus;
+
+    public EmployeeWorkStatus getWorkStatus() {
+        return workStatus;
+    }
+
+    public void setWorkStatus(EmployeeWorkStatus workStatus) {
+        this.workStatus = workStatus;
+    }
+
     public Boolean getSignEndProcessVacancyClosed() {
         return signEndProcessVacancyClosed;
     }

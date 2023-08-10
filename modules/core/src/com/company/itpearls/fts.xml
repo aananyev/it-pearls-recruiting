@@ -148,5 +148,11 @@
         <entity class="com.company.itpearls.entity.SomeFilesOpenPosition">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.Employee">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.EmployeeWorkStatus">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

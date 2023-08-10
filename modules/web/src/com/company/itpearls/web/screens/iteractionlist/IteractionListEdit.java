@@ -139,6 +139,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private CollectionContainer<OpenPosition> vacancyDc;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private CollectionContainer<Employee> employeeDc;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -718,6 +720,65 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         getEditedEntity().setCurrentOpenClose(vacancyFiels.getValue().getOpenClose());
 
         setChainInteraction(event);
+        checkEmployyementStatus(event);
+    }
+
+    private void checkEmployyementStatus(BeforeCommitChangesEvent event) {
+        if (getEditedEntity() != null) {
+            if (getEditedEntity().getIteractionType() != null) {
+                // если нашли оформление персонала
+                if (getEditedEntity().getIteractionType().getSignStartProject() != null) {
+                    if (getEditedEntity().getIteractionType().getSignStartProject()) {
+                        Employee currentEmployee = null;
+
+                        for (Employee employee : employeeDc.getItems()) {
+                            if (employee.getJobCandidate().equals(getEditedEntity().getCandidate())) {
+                                currentEmployee = employee;
+                                break;
+                            }
+                        }
+
+                        if (currentEmployee == null) {
+                            currentEmployee = metadata.create(Employee.class);
+                            currentEmployee.setJobCandidate(getEditedEntity().getCandidate());
+                        }
+
+                        currentEmployee.setEmployeeDate(getEditedEntity().getAddDate());
+                        currentEmployee.setOpenPosition(getEditedEntity().getVacancy());
+
+                        dataManager.commit(currentEmployee);
+                    }
+                }
+                // а тут увольнение персонала
+                if (getEditedEntity().getIteractionType().getSignEndProject() != null) {
+                    if (getEditedEntity().getIteractionType().getSignEndProject()) {
+                        Employee currentEmployee = null;
+
+                        for (Employee employee : employeeDc.getItems()) {
+                            if (employee.getJobCandidate().equals(getEditedEntity().getCandidate())) {
+                                currentEmployee = employee;
+                                break;
+                            }
+                        }
+
+                        if (currentEmployee == null) {
+                            currentEmployee = metadata.create(Employee.class);
+                            currentEmployee.setJobCandidate(getEditedEntity().getCandidate());
+                        }
+
+                        currentEmployee.setDissmisalDate(getEditedEntity().getAddDate());
+                        currentEmployee.setOpenPosition(getEditedEntity().getVacancy());
+                        if (getEditedEntity().getIteractionType() != null) {
+                            if (getEditedEntity().getIteractionType().getWorkStatus() != null) {
+                                currentEmployee.setWorkStatus(getEditedEntity().getIteractionType().getWorkStatus());
+                            }
+                        }
+
+                        dataManager.commit(currentEmployee);
+                    }
+                }
+            }
+        }
     }
 
     Boolean setChainFlag = false;

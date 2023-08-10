@@ -17,6 +17,8 @@
                 </property>
                 <property name="iteractionType"
                           view="_local">
+                    <property name="workStatus"
+                              view="employeeWorkStatus-view"/>
                 </property>
                 <property name="vacancy"
                           view="_local">
@@ -48,9 +50,18 @@
             </view>
             <loader id="iteractionListDl"/>
         </instance>
+        <collection id="employeeDc" class="com.company.itpearls.entity.Employee">
+            <view extends="employee-view"/>
+            <loader id="employeeDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_Employee e]]>
+                </query>
+            </loader>
+        </collection>
         <collection id="iteractionTypesDc"
                     class="com.company.itpearls.entity.Iteraction">
             <view extends="_local">
+                <property name="workStatus" view="employeeWorkStatus-view"/>
             </view>
             <loader id="iteractionTypesLc"
                     cacheable="true">

@@ -5,6 +5,7 @@ import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.StandartRegistrationForWork;
 import com.company.itpearls.web.screens.position.PositionEdit;
 import com.haulmont.bpm.entity.ProcAttachment;
 import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
@@ -1539,10 +1540,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setRadioButtons() {
         Map<String, Integer> rwMap = new LinkedHashMap<>();
+        String a = messageBundle.getMessage("mainmsgAllVariants");
 
-        rwMap.put("Аутстаф", 0);
-        rwMap.put("В штат заказчику", 1);
-        rwMap.put("Возможны оба варианта", 2);
+        rwMap.put(messageBundle.getMessage(StandartRegistrationForWork.OUTSTAFING_MSG),
+                StandartRegistrationForWork.OUTSTAFING);
+        rwMap.put(messageBundle.getMessage(StandartRegistrationForWork.RECRUITING_MSG),
+                StandartRegistrationForWork.RECRUITING);
+        rwMap.put(messageBundle.getMessage(StandartRegistrationForWork.ALL_MSG),
+                StandartRegistrationForWork.ALL);
 
         registrationForWorkField.setOptionsMap(rwMap);
 

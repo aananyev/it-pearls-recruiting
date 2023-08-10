@@ -242,6 +242,7 @@ create table ITPEARLS_ITERACTION (
     NOTIFICATION_BEFORE_AFTER_DAY integer,
     NOTIFICATION_WHEN_SEND integer,
     STATISTICS_ boolean,
+    WORK_STATUS_ID uuid,
     --
     primary key (ID)
 )^
@@ -1147,3 +1148,39 @@ create table ITPEARLS_OPEN_POSITION_COMMENT (
     primary key (ID)
 )^
 -- end ITPEARLS_OPEN_POSITION_COMMENT
+-- begin ITPEARLS_EMPLOYEE
+create table ITPEARLS_EMPLOYEE (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    OPEN_POSITION_ID uuid not null,
+    EMPLOYEE_DATE date,
+    DISSMISAL_DATE date,
+    OUTSTAFFING_COST decimal(19, 2),
+    SALARY decimal(19, 2),
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_EMPLOYEE
+-- begin ITPEARLS_EMPLOYEE_WORK_STATUS
+create table ITPEARLS_EMPLOYEE_WORK_STATUS (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    WORK_STATUS_NAME varchar(60) not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_EMPLOYEE_WORK_STATUS

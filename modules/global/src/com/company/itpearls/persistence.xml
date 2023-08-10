@@ -53,5 +53,7 @@
         <class>com.company.itpearls.entity.SomeFilesAgreement</class>
         <class>com.company.itpearls.entity.SomeFilesCandidateCV</class>
         <class>com.company.itpearls.entity.SomeFilesOpenPosition</class>
+        <class>com.company.itpearls.entity.Employee</class>
+        <class>com.company.itpearls.entity.EmployeeWorkStatus</class>
     </persistence-unit>
 </persistence>
