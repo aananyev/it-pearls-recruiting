@@ -76,8 +76,6 @@
                 <column id="openPosition"/>
                 <column id="employeeDate"/>
                 <column id="dissmisalDate"/>
-                <column id="outstaffingCost"/>
-                <column id="salary"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

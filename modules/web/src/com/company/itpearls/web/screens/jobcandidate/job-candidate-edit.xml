@@ -547,6 +547,7 @@
                                 <lookupPickerField id="currentCompanyField"
                                                    optionsContainer="currentCompaniesDc"
                                                    dataContainer="jobCandidateDc"
+                                                   nullOptionVisible="false"
                                                    property="currentCompany"
                                                    width="100%"
                                                    caption="msg://msgCorrentCompany"
@@ -580,6 +581,7 @@
                                     <lookupPickerField id="personPositionField"
                                                        optionsContainer="personPositionsDc"
                                                        dataContainer="jobCandidateDc"
+                                                       nullOptionVisible="false"
                                                        property="personPosition"
                                                        align="BOTTOM_RIGHT"
                                                        caption="msg://msgPersonPosition"
@@ -626,6 +628,7 @@
                                 </suggestionField>
                                 <lookupPickerField id="jobCityCandidateField"
                                                    dataContainer="jobCandidateDc"
+                                                   nullOptionVisible="false"
                                                    width="100%"
                                                    caption="msg://msgCityOfResidence"
                                                    optionsContainer="citiesDc"
@@ -1051,23 +1054,28 @@
                                     property="comment"/>
                         </columns>
                     </dataGrid>
-                    <vbox spacing="true" width="100%">
+                    <groupBox stylename="well"
+                              spacing="true"
+                              width="100%">
                         <textField id="chatMessageTextField"
+                                   stylename="large"
                                    width="100%"/>
-                        <hbox width="100%">
+                        <hbox width="100%" expand="vacancyPopupPickerField" spacing="true">
                             <lookupPickerField id="vacancyPopupPickerField"
+                                               align="MIDDLE_LEFT"
+                                               stylename="large"
                                                optionsContainer="openPositionDc"
                                                width="100%"/>
-                        </hbox>
-                        <hbox width="100%">
                             <button id="sendCommentButton"
                                     caption="msg://msgSendComment"
+                                    stylename="large"
+                                    icon="COMMENTING"
                                     width="AUTO"
                                     enable="false"
                                     align="MIDDLE_RIGHT"
                                     invoke="sendCommentButtonInvoke"/>
                         </hbox>
-                    </vbox>
+                    </groupBox>
                 </vbox>
             </tab>
         </tabSheet>

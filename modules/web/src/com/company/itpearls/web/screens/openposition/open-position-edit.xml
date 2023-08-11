@@ -300,6 +300,7 @@
                                                          property="priority"
                                                          caption="msg://msgPriorityPosition"
                                                          required="true"
+                                                         nullOptionVisible="false"
                                                          align="BOTTOM_LEFT"
                                                          width="AUTO"/>
                                             <textField id="commentPriority"
@@ -352,6 +353,7 @@
                                     <lookupPickerField id="positionTypeField"
                                                        optionsContainer="positionTypesDc"
                                                        dataContainer="openPositionDc"
+                                                       nullOptionVisible="false"
                                                        property="positionType"
                                                        caption="msg://msgPositionType"
                                                        width="100%"
@@ -366,6 +368,7 @@
                                         <lookupField id="remoteWorkField"
                                                      dataContainer="openPositionDc"
                                                      property="remoteWork"
+                                                     nullOptionVisible="false"
                                                      required="true"
                                                      align="MIDDLE_LEFT"
                                                      caption="msg://msgRemoteWork"
@@ -387,6 +390,7 @@
                                                        optionsContainer="projectNamesDc"
                                                        dataContainer="openPositionDc"
                                                        property="projectName"
+                                                       nullOptionVisible="false"
                                                        caption="msg://msgNamePosition"
                                                        width="100%"
                                                        required="true">
@@ -398,6 +402,7 @@
                                     <lookupPickerField id="companyDepartamentField"
                                                        optionsContainer="companyDepartamentsDc"
                                                        caption="msg://msgDepartment"
+                                                       nullOptionVisible="false"
                                                        width="100%"
                                                        required="true">
                                         <actions>
@@ -412,6 +417,7 @@
                                     <lookupPickerField id="companyNameField"
                                                        optionsContainer="companyNamesDc"
                                                        caption="msg://msgCompanyName"
+                                                       nullOptionVisible="false"
                                                        width="100%"
                                                        required="true">
                                         <actions>
@@ -426,6 +432,7 @@
                                                            dataContainer="openPositionDc"
                                                            optionsContainer="citiesDc"
                                                            property="cityPosition"
+                                                           nullOptionVisible="false"
                                                            width="100%"
                                                            caption="mainMsg://msgCity"
                                                            align="BOTTOM_LEFT"
@@ -542,6 +549,7 @@
                                          dataContainer="openPositionDc"
                                          property="registrationForWork"
                                          caption="msg://msgRegistrationForWork"
+                                         nullOptionVisible="false"
                                          required="true"
                                          align="BOTTOM_LEFT"
                                          width="AUTO"/>

@@ -137,9 +137,9 @@
                                            optionsContainer="openPositionsDc"
                                            property="openPosition">
                             <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="open" type="picker_open"/>
-                            <action id="clear" type="picker_clear"/>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                                <action id="clear" type="picker_clear"/>
                             </actions>
                         </lookupPickerField>
                     </hbox>
@@ -179,9 +179,9 @@
                                        optionsContainer="laborAgreementsDc"
                                        property="laborAgreement">
                         <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                                <action id="open" type="picker_open"/>
-                                <action id="clear" type="picker_clear"/>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                            <action id="clear" type="picker_clear"/>
                         </actions>
                     </lookupPickerField>
                 </vbox>

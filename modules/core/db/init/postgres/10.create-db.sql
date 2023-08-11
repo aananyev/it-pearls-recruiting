@@ -1160,7 +1160,7 @@ create table ITPEARLS_EMPLOYEE (
     DELETED_BY varchar(50),
     --
     JOB_CANDIDATE_ID uuid not null,
-    OPEN_POSITION_ID uuid not null,
+    OPEN_POSITION_ID uuid,
     EMPLOYEE_DATE date,
     DISSMISAL_DATE date,
     OUTSTAFFING_COST decimal(19, 2),

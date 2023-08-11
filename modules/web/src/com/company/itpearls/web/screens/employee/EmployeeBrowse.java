@@ -1,10 +1,12 @@
 package com.company.itpearls.web.screens.employee;
 
 import com.company.itpearls.entity.EmployeeWorkStatus;
+import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.web.StandartRegistrationForWork;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.components.RadioButtonGroup;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -59,8 +61,8 @@ public class EmployeeBrowse extends StandardLookup<Employee> {
         selectTypeOfWorksRadioButton.setOptionsMap(workStatusMap);
 
         selectTypeOfWorksRadioButton.addValueChangeListener(e -> {
-            if (e.equals(allWorkStatus)) {
-                    employeesDl.setParameter("workStatus", (int) e);
+            if (!((EmployeeWorkStatus)selectTypeOfWorksRadioButton.getValue()).equals(allWorkStatus)) {
+                    employeesDl.setParameter("workStatus", (EmployeeWorkStatus) selectTypeOfWorksRadioButton.getValue());
                 } else {
                     employeesDl.removeParameter("workStatus");
             }
@@ -78,4 +80,5 @@ public class EmployeeBrowse extends StandardLookup<Employee> {
 
         recrutingOrAutstaffingRadioButtonGroup.setOptionsMap(recruitingOrOutstaffingMap);
     }
+
 }

@@ -23,8 +23,7 @@ public class Employee extends StandardEntity {
     private JobCandidate jobCandidate;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OPEN_POSITION_ID")
     private OpenPosition openPosition;
 

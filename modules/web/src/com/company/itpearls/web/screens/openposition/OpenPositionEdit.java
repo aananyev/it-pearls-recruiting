@@ -238,6 +238,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private StarsAndOtherService starsAndOtherService;
     @Inject
     private Messages messages;
+    @Named("tabSheetOpenPosition.tabFiles")
+    private VBoxLayout tabFiles;
+    @Inject
+    private CollectionPropertyContainer<SomeFilesOpenPosition> someFilesesDc;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1978,6 +1982,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         setTopLabel();
+        setIconSomeFileTab();
 
         if (openPositionRichTextArea.getValue() != null) {
             openPositionRichTextArea.setValue(showKeyCompetition(openPositionRichTextArea.getValue()));
@@ -1986,6 +1991,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         openClosePositionCheckBox.setValue(openClosePositionCheckBox.getValue() == null ? false : true);
 
         setInitApprovalProcess();
+    }
+
+    private void setIconSomeFileTab() {
+        if (someFilesesDc.getItems().size() > 0) {
+            tabFiles.setIconFromSet(CubaIcon.FILE_TEXT_O);
+        } else {
+            tabFiles.setIconFromSet(CubaIcon.FILE_O);
+        }
+    }
+
+    @Subscribe(id = "someFilesesDc", target = Target.DATA_CONTAINER)
+    public void onSomeFilesesDcCollectionChange(CollectionContainer.CollectionChangeEvent<SomeFilesOpenPosition> event) {
+        setIconSomeFileTab();
     }
 
     private void setInitApprovalProcess() {

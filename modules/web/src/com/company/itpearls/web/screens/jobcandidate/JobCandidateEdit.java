@@ -3534,4 +3534,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .withPosition(Notifications.Position.MIDDLE_CENTER)
                 .show();
     }
+
+    @Install(to = "vacancyPopupPickerField", subject = "optionIconProvider")
+    private String vacancyPopupPickerFieldOptionIconProvider(OpenPosition openPosition) {
+        if (!openPosition.getOpenClose()) {
+            return CubaIcon.PLUS_CIRCLE.source();
+        } else {
+            return CubaIcon.MINUS_CIRCLE.source();
+        }
+    }
 }
