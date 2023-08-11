@@ -80,7 +80,7 @@
                 </query>
             </loader>
         </collection>
-        <collection id="vacancyDc"
+        <collection id="openPositionDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local">
                 <property name="grade"
@@ -327,7 +327,7 @@
                                     <lookupPickerField id="vacancyFiels"
                                                        caption="mainMsg://msgVacancy"
                                                        dataContainer="iteractionListDc"
-                                                       optionsContainer="vacancyDc"
+                                                       optionsContainer="openPositionDc"
                                                        property="vacancy"
                                                        width="100%">
                                         <actions>

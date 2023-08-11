@@ -1,6 +1,6 @@
 package com.company.itpearls.entity;
 
-import com.haulmont.chile.core.annotations.MetaProperty;
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -12,13 +12,14 @@ import java.util.Date;
 
 @Table(name = "ITPEARLS_EMPLOYEE")
 @Entity(name = "itpearls_Employee")
+@NamePattern("%s %s|jobCandidate,openPosition")
 public class Employee extends StandardEntity {
     private static final long serialVersionUID = -6920073032090937565L;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @JoinColumn(name = "JOB_CANDIDATE_ID")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @NotNull
-    @MetaProperty(mandatory = true)
-    @Transient
     private JobCandidate jobCandidate;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
@@ -42,29 +43,29 @@ public class Employee extends StandardEntity {
     private BigDecimal salary;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
-    @MetaProperty
-    @Transient
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "LABOR_AGREEMENT_ID")
     private LaborAgreement laborAgreement;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
-    @Transient
-    @MetaProperty
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "WORK_STATUS_ID")
     private EmployeeWorkStatus workStatus;
 
-    public EmployeeWorkStatus getWorkStatus() {
-        return workStatus;
-    }
-
-    public void setWorkStatus(EmployeeWorkStatus workStatus) {
-        this.workStatus = workStatus;
+    public void setLaborAgreement(LaborAgreement laborAgreement) {
+        this.laborAgreement = laborAgreement;
     }
 
     public LaborAgreement getLaborAgreement() {
         return laborAgreement;
     }
 
-    public void setLaborAgreement(LaborAgreement laborAgreement) {
-        this.laborAgreement = laborAgreement;
+    public void setWorkStatus(EmployeeWorkStatus workStatus) {
+        this.workStatus = workStatus;
+    }
+
+    public EmployeeWorkStatus getWorkStatus() {
+        return workStatus;
     }
 
     public BigDecimal getSalary() {

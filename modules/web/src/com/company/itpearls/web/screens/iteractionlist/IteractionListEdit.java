@@ -763,11 +763,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
                         if (currentEmployee == null) {
                             currentEmployee = metadata.create(Employee.class);
-                            currentEmployee.setJobCandidate(getEditedEntity().getCandidate());
                         }
 
+                        currentEmployee.setJobCandidate(getEditedEntity().getCandidate());
                         currentEmployee.setDissmisalDate(getEditedEntity().getAddDate());
                         currentEmployee.setOpenPosition(getEditedEntity().getVacancy());
+
                         if (getEditedEntity().getIteractionType() != null) {
                             if (getEditedEntity().getIteractionType().getWorkStatus() != null) {
                                 currentEmployee.setWorkStatus(getEditedEntity().getIteractionType().getWorkStatus());

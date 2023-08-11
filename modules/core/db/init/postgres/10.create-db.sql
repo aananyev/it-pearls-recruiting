@@ -1159,11 +1159,14 @@ create table ITPEARLS_EMPLOYEE (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    JOB_CANDIDATE_ID uuid not null,
     OPEN_POSITION_ID uuid not null,
     EMPLOYEE_DATE date,
     DISSMISAL_DATE date,
     OUTSTAFFING_COST decimal(19, 2),
     SALARY decimal(19, 2),
+    LABOR_AGREEMENT_ID uuid,
+    WORK_STATUS_ID uuid,
     --
     primary key (ID)
 )^

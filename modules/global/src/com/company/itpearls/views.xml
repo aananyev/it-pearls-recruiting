@@ -531,7 +531,7 @@
         <property name="jobCandidate" view="_base"/>
         <property name="openPosition" view="_base"/>
         <property name="laborAgreement" view="_base"/>
-        <property name="workStatus" view="_base"/>
+        <property name="workStatus" view="_local"/>
     </view>
-    <view entity="itpearls_EmployeeWorkStatus" name="employeeWorkStatus-view" extends="_base"/>
+    <view entity="itpearls_EmployeeWorkStatus" name="employeeWorkStatus-view" extends="_local"/>
 </views>

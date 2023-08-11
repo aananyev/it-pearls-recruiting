@@ -95,14 +95,6 @@ order by e.number]]>
                                   dataContainer="iteractionDc"
                                   property="signEndProcessVacancyClosed"
                                   caption="msg://msgSignEndProcessVacancyClosed"/>
-                        <checkBox id="signStartProject"
-                                  caption="msg://msgSignStartProject"
-                                  dataContainer="iteractionDc"
-                                  property="signStartProject"/>
-                        <checkBox id="signEndProject"
-                                  caption="msg://msgSignEndProject"
-                                  dataContainer="iteractionDc"
-                                  property="signEndProject"/>
                         <checkBox id="signFeedbackCheckBox"
                                   caption="msg://msgSignFeedBack"
                                   dataContainer="iteractionDc"
@@ -164,28 +156,41 @@ order by e.number]]>
                  icon="CUBES"
                  margin="true,true,true,true"
                  caption="msg://mshOutstaffingTab">
-                <vbox spacing="true">
-                    <checkBox id="outstaffingSign"
-                              dataContainer="iteractionDc"
-                              property="outstaffingSign"
-                              caption="msg://msgOutstaffingSign"/>
-                    <radioButtonGroup id="staffInteractionStatusRadioButtonsGroup"
-                                      dataContainer="iteractionDc"
-                                      caption="msg://msgStaffStatus"
-                                      property="staffInteractionStatus"
-                                      optionsEnum="com.company.itpearls.entity.StaffInteractionStatus"/>
-                    <lookupPickerField id="workStatusPickerField"
-                                       dataContainer="iteractionDc"
-                                       property="workStatus"
-                                       width="AUTO"
-                                       optionsContainer="workStatusDc"
-                                       caption="msg://msgChangingWorkingStatus">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="clear" type="picker_clear"/>
-                        </actions>
-                    </lookupPickerField>
-                </vbox>
+                <checkBox id="outstaffingSign"
+                          dataContainer="iteractionDc"
+                          property="outstaffingSign"
+                          caption="msg://msgOutstaffingSign"/>
+                <groupBox orientation="horizontal" width="100%" spacing="true" stylename="light">
+                    <vbox spacing="true" stylename="card" margin="true" height="100%">
+                        <radioButtonGroup id="staffInteractionStatusRadioButtonsGroup"
+                                          dataContainer="iteractionDc"
+                                          caption="msg://msgStaffStatus"
+                                          property="staffInteractionStatus"
+                                          optionsEnum="com.company.itpearls.entity.StaffInteractionStatus"/>
+                        <lookupPickerField id="workStatusPickerField"
+                                           dataContainer="iteractionDc"
+                                           property="workStatus"
+                                           width="AUTO"
+                                           optionsContainer="workStatusDc"
+                                           caption="msg://msgChangingWorkingStatus">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                                <action id="clear" type="picker_clear"/>
+                            </actions>
+                        </lookupPickerField>
+                    </vbox>
+                    <vbox spacing="true" stylename="card" margin="true" height="100%">
+                        <checkBox id="signStartProject"
+                                  caption="msg://msgSignStartProject"
+                                  dataContainer="iteractionDc"
+                                  property="signStartProject"/>
+                        <checkBox id="signEndProject"
+                                  caption="msg://msgSignEndProject"
+                                  dataContainer="iteractionDc"
+                                  property="signEndProject"/>
+                    </vbox>
+                </groupBox>
             </tab>
             <tab caption="msg://Tab"
                  spacing="true"

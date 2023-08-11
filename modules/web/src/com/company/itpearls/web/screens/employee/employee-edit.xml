@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://employeeEdit.caption"
-        focusComponent="form"
+        focusComponent="candidateField"
         messagesPack="com.company.itpearls.web.screens.employee">
     <data>
         <instance id="employeeDc"
                   class="com.company.itpearls.entity.Employee">
-            <view extends="_local">
+            <view extends="employee-view">
                 <property name="jobCandidate" view="_local">
-                    <property name="iteractionList" view="_local"/>
+                    <property name="personPosition" view="_local"/>
+                    <property name="iteractionList" view="_local">
+                        <property name="iteractionType" view="_local">
+                            <property name="workStatus" view="employeeWorkStatus-view"/>
+                        </property>
+                    </property>
                     <property name="laborAgreement" view="_local">
                         <property name="jobCandidate" view="_local"/>
                         <property name="legalEntityEmployee" view="_local"/>
@@ -32,20 +37,25 @@
                     <property name="company" view="_local"/>
                     <property name="laborAgreementType" view="_local"/>
                 </property>
+                <property name="workStatus" view="_base"/>
             </view>
             <loader/>
         </instance>
-        <collection id="jobCandidatesDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
-            <loader id="jobCandidatesDl">
+        <collection id="workStatusDc"
+                    class="com.company.itpearls.entity.EmployeeWorkStatus"
+                    view="employeeWorkStatus-view">
+            <loader id="workStatusDl">
                 <query>
-                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                    <![CDATA[select e from itpearls_EmployeeWorkStatus e order by e.workStatusName]]>
                 </query>
             </loader>
         </collection>
-        <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="_minimal">
+        <collection id="openPositionsDc"
+                    class="com.company.itpearls.entity.OpenPosition"
+                    view="_minimal">
             <loader id="openPositionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e]]>
+                    <![CDATA[select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName]]>
                 </query>
             </loader>
         </collection>
@@ -59,19 +69,124 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="employeeDc">
-            <column width="350px">
-                <lookupPickerField id="jobCandidateField" optionsContainer="jobCandidatesDc" property="jobCandidate"/>
-                <lookupPickerField id="openPositionField" optionsContainer="openPositionsDc" property="openPosition"/>
-                <dateField id="employeeDateField" property="employeeDate"/>
-                <dateField id="dissmisalDateField" property="dissmisalDate"/>
-                <textField id="outstaffingCostField" property="outstaffingCost"/>
-                <textField id="salaryField" property="salary"/>
-                <lookupPickerField id="laborAgreementField" optionsContainer="laborAgreementsDc"
-                                   property="laborAgreement"/>
-            </column>
-        </form>
+    <layout spacing="true"
+            expand="layoutVBox">
+        <vbox id="layoutVBox"
+              height="100%"
+              expand="mainVBox"
+              width="100%">
+            <groupBox align="TOP_LEFT"
+                      stylename="light"
+                      spacing="false"
+                      width="100%"
+                      height="AUTO">
+                <lookupPickerField id="workStatusField"
+                                   height="AUTO"
+                                   width="AUTO"
+                                   align="TOP_LEFT"
+                                   nullOptionVisible="false"
+                                   caption="msg://msgWorkStatus"
+                                   dataContainer="employeeDc"
+                                   optionsContainer="workStatusDc"
+                                   property="workStatus"/>
+            </groupBox>
+            <groupBox id="mainVBox"
+                      width="100%"
+                      stylename="light"
+                      height="100%"
+                      align="TOP_LEFT"
+                      spacing="true">
+                <vbox height="AUTO"
+                      width="100%"
+                      spacing="true">
+                    <hbox spacing="true"
+                          align="TOP_LEFT"
+                          width="100%">
+                        <suggestionPickerField id="candidateField"
+                                               inputPrompt="mainMsg://msgStartInput"
+                                               minSearchStringLength="3"
+                                               rowspan="1"
+                                               align="TOP_LEFT"
+                                               colspan="1"
+                                               caption="msg://msgCandidate"
+                                               width="100%"
+                                               required="true"
+                                               dataContainer="employeeDc"
+                                               property="jobCandidate">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                            </actions>
+                            <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                   escapeValueForLike="true"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from itpearls_JobCandidate e
+                                where lower(e.fullName) like lower(:searchString) escape '\'
+                                and e.middleName not like '(не использовать)'
+                                and not e.blockCandidate = true
+                                order by e.secondName, e.firstName
+                            </query>
+                        </suggestionPickerField>
+                        <lookupPickerField id="openPositionField"
+                                           caption="msg://msgOpenPosition"
+                                           align="TOP_LEFT"
+                                           width="100%"
+                                           nullOptionVisible="false"
+                                           dataContainer="employeeDc"
+                                           optionsContainer="openPositionsDc"
+                                           property="openPosition">
+                            <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                            <action id="clear" type="picker_clear"/>
+                            </actions>
+                        </lookupPickerField>
+                    </hbox>
+                    <hbox spacing="true" width="50%">
+                        <dateField id="employeeDateField"
+                                   align="TOP_LEFT"
+                                   width="100%"
+                                   caption="msg://msgEmployeeDate"
+                                   dataContainer="employeeDc"
+                                   property="employeeDate"/>
+                        <dateField id="dissmisalDateField"
+                                   align="TOP_LEFT"
+                                   width="100%"
+                                   caption="msg://msgDismissDate"
+                                   dataContainer="employeeDc"
+                                   property="dissmisalDate"/>
+                    </hbox>
+                    <hbox spacing="true" align="TOP_LEFT" width="50%">
+                        <textField id="outstaffingCostField"
+                                   align="TOP_LEFT"
+                                   width="100%"
+                                   caption="msg://msgOutstaffingCost"
+                                   dataContainer="employeeDc"
+                                   property="outstaffingCost"/>
+                        <textField id="salaryField"
+                                   align="TOP_LEFT"
+                                   width="100%"
+                                   caption="msg://msgSalary"
+                                   dataContainer="employeeDc"
+                                   property="salary"/>
+                    </hbox>
+                    <lookupPickerField id="laborAgreementField"
+                                       align="TOP_LEFT"
+                                       width="100%"
+                                       caption="msg://msgLaborAgreement"
+                                       dataContainer="employeeDc"
+                                       optionsContainer="laborAgreementsDc"
+                                       property="laborAgreement">
+                        <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                                <action id="clear" type="picker_clear"/>
+                        </actions>
+                    </lookupPickerField>
+                </vbox>
+            </groupBox>
+        </vbox>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>

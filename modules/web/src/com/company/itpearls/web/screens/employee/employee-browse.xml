@@ -7,25 +7,14 @@
     <data readOnly="true">
         <collection id="employeesDc"
                     class="com.company.itpearls.entity.Employee">
-            <view extends="_local">
+            <view extends="employee-view">
                 <property name="jobCandidate" view="_local">
                     <property name="personPosition" view="_local"/>
                     <property name="iteractionList" view="_local"/>
-                    <property name="laborAgreement" view="_local">
-                        <property name="jobCandidate" view="_local"/>
-                        <property name="legalEntityEmployee" view="_local"/>
-                        <property name="customerCompany" view="_local"/>
-                        <property name="additionalLaborAgreement" view="_local"/>
-                        <property name="legalEntityFrom" view="_local"/>
-                        <property name="company" view="_local"/>
-                        <property name="laborAgreementType" view="_local"/>
-                        <property name="openPositions" view="_local"/>
-                        <property name="fileAgreement" view="_local"/>
-                        <property name="someFilesAgreement" view="_local"/>
-                    </property>
+                    <property name="laborAgreement" view="_local"/>
                 </property>
                 <property name="openPosition" view="_local"/>
-                <property name="workStatus" view="_local"/>
+                <property name="workStatus" view="employeeWorkStatus-view"/>
                 <property name="laborAgreement" view="_local">
                     <property name="jobCandidate" view="_local"/>
                     <property name="legalEntityEmployee" view="_local"/>
@@ -39,6 +28,13 @@
             <loader id="employeesDl">
                 <query>
                     <![CDATA[select e from itpearls_Employee e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.workStatus = :workStatus</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -82,7 +78,6 @@
                 <column id="dissmisalDate"/>
                 <column id="outstaffingCost"/>
                 <column id="salary"/>
-                <column id="laborAgreement"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
