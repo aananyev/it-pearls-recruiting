@@ -18,6 +18,7 @@
                         <property name="grade" view="_local"/>
                         <property name="positionType" view="_local"/>
                         <property name="projectName" view="_local">
+                            <property name="projectLogo" view="_local"/>
                             <property name="projectDepartment" view="_local">
                                 <property name="companyName" view="_local"/>
                             </property>
@@ -38,6 +39,7 @@
                         <property name="owner" view="_local"/>
                         <property name="positionType" view="_local"/>
                         <property name="projectName" view="_local">
+                            <property name="projectLogo" view="_local"/>
                             <property name="projectDepartment" view="_local"/>
                         </property>
                     </property>
@@ -874,6 +876,15 @@
                         <column id="icon"
                                 width="48px"
                                 caption=""/>
+                        <column id="projectLogoColumn"
+                                resizable="true"
+                                collapsible="true"
+                                collapsed="false"
+                                caption="msg://msgProject"
+                                width="70px"
+                                minimumWidth="70px">
+                            <componentRenderer/>
+                        </column>
                         <column id="numberIteraction"
                                 property="numberIteraction"
                                 sort="DESCENDING"
@@ -939,6 +950,15 @@
                               bodyRowHeight="55px"
                               dataContainer="jobCandidateCandidateCvsDc">
                         <columns>
+                            <column id="projectLogoColumn"
+                                    resizable="true"
+                                    collapsible="true"
+                                    collapsed="false"
+                                    caption="msg://msgProject"
+                                    width="70px"
+                                    minimumWidth="70px">
+                                <componentRenderer/>
+                            </column>
                             <column id="datePost"
                                     width="100px"
                                     maximumWidth="100px"

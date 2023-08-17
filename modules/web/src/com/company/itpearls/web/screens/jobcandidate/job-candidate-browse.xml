@@ -83,6 +83,8 @@
         </filter>
         <dataGrid id="jobCandidatesTable"
                   width="100%"
+                  descriptionAsHtml="true"
+                  captionAsHtml="true"
                   dataContainer="jobCandidatesDc">
             <actions>
                 <action id="create" type="create"/>
@@ -93,7 +95,7 @@
             <columns>
                 <column id="status"
                         width="50px">
-                    <iconRenderer/>
+                    <componentRenderer/>
                 </column>
                 <column id="fileImageFace"
                         property="fileImageFace"

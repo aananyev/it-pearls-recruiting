@@ -18,6 +18,17 @@ public class EmployeeWorkStatus extends StandardEntity {
     @Column(name = "WORK_STATUS_NAME", nullable = false, length = 60)
     private String workStatusName;
 
+    @Column(name = "IN_STAFF")
+    private Boolean inStaff;
+
+    public Boolean getInStaff() {
+        return inStaff;
+    }
+
+    public void setInStaff(Boolean inStaff) {
+        this.inStaff = inStaff;
+    }
+
     public String getWorkStatusName() {
         return workStatusName;
     }

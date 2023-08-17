@@ -15,6 +15,7 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="employeeWorkStatusDc">
             <column width="350px">
+                <checkBox id="inStaffField" property="inStaff"/>
                 <textField id="workStatusNameField" property="workStatusName"/>
             </column>
         </form>

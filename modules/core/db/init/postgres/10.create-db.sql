@@ -1183,6 +1183,7 @@ create table ITPEARLS_EMPLOYEE_WORK_STATUS (
     DELETED_BY varchar(50),
     --
     WORK_STATUS_NAME varchar(60) not null,
+    IN_STAFF boolean,
     --
     primary key (ID)
 )^

@@ -12,6 +12,7 @@
                     <property name="personPosition" view="_local"/>
                     <property name="iteractionList" view="_local"/>
                     <property name="laborAgreement" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
                 </property>
                 <property name="openPosition" view="_local"/>
                 <property name="workStatus" view="employeeWorkStatus-view"/>
@@ -27,7 +28,7 @@
             </view>
             <loader id="employeesDl">
                 <query>
-                    <![CDATA[select e from itpearls_Employee e]]>
+                    <![CDATA[select e from itpearls_Employee e order by e.jobCandidate.fullName]]>
                     <condition>
                         <and>
                             <c:jpql>
@@ -55,9 +56,9 @@
                   spacing="true"
                   height="AUTO"
                   orientation="vertical">
-            <radioButtonGroup id="recrutingOrAutstaffingRadioButtonGroup"
+<!--            <radioButtonGroup id="recrutingOrAutstaffingRadioButtonGroup"
                               orientation="horizontal"
-                              caption="msg://msgrecrutingOrAutstaffingRadioButtonGroup"/>
+                              caption="msg://msgrecrutingOrAutstaffingRadioButtonGroup"/> -->
             <radioButtonGroup id="selectTypeOfWorksRadioButton"
                               orientation="horizontal"
                               caption="msg://msgSelectTypeOfWorks"/>
@@ -71,9 +72,13 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="jobCandidate"/>
+                <column id="fileImageFace"
+                        caption=""
+                        width="50px">
+                </column>
+                <column id="jobCandidate" sort="ASCENDING"/>
                 <column id="workStatus"/>
-                <column id="openPosition"/>
+                <column id="openPosition" width="300px"/>
                 <column id="employeeDate"/>
                 <column id="dissmisalDate"/>
             </columns>

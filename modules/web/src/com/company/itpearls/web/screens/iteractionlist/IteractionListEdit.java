@@ -136,7 +136,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private CheckBox onlyMySubscribeCheckBox;
     @Inject
-    private CollectionContainer<OpenPosition> vacancyDc;
+    private CollectionContainer<OpenPosition> openPositionDc;
     @Inject
     private MessageBundle messageBundle;
     @Inject
@@ -734,6 +734,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         for (Employee employee : employeeDc.getItems()) {
                             if (employee.getJobCandidate().equals(getEditedEntity().getCandidate())) {
                                 currentEmployee = employee;
+                                if(checkCandidateIsEmployee(employee.getJobCandidate())) {
+                                    notifications.create(Notifications.NotificationType.ERROR)
+                                            .withType(Notifications.NotificationType.ERROR)
+                                            .withCaption(messageBundle.getMessage("msgError"))
+                                            .withDescription(messageBundle.getMessage("msgCandidateAlreadyInStaff"))
+                                            .show();
+                                }
                                 break;
                             }
                         }
@@ -745,6 +752,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
                         currentEmployee.setEmployeeDate(getEditedEntity().getAddDate());
                         currentEmployee.setOpenPosition(getEditedEntity().getVacancy());
+                        currentEmployee.setWorkStatus(getEditedEntity().getIteractionType().getWorkStatus());
 
                         dataManager.commit(currentEmployee);
                     }
@@ -757,6 +765,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         for (Employee employee : employeeDc.getItems()) {
                             if (employee.getJobCandidate().equals(getEditedEntity().getCandidate())) {
                                 currentEmployee = employee;
+                                // а если он уже уволен?
+                                if(!checkCandidateIsEmployee(employee.getJobCandidate())) {
+                                    notifications.create(Notifications.NotificationType.ERROR)
+                                    .withType(Notifications.NotificationType.ERROR)
+                                    .withCaption(messageBundle.getMessage("msgError"))
+                                    .withDescription(messageBundle.getMessage("msgCandidateNotInStaff"))
+                                    .show();
+                                }
+
                                 break;
                             }
                         }
@@ -780,6 +797,23 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         }
+    }
+
+    private Boolean checkCandidateIsEmployee(JobCandidate jobCandidate) {
+        final String QUERY_CHECK_CANDIDATE_EMPLOYEE = "select e.workStatus.inStaff from itpearls_Employee e " +
+                "where e.jobCandidate = :jobCandidate";
+
+        Boolean inStaff = null;
+
+        try {
+            inStaff = dataManager.loadValue(QUERY_CHECK_CANDIDATE_EMPLOYEE, Boolean.class)
+                    .parameter("jobCandidate", jobCandidate)
+                    .one();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return inStaff;
     }
 
     Boolean setChainFlag = false;
@@ -1079,7 +1113,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         openPositionsDl.setParameter("subscriber", userSession.getUser());
         openPositionsDl.load();
 
-        if (vacancyDc.getItems().size() == 0) {
+        if (openPositionDc.getItems().size() == 0) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption(messageBundle.getMessage("msgWarning"))
                     .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))
@@ -1094,7 +1128,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 openPositionsDl.setParameter("subscriber", userSession.getUser());
                 openPositionsDl.load();
 
-                if (vacancyDc.getItems().size() == 0) {
+                if (openPositionDc.getItems().size() == 0) {
                     notifications.create(Notifications.NotificationType.WARNING)
                             .withCaption(messageBundle.getMessage("msgWarning"))
                             .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))

@@ -13,10 +13,9 @@ import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.loadfromfilescreen.LoadFromFileScreen;
+import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -28,7 +27,6 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.io.*;
@@ -97,6 +95,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private MessageBundle messageBundle;
     @Inject
     private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private FileStorageService fileStorageService;
 
     private final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
     private CollectionContainer<IteractionList> iteractionListDc;
@@ -107,6 +107,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CandidateCVEdit candidateCVEdit;
     private OnlyTextPersonPosition screenOnlytext;
     private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
+    private List<Employee> employees;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -124,6 +125,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidatesDl.load();
 
         buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
+        
+        employees = dataManager.load(Employee.class)
+                .view("employee-view")
+                .list();
     }
 
     @Subscribe("checkBoxOnWork")
@@ -151,7 +156,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidatesDl.load();
     }
 
-    @Install(to = "jobCandidatesTable.status", subject = "styleProvider")
+/*    @Install(to = "jobCandidatesTable.status", subject = "styleProvider")
     private String jobCandidatesTableStatusStyleProvider(JobCandidate jobCandidate) {
         Integer s = getPictString(jobCandidate);
         String retStr = "";
@@ -188,7 +193,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return retStr;
-    }
+    } */
 
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
@@ -1041,7 +1046,95 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     @Install(to = "jobCandidatesTable.status", subject = "columnGenerator")
-    private Icons.Icon jobCandidatesTableStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+    private Component jobCandidatesTableStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+
+        Label contactsStatusLabel = uiComponents.create(Label.class);
+        contactsStatusLabel.setIconFromSet(getContactsStatusIcon(event));
+        contactsStatusLabel.setStyleName(getContactsStatusStyle(event));
+        contactsStatusLabel.setAlignment(Component.Alignment.TOP_LEFT);
+
+        Label employeeStatus = genEmployeeStatusLabel(event);
+
+        retHBox.add(contactsStatusLabel);
+        retHBox.add(employeeStatus);
+        return retHBox;
+    }
+
+    private Label genEmployeeStatusLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        return setEployeeStatusIcon(event);
+    }
+
+
+    private Label setEployeeStatusIcon(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setIconFromSet(CubaIcon.CIRCLE_O);
+
+        for (Employee employee : employees) {
+            if (event.getItem().equals(employee.getJobCandidate())) {
+                retLabel.setIconFromSet(CubaIcon.CHILD);
+                retLabel.setAlignment(Component.Alignment.TOP_LEFT);
+
+                if (employee.getWorkStatus() != null) {
+                    if (employee.getWorkStatus().getInStaff() != null) {
+                        if (employee.getWorkStatus().getInStaff()) {
+                            retLabel.setStyleName("pic-center-large-red");
+                        } else {
+                            retLabel.setStyleName("pic-center-large-green");
+                        }
+                    } else {
+                        retLabel.setStyleName("pic-center-large-yellow");
+                    }
+                } else {
+                    retLabel.setStyleName("pic-center-large-yellow");
+                }
+            } else {
+                retLabel.setStyleName("pic-center-large-grey");
+            }
+        }
+
+        return retLabel;
+    }
+
+    private String getContactsStatusStyle(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Integer s = getPictString(event.getItem());
+        String retStr = "";
+
+        if (s != null) {
+            switch (s) {
+                case 0: // WHITE
+                    retStr = "pic-center-large-grey";
+                    break;
+                case 1: // red
+                    retStr = "pic-center-large-red";
+                    break;
+                case 2: // yellow
+                    retStr = "pic-center-large-yellow";
+                    break;
+                case 3: // green
+                    retStr = "pic-center-large-green";
+                    break;
+                case 4: // to client
+                    retStr = "pic-center-large-grey";
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10: // recruiting
+                    retStr = "pic-center-large-grey";
+                    break;
+                default:
+                    retStr = "pic-center-large";
+                    break;
+            }
+        }
+
+        return retStr;
+    }
+
+    private CubaIcon getContactsStatusIcon(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Integer s = getPictString(event.getItem());
         String retStr = "";
 
@@ -1078,6 +1171,46 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return CubaIcon.valueOf(retStr);
     }
+
+
+/*    @Install(to = "jobCandidatesTable.status", subject = "columnGenerator")
+    private Icons.Icon jobCandidatesTableStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Integer s = getPictString(event.getItem());
+        String retStr = "";
+
+        if (s != null) {
+            switch (s) {
+                case 0: // WHITE
+                    retStr = "QUESTION_CIRCLE";
+                    break;
+                case 1: // red
+                    retStr = "BOMB";
+                    break;
+                case 2: // yellow
+                    retStr = "BOMB";
+                    break;
+                case 3: // green
+                    retStr = "BOMB";
+                    break;
+                case 4: // to client
+                    retStr = "BOMB";
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10: // recruiting
+                    retStr = "BOMB";
+                    break;
+                default:
+                    retStr = "QUESTION_CIRCLE";
+                    break;
+            }
+        }
+
+        return CubaIcon.valueOf(retStr);
+    } */
 
     private Integer getPictString(JobCandidate jobCandidate) {
         // если только имя и отчество - красный сигнал светофора
@@ -1815,5 +1948,38 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         candidateCVEdit.setParentDataContext(dataContext);
         candidateCVEdit.show();
+    }
+
+    @Install(to = "jobCandidatesTable.fileImageFace", subject = "descriptionProvider")
+    private String jobCandidatesTableFileImageFaceDescriptionProvider(JobCandidate jobCandidate) {
+        FileDescriptor fd = jobCandidate.getFileImageFace();
+        return getImage(fd);
+    }
+
+    private String getImage(FileDescriptor fd) {
+        //UUID id = UuidProvider.fromString("f5fb2eef-bf8f-af1d-dfed-5b381001579f");
+        byte[] image;
+
+        if (fd != null) {
+            if (fd.getCreateDate() == null) {
+                fd.setCreateDate(new Date());
+            }
+
+            try {
+                image = fileStorageService.loadFile(fd);
+            } catch (FileStorageException e) {
+                return "";
+            }
+
+            Base64.Encoder encoder = Base64.getEncoder();
+            String encodedString = encoder.encodeToString(image);
+
+            return
+                    "<img src=\"data:image/" + fd.getExtension() + ";base64, " +
+                            encodedString +
+                            "\"" +
+                            " width=\"220\" height=\"292\">";
+        } else
+            return null;
     }
 }

@@ -33,6 +33,7 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="inStaff"/>
                 <column id="workStatusName"/>
             </columns>
             <rowsCount/>

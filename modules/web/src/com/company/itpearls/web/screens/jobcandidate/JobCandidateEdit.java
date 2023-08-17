@@ -51,11 +51,6 @@ import java.util.stream.Collectors;
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
-
-    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK
-            = "select e " +
-            "from itpearls_SocialNetworkType e " +
-            "where e.socialNetwork = :other";
     @Inject
     private DataManager dataManager;
     @Inject
@@ -177,6 +172,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private static final String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
     private static final String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
+    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK
+            = "select e " +
+            "from itpearls_SocialNetworkType e " +
+            "where e.socialNetwork = :other";
+    private static final String TELEGRAM_NAME_URL = "http://t.me/";
 
     List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
@@ -721,6 +721,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLastProjectOfCandidate();
         setCandidatePicImage();
         setAddSocialNetworkButtonEnable();
+        checkTelegramName();
 
         lastIteraction = getLastIteraction();
 
@@ -903,8 +904,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         replaceE_yo();
         setFullNameCandidate();
 
+        checkTelegramName();
         trimTelegramName();
+
         addIteractionOfNewCandidate();
+    }
+
+    private void checkTelegramName() {
+        if (telegramNameField.getValue() != null) {
+            if (telegramNameField.getValue().toLowerCase().startsWith(TELEGRAM_NAME_URL.toLowerCase())) {
+                telegramNameField.setValue(
+                        telegramNameField.getValue().substring(TELEGRAM_NAME_URL.length()));
+            }
+        }
     }
 
     private void replaceE_yo() {
@@ -1019,6 +1031,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void trimTelegramName() {
         if (telegramNameField != null) {
             if (telegramNameField.getValue() != null) {
+                String tn = telegramNameField.getValue();
+
                 telegramNameField.setValue(telegramNameField.getValue().trim().charAt(0) == '@' ?
                         telegramNameField.getValue().trim().substring(1) :
                         telegramNameField.getValue().trim());
@@ -1900,10 +1914,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String retStr = event.getButton().getCaption();
 
         if (retStr.charAt(0) != '@') {
-            webBrowserTools.showWebPage("http://t.me/" + retStr, null);
+            webBrowserTools.showWebPage(TELEGRAM_NAME_URL + retStr, null);
         } else {
             retStr = retStr.substring(1);
-            webBrowserTools.showWebPage("http://t.me/" + retStr.substring(1, retStr.length() - 1), null);
+            webBrowserTools.showWebPage(TELEGRAM_NAME_URL + retStr.substring(1, retStr.length() - 1), null);
         }
     }
 
@@ -2467,7 +2481,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             } else {
                                 String messageSoc = "";
                                 try {
-                                        messageSoc = messageSocial.get(entry.getKey()).get(2);
+                                    messageSoc = messageSocial.get(entry.getKey()).get(2);
                                 } catch (IndexOutOfBoundsException e) {
                                     e.getStackTrace();
                                 } finally {
@@ -3542,5 +3556,109 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         } else {
             return CubaIcon.MINUS_CIRCLE.source();
         }
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.projectLogoColumn", subject = "columnGenerator")
+    private Component jobCandidateCandidateCvTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        Image image = uiComponents.create(Image.class);
+        image.setDescriptionAsHtml(true);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("50px");
+        image.setHeight("50px");
+        image.setStyleName("icon-no-border-50px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem()
+                .getToVacancy()
+                .getProjectName() != null) {
+            if (event.getItem()
+                    .getToVacancy()
+                    .getProjectName()
+                    .getProjectDescription() != null) {
+                image.setDescription("<h4>"
+                        + event.getItem()
+                        .getToVacancy()
+                        .getProjectName()
+                        .getProjectName()
+                        + "</h4><br><br>"
+                        + event.getItem()
+                        .getToVacancy()
+                        .getProjectName()
+                        .getProjectDescription());
+            }
+
+            if (event.getItem()
+                    .getToVacancy()
+                    .getProjectName()
+                    .getProjectLogo() != null) {
+                image.setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(event
+                                .getItem()
+                                .getToVacancy()
+                                .getProjectName()
+                                .getProjectLogo());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        }
+
+        retBox.add(image);
+        return retBox;
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.projectLogoColumn", subject = "columnGenerator")
+    private Component jobCandidateIteractionListTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        Image image = uiComponents.create(Image.class);
+        image.setDescriptionAsHtml(true);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("50px");
+        image.setHeight("50px");
+        image.setStyleName("icon-no-border-50px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem()
+                .getVacancy()
+                .getProjectName() != null) {
+            if (event.getItem()
+                    .getVacancy()
+                    .getProjectName()
+                    .getProjectDescription() != null) {
+                image.setDescription("<h4>"
+                        + event.getItem()
+                        .getVacancy()
+                        .getProjectName()
+                        .getProjectName()
+                        + "</h4><br><br>"
+                        + event.getItem()
+                        .getVacancy()
+                        .getProjectName()
+                        .getProjectDescription());
+            }
+
+            if (event.getItem()
+                    .getVacancy()
+                    .getProjectName()
+                    .getProjectLogo() != null) {
+                image.setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(event
+                                .getItem()
+                                .getVacancy()
+                                .getProjectName()
+                                .getProjectLogo());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        }
+
+        retBox.add(image);
+        return retBox;
     }
 }
