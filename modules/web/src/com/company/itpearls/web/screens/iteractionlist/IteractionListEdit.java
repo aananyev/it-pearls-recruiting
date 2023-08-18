@@ -15,10 +15,10 @@ import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
-import com.haulmont.cuba.gui.util.OperationResult;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.slf4j.Logger;
@@ -141,6 +141,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private MessageBundle messageBundle;
     @Inject
     private CollectionContainer<Employee> employeeDc;
+    @Inject
+    private Image projectLogoImage;
+    @Inject
+    private Image candidateImage;
+    @Inject
+    private InstanceContainer<IteractionList> iteractionListDc;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -155,6 +161,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
         // запомним кандидата
         candidate = candidateField.getValue();
+
+        if (event.getValue().getFileImageFace() != null) {
+            candidateImage.setValueSource(
+                    new ContainerValueSource<>(iteractionListDc, "candidate.fileImageFace"));
+        } else {
+            candidateImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        }
     }
 
     @Subscribe
@@ -287,7 +300,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null)
                     if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null)
                         if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName().getCompanyShortName() != null) {
-                            String labetText = "<h4><b>" +
+                            String labetText = "<h3><b>" +
                                     vacancyFiels.getValue()
                                             .getProjectName()
                                             .getProjectDepartment()
@@ -298,7 +311,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                             .getProjectName()
                                             .getProjectDepartment()
                                             .getDepartamentRuName() +
-                                    "</h4>";
+                                    "</h3>";
 
                             companyLabel.setValue(labetText);
 
@@ -1398,8 +1411,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onInit(InitEvent event) {
-
-
+        projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        candidateImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         // изначально предполагаем, что это продолжение проекта
         newProject = false;
         // вся сортировка в поле IteractionType
@@ -1492,6 +1505,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             vacancyFieldValueChange(event);
             setPriorityLabel(event);
             setStatusOfVacancyLabel(event);
+        }
+
+        if (event.getValue().getProjectName().getProjectLogo() != null) {
+            projectLogoImage.setValueSource(
+                    new ContainerValueSource<>(iteractionListDc, "vacancy.projectName.projectLogo"));
+        } else {
+            projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
         }
     }
 

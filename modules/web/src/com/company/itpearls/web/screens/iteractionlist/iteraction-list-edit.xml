@@ -12,6 +12,7 @@
                           view="_local"/>
                 <property name="candidate"
                           view="_local">
+                    <property name="fileImageFace" view="_local"/>
                     <property name="personPosition"
                               view="_local"/>
                 </property>
@@ -30,6 +31,8 @@
                               view="_local"/>
                     <property name="projectName"
                               view="_local">
+                        <property name="projectLogo"
+                                  view="_local"/>
                         <property name="projectTree"
                                   view="_local"/>
                         <property name="projectOwner"
@@ -91,6 +94,8 @@
                           view="_local"/>
                 <property name="projectName"
                           view="_local">
+                    <property name="projectLogo"
+                              view="_local"/>
                     <property name="projectDepartment"
                               view="_local">
                         <property name="companyName"
@@ -145,36 +150,37 @@
                   caption="msg://msgHeaderIteraction">
             <hbox spacing="true"
                   width="100%">
-                <hbox width="40%"
+                <vbox width="AUTO"
                       height="AUTO">
                     <textField id="numberIteractionField"
                                dataContainer="iteractionListDc"
                                property="numberIteraction"
                                editable="false"
                                caption="msg://msgNumber"
-                               width="80%"
+                               width="AUTO"
                                align="MIDDLE_CENTER"/>
                     <dateField id="dateIteractionField"
                                dataContainer="iteractionListDc"
                                property="dateIteraction"
                                editable="false"
                                caption="msg://msgDate"/>
-                </hbox>
+                </vbox>
                 <vbox width="AUTO"
                       spacing="true"
                       height="AUTO">
                     <hbox width="AUTO"
                           spacing="true"
                           height="AUTO">
-                        <label stylename="h4"
+                        <label stylename="h3"
                                width="AUTO"
                                height="AUTO"
                                value="msg://msgCompanyDepartament"/>
-                        <label stylename="h4"
+                        <label stylename="h3"
                                width="AUTO"
                                height="AUTO"
                                value=": "/>
                         <label id="companyLabel"
+                               stylename="h3"
                                width="AUTO"
                                height="AUTO"
                                htmlEnabled="true"/>
@@ -182,19 +188,20 @@
                     <hbox spacing="true"
                           width="AUTO"
                           height="AUTO">
-                        <label stylename="h4"
+                        <label stylename="h3"
                                width="AUTO"
                                height="AUTO"
                                value="msg://msgProject"/>
-                        <label stylename="h4"
+                        <label stylename="h3"
                                width="AUTO"
                                height="AUTO"
                                value=": "/>
                         <label id="projectLabel"
                                width="AUTO"
                                height="AUTO"
-                               stylename="h4"/>
+                               stylename="h3"/>
                     </hbox>
+
                 </vbox>
                 <label id="ratingLabel"
                        stylename="h1"
@@ -211,11 +218,28 @@
                            align="MIDDLE_RIGHT"
                            height="50px"/>
                 </hbox>
+                <image id="projectLogoImage"
+                       width="100px"
+                       height="100px"
+                       visible="true"
+                       align="TOP_RIGHT"
+                       stylename="widget-border"
+                       scaleMode="FILL"/>
+                <image id="candidateImage"
+                       dataContainer="iteractionListDc"
+                       property="candidate.fileImageFace"
+                       width="100px"
+                       height="100px"
+                       visible="true"
+                       align="TOP_RIGHT"
+                       stylename="widget-border"
+                       scaleMode="FILL"/>
             </hbox>
         </groupBox>
         <groupBox width="100%"
                   caption="msg://mshMostPopular"
                   stylename="light"
+                  spacing="false"
                   collapsable="true">
             <hbox id="mostPopularHbox"
                   width="100%"
@@ -405,7 +429,7 @@
                     </grid>
                     <textArea id="commentField"
                               property="comment"
-                              rows="4"
+                              rows="8"
                               width="100%"
                               dataContainer="iteractionListDc"
                               caption="msg://msgComment"

@@ -13,6 +13,7 @@ import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.itpearls.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
@@ -21,7 +22,9 @@ import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.DataGridItems;
 import com.haulmont.cuba.gui.components.data.ValueSource;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -265,6 +268,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> telegramLabel;
     @Inject
     private Button addSocialNetworkListsButton;
+    @Inject
+    private LookupPickerField vacancyFilterLookupPickerField;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -722,6 +727,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setCandidatePicImage();
         setAddSocialNetworkButtonEnable();
         checkTelegramName();
+        setIteractionListVacancyFilter();
 
         lastIteraction = getLastIteraction();
 
@@ -734,6 +740,58 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 //        setLaborAgreement();
         setLastProjectTable();
+    }
+
+
+    @Install(to = "vacancyFilterLookupPickerField", subject = "optionImageProvider")
+    private Resource vacancyFilterLookupPickerFieldOptionImageProvider(OpenPosition object) {
+        Image imageResource = uiComponents.create(Image.class);
+        imageResource.setWidth("20px");
+        imageResource.setHeight("20px");
+        imageResource.setScaleMode(Image.ScaleMode.FILL);
+
+        if (object.getProjectName().getProjectLogo() == null) {
+            return imageResource.createResource(ThemeResource.class)
+                    .setPath("icons/no-company.png");
+        } else {
+            return imageResource.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(object.getProjectName()
+                            .getProjectLogo());
+        }
+    }
+
+    private void setIteractionListVacancyFilter() {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            Set<OpenPosition> openPositions = new HashSet<>();
+
+            for (IteractionList iteractionList : getEditedEntity().getIteractionList()) {
+                if (iteractionList.getVacancy() != null) {
+                    openPositions.add(iteractionList.getVacancy());
+                }
+            }
+
+            List<OpenPosition> op = new ArrayList<>(openPositions);
+            vacancyFilterLookupPickerField.setOptionsList(op);
+
+            vacancyFilterLookupPickerField.addValueChangeListener(e -> {
+                if (vacancyFilterLookupPickerField.getValue() != null) {
+                    jobCandidateIteractionDc.setDisconnectedItems(getEditedEntity().getIteractionList());
+
+                    List<IteractionList> filtered = getEditedEntity()
+                            .getIteractionList()
+                            .stream()
+                            .filter(iteractionList ->
+                                    iteractionList.getVacancy().equals(vacancyFilterLookupPickerField.getValue()))
+                            .collect(Collectors.toList());
+
+                    jobCandidateIteractionDc.setDisconnectedItems(filtered);
+                } else {
+                    jobCandidateIteractionDc.setDisconnectedItems(getEditedEntity().getIteractionList());
+                }
+
+                jobCandidateIteractionListTable.repaint();
+            });
+        }
     }
 
     private void setAddSocialNetworkButtonEnable() {
@@ -2909,6 +2967,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
         OpenPosition openPosition = entity.getValue("vacancy");
         IteractionList lastInteraction = null;
+        jobCandidateIteractionDc.setDisconnectedItems(getEditedEntity().getIteractionList());
 
         if (jobCandidateIteractionDc.getMutableItems().size() != 0) {
             for (int i = 0; i < jobCandidateIteractionDc.getMutableItems().size(); i++) {
@@ -3051,11 +3110,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (iteractionList.getVacancy() != null) {
                 if (iteractionList.getVacancy().getOpenClose() != null) {
                     return iteractionList.getVacancy().getOpenClose() ?
-                            "Закрыта на текущий момент" : "Открыта на текущий момент";
+                            messageBundle.getMessage("msgCurrentlyClosed") :
+                            messageBundle.getMessage("msgCurrentlyOpen");
                 } else
-                    return "Открыта на текущий момент";
+                    return messageBundle.getMessage("msgCurrentlyOpen");
             } else
-                return "Закрыта на текущий момент";
+                return messageBundle.getMessage("msgCurrentlyClosed");
         }
     }
 
@@ -3565,44 +3625,46 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retBox.setHeightFull();
 
         Image image = uiComponents.create(Image.class);
+
         image.setDescriptionAsHtml(true);
         image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         image.setWidth("50px");
         image.setHeight("50px");
         image.setStyleName("icon-no-border-50px");
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        image.setSource(ThemeResource.class).setPath("icons/no-company.png");
 
-        if (event.getItem()
-                .getToVacancy()
-                .getProjectName() != null) {
+        if (event.getItem().getToVacancy() != null) {
             if (event.getItem()
                     .getToVacancy()
-                    .getProjectName()
-                    .getProjectDescription() != null) {
-                image.setDescription("<h4>"
-                        + event.getItem()
+                    .getProjectName() != null) {
+                if (event.getItem()
                         .getToVacancy()
                         .getProjectName()
-                        .getProjectName()
-                        + "</h4><br><br>"
-                        + event.getItem()
-                        .getToVacancy()
-                        .getProjectName()
-                        .getProjectDescription());
-            }
+                        .getProjectDescription() != null) {
+                    image.setDescription("<h4>"
+                            + event.getItem()
+                            .getToVacancy()
+                            .getProjectName()
+                            .getProjectName()
+                            + "</h4><br><br>"
+                            + event.getItem()
+                            .getToVacancy()
+                            .getProjectName()
+                            .getProjectDescription());
+                }
 
-            if (event.getItem()
-                    .getToVacancy()
-                    .getProjectName()
-                    .getProjectLogo() != null) {
-                image.setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(event
-                                .getItem()
-                                .getToVacancy()
-                                .getProjectName()
-                                .getProjectLogo());
-            } else {
-                image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                if (event.getItem()
+                        .getToVacancy()
+                        .getProjectName()
+                        .getProjectLogo() != null) {
+                    image.setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(event
+                                    .getItem()
+                                    .getToVacancy()
+                                    .getProjectName()
+                                    .getProjectLogo());
+                }
             }
         }
 
@@ -3623,38 +3685,39 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         image.setHeight("50px");
         image.setStyleName("icon-no-border-50px");
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        image.setSource(ThemeResource.class).setPath("icons/no-company.png");
 
-        if (event.getItem()
-                .getVacancy()
-                .getProjectName() != null) {
+        if (event.getItem().getVacancy() != null) {
             if (event.getItem()
                     .getVacancy()
-                    .getProjectName()
-                    .getProjectDescription() != null) {
-                image.setDescription("<h4>"
-                        + event.getItem()
+                    .getProjectName() != null) {
+                if (event.getItem()
                         .getVacancy()
                         .getProjectName()
-                        .getProjectName()
-                        + "</h4><br><br>"
-                        + event.getItem()
-                        .getVacancy()
-                        .getProjectName()
-                        .getProjectDescription());
-            }
+                        .getProjectDescription() != null) {
+                    image.setDescription("<h4>"
+                            + event.getItem()
+                            .getVacancy()
+                            .getProjectName()
+                            .getProjectName()
+                            + "</h4><br><br>"
+                            + event.getItem()
+                            .getVacancy()
+                            .getProjectName()
+                            .getProjectDescription());
+                }
 
-            if (event.getItem()
-                    .getVacancy()
-                    .getProjectName()
-                    .getProjectLogo() != null) {
-                image.setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(event
-                                .getItem()
-                                .getVacancy()
-                                .getProjectName()
-                                .getProjectLogo());
-            } else {
-                image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                if (event.getItem()
+                        .getVacancy()
+                        .getProjectName()
+                        .getProjectLogo() != null) {
+                    image.setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(event
+                                    .getItem()
+                                    .getVacancy()
+                                    .getProjectName()
+                                    .getProjectLogo());
+                }
             }
         }
 

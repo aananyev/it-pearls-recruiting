@@ -901,10 +901,26 @@ rating_battery_yellow_3:before {
     margin: 0 auto;
 }
 
-.pic-center-large-blue {
-    color: green;
+.pic-center-large-black {
+    color: black;
     text-align: center;
-    text-color: green;
+    text-color: black;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large-lightblue {
+    color: lightblue;
+    text-align: center;
+    text-color: lightblue;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large-blue {
+    color: blue;
+    text-align: center;
+    text-color: blue;
     font-size: large;
     margin: 0 auto;
 }
@@ -1031,9 +1047,9 @@ rating_battery_yellow_3:before {
 }
 
 .pic-center-large-yellow {
-    color: yellow;
+    color: orange;
     text-align: center;
-    text-color: yellow;
+    text-color: orange;
     font-size: large;
     margin: 0 auto;
 }
@@ -1083,9 +1099,9 @@ rating_battery_yellow_3:before {
 }
 
 .open-position-pic-center-large-yellow {
-    color: yellow;
+    color: orange;
     text-align: center;
-    text-color: yellow;
+    text-color: orange;
     font-size: large;
     margin: 0 auto;
 }

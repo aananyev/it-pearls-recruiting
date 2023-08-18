@@ -125,7 +125,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidatesDl.load();
 
         buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
-        
+
         employees = dataManager.load(Employee.class)
                 .view("employee-view")
                 .list();
@@ -1035,7 +1035,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Component createCloseButton(JobCandidate entity) {
         Button closeButton = uiComponents.create(Button.class);
-        closeButton.setDescription("Закрыть");
+        closeButton.setDescription(messageBundle.getMessage("msgClose"));
         closeButton.setIcon("icons/close.png");
         BaseAction closeAction = new BaseAction("closeAction")
                 .withHandler(actionPerformedEvent ->
@@ -1052,13 +1052,124 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Label contactsStatusLabel = uiComponents.create(Label.class);
         contactsStatusLabel.setIconFromSet(getContactsStatusIcon(event));
         contactsStatusLabel.setStyleName(getContactsStatusStyle(event));
-        contactsStatusLabel.setAlignment(Component.Alignment.TOP_LEFT);
+        contactsStatusLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        if (contactsInfoStyle.equals("pic-center-large-grey")) { // костыль, лениво рефакторить пока
+            contactsStatusLabel.setDescription(messageBundle.getMessage("msgNoContactsInfo"));
+        } else {
+            contactsStatusLabel.setDescription(messageBundle.getMessage("msgHaveContactsInfo"));
+        }
 
-        Label employeeStatus = genEmployeeStatusLabel(event);
+        Label employeeStatusLabel = genEmployeeStatusLabel(event);
+        Label commentCandidateLabel = getCommentCandidateLabel(event);
+        Label telegramCLabel = genTelegramLabel(event);
+        Label skypeLabel = genSkypeLabel(event);
+        Label emailLabel = getEmailLabel(event);
+        Label blackListLabel = getBlackList(event);
 
+        retHBox.add(blackListLabel);
         retHBox.add(contactsStatusLabel);
-        retHBox.add(employeeStatus);
+        retHBox.add(employeeStatusLabel);
+        retHBox.add(emailLabel);
+        retHBox.add(telegramCLabel);
+        retHBox.add(skypeLabel);
+        retHBox.add(commentCandidateLabel);
+
         return retHBox;
+    }
+
+    private Label getBlackList(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setVisible(false);
+        retLabel.setIconFromSet(CubaIcon.STOP_CIRCLE_O);
+        retLabel.setStyleName("pic-center-large-black");
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retLabel.setDescription(messageBundle.getMessage("msgBlackList"));
+
+        if (event.getItem().getBlockCandidate() != null) {
+            if (event.getItem().getBlockCandidate())
+                retLabel.setVisible(true);
+        }
+
+        return retLabel;
+    }
+
+    private Label getEmailLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setVisible(false);
+        retLabel.setIconFromSet(CubaIcon.PAPERCLIP);
+        retLabel.setStyleName("pic-center-large-gray");
+        retLabel.setDescription(event.getItem().getEmail());
+        retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
+
+
+        if (event.getItem().getEmail() != null) {
+            if (!event.getItem().getEmail().equals(""))
+                retLabel.setVisible(true);
+        }
+
+        return retLabel;
+    }
+
+    private Label genSkypeLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setVisible(false);
+        retLabel.setIconFromSet(CubaIcon.SKYPE);
+        retLabel.setStyleName("pic-center-large-blue");
+        retLabel.setDescription(event.getItem().getSkypeName());
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem().getSkypeName() != null) {
+            if (!event.getItem().getSkypeName().equals("")) {
+                retLabel.setVisible(true);
+            }
+        }
+
+        return retLabel;
+    }
+
+    private Label genTelegramLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setVisible(false);
+        retLabel.setIconFromSet(CubaIcon.TELEGRAM);
+        retLabel.setStyleName("pic-center-large-lightblue");
+        retLabel.setDescription(event.getItem().getTelegramName());
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem().getTelegramName() != null) {
+            if (!event.getItem().getTelegramName().equals("")) {
+                retLabel.setVisible(true);
+            }
+        }
+
+        return retLabel;
+    }
+
+    private Label getCommentCandidateLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setVisible(false);
+        retLabel.setDescription(messageBundle.getMessage("msgHaveComment"));
+        retLabel.setIconFromSet(CubaIcon.COMMENTS_O);
+        retLabel.setStyleName("pic-center-large-black");
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        Boolean isComment = false;
+
+        if (event.getItem().getIteractionList() != null) {
+            for (IteractionList iteractionList : event.getItem().getIteractionList()) {
+                if (iteractionList.getComment() != null) {
+                    if (!iteractionList.getComment().equals("")) {
+                        isComment = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isComment) {
+                retLabel.setVisible(true);
+            }
+        }
+
+        return retLabel;
     }
 
     private Label genEmployeeStatusLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -1069,24 +1180,35 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Label setEployeeStatusIcon(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setIconFromSet(CubaIcon.CIRCLE_O);
+        retLabel.setDescription(messageBundle.getMessage("msgCandidate"));
+        retLabel.setVisible(false);
 
         for (Employee employee : employees) {
             if (event.getItem().equals(employee.getJobCandidate())) {
                 retLabel.setIconFromSet(CubaIcon.CHILD);
-                retLabel.setAlignment(Component.Alignment.TOP_LEFT);
+                retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+                retLabel.setVisible(true);
 
                 if (employee.getWorkStatus() != null) {
                     if (employee.getWorkStatus().getInStaff() != null) {
                         if (employee.getWorkStatus().getInStaff()) {
-                            retLabel.setStyleName("pic-center-large-red");
-                        } else {
                             retLabel.setStyleName("pic-center-large-green");
+                            retLabel.setDescription(messageBundle.getMessage("msgOurWorker"));
+                            break;
+                        } else {
+                            retLabel.setStyleName("pic-center-large-red");
+                            retLabel.setDescription(messageBundle.getMessage("msgDissmised"));
+                            break;
                         }
                     } else {
                         retLabel.setStyleName("pic-center-large-yellow");
+                        retLabel.setDescription(messageBundle.getMessage("msgUndefined"));
+                        break;
                     }
                 } else {
                     retLabel.setStyleName("pic-center-large-yellow");
+                    retLabel.setDescription(messageBundle.getMessage("msgUndefined"));
+                    break;
                 }
             } else {
                 retLabel.setStyleName("pic-center-large-grey");
@@ -1095,6 +1217,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return retLabel;
     }
+
+    private String contactsInfoStyle;
 
     private String getContactsStatusStyle(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Integer s = getPictString(event.getItem());
@@ -1131,6 +1255,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             }
         }
 
+        contactsInfoStyle = retStr;
         return retStr;
     }
 

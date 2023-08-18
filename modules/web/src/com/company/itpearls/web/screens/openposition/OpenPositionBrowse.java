@@ -34,7 +34,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -161,18 +160,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private UiComponents uiComponents;
 
-    private String ROLE_MANAGER = "Manager";
-    private String ROLE_RESEARCHER = "Researcher";
-
     private static final String MANAGEMENT_GROUP = "Менеджмент";
     private static final String ACCOUNTING_GROUP = "Аккаунтинг";
     private static final String HUNTING_GROUP = "Хантинг";
-    private String ROLE_ADMINISTRATOR = "Administrators";
     private Map<String, Integer> remoteWork = new LinkedHashMap<>();
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
     private Map<String, Integer> mapWorkExperience = new LinkedHashMap<>();
     private List<User> users = new ArrayList<>();
-    private static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
+    private final static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
 
     public final static int PRIORITY_NONE = -2;
     public final static int PRIORITY_DRAFT = -1;
@@ -494,9 +489,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         remoteWork.put(messageBundle.getMessage("msgHybridWork"), 2);
     }
 
-    private static final String ICON_STYLE = "icon-label";
-    private static final String VBOX_STYLE = "vbox-icon";
-
     @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
     private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retHbox = setPlusMinusIcon(setRemoteWorkIcon(event));
@@ -807,6 +799,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 //        Component viewCommentButton = createViewCommentButton(entity);
         Component openCloseButton = createOpenCloseButton(entity);
         Component viewDescriptionButton = createViewDescriptionButton(entity);
+        Component gigachatButton = createGigaChatLetterButton(entity);
         Component sendedCandidatesButton = createSendedCandidatesButton(entity);
 
         closeButton.setAlignment(Component.Alignment.TOP_RIGHT);
@@ -855,6 +848,21 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
         return mainLayout;
+    }
+
+    private Component createGigaChatLetterButton(OpenPosition entity) {
+        Button retButton = uiComponents.create(Button.class);
+        retButton.setIcon(CubaIcon.MAGIC.source());
+        retButton.setDescription(messageBundle.getMessage("msgGigaChatLetter"));
+        retButton.setEnabled(true);
+        retButton.setVisible(false);
+
+        retButton.addClickListener(addClickListenerEvent -> {
+            openPositionCommentViewInvoke();
+        });
+
+        return retButton;
+
     }
 
     private Component createViewCommentButton(OpenPosition entity) {

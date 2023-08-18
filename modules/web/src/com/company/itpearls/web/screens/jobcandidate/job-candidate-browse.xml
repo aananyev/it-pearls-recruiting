@@ -94,7 +94,7 @@
             </actions>
             <columns>
                 <column id="status"
-                        width="50px">
+                        width="200px">
                     <componentRenderer/>
                 </column>
                 <column id="fileImageFace"

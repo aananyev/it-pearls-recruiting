@@ -843,6 +843,14 @@
                  expand="jobCandidateIteractionListTable"
                  icon="LIST"
                  spacing="true">
+                <lookupPickerField id="vacancyFilterLookupPickerField"
+                                   caption="msg://msgVacancyFiler"
+                                   visible="true"
+                                   width="AUTO">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                    </actions>
+                </lookupPickerField>
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionDc"
                           width="100%"
@@ -903,7 +911,7 @@
                                 property="vacancy"/>
                         <column id="currentOpenCloseColumn"
                                 caption="mainMsg://msgCurrentOpenClose"
-                                maximumWidth="85px">
+                                maximumWidth="45px">
                             <iconRenderer/>
                         </column>
                         <column id="iteractionType"
