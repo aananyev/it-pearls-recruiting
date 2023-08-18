@@ -1082,7 +1082,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retLabel.setVisible(false);
         retLabel.setIconFromSet(CubaIcon.STOP_CIRCLE_O);
         retLabel.setStyleName("pic-center-large-black");
-        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
         retLabel.setDescription(messageBundle.getMessage("msgBlackList"));
 
         if (event.getItem().getBlockCandidate() != null) {

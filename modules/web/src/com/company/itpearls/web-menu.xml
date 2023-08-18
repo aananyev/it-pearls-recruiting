@@ -85,7 +85,7 @@
         <item screen="itpearls_Currency.browse" caption="mainMsg://menu_config.itpearls_Currency.browse" icon="DOLLAR"/>
         <item screen="itpearls_OutstaffingRates.browse" caption="mainMsg://menu_config.itpearls_OutstaffingRates.browse"
               icon="RUBLE"/>
-        <item screen="itpearls_EmployeeWorkStatus.browse"
+        <item screen="itpearls_EmployeeWorkStatus.browse" icon="HOURGLASS_START"
               caption="mainMsg://menu_config.itpearls_EmployeeWorkStatus.browse"/>
     </menu>
     <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-hadbook">
