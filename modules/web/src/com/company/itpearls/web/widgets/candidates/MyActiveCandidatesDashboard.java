@@ -1,10 +1,10 @@
 package com.company.itpearls.web.widgets.candidates;
 
-import com.company.itpearls.entity.IteractionList;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.*;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
@@ -38,6 +38,16 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private DataManager dataManager;
     @Inject
     private RadioButtonGroup candidateRadioButtonGroup;
+    @Inject
+    private Label<String> notCandidatesLabel;
+    @Inject
+    private MessageBundle messageBundle;
+    @Inject
+    private CheckBox excludeCheckBox;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private Dialogs dialogs;
 
     private Set<OpenPosition> caseClosedOpenPosition;
     private Set<OpenPosition> processedOpenPosition;
@@ -46,16 +56,15 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private ScrollBoxLayout scrollBoxLayout;
     private Boolean generatedWidget = false;
     private int candidatesCount = 0;
-    @Inject
-    private Label<String> notCandidatesLabel;
-    @Inject
-    private MessageBundle messageBundle;
-    @Inject
-    private CheckBox excludeCheckBox;
+
+    final static String QUERY_MY_CANIDATE_EXCLUDE = "select e from itpearls_MyActiveCandidateExclude e " +
+            "where e.jobCandidate = :jobCandidate and e.user = :user";
 
     final static String QUERY_EXCLUDE_CANDIDATES = "select e from itpearls_OpenPosition e " +
             "where e.positionType = :positionType and not e.openClose = true " +
             "and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
+    @Inject
+    private GroupBoxLayout excludeCandidatesLineGroupBox;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -116,6 +125,8 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
     private void initCandidatesList() {
         Set<JobCandidate> jobCandidateSet = new HashSet<>();
+        Map<JobCandidate, Map.Entry<Integer, Integer>> candidateProjectMap = new HashMap<JobCandidate, Map.Entry<Integer, Integer>>();
+
         candidatesCount = jobCandidateSet.size();
 
         for (IteractionList interactionList : iteractionListsDc.getItems()) {
@@ -136,32 +147,14 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         }
 
         for (JobCandidate jobCandidate : jobCandidateSet) {
-            HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.class);
-            hBoxLayout.setWidthAuto();
-            hBoxLayout.setHeightAuto();
-            hBoxLayout.setSpacing(true);
+            HBoxLayout candidateLineHBoxLayout =
+                    uiComponents.create(HBoxLayout.class);
+            candidateLineHBoxLayout.setWidthAuto();
+            candidateLineHBoxLayout.setHeightAuto();
+            candidateLineHBoxLayout.setSpacing(true);
 
-            LinkButton candidateLinkButton = uiComponents.create(LinkButton.class);
-            candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            candidateLinkButton.setCaption(jobCandidate.getFullName()
-                    + " / "
-                    + jobCandidate.getPersonPosition().getPositionRuName());
-
-            candidateLinkButton.addClickListener(e -> {
-                screenBuilders.editor(JobCandidate.class, this)
-                        .editEntity(jobCandidate)
-                        .build()
-                        .show();
-            });
-
-            PopupButton candidateActioButton = uiComponents.create(PopupButton.class);
-            candidateActioButton.setIconFromSet(CubaIcon.ADD_ACTION);
-            candidateActioButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-            candidateActioButton.addAction(new BaseAction("closeAllProcesses")
-                    .withCaption(messageBundle.getMessage("msgCloseAllProcesses"))
-                    .withDescription(messageBundle.getMessage("msgCloseAllProcessesDescription"))
-                    .withHandler(actionPerformedEvent -> closeAllProcesses()));
+            HBoxLayout jobCandidateNameHBox = jobCandidateNameHBox(jobCandidate);
+            candidateLineHBoxLayout.add(jobCandidateNameHBox);
 
             caseClosedOpenPosition = getCaseClosedOpenPosition(jobCandidate);
             processedOpenPosition = getProcessedOpenPosition(jobCandidate);
@@ -171,36 +164,141 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
             opportunityOpenPosition = getOpportunityOpenPosition(jobCandidate);
 
-            hBoxLayout.add(candidateLinkButton);
-            // /* TO-DO как то доработать чтоб была кнопка удалить из рассмотрения */
-            // hBoxLayout.add(candidateActioButton);
-
             scrollBoxLayout = uiComponents.create(ScrollBoxLayout.class);
             scrollBoxLayout.setWidthAuto();
             scrollBoxLayout.setSpacing(true);
             scrollBoxLayout.setOrientation(HasOrientation.Orientation.HORIZONTAL);
             scrollBoxLayout.setScrollBarPolicy(ScrollBoxLayout.ScrollBarPolicy.HORIZONTAL);
 
-            createLabels(opportunityOpenPosition, "text-block-gradient-green",
+            Integer labelCounter = 0;
+            Integer labelExcludeCounter = 0;
+            Integer labelCloseAllProjectsCounter = 0;
+
+            List<Integer> labelCounterOpportunity = new ArrayList<>();
+            List<Integer> labelCounterProcessed = new ArrayList<>();
+            List<Integer> labelCounterCaseClosed = new ArrayList<>();
+
+            labelCounterOpportunity = createLabels(jobCandidate, opportunityOpenPosition, "text-block-gradient-green",
                     messageBundle.getMessage("msgCanSendCandidate"));
-            createLabels(processedOpenPosition, "text-block-gradient-yellow",
+            labelCounterProcessed = createLabels(jobCandidate, processedOpenPosition, "text-block-gradient-yellow",
                     messageBundle.getMessage("msgCandidateIsWork"));
-            createLabels(caseClosedOpenPosition, "text-block-gradient-red",
+            labelCounterCaseClosed = createLabels(jobCandidate, caseClosedOpenPosition, "text-block-gradient-red",
                     messageBundle.getMessage("msgCandidateisEndProcess"));
 
-            hBoxLayout.add(scrollBoxLayout);
+            labelCounter = labelCounterOpportunity.get(0)
+                    + labelCounterProcessed.get(0)
+                    + labelCounterCaseClosed.get(0);
+            labelExcludeCounter = labelCounterOpportunity.get(1)
+                    + labelCounterProcessed.get(1)
+                    + labelCounterCaseClosed.get(1);
+            labelCloseAllProjectsCounter = labelCounterOpportunity.get(2)
+                    + labelCounterProcessed.get(2)
+                    + labelCounterCaseClosed.get(2);
 
-            candidatesScrollBox.add(hBoxLayout);
+            candidateLineHBoxLayout.add(scrollBoxLayout);
+
+            candidateLineHBoxLayout.setVisible(labelCounter > labelExcludeCounter);
+            candidateProjectMap.put(jobCandidate, new AbstractMap.SimpleEntry<>(labelCounter, labelExcludeCounter));
+
+            candidateLineHBoxLayout.setVisible(labelCloseAllProjectsCounter == 0);
+
+            HBoxLayout jobCandidateExcludeNameHBox = jobCandidateNameHBox(jobCandidate);
+
+            jobCandidateExcludeNameHBox.setVisible(labelCounter == labelExcludeCounter);
+
+            if (jobCandidateExcludeNameHBox.isVisible()) {
+                jobCandidateExcludeNameHBox.setVisible(labelCloseAllProjectsCounter != 0);
+            }
+
+            candidatesScrollBox.add(candidateLineHBoxLayout);
+            excludeCandidatesLineGroupBox.add(jobCandidateExcludeNameHBox);
+
+            candidateProjectMap.put(jobCandidate, new AbstractMap.SimpleEntry<>(labelCounter, labelExcludeCounter));
         }
 
         generatedWidget = true;
     }
 
-    private void closeAllProcesses() {
+    private HBoxLayout jobCandidateNameHBox(JobCandidate jobCandidate) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+
+        LinkButton candidateLinkButton = uiComponents.create(LinkButton.class);
+        candidateLinkButton.setStyleName("h4");
+        candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        candidateLinkButton.setCaption(jobCandidate.getFullName()
+                + " / "
+                + jobCandidate.getPersonPosition().getPositionRuName());
+
+        candidateLinkButton.addClickListener(e -> {
+            screenBuilders.editor(JobCandidate.class, this)
+                    .editEntity(jobCandidate)
+                    .build()
+                    .show();
+        });
+
+        PopupButton candidateActioButton = uiComponents.create(PopupButton.class);
+        candidateActioButton.setIconFromSet(CubaIcon.ADD_ACTION);
+        candidateActioButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        candidateActioButton.addAction(new BaseAction("closeAllProcesses")
+                .withCaption(messageBundle.getMessage("msgCloseAllProcesses"))
+                .withDescription(messageBundle.getMessage("msgCloseAllProcessesDescription"))
+                .withHandler(actionPerformedEvent -> closeAllProcesses(jobCandidate)));
+
+        LinkButton removeCandidateFromConsideration = uiComponents.create(LinkButton.class);
+        removeCandidateFromConsideration.setIconFromSet(CubaIcon.EXCLUDE_ACTION);
+        removeCandidateFromConsideration.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        removeCandidateFromConsideration.setDescription(messageBundle.getMessage("msgRemoveCandidateFromConsideration"));
+        removeCandidateFromConsideration.addClickListener(event -> {closeAllProcesses(jobCandidate);});
+
+        LinkButton undoRemoveCandidateFromConsideration = uiComponents.create(LinkButton.class);
+        undoRemoveCandidateFromConsideration.setIconFromSet(CubaIcon.UNDO);
+        undoRemoveCandidateFromConsideration.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        undoRemoveCandidateFromConsideration.setDescription(
+                messageBundle.getMessage("msgUndoRemoveCandidateFromConsiderationDesc"));
+
+        retHbox.add(candidateLinkButton);
+        retHbox.add(undoRemoveCandidateFromConsideration);
+        retHbox.add(removeCandidateFromConsideration);
+
+        return retHbox;
     }
 
-    private void createLabels(Set<OpenPosition> openPositions, String style, String description) {
+    private void closeAllProcesses(JobCandidate jobCandidate) {
+        MyActiveCandidateExclude myActiveCandidateExclude = metadata.create(MyActiveCandidateExclude.class);
+        myActiveCandidateExclude.setUser((ExtUser) userSession.getUser());
+        myActiveCandidateExclude.setJobCandidate(jobCandidate);
+
+        dataManager.commit(myActiveCandidateExclude);
+    }
+
+    private List<Integer> createLabels(JobCandidate jobCandidate, Set<OpenPosition> openPositions, String style, String description) {
+        List<Integer> retList = new ArrayList<>();
+
+        Integer labelCounter = 0;
+        Integer excludeCounter = 0;
+        Integer flagCandidateCloseAllProject = 0;
+
+        List<MyActiveCandidateExclude> myActiveCandidateExclude = dataManager.load(MyActiveCandidateExclude.class)
+                .query(QUERY_MY_CANIDATE_EXCLUDE)
+                .parameter("jobCandidate", jobCandidate)
+                .parameter("user", userSession.getUser())
+                .view("myActiveCandidateExclude-view")
+                .list();
+
+        for (MyActiveCandidateExclude mace : myActiveCandidateExclude) {
+            if (mace.getOpenPosition() == null) {
+                flagCandidateCloseAllProject = 1;
+                break;
+            }
+        }
+
         for (OpenPosition openPosition : openPositions) {
+            HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+            retHBox.setStyleName(style);
+            retHBox.setSpacing(true);
+
+            labelCounter++;
             LinkButton retLinkButton = uiComponents.create(LinkButton.class);
             if (openPosition.getProjectName().getProjectName().length() > 20) {
                 retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
@@ -210,11 +308,58 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
             retLinkButton.setDescription(description + "\n\n" + openPosition.getVacansyName());
             retLinkButton.setWidthAuto();
-            retLinkButton.setStyleName(style);
             retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
-            scrollBoxLayout.add(retLinkButton);
+            LinkButton closeInprocessLinkButton = uiComponents.create(LinkButton.class);
+            closeInprocessLinkButton.setIcon(CubaIcon.EXCLUDE_ACTION.source());
+            closeInprocessLinkButton.setStyleName("pic-center-large-black");
+            closeInprocessLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            closeInprocessLinkButton.addClickListener(event -> {
+
+                dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                        .withMessage(messageBundle.getMessage("msgRemoveFromConsideration"))
+                        .withType(Dialogs.MessageType.WARNING)
+                        .withCaption(messageBundle.getMessage("mainmsgWarning"))
+                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                        .withHandler(e -> {
+                                            MyActiveCandidateExclude mace = metadata.create(MyActiveCandidateExclude.class);
+
+                                            mace.setJobCandidate(jobCandidate);
+                                            mace.setOpenPosition(openPosition);
+                                            mace.setUser((ExtUser) userSession.getUser());
+
+                                            dataManager.commit(mace);
+
+                                            retHBox.setVisible(false);
+                                        }),
+                                new DialogAction(DialogAction.Type.NO))
+                        .show();
+
+            });
+
+            retHBox.add(retLinkButton);
+            retHBox.add(closeInprocessLinkButton);
+
+            scrollBoxLayout.add(retHBox);
+
+            Boolean excludeProject = false;
+
+            for (MyActiveCandidateExclude mace : myActiveCandidateExclude) {
+                if (openPosition.equals(mace.getOpenPosition())) {
+                    excludeProject = true;
+                    excludeCounter ++;
+                    break;
+                }
+            }
+
+            retHBox.setVisible(!excludeProject);
         }
+        // блок с "закрытыми" кандидатами
+        retList.add(labelCounter);
+        retList.add(excludeCounter);
+        retList.add(flagCandidateCloseAllProject);
+
+        return retList;
     }
 
     private Set<OpenPosition> getProcessedOpenPosition(JobCandidate jobCandidate) {
@@ -251,7 +396,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     }
 
     private Set<OpenPosition> getOpportunityOpenPosition(JobCandidate jobCandidate) {
-        String QUERY_OPPORTUNITY = "select e from itpearls_OpenPosition e " +
+        final String QUERY_OPPORTUNITY = "select e from itpearls_OpenPosition e " +
                 "where e.positionType = :positionType and not e.openClose = true";
 
         List<OpenPosition> opportunityOpenPosition = dataManager.load(OpenPosition.class)

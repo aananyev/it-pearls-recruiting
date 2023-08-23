@@ -1061,6 +1061,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         Label employeeStatusLabel = genEmployeeStatusLabel(event);
         Label commentCandidateLabel = getCommentCandidateLabel(event);
+        Label phoneCandidateLabel = getPhoneCandidateLabel(event);
         Label telegramCLabel = genTelegramLabel(event);
         Label skypeLabel = genSkypeLabel(event);
         Label emailLabel = getEmailLabel(event);
@@ -1069,12 +1070,37 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHBox.add(blackListLabel);
         retHBox.add(contactsStatusLabel);
         retHBox.add(employeeStatusLabel);
+        retHBox.add(phoneCandidateLabel);
         retHBox.add(emailLabel);
         retHBox.add(telegramCLabel);
         retHBox.add(skypeLabel);
         retHBox.add(commentCandidateLabel);
 
         return retHBox;
+    }
+
+    private Label getPhoneCandidateLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setVisible(false);
+        retLabel.setIconFromSet(CubaIcon.PHONE);
+        retLabel.setStyleName("pic-center-large-blue");
+        retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
+
+        if (event.getItem().getMobilePhone() != null) {
+            if (!event.getItem().getMobilePhone().equals("")) {
+                retLabel.setDescription(event.getItem().getMobilePhone());
+                retLabel.setVisible(true);
+            }
+        }
+
+        if (event.getItem().getPhone() != null) {
+            if (!event.getItem().getPhone().equals("")) {
+                retLabel.setDescription(event.getItem().getPhone());
+                retLabel.setVisible(true);
+            }
+        }
+
+        return retLabel;
     }
 
     private Label getBlackList(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -1096,7 +1122,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Label getEmailLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setVisible(false);
-        retLabel.setIconFromSet(CubaIcon.PAPERCLIP);
+        retLabel.setIconFromSet(CubaIcon.ENVELOPE);
         retLabel.setStyleName("pic-center-large-gray");
         retLabel.setDescription(event.getItem().getEmail());
         retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
@@ -1148,7 +1174,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setVisible(false);
         retLabel.setDescription(messageBundle.getMessage("msgHaveComment"));
-        retLabel.setIconFromSet(CubaIcon.COMMENTS_O);
+        retLabel.setIconFromSet(CubaIcon.COMMENTS);
         retLabel.setStyleName("pic-center-large-black");
         retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
 

@@ -170,6 +170,12 @@
                                    caption="msg://msgSalary"
                                    dataContainer="employeeDc"
                                    property="salary"/>
+                        <textField id="salaryCost"
+                                   align="TOP_CENTER"
+                                   width="100%"
+                                   caption="msg://msgSalaryCost"
+                                   dataContainer="employeeDc"
+                                   property="salaryCost"/>
                     </hbox>
                     <lookupPickerField id="laborAgreementField"
                                        align="TOP_LEFT"

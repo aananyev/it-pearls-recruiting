@@ -1507,9 +1507,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             setStatusOfVacancyLabel(event);
         }
 
-        if (event.getValue().getProjectName().getProjectLogo() != null) {
-            projectLogoImage.setValueSource(
-                    new ContainerValueSource<>(iteractionListDc, "vacancy.projectName.projectLogo"));
+        if (event.getValue() != null) {
+            if (event.getValue().getProjectName() != null) {
+                if (event.getValue().getProjectName().getProjectLogo() != null) {
+                    projectLogoImage.setValueSource(
+                            new ContainerValueSource<>(iteractionListDc, "vacancy.projectName.projectLogo"));
+                } else {
+                    projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                }
+            } else {
+                projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
         } else {
             projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
         }

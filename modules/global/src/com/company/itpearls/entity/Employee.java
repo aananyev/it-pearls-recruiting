@@ -38,6 +38,9 @@ public class Employee extends StandardEntity {
     @Column(name = "OUTSTAFFING_COST")
     private BigDecimal outstaffingCost;
 
+    @Column(name = "SALARY_COST")
+    private BigDecimal salaryCost;
+
     @Column(name = "SALARY")
     private BigDecimal salary;
 
@@ -50,6 +53,14 @@ public class Employee extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WORK_STATUS_ID")
     private EmployeeWorkStatus workStatus;
+
+    public BigDecimal getSalaryCost() {
+        return salaryCost;
+    }
+
+    public void setSalaryCost(BigDecimal salaryCost) {
+        this.salaryCost = salaryCost;
+    }
 
     public void setLaborAgreement(LaborAgreement laborAgreement) {
         this.laborAgreement = laborAgreement;

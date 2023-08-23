@@ -1164,6 +1164,7 @@ create table ITPEARLS_EMPLOYEE (
     EMPLOYEE_DATE date,
     DISSMISAL_DATE date,
     OUTSTAFFING_COST decimal(19, 2),
+    SALARY_COST decimal(19, 2),
     SALARY decimal(19, 2),
     LABOR_AGREEMENT_ID uuid,
     WORK_STATUS_ID uuid,
@@ -1188,3 +1189,21 @@ create table ITPEARLS_EMPLOYEE_WORK_STATUS (
     primary key (ID)
 )^
 -- end ITPEARLS_EMPLOYEE_WORK_STATUS
+-- begin ITPEARLS_MY_ACTIVE_CANDIDATE_EXCLUDE
+create table ITPEARLS_MY_ACTIVE_CANDIDATE_EXCLUDE (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    JOB_CANDIDATE_ID uuid not null,
+    OPEN_POSITION_ID uuid,
+    USER_ID uuid not null,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_MY_ACTIVE_CANDIDATE_EXCLUDE

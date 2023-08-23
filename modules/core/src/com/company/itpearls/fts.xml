@@ -154,5 +154,8 @@
         <entity class="com.company.itpearls.entity.EmployeeWorkStatus">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.MyActiveCandidateExclude">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

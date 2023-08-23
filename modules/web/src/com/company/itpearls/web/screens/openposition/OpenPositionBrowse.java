@@ -2706,9 +2706,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 for (IteractionList il : jc.getIteractionList()) {
                     if (il.getVacancy().equals(closeVacancy)) {
                         if (!sendCV) {
-                            if (il.getIteractionType().getSignSendToClient() != null) {
-                                if (il.getIteractionType().getSignSendToClient()) {
-                                    sendCV = true;
+                            if (il.getIteractionType() != null) {
+                                if (il.getIteractionType().getSignSendToClient() != null) {
+                                    if (il.getIteractionType().getSignSendToClient()) {
+                                        sendCV = true;
+                                    }
                                 }
                             }
                         } else {

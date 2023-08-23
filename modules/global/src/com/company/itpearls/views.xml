@@ -534,4 +534,12 @@
         <property name="workStatus" view="_local"/>
     </view>
     <view entity="itpearls_EmployeeWorkStatus" name="employeeWorkStatus-view" extends="_local"/>
+    <view entity="itpearls_MyActiveCandidateExclude" name="myActiveCandidateExclude-view" extends="_local">
+        <property name="jobCandidate" view="_local">
+            <property name="fileImageFace" view="_local"/>
+            <property name="personPosition" view="_local"/>
+        </property>
+        <property name="openPosition" view="_local"/>
+        <property name="user" view="_local"/>
+    </view>
 </views>

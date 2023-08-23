@@ -55,5 +55,6 @@
         <class>com.company.itpearls.entity.SomeFilesOpenPosition</class>
         <class>com.company.itpearls.entity.Employee</class>
         <class>com.company.itpearls.entity.EmployeeWorkStatus</class>
+        <class>com.company.itpearls.entity.MyActiveCandidateExclude</class>
     </persistence-unit>
 </persistence>

@@ -127,5 +127,14 @@
                stylename="h1"
                value="msg://msgNoCandidates"
                visible="false"/>
+        <groupBox id="excludeCandidatesLineGroupBox"
+                  collapsable="true"
+                  spacing="true"
+                  width="100%"
+                  align="TOP_LEFT"
+                  height="AUTO"
+                  stylename="light"
+                  caption="msg://msgExcludedCandidates"
+                  orientation="vertical"/>
     </layout>
 </fragment>
