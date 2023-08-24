@@ -62,7 +62,7 @@
                     cacheable="true">
                 <query><![CDATA[select e
                     from itpearls_IteractionList e
-                    order by e.candidate.fullName ]]>
+                    order by e.candidate.fullName]]>
                     <condition>
                         <and>
                             <c:jpql>
@@ -129,7 +129,7 @@
                visible="false"/>
         <groupBox id="excludeCandidatesLineGroupBox"
                   collapsable="true"
-                  spacing="true"
+                  spacing="false"
                   width="100%"
                   align="TOP_LEFT"
                   height="AUTO"
