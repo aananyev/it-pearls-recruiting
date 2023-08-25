@@ -1602,6 +1602,9 @@ rating_battery_yellow_3:before {
           background-color: #ccc;
           display: inline-block;
           margin-left: 5px;
+          background-image: linear-gradient(45deg, white, white), linear-gradient(45deg, green, green);
+          background-size: 100% 2px, 0 2px;
+          background-position: 0 100%, 0 0;
     }
 
 

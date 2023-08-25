@@ -6,14 +6,14 @@
     <companions>
         <web class="com.haulmont.cuba.web.app.ui.security.user.UserEditorCompanion"/>
     </companions>
-
     <dsContext>
-        <datasource id="userDs" class="com.haulmont.cuba.security.entity.User" view="extUser-view">
+        <datasource id="userDs"
+                    class="com.haulmont.cuba.security.entity.User"
+                    view="extUser-view">
             <groupDatasource id="rolesDs" property="userRoles"/>
             <collectionDatasource id="substitutionsDs" property="substitutions"/>
         </datasource>
     </dsContext>
-
     <dialogMode height="theme://cuba.gui.dialogSize.height.xlarge"
                 width="theme://cuba.gui.dialogSize.width.xlarge"
                 resizable="true"/>
@@ -157,6 +157,7 @@
                             <column id="fieldGroupLeftColumn" flex="1"/>
                             <column id="fieldGroupRightColumn" flex="3"/>
                             <column id="fieldRequiredPasswordColumn" flex="1"/>
+                            <column id="fieldRequiredUserColumn" flex="3"/>
                             <column id="fieldGroupPasswordCloumn" flex="3"/>
                         </columns>
                         <rows>
@@ -189,6 +190,16 @@
                                         <field id="smtpPasswordRequired"/>
                                         <field id="pop3PasswordRequired"/>
                                         <field id="imapPasswordRequired"/>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="emailFieldGroupUser" datasource="userDs" width="AUTO">
+                                    <column width="250px">
+                                        <field id="smtpUser" caption="SMTP user">
+                                        </field>
+                                        <field id="pop3User" caption="POP3 user">
+                                        </field>
+                                        <field id="imapUset" caption="IMAP user">
+                                        </field>
                                     </column>
                                 </fieldGroup>
                                 <fieldGroup id="emailFieldGroupPasswords" datasource="userDs" width="AUTO">

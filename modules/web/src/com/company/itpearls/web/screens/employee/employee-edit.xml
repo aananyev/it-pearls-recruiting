@@ -41,6 +41,12 @@
             </view>
             <loader/>
         </instance>
+        <collection id="currencyDc" class="com.company.itpearls.entity.Currency">
+            <view extends="_local"/>
+            <loader id="currencyDl" cacheable="true">
+                <query><![CDATA[select e from itpearls_Currency e order by e.currencyShortName]]></query>
+            </loader>
+        </collection>
         <collection id="workStatusDc"
                     class="com.company.itpearls.entity.EmployeeWorkStatus"
                     view="employeeWorkStatus-view">
@@ -163,19 +169,35 @@
                                    width="100%"
                                    caption="msg://msgOutstaffingCost"
                                    dataContainer="employeeDc"
-                                   property="outstaffingCost"/>
-                        <textField id="salaryField"
-                                   align="TOP_LEFT"
-                                   width="100%"
-                                   caption="msg://msgSalary"
-                                   dataContainer="employeeDc"
-                                   property="salary"/>
+                                   property="outstaffingCost">
+                            <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                        </textField>
                         <textField id="salaryCost"
                                    align="TOP_CENTER"
                                    width="100%"
                                    caption="msg://msgSalaryCost"
                                    dataContainer="employeeDc"
-                                   property="salaryCost"/>
+                                   property="salaryCost">
+                            <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                        </textField>
+                    </hbox>
+                    <hbox width="50%"
+                          spacing="true"
+                          expand="salaryTextField">
+                    <textField id="salaryTextField"
+                               width="AUTO"
+                               dataContainer="employeeDc"
+                               property="salary"
+                               caption="msg://msgSalary">
+                        <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                    </textField>
+                        <lookupField id="currencyLookupField"
+                                     dataContainer="employeeDc"
+                                     optionsContainer="currencyDc"
+                                     property="currency"
+                                     caption="msg://msgCurrency"
+                                     width="AUTO"
+                                     nullOptionVisible="true"/>
                     </hbox>
                     <lookupPickerField id="laborAgreementField"
                                        align="TOP_LEFT"

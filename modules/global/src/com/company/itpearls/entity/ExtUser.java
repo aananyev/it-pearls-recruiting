@@ -26,6 +26,9 @@ public class ExtUser extends User {
     @Column(name = "SMTP_PASSWORD_REQUIRED")
     private Boolean smtpPasswordRequired;
 
+    @Column(name = "SMTP_USER", length = 64)
+    private String smtpUser;
+
     @Column(name = "SMTP_PASSWORD", length = 128)
     private String smtpPassword;
 
@@ -37,6 +40,9 @@ public class ExtUser extends User {
 
     @Column(name = "POP3_PASSWORD_REQUIRED")
     private Boolean pop3PasswordRequired;
+
+    @Column(name = "POP3_USER", length = 64)
+    private String pop3User;
 
     @Column(name = "POP3PASSWORD", length = 128)
     private String pop3Password;
@@ -50,8 +56,35 @@ public class ExtUser extends User {
     @Column(name = "IMAP_PASSWORD_REQUIRED")
     private Boolean imapPasswordRequired;
 
+    @Column(name = "IMAP_USER", length = 64)
+    private String imapUser;
+
     @Column(name = "IMAP_PASSWORD", length = 128)
     private String imapPassword;
+
+    public String getImapUser() {
+        return imapUser;
+    }
+
+    public void setImapUser(String imapUser) {
+        this.imapUser = imapUser;
+    }
+
+    public String getPop3User() {
+        return pop3User;
+    }
+
+    public void setPop3User(String pop3User) {
+        this.pop3User = pop3User;
+    }
+
+    public String getSmtpUser() {
+        return smtpUser;
+    }
+
+    public void setSmtpUser(String smtpUser) {
+        this.smtpUser = smtpUser;
+    }
 
     public FileDescriptor getFileImageFace() {
         return fileImageFace;

@@ -528,10 +528,9 @@
         <property name="fileType" view="_local"/>
     </view>
     <view entity="itpearls_Employee" name="employee-view" extends="_base">
-        <property name="jobCandidate" view="_base"/>
-        <property name="openPosition" view="_base"/>
         <property name="laborAgreement" view="_base"/>
         <property name="workStatus" view="_local"/>
+        <property name="currency" view="_local"/>
     </view>
     <view entity="itpearls_EmployeeWorkStatus" name="employeeWorkStatus-view" extends="_local"/>
     <view entity="itpearls_MyActiveCandidateExclude" name="myActiveCandidateExclude-view" extends="_local">

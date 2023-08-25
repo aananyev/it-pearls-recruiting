@@ -194,6 +194,11 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                     + labelCounterProcessed.get(2)
                     + labelCounterCaseClosed.get(2);
 
+            Label countersLabel = uiComponents.create(Label.class);
+            countersLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            countersLabel.setValue(" (" + labelCounter + "/" + labelExcludeCounter + ") ");
+            countersLabel.setDescription(messageBundle.getMessage("msgCoubterLabelDesc"));
+
             candidateProjectMap.put(jobCandidate, new AbstractMap.SimpleEntry<>(labelCounter, labelExcludeCounter));
 
             HBoxLayout jobCandidateExcludeNameHBox = jobCandidateExcludeNameHBox(jobCandidate);
@@ -212,6 +217,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             }
 
             candidateLineHBoxLayout.add(jobCandidateNameHBox);
+            candidateLineHBoxLayout.add(countersLabel);
             candidateLineHBoxLayout.add(scrollBoxLayout);
             candidatesScrollBox.add(candidateLineHBoxLayout);
             excludeCandidatesLineGroupBox.add(jobCandidateExcludeNameHBox);
@@ -257,6 +263,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
     private HBoxLayout jobCandidateNameHBox(JobCandidate jobCandidate) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
         LinkButton candidateLinkButton = uiComponents.create(LinkButton.class);
         candidateLinkButton.setStyleName("h4");

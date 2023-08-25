@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.internalemailer;
 
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.service.SendEmailService;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.AppContext;
@@ -9,21 +10,14 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.InternalEmailer;
 import com.haulmont.cuba.security.global.UserSession;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @UiController("itpearls_InternalEmailer.edit")
 @UiDescriptor("internal-emailer-edit.xml")
@@ -72,6 +66,8 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     private String cuba_email_smtpPort = "";
     private String cuba_email_smtpUser = "";
     private String cuba_email_smtpPassword = "";
+    @Inject
+    private SendEmailService sendEmailService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -134,6 +130,21 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                         }),
                         new DialogAction(DialogAction.Type.NO)
                 ).show();
+    }
+
+    private void sendEmailDef() {
+/*        EmailServerParameters emailServerParameters = new EmailServerParameters();
+
+        emailServerParameters.setSmtpServer(((ExtUser) userSession.getUser()).getSmtpServer());
+        emailServerParameters.setSmtpPort(((ExtUser) userSession.getUser()).getSmtpPort());
+        emailServerParameters.setSmtpUser(((ExtUser) userSession.getUser()).getSmtpUser());
+        emailServerParameters.setSmtpPassword(((ExtUser) userSession.getUser()).getSmtpPassword()); */
+
+/*        sendEmailService.send(emailServerParameters,
+                toEmailField.getValue().getEmail(),
+                subjectEmailField.getValue(),
+                bodyEmailField.getValue()); */
+
     }
 
     private void sendByEmailDefault() {

@@ -794,14 +794,17 @@ alter table SEC_USER add column IMAGE_ID uuid ^
 alter table SEC_USER add column SMTP_SERVER varchar(128) ^
 alter table SEC_USER add column SMTP_PORT integer ^
 alter table SEC_USER add column SMTP_PASSWORD_REQUIRED boolean ^
+alter table SEC_USER add column SMTP_USER varchar(64) ^
 alter table SEC_USER add column SMTP_PASSWORD varchar(128) ^
 alter table SEC_USER add column POP3_SERVER varchar(128) ^
 alter table SEC_USER add column POP3_PORT integer ^
 alter table SEC_USER add column POP3_PASSWORD_REQUIRED boolean ^
+alter table SEC_USER add column POP3_USER varchar(64) ^
 alter table SEC_USER add column POP3PASSWORD varchar(128) ^
 alter table SEC_USER add column IMAP_SERVER varchar(128) ^
 alter table SEC_USER add column IMAP_PORT integer ^
 alter table SEC_USER add column IMAP_PASSWORD_REQUIRED boolean ^
+alter table SEC_USER add column IMAP_USER varchar(64) ^
 alter table SEC_USER add column IMAP_PASSWORD varchar(128) ^
 alter table SEC_USER add column DTYPE varchar(31) ^
 update SEC_USER set DTYPE = 'itpearls_ExtUser' where DTYPE is null ^
@@ -1166,6 +1169,7 @@ create table ITPEARLS_EMPLOYEE (
     OUTSTAFFING_COST decimal(19, 2),
     SALARY_COST decimal(19, 2),
     SALARY decimal(19, 2),
+    CURRENCY_ID uuid,
     LABOR_AGREEMENT_ID uuid,
     WORK_STATUS_ID uuid,
     --
