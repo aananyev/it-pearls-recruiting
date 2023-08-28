@@ -152,7 +152,8 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             HBoxLayout candidateLineHBoxLayout =
                     uiComponents.create(HBoxLayout.class);
             candidateLineHBoxLayout.setWidthAuto();
-            candidateLineHBoxLayout.setHeightAuto();
+            candidateLineHBoxLayout.setHeightFull();
+            candidateLineHBoxLayout.setAlignment(Component.Alignment.MIDDLE_LEFT);
             candidateLineHBoxLayout.setSpacing(true);
 
             HBoxLayout jobCandidateNameHBox = jobCandidateNameHBox(jobCandidate);
@@ -226,9 +227,12 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
     private HBoxLayout jobCandidateExcludeNameHBox(JobCandidate jobCandidate) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retHbox.setHeightFull();
 
         LinkButton candidateLinkButton = uiComponents.create(LinkButton.class);
         candidateLinkButton.setStyleName("h4");
+        candidateLinkButton.setHeightFull();
         candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
         candidateLinkButton.setCaption(jobCandidate.getFullName()
                 + " / "
@@ -243,6 +247,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
         LinkButton undoRemoveCandidateFromConsideration = uiComponents.create(LinkButton.class);
         undoRemoveCandidateFromConsideration.setIconFromSet(CubaIcon.UNDO);
+        undoRemoveCandidateFromConsideration.setHeightFull();
         undoRemoveCandidateFromConsideration.setAlignment(Component.Alignment.MIDDLE_CENTER);
         undoRemoveCandidateFromConsideration.setDescription(
                 messageBundle.getMessage("msgUndoRemoveCandidateFromConsiderationDesc"));
@@ -259,6 +264,8 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
     private HBoxLayout jobCandidateNameHBox(JobCandidate jobCandidate) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setHeightFull();
+        retHbox.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
         LinkButton candidateLinkButton = uiComponents.create(LinkButton.class);
         candidateLinkButton.setStyleName("h4");
@@ -386,6 +393,10 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                             newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
                             newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLessMonth"));
                             newVacanciesLabel.setStyleName("label_button_green");
+                        } else {
+                            newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
+                            newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedMoreMonth"));
+                            newVacanciesLabel.setStyleName("label_button_gray");
                         }
                     }
                 }

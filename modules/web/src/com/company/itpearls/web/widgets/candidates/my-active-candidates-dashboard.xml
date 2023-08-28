@@ -129,7 +129,8 @@
                visible="false"/>
         <groupBox id="excludeCandidatesLineGroupBox"
                   collapsable="true"
-                  spacing="false"
+                  collapsed="true"
+                  spacing="true"
                   width="100%"
                   align="TOP_LEFT"
                   height="AUTO"
