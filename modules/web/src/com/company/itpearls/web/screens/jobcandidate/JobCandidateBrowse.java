@@ -99,6 +99,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private FileStorageService fileStorageService;
 
     private final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
+    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK
+            = "select e " +
+            "from itpearls_SocialNetworkType e " +
+            "where e.socialNetwork = :other";
+
     private CollectionContainer<IteractionList> iteractionListDc;
     private CollectionLoader<IteractionList> iteractionListDl;
     private CollectionContainer<CandidateCV> candidateCVDc;
@@ -1832,16 +1837,39 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
+    private SocialNetworkType getOtherSocialNetwork() {
+        SocialNetworkType socialNetworkType = null;
+
+        try {
+            socialNetworkType = dataManager.load(SocialNetworkType.class)
+                    .query(QUERY_GET_OTHER_SOCIAL_NETWORK)
+                    .parameter("other", "Other")
+                    .view("socialNetworkType-view")
+                    .one();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgNotFindOtherSocialNetwork"))
+                    .show();
+        }
+
+        return socialNetworkType;
+    }
+
     private void addSocialNetworkList(JobCandidate e, String resultText) {
         Set<String> socialNetworks = parseCVService.scanSocialNetworksFromCVs(resultText);
         List<SocialNetworkType> socialNetworkTypes = dataManager.load(SocialNetworkType.class)
                 .view("socialNetworkType-view")
                 .list();
+        SocialNetworkType otherSocialNetworkType = getOtherSocialNetwork();
 
         for (String network : socialNetworks) {
             URI uriCandidate = null;
             URI uriNetworTypes = null;
             SocialNetworkType realSocialNetwork = null;
+            Boolean flag = false;
 
             try {
                 uriCandidate = new URI(network);
@@ -1856,24 +1884,40 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     uriSyntaxException.printStackTrace();
                 }
 
-                if (uriNetworTypes.getHost().equals(uriCandidate.getHost())) {
-                    realSocialNetwork = socialNetworkType;
-                    break;
+                if (uriNetworTypes.getHost() != null) {
+                    if (uriNetworTypes.getHost().equals(uriCandidate.getHost())) {
+                        realSocialNetwork = socialNetworkType;
+                        flag = true;
+                        break;
+                    }
                 }
             }
 
 
-            if (realSocialNetwork != null) {
+            if (flag) {
+                if (realSocialNetwork != null) {
+                    SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
+                    socialNetworkURLs.setJobCandidate(e);
+                    socialNetworkURLs.setSocialNetworkURL(realSocialNetwork);
+                    socialNetworkURLs.setNetworkURLS(network);
+
+                    if (e.getSocialNetwork() == null) {
+                        e.setSocialNetwork(new ArrayList<>());
+                    }
+
+                    // dataContext.merge(socialNetworkURLs);
+                    e.getSocialNetwork().add(socialNetworkURLs);
+                }
+            } else {
                 SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
                 socialNetworkURLs.setJobCandidate(e);
-                socialNetworkURLs.setSocialNetworkURL(realSocialNetwork);
+                socialNetworkURLs.setSocialNetworkURL(otherSocialNetworkType);
                 socialNetworkURLs.setNetworkURLS(network);
 
                 if (e.getSocialNetwork() == null) {
                     e.setSocialNetwork(new ArrayList<>());
                 }
 
-                // dataContext.merge(socialNetworkURLs);
                 e.getSocialNetwork().add(socialNetworkURLs);
             }
         }

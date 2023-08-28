@@ -2629,6 +2629,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .one();
             } catch (IllegalStateException e) {
                 e.printStackTrace();
+
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withType(Notifications.NotificationType.ERROR)
+                        .withCaption(messageBundle.getMessage("msgError"))
+                        .withDescription(messageBundle.getMessage("msgNotFindOtherSocialNetwork"))
+                        .show();
             }
 
             return socialNetworkType;
