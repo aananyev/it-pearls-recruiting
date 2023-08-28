@@ -155,47 +155,48 @@
                     <grid id="propertiesEmailGrid" width="100%" spacing="true">
                         <columns>
                             <column id="fieldGroupLeftColumn" flex="1"/>
-                            <column id="fieldGroupRightColumn" flex="3"/>
+                            <column id="fieldGroupRightColumn" flex="1"/>
                             <column id="fieldRequiredPasswordColumn" flex="1"/>
-                            <column id="fieldGroupPasswordCloumn" flex="3"/>
                         </columns>
                         <rows>
                             <row id="propertiesEmailRow">
                                 <fieldGroup id="emailFieldGroupLeft" datasource="userDs" width="AUTO">
-                                    <column width="250px">
+                                    <column width="AUTO">
                                         <field id="smtpServer" caption="SMTP server"/>
-                                        <field id="pop3Server" caption="POP3 server"/>
-                                        <field id="imapServer" caption="IMAP server"/>
-                                    </column>
-                                </fieldGroup>
-                                <fieldGroup id="emailFieldGroupRight" datasource="userDs" width="AUTO">
-                                    <column width="250px">
                                         <field id="smtpPort" caption="SMTP port">
                                             <validator
                                                     class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                         </field>
+                                        <field id="smtpPasswordRequired"/>
+                                        <field id="smtpUser" caption="SMTP user">
+                                        </field>
+                                        <field id="smtpPassword" caption="SMTP password">
+                                        </field>
+                                    </column>
+                                </fieldGroup>
+                                <fieldGroup id="emailFieldGroupRight" datasource="userDs" width="AUTO">
+                                    <column width="AUTO">
+                                        <field id="pop3Server" caption="POP3 server"/>
                                         <field id="pop3Port" caption="POP3 port">
                                             <validator
                                                     class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                         </field>
-                                        <field id="imapPort" caption="IMAP port">
-                                            <validator
-                                                    class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        <field id="pop3PasswordRequired"/>
+                                        <field id="pop3User" caption="POP3 user">
+                                        </field>
+                                        <field id="pop3Password" caption="POP3 password">
                                         </field>
                                     </column>
                                 </fieldGroup>
                                 <fieldGroup id="emailFieldPasswordRequired" datasource="userDs" width="AUTO">
-                                    <column width="30px">
-                                        <field id="smtpPasswordRequired"/>
-                                        <field id="pop3PasswordRequired"/>
-                                        <field id="imapPasswordRequired"/>
-                                    </column>
-                                </fieldGroup>
-                                <fieldGroup id="emailFieldGroupPasswords" datasource="userDs" width="AUTO">
-                                    <column width="250px">
-                                        <field id="smtpPassword" caption="SMTP password">
+                                    <column width="AUTO">
+                                        <field id="imapServer" caption="IMAP server"/>
+                                        <field id="imapPort" caption="IMAP port">
+                                            <validator
+                                                    class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                         </field>
-                                        <field id="pop3Password" caption="POP3 password">
+                                        <field id="imapPasswordRequired"/>
+                                        <field id="imapUser" caption="IMAP user">
                                         </field>
                                         <field id="imapPassword" caption="IMAP password">
                                         </field>

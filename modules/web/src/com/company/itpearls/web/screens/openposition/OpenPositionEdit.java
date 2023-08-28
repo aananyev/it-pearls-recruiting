@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.persistence.NoResultException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -2555,10 +2556,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         boolean flag = false;
 
         for (Grade grade : gradeDc.getItems()) {
-            if (vacansyNameField.getValue().startsWith(grade.getGradeName())) {
-                vacansyNameField.setValue(event.getValue().getGradeName()
-                        + vacansyNameField.getValue()
-                        .substring(grade.getGradeName().length()));
+            if (vacansyNameField.getValue() != null) {
+                if (vacansyNameField.getValue().startsWith(grade.getGradeName())) {
+                    vacansyNameField.setValue(event.getValue().getGradeName()
+                            + vacansyNameField.getValue()
+                            .substring(grade.getGradeName().length()));
+                    flag = true;
+                    break;
+                }
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription(messageBundle.getMessage("msgNotSetGrade"))
+                        .withType(Notifications.NotificationType.WARNING)
+                        .show();
                 flag = true;
                 break;
             }
@@ -2654,10 +2665,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     public void setSalaryFieldButtonInvoke() {
-        OutstaffingRates outstaffingRates = dataManager.load(OutstaffingRates.class)
-                .query(QUERY_OUTSTAFF_RATES)
-                .parameter("rate", outstaffingCostTextField.getValue())
-                .one();
+        OutstaffingRates outstaffingRates = null;
+
+        try {
+            outstaffingRates = dataManager.load(OutstaffingRates.class)
+                    .query(QUERY_OUTSTAFF_RATES)
+                    .parameter("rate", outstaffingCostTextField.getValue())
+                    .one();
+        } catch (NoResultException | IllegalStateException e) {
+            e.printStackTrace();
+
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgErrorNotCostForSalary")
+                            + " "
+                            + outstaffingCostTextField.getValue())
+                    .show();
+        }
 
         if (outstaffingRates != null) {
             String commentSalary = messageBundle.getMessage("msgMarginalRate")
@@ -2682,11 +2707,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .show();
 
         } else {
-            notifications.create(Notifications.NotificationType.ERROR)
+            /* notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
                     .withDescription(messageBundle.getMessage("msgNotRate")
                             + outstaffingCostTextField.getValue())
-                    .show();
+                    .show(); */
         }
     }
 }

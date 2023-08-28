@@ -16,7 +16,9 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Calendar;
 
 @UiController("itpearls_MyActiveCandidatesDashboard")
 @UiDescriptor("my-active-candidates-dashboard.xml")
@@ -357,6 +359,40 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             retHBox.setSpacing(true);
 
             labelCounter++;
+
+            Label newVacanciesLabel = uiComponents.create(Label.class);
+            GregorianCalendar gregorianCalendar = new GregorianCalendar();
+            gregorianCalendar.setTime(new Date());
+            gregorianCalendar.add(Calendar.DAY_OF_MONTH, -3);
+
+            if (openPosition.getLastOpenDate() != null) {
+                if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
+                    newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
+                    newVacanciesLabel.setStyleName("h2-red");
+                } else {
+                    gregorianCalendar.setTime(new Date());
+                    gregorianCalendar.add(Calendar.DAY_OF_MONTH, -7);
+                    if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
+                        newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
+                        newVacanciesLabel.setStyleName("h2-yellow");
+                    } else {
+                        gregorianCalendar.setTime(new Date());
+                        gregorianCalendar.add(Calendar.MONTH, -1);
+
+                        if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
+                            newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
+                            newVacanciesLabel.setStyleName("h2-green");
+                        }
+                    }
+                }
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+                newVacanciesLabel.setDescription(messageBundle.getMessage("msgLastOpenDate")
+                        + ": "
+                        + sdf.format(openPosition.getLastOpenDate()));
+            }
+
             LinkButton retLinkButton = uiComponents.create(LinkButton.class);
             if (openPosition.getProjectName().getProjectName().length() > 20) {
                 retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
@@ -395,6 +431,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
             });
 
+            retHBox.add(newVacanciesLabel);
             retHBox.add(retLinkButton);
             retHBox.add(closeInprocessLinkButton);
 
