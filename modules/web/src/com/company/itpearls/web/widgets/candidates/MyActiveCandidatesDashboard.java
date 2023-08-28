@@ -361,6 +361,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             labelCounter++;
 
             Label newVacanciesLabel = uiComponents.create(Label.class);
+            newVacanciesLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
             GregorianCalendar gregorianCalendar = new GregorianCalendar();
             gregorianCalendar.setTime(new Date());
             gregorianCalendar.add(Calendar.DAY_OF_MONTH, -3);
@@ -368,27 +369,32 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             if (openPosition.getLastOpenDate() != null) {
                 if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
                     newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
-                    newVacanciesLabel.setStyleName("h2-red");
+                    newVacanciesLabel.setStyleName("label_button_red");
+                    newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLess3days"));
                 } else {
                     gregorianCalendar.setTime(new Date());
                     gregorianCalendar.add(Calendar.DAY_OF_MONTH, -7);
                     if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
                         newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
-                        newVacanciesLabel.setStyleName("h2-yellow");
+                        newVacanciesLabel.setStyleName("label_button_orange");
+                        newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLess7days"));
                     } else {
                         gregorianCalendar.setTime(new Date());
                         gregorianCalendar.add(Calendar.MONTH, -1);
 
                         if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
                             newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
-                            newVacanciesLabel.setStyleName("h2-green");
+                            newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLessMonth"));
+                            newVacanciesLabel.setStyleName("label_button_green");
                         }
                     }
                 }
 
                 SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
-                newVacanciesLabel.setDescription(messageBundle.getMessage("msgLastOpenDate")
+                newVacanciesLabel.setDescription(newVacanciesLabel.getDescription()
+                        + "\n"
+                        + messageBundle.getMessage("msgLastOpenDate")
                         + ": "
                         + sdf.format(openPosition.getLastOpenDate()));
             }

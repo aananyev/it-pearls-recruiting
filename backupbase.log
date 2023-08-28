@@ -1203,3 +1203,37 @@ server started
 2023-08-24 13:54:24.855 +04 [87267] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-08-24 13:54:25.289 +04 [87269] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-08-24 13:54:25.413 +04 [87271] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down.... done
+server stopped
+waiting for server to start....2023-08-28 18:05:21.879 +04 [54131] LOG:  listening on IPv6 address "::1", port 5432
+2023-08-28 18:05:21.879 +04 [54131] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2023-08-28 18:05:21.880 +04 [54131] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2023-08-28 18:05:21.903 +04 [54132] LOG:  database system was interrupted; last known up at 2023-08-28 18:00:41 +04
+2023-08-28 18:05:22.429 +04 [54132] LOG:  redo starts at 29/11000028
+2023-08-28 18:05:22.444 +04 [54132] LOG:  consistent recovery state reached at 29/11091D80
+2023-08-28 18:05:22.444 +04 [54132] LOG:  redo done at 29/11091D80
+2023-08-28 18:05:22.444 +04 [54132] LOG:  last completed transaction was at log time 2023-08-28 18:04:08.991617+04
+2023-08-28 18:05:22.593 +04 [54131] LOG:  database system is ready to accept connections
+ done
+server started
+2023-08-28 18:05:42.364 +04 [54160] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:05:42.442 +04 [54162] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:06:11.632 +04 [54174] ERROR:  column "smtp_user" does not exist
+2023-08-28 18:06:11.632 +04 [54174] STATEMENT:  alter table SEC_USER rename column smtp_user to smtp_user__u75709 
+2023-08-28 18:06:42.088 +04 [54278] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:06:42.133 +04 [54280] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:07:11.853 +04 [54365] ERROR:  column "imap_user" does not exist at character 387
+2023-08-28 18:07:11.853 +04 [54365] STATEMENT:  SELECT ID, DTYPE, ACTIVE, CHANGE_PASSWORD_AT_LOGON, CREATE_TS, CREATED_BY, DELETE_TS, DELETED_BY, EMAIL, FIRST_NAME, GROUP_NAMES, IP_MASK, LANGUAGE_, LAST_NAME, LOGIN, LOGIN_LC, MIDDLE_NAME, NAME, PASSWORD, PASSWORD_ENCRYPTION, POSITION_, SYS_TENANT_ID, TIME_ZONE, TIME_ZONE_AUTO, UPDATE_TS, UPDATED_BY, VERSION, GROUP_ID, IMAP_PASSWORD, IMAP_PASSWORD_REQUIRED, IMAP_PORT, IMAP_SERVER, IMAP_USER, POP3PASSWORD, POP3_PASSWORD_REQUIRED, POP3_PORT, POP3_SERVER, POP3_USER, SMTP_PASSWORD, SMTP_PASSWORD_REQUIRED, SMTP_PORT, SMTP_SERVER, SMTP_USER, IMAGE_ID FROM SEC_USER WHERE (((LOGIN_LC = $1) AND ((ACTIVE = $2) OR (ACTIVE IS NULL))) AND ((DELETE_TS IS NULL) AND (DTYPE = $3)))
+2023-08-28 18:08:06.553 +04 [54491] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:08:06.603 +04 [54493] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:10:59.472 +04 [54751] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:10:59.536 +04 [54753] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:11:08.605 +04 [54760] ERROR:  column "pop3_user__u96090" of relation "sec_user" does not exist
+2023-08-28 18:11:08.605 +04 [54760] STATEMENT:  alter table SEC_USER drop column POP3_USER__U96090 cascade 
+2023-08-28 18:11:26.610 +04 [54816] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:11:26.657 +04 [54818] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:12:28.243 +04 [55042] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:12:28.319 +04 [55044] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:12:28.588 +04 [55046] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:12:29.031 +04 [55050] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-08-28 18:12:29.160 +04 [55056] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
