@@ -5,18 +5,23 @@ import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.web.screens.SelectedCloseAction;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
+import com.company.itpearls.web.screens.candidatecv.SelectRenderedImagesFromList;
 import com.company.itpearls.web.screens.fragments.OnlyTextPersonPosition;
+import com.company.itpearls.web.screens.fragments.OnlyTextPersonPositionLoadPdf;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.loadfromfilescreen.LoadFromFileScreen;
 import com.haulmont.cuba.core.app.FileStorageService;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
+import com.haulmont.cuba.gui.app.core.file.FileUploadDialog;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
@@ -25,10 +30,26 @@ import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.PDXObject;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.extractor.POITextExtractor;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import javax.inject.Inject;
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -113,6 +134,17 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private OnlyTextPersonPosition screenOnlytext;
     private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
     private List<Employee> employees;
+    private static final String EXTENSION_PDF = "pdf";
+    private static final String EXTENSION_DOC = "doc";
+    private static final String EXTENSION_DOCX = "docx";
+    private String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
+
+
+    @Inject
+    private FileUploadingAPI fileUploadingAPI;
+    @Inject
+    private FileLoader fileLoader;
+    private OnlyTextPersonPositionLoadPdf screenOnlytextLoadFromPdf;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -1716,16 +1748,146 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .show();
     }
 
+    protected FileDescriptor loadCVFileForQuickLoad() {
+        AtomicReference<FileDescriptor> fileDescriptor = new AtomicReference<>();
+
+/*        FileUploadDialog dialog = (FileUploadDialog) screens.create("fileUploadDialog", OpenMode.DIALOG);
+
+        dialog.addCloseWithCommitListener(() -> {
+            UUID fileId = dialog.getFileId();
+            String fileName = dialog.getFileName();
+
+            File file = fileUploadingAPI.getFile(fileId);
+
+            fileDescriptor.set(fileUploadingAPI.getFileDescriptor(fileId, fileName));
+            try {
+                fileUploadingAPI.putFileIntoStorage(fileId, fileDescriptor.get());
+                dataManager.commit(fileDescriptor.get());
+            } catch (FileStorageException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        screens.show(dialog); */
+
+        return fileDescriptor.get();
+    }
+
+    public List<RenderedImage> getImagesFromResources(PDResources resources) throws IOException {
+        List<RenderedImage> images = new ArrayList<>();
+
+        for (COSName xObjectName : resources.getXObjectNames()) {
+            PDXObject xObject = resources.getXObject(xObjectName);
+
+            if (xObject instanceof PDFormXObject) {
+                images.addAll(getImagesFromResources(((PDFormXObject) xObject).getResources()));
+            } else if (xObject instanceof PDImageXObject) {
+                images.add(((PDImageXObject) xObject).getImage());
+            }
+        }
+
+        return images;
+    }
+
+    private String parsePdfCV(InputStream inputStream) {
+        String parsedText = "";
+
+        try {
+            RandomAccessRead rad = new RandomAccessReadBuffer(inputStream);
+
+            PDFParser parser = new PDFParser(rad);
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            PDDocument pdDoc = parser.parse();
+            parsedText = pdfStripper.getText(pdDoc).replace("\n", "<br>");
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return null;
+        }
+
+        return parsedText;
+    }
+
+    private String getTextCVFromPDF(FileDescriptor fileDescriptor) {
+        List<RenderedImage> images = new ArrayList<>();
+        String textResume = "";
+
+        try {
+            InputStream inputStream = fileLoader.openStream(fileDescriptor);
+
+            textResume = parsePdfCV(inputStream);
+            RandomAccessRead rad = new RandomAccessReadBuffer(fileLoader.openStream(fileDescriptor));
+
+            PDFParser parser = new PDFParser(rad);
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            PDDocument pdDoc = parser.parse();
+
+            for (PDPage page : pdDoc.getPages()) {
+                images.addAll(getImagesFromResources(page.getResources()));
+            }
+
+            if (images.size() > 0) {
+                SelectRenderedImagesFromList selectRenderedImagesFromList =
+                        screens.create(SelectRenderedImagesFromList.class);
+                selectRenderedImagesFromList.setRenderedImages(images);
+// заголовок окна выбора                    selectRenderedImagesFromList.setCandidateCV(getEditedEntity());
+
+                selectRenderedImagesFromList.addAfterCloseListener(evnt -> {
+                    if (((SelectedCloseAction) evnt.getCloseAction()).getResult()
+                            .equals(CandidateCV.SelectedCloseActionType.SELECTED)) {
+                        Image selectedImage = selectRenderedImagesFromList
+                                .getSelectedImage();
+
+                        FileDescriptor fd = dataManager
+                                .commit(selectRenderedImagesFromList.getSelectedImageFileDescriptor());
+
+                        try {
+                            fileUploadingAPI.putFileIntoStorage(fd.getUuid(), fd);
+                        } catch (FileStorageException e) {
+                            e.printStackTrace();
+                        }
+
+                        FileDescriptorResource resource = selectedImage
+                                .createResource(FileDescriptorResource.class)
+                                .setFileDescriptor(fd);
+
+/* фото кандидата                            getEditedEntity().setFileImageFace(fd);
+
+                            candidatePic
+                                    .setSource(FileDescriptorResource.class)
+                                    .setFileDescriptor(fd); */
+                    }
+                });
+
+                selectRenderedImagesFromList.show();
+            }
+        } catch (FileStorageException | IOException | IllegalArgumentException e) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
+                    .show();
+
+            throw new RuntimeException(e);
+        }
+
+        if (textResume != null) {
+            return textResume.replaceAll("\n", breakLine[0]);
+        } else
+            return null;
+    }
+
     @Subscribe("quickLoadCV.loadFromPdf")
     public void onQuickLoadCVLoadFromPdf(Action.ActionPerformedEvent event) {
-        Screen screen = screenBuilders.screen(this)
-                .withScreenClass(LoadFromFileScreen.class)
-                .withOpenMode(OpenMode.DIALOG)
+        screenOnlytextLoadFromPdf = screenBuilders.screen(this)
+                .withScreenClass(OnlyTextPersonPositionLoadPdf.class)
+                .withOpenMode(OpenMode.NEW_TAB)
                 .build();
 
+        AtomicReference<JobCandidate> loadedJobCandidate = null;
 
-        screen.show();
+        screenOnlytextLoadFromPdf.addAfterCloseListener(afterCloseEvent -> {
+        });
 
+        screenOnlytextLoadFromPdf.show();
     }
 
     @Subscribe("quickLoadCV.loadFromClipboard")

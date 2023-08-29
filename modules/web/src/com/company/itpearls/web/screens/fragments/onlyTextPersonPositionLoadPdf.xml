@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/fragments/onlyTextPersonPosition.xml"
+        messagesPack="com.company.itpearls.web.screens.fragments">
+    <layout>
+        <vbox id="dropZone"
+              height="150px"
+              spacing="true"
+              ext:index="1"
+              stylename="dropzone-container">
+            <label stylename="dropzone-description"
+                   value="Drop file here"
+                   align="MIDDLE_CENTER"/>
+        </vbox>
+        <upload id="uploadField"
+                dropZone="dropZone"
+                showClearButton="true"
+                ext:index="1"
+                showFileName="true"/>
+    </layout>
+</window>

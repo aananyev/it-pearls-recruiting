@@ -160,7 +160,7 @@
                     <actions>
                         <action id="loadFromPdf"
                                 icon="FILE_PDF_O"
-                                enable="false"
+                                enable="true"
                                 caption="msg://msgLoadFromPDF"/>
                         <action id="loadFromWord"
                                 icon="FILE_WORD_O"
