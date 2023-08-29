@@ -55,7 +55,9 @@
                 <property name="vacancy"
                           view="_local">
                     <property name="projectName"
-                              view="_local"/>
+                              view="_local">
+                        <property name="projectOwner" view="_local"/>
+                    </property>
                 </property>
             </view>
             <loader id="iteractionListsDl"
@@ -114,6 +116,12 @@
                       height="AUTO"
                       align="BOTTOM_LEFT"
                       description="msg://msgExcludeDesc"/>
+            <checkBox id="cardDetailCheckBox"
+                      caption="msg://msgCardDetail"
+                      description="msg://msgCardDetailDesc"
+                      align="BOTTOM_LEFT"
+                      width="AUTO"
+                      height="AUTO"/>
         </hbox>
         <scrollBox id="candidatesScrollBox"
                    spacing="true"

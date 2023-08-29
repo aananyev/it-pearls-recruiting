@@ -84,6 +84,7 @@
         <dataGrid id="jobCandidatesTable"
                   width="100%"
                   descriptionAsHtml="true"
+                  htmlSanitizerEnabled="false"
                   captionAsHtml="true"
                   dataContainer="jobCandidatesDc">
             <actions>

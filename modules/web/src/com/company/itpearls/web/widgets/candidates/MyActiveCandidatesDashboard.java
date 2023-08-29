@@ -67,6 +67,8 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             "and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
     @Inject
     private GroupBoxLayout excludeCandidatesLineGroupBox;
+    @Inject
+    private CheckBox cardDetailCheckBox;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -361,7 +363,15 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         }
 
         for (OpenPosition openPosition : openPositions) {
-            HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+            VBoxLayout internalVBox = uiComponents.create(VBoxLayout.class);
+            internalVBox.setHeightAuto();
+            internalVBox.setSpacing(true);
+
+            HBoxLayout internalHBox = uiComponents.create(HBoxLayout.class);
+            internalHBox.setWidthFull();
+            internalHBox.setSpacing(false);
+
+            VBoxLayout retHBox = uiComponents.create(VBoxLayout.class);
             retHBox.setStyleName(style);
             retHBox.setSpacing(true);
 
@@ -411,20 +421,35 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             }
 
             LinkButton retLinkButton = uiComponents.create(LinkButton.class);
-            if (openPosition.getProjectName().getProjectName().length() > 20) {
-                retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
+            if (!cardDetailCheckBox.getValue()) {
+                if (openPosition.getProjectName().getProjectName().length() > 20) {
+                    retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
+                } else {
+                    retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
+                }
+
+                retLinkButton.removeStyleName("detail-candidate-card-wordwrap");
             } else {
                 retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
+                retLinkButton.setStyleName("detail-candidate-card-wordwrap");
             }
 
-            retLinkButton.setDescription(description + "\n\n" + openPosition.getVacansyName());
-            retLinkButton.setWidthAuto();
+
+            retLinkButton.setDescription(description
+                    + "\n\n"
+                    + openPosition.getVacansyName());
+                    /*+ "\n\n"
+                    + openPosition.getProjectName().getProjectOwner().getSecondName()
+                    + " "
+                    + openPosition.getProjectName().getProjectOwner().getFirstName());*/
             retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
+            retLinkButton.setWidthFull();
 
             LinkButton closeInprocessLinkButton = uiComponents.create(LinkButton.class);
             closeInprocessLinkButton.setIcon(CubaIcon.EXCLUDE_ACTION.source());
             closeInprocessLinkButton.setStyleName("pic-center-large-black");
             closeInprocessLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            closeInprocessLinkButton.setWidthAuto();
             closeInprocessLinkButton.addClickListener(event -> {
 
                 dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
@@ -448,9 +473,53 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
             });
 
-            retHBox.add(newVacanciesLabel);
-            retHBox.add(retLinkButton);
-            retHBox.add(closeInprocessLinkButton);
+            Label projectDetailLabel = uiComponents.create(Label.class);
+            projectDetailLabel.setValue(openPosition.getVacansyName());
+            projectDetailLabel.setWidthAuto();
+            projectDetailLabel.setHeightAuto();
+            projectDetailLabel.setStyleName("detail-candidate-card-wordwrap");
+            projectDetailLabel.setDescriptionAsHtml(true);
+            projectDetailLabel.setDescription(openPosition.getVacansyName() + "<br><br>" + openPosition.getComment());
+
+            HBoxLayout salaryMinHBox = uiComponents.create(HBoxLayout.class);
+            salaryMinHBox.setWidthFull();
+            salaryMinHBox.setSpacing(true);
+
+            Label salaryMinLabel = uiComponents.create(Label.class);
+            salaryMinLabel.setValue(messageBundle.getMessage("msgSalaryMin"));
+
+            Label salaryMinValueLabel = uiComponents.create(Label.class);
+            salaryMinValueLabel.setValue(openPosition.getSalaryMin());
+
+            salaryMinHBox.add(salaryMinLabel);
+            salaryMinHBox.add(salaryMinValueLabel);
+
+            HBoxLayout salaryMaxHBox = uiComponents.create(HBoxLayout.class);
+            salaryMaxHBox.setWidthFull();
+            salaryMaxHBox.setSpacing(true);
+
+            Label salaryMaxLabel = uiComponents.create(Label.class);
+            salaryMaxLabel.setValue(messageBundle.getMessage("msgSalaryMax"));
+
+            Label salaryMaxValueLabel = uiComponents.create(Label.class);
+            salaryMaxValueLabel.setValue(openPosition.getSalaryMax());
+
+            salaryMaxHBox.add(salaryMaxLabel);
+            salaryMaxHBox.add(salaryMaxValueLabel);
+
+            setProjectVisibleDetails(retHBox, internalVBox, openPosition, retLinkButton, salaryMinHBox, salaryMaxHBox);
+
+            internalHBox.add(newVacanciesLabel);
+            internalHBox.add(retLinkButton);
+            internalHBox.expand(retLinkButton);
+            internalHBox.add(closeInprocessLinkButton);
+
+            internalVBox.add(projectDetailLabel);
+            internalVBox.add(salaryMinHBox);
+            internalHBox.add(salaryMaxHBox);
+
+            retHBox.add(internalHBox);
+            retHBox.add(internalVBox);
 
             scrollBoxLayout.add(retHBox);
 
@@ -472,6 +541,47 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         retList.add(flagCandidateCloseAllProject);
 
         return retList;
+    }
+
+    private void setProjectVisibleDetails(VBoxLayout retHBox,
+                                          VBoxLayout vBoxDetail,
+                                          OpenPosition openPosition,
+                                          LinkButton retLinkButton,
+                                          HBoxLayout salaryMinHBox,
+                                          HBoxLayout salaryMaxHBox) {
+        if (cardDetailCheckBox.getValue() != null ? cardDetailCheckBox.getValue() : false) {
+            vBoxDetail.setVisible(true);
+            retHBox.setWidth("300px");
+        } else {
+            vBoxDetail.setVisible(false);
+            retHBox.setWidthAuto();
+        }
+
+        if (!cardDetailCheckBox.getValue()) {
+            if (openPosition.getProjectName().getProjectName().length() > 20) {
+                retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
+            } else {
+                retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
+            }
+
+            retLinkButton.removeStyleName("detail-candidate-card-wordwrap");
+        } else {
+            retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
+            retLinkButton.setStyleName("detail-candidate-card-wordwrap");
+        }
+
+        if (!cardDetailCheckBox.getValue()) {
+            salaryMinHBox.setVisible(false);
+            salaryMaxHBox.setVisible(false);
+        } else {
+            salaryMinHBox.setVisible(true);
+            salaryMaxHBox.setVisible(true);
+        }
+    }
+
+    @Subscribe("cardDetailCheckBox")
+    public void onCardDetailCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+       reinitInteractionListDataContainer();
     }
 
     private Set<OpenPosition> getProcessedOpenPosition(JobCandidate jobCandidate) {
