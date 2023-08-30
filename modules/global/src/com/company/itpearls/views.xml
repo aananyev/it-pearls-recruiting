@@ -60,6 +60,8 @@
             <property name="projectDepartment" view="_local">
                 <property name="companyName" view="_local"/>
             </property>
+            <property name="projectLogo" view="_local"/>
+            <property name="projectOwner" view="_local"/>
         </property>
         <property name="openPositionComments" view="_local">
             <property name="user" view="_local">
@@ -219,13 +221,16 @@
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
         <property name="vacancy" view="_local">
             <property name="positionType" view="_local"/>
-            <property name="projectName" view="_local"/>
+            <property name="projectName" view="_local">
+                <property name="projectLogo" view="_local"/>
+                <property name="projectOwner" view="_local"/>
+            </property>
             <property name="grade" view="_local"/>
             <property name="owner" view="_local"/>
+            <property name="cityPosition" view="_local"/>
         </property>
         <property name="iteractionType" view="_local">
             <property name="workStatus" view="_minimal">
-                <property name="workStatusName"/>
             </property>
         </property>
         <property name="recrutier" view="_local">

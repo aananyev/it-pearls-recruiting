@@ -16,6 +16,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
@@ -151,13 +152,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         }
 
         for (JobCandidate jobCandidate : jobCandidateSet) {
-            HBoxLayout candidateLineHBoxLayout =
-                    uiComponents.create(HBoxLayout.class);
-            candidateLineHBoxLayout.setWidthAuto();
-            candidateLineHBoxLayout.setHeightFull();
-            candidateLineHBoxLayout.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            candidateLineHBoxLayout.setSpacing(true);
-
+            HBoxLayout candidateLineHBoxLayout = createCandidateLineHBoxLayout(jobCandidate);
             HBoxLayout jobCandidateNameHBox = jobCandidateNameHBox(jobCandidate);
 
             caseClosedOpenPosition = getCaseClosedOpenPosition(jobCandidate);
@@ -167,12 +162,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             wasOrNowOpenPosition.addAll(processedOpenPosition);
 
             opportunityOpenPosition = getOpportunityOpenPosition(jobCandidate);
-
-            scrollBoxLayout = uiComponents.create(ScrollBoxLayout.class);
-            scrollBoxLayout.setWidthAuto();
-            scrollBoxLayout.setSpacing(true);
-            scrollBoxLayout.setOrientation(HasOrientation.Orientation.HORIZONTAL);
-            scrollBoxLayout.setScrollBarPolicy(ScrollBoxLayout.ScrollBarPolicy.HORIZONTAL);
+            scrollBoxLayout = createScrollBoxLayout(jobCandidate);
 
             Integer labelCounter = 0;
             Integer labelExcludeCounter = 0;
@@ -227,6 +217,27 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         generatedWidget = true;
     }
 
+    private ScrollBoxLayout createScrollBoxLayout(JobCandidate jobCandidate) {
+        scrollBoxLayout = uiComponents.create(ScrollBoxLayout.class);
+        scrollBoxLayout.setWidthAuto();
+        scrollBoxLayout.setSpacing(true);
+        scrollBoxLayout.setOrientation(HasOrientation.Orientation.HORIZONTAL);
+        scrollBoxLayout.setScrollBarPolicy(ScrollBoxLayout.ScrollBarPolicy.HORIZONTAL);
+
+        return scrollBoxLayout;
+    }
+
+    private HBoxLayout createCandidateLineHBoxLayout(JobCandidate jobCandidate) {
+        HBoxLayout candidateLineHBoxLayout =
+                uiComponents.create(HBoxLayout.class);
+        candidateLineHBoxLayout.setWidthAuto();
+        candidateLineHBoxLayout.setHeightFull();
+        candidateLineHBoxLayout.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        candidateLineHBoxLayout.setSpacing(true);
+
+        return candidateLineHBoxLayout;
+    }
+
     private HBoxLayout jobCandidateExcludeNameHBox(JobCandidate jobCandidate) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setAlignment(Component.Alignment.MIDDLE_LEFT);
@@ -238,7 +249,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
         candidateLinkButton.setCaption(jobCandidate.getFullName()
                 + " / "
-                + jobCandidate.getPersonPosition().getPositionRuName());
+                + jobCandidate.getPersonPosition().getPositionRuName()
+                + " / "
+                + jobCandidate.getCityOfResidence().getCityRuName());
 
         candidateLinkButton.addClickListener(e -> {
             screenBuilders.editor(JobCandidate.class, this)
@@ -274,7 +287,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
         candidateLinkButton.setCaption(jobCandidate.getFullName()
                 + " / "
-                + jobCandidate.getPersonPosition().getPositionRuName());
+                + jobCandidate.getPersonPosition().getPositionRuName()
+                + " / "
+                + jobCandidate.getCityOfResidence().getCityRuName());
 
         candidateLinkButton.addClickListener(e -> {
             screenBuilders.editor(JobCandidate.class, this)
@@ -363,160 +378,48 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         }
 
         for (OpenPosition openPosition : openPositions) {
-            VBoxLayout internalVBox = uiComponents.create(VBoxLayout.class);
-            internalVBox.setHeightAuto();
-            internalVBox.setSpacing(true);
-
-            HBoxLayout internalHBox = uiComponents.create(HBoxLayout.class);
-            internalHBox.setWidthFull();
-            internalHBox.setSpacing(false);
-
-            VBoxLayout retHBox = uiComponents.create(VBoxLayout.class);
-            retHBox.setStyleName(style);
-            retHBox.setSpacing(true);
+            VBoxLayout internalVBox = createInternalVBox(openPosition);
+            HBoxLayout internalHBox = createInternalHBox(openPosition);
+            VBoxLayout retHBox = createRetHBox(openPosition, style);
 
             labelCounter++;
 
-            Label newVacanciesLabel = uiComponents.create(Label.class);
-            newVacanciesLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            GregorianCalendar gregorianCalendar = new GregorianCalendar();
-            gregorianCalendar.setTime(new Date());
-            gregorianCalendar.add(Calendar.DAY_OF_MONTH, -3);
+            Label newVacanciesLabel = createNewVacanciesLabel(openPosition);
+            Image projectLogoImage = createProjectLogoImage(openPosition);
+            LinkButton retLinkButton = createRetLinkButton(openPosition, description);
+            LinkButton closeInprocessLinkButton = createCloseInprocessLinkButton(openPosition,
+                    jobCandidate,
+                    retHBox);
+// блок детализации
+            Label projectDetailLabel = createProjectDetailLabel(openPosition);
 
-            if (openPosition.getLastOpenDate() != null) {
-                if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
-                    newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
-                    newVacanciesLabel.setStyleName("label_button_red");
-                    newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLess3days"));
-                } else {
-                    gregorianCalendar.setTime(new Date());
-                    gregorianCalendar.add(Calendar.DAY_OF_MONTH, -7);
-                    if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
-                        newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
-                        newVacanciesLabel.setStyleName("label_button_orange");
-                        newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLess7days"));
-                    } else {
-                        gregorianCalendar.setTime(new Date());
-                        gregorianCalendar.add(Calendar.MONTH, -1);
+            HBoxLayout cityOfVacancy = setDetailValueLabel(messageBundle.getMessage("msgCity"),
+                    openPosition.getCityPosition().getCityRuName());
+            HBoxLayout salaryMinHBox = setDetailValueLabel(messageBundle.getMessage("msgSalaryMin"),
+                    openPosition.getSalaryMin() != null
+                            ? openPosition.getSalaryMin().toString() : "");
+            HBoxLayout salaryMaxHBox = setDetailValueLabel(messageBundle.getMessage("msgSalaryMax"),
+                    openPosition.getSalaryMax() != null
+                            ? openPosition.getSalaryMax().toString() : "");
 
-                        if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
-                            newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
-                            newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLessMonth"));
-                            newVacanciesLabel.setStyleName("label_button_green");
-                        } else {
-                            newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
-                            newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedMoreMonth"));
-                            newVacanciesLabel.setStyleName("label_button_gray");
-                        }
-                    }
-                }
-
-                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
-                newVacanciesLabel.setDescription(newVacanciesLabel.getDescription()
-                        + "\n"
-                        + messageBundle.getMessage("msgLastOpenDate")
-                        + ": "
-                        + sdf.format(openPosition.getLastOpenDate()));
-            }
-
-            LinkButton retLinkButton = uiComponents.create(LinkButton.class);
-            if (!cardDetailCheckBox.getValue()) {
-                if (openPosition.getProjectName().getProjectName().length() > 20) {
-                    retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
-                } else {
-                    retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
-                }
-
-                retLinkButton.removeStyleName("detail-candidate-card-wordwrap");
-            } else {
-                retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
-                retLinkButton.setStyleName("detail-candidate-card-wordwrap");
-            }
-
-
-            retLinkButton.setDescription(description
-                    + "\n\n"
-                    + openPosition.getVacansyName());
-                    /*+ "\n\n"
-                    + openPosition.getProjectName().getProjectOwner().getSecondName()
-                    + " "
-                    + openPosition.getProjectName().getProjectOwner().getFirstName());*/
-            retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            retLinkButton.setWidthFull();
-
-            LinkButton closeInprocessLinkButton = uiComponents.create(LinkButton.class);
-            closeInprocessLinkButton.setIcon(CubaIcon.EXCLUDE_ACTION.source());
-            closeInprocessLinkButton.setStyleName("pic-center-large-black");
-            closeInprocessLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            closeInprocessLinkButton.setWidthAuto();
-            closeInprocessLinkButton.addClickListener(event -> {
-
-                dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
-                        .withMessage(messageBundle.getMessage("msgRemoveFromConsideration"))
-                        .withType(Dialogs.MessageType.WARNING)
-                        .withCaption(messageBundle.getMessage("mainmsgWarning"))
-                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                        .withHandler(e -> {
-                                            MyActiveCandidateExclude mace = metadata.create(MyActiveCandidateExclude.class);
-
-                                            mace.setJobCandidate(jobCandidate);
-                                            mace.setOpenPosition(openPosition);
-                                            mace.setUser((ExtUser) userSession.getUser());
-
-                                            dataManager.commit(mace);
-
-                                            retHBox.setVisible(false);
-                                        }),
-                                new DialogAction(DialogAction.Type.NO))
-                        .show();
-
-            });
-
-            Label projectDetailLabel = uiComponents.create(Label.class);
-            projectDetailLabel.setValue(openPosition.getVacansyName());
-            projectDetailLabel.setWidthAuto();
-            projectDetailLabel.setHeightAuto();
-            projectDetailLabel.setStyleName("detail-candidate-card-wordwrap");
-            projectDetailLabel.setDescriptionAsHtml(true);
-            projectDetailLabel.setDescription(openPosition.getVacansyName() + "<br><br>" + openPosition.getComment());
-
-            HBoxLayout salaryMinHBox = uiComponents.create(HBoxLayout.class);
-            salaryMinHBox.setWidthFull();
-            salaryMinHBox.setSpacing(true);
-
-            Label salaryMinLabel = uiComponents.create(Label.class);
-            salaryMinLabel.setValue(messageBundle.getMessage("msgSalaryMin"));
-
-            Label salaryMinValueLabel = uiComponents.create(Label.class);
-            salaryMinValueLabel.setValue(openPosition.getSalaryMin());
-
-            salaryMinHBox.add(salaryMinLabel);
-            salaryMinHBox.add(salaryMinValueLabel);
-
-            HBoxLayout salaryMaxHBox = uiComponents.create(HBoxLayout.class);
-            salaryMaxHBox.setWidthFull();
-            salaryMaxHBox.setSpacing(true);
-
-            Label salaryMaxLabel = uiComponents.create(Label.class);
-            salaryMaxLabel.setValue(messageBundle.getMessage("msgSalaryMax"));
-
-            Label salaryMaxValueLabel = uiComponents.create(Label.class);
-            salaryMaxValueLabel.setValue(openPosition.getSalaryMax());
-
-            salaryMaxHBox.add(salaryMaxLabel);
-            salaryMaxHBox.add(salaryMaxValueLabel);
-
-            setProjectVisibleDetails(retHBox, internalVBox, openPosition, retLinkButton, salaryMinHBox, salaryMaxHBox);
+            setProjectVisibleDetails(retHBox,
+                    internalVBox,
+                    openPosition,
+                    retLinkButton,
+                    cityOfVacancy,
+                    salaryMinHBox,
+                    salaryMaxHBox);
 
             internalHBox.add(newVacanciesLabel);
+            internalHBox.add(projectLogoImage);
             internalHBox.add(retLinkButton);
             internalHBox.expand(retLinkButton);
             internalHBox.add(closeInprocessLinkButton);
 
             internalVBox.add(projectDetailLabel);
+            internalVBox.add(cityOfVacancy);
             internalVBox.add(salaryMinHBox);
-            internalHBox.add(salaryMaxHBox);
+            internalVBox.add(salaryMaxHBox);
 
             retHBox.add(internalHBox);
             retHBox.add(internalVBox);
@@ -543,10 +446,208 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         return retList;
     }
 
+    private VBoxLayout createRetHBox(OpenPosition openPosition, String style) {
+        VBoxLayout retHBox = uiComponents.create(VBoxLayout.class);
+        retHBox.setStyleName(style);
+        retHBox.setSpacing(true);
+
+        return retHBox;
+    }
+
+    private HBoxLayout createInternalHBox(OpenPosition openPosition) {
+        HBoxLayout internalHBox = uiComponents.create(HBoxLayout.class);
+        internalHBox.setWidthFull();
+        internalHBox.setSpacing(false);
+
+        return internalHBox;
+    }
+
+    private VBoxLayout createInternalVBox(OpenPosition openPosition) {
+        VBoxLayout internalVBox = uiComponents.create(VBoxLayout.class);
+        internalVBox.setHeightAuto();
+        internalVBox.setSpacing(true);
+
+        return internalVBox;
+    }
+
+    private Label createProjectDetailLabel(OpenPosition openPosition) {
+        Label projectDetailLabel = uiComponents.create(Label.class);
+        projectDetailLabel.setValue(openPosition.getVacansyName());
+        projectDetailLabel.setWidthAuto();
+        projectDetailLabel.setHeightAuto();
+        projectDetailLabel.setStyleName("detail-candidate-card-wordwrap");
+        projectDetailLabel.setDescriptionAsHtml(true);
+        projectDetailLabel.setDescription(openPosition.getVacansyName() + "<br><br>" + openPosition.getComment());
+
+        return projectDetailLabel;
+    }
+
+    private Label createNewVacanciesLabel(OpenPosition openPosition) {
+        Label newVacanciesLabel = uiComponents.create(Label.class);
+        newVacanciesLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.add(Calendar.DAY_OF_MONTH, -3);
+
+        if (openPosition.getLastOpenDate() != null) {
+            if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
+                newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
+                newVacanciesLabel.setStyleName("label_button_red");
+                newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLess3days"));
+            } else {
+                gregorianCalendar.setTime(new Date());
+                gregorianCalendar.add(Calendar.DAY_OF_MONTH, -7);
+                if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
+                    newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
+                    newVacanciesLabel.setStyleName("label_button_orange");
+                    newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLess7days"));
+                } else {
+                    gregorianCalendar.setTime(new Date());
+                    gregorianCalendar.add(Calendar.MONTH, -1);
+
+                    if (openPosition.getLastOpenDate().after(gregorianCalendar.getTime())) {
+                        newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
+                        newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedLessMonth"));
+                        newVacanciesLabel.setStyleName("label_button_green");
+                    } else {
+                        newVacanciesLabel.setIconFromSet(CubaIcon.WARNING);
+                        newVacanciesLabel.setDescription(messageBundle.getMessage("msgOpenedMoreMonth"));
+                        newVacanciesLabel.setStyleName("label_button_gray");
+                    }
+                }
+            }
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+            newVacanciesLabel.setDescription(newVacanciesLabel.getDescription()
+                    + "\n"
+                    + messageBundle.getMessage("msgLastOpenDate")
+                    + ": "
+                    + sdf.format(openPosition.getLastOpenDate()));
+        }
+
+        return newVacanciesLabel;
+    }
+
+    private LinkButton createRetLinkButton(OpenPosition openPosition, String description) {
+        LinkButton retLinkButton = uiComponents.create(LinkButton.class);
+        if (!cardDetailCheckBox.getValue()) {
+            if (openPosition.getProjectName().getProjectName().length() > 20) {
+                retLinkButton.setCaption(openPosition.getProjectName().getProjectName().substring(0, 20));
+            } else {
+                retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
+            }
+
+            retLinkButton.removeStyleName("detail-candidate-card-wordwrap");
+        } else {
+            retLinkButton.setCaption(openPosition.getProjectName().getProjectName());
+            retLinkButton.setStyleName("detail-candidate-card-wordwrap");
+        }
+
+        retLinkButton.setDescription(description
+                + "\n\n"
+                + openPosition.getVacansyName()
+                + "\n\n"
+                + openPosition.getProjectName().getProjectOwner().getSecondName()
+                + " "
+                + openPosition.getProjectName().getProjectOwner().getFirstName());
+        retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retLinkButton.setWidthFull();
+
+        return retLinkButton;
+    }
+
+    private LinkButton createCloseInprocessLinkButton(OpenPosition openPosition, JobCandidate jobCandidate, VBoxLayout retHBox) {
+        LinkButton closeInprocessLinkButton = uiComponents.create(LinkButton.class);
+        closeInprocessLinkButton.setIcon(CubaIcon.EXCLUDE_ACTION.source());
+        closeInprocessLinkButton.setStyleName("pic-center-large-black");
+        closeInprocessLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        closeInprocessLinkButton.setWidthAuto();
+        closeInprocessLinkButton.addClickListener(event -> {
+
+            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                    .withMessage(messageBundle.getMessage("msgRemoveFromConsideration"))
+                    .withType(Dialogs.MessageType.WARNING)
+                    .withCaption(messageBundle.getMessage("mainmsgWarning"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                    .withHandler(e -> {
+                                        MyActiveCandidateExclude mace = metadata.create(MyActiveCandidateExclude.class);
+
+                                        mace.setJobCandidate(jobCandidate);
+                                        mace.setOpenPosition(openPosition);
+                                        mace.setUser((ExtUser) userSession.getUser());
+
+                                        dataManager.commit(mace);
+
+                                        retHBox.setVisible(false);
+                                    }),
+                            new DialogAction(DialogAction.Type.NO))
+                    .show();
+
+        });
+
+        return closeInprocessLinkButton;
+    }
+
+    private Image createProjectLogoImage(OpenPosition openPosition) {
+        Image projectLogoImage = uiComponents.create(Image.class);
+        projectLogoImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        projectLogoImage.setWidth("28px");
+        projectLogoImage.setHeight("28px");
+        projectLogoImage.setStyleName("icon-no-border-20px");
+        projectLogoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        projectLogoImage.setDescriptionAsHtml(true);
+
+        if (openPosition.getProjectName() != null) {
+            if (openPosition.getProjectName().getProjectDescription() != null) {
+                projectLogoImage.setDescription("<h4>"
+                        + openPosition.getProjectName().getProjectName()
+                        + "</h4><br><br>"
+                        + openPosition.getProjectName().getProjectDescription());
+            }
+
+            if (openPosition.getProjectName().getProjectLogo() != null) {
+                projectLogoImage.setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(openPosition
+                                .getProjectName()
+                                .getProjectLogo());
+            } else {
+                projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        }
+
+        return projectLogoImage;
+    }
+
+    private HBoxLayout setDetailValueLabel(String leftLabelStr,
+                                           String rightLabelStr) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+
+        Label leftDetailLabel = uiComponents.create(Label.class);
+        leftDetailLabel.setValue(leftLabelStr);
+        leftDetailLabel.setWidthFull();
+        leftDetailLabel.setStyleName("my-active-candidate-dashboard-detail-normal");
+        leftDetailLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
+        Label rightDetailLabel = uiComponents.create(Label.class);
+        rightDetailLabel.setValue(rightLabelStr);
+        rightDetailLabel.setWidthAuto();
+        rightDetailLabel.setStyleName("my-active-candidate-dashboard-detail-bold");
+        rightDetailLabel.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+
+        retHBox.add(leftDetailLabel);
+        retHBox.add(rightDetailLabel);
+        retHBox.expand(leftDetailLabel);
+
+        return retHBox;
+    }
+
     private void setProjectVisibleDetails(VBoxLayout retHBox,
                                           VBoxLayout vBoxDetail,
                                           OpenPosition openPosition,
                                           LinkButton retLinkButton,
+                                          HBoxLayout cityOfVacancy,
                                           HBoxLayout salaryMinHBox,
                                           HBoxLayout salaryMaxHBox) {
         if (cardDetailCheckBox.getValue() != null ? cardDetailCheckBox.getValue() : false) {
@@ -573,15 +674,17 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         if (!cardDetailCheckBox.getValue()) {
             salaryMinHBox.setVisible(false);
             salaryMaxHBox.setVisible(false);
+            cityOfVacancy.setVisible(false);
         } else {
             salaryMinHBox.setVisible(true);
             salaryMaxHBox.setVisible(true);
+            cityOfVacancy.setVisible(true);
         }
     }
 
     @Subscribe("cardDetailCheckBox")
     public void onCardDetailCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-       reinitInteractionListDataContainer();
+        reinitInteractionListDataContainer();
     }
 
     private Set<OpenPosition> getProcessedOpenPosition(JobCandidate jobCandidate) {

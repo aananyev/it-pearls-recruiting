@@ -1630,4 +1630,12 @@ rating_battery_yellow_3:before {
           display: inline-block;
           margin-left: 5px;
     }
+
+    .my-active-candidate-dashboard-detail-normal {
+          font-weight: normal;
+    }
+
+    .my-active-candidate-dashboard-detail-bold {
+          font-weight: bold;
+    }
 }
