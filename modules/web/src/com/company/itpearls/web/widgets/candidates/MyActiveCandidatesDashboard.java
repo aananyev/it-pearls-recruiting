@@ -2,11 +2,13 @@ package com.company.itpearls.web.widgets.candidates;
 
 import com.company.itpearls.entity.*;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
+import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.WindowParam;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -52,6 +54,14 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     @Inject
     private Dialogs dialogs;
 
+    @WidgetParam
+    @WindowParam
+    protected Boolean detailMode;
+
+    @WidgetParam
+    @WindowParam
+    protected Boolean simpleMode;
+
     private Set<OpenPosition> caseClosedOpenPosition;
     private Set<OpenPosition> processedOpenPosition;
     private Set<OpenPosition> opportunityOpenPosition;
@@ -79,6 +89,31 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         initCandidatesList();
         initNoCandidatesLabel();
         initCheckBox();
+        initSimpleMode();
+        initDetailMode();
+    }
+
+    private void initDetailMode() {
+        if (detailMode != null) {
+            cardDetailCheckBox.setValue(detailMode);
+        } else {
+            cardDetailCheckBox.setValue(false);
+        }
+    }
+
+    private void initSimpleMode() {
+        if (simpleMode != null) {
+            if (simpleMode) {
+                cardDetailCheckBox.setVisible(false);
+                excludeCheckBox.setVisible(false);
+            } else {
+                cardDetailCheckBox.setVisible(true);
+                excludeCheckBox.setVisible(true);
+            }
+        } else {
+            cardDetailCheckBox.setVisible(true);
+            excludeCheckBox.setVisible(true);
+        }
     }
 
     private void initCheckBox() {
@@ -393,8 +428,13 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 // блок детализации
             Label projectDetailLabel = createProjectDetailLabel(openPosition);
 
+            String remoteWorkStr = getRemoteWorkStr(openPosition);
+            HBoxLayout remoteWorkHBox = setDetailValueLabel(messageBundle.getMessage("msgRemoteWork"), remoteWorkStr);
+
             HBoxLayout cityOfVacancy = setDetailValueLabel(messageBundle.getMessage("msgCity"),
-                    openPosition.getCityPosition().getCityRuName());
+                    openPosition.getCityPosition() != null
+                            ? openPosition.getCityPosition().getCityRuName()
+                            : messageBundle.getMessage("msgUndefinedCity"));
             HBoxLayout salaryMinHBox = setDetailValueLabel(messageBundle.getMessage("msgSalaryMin"),
                     openPosition.getSalaryMin() != null
                             ? openPosition.getSalaryMin().toString() : "");
@@ -407,6 +447,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                     openPosition,
                     retLinkButton,
                     cityOfVacancy,
+                    remoteWorkHBox,
                     salaryMinHBox,
                     salaryMaxHBox);
 
@@ -417,6 +458,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             internalHBox.add(closeInprocessLinkButton);
 
             internalVBox.add(projectDetailLabel);
+            internalVBox.add(remoteWorkHBox);
             internalVBox.add(cityOfVacancy);
             internalVBox.add(salaryMinHBox);
             internalVBox.add(salaryMaxHBox);
@@ -444,6 +486,27 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         retList.add(flagCandidateCloseAllProject);
 
         return retList;
+    }
+
+    private String getRemoteWorkStr(OpenPosition openPosition) {
+        StringBuffer remoteWorkStr = new StringBuffer();
+
+        switch (openPosition.getRemoteWork()) {
+            case -1:
+                remoteWorkStr.append(messageBundle.getMessage("msgUndefined"));
+                break;
+            case 0:
+                remoteWorkStr.append(messageBundle.getMessage("msgWorkInOffice"));
+                break;
+            case 1:
+                remoteWorkStr.append(messageBundle.getMessage("msgRemoteWork"));
+                break;
+            case 2:
+                remoteWorkStr.append(messageBundle.getMessage("msgHybridWork"));
+                break;
+        }
+
+        return remoteWorkStr.toString();
     }
 
     private VBoxLayout createRetHBox(OpenPosition openPosition, String style) {
@@ -648,6 +711,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                                           OpenPosition openPosition,
                                           LinkButton retLinkButton,
                                           HBoxLayout cityOfVacancy,
+                                          HBoxLayout remoteWorkHBox,
                                           HBoxLayout salaryMinHBox,
                                           HBoxLayout salaryMaxHBox) {
         if (cardDetailCheckBox.getValue() != null ? cardDetailCheckBox.getValue() : false) {
@@ -675,10 +739,13 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             salaryMinHBox.setVisible(false);
             salaryMaxHBox.setVisible(false);
             cityOfVacancy.setVisible(false);
+            remoteWorkHBox.setVisible(false);
+
         } else {
             salaryMinHBox.setVisible(true);
             salaryMaxHBox.setVisible(true);
             cityOfVacancy.setVisible(true);
+            remoteWorkHBox.setVisible(true);
         }
     }
 

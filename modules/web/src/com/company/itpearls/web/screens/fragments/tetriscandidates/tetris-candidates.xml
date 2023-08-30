@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:dashboard="http://schemas.haulmont.com/cubadshb/ui-component.xsd"
+        caption="msg://tetrisCandidates.caption"
+        messagesPack="com.company.itpearls.web.screens.fragments.tetriscandidates">
+    <layout>
+        <dashboard:dashboard id="tetrisCandidatesDashboard"
+                             code="tetris-candidates-dashboard"
+                             timerDelay="60"
+                             width="100%">
+        </dashboard:dashboard>>
+    </layout>
+</window>
