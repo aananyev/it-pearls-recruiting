@@ -19,10 +19,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import javax.mail.*;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @UiController("itpearls_InternalEmailer.edit")
@@ -129,11 +130,79 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                         + toEmailField.getValue().getEmail()
                         + ") ?")
                 .withType(Dialogs.MessageType.CONFIRMATION)
-                .withActions(new DialogAction(DialogAction.Type.YES).withHandler(e -> {
-                            sendByEmailDefault();
-                        }),
+                .withActions(new DialogAction(DialogAction.Type.YES).withHandler(e ->
+                        {
+                            try {
+                                sendByEmailDefaultMailx();
+                            } catch (MessagingException messagingException) {
+                                messagingException.printStackTrace();
+                            }
+                        }
+                        ),
                         new DialogAction(DialogAction.Type.NO)
                 ).show();
+    }
+
+    private void sendByEmailDefaultMailx() throws MessagingException {
+        final String SMTP_SERVER = ((ExtUser) userSession.getUser()).getSmtpServer();
+        final String SMTP_PORT = ((ExtUser) userSession.getUser()).getSmtpPort().toString();
+        final String SMTP_USERNAME = ((ExtUser) userSession.getUser()).getSmtpUser();
+        final String SMTP_PASSWORD = ((ExtUser) userSession.getUser()).getSmtpPassword();
+
+        String to = toEmailField.getValue().getEmail();
+        String subject = subjectEmailField.getValue();
+        String body = bodyEmailField.getValue();
+
+        Properties props = new Properties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.host", SMTP_SERVER);
+        props.put("mail.smtp.port", SMTP_PORT);
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.sendpartial", "true");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.port", SMTP_PORT);
+        props.put("mail.smtp.ssl.trust", SMTP_SERVER);
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+
+//        Session session = Session.getDefaultInstance(props);
+
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(SMTP_USERNAME, SMTP_PASSWORD);
+            }
+        });
+
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(SMTP_USERNAME));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            message.setSubject(subject);
+            message.setText(body);
+            message.setSentDate(new Date());
+
+            Transport.send(message);
+/*            Transport transport = session.getTransport();
+            transport.connect(SMTP_SERVER, Integer.parseInt(SMTP_PORT), SMTP_USERNAME, SMTP_PASSWORD);
+            transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO)); */
+
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withType(Notifications.NotificationType.HUMANIZED)
+                    .withHideDelayMs(15000)
+                    .withCaption(messageBundle.getMessage("msgInfo"))
+                    .withDescription(messageBundle.getMessage("msgEmailSended"))
+                    .show();
+
+            getEditedEntity().setDateSendEmail(new Date());
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgErrorSendEmail") + " " + e.getMessage())
+                    .show();
+        }
     }
 
     private void sendByEmailDefault() {
