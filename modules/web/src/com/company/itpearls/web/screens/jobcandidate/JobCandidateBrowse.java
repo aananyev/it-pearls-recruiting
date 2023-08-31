@@ -148,6 +148,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        jobCandidatesTable.setDescriptionAsHtml(true);
         if (userSession.getUser().getGroup().getName().equals("Стажер")) {
             jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
 
@@ -2331,12 +2332,31 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             Base64.Encoder encoder = Base64.getEncoder();
             String encodedString = encoder.encodeToString(image);
 
-            return
-                    "<img src=\"data:image/" + fd.getExtension() + ";base64, " +
-                            encodedString +
-                            "\"" +
-                            " width=\"220\" height=\"292\">";
+            return getMailHTMLHeader()
+                    + "\n<img src=\"data:image/" + fd.getExtension() + ";base64, " +
+                    encodedString +
+                    "\"" +
+                    " width=\"220\" height=\"292\">\n"
+                    + getMailHTMLFooter();
         } else
             return null;
+    }
+
+
+    private String getMailHTMLFooter() {
+        return "</body>\n" +
+                "</html>";
+    }
+
+    private String getMailHTMLHeader() {
+        return "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n" +
+                "<title></title>\n" +
+                "<style type=\"text/css\">\n" +
+                "</style>\n" +
+                "</head>\n" +
+                "<body>";
     }
 }

@@ -228,6 +228,7 @@
             <property name="grade" view="_local"/>
             <property name="owner" view="_local"/>
             <property name="cityPosition" view="_local"/>
+            <property name="cities" view="_local"/>
         </property>
         <property name="iteractionType" view="_local">
             <property name="workStatus" view="_minimal">

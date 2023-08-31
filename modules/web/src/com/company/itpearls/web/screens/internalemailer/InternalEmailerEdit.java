@@ -166,8 +166,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
 
-//        Session session = Session.getDefaultInstance(props);
-
         Session session = Session.getInstance(props, new javax.mail.Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(SMTP_USERNAME, SMTP_PASSWORD);
@@ -179,13 +177,13 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             message.setFrom(new InternetAddress(SMTP_USERNAME));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(subject);
-            message.setText(body);
+            message.setContent(getMailHTMLHeader()
+                    + body
+                    + getMailHTMLFooter(), "text/html; charset=utf-8");
+
             message.setSentDate(new Date());
 
             Transport.send(message);
-/*            Transport transport = session.getTransport();
-            transport.connect(SMTP_SERVER, Integer.parseInt(SMTP_PORT), SMTP_USERNAME, SMTP_PASSWORD);
-            transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO)); */
 
             notifications.create(Notifications.NotificationType.HUMANIZED)
                     .withType(Notifications.NotificationType.HUMANIZED)
@@ -203,6 +201,23 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                     .withDescription(messageBundle.getMessage("msgErrorSendEmail") + " " + e.getMessage())
                     .show();
         }
+    }
+
+    private String getMailHTMLFooter() {
+        return "</body>\n" +
+                "</html>";
+    }
+
+    private String getMailHTMLHeader() {
+        return "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n" +
+                "<title>...</title>\n" +
+                "<style type=\"text/css\">\n" +
+                "</style>\n" +
+                "</head>\n" +
+                "<body>";
     }
 
     private void sendByEmailDefault() {
