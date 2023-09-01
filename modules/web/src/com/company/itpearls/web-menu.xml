@@ -7,7 +7,6 @@
               icon="CALENDAR"/>
         <item screen="itpearls_WeekInterviewCalendar"
               icon="CALENDAR"/>
-        <item screen="itpearls_LoadFromFileScreen" caption="mainMsg://menu_config.itpearls_LoadFromFileScreen"/>
     </menu>
     <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
         <item screen="itpearls_OpenPositionMaster.browse"
@@ -26,6 +25,15 @@
         </menu>
         <item screen="itpearls_TetrisCandidates" caption="mainMsg://menu_config.itpearls_TetrisCandidates"
               icon="ROTATE_RIGHT"/>
+    </menu>
+    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
+        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
+              icon="font-icon:ADDRESS_BOOK_O"/>
+        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
+              icon="GROUP"/>
+        <item screen="itpearls_ApplicationRecruitment.browse"
+              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
+        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
     </menu>
     <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
         <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"

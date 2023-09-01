@@ -1169,6 +1169,7 @@ create table ITPEARLS_EMPLOYEE (
     OUTSTAFFING_COST decimal(19, 2),
     SALARY_COST decimal(19, 2),
     SALARY decimal(19, 2),
+    CURRENCY_ID uuid,
     LABOR_AGREEMENT_ID uuid,
     WORK_STATUS_ID uuid,
     --

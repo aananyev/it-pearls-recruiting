@@ -18,7 +18,7 @@ import java.util.List;
         @Index(name = "IDX_ITPEARLS_LABOR_AGREEMENT_NAME", columnList = "AGREEMENT_NAME")
 })
 @Entity(name = "itpearls_LaborAgreement")
-@NamePattern("%s|laborAgreementType")
+@NamePattern("%s '%s' №%s от %s|laborAgreementType,agreementName,agreementNumber,agreementDate")
 public class LaborAgreement extends StandardEntity {
     private static final long serialVersionUID = 2987525215308840854L;
 
