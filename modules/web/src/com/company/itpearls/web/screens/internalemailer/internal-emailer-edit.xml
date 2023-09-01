@@ -75,7 +75,7 @@
                             where lower(e.fullName) like lower(:searchString) escape '\'
                             and e.middleName not like '(не использовать)'
                             and not e.blockCandidate = true
-                            order by e.secondName, e.firstName
+                            order by e.fullName
                         </query>
                     </suggestionPickerField>
                 </vbox>
