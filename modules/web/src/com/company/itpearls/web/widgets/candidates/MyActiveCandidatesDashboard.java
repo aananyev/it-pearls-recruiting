@@ -774,9 +774,15 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         for (IteractionList iteractionList : caseClosedInteraction) {
             Boolean flag = false;
             for (OpenPosition op : caseClosedOpenPosition) {
-                if (op.equals(iteractionList.getVacancy())) {
-                    flag = true;
-                    break;
+                if (op != null) {
+                    if (iteractionList != null) {
+                        if (iteractionList.getVacancy() != null) {
+                            if (op.equals(iteractionList.getVacancy())) {
+                                flag = true;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -802,9 +808,13 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         for (OpenPosition openPosition : opportunityOpenPosition) {
             Boolean flag = false;
             for (OpenPosition ccOP : wasOrNowOpenPosition) {
-                if (openPosition.equals(ccOP)) {
-                    flag = true;
-                    break;
+                if (openPosition != null) {
+                    if (ccOP != null) {
+                        if (openPosition.equals(ccOP)) {
+                            flag = true;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -831,7 +841,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         Set<OpenPosition> retOpenPosition = new HashSet<>();
 
         for (IteractionList iteractionList : caseClosedInteraction) {
-            retOpenPosition.add(iteractionList.getVacancy());
+            if (iteractionList.getVacancy() != null) {
+                retOpenPosition.add(iteractionList.getVacancy());
+            }
         }
 
         return retOpenPosition;
