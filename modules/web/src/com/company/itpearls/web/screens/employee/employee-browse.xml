@@ -76,12 +76,15 @@
                         caption=""
                         width="50px">
                 </column>
-                <column id="jobCandidate" sort="ASCENDING"/>
+                <column id="jobCandidate"
+                        sort="ASCENDING"/>
                 <column id="workStatus"/>
-                <column id="openPosition" width="300px"/>
+                <column id="openPosition"
+                        width="300px"/>
                 <column id="employeeDate"/>
                 <column id="dissmisalDate"/>
                 <column id="outstaffingCost"/>
+                <column id="salary"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

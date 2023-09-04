@@ -46,6 +46,11 @@ public class Employee extends StandardEntity {
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CURRENCY_ID")
+    private Currency currency;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "LABOR_AGREEMENT_ID")
     private LaborAgreement laborAgreement;
 
@@ -53,6 +58,14 @@ public class Employee extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WORK_STATUS_ID")
     private EmployeeWorkStatus workStatus;
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+    }
 
     public BigDecimal getSalaryCost() {
         return salaryCost;
