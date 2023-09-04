@@ -7,13 +7,30 @@
         <instance id="internalEmailerTemplateDc"
                   class="com.company.itpearls.entity.InternalEmailerTemplate">
             <view extends="_local">
-                <property name="emailTemplate" view="_local"/>
+                <property name="emailTemplate" view="_local">
+                    <property name="templateOpenPosition" view="_local"/>
+                    <property name="templatePosition" view="_local"/>
+                    <property name="templateAuthor" view="_local"/>
+                </property>
                 <property name="fromEmail" view="_local"/>
                 <property name="toEmail" view="_local"/>
             </view>
             <loader/>
         </instance>
-        <collection id="emailTemplatesDc" class="com.company.itpearls.entity.InternalEmailTemplate" view="_minimal">
+        <collection id="emailTemplatesDc" class="com.company.itpearls.entity.InternalEmailTemplate">
+            <view extends="_local">
+                <property name="templateAuthor" view="_local"/>
+                <property name="templatePosition" view="_local"/>
+                <property name="templateOpenPosition" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectDepartment" view="_local">
+                            <property name="companyName" view="_local"/>
+                        </property>
+                        <property name="projectLogo" view="_local"/>
+                    </property>
+                    <property name="positionType" view="_local"/>
+                </property>
+            </view>
             <loader id="emailTemplatesDl">
                 <query>
                     <![CDATA[select e from itpearls_InternalEmailTemplate e]]>
@@ -39,12 +56,22 @@
                 width="800"/>
     <layout>
         <vbox id="subjectGroupBox">
-            <lookupPickerField id="emailTemplateField"
-                               optionsContainer="emailTemplatesDc"
-                               dataContainer="internalEmailerTemplateDc"
-                               width="100%"
-                               caption="msg://msgEmailTemplate"
-                               property="emailTemplate"/>
+            <hbox spacing="true"
+                  width="100%"
+                  expand="emailTemplateField">
+                <lookupPickerField id="emailTemplateField"
+                                   optionsContainer="emailTemplatesDc"
+                                   dataContainer="internalEmailerTemplateDc"
+                                   width="100%"
+                                   caption="msg://msgEmailTemplate"
+                                   property="emailTemplate"/>
+                <button id="selectOpenPositionButton"
+                        icon="COMPASS"
+                        width="AUTO"
+                        align="BOTTOM_RIGHT"
+                        caption="msg://msgSelectOpenPosition"
+                        invoke="selectOpenPositionButton"/>
+            </hbox>
         </vbox>
     </layout>
 </window>

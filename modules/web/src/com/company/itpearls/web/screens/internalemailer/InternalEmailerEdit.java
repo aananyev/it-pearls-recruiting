@@ -74,6 +74,8 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     private String cuba_email_smtpUser = "";
     private String cuba_email_smtpPassword = "";
 
+    protected JobCandidate jobCandidate = null;
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
 
@@ -83,6 +85,10 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         }
 
         setSender((ExtUser) userSession.getUser());
+
+        if (jobCandidate != null) {
+            toEmailField.setValue(jobCandidate);
+        }
     }
 
     private void setSender(ExtUser user) {
@@ -290,5 +296,13 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         } else {
             return null;
         }
+    }
+
+    public JobCandidate getJobCandidate() {
+        return jobCandidate;
+    }
+
+    public void setJobCandidate(JobCandidate jobCandidate) {
+        this.jobCandidate = jobCandidate;
     }
 }

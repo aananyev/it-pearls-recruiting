@@ -176,6 +176,7 @@
                 <button id="sendEmailButton"
                         caption="mainMsg://msgSendEmail"
                         enable="false"
+                        icon="ENVELOPE_O"
                         invoke="onSendEmail"/>
             </buttonsPanel>
         </dataGrid>

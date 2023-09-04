@@ -43,102 +43,128 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
 
     @Override
     public String preparingMessage(String text,
+                                   OpenPosition openPosition) {
+        return preparingMessage(text, null, openPosition, null, null);
+    }
+
+    @Override
+    public String preparingMessage(String text,
+                                   JobCandidate jobCandidate,
+                                   OpenPosition openPosition,
+                                   ExtUser user) {
+        return preparingMessage(text, jobCandidate, openPosition, user, null);
+    }
+
+    @Override
+    public String preparingMessage(String text,
                                    JobCandidate jobCandidate,
                                    OpenPosition openPosition,
                                    ExtUser user,
                                    Data addDate) {
         HashMap<String, String> emailKeys = generateKeys();
 
-        StringBuffer textBuff = new StringBuffer(text);
+        if (text != null) {
+            if (!text.equals("")) {
+                StringBuffer textBuff = new StringBuffer(text);
 
-        String retStr = textBuff.toString();
+                String retStr = textBuff.toString();
 
-        try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-            retStr = strSimpleService.replaceAll(retStr, emailKeys.get(EmailKeys.DATE.getId()),
-                    simpleDateFormat.format(addDate));
+                try {
+                    if (addDate != null) {
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+                        retStr = strSimpleService.replaceAll(retStr, emailKeys.get(EmailKeys.DATE.getId()),
+                                simpleDateFormat.format(addDate));
 
-            SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("hh:mm");
-            simpleDateFormat1.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-            retStr = strSimpleService.replaceAll(retStr,
-                    emailKeys.get(EmailKeys.TIME.getId()),
-                    simpleDateFormat1.format(addDate));
-
-            if (jobCandidate != null) {
-                if (jobCandidate.getFirstName() != null) {
-                    retStr = strSimpleService.replaceAll(retStr,
-                            emailKeys.get(EmailKeys.FIRST_NAME.getId()),
-                            jobCandidate.getFirstName());
-                }
-
-                if (jobCandidate.getFirstName() != null) {
-                    retStr = strSimpleService.replaceAll(retStr,
-                            emailKeys.get(EmailKeys.MIDDLE_NAME.getId()),
-                            jobCandidate.getMiddleName());
-                }
-
-                if (jobCandidate.getMiddleName() != null) {
-                    retStr = strSimpleService.replaceAll(retStr,
-                            emailKeys.get(EmailKeys.SECOND_NAME.getId()),
-                            jobCandidate.getSecondName());
-                }
-            }
-
-            if (openPosition != null) {
-                retStr = strSimpleService.replaceAll(retStr,
-                        emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()),
-                        openPosition.getComment());
-
-                retStr = strSimpleService.replaceAll(retStr,
-                        emailKeys.get(EmailKeys.SALARY_MIN.getId()),
-                        openPosition.getSalaryMin().toString());
-
-                retStr = strSimpleService.replaceAll(retStr,
-                        emailKeys.get(EmailKeys.SALARY_MAX.getId()),
-                        openPosition.getSalaryMax().toString());
-
-                if (openPosition.getPositionType() != null) {
-                    if (openPosition.getPositionType().getPositionEnName() != null) {
+                        SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("hh:mm");
+                        simpleDateFormat1.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
                         retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.POSITION.getId()),
-                                openPosition.getPositionType().getPositionEnName());
-                    }
-                }
-
-                if (openPosition.getProjectName() != null) {
-                    if (openPosition.getProjectName().getProjectName() != null) {
-                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.PROJECT.getId()),
-                                openPosition.getProjectName().getProjectName());
+                                emailKeys.get(EmailKeys.TIME.getId()),
+                                simpleDateFormat1.format(addDate));
                     }
 
+                    if (jobCandidate != null) {
+                        if (jobCandidate.getFirstName() != null) {
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.FIRST_NAME.getId()),
+                                    jobCandidate.getFirstName());
+                        }
 
-                    if (openPosition.getProjectName().getProjectDepartment() != null) {
-                        if (openPosition.getProjectName().getProjectDepartment().getCompanyName() != null) {
-                            if (openPosition.getProjectName().getProjectDepartment().getCompanyName().getComanyName() != null) {
+                        if (jobCandidate.getFirstName() != null) {
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.MIDDLE_NAME.getId()),
+                                    jobCandidate.getMiddleName());
+                        }
+
+                        if (jobCandidate.getMiddleName() != null) {
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.SECOND_NAME.getId()),
+                                    jobCandidate.getSecondName());
+                        }
+                    }
+
+                    if (openPosition != null) {
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()),
+                                openPosition.getComment());
+
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.SALARY_MIN.getId()),
+                                openPosition.getSalaryMin().toString());
+
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.SALARY_MAX.getId()),
+                                openPosition.getSalaryMax().toString());
+
+                        if (openPosition.getPositionType() != null) {
+                            if (openPosition.getPositionType().getPositionEnName() != null) {
                                 retStr = strSimpleService.replaceAll(retStr,
-                                        emailKeys.get(EmailKeys.COMPANY.getId()),
-                                        openPosition.getProjectName().getProjectDepartment().getCompanyName().getComanyName());
+                                        emailKeys.get(EmailKeys.POSITION.getId()),
+                                        openPosition.getPositionType().getPositionEnName());
                             }
                         }
 
-                        if (openPosition.getProjectName().getProjectDepartment().getDepartamentRuName() != null) {
-                            retStr = strSimpleService.replaceAll(retStr,
-                                    emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
-                                    openPosition.getProjectName().getProjectDepartment().getDepartamentRuName());
+                        if (openPosition.getProjectName() != null) {
+                            if (openPosition.getProjectName().getProjectName() != null) {
+                                retStr = strSimpleService.replaceAll(retStr,
+                                        emailKeys.get(EmailKeys.PROJECT.getId()),
+                                        openPosition.getProjectName().getProjectName());
+                            }
+
+
+                            if (openPosition.getProjectName().getProjectDepartment() != null) {
+                                if (openPosition.getProjectName().getProjectDepartment().getCompanyName() != null) {
+                                    if (openPosition.getProjectName().getProjectDepartment().getCompanyName().getComanyName() != null) {
+                                        retStr = strSimpleService.replaceAll(retStr,
+                                                emailKeys.get(EmailKeys.COMPANY.getId()),
+                                                openPosition.getProjectName().getProjectDepartment().getCompanyName().getComanyName());
+                                    }
+                                }
+
+                                if (openPosition.getProjectName().getProjectDepartment().getDepartamentRuName() != null) {
+                                    retStr = strSimpleService.replaceAll(retStr,
+                                            emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
+                                            openPosition.getProjectName().getProjectDepartment().getDepartamentRuName());
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-            retStr = strSimpleService.replaceAll(retStr,
-                    emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()),
-                    user.getName());
-        } catch (NullPointerException e) {
-            log.error("Error", e);
-        } finally {
-            return retStr;
+                    if (user != null) {
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()),
+                                user.getName());
+                    }
+                } catch (NullPointerException e) {
+                    log.error("Error", e);
+                } finally {
+                    return retStr;
+                }
+            } else {
+                return "";
+            }
+        } else {
+            return "";
         }
     }
 

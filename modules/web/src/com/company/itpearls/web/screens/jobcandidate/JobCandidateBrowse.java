@@ -13,6 +13,8 @@ import com.company.itpearls.web.screens.fragments.OnlyTextPersonPosition;
 import com.company.itpearls.web.screens.fragments.OnlyTextPersonPositionLoadPdf;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
+import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
+import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.loadfromfilescreen.LoadFromFileScreen;
@@ -1738,15 +1740,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     public void onSendEmail() {
-        screenBuilders.editor(InternalEmailerTemplate.class, this)
-//                .withScreenClass(InternalEmailerTemplateEdit.class)
+        InternalEmailerTemplateEdit screen = (InternalEmailerTemplateEdit) screenBuilders.editor(InternalEmailerTemplate.class, this)
                 .newEntity()
                 .withInitializer(e -> {
                     e.setFromEmail((ExtUser) userSession.getUser());
                     e.setToEmail(jobCandidatesTable.getSingleSelected());
                 })
-                .build()
-                .show();
+                .build();
+        screen.setJobCandidate(jobCandidatesTable.getSingleSelected());
+        screen.show();
     }
 
     protected FileDescriptor loadCVFileForQuickLoad() {

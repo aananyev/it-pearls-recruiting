@@ -25,6 +25,14 @@ public interface EmailGenerationService {
                             Data addDate);
 
     String preparingMessage(String text,
+                            OpenPosition openPosition);
+
+    String preparingMessage(String text,
+                            JobCandidate jobCandidate,
+                            OpenPosition openPosition,
+                            ExtUser user);
+
+    String preparingMessage(String text,
                             JobCandidate jobCandidate,
                             OpenPosition openPosition,
                             ExtUser user,

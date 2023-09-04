@@ -3,7 +3,9 @@ package com.company.itpearls.web.screens.internalemailertemplate;
 import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
+import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -31,6 +33,10 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private SuggestionPickerField<JobCandidate> toEmailField;
     @Inject
     private UserSession userSession;
+    @Inject
+    private ScreenBuilders screenBuilders;
+
+    private OpenPosition currentOpenPosition = null;
 
     @Subscribe("emailTemplateField")
     public void onEmailTemplateFieldValueChange(HasValue.ValueChangeEvent<InternalEmailTemplate> event) {
@@ -68,11 +74,62 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private void createTextMessage() {
         bodyEmailField.setValue(emailGenerationService
                 .preparingMessage(emailTemplateField.getValue().getTemplateText(),
-                        toEmailField.getValue(), (ExtUser) userSession.getUser()));
+                        toEmailField.getValue(),
+                        (ExtUser) userSession.getUser()
+                ));
+
+        subjectEmailField.setValue(emailGenerationService
+                .preparingMessage(emailTemplateField.getValue().getTemplateSubj(),
+                        toEmailField.getValue(),
+                        emailTemplateField.getValue().getTemplateOpenPosition(),
+                        (ExtUser) userSession.getUser()
+                ));
     }
 
     private void clearAllFields() {
         subjectEmailField.setValue(null);
         bodyEmailField.setValue(null);
+    }
+
+    public void selectOpenPositionButton() {
+        screenBuilders.lookup(OpenPosition.class, this)
+                .withLaunchMode(OpenMode.DIALOG)
+                .withSelectHandler(selectHandler -> {
+                    OpenPosition openPosition = selectHandler.iterator().next();
+                    if (currentOpenPosition == null) {
+                        if (openPosition != null) {
+                            bodyEmailField.setValue(emailGenerationService
+                                    .preparingMessage(bodyEmailField.getValue(), openPosition));
+
+                            subjectEmailField.setValue(emailGenerationService
+                                    .preparingMessage(subjectEmailField.getValue(), openPosition));
+                        }
+
+                        currentOpenPosition = openPosition;
+                    } else {
+                        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                                .withType(Dialogs.MessageType.CONFIRMATION)
+                                .withCaption(messageBundle.getMessage("msgWarning"))
+                                .withMessage(messageBundle.getMessage("msgRebuildTemplateWithNewOpenPosition"))
+                                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                        .withHandler(event -> {
+                                            clearAllFields();
+                                            createTextMessage();
+                                            currentOpenPosition = openPosition;
+
+                                            if (openPosition != null) {
+                                                bodyEmailField.setValue(emailGenerationService
+                                                        .preparingMessage(bodyEmailField.getValue(), openPosition));
+
+                                                subjectEmailField.setValue(emailGenerationService
+                                                        .preparingMessage(subjectEmailField.getValue(), openPosition));
+                                            }
+                                        }),
+                                        new DialogAction((DialogAction.Type.NO)))
+                                .show();
+                    }
+                })
+                .build()
+                .show();
     }
 }
