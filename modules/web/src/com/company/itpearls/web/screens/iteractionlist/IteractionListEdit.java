@@ -555,68 +555,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                     })
                                     .build()
                                     .show();
-
-/*                            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
-                                    .withContentMode(ContentMode.HTML)
-                                    .withType(Dialogs.MessageType.CONFIRMATION)
-                                    .withWidth("800px")
-                                    .withHeight("600px")
-                                    .withMessage("<h3>Высылать ли кандидату оповещение по электронной почте?</h3><br><br><i>"
-                                            + message
-                                            + "</i>")
-                                    .withActions(new DialogAction(DialogAction.Type.YES,
-                                                    Action.Status.PRIMARY).withHandler(event -> {
-                                                IteractionList newsItem = getEditedEntity();
-                                                String bodyMessage = preparingMessage(newsItem);
-
-                                                if (newsItem.getVacancy().getNeedMemoForInterview() != null) {
-                                                    if (newsItem.getVacancy().getNeedMemoForInterview()) {
-                                                        if (newsItem.getVacancy().getMemoForInterview() != null) {
-                                                            if (newsItem.getIteractionType().getNeedSendMemo() != null) {
-                                                                if (newsItem.getIteractionType().getNeedSendMemo()) {
-                                                                    bodyMessage = bodyMessage
-                                                                            + "<br><br><b>Памятка для собеседования</b><br><br>"
-                                                                            + newsItem.getVacancy().getMemoForInterview();
-
-
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-/*                                                EmailInfo emailInfo = EmailInfoBuilder.create()
-                                                        .setAddresses(newsItem.getCandidate().getEmail())
-                                                        .setCaption("IT Pearls - "
-                                                                + newsItem.getVacancy().getVacansyName()
-                                                                + "/"
-                                                                + newsItem.getIteractionType().getIterationName())
-                                                        .setFrom(null)
-                                                        .setBody(bodyMessage)
-                                                        .setTemplateParameters(Collections.singletonMap("newsItem", newsItem))
-                                                        .build();
-
-                                                emailInfo.setBodyContentType("text/html; charset=UTF-8");
-                                                emailService.sendEmailAsync(emailInfo);
-
-                                                if (bodyMessage != null) {
-                                                    String finalBodyMessage = bodyMessage;
-                                                    screenBuilders.editor(InternalEmailer.class, this)
-                                                            .withScreenClass(InternalEmailerEdit.class)
-                                                            .newEntity()
-                                                            .withInitializer(e -> {
-                                                                e.setFromEmail((ExtUser) userSession.getUser());
-                                                                e.setToEmail(candidateField.getValue());
-                                                                e.setBodyEmail(finalBodyMessage);
-                                                            })
-                                                            .build()
-                                                            .show();
-                                                }
-
-                                                afterCommitEmailToCandidateSended = true;
-                                            }),
-                                            new DialogAction(DialogAction.Type.NO))
-                                    .show(); */
                         }
                     }
                 }
@@ -625,16 +563,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private String preparingMessage(IteractionList newsItem) {
+        return emailGenerationService.preparingMessage(newsItem);
+/*
         HashMap<String, String> emailKeys = emailGenerationService.generateKeys();
 
         String retStr = newsItem.getIteractionType().getTextEmailToSend();
 
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
             retStr = strSimpleService.replaceAll(retStr, emailKeys.get(EmailKeys.DATE.getId()),
                     simpleDateFormat.format(newsItem.getAddDate()));
 
             SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("hh:mm");
+            simpleDateFormat1.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
             retStr = strSimpleService.replaceAll(retStr,
                     emailKeys.get(EmailKeys.TIME.getId()),
                     simpleDateFormat1.format(newsItem.getAddDate()));
@@ -685,7 +627,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             retStr = strSimpleService.replaceAll(retStr,
                     emailKeys.get(EmailKeys.SALARY_MAX.getId()),
-                    newsItem.getVacancy().getSalaryMax().toString());
+                    newsItem.getVacancy().getSalaryMax().toString()); */
 
 /*            if (newsItem.getVacancy() != null)
                 if (newsItem.getVacancy().getProjectName() != null)
@@ -713,11 +655,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 retStr = retStr.replaceAll(emailKeys.get(EmailKeys.SALARY_MAX.getId()),
                         newsItem.getVacancy().getSalaryMax().toString()); */
 
-        } catch (NullPointerException e) {
+       /* } catch (NullPointerException e) {
             log.error("Error", e);
         } finally {
             return retStr;
-        }
+        } */
     }
 
     Boolean deleteTwiceEvent = true;

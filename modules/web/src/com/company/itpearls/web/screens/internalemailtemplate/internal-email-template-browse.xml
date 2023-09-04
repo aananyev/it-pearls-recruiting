@@ -38,7 +38,6 @@
             </actions>
             <columns>
                 <column id="templateName"/>
-                <column id="templateText"/>
                 <column id="templateOpenPosition"/>
                 <column id="templatePosition"/>
                 <column id="templateComment"/>
