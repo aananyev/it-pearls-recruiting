@@ -1,0 +1,1 @@
+alter table ITPEARLS_INTERNAL_EMAIL_TEMPLATE add column SHARE_TEMPLATE boolean ;

@@ -1734,3 +1734,55 @@ server started
 2023-09-04 22:40:58.318 +04 [87590] STATEMENT:  INSERT INTO ITPEARLS_INTERNAL_EMAILER (ID, BODY_EMAIL, BODY_HTML, CREATE_TS, CREATED_BY, DATE_CREATE_EMAIL, DATE_SEND_EMAIL, DELETE_TS, DELETED_BY, DRAFT_EMAIL, SUBJECT_EMAIL, UPDATE_TS, UPDATED_BY, VERSION, EMAIL_TEMPLATE_ID, FROM_EMAIL_ID, TO_EMAIL_ID, DTYPE) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 2023-09-04 22:40:58.320 +04 [87590] ERROR:  current transaction is aborted, commands ignored until end of transaction block
 2023-09-04 22:40:58.320 +04 [87590] STATEMENT:  SELECT 1
+waiting for server to shut down....2023-09-04 22:49:27.260 +04 [79105] LOG:  received fast shutdown request
+2023-09-04 22:49:27.260 +04 [79105] LOG:  aborting any active transactions
+2023-09-04 22:49:27.261 +04 [87590] FATAL:  terminating connection due to administrator command
+2023-09-04 22:49:27.261 +04 [87340] FATAL:  terminating connection due to administrator command
+2023-09-04 22:49:27.264 +04 [79105] LOG:  background worker "logical replication launcher" (PID 79112) exited with exit code 1
+2023-09-04 22:49:27.269 +04 [79107] LOG:  shutting down
+2023-09-04 22:49:27.287 +04 [79105] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2023-09-04 22:59:26.755 +04 [88152] LOG:  listening on IPv6 address "::1", port 5432
+2023-09-04 22:59:26.755 +04 [88152] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2023-09-04 22:59:26.756 +04 [88152] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2023-09-04 22:59:26.774 +04 [88153] LOG:  database system was interrupted; last known up at 2023-09-04 22:54:36 +04
+2023-09-04 22:59:27.313 +04 [88153] LOG:  redo starts at 29/49000028
+2023-09-04 22:59:27.323 +04 [88153] LOG:  consistent recovery state reached at 29/490BCEF8
+2023-09-04 22:59:27.323 +04 [88153] LOG:  redo done at 29/490BCEF8
+2023-09-04 22:59:27.323 +04 [88153] LOG:  last completed transaction was at log time 2023-09-04 22:58:20.068232+04
+2023-09-04 22:59:27.375 +04 [88152] LOG:  database system is ready to accept connections
+ done
+server started
+waiting for server to shut down...2023-09-04 22:59:50.086 +04 [88152] LOG:  received fast shutdown request
+.2023-09-04 22:59:50.086 +04 [88152] LOG:  aborting any active transactions
+2023-09-04 22:59:50.086 +04 [88152] LOG:  background worker "logical replication launcher" (PID 88159) exited with exit code 1
+2023-09-04 22:59:50.086 +04 [88154] LOG:  shutting down
+2023-09-04 22:59:50.092 +04 [88152] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to shut down.... done
+server stopped
+rm: ../it-pearls-basebackup-old.tgz: No such file or directory
+waiting for server to start....2023-09-05 09:45:03.174 +04 [89731] LOG:  listening on IPv6 address "::1", port 5432
+2023-09-05 09:45:03.174 +04 [89731] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2023-09-05 09:45:03.175 +04 [89731] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2023-09-05 09:45:03.196 +04 [89732] LOG:  database system was interrupted; last known up at 2023-09-05 09:40:21 +04
+2023-09-05 09:45:03.815 +04 [89732] LOG:  redo starts at 29/4F000028
+2023-09-05 09:45:03.824 +04 [89732] LOG:  consistent recovery state reached at 29/4F094610
+2023-09-05 09:45:03.824 +04 [89732] LOG:  redo done at 29/4F094610
+2023-09-05 09:45:03.824 +04 [89732] LOG:  last completed transaction was at log time 2023-09-05 09:43:47.740202+04
+2023-09-05 09:45:03.901 +04 [89731] LOG:  database system is ready to accept connections
+ done
+server started
+2023-09-05 09:50:55.126 +04 [89923] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:50:55.154 +04 [89925] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:50:55.425 +04 [89927] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:50:55.776 +04 [89929] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:50:55.860 +04 [89931] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:50:58.021 +04 [89934] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:50:58.058 +04 [89936] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:50:58.218 +04 [89938] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:51:12.347 +04 [89956] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:51:12.366 +04 [89958] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-09-05 09:51:12.381 +04 [89960] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

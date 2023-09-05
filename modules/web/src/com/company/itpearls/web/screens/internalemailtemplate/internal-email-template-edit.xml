@@ -39,6 +39,13 @@
                 width="800"/>
     <layout expand="textAreaGroupBox"
             spacing="true">
+        <checkBox id="visibleOtherCheckBox"
+                  width="AUTO"
+                  height="AUTO"
+                  caption="msg://msgVisibleOther"
+                  description="msg://msgVisibleOtherDesc"
+                  dataContainer="internalEmailTemplateDc"
+                  property="shareTemplate"/>
         <textField id="templateNameField"
                    caption="msg://msgTemplateName"
                    width="50%"

@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.internalemailtemplate;
 
 import com.company.itpearls.core.EmailGenerationService;
+import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.RichTextArea;
 import com.haulmont.cuba.gui.screen.*;
@@ -25,6 +26,8 @@ public class InternalEmailTemplateEdit extends StandardEditor<InternalEmailTempl
     private LookupPickerField<User> templateAuthorField;
     @Inject
     private UserSession userSession;
+    @Inject
+    private CheckBox visibleOtherCheckBox;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -42,5 +45,12 @@ public class InternalEmailTemplateEdit extends StandardEditor<InternalEmailTempl
         }
 
         commentKeysRichTextArea.setValue(retStr);
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        if (visibleOtherCheckBox.getValue() == null) {
+            visibleOtherCheckBox.setValue(false);
+        }
     }
 }

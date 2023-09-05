@@ -46,6 +46,17 @@ public class InternalEmailTemplate extends StandardEntity {
     @JoinColumn(name = "TEMPLATE_AUTHOR_ID")
     private User templateAuthor;
 
+    @Column(name = "SHARE_TEMPLATE")
+    private Boolean shareTemplate;
+
+    public Boolean getShareTemplate() {
+        return shareTemplate;
+    }
+
+    public void setShareTemplate(Boolean shareTemplate) {
+        this.shareTemplate = shareTemplate;
+    }
+
     public String getTemplateSubj() {
         return templateSubj;
     }

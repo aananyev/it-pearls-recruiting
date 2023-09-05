@@ -814,6 +814,15 @@ rating_battery_yellow_3:before {
    line-height: 150%;
 }
 
+.table-wordwrap-linehight-200 {
+   white-space: pre-wrap;      /* CSS3 */
+   white-space: -moz-pre-wrap; /* Firefox */
+   white-space: -pre-wrap;     /* Opera <7 */
+   white-space: -o-pre-wrap;   /* Opera 7 */
+   word-wrap: break-word;      /* IE */
+   line-height: 200%;
+}
+
 .table-row-not-visibe {
     text-color: gray;
     text-decoration: line-through;

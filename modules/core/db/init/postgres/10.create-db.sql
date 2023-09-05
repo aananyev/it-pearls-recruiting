@@ -1033,6 +1033,7 @@ create table ITPEARLS_INTERNAL_EMAIL_TEMPLATE (
     TEMPLATE_POSITION_ID uuid,
     TEMPLATE_COMMENT varchar(255),
     TEMPLATE_AUTHOR_ID uuid not null,
+    SHARE_TEMPLATE boolean,
     --
     primary key (ID)
 )^

@@ -15,6 +15,16 @@
             <loader id="internalEmailTemplatesDl">
                 <query>
                     <![CDATA[select e from itpearls_InternalEmailTemplate e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.shareTemplate = :shareTemplate</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.templateAuthor = :templateAuthor</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -23,6 +33,11 @@
                 width="800"/>
     <layout expand="internalEmailTemplatesTable"
             spacing="true">
+        <checkBox id="viewOtherCheckBox"
+                  width="AUTO"
+                  height="AUTO"
+                  caption="msg://msgViewOther"
+                  description="msg://msgViewOtherDesc"/>
         <filter id="filter"
                 applyTo="internalEmailTemplatesTable"
                 dataLoader="internalEmailTemplatesDl">
@@ -30,6 +45,8 @@
         </filter>
         <groupTable id="internalEmailTemplatesTable"
                     width="100%"
+                    stylename="table-wordwrap-linehight-200"
+                    multiLineCells="true"
                     dataContainer="internalEmailTemplatesDc">
             <actions>
                 <action id="create" type="create"/>
