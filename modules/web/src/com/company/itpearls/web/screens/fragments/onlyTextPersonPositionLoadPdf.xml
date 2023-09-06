@@ -15,7 +15,7 @@
         </vbox>
         <upload id="uploadField"
                 dropZone="dropZone"
-                showClearButton="true"
+                showClearButton="true" fileStoragePutMode="IMMEDIATE"
                 ext:index="1"
                 showFileName="true"/>
     </layout>

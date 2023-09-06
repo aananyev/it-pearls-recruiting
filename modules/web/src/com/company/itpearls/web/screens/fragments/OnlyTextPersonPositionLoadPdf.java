@@ -68,36 +68,41 @@ public class OnlyTextPersonPositionLoadPdf extends OnlyTextPersonPosition {
 
     @Subscribe("uploadField")
     public void onUploadFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
-        notifications.create()
-                .withCaption("File upload error")
+        notifications.create(Notifications.NotificationType.ERROR)
+                .withCaption(messageBundle.getMessage("msgError"))
+                .withDescription("File upload error")
                 .show();
     }
 
     @Subscribe("uploadField")
     public void onUploadFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) throws FileStorageException, IOException {
-        File file = fileUploadingAPI.getFile(uploadField.getFileId());
+//        File file = fileUploadingAPI.getFile(uploadField.getFileId());
 
-        if (file != null) {
-            notifications.create()
-                    .withCaption("File is uploaded to temporary storage at " + file.getAbsolutePath())
+/*        if (file != null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription("File is uploaded to temporary storage at " + file.getAbsolutePath())
                     .show();
-        }
+        } */
 
         AtomicReference<FileDescriptor> fd = new AtomicReference<>(uploadField.getFileDescriptor());
 
-        try {
+/*        try {
             fileUploadingAPI.putFileIntoStorage(uploadField.getFileId(), fd.get());
         } catch (FileStorageException e) {
             throw new RuntimeException("Error saving file to FileStorage", e);
-        }
+        } */
 
-//        dataManager.commit(fd);
-        notifications.create()
-                .withCaption("Uploaded file: " + uploadField.getFileName())
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .withDescription("Uploaded file: " + uploadField.getFileName())
                 .show();
 
-        if (fd.get().getExtension().toLowerCase().equals(EXTENSION_PDF.toLowerCase())) {
-            InputStream inputStream = fileLoader.openStream(fd.get());
+        FileDescriptor fdcv = fd.get();
+
+        if (fdcv.getExtension().toLowerCase().equals(EXTENSION_PDF.toLowerCase())) {
+//            if (fd.get().getExtension().toLowerCase().equals(EXTENSION_PDF.toLowerCase())) {
+            InputStream inputStream = fileLoader.openStream(fdcv);
             List<RenderedImage> images = new ArrayList<>();
 
             textResume = parsePdfCV(inputStream);

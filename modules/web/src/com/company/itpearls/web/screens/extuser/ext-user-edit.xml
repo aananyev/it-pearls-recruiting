@@ -198,7 +198,7 @@
                                         </field>
                                         <field id="pop3User" caption="POP3 user">
                                         </field>
-                                        <field id="imapUset" caption="IMAP user">
+                                        <field id="imapUser" caption="IMAP user">
                                         </field>
                                     </column>
                                 </fieldGroup>

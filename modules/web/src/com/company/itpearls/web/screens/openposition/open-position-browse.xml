@@ -386,11 +386,21 @@
                         action="openPositionsTable.edit"/>
                 <button id="removeBtn"
                         action="openPositionsTable.remove"/>
-                <button id="openCloseButton"
-                        caption="msg://msgOpenClose"
-                        enable="false"
-                        invoke="openCloseButtonInvoke"
-                        icon="CLOSE"/>
+                <popupButton id="openCloseButton"
+                             caption="msg://msgOpenClose"
+                             enable="false"
+                             icon="DIALOG_CLOSE">
+                    <actions>
+                        <action id="closeOpenPositionAction"
+                                caption="msg://msgCloseOpenPosition"
+                                icon="CLOSE"
+                                invoke="openCloseButtonInvoke"/>
+                        <action id="closeOpenPositionWithCommentAction"
+                                caption="msg://msgCloseOpenPositionWithComment"
+                                icon="COMMENTING"
+                                invoke="openCloseButtonWithCommentInvoke"/>
+                    </actions>
+                </popupButton>
                 <button id="buttonSubscribe"
                         caption="msg://mshSubscibe"
                         invoke="subscribePosition"

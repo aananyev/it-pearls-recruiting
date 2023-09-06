@@ -218,7 +218,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private Dialogs dialogs;
     @Inject
-    private Button openCloseButton;
+    private PopupButton openCloseButton;
     @Inject
     private PopupButton reportsPopupButton;
 
@@ -1124,6 +1124,90 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
+    private void openCloseButtonClickListener(OpenPosition entity, PopupButton retButton) {
+        if (!openCloseChildVacancy(entity)) {
+            entity.setOpenClose(!entity.getOpenClose());
+
+            retButton.getAction("closeOpenPositionAction").setCaption(!entity.getOpenClose()
+                    ? messageBundle.getMessage("msgClose")
+                    : messageBundle.getMessage("msgOpen"));
+            retButton.setDescription(!entity.getOpenClose()
+                    ? messageBundle.getMessage("msgCloseVacamcy")
+                    : messageBundle.getMessage("msgOpenVacancy"));
+
+            openCloseVacancy(entity);
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withDescription(
+                            messageBundle.getMessage("msgCanNotCloseWithout"))
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .show();
+        }
+    }
+
+    private void openCloseVacancy(OpenPosition entity) {
+        if (entity.getOpenClose() || entity.getOpenClose() == null) {
+            events.publish(new UiNotificationEvent(this, "Закрыта вакансия: "
+                    + entity.getVacansyName()
+                    + "<br><svg align=\"right\" width=\"100%\"><i>"
+                    + userSession.getUser().getName()
+                    + "</i></svg>"));
+
+            setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+                    "Закрылась вакансия",
+                    "Закрыта вакансия",
+                    new Date(),
+                    userSession.getUser());
+
+            entity.setOwner(null);
+            entity.setLastOpenDate(null);
+
+            openPositionsTable.setDetailsVisible(entity, false);
+            openPositionsDl.load();
+
+        } else {
+            events.publish(new UiNotificationEvent(this, "Открыта вакансия: "
+                    + entity.getVacansyName()
+                    + "<br><svg align=\"right\" width=\"100%\"><i>"
+                    + userSession.getUser().getName()
+                    + "</i></svg>"));
+
+            setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+                    "Открылась вакансия",
+                    "Открыта вакансия",
+                    new Date(),
+                    userSession.getUser());
+
+            entity.setOwner(userSession.getUser());
+            entity.setLastOpenDate(new Date());
+            entity.setPriority(PRIORITY_NORMAL);
+
+            if (entity.getParentOpenPosition() != null) {
+                if (entity.getParentOpenPosition().getOpenClose()) {
+                    entity.getParentOpenPosition().setOpenClose(false);
+                    setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected().getParentOpenPosition(),
+                            "Открыта дочерней вакансией "
+                                    + openPositionsTable.getSingleSelected().getVacansyName(),
+                            "Открыта ввиду открытия дочерней вакансии "
+                                    + openPositionsTable.getSingleSelected().getVacansyName(),
+                            new Date(),
+                            userSession.getUser());
+                }
+            }
+
+            openPositionsTable.setDetailsVisible(entity, false);
+            openPositionsDl.load();
+        }
+
+        dataManager.commit(entity);
+
+        if (!entity.getOpenClose()) {
+            entity.getProjectName().setProjectIsClosed(false);
+        }
+
+        openPositionsDl.load();
+    }
+
     private void openCloseButtonClickListener(OpenPosition entity, Button retButton) {
         if (!openCloseChildVacancy(entity)) {
             entity.setOpenClose(!entity.getOpenClose());
@@ -1132,68 +1216,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     ? messageBundle.getMessage("msgClose")
                     : messageBundle.getMessage("msgOpen"));
             retButton.setDescription(!entity.getOpenClose()
-                    ? messageBundle.getMessage("msgCloseVacamcy") : messageBundle.getMessage("msgOpenVacancy"));
+                    ? messageBundle.getMessage("msgCloseVacamcy") :
+                    messageBundle.getMessage("msgOpenVacancy"));
 
-            if (entity.getOpenClose() || entity.getOpenClose() == null) {
-                events.publish(new UiNotificationEvent(this, "Закрыта вакансия: "
-                        + entity.getVacansyName()
-                        + "<br><svg align=\"right\" width=\"100%\"><i>"
-                        + userSession.getUser().getName()
-                        + "</i></svg>"));
-
-                setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
-                        "Закрылась вакансия",
-                        "Закрыта вакансия",
-                        new Date(),
-                        userSession.getUser());
-
-                entity.setOwner(null);
-                entity.setLastOpenDate(null);
-
-                openPositionsTable.setDetailsVisible(entity, false);
-                openPositionsDl.load();
-
-            } else {
-                events.publish(new UiNotificationEvent(this, "Открыта вакансия: "
-                        + entity.getVacansyName()
-                        + "<br><svg align=\"right\" width=\"100%\"><i>"
-                        + userSession.getUser().getName()
-                        + "</i></svg>"));
-
-                setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
-                        "Открылась вакансия",
-                        "Открыта вакансия",
-                        new Date(),
-                        userSession.getUser());
-
-                entity.setOwner(userSession.getUser());
-                entity.setLastOpenDate(new Date());
-                entity.setPriority(PRIORITY_NORMAL);
-
-                if (entity.getParentOpenPosition() != null) {
-                    if (entity.getParentOpenPosition().getOpenClose()) {
-                        entity.getParentOpenPosition().setOpenClose(false);
-                        setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected().getParentOpenPosition(),
-                                "Открыта дочерней вакансией "
-                                        + openPositionsTable.getSingleSelected().getVacansyName(),
-                                "Открыта ввиду открытия дочерней вакансии "
-                                        + openPositionsTable.getSingleSelected().getVacansyName(),
-                                new Date(),
-                                userSession.getUser());
-                    }
-                }
-
-                openPositionsTable.setDetailsVisible(entity, false);
-                openPositionsDl.load();
-            }
-
-            dataManager.commit(entity);
-
-            if (!entity.getOpenClose()) {
-                entity.getProjectName().setProjectIsClosed(false);
-            }
-
-            openPositionsDl.load();
+            openCloseChildVacancy(entity);
         } else {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withDescription(
@@ -3042,6 +3068,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retBox.add(starLabel);
 
         return retBox;
+    }
+
+    public void openCloseButtonWithCommentInvoke() {
+        setRatingComment();
+        openCloseButtonInvoke();
     }
 }
 

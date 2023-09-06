@@ -55,9 +55,9 @@
             </actions>
             <columns>
                 <column id="templateName"/>
+                <column id="shareTemplate"/>
                 <column id="templateOpenPosition"/>
                 <column id="templatePosition"/>
-                <column id="templateComment"/>
                 <column id="templateAuthor"/>
             </columns>
             <rowsCount/>
