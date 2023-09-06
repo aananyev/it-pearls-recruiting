@@ -44,6 +44,9 @@ public class Employee extends StandardEntity {
     @Column(name = "SALARY")
     private BigDecimal salary;
 
+    @Column(name = "FULL_COSTS")
+    private BigDecimal fullCosts;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CURRENCY_ID")
@@ -58,6 +61,14 @@ public class Employee extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WORK_STATUS_ID")
     private EmployeeWorkStatus workStatus;
+
+    public BigDecimal getFullCosts() {
+        return fullCosts;
+    }
+
+    public void setFullCosts(BigDecimal fullCosts) {
+        this.fullCosts = fullCosts;
+    }
 
     public Currency getCurrency() {
         return currency;

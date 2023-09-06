@@ -184,17 +184,25 @@
                     <hbox width="50%"
                           spacing="true"
                           expand="salaryTextField">
-                    <textField id="salaryTextField"
-                               width="AUTO"
-                               dataContainer="employeeDc"
-                               property="salary"
-                               caption="msg://msgSalary">
-                        <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
-                    </textField>
+                        <textField id="salaryTextField"
+                                   width="AUTO"
+                                   dataContainer="employeeDc"
+                                   property="salary"
+                                   caption="msg://msgSalary">
+                            <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                        </textField>
+                        <textField id="fullCostsField"
+                                   width="AUTO"
+                                   dataContainer="employeeDc"
+                                   property="fullCosts"
+                                   caption="msg://msgFullCosts">
+                            <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                        </textField>
                         <lookupField id="currencyLookupField"
                                      dataContainer="employeeDc"
                                      optionsContainer="currencyDc"
                                      property="currency"
+                                     visible="false"
                                      caption="msg://msgCurrency"
                                      width="AUTO"
                                      nullOptionVisible="true"/>

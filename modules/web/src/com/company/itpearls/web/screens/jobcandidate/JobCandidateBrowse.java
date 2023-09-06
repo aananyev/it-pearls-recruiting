@@ -349,7 +349,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             + "\n"
                             + recrutierName : "";
         } else {
-            return "ЗАПРЕЩЕНО ВЗАИМОДЕЙСТВИЕ С КАНДИДАТОМ";
+            return messageBundle.getMessage("msgInteractionProhibited");
         }
     }
 

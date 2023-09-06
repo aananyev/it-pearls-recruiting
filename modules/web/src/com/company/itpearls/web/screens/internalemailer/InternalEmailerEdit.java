@@ -1,7 +1,6 @@
 package com.company.itpearls.web.screens.internalemailer;
 
-import com.company.itpearls.entity.ExtUser;
-import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.AppContext;
@@ -9,22 +8,16 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.InternalEmailer;
 import com.haulmont.cuba.security.global.UserSession;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.mail.*;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @UiController("itpearls_InternalEmailer.edit")
 @UiDescriptor("internal-emailer-edit.xml")
@@ -75,6 +68,10 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     private String cuba_email_smtpPassword = "";
 
     protected JobCandidate jobCandidate = null;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -141,7 +138,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                             try {
                                 sendByEmailDefaultMailx();
                             } catch (MessagingException messagingException) {
-                                messagingException.printStackTrace();
+                                log.error("Error", messagingException);
                             }
                         }
                         ),
@@ -172,7 +169,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
 
-        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+        Session session = Session.getInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(SMTP_USERNAME, SMTP_PASSWORD);
             }
@@ -199,8 +196,19 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                     .show();
 
             getEditedEntity().setDateSendEmail(new Date());
+
+            IteractionList emailIteraction = createIteraction();
+            if (emailIteraction != null) {
+                dataManager.commit(emailIteraction);
+            } else {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withType(Notifications.NotificationType.WARNING)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription(messageBundle.getMessage("msgFailedCreateInteraction"))
+                        .show();
+            }
         } catch (MessagingException e) {
-            e.printStackTrace();
+            log.error("Error", e);
             notifications.create(Notifications.NotificationType.ERROR)
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
@@ -208,6 +216,100 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                     .show();
         }
     }
+
+    protected IteractionList createIteraction() {
+        IteractionList iteractionList = metadata.create(IteractionList.class);
+
+        iteractionList.setRecrutier((ExtUser) userSession.getUser());
+        iteractionList.setRecrutierName(userSession.getUser().getName());
+        iteractionList.setRating(5);
+        iteractionList.setDateIteraction(new Date());
+        iteractionList.setCandidate(toEmailField.getValue());
+        iteractionList.setComment(subjectEmailField.getValue() != null ? subjectEmailField.getValue() : "");
+
+        OpenPosition openPosition = getDefaultOpenPosition();
+
+        if (openPosition != null) {
+            iteractionList.setVacancy(openPosition);
+        } else {
+            return null;
+        }
+
+        BigDecimal maxNumberInteraction = getMaxNumberInteraction();
+        if (maxNumberInteraction != null) {
+            iteractionList.setNumberIteraction(maxNumberInteraction.add(BigDecimal.ONE));
+        } else {
+            return null;
+        }
+
+        Iteraction iteraction = getInteractionSignEmailSend();
+
+        if (iteraction != null) {
+            iteractionList.setIteractionType(getInteractionSignEmailSend());
+        } else {
+            return null;
+        }
+
+        return iteractionList;
+    }
+
+    private OpenPosition getDefaultOpenPosition() {
+        String QUERY_GET_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
+        OpenPosition openPosition = null;
+
+        try {
+            openPosition = dataManager.load(OpenPosition.class)
+                    .query(QUERY_GET_DEFAULT_OPEN_POSITION)
+                    .one();
+        } catch (NullPointerException e) {
+            log.error("Error", e);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgErrorNotDefaultOpenPosition"))
+                    .show();
+        } finally {
+            return openPosition;
+        }
+    }
+
+    private Iteraction getInteractionSignEmailSend() {
+        String QUERY_GET_INTERACTION_SIGN_EMAIL_SEND = "select e from itpearls_Iteraction e where e.signEmailSend = true";
+        Iteraction retInteraction = null;
+
+        try {
+            retInteraction = dataManager.load(Iteraction.class)
+                    .query(QUERY_GET_INTERACTION_SIGN_EMAIL_SEND)
+                    .one();
+        } catch (NullPointerException e) {
+            log.error("Error", e);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgErrorNotFindSignEmailInteraction"))
+                    .show();
+        } finally {
+            return retInteraction;
+        }
+    }
+
+    private BigDecimal getMaxNumberInteraction() {
+        String QUERY_GEM_MAX_NUMBER_INTERACTION = "select max(e.numberIteraction) from itpearls_IteractionList e";
+
+        try {
+            return dataManager.loadValue(QUERY_GEM_MAX_NUMBER_INTERACTION, BigDecimal.class)
+                    .one();
+        } catch (NullPointerException e) {
+            log.error("Error", e);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withType(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgErrorGettingMaxNumberInteraction"))
+                    .show();
+            return null;
+        }
+    }
+
 
     private String getMailHTMLFooter() {
         return "</body>\n" +

@@ -91,6 +91,10 @@ order by e.number]]>
                     <vbox id="signsVBox"
                           height="AUTO"
                           width="AUTO">
+                        <checkBox id="signEmailSendCheckBox"
+                                  dataContainer="iteractionDc"
+                                  property="signEmailSend"
+                                  caption="msg://msgSignEmailSend"/>
                         <checkBox id="signEndProcessVacancyClosedCheckBox"
                                   dataContainer="iteractionDc"
                                   property="signEndProcessVacancyClosed"

@@ -37,6 +37,8 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private ScreenBuilders screenBuilders;
 
     private OpenPosition currentOpenPosition = null;
+    @Inject
+    private Label<String> openPositionLabel;
 
     @Subscribe("emailTemplateField")
     public void onEmailTemplateFieldValueChange(HasValue.ValueChangeEvent<InternalEmailTemplate> event) {
@@ -84,6 +86,13 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                         emailTemplateField.getValue().getTemplateOpenPosition(),
                         (ExtUser) userSession.getUser()
                 ));
+
+        if (emailTemplateField.getValue().getTemplateOpenPosition() != null) {
+            currentOpenPosition = emailTemplateField.getValue().getTemplateOpenPosition();
+            openPositionLabel.setValue(emailTemplateField.getValue().getTemplateOpenPosition().getVacansyName());
+            bodyEmailField.setValue(emailGenerationService.preparingMessage(bodyEmailField.getValue(),
+                    currentOpenPosition));
+        }
     }
 
     private void clearAllFields() {
@@ -106,30 +115,43 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                         }
 
                         currentOpenPosition = openPosition;
+
+                        openPositionLabel.setValue(currentOpenPosition.getVacansyName());
                     } else {
                         dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
                                 .withType(Dialogs.MessageType.CONFIRMATION)
                                 .withCaption(messageBundle.getMessage("msgWarning"))
                                 .withMessage(messageBundle.getMessage("msgRebuildTemplateWithNewOpenPosition"))
                                 .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                        .withHandler(event -> {
-                                            clearAllFields();
-                                            createTextMessage();
-                                            currentOpenPosition = openPosition;
+                                                .withHandler(event -> {
+                                                    clearAllFields();
+                                                    createTextMessage();
+                                                    currentOpenPosition = openPosition;
 
-                                            if (openPosition != null) {
-                                                bodyEmailField.setValue(emailGenerationService
-                                                        .preparingMessage(bodyEmailField.getValue(), openPosition));
+                                                    if (openPosition != null) {
+                                                        bodyEmailField.setValue(emailGenerationService
+                                                                .preparingMessage(bodyEmailField.getValue(), openPosition));
 
-                                                subjectEmailField.setValue(emailGenerationService
-                                                        .preparingMessage(subjectEmailField.getValue(), openPosition));
-                                            }
-                                        }),
+                                                        subjectEmailField.setValue(emailGenerationService
+                                                                .preparingMessage(subjectEmailField.getValue(), openPosition));
+                                                    }
+                                                }),
                                         new DialogAction((DialogAction.Type.NO)))
                                 .show();
                     }
                 })
                 .build()
                 .show();
+    }
+
+    @Override
+    protected IteractionList createIteraction() {
+        IteractionList iteractionList = super.createIteraction();
+
+        if (currentOpenPosition != null) {
+            iteractionList.setVacancy(currentOpenPosition);
+        }
+
+        return iteractionList;
     }
 }

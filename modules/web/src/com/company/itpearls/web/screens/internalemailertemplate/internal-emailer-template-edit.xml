@@ -56,6 +56,10 @@
                 width="800"/>
     <layout>
         <vbox id="subjectGroupBox">
+            <label id="openPositionLabel"
+                   value="msg://msgOpenPositionUndefined"
+                   width="AUTO"
+                   stylename="h3"/>
             <hbox spacing="true"
                   width="100%"
                   expand="emailTemplateField">
