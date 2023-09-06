@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://internalEmailerTemplateEdit.caption"
         extends="com/company/itpearls/web/screens/internalemailer/internal-emailer-edit.xml"
         messagesPack="com.company.itpearls.web.screens.internalemailertemplate">
@@ -17,7 +18,8 @@
             </view>
             <loader/>
         </instance>
-        <collection id="emailTemplatesDc" class="com.company.itpearls.entity.InternalEmailTemplate">
+        <collection id="emailTemplatesDc"
+                    class="com.company.itpearls.entity.InternalEmailTemplate">
             <view extends="_local">
                 <property name="templateAuthor" view="_local"/>
                 <property name="templatePosition" view="_local"/>
@@ -33,18 +35,29 @@
             </view>
             <loader id="emailTemplatesDl">
                 <query>
-                    <![CDATA[select e from itpearls_InternalEmailTemplate e]]>
+                    <![CDATA[select e from itpearls_InternalEmailTemplate e order by e.templateName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.templateAuthor = :templateAuthor</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
-        <collection id="fromEmailsDc" class="com.company.itpearls.entity.ExtUser" view="_minimal">
+        <collection id="fromEmailsDc"
+                    class="com.company.itpearls.entity.ExtUser"
+                    view="_minimal">
             <loader id="fromEmailsDl">
                 <query>
                     <![CDATA[select e from itpearls_ExtUser e]]>
                 </query>
             </loader>
         </collection>
-        <collection id="toEmailsDc" class="com.company.itpearls.entity.JobCandidate" view="_minimal">
+        <collection id="toEmailsDc"
+                    class="com.company.itpearls.entity.JobCandidate"
+                    view="_minimal">
             <loader id="toEmailsDl">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e]]>

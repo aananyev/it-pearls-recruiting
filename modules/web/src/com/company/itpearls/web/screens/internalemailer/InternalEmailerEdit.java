@@ -93,7 +93,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         fromEmailTextAddressField.setValue(user.getName() + " \"" + user.getEmail() + "\"");
         fromEmailTextAddressField.setDescription("SMTP server: " + user.getSmtpServer() + ":" + user.getSmtpPort() + "\n" +
                 "POP3 server: " + user.getPop3Server() + ":" + user.getPop3Port() + "\n" +
-                "IMAP server% " + user.getImapServer() + ":" + user.getImapPort());
+                "IMAP server: " + user.getImapServer() + ":" + user.getImapPort());
     }
 
     @Install(to = "toEmailField", subject = "optionIconProvider")

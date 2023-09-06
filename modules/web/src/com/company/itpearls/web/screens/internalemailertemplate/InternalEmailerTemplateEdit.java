@@ -7,6 +7,7 @@ import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
@@ -39,6 +40,18 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private OpenPosition currentOpenPosition = null;
     @Inject
     private Label<String> openPositionLabel;
+    @Inject
+    private CollectionLoader<InternalEmailTemplate> emailTemplatesDl;
+
+    @Subscribe
+    public void onAfterInit(AfterInitEvent event) {
+        setAuthorTemplate();
+    }
+
+    private void setAuthorTemplate() {
+        emailTemplatesDl.setParameter("templateAuthor", userSession.getUser());
+        emailTemplatesDl.load();
+    }
 
     @Subscribe("emailTemplateField")
     public void onEmailTemplateFieldValueChange(HasValue.ValueChangeEvent<InternalEmailTemplate> event) {
