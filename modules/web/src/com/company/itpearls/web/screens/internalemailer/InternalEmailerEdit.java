@@ -121,7 +121,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     public void sendAndCloseButtonInvoke() {
         fromEmailField.setValue((ExtUser) userSession.getUser());
         sendEmail();
-        close(StandardOutcome.CLOSE);
+        close(StandardOutcome.COMMIT);
     }
 
     private void sendEmail() {
@@ -196,6 +196,12 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                     .show();
 
             getEditedEntity().setDateSendEmail(new Date());
+            getEditedEntity().setDraftEmail(false);
+
+            draftEmailField.setValue(false);
+            dateSendEmailField.setValue(new Date());
+
+            dataManager.commit(getEditedEntity());
 
             IteractionList emailIteraction = createIteraction();
             if (emailIteraction != null) {

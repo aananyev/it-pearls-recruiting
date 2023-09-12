@@ -484,19 +484,27 @@
     </view>
     <view entity="itpearls_InternalEmailerTemplate" name="internalEmailerTemplate-view" extends="_local">
         <property name="emailTemplate" view="_local">
-            <property name="templateOpenPosition" view="_local"/>
+            <property name="templateOpenPosition" view="_local">
+                <property name="grade" view="_local"/>
+            </property>
             <property name="templatePosition" view="_local"/>
             <property name="templateAuthor" view="_local"/>
         </property>
         <property name="fromEmail" view="_local"/>
-        <property name="toEmail" view="_local"/>
+        <property name="toEmail" view="_local">
+            <property name="iteractionList" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_InternalEmailer" name="internalEmailer-view" extends="_local">
         <property name="fromEmail" view="_local"/>
-        <property name="toEmail" view="_local"/>
+        <property name="toEmail" view="_local">
+            <property name="personPosition" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_InternalEmailTemplate" name="internalEmailTemplate-view" extends="_local">
-        <property name="templateOpenPosition" view="_local"/>
+        <property name="templateOpenPosition" view="_local">
+            <property name="grade" view="_local"/>
+        </property>
         <property name="templatePosition" view="_local"/>
         <property name="templateAuthor" view="_local"/>
     </view>

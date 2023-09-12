@@ -30,8 +30,7 @@ public class InternalEmailer extends StandardEntity {
     @NotNull
     private JobCandidate toEmail;
 
-    @NotNull
-    @Column(name = "SUBJECT_EMAIL", nullable = false)
+    @Column(name = "SUBJECT_EMAIL")
     private String subjectEmail;
 
     @NotNull

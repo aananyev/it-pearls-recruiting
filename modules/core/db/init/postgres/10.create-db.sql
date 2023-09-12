@@ -1054,7 +1054,7 @@ create table ITPEARLS_INTERNAL_EMAILER (
     DRAFT_EMAIL boolean,
     FROM_EMAIL_ID uuid not null,
     TO_EMAIL_ID uuid not null,
-    SUBJECT_EMAIL varchar(255) not null,
+    SUBJECT_EMAIL varchar(255),
     BODY_EMAIL text not null,
     BODY_HTML boolean,
     DATE_CREATE_EMAIL timestamp not null,

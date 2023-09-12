@@ -6,7 +6,7 @@
     <data>
         <instance id="emailerDc"
                   class="com.company.itpearls.entity.InternalEmailer">
-            <view extends="_local">
+            <view extends="internalEmailer-view">
                 <property name="fromEmail" view="_minimal">
                     <property name="smtpServer"/>
                     <property name="smtpPort"/>
@@ -19,8 +19,8 @@
                     <property name="timeZone"/>
                     <property name="active"/>
                 </property>
-                <property name="toEmail" view="_minimal">
-                    <property name="email"/>
+                <property name="toEmail" view="_local">
+                    <property name="personPosition" view="_local"/>
                 </property>
             </view>
             <loader/>
@@ -32,6 +32,8 @@
         <checkBox id="draftEmailField"
                   caption="msg://msgDraftEmail"
                   dataContainer="emailerDc"
+                  align="TOP_RIGHT"
+                  stylename="h2"
                   property="draftEmail"/>
         <groupBox id="emailSettingGroupBox"
                   width="100%"
@@ -79,7 +81,8 @@
                         </query>
                     </suggestionPickerField>
                 </vbox>
-                <vbox width="AUTO"
+                <vbox id="dateFieldVBox"
+                      width="AUTO"
                       spacing="true">
                     <dateField id="dateCreateEmailField"
                                dataContainer="emailerDc"

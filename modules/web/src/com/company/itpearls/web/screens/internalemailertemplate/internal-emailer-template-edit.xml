@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
         caption="msg://internalEmailerTemplateEdit.caption"
         extends="com/company/itpearls/web/screens/internalemailer/internal-emailer-edit.xml"
         messagesPack="com.company.itpearls.web.screens.internalemailertemplate">
     <data>
         <instance id="internalEmailerTemplateDc"
                   class="com.company.itpearls.entity.InternalEmailerTemplate">
-            <view extends="_local">
+            <view extends="internalEmailerTemplate-view">
                 <property name="emailTemplate" view="_local">
-                    <property name="templateOpenPosition" view="_local"/>
+                    <property name="templateOpenPosition" view="_local">
+                        <property name="grade" view="_local"/>
+                    </property>
                     <property name="templatePosition" view="_local"/>
                     <property name="templateAuthor" view="_local"/>
                 </property>
@@ -68,7 +71,30 @@
     <dialogMode height="600"
                 width="800"/>
     <layout>
-        <vbox id="subjectGroupBox">
+        <checkBox id="draftEmailField" ext:index="0"
+                  dataContainer="internalEmailerTemplateDc"/>
+        <groupBox id="emailSettingGroupBox" ext:index="1">
+            <hbox id="emailSettingHBox">
+                <vbox id="fromEmailHBox">
+                    <pickerField id="fromEmailField"
+                                 property="fromEmail"
+                                 dataContainer="internalEmailerTemplateDc"/>
+                    <textField id="fromEmailTextAddressField"/>
+                    <suggestionPickerField id="toEmailField"
+                                           property="toEmail"
+                                           dataContainer="internalEmailerTemplateDc"/>
+                </vbox>
+                <vbox id="dateFieldVBox">
+                    <dateField id="dateCreateEmailField"
+                               property="dateCreateEmail"
+                               dataContainer="internalEmailerTemplateDc"/>
+                    <dateField id="dateSendEmailField"
+                               property="dateSendEmail"
+                               dataContainer="internalEmailerTemplateDc"/>
+                </vbox>
+            </hbox>
+        </groupBox>
+        <vbox id="templatesVBox" ext:index="1">
             <label id="openPositionLabel"
                    value="msg://msgOpenPositionUndefined"
                    width="AUTO"
@@ -90,5 +116,14 @@
                         invoke="selectOpenPositionButton"/>
             </hbox>
         </vbox>
+        <vbox id="subjectGroupBox" ext:index="3">
+            <textField id="subjectEmailField"
+                       dataContainer="internalEmailerTemplateDc"
+                       property="subjectEmail"/>
+        </vbox>
+        <richTextArea id="bodyEmailField"
+                      ext:index="4"
+                      dataContainer="internalEmailerTemplateDc"
+                      property="bodyEmail"/>
     </layout>
 </window>

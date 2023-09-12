@@ -3,7 +3,6 @@ package com.company.itpearls.web.screens.internalemailertemplate;
 import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
-import com.company.itpearls.web.screens.openposition.OpenPositionEdit;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
