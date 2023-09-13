@@ -113,6 +113,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_PERSONAL_RESERVE")
     private Boolean signPersonalReserve;
 
+    @Column(name = "SIGN_PERSONAL_RESERVE_DELETE")
+    private Boolean signPersonalReserveDelete;
+
     @Column(name = "SIGN_PUT_RESONAL", unique = true)
     private Boolean signPersonalReservePut;
 
@@ -162,6 +165,14 @@ public class Iteraction extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WORK_STATUS_ID")
     private EmployeeWorkStatus workStatus;
+
+    public Boolean getSignPersonalReserveDelete() {
+        return signPersonalReserveDelete;
+    }
+
+    public void setSignPersonalReserveDelete(Boolean signPersonalReserveDelete) {
+        this.signPersonalReserveDelete = signPersonalReserveDelete;
+    }
 
     public Boolean getSignEmailSend() {
         return signEmailSend;

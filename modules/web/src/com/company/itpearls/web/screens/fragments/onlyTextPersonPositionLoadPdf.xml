@@ -8,14 +8,15 @@
               height="150px"
               spacing="true"
               ext:index="1"
+              visible="false"
               stylename="dropzone-container">
             <label stylename="dropzone-description"
                    value="Drop file here"
                    align="MIDDLE_CENTER"/>
         </vbox>
         <upload id="uploadField"
-                dropZone="dropZone"
-                showClearButton="true" fileStoragePutMode="IMMEDIATE"
+                showClearButton="false"
+                fileStoragePutMode="MANUAL"
                 ext:index="1"
                 showFileName="true"/>
     </layout>

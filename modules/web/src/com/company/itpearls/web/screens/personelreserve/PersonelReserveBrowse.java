@@ -5,10 +5,13 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
+import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
+import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -33,6 +36,8 @@ import java.util.List;
 @LoadDataBeforeShow
 public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     @Inject
+    private Button viewJobCandidateCardButton;
+    @Inject
     private CheckBox allCandidatesCheckBox;
     @Inject
     private CollectionLoader<PersonelReserve> personelReservesDl;
@@ -48,11 +53,6 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private CheckBox inNotWorkCheckBox;
     @Inject
     private DataGrid<PersonelReserve> personelReservesTable;
-
-    private final static String statusColumn = "statusColumn";
-    private final static String inWorkColumn = "inWorkColumn";
-    private final static String faceImage = "faceImage";
-    private final static String tableWordWrapStyle = "table-wordwrap";
     @Inject
     private Fragments fragments;
     @Inject
@@ -65,17 +65,49 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private Notifications notifications;
     @Inject
     private DataComponents dataComponents;
-
-    private CollectionContainer<IteractionList> iteractionListDc;
-    private CollectionLoader<IteractionList> iteractionListDl;
-    private CollectionContainer<CandidateCV> candidateCVDc;
-    private CollectionLoader<CandidateCV> candidateCVDl;
     @Inject
     private InteractionService interactionService;
     @Inject
     private UserSessionSource userSessionSource;
     @Inject
     private Dialogs dialogs;
+    @Inject
+    private Button sendEmailButton;
+    @Inject
+    private Metadata metadata;
+
+    static final String QUERY_ITERACTION_DELETE_PERSONAL_RESERVE = "select e from itpearls_Iteraction e where e.signPersonalReserveDelete = true";
+    static final String QUERY_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
+    static final String QUERY_MAX_NUMBER_INTERACTION = "select max(e.numberIteraction) from itpearls_IteractionList e";
+
+    private CollectionContainer<IteractionList> iteractionListDc;
+    private CollectionLoader<IteractionList> iteractionListDl;
+    private CollectionContainer<CandidateCV> candidateCVDc;
+    private CollectionLoader<CandidateCV> candidateCVDl;
+
+    private final static String statusColumn = "statusColumn";
+    private final static String inWorkColumn = "inWorkColumn";
+    private final static String faceImage = "faceImage";
+    private final static String tableWordWrapStyle = "table-wordwrap";
+
+    @Subscribe("personelReservesTable")
+    public void onPersonelReservesTableSelection(DataGrid.SelectionEvent<PersonelReserve> event) {
+        viewJobCandidateCardButton.setEnabled(personelReservesTable.getSingleSelected() != null);
+
+        if (personelReservesTable.getSingleSelected() != null) {
+            if (personelReservesTable.getSingleSelected().getJobCandidate().getEmail() != null) {
+                if (!personelReservesTable.getSingleSelected().getJobCandidate().getEmail().equals("")) {
+                    sendEmailButton.setEnabled(true);
+                } else {
+                    sendEmailButton.setEnabled(false);
+                }
+            } else {
+                sendEmailButton.setEnabled(false);
+            }
+        } else {
+            sendEmailButton.setEnabled(false);
+        }
+    }
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -177,7 +209,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                             + "\n\n"
                             + messageBundle.getMessage("msgLastInteraction")
                             + " \'"
-                            + iteractionList.getIteractionType().getIterationName()
+                            + (iteractionList.getIteractionType() != null
+                            ? iteractionList.getIteractionType().getIterationName() + "\' " : "")
                             + "\' "
                             + messageBundle.getMessage("msgFrom")
                             + " "
@@ -839,5 +872,148 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     }
 
     public void closePersonalReserveButtonInvoke() {
+        Iteraction iteractionPersonalReserveDelete = null;
+
+        try {
+            iteractionPersonalReserveDelete = dataManager
+                    .load(Iteraction.class)
+                    .query(QUERY_ITERACTION_DELETE_PERSONAL_RESERVE).one();
+        } catch (IllegalStateException | NullPointerException e) {
+            e.printStackTrace();
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgNotIteractionPersonalReserveDelete"))
+                    .show();
+        }
+
+        IteractionList iteractionList = metadata.create(IteractionList.class);
+        iteractionList.setDateIteraction(new Date());
+        iteractionList.setIteractionType(iteractionPersonalReserveDelete);
+        iteractionList.setCandidate(personelReservesTable.getSingleSelected().getJobCandidate());
+        iteractionList.setRating(4);
+        iteractionList.setRecrutierName(userSession.getUser().getName());
+        iteractionList.setRecrutier((ExtUser) userSession.getUser());
+
+        if (personelReservesTable.getSingleSelected().getOpenPosition() != null) {
+            iteractionList.setVacancy(personelReservesTable.getSingleSelected().getOpenPosition());
+            iteractionList.setCurrentOpenClose(personelReservesTable.getSingleSelected().getOpenPosition().getOpenClose());
+        } else {
+            OpenPosition openPositionDefault = null;
+
+            try {
+                openPositionDefault = dataManager.load(OpenPosition.class)
+                        .query(QUERY_DEFAULT_OPEN_POSITION)
+                        .one();
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withType(Notifications.NotificationType.WARNING)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription(messageBundle.getMessage("msgNotDefaultOpenPosition"))
+                        .show();
+            }
+
+            if (openPositionDefault != null) {
+                iteractionList.setVacancy(openPositionDefault);
+                iteractionList.setCurrentOpenClose(openPositionDefault.getOpenClose());
+            }
+        }
+
+        BigDecimal numberIteraction = null;
+        numberIteraction = dataManager.loadValue(QUERY_MAX_NUMBER_INTERACTION, BigDecimal.class)
+                .one();
+
+        numberIteraction.add(BigDecimal.ONE);
+        iteractionList.setNumberIteraction(numberIteraction);
+
+        dataManager.commit(iteractionList);
+
+        PersonelReserve personelReserve = personelReservesTable.getSingleSelected();
+        personelReserve.setEndDate(new Date());
+        personelReserve.setInProcess(false);
+
+        dataManager.commit(personelReserve);
+    }
+
+    public void viewJobCandidateCardButtonInvoke() {
+        screenBuilders.editor(JobCandidate.class, this)
+                .withScreenClass(JobCandidateEdit.class)
+                .editEntity(personelReservesTable.getSingleSelected().getJobCandidate())
+                .build()
+                .show();
+    }
+
+    public void sendEmailButtonInvoke() {
+        InternalEmailerTemplateEdit screen = (InternalEmailerTemplateEdit) screenBuilders.editor(InternalEmailerTemplate.class, this)
+                .newEntity()
+                .withInitializer(e -> {
+                    e.setFromEmail((ExtUser) userSession.getUser());
+                    e.setToEmail(personelReservesTable.getSingleSelected().getJobCandidate());
+                })
+                .build();
+        screen.setJobCandidate(personelReservesTable.getSingleSelected().getJobCandidate());
+        screen.show();
+    }
+
+
+    @Install(to = "personelReservesTable.candidateActions", subject = "columnGenerator")
+    private Component personelReservesTableCandidateActionsColumnGenerator(DataGrid.ColumnGeneratorEvent<PersonelReserve> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        PopupButton actionButton = uiComponents.create(PopupButton.class);
+        actionButton.setIconFromSet(CubaIcon.BARS);
+        actionButton.setWidthAuto();
+        actionButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        actionButton.addAction(new BaseAction("sendEmailAction")
+                .withCaption(messageBundle.getMessage("msgEmail"))
+                .withHandler(actionPerformedEvent -> {
+                    personelReservesTable.setSelected(event.getItem());
+                    sendEmailButtonInvoke();
+                }));
+
+        actionButton.addAction(new BaseAction("openCardAction")
+                .withCaption(messageBundle.getMessage("msgJobCandidate"))
+                .withHandler(actionPerformedEvent -> {
+                    personelReservesTable.setSelected(event.getItem());
+                    viewJobCandidateCardButtonInvoke();
+                }));
+
+        if (event.getItem().getInProcess() != false) {
+            actionButton.addAction(new BaseAction("clearPersonalReserveAction")
+                    .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
+                    .withHandler(actionPerformedEvent -> {
+                        personelReservesTable.setSelected(event.getItem());
+                        closePersonalReserveButtonInvoke();
+                    }));
+        }
+
+        actionButton.addAction(new BaseAction("createIntecactionAction")
+                .withCaption(messageBundle.getMessage("msgCreateInteraction"))
+                .withHandler(actionPerformedEvent -> {
+                    personelReservesTable.setSelected(event.getItem());
+                    createInteractionButtonInvoke();
+                }));
+
+        actionButton.addAction(new BaseAction("viewInteractionAction")
+                .withCaption(messageBundle.getMessage("msgViewInteraction"))
+                .withHandler(actionPerformedEvent -> {
+                    personelReservesTable.setSelected(event.getItem());
+                    viewInteractionButtonInvoke();
+                }));
+
+        retBox.add(actionButton);
+
+        return retBox;
+    }
+
+    private void viewInteractionButtonInvoke() {
+    }
+
+    private void createInteractionButtonInvoke() {
     }
 }

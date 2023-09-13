@@ -143,6 +143,10 @@ order by e.number]]>
                                   dataContainer="iteractionDc"
                                   property="signPersonalReserve"
                                   caption="msg://msgSignPersonalReserve"/>
+                        <checkBox id="signPersonalReserveDeleteCheckBox"
+                                  dataContainer="iteractionDc"
+                                  property="signPersonalReserveDelete"
+                                  caption="msg://msgSignPersonalReserveDelete"/>
                         <checkBox id="signPersonalReservePutCheckBox"
                                   dataContainer="iteractionDc"
                                   property="signPersonalReservePut"

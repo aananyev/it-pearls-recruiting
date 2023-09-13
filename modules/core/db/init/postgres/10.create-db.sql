@@ -228,6 +228,7 @@ create table ITPEARLS_ITERACTION (
     SIGN_VIEW_ONLY_MANAGER boolean,
     SIGN_COMMENT boolean,
     SIGN_PERSONAL_RESERVE boolean,
+    SIGN_PERSONAL_RESERVE_DELETE boolean,
     SIGN_PUT_RESONAL boolean,
     SIGN_PERSONAL_RESERVE_REMOVE boolean,
     SIGN_END_CASE boolean,

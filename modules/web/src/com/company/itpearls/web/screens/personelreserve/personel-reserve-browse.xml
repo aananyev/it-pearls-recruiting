@@ -8,7 +8,7 @@
         <collection id="personelReservesDc"
                     class="com.company.itpearls.entity.PersonelReserve">
             <view extends="_local">
-                <property name="jobCandidate" view="_local">
+                <property name="jobCandidate" view="jobCandidate-view">
                     <property name="currentCompany" view="_local"/>
                     <property name="cityOfResidence" view="_local"/>
                     <property name="personPosition" view="_local"/>
@@ -81,6 +81,7 @@
                     <componentRenderer/>
                 </column>
                 <column id="jobCandidate"
+                        sort="ASCENDING"
                         property="jobCandidate"
                         width="300px"/>
                 <column id="recruter"
@@ -94,13 +95,18 @@
                         width="300px"/>
                 <column id="date"
                         property="date"
-                        width="150px"/>
+                        width="100px"/>
                 <column id="termOfPlacement"
                         property="termOfPlacement"
                         width="150px"/>
                 <column id="endDate"
                         property="endDate"
-                        width="150px"/>
+                        width="100px"/>
+                <column id="candidateActions"
+                        width="80px"
+                        caption="msg://msgAction">
+                    <componentRenderer/>
+                </column>
             </columns>
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"
@@ -116,6 +122,20 @@
                         icon="CLOSE"
                         caption="msg://msgClosePersonalReserve"
                         invoke="closePersonalReserveButtonInvoke"/>
+                <button id="viewJobCandidateCardButton"
+                        width="AUTO"
+                        icon="CHILD"
+                        caption="msg://msgJobCandidate"
+                        description="msg://msgJobCandidateDesc"
+                        enable="false"
+                        invoke="viewJobCandidateCardButtonInvoke"/>
+                <button id="sendEmailButton"
+                        width="AUTO"
+                        icon="ENVELOPE_O"
+                        caption="msg://msgEmail"
+                        description="msg://msgEmailDesc"
+                        enable="false"
+                        invoke="sendEmailButtonInvoke"/>
             </buttonsPanel>
         </dataGrid>
         <groupBox id="filtersHBox"

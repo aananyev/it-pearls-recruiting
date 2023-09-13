@@ -27,6 +27,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import javax.inject.Inject;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -76,37 +77,39 @@ public class OnlyTextPersonPositionLoadPdf extends OnlyTextPersonPosition {
 
     @Subscribe("uploadField")
     public void onUploadFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) throws FileStorageException, IOException {
-//        File file = fileUploadingAPI.getFile(uploadField.getFileId());
+        File file = fileUploadingAPI.getFile(uploadField.getFileId());
 
-/*        if (file != null) {
+        if (file != null) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption(messageBundle.getMessage("msgWarning"))
                     .withDescription("File is uploaded to temporary storage at " + file.getAbsolutePath())
                     .show();
-        } */
+        }
 
-        AtomicReference<FileDescriptor> fd = new AtomicReference<>(uploadField.getFileDescriptor());
+        FileDescriptor fd = uploadField.getFileDescriptor();
 
-/*        try {
-            fileUploadingAPI.putFileIntoStorage(uploadField.getFileId(), fd.get());
+        try {
+            fileUploadingAPI.putFileIntoStorage(uploadField.getFileId(), fd);
         } catch (FileStorageException e) {
             throw new RuntimeException("Error saving file to FileStorage", e);
-        } */
+        }
 
         notifications.create(Notifications.NotificationType.WARNING)
                 .withCaption(messageBundle.getMessage("msgWarning"))
                 .withDescription("Uploaded file: " + uploadField.getFileName())
                 .show();
 
-        FileDescriptor fdcv = fd.get();
+//        FileDescriptor fdcv = fd.get();
+//        FileDescriptor fdcv = uploadField.getFileDescriptor();
 
-        if (fdcv.getExtension().toLowerCase().equals(EXTENSION_PDF.toLowerCase())) {
+        if (fd.getExtension().toLowerCase().equals(EXTENSION_PDF.toLowerCase())) {
 //            if (fd.get().getExtension().toLowerCase().equals(EXTENSION_PDF.toLowerCase())) {
-            InputStream inputStream = fileLoader.openStream(fdcv);
+            InputStream inputStream = new FileInputStream(fd.getName());
+//            InputStream inputStream = fileLoader.openStream(file);
             List<RenderedImage> images = new ArrayList<>();
 
             textResume = parsePdfCV(inputStream);
-            RandomAccessRead rad = new RandomAccessReadBuffer(fileLoader.openStream(fd.get()));
+            RandomAccessRead rad = new RandomAccessReadBuffer(fileLoader.openStream(fd));
 
             PDFParser parser = new PDFParser(rad);
             PDFTextStripper pdfStripper = new PDFTextStripper();
@@ -127,11 +130,11 @@ public class OnlyTextPersonPositionLoadPdf extends OnlyTextPersonPosition {
                         Image selectedImage = selectRenderedImagesFromList
                                 .getSelectedImage();
 
-                        fd.set(dataManager
-                                .commit(selectRenderedImagesFromList.getSelectedImageFileDescriptor()));
+//                        fd.set(dataManager
+//                                .commit(selectRenderedImagesFromList.getSelectedImageFileDescriptor()));
 
                         try {
-                            fileUploadingAPI.putFileIntoStorage(fd.get().getUuid(), fd.get());
+                            fileUploadingAPI.putFileIntoStorage(fd.getUuid(), fd);
                         } catch (FileStorageException e) {
                             e.printStackTrace();
                             notifications.create(Notifications.NotificationType.ERROR)
@@ -143,12 +146,12 @@ public class OnlyTextPersonPositionLoadPdf extends OnlyTextPersonPosition {
 
                         resource = selectedImage
                                 .createResource(FileDescriptorResource.class)
-                                .setFileDescriptor(fd.get());
+                                .setFileDescriptor(fd);
 
-                        candidatePicFileDescriptot = fd.get();
+                        candidatePicFileDescriptot = fd;
                         candidatePic
                                 .setSource(FileDescriptorResource.class)
-                                .setFileDescriptor(fd.get());
+                                .setFileDescriptor(fd);
                     } else {
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withType(Notifications.NotificationType.ERROR)

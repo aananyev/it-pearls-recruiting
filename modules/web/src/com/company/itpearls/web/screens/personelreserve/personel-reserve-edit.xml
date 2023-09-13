@@ -48,6 +48,24 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
+        <vbox id="picVBox">
+            <image id="candidatePic"
+                   dataContainer="jobCandidateDc"
+                   property="fileImageFace"
+                   width="100%"
+                   visible="true"
+                   align="TOP_RIGHT"
+                   stylename="widget-border"
+                   scaleMode="FILL"/>
+            <image id="candidateDefaultPic"
+                   width="100%"
+                   visible="false"
+                   align="TOP_RIGHT"
+                   stylename="widget-border"
+                   scaleMode="FILL">
+                <theme path="icons/no-programmer.jpeg"/>
+            </image>
+        </vbox>
         <suggestionPickerField id="jobCandidateField"
                                inputPrompt="mainMsg://msgStartInput"
                                minSearchStringLength="3"

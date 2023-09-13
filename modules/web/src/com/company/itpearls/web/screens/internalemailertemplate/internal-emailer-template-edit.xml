@@ -10,7 +10,7 @@
                   class="com.company.itpearls.entity.InternalEmailerTemplate">
             <view extends="internalEmailerTemplate-view">
                 <property name="emailTemplate" view="_local">
-                    <property name="templateOpenPosition" view="_local">
+                    <property name="templateOpenPosition" view="openPosition-view">
                         <property name="grade" view="_local"/>
                     </property>
                     <property name="templatePosition" view="_local"/>
@@ -26,7 +26,7 @@
             <view extends="_local">
                 <property name="templateAuthor" view="_local"/>
                 <property name="templatePosition" view="_local"/>
-                <property name="templateOpenPosition" view="_local">
+                <property name="templateOpenPosition" view="openPosition-view">
                     <property name="projectName" view="_local">
                         <property name="projectDepartment" view="_local">
                             <property name="companyName" view="_local"/>
