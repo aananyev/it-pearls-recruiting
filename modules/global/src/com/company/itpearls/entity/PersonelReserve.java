@@ -3,7 +3,6 @@ package com.company.itpearls.entity;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -21,7 +20,7 @@ public class PersonelReserve extends StandardEntity {
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REACTUTIER_ID")
-    private User recruter;
+    private ExtUser recruter;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,6 +51,14 @@ public class PersonelReserve extends StandardEntity {
 
     @Column(name = "REMOVED_FROM_RESERVE")
     private Boolean removedFromReserve;
+
+    public void setRecruter(ExtUser recruter) {
+        this.recruter = recruter;
+    }
+
+    public ExtUser getRecruter() {
+        return recruter;
+    }
 
     public Boolean getSelectedForAction() {
         return selectedForAction;
@@ -115,14 +122,6 @@ public class PersonelReserve extends StandardEntity {
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    public User getRecruter() {
-        return recruter;
-    }
-
-    public void setRecruter(User recruter) {
-        this.recruter = recruter;
     }
 
     public JobCandidate getJobCandidate() {

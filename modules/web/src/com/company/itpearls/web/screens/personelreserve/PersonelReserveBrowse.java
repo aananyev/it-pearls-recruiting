@@ -40,8 +40,6 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     @Inject
     private CheckBox allCandidatesCheckBox;
     @Inject
-    private CollectionLoader<PersonelReserve> personelReservesDl;
-    @Inject
     private UserSession userSession;
     @Inject
     private CheckBox activesCheckBox;
@@ -89,6 +87,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private final static String inWorkColumn = "inWorkColumn";
     private final static String faceImage = "faceImage";
     private final static String tableWordWrapStyle = "table-wordwrap";
+    @Inject
+    private CollectionLoader<PersonelReserve> personelReservesDl;
 
     @Subscribe("personelReservesTable")
     public void onPersonelReservesTableSelection(DataGrid.SelectionEvent<PersonelReserve> event) {
@@ -316,10 +316,12 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
     @Subscribe("allCandidatesCheckBox")
     public void onAllCandidatesCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if (event.getValue()) {
-            personelReservesDl.setParameter("recruter", userSession.getUser());
-        } else {
-            personelReservesDl.removeParameter("recruter");
+        if (event.getValue() != null) {
+            if (event.getValue()) {
+                personelReservesDl.setParameter("recruter", userSession.getUser());
+            } else {
+                personelReservesDl.removeParameter("recruter");
+            }
         }
 
         personelReservesDl.load();

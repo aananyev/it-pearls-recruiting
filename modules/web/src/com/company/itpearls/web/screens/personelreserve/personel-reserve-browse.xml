@@ -24,7 +24,7 @@
             </view>
             <loader id="personelReservesDl">
                 <query>
-                    <![CDATA[select e from itpearls_PersonelReserve e order by e.jobCandidate.fullName]]>
+                    <![CDATA[select e from itpearls_PersonelReserve e]]>
                     <condition>
                         <and>
                             <c:jpql>
@@ -121,11 +121,6 @@
                         action="personelReservesTable.edit"/>
                 <button id="removeBtn"
                         action="personelReservesTable.remove"/>
-                <button id="closePersonalReserveButton"
-                        width="AUTO"
-                        icon="CLOSE"
-                        caption="msg://msgClosePersonalReserve"
-                        invoke="closePersonalReserveButtonInvoke"/>
                 <button id="viewJobCandidateCardButton"
                         width="AUTO"
                         icon="CHILD"
@@ -140,6 +135,11 @@
                         description="msg://msgEmailDesc"
                         enable="false"
                         invoke="sendEmailButtonInvoke"/>
+                <button id="closePersonalReserveButton"
+                        width="AUTO"
+                        icon="CLOSE"
+                        caption="msg://msgClosePersonalReserve"
+                        invoke="closePersonalReserveButtonInvoke"/>
             </buttonsPanel>
         </dataGrid>
         <groupBox id="filtersHBox"

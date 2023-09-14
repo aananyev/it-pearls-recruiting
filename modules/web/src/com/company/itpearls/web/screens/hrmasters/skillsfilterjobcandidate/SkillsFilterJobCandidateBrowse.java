@@ -1487,7 +1487,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
         personelReserve.setDate(new Date());
         personelReserve.setJobCandidate(jobCandidate);
-        personelReserve.setRecruter(userSessionSource.getUserSession().getUser());
+        personelReserve.setRecruter((ExtUser) userSessionSource.getUserSession().getUser());
         personelReserve.setInProcess(true);
 
         int noOfDays = 30;
