@@ -1042,6 +1042,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        initVacancyFiels();
         buttonCallAction.setVisible(false);
         // запомнить текущий проект
         candidate = candidateField.getValue();
@@ -1789,5 +1790,29 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     + ": "
                     + event.getValue());
         }
+    }
+
+    private void initVacancyFiels() {
+        vacancyFiels.setOptionImageProvider(this::vacancyFielsImageProvider);
+    }
+
+    protected Resource vacancyFielsImageProvider(OpenPosition openPosition) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+            if (openPosition.getProjectName() != null) {
+                if (openPosition.getProjectName().getProjectLogo() != null) {
+                    return retImage.createResource(FileDescriptorResource.class)
+                            .setFileDescriptor(
+                                    openPosition
+                                            .getProjectName()
+                                            .getProjectLogo());
+                } else {
+                    return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+                }
+            } else {
+                return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+            }
     }
 }

@@ -14,6 +14,9 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.*;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -89,6 +92,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private final static String tableWordWrapStyle = "table-wordwrap";
     @Inject
     private CollectionLoader<PersonelReserve> personelReservesDl;
+    private String personelReserveCloseComment;
 
     @Subscribe("personelReservesTable")
     public void onPersonelReservesTableSelection(DataGrid.SelectionEvent<PersonelReserve> event) {
@@ -983,7 +987,17 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     viewInteractionButtonInvoke();
                 }));
 
-        if (event.getItem().getInProcess() != false) {
+        if (event.getItem().getRemovedFromReserve() != null) {
+            if (event.getItem().getRemovedFromReserve() != true) {
+                actionButton.addAction(new BaseAction("clearPersonalReserveAction")
+                        .withIcon(CubaIcon.CANCEL.source())
+                        .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
+                        .withHandler(actionPerformedEvent -> {
+                            personelReservesTable.setSelected(event.getItem());
+                            closePersonalReserveButtonInvoke();
+                        }));
+            }
+        } else {
             actionButton.addAction(new BaseAction("clearPersonalReserveAction")
                     .withIcon(CubaIcon.CANCEL.source())
                     .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
@@ -993,9 +1007,47 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     }));
         }
 
+        if (event.getItem().getRemovedFromReserve() != null) {
+            if (event.getItem().getRemovedFromReserve() != true) {
+                actionButton.addAction(new BaseAction("clearPersonalReserveWithCommentAction")
+                        .withIcon(CubaIcon.PICKERFIELD_CLEAR_READONLY.source())
+                        .withCaption(messageBundle.getMessage("msgClosePersonalReserveWithComment"))
+                        .withHandler(actionPerformedEvent -> {
+                            personelReservesTable.setSelected(event.getItem());
+                            closePersonalReserveButtonWithCommentInvoke();
+                        }));
+            }
+        } else {
+            actionButton.addAction(new BaseAction("clearPersonalReserveWithCommentAction")
+                    .withIcon(CubaIcon.PICKERFIELD_CLEAR_READONLY.source())
+                    .withCaption(messageBundle.getMessage("msgClosePersonalReserveWithComment"))
+                    .withHandler(actionPerformedEvent -> {
+                        personelReservesTable.setSelected(event.getItem());
+                        closePersonalReserveButtonWithCommentInvoke();
+                    }));
+        }
+
         retBox.add(actionButton);
 
         return retBox;
+    }
+
+    private void closePersonalReserveButtonWithCommentInvoke() {
+        dialogs.createInputDialog(this)
+                .withCaption(messageBundle.getMessage("msgInputComment"))
+                .withParameters(
+                        InputParameter.stringParameter("comment")
+                                .withCaption(messageBundle.getMessage("msgComment")))
+                .withActions(DialogActions.OK_CANCEL)
+                .withCloseListener(inputDialogCloseEvent -> {
+                    if (inputDialogCloseEvent.closedWith(DialogOutcome.OK)) {
+                        String comment = inputDialogCloseEvent.getValue("comment");
+
+                        personelReserveCloseComment = comment;
+                        closePersonalReserveButtonInvoke();
+                    }
+                })
+                .show();
     }
 
     private void selectForAction() {
@@ -1038,6 +1090,12 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         iteractionList.setRating(4);
         iteractionList.setRecrutierName(userSession.getUser().getName());
         iteractionList.setRecrutier((ExtUser) userSession.getUser());
+
+        if (personelReserveCloseComment != null) {
+            StringBuffer comment = new StringBuffer(personelReserveCloseComment);
+            personelReserveCloseComment = null;
+            iteractionList.setComment(comment.toString());
+        }
 
         if (personelReservesTable.getSingleSelected().getOpenPosition() != null) {
             iteractionList.setVacancy(personelReservesTable.getSingleSelected().getOpenPosition());

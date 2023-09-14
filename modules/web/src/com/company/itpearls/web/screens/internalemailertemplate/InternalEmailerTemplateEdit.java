@@ -5,6 +5,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -41,10 +42,46 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private Label<String> openPositionLabel;
     @Inject
     private CollectionLoader<InternalEmailTemplate> emailTemplatesDl;
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         setAuthorTemplate();
+    }
+
+    @Subscribe
+    public void onBeforeShow1(BeforeShowEvent event) {
+        initEmailTemplateField();
+    }
+
+    private void initEmailTemplateField() {
+        emailTemplateField.setOptionImageProvider(this::emailTemplateImageProvider);
+    }
+
+    protected Resource emailTemplateImageProvider(InternalEmailTemplate internalEmailTemplate) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (internalEmailTemplate.getTemplateOpenPosition() != null) {
+            if (internalEmailTemplate.getTemplateOpenPosition().getProjectName() != null) {
+                if (internalEmailTemplate.getTemplateOpenPosition().getProjectName().getProjectLogo() != null) {
+                    return retImage.createResource(FileDescriptorResource.class)
+                            .setFileDescriptor(
+                                    internalEmailTemplate
+                                            .getTemplateOpenPosition()
+                                            .getProjectName()
+                                            .getProjectLogo());
+                } else {
+                    return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+                }
+            } else {
+                return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        } else {
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+        }
     }
 
     private void setAuthorTemplate() {

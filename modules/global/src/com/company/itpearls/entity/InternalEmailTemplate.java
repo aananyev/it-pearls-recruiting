@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 @Table(name = "ITPEARLS_INTERNAL_EMAIL_TEMPLATE")
 @Entity(name = "itpearls_InternalEmailTemplate")
-@NamePattern("%s / %s / %s|templateName,templateAuthor,templateOpenPosition")
+@NamePattern("%s / %s|templateName,templateAuthor")
 public class InternalEmailTemplate extends StandardEntity {
     private static final long serialVersionUID = -1764987245585713063L;
 
