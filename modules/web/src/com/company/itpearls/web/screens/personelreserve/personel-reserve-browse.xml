@@ -24,7 +24,7 @@
             </view>
             <loader id="personelReservesDl">
                 <query>
-                    <![CDATA[select e from itpearls_PersonelReserve e]]>
+                    <![CDATA[select e from itpearls_PersonelReserve e order by e.jobCandidate.fullName]]>
                     <condition>
                         <and>
                             <c:jpql>

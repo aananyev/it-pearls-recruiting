@@ -941,12 +941,12 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         actionButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         actionButton.addAction(new BaseAction("selectedForActionAction")
-        .withIcon(CubaIcon.STAR.source())
-        .withCaption(messageBundle.getMessage("msgSelectForAction"))
-        .withHandler(actionPerformedAction -> {
-                personelReservesTable.setSelected(event.getItem());
-                selectForAction();
-        }));
+                .withIcon(CubaIcon.STAR.source())
+                .withCaption(messageBundle.getMessage("msgSelectForAction"))
+                .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(event.getItem());
+                    selectForAction();
+                }));
 
         actionButton.addAction(new BaseAction("sendEmailAction")
                 .withIcon(CubaIcon.ENVELOPE.source())
@@ -998,7 +998,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
     private void selectForAction() {
         PersonelReserve personelReserve = personelReservesTable.getSingleSelected();
-        personelReserve.setSelectedForAction(true);
+        personelReserve.setSelectedForAction(!personelReserve.getSelectedForAction());
         dataManager.commit(personelReserve);
 
         personelReservesTable.repaint();
@@ -1085,7 +1085,13 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         Label jobCandidateLabel = uiComponents.create(Label.class);
         jobCandidateLabel.setWidthFull();
         jobCandidateLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
-        jobCandidateLabel.setValue(event.getItem().getJobCandidate().getFullName());
+        jobCandidateLabel.setValue(event.getItem().getJobCandidate().getFullName()
+                + " / "
+                + event.getItem().getJobCandidate().getPersonPosition().getPositionRuName()
+                + " / "
+                + event.getItem().getJobCandidate().getPersonPosition().getPositionEnName()
+                + " / "
+                + event.getItem().getJobCandidate().getCityOfResidence().getCityRuName());
         jobCandidateLabel.setStyleName("table-wordwrap");
 
         Label star = uiComponents.create(Label.class);
