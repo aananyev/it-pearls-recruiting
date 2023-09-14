@@ -998,9 +998,10 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
     private void selectForAction() {
         PersonelReserve personelReserve = personelReservesTable.getSingleSelected();
-        personelReserve.setSelectedForAction(!personelReserve.getSelectedForAction());
+        personelReserve.setSelectedForAction(personelReserve.getSelectedForAction() != null ? !personelReserve.getSelectedForAction() : true);
         dataManager.commit(personelReserve);
 
+        personelReservesDl.load();
         personelReservesTable.repaint();
         personelReservesTable.setSelected(personelReserve);
     }

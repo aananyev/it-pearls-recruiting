@@ -1138,15 +1138,48 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         List<PersonelReserve> personelReserves = dataManager.load(PersonelReserve.class)
                 .query(QUERY_CHECK_PERSONAL_RESERVE)
                 .parameter("jobCandidate", event.getItem())
+                .view("personelReserve-view")
                 .list();
 
+        Boolean flagSelected = false;
         Boolean flag = false;
 
+        for (PersonelReserve personelReserve : personelReserves) {
+            if (personelReserve.getRemovedFromReserve() != null) {
+                if (!personelReserve.getRemovedFromReserve()) {
+                    flag = true;
+                    break;
+                }
+            } else {
+                flag = true;
+            }
+        }
+
+        for (PersonelReserve personelReserve : personelReserves) {
+            if (personelReserve.getSelectedForAction() != null) {
+                if (personelReserve.getSelectedForAction()) {
+                    flagSelected = true;
+                }
+            }
+        }
+
         if (personelReserves.size() > 0) {
-            retLabel.setVisible(true);
+            if (flag) {
+                if (flagSelected) {
+                    retLabel.setIconFromSet(CubaIcon.STAR);
+                }
+
+                retLabel.setVisible(true);
+                retLabel.setDescription(messageBundle.getMessage("msgPersonalReserve")
+                        + " "
+                        + personelReserves.get(0).getRecruter().getName());
+            } else {
+                retLabel.setVisible(false);
+            }
         } else {
             retLabel.setVisible(false);
         }
+
 
         return retLabel;
     }
