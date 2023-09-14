@@ -47,8 +47,19 @@ public class PersonelReserve extends StandardEntity {
     @Column(name = "END_DATE")
     private Date endDate;
 
+    @Column(name = "SELECTED_FOR_ACTION")
+    private Boolean selectedForAction;
+
     @Column(name = "REMOVED_FROM_RESERVE")
     private Boolean removedFromReserve;
+
+    public Boolean getSelectedForAction() {
+        return selectedForAction;
+    }
+
+    public void setSelectedForAction(Boolean selectedForAction) {
+        this.selectedForAction = selectedForAction;
+    }
 
     public Boolean getInProcess() {
         return inProcess;

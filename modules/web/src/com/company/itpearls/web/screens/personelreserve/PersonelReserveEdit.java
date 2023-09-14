@@ -22,6 +22,16 @@ public class PersonelReserveEdit extends StandardEditor<PersonelReserve> {
     private Image candidatePic;
 
     @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        getEditedEntity().setSelectedForAction(getEditedEntity().getRemovedFromReserve() != null
+                ? getEditedEntity().getRemovedFromReserve() : false);
+        getEditedEntity().setRemovedFromReserve(getEditedEntity().getRemovedFromReserve() != null
+                ? getEditedEntity().getRemovedFromReserve() : false);
+        getEditedEntity().setInProcess(getEditedEntity().getInProcess() != null
+                ? getEditedEntity().getInProcess() : false);
+    }
+
+    @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             dateField.setValue(new Date());

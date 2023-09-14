@@ -236,10 +236,11 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private void initStatusColumnRenderer() {
         personelReservesTable.addGeneratedColumn(statusColumn, entity -> {
             HBoxLayout retHBoxLayout = uiComponents.create(HBoxLayout.class);
+            retHBoxLayout.setWidthFull();
+            retHBoxLayout.setHeightFull();
 
             Label retLabel = uiComponents.create(Label.class);
             retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
 
             if (entity.getItem().getEndDate().before(new Date())) { // просрочено
                 retLabel.setIconFromSet(CubaIcon.CANCEL);
@@ -264,10 +265,16 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 }
             }
 
+            if (entity.getItem().getRemovedFromReserve() != null) {
+                if (entity.getItem().getRemovedFromReserve()) {
+                    retLabel.setIconFromSet(CubaIcon.CANCEL);
+                    retLabel.setStyleName("pic-center-large-red");
+                    retLabel.setDescription(messageBundle.getMessage("msgReserveIsOverdue"));
+                }
+            }
+
             retHBoxLayout.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            retHBoxLayout.setWidthFull();
-            retHBoxLayout.setHeightFull();
             retHBoxLayout.add(retLabel);
 
             return retHBoxLayout;
@@ -329,10 +336,10 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         personelReservesDl.load();
     }
 
-    @Install(to = "personelReservesTable.jobCandidate", subject = "styleProvider")
+/*    @Install(to = "personelReservesTable.jobCandidate", subject = "styleProvider")
     private String personelReservesTableJobCandidateStyleProvider(PersonelReserve personelReserve) {
         return tableWordWrapStyle;
-    }
+    } */
 
     @Install(to = "personelReservesTable.recruter", subject = "styleProvider")
     private String personelReservesTableRecruterStyleProvider(PersonelReserve personelReserve) {
@@ -840,6 +847,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .query("select e from itpearls_CandidateCV e where e.candidate = :candidate")
                 .cacheable(true)
                 .parameter("candidate", entity)
+                .view("candidateCV-view")
                 .list().size() != 0) {
             Button suitableButton = uiComponents.create(Button.class);
             suitableButton.setDescription("Подобрать вакансию по резюме");
@@ -877,7 +885,9 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         try {
             iteractionPersonalReserveDelete = dataManager
                     .load(Iteraction.class)
-                    .query(QUERY_ITERACTION_DELETE_PERSONAL_RESERVE).one();
+                    .query(QUERY_ITERACTION_DELETE_PERSONAL_RESERVE)
+                    .view("iteraction-view")
+                    .one();
         } catch (IllegalStateException | NullPointerException e) {
             e.printStackTrace();
             notifications.create(Notifications.NotificationType.WARNING)
@@ -890,10 +900,12 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         createIteraction(iteractionPersonalReserveDelete);
 
         PersonelReserve personelReserve = personelReservesTable.getSingleSelected();
-        personelReserve.setEndDate(new Date());
         personelReserve.setInProcess(false);
+        personelReserve.setRemovedFromReserve(true);
 
         dataManager.commit(personelReserve);
+
+        personelReservesTable.repaint();
     }
 
     public void viewJobCandidateCardButtonInvoke() {
@@ -928,7 +940,16 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         actionButton.setWidthAuto();
         actionButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
+        actionButton.addAction(new BaseAction("selectedForActionAction")
+        .withIcon(CubaIcon.STAR.source())
+        .withCaption(messageBundle.getMessage("msgSelectForAction"))
+        .withHandler(actionPerformedAction -> {
+                personelReservesTable.setSelected(event.getItem());
+                selectForAction();
+        }));
+
         actionButton.addAction(new BaseAction("sendEmailAction")
+                .withIcon(CubaIcon.ENVELOPE.source())
                 .withCaption(messageBundle.getMessage("msgEmail"))
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(event.getItem());
@@ -936,22 +957,16 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 }));
 
         actionButton.addAction(new BaseAction("openCardAction")
+                .withIcon(CubaIcon.CHILD.source())
                 .withCaption(messageBundle.getMessage("msgJobCandidate"))
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(event.getItem());
                     viewJobCandidateCardButtonInvoke();
                 }));
 
-        if (event.getItem().getInProcess() != false) {
-            actionButton.addAction(new BaseAction("clearPersonalReserveAction")
-                    .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
-                    .withHandler(actionPerformedEvent -> {
-                        personelReservesTable.setSelected(event.getItem());
-                        closePersonalReserveButtonInvoke();
-                    }));
-        }
 
         actionButton.addAction(new BaseAction("createIntecactionAction")
+                .withIcon(CubaIcon.BATH.source())
                 .withCaption(messageBundle.getMessage("msgCreateInteraction"))
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(event.getItem());
@@ -959,15 +974,35 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 }));
 
         actionButton.addAction(new BaseAction("viewInteractionAction")
+                .withIcon(CubaIcon.VIEW_ACTION.source())
                 .withCaption(messageBundle.getMessage("msgViewInteraction"))
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(event.getItem());
                     viewInteractionButtonInvoke();
                 }));
 
+        if (event.getItem().getInProcess() != false) {
+            actionButton.addAction(new BaseAction("clearPersonalReserveAction")
+                    .withIcon(CubaIcon.CANCEL.source())
+                    .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
+                    .withHandler(actionPerformedEvent -> {
+                        personelReservesTable.setSelected(event.getItem());
+                        closePersonalReserveButtonInvoke();
+                    }));
+        }
+
         retBox.add(actionButton);
 
         return retBox;
+    }
+
+    private void selectForAction() {
+        PersonelReserve personelReserve = personelReservesTable.getSingleSelected();
+        personelReserve.setSelectedForAction(true);
+        dataManager.commit(personelReserve);
+
+        personelReservesTable.repaint();
+        personelReservesTable.setSelected(personelReserve);
     }
 
     private void viewInteractionButtonInvoke() {
@@ -1010,6 +1045,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
             try {
                 openPositionDefault = dataManager.load(OpenPosition.class)
                         .query(QUERY_DEFAULT_OPEN_POSITION)
+                        .view("openPosition-view")
                         .one();
             } catch (NullPointerException e) {
                 e.printStackTrace();
@@ -1036,5 +1072,41 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         dataManager.commit(iteractionList);
 
         return iteractionList;
+    }
+
+    @Install(to = "personelReservesTable.jobCandidate", subject = "columnGenerator")
+    private Component personelReservesTableJobCandidateColumnGenerator(DataGrid.ColumnGeneratorEvent<PersonelReserve> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setSpacing(true);
+
+        Label jobCandidateLabel = uiComponents.create(Label.class);
+        jobCandidateLabel.setWidthFull();
+        jobCandidateLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        jobCandidateLabel.setValue(event.getItem().getJobCandidate().getFullName());
+        jobCandidateLabel.setStyleName("table-wordwrap");
+
+        Label star = uiComponents.create(Label.class);
+        star.setIconFromSet(CubaIcon.STAR);
+        star.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        star.setStyleName("pic-center-large-orange");
+
+        if (event.getItem().getSelectedForAction() != null) {
+            if (event.getItem().getSelectedForAction()) {
+                star.setVisible(true);
+            } else {
+                star.setVisible(false);
+            }
+        } else {
+            star.setVisible(false);
+        }
+
+        retHBox.add(star);
+        retHBox.add(jobCandidateLabel);
+        retHBox.expand(jobCandidateLabel);
+
+        return retHBox;
     }
 }

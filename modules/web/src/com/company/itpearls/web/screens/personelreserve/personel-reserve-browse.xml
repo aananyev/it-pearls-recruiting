@@ -7,20 +7,20 @@
     <data readOnly="true">
         <collection id="personelReservesDc"
                     class="com.company.itpearls.entity.PersonelReserve">
-            <view extends="_local">
+            <view extends="personelReserve-view">
                 <property name="jobCandidate" view="jobCandidate-view">
                     <property name="currentCompany" view="_local"/>
                     <property name="cityOfResidence" view="_local"/>
                     <property name="personPosition" view="_local"/>
                     <property name="fileImageFace" view="_local"/>
-                    <property name="iteractionList" view="_local">
+                    <property name="iteractionList" view="iteractionList-view">
                         <property name="vacancy" view="_local"/>
                         <property name="iteractionType" view="_local"/>
                     </property>
                 </property>
                 <property name="recruter" view="_local"/>
                 <property name="personPosition" view="_local"/>
-                <property name="openPosition" view="_local"/>
+                <property name="openPosition" view="openPosition-view"/>
             </view>
             <loader id="personelReservesDl">
                 <query>
@@ -81,14 +81,18 @@
                     <componentRenderer/>
                 </column>
                 <column id="jobCandidate"
-                        sort="ASCENDING"
-                        property="jobCandidate"
-                        width="300px"/>
+                        width="300px">
+                    <componentRenderer/>
+                </column>
                 <column id="recruter"
+                        collapsible="true"
+                        collapsed="true"
                         property="recruter"
                         width="150px"/>
                 <column id="personPosition"
                         property="personPosition"
+                        collapsed="true"
+                        collapsible="true"
                         width="150px"/>
                 <column id="openPosition"
                         property="openPosition"

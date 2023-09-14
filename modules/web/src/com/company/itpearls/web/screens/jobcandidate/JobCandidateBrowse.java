@@ -1100,6 +1100,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         Label employeeStatusLabel = genEmployeeStatusLabel(event);
+        Label personalReserveLabel = genPersonalReserveLabel(event);
         Label commentCandidateLabel = getCommentCandidateLabel(event);
         Label phoneCandidateLabel = getPhoneCandidateLabel(event);
         Label telegramCLabel = genTelegramLabel(event);
@@ -1108,8 +1109,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Label blackListLabel = getBlackList(event);
 
         retHBox.add(blackListLabel);
-        retHBox.add(contactsStatusLabel);
         retHBox.add(employeeStatusLabel);
+        retHBox.add(personalReserveLabel);
+        retHBox.add(contactsStatusLabel);
         retHBox.add(phoneCandidateLabel);
         retHBox.add(emailLabel);
         retHBox.add(telegramCLabel);
@@ -1117,6 +1119,36 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHBox.add(commentCandidateLabel);
 
         return retHBox;
+    }
+
+    private Label genPersonalReserveLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setVisible(false);
+        retLabel.setIconFromSet(CubaIcon.STAR_O);
+        retLabel.setStyleName("pic-center-large-orange");
+        retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
+
+        final String QUERY_CHECK_PERSONAL_RESERVE = "select e from itpearls_PersonelReserve e " +
+                "where e.jobCandidate = :jobCandidate "
+//                + "and e.inProcess = true "
+                + "and @dateAfter(e.endDate, now) "
+                + "and @dateBefore(e.date, now) "
+//                + "and not e.removedFromReserve = true"
+                ;
+        List<PersonelReserve> personelReserves = dataManager.load(PersonelReserve.class)
+                .query(QUERY_CHECK_PERSONAL_RESERVE)
+                .parameter("jobCandidate", event.getItem())
+                .list();
+
+        Boolean flag = false;
+
+        if (personelReserves.size() > 0) {
+            retLabel.setVisible(true);
+        } else {
+            retLabel.setVisible(false);
+        }
+
+        return retLabel;
     }
 
     private Label getPhoneCandidateLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {

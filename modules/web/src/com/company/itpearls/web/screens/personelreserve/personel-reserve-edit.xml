@@ -9,6 +9,7 @@
             <view extends="_local">
                 <property name="jobCandidate" view="_local">
                     <property name="personPosition" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
                 </property>
                 <property name="recruter" view="_local"/>
                 <property name="personPosition" view="_local"/>
@@ -48,24 +49,7 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <vbox id="picVBox">
-            <image id="candidatePic"
-                   dataContainer="jobCandidateDc"
-                   property="fileImageFace"
-                   width="100%"
-                   visible="true"
-                   align="TOP_RIGHT"
-                   stylename="widget-border"
-                   scaleMode="FILL"/>
-            <image id="candidateDefaultPic"
-                   width="100%"
-                   visible="false"
-                   align="TOP_RIGHT"
-                   stylename="widget-border"
-                   scaleMode="FILL">
-                <theme path="icons/no-programmer.jpeg"/>
-            </image>
-        </vbox>
+
         <suggestionPickerField id="jobCandidateField"
                                inputPrompt="mainMsg://msgStartInput"
                                minSearchStringLength="3"
@@ -91,6 +75,7 @@
                 order by e.secondName, e.firstName
             </query>
         </suggestionPickerField>
+        <hbox width="100%" spacing="true" expand="form">
         <form id="form" dataContainer="personelReserveDc">
             <column width="350px">
                 <lookupPickerField id="reactutierField" optionsContainer="reactutiersDc" property="recruter"/>
@@ -108,6 +93,25 @@
                 </lookupPickerField>
             </column>
         </form>
+            <vbox id="picVBox" width="200px">
+                <image id="candidatePic"
+                       dataContainer="personelReserveDc"
+                       property="jobCandidate.fileImageFace"
+                       width="100%"
+                       visible="true"
+                       align="TOP_RIGHT"
+                       stylename="widget-border"
+                       scaleMode="FILL"/>
+                <image id="candidateDefaultPic"
+                       width="100%"
+                       visible="false"
+                       align="TOP_RIGHT"
+                       stylename="widget-border"
+                       scaleMode="FILL">
+                    <theme path="icons/no-programmer.jpeg"/>
+                </image>
+            </vbox>
+        </hbox>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>
