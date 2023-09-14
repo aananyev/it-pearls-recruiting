@@ -1,10 +1,13 @@
 package com.company.itpearls.web.screens.internalemailtemplate;
 
-import com.haulmont.cuba.gui.components.GroupTable;
-import com.haulmont.cuba.gui.components.HasValue;
+import com.company.itpearls.entity.InternalEmailerTemplate;
+import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.InternalEmailTemplate;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
@@ -20,6 +23,8 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
     private UserSession userSession;
     @Inject
     private GroupTable<InternalEmailTemplate> internalEmailTemplatesTable;
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -43,5 +48,32 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
             loadDefaultFilter();
             internalEmailTemplatesTable.setEditable(true);
         }
+    }
+
+    public Component projectFileImageGenegator(InternalEmailTemplate entity) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Image image = uiComponents.create(Image.class);
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        image.setWidth("50px");
+        image.setHeight("50px");
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+
+        if (entity.getTemplateOpenPosition() != null) {
+            image.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(entity
+                    .getTemplateOpenPosition()
+                    .getProjectName()
+                    .getProjectLogo());
+        } else {
+            image.setSource(ThemeResource.class)
+                    .setPath("icons/no-company.png");
+        }
+
+        retHBox.add(image);
+
+        return retHBox;
     }
 }

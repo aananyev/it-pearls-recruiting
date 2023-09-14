@@ -887,48 +887,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     .show();
         }
 
-        IteractionList iteractionList = metadata.create(IteractionList.class);
-        iteractionList.setDateIteraction(new Date());
-        iteractionList.setIteractionType(iteractionPersonalReserveDelete);
-        iteractionList.setCandidate(personelReservesTable.getSingleSelected().getJobCandidate());
-        iteractionList.setRating(4);
-        iteractionList.setRecrutierName(userSession.getUser().getName());
-        iteractionList.setRecrutier((ExtUser) userSession.getUser());
-
-        if (personelReservesTable.getSingleSelected().getOpenPosition() != null) {
-            iteractionList.setVacancy(personelReservesTable.getSingleSelected().getOpenPosition());
-            iteractionList.setCurrentOpenClose(personelReservesTable.getSingleSelected().getOpenPosition().getOpenClose());
-        } else {
-            OpenPosition openPositionDefault = null;
-
-            try {
-                openPositionDefault = dataManager.load(OpenPosition.class)
-                        .query(QUERY_DEFAULT_OPEN_POSITION)
-                        .one();
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withType(Notifications.NotificationType.WARNING)
-                        .withCaption(messageBundle.getMessage("msgWarning"))
-                        .withDescription(messageBundle.getMessage("msgNotDefaultOpenPosition"))
-                        .show();
-            }
-
-            if (openPositionDefault != null) {
-                iteractionList.setVacancy(openPositionDefault);
-                iteractionList.setCurrentOpenClose(openPositionDefault.getOpenClose());
-            }
-        }
-
-        BigDecimal numberIteraction = null;
-        numberIteraction = dataManager.loadValue(QUERY_MAX_NUMBER_INTERACTION, BigDecimal.class)
-                .one();
-
-        numberIteraction.add(BigDecimal.ONE);
-        iteractionList.setNumberIteraction(numberIteraction);
-
-        dataManager.commit(iteractionList);
+        createIteraction(iteractionPersonalReserveDelete);
 
         PersonelReserve personelReserve = personelReservesTable.getSingleSelected();
         personelReserve.setEndDate(new Date());
@@ -1012,8 +971,70 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     }
 
     private void viewInteractionButtonInvoke() {
+        IteractionListSimpleBrowse iteractionListSimpleBrowse = screens.create(IteractionListSimpleBrowse.class);
+        iteractionListSimpleBrowse.setSelectedCandidate(personelReservesTable.getSingleSelected().getJobCandidate());
+        screens.show(iteractionListSimpleBrowse);
     }
 
     private void createInteractionButtonInvoke() {
+        screenBuilders.editor(IteractionList.class, this)
+                .withScreenClass(IteractionListEdit.class)
+                .withInitializer(event -> {
+                    event.setCandidate(personelReservesTable.getSingleSelected().getJobCandidate());
+                    if (personelReservesTable.getSingleSelected().getOpenPosition() != null) {
+                        event.setVacancy(personelReservesTable.getSingleSelected().getOpenPosition());
+                        event.setCurrentOpenClose(personelReservesTable.getSingleSelected().getOpenPosition().getOpenClose());
+                    }
+                })
+                .newEntity()
+                .build()
+                .show();
+    }
+
+    private IteractionList createIteraction(Iteraction iteraction) {
+
+        IteractionList iteractionList = metadata.create(IteractionList.class);
+        iteractionList.setDateIteraction(new Date());
+        iteractionList.setIteractionType(iteraction);
+        iteractionList.setCandidate(personelReservesTable.getSingleSelected().getJobCandidate());
+        iteractionList.setRating(4);
+        iteractionList.setRecrutierName(userSession.getUser().getName());
+        iteractionList.setRecrutier((ExtUser) userSession.getUser());
+
+        if (personelReservesTable.getSingleSelected().getOpenPosition() != null) {
+            iteractionList.setVacancy(personelReservesTable.getSingleSelected().getOpenPosition());
+            iteractionList.setCurrentOpenClose(personelReservesTable.getSingleSelected().getOpenPosition().getOpenClose());
+        } else {
+            OpenPosition openPositionDefault = null;
+
+            try {
+                openPositionDefault = dataManager.load(OpenPosition.class)
+                        .query(QUERY_DEFAULT_OPEN_POSITION)
+                        .one();
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withType(Notifications.NotificationType.WARNING)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription(messageBundle.getMessage("msgNotDefaultOpenPosition"))
+                        .show();
+            }
+
+            if (openPositionDefault != null) {
+                iteractionList.setVacancy(openPositionDefault);
+                iteractionList.setCurrentOpenClose(openPositionDefault.getOpenClose());
+            }
+        }
+
+        BigDecimal numberIteraction = null;
+        numberIteraction = dataManager.loadValue(QUERY_MAX_NUMBER_INTERACTION, BigDecimal.class)
+                .one();
+
+        numberIteraction.add(BigDecimal.ONE);
+        iteractionList.setNumberIteraction(numberIteraction);
+        dataManager.commit(iteractionList);
+
+        return iteractionList;
     }
 }

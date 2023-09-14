@@ -8,7 +8,11 @@
         <collection id="internalEmailTemplatesDc"
                     class="com.company.itpearls.entity.InternalEmailTemplate">
             <view extends="_local">
-                <property name="templateOpenPosition" view="_local"/>
+                <property name="templateOpenPosition" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectLogo" view="_local"/>
+                    </property>
+                </property>
                 <property name="templatePosition" view="_local"/>
                 <property name="templateAuthor" view="_local"/>
             </view>
@@ -54,10 +58,14 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="templateName"/>
-                <column id="shareTemplate"/>
-                <column id="templateOpenPosition"/>
-                <column id="templatePosition"/>
+                <column id="projectImage"
+                        caption=""
+                        width="60px"
+                        generator="projectFileImageGenegator"/>
+                <column id="templateName" width="300px"/>
+                <column id="shareTemplate" width="60px"/>
+                <column id="templateOpenPosition" width="450px"/>
+                <column id="templatePosition" width="300px"/>
                 <column id="templateAuthor"/>
             </columns>
             <rowsCount/>

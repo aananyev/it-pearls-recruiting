@@ -108,6 +108,9 @@
             <property name="vacancy" view="_local">
                 <property name="owner" view="_local"/>
                 <property name="grade" view="_minimal"/>
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
+                </property>
             </property>
             <property name="candidate" view="_local">
                 <property name="personPosition" view="_local"/>

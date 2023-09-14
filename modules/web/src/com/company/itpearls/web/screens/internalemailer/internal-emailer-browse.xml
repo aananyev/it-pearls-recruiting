@@ -7,20 +7,13 @@
     <data readOnly="true">
         <collection id="emailersDc"
                     class="com.company.itpearls.entity.InternalEmailer">
-            <view extends="_local">
-                <property name="fromEmail" view="_minimal">
-                    <property name="smtpServer"/>
-                    <property name="smtpPort"/>
-                    <property name="pop3Server"/>
-                    <property name="pop3Port"/>
-                    <property name="imapServer"/>
-                    <property name="imapPort"/>
-                    <property name="email"/>
-                    <property name="language"/>
-                    <property name="timeZone"/>
-                    <property name="active"/>
+            <view extends="internalEmailer-view">
+                <property name="fromEmail" view="_local">
+                    <property name="fileImageFace" view="_local"/>
                 </property>
-                <property name="toEmail" view="_minimal"/>
+                <property name="toEmail" view="_local">
+                    <property name="fileImageFace" view="_local"/>
+                </property>
             </view>
             <loader id="emailersDl">
                 <query>
@@ -48,22 +41,26 @@
             <columns>
                 <column property="draftEmail"
                         id="draftEmail"
-                        width="85px"/>
-                <column property="fromEmail"
-                        id="fromEmail"
+                        width="60px"/>
+                <column id="toEmail"
                         width="250px"
                         minimumWidth="170px"
-                        maximumWidth="250px"/>
-                <column property="toEmail"
-                        id="toEmail"
+                        maximumWidth="250px">
+                    <componentRenderer/>
+                </column>
+                <column id="fromEmail"
                         width="250px"
                         minimumWidth="170px"
-                        maximumWidth="250px"/>
+                        maximumWidth="250px">
+                    <componentRenderer/>
+                </column>
                 <column property="subjectEmail"
                         id="subjectEmail"
                         width="495px"
-                        minimumWidth="250px"/>
+                        minimumWidth="250px">
+                </column>
                 <column property="dateCreateEmail"
+                        sort="DESCENDING"
                         id="dateCreateEmail"
                         width="140px"
                         maximumWidth="140px"/>
