@@ -135,6 +135,11 @@
                         minimumWidth="90px">
                     <htmlRenderer/>
                 </column>
+                <column id="actionsWithCandidate"
+                        caption="msg://msgActions"
+                        width="80px">
+                    <componentRenderer/>
+                </column>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

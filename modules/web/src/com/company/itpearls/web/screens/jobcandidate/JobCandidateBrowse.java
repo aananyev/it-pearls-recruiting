@@ -175,9 +175,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             })
                             .build()
                             .show();
+                    jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
                 }));
 
-        actionsWithCandidateButton.addAction(new BaseAction("sendEmail")
+        actionsWithCandidateButton.addAction(new BaseAction("sendEmailAction")
                 .withIcon(CubaIcon.ENVELOPE.source())
                 .withCaption(messageBundle.getMessage("msgSendEmail"))
                 .withHandler(actionPerformedAction -> {
@@ -188,7 +189,44 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             })
                             .build()
                             .show();
+
+                    jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
                 }));
+
+        actionsWithCandidateButton.addAction(new BaseAction("addCommentAction")
+                .withIcon(CubaIcon.COMMENTING.source())
+                .withCaption(messageBundle.getMessage("msgComment"))
+                .withHandler(actionPerformedEvent -> {
+
+                }));
+
+        actionsWithCandidateButton.addAction(new BaseAction("viewComment")
+                .withIcon(CubaIcon.COMMENTS.source())
+                .withCaption(messageBundle.getMessage("msgViewComments"))
+                .withHandler(actionPerformedAction -> {
+
+                }));
+    }
+
+    @Install(to = "jobCandidatesTable.actionsWithCandidate", subject = "columnGenerator")
+    private Component jobCandidatesTableActionsWithCandidateColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        PopupButton actionPopupButton = uiComponents.create(PopupButton.class);
+        actionPopupButton.setIconFromSet(CubaIcon.BARS);
+        actionPopupButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        actionPopupButton.addPopupVisibilityListener(e -> {
+            jobCandidatesTable.setSelected(event.getItem());
+        });
+
+        initActionButton(actionPopupButton);
+
+        retHBox.add(actionPopupButton);
+
+
+        return retHBox;
     }
 
     @Subscribe
@@ -637,6 +675,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             } else {
                 lastInteractionPopupButton.setEnabled(true);
                 actionsWithCandidateButton.setEnabled(true);
+
+                if (jobCandidatesTable.getSingleSelected().getEmail() == null) {
+                    actionsWithCandidateButton.getAction("sendEmailAction").setEnabled(false);
+                } else {
+                    actionsWithCandidateButton.getAction("sendEmailAction").setEnabled(true);
+                }
             }
 
         });
@@ -1627,6 +1671,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidatesTable.addSelectionListener(e -> {
             if (jobCandidatesTable.getSingleSelected() != null) {
                 actionsWithCandidateButton.setEnabled(true);
+
+                if (jobCandidatesTable.getSingleSelected().getEmail() == null) {
+                    actionsWithCandidateButton.getAction("sendEmailAction").setEnabled(false);
+                } else {
+                    actionsWithCandidateButton.getAction("sendEmailAction").setEnabled(true);
+                }
+
                 if (jobCandidatesTable.getSingleSelected().getEmail() != null) {
                     sendEmailButton.setEnabled(true);
                 } else {
