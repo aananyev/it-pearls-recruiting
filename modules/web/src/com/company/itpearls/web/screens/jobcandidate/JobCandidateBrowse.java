@@ -18,6 +18,7 @@ import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerT
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.loadfromfilescreen.LoadFromFileScreen;
+import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
 import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -147,6 +148,48 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private FileLoader fileLoader;
     private OnlyTextPersonPositionLoadPdf screenOnlytextLoadFromPdf;
+    @Inject
+    private PopupButton actionsWithCandidateButton;
+
+    @Subscribe
+    public void onInit1(InitEvent event) {
+        initActionsWithCandidateButton();
+    }
+
+    private void initActionsWithCandidateButton() {
+        initActionButton(actionsWithCandidateButton);
+    }
+
+    private void initActionButton(PopupButton actionsWithCandidateButton) {
+        actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserve")
+                .withIcon(CubaIcon.SUPERSCRIPT.source())
+                .withCaption(messageBundle.getMessage("msgAddPersonalReserve"))
+                .withHandler(actionPerformedEvent -> {
+                    screenBuilders.editor(PersonelReserve.class, this)
+                            .withScreenClass(PersonelReserveEdit.class)
+                            .newEntity()
+                            .withInitializer(event -> {
+                                event.setRecruter((ExtUser) userSession.getUser());
+                                event.setJobCandidate(jobCandidatesTable.getSingleSelected());
+                                event.setPersonPosition(jobCandidatesTable.getSingleSelected().getPersonPosition());
+                            })
+                            .build()
+                            .show();
+                }));
+
+        actionsWithCandidateButton.addAction(new BaseAction("sendEmail")
+                .withIcon(CubaIcon.ENVELOPE.source())
+                .withCaption(messageBundle.getMessage("msgSendEmail"))
+                .withHandler(actionPerformedAction -> {
+                    screenBuilders.editor(InternalEmailerTemplate.class, this)
+                            .newEntity()
+                            .withInitializer(event -> {
+                                event.setToEmail(jobCandidatesTable.getSingleSelected());
+                            })
+                            .build()
+                            .show();
+                }));
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -164,7 +207,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         jobCandidatesDl.load();
 
-        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
+//        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
 
         employees = dataManager.load(Employee.class)
                 .view("employee-view")
@@ -590,8 +633,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         jobCandidatesTable.addSelectionListener(e -> {
             if (jobCandidatesTable.getSingleSelected() == null) {
                 lastInteractionPopupButton.setEnabled(false);
+                actionsWithCandidateButton.setEnabled(false);
             } else {
                 lastInteractionPopupButton.setEnabled(true);
+                actionsWithCandidateButton.setEnabled(true);
             }
 
         });
@@ -1581,11 +1626,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private void setSendEmailButton() {
         jobCandidatesTable.addSelectionListener(e -> {
             if (jobCandidatesTable.getSingleSelected() != null) {
+                actionsWithCandidateButton.setEnabled(true);
                 if (jobCandidatesTable.getSingleSelected().getEmail() != null) {
                     sendEmailButton.setEnabled(true);
                 } else {
                     sendEmailButton.setEnabled(false);
                 }
+            } else {
+                actionsWithCandidateButton.setEnabled(false);
             }
         });
     }

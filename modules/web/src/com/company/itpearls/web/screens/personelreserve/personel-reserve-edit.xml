@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://personelReserveEdit.caption"
         focusComponent="form"
         messagesPack="com.company.itpearls.web.screens.personelreserve">
@@ -41,7 +42,26 @@
         <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="_minimal">
             <loader id="openPositionsDl">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e]]>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                                where not e.openClose = true
+                                order by e.openClose, e.vacansyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.companyDepartament = :departament
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -91,6 +111,11 @@
                         <action id="clear" type="picker_clear"/>
                     </actions>
                 </lookupPickerField>
+                <checkBox id="onlyMySubscribeCheckBox"
+                          align="TOP_RIGHT"
+                          width="AUTO"
+                          description="msg://msgOnlyMySebscribeDec"
+                          caption="msg://msgOnlyMySubscribe"/>
             </column>
         </form>
             <vbox id="picVBox" width="200px">

@@ -952,6 +952,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedAction -> {
                     personelReservesTable.setSelected(event.getItem());
                     selectForAction();
+                    personelReservesTable.scrollTo(event.getItem());
                 }));
 
         actionButton.addAction(new BaseAction("sendEmailAction")
@@ -960,6 +961,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(event.getItem());
                     sendEmailButtonInvoke();
+                    personelReservesTable.scrollTo(event.getItem());
                 }));
 
         actionButton.addAction(new BaseAction("openCardAction")
@@ -968,6 +970,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(event.getItem());
                     viewJobCandidateCardButtonInvoke();
+                    personelReservesTable.scrollTo(event.getItem());
                 }));
 
 
@@ -985,6 +988,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(event.getItem());
                     viewInteractionButtonInvoke();
+                    personelReservesTable.scrollTo(event.getItem());
                 }));
 
         if (event.getItem().getRemovedFromReserve() != null) {
@@ -995,6 +999,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                         .withHandler(actionPerformedEvent -> {
                             personelReservesTable.setSelected(event.getItem());
                             closePersonalReserveButtonInvoke();
+                            personelReservesTable.scrollTo(event.getItem());
                         }));
             }
         } else {
@@ -1004,6 +1009,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     .withHandler(actionPerformedEvent -> {
                         personelReservesTable.setSelected(event.getItem());
                         closePersonalReserveButtonInvoke();
+                        personelReservesTable.scrollTo(event.getItem());
                     }));
         }
 
@@ -1015,6 +1021,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                         .withHandler(actionPerformedEvent -> {
                             personelReservesTable.setSelected(event.getItem());
                             closePersonalReserveButtonWithCommentInvoke();
+                            personelReservesTable.scrollTo(event.getItem());
                         }));
             }
         } else {
@@ -1024,6 +1031,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     .withHandler(actionPerformedEvent -> {
                         personelReservesTable.setSelected(event.getItem());
                         closePersonalReserveButtonWithCommentInvoke();
+                        personelReservesTable.scrollTo(event.getItem());
                     }));
         }
 
@@ -1057,7 +1065,11 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
         personelReservesDl.load();
         personelReservesTable.repaint();
-        personelReservesTable.setSelected(personelReserve);
+        try {
+            personelReservesTable.setSelected(personelReserve);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void viewInteractionButtonInvoke() {

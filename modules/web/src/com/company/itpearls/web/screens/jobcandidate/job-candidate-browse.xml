@@ -174,9 +174,21 @@
                                 caption="msg://msgLoadFromClipboard"/>
                     </actions>
                 </popupButton>
+                <popupButton id="actionsWithCandidateButton"
+                             caption="msg://msgActions"
+                             enable="false"
+                             description="msg://msgActionsDesc"
+                             icon="ADD_ACTION"
+                             width="AUTO">
+                    <actions>
+                        <action id="addPersonalReserve" icon="SUPERSCRIPT"/>
+                        <action id="sendEmail" icon="ENVELOPE"/>
+                    </actions>
+                </popupButton>
                 <button id="sendEmailButton"
                         caption="mainMsg://msgSendEmail"
                         enable="false"
+                        visible="false"
                         icon="ENVELOPE_O"
                         invoke="onSendEmail"/>
             </buttonsPanel>
