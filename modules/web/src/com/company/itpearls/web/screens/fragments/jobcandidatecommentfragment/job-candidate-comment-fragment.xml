@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout>
+        <hbox id="innerBox"
+              margin="true"
+              width="AUTO"
+              stylename="toolTip"
+              spacing="true">
+            <image id="imageLeft"
+                   scaleMode="SCALE_DOWN"
+                   width="50px"
+                   height="50px"
+                   stylename="circle-50px"/>
+            <vbox id="outerBox"
+                  margin="false"
+                  width="AUTO"
+                  spacing="false">
+                <label id="nameLabel"
+                       stylename="tailName"/>
+                <label id="vacancyLabel"
+                       stylename="tailVacancy"/>
+                <label id="textLabel"
+                       align="BOTTOM_RIGHT"
+                       stylename="table-wordwrap"/>
+                <label id="dateLabel"
+                       align="BOTTOM_RIGHT"
+                       stylename="tailDate"/>
+            </vbox>
+            <image id="imageRight"
+                   scaleMode="SCALE_DOWN"
+                   width="50px"
+                   height="50px"
+                   stylename="circle-50px"/>
+            <button id="replyButton"
+                    width="AUTO"
+                    align="BOTTOM_RIGHT"
+                    caption="msg://msgReplyButton"
+                    description="msg://msgReplyButtonDesc"/>
+        </hbox>
+    </layout>
+</fragment>

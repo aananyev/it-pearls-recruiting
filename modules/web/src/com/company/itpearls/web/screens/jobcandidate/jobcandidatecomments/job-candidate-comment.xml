@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://jobCandidateComment.caption"
+        messagesPack="com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments">
+    <data>
+        <collection id="candidateCommentDc" class="com.company.itpearls.entity.IteractionList">
+            <view extends="iteractionList-view">
+
+            </view>
+            <loader id="candidateCommentDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_IteractionList e
+                    where not e.comment like '' and not e.comment is null
+                    order by e.dateIteraction desc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.candidate = :jobCandidate</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout width="100%" height="100%" expand="commentScrollBox">
+        <scrollBox id="commentScrollBox"
+                   orientation="vertical"
+                   width="100%"
+                   spacing="true"
+                   height="AUTO"/>
+        <button caption="msg://msgClose"
+                invoke="closeScreenButton"
+                align="BOTTOM_RIGHT"/>
+
+    </layout>
+</window>

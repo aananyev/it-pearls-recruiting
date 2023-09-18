@@ -17,6 +17,7 @@ import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
 import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
+import com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments.JobCandidateComment;
 import com.company.itpearls.web.screens.loadfromfilescreen.LoadFromFileScreen;
 import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
 import com.haulmont.cuba.core.app.FileStorageService;
@@ -200,12 +201,18 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
                 }));
 
-        actionsWithCandidateButton.addAction(new BaseAction("viewComment")
+        actionsWithCandidateButton.addAction(new BaseAction("viewCommentAction")
                 .withIcon(CubaIcon.COMMENTS.source())
                 .withCaption(messageBundle.getMessage("msgViewComments"))
                 .withHandler(actionPerformedAction -> {
-
+                    JobCandidateComment screen = screens.create(JobCandidateComment.class);
+//                    jobCandidatesTable.setSelected(((JobCandidate)actionPerformedAction.getSource()));
+                    screen.setJobCandidate(jobCandidatesTable.getSingleSelected());
+                    screen.show();
                 }));
+
+        actionsWithCandidateButton.getAction("addCommentAction").setEnabled(false);
+        actionsWithCandidateButton.getAction("viewCommentAction").setEnabled(true);
     }
 
     @Install(to = "jobCandidatesTable.actionsWithCandidate", subject = "columnGenerator")
