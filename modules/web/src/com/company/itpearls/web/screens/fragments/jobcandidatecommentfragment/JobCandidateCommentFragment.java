@@ -125,7 +125,10 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                     .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
                                 createComment(iteractionList,
                                         closeEvent.getValue("openPosition"),
-                                        "Re: " + (String) closeEvent.getValue("comment"));
+                                        iteractionList.getRecrutier().getName()
+                                                + " Re: "
+                                                + (String) closeEvent.getValue("comment"));
+                                /* TODO тут надо сделать отправку сообщения что кому-то прилетел коммент */
                             }
                         }).show();
             });
