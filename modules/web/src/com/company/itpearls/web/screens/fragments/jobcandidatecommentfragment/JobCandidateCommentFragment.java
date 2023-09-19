@@ -116,11 +116,10 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                             if (closeEvent
                                     .getCloseAction()
                                     .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
-//                                replyButtonInvoke(e, "(" + ") Re:" + (String) closeEvent.getValue("comment"));
                                 createComment(iteractionList,
-                                        iteractionList.getVacancy(),
-                                        "(" + ") Re:" + (String) closeEvent.getValue("comment"));
-                           }
+                                        closeEvent.getValue("openPosition"),
+                                        "Re: " + (String) closeEvent.getValue("comment"));
+                            }
                         }).show();
             });
         }
@@ -166,10 +165,17 @@ public class JobCandidateCommentFragment extends ScreenFragment {
             numberInteraction = numberInteraction.add(BigDecimal.ONE);
 
             IteractionList comment = metadata.create(IteractionList.class);
-            comment.setCandidate(iteractionList.getCandidate());
+            if (iteractionList != null) {
+                comment.setCandidate(iteractionList.getCandidate());
+            } else {
+                if (this.iteractionList != null) {
+                    comment.setCandidate(this.iteractionList.getCandidate());
+                }
+            }
+
             comment.setDateIteraction(new Date());
-            comment.setCurrentOpenClose(iteractionList.getVacancy().getOpenClose() != null ?
-                    iteractionList.getVacancy().getOpenClose() : false);
+            comment.setCurrentOpenClose(openPosition.getOpenClose() != null ?
+                    openPosition.getOpenClose() : false);
             comment.setRecrutier((ExtUser) userSession.getUser());
 
             if (inputComment == null) {
@@ -192,7 +198,7 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                 OpenPosition.class)
                         .one());
             }
-            
+
             dataManager.commit(comment);
 
             reloadInteractions();
@@ -206,5 +212,29 @@ public class JobCandidateCommentFragment extends ScreenFragment {
     }
 
     private void reloadInteractions() {
+    }
+
+    public void addCommentButtonInvoke() {
+        dialogs.createInputDialog(this)
+                .withCaption(messageBundle.getMessage("msgComment"))
+                .withParameters(
+                        InputParameter.stringParameter("comment")
+                                .withCaption(messageBundle.getMessage("msgInputComment"))
+                                .withRequired(true),
+                        InputParameter.entityParameter("openPosition", OpenPosition.class)
+                                .withCaption(messageBundle.getMessage("msgOpenPosition"))
+                )
+                .withActions(DialogActions.OK_CANCEL)
+                .withCloseListener(closeEvent -> {
+                    if (closeEvent
+                            .getCloseAction()
+                            .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                        createComment(null,
+                                closeEvent.getValue("openPosition"),
+                                "Re: " + (String) closeEvent.getValue("comment"));
+                    }
+                })
+                .show();
+
     }
 }

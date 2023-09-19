@@ -190,7 +190,8 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
 
             notifications.create(Notifications.NotificationType.HUMANIZED)
                     .withType(Notifications.NotificationType.HUMANIZED)
-                    .withHideDelayMs(15000)
+                    .withHideDelayMs(5000)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .withCaption(messageBundle.getMessage("msgInfo"))
                     .withDescription(messageBundle.getMessage("msgEmailSended"))
                     .show();
@@ -211,6 +212,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                         .withType(Notifications.NotificationType.WARNING)
                         .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription(messageBundle.getMessage("msgFailedCreateInteraction"))
+                        .withHideDelayMs(15000)
                         .show();
             }
         } catch (MessagingException e) {
@@ -219,6 +221,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
                     .withDescription(messageBundle.getMessage("msgErrorSendEmail") + " " + e.getMessage())
+                    .withHideDelayMs(15000)
                     .show();
         }
     }
@@ -273,6 +276,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
                     .withDescription(messageBundle.getMessage("msgErrorNotDefaultOpenPosition"))
+                    .withHideDelayMs(15000)
                     .show();
         } finally {
             return openPosition;
@@ -293,6 +297,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
                     .withDescription(messageBundle.getMessage("msgErrorNotFindSignEmailInteraction"))
+                    .withHideDelayMs(15000)
                     .show();
         } finally {
             return retInteraction;
@@ -311,6 +316,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
                     .withDescription(messageBundle.getMessage("msgErrorGettingMaxNumberInteraction"))
+                    .withHideDelayMs(15000)
                     .show();
             return null;
         }
@@ -350,14 +356,21 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             notifications.create()
                     .withType(Notifications.NotificationType.WARNING)
                     .withCaption(messageBundle.getMessage("msgInfo"))
-                    .withDescription("Письмо адресату " + toEmailField.getValue().getEmail() + " отослано успешно.")
+                    .withDescription(messageBundle.getMessage("msgLetterToRecipient")
+                            + " "
+                            + toEmailField.getValue().getEmail()
+                            + " "
+                            + messageBundle.getMessage("msgSendSucessfully"))
+                    .withHideDelayMs(5000)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .show();
         } catch (EmailException e) {
             draftEmailField.setValue(true);
             notifications.create()
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
-                    .withDescription("Письмо не отправлено: " + e.getCause())
+                    .withDescription(messageBundle.getMessage("msgMailNotSend")
+                            + e.getCause())
                     .show();
 
             commitChanges();

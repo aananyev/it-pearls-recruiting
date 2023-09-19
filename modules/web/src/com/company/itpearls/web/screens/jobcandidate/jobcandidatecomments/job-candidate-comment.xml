@@ -24,7 +24,17 @@
             </loader>
         </collection>
     </data>
-    <layout width="100%" height="100%" expand="commentScrollBox">
+    <layout width="100%"
+            height="100%"
+            expand="commentScrollBox"
+            spacing="true">
+        <button id="addCommentButton"
+                caption="msg://msgAddComment"
+                description="msg://msgAddCommentButtonDesc"
+                invoke="addCommentButtonInvoke"
+                icon="COMMENTING"
+                width="AUTO"
+                align="TOP_LEFT"/>
         <scrollBox id="commentScrollBox"
                    orientation="vertical"
                    width="100%"

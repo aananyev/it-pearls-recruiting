@@ -2548,14 +2548,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.positionType", subject = "columnGenerator")
     private Object openPositionsTablePositionTypeColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        HBoxLayout retObject = setComponentsToOpenPositionsTable(event,
-                event.getItem().getPositionType().getPositionEnName() != null
-                        ? event.getItem().getPositionType().getPositionEnName()
-                        : messageBundle.getMessage("msgNotNamePosition")
-                        + " / "
-                        + event.getItem().getPositionType().getPositionRuName() != null ?
-                        event.getItem().getPositionType().getPositionRuName()
-                        : messageBundle.getMessage("msgNotNamePosition"));
+        HBoxLayout retObject;
+        if (event.getItem().getPositionType() != null) {
+            retObject = setComponentsToOpenPositionsTable(event,
+                    event.getItem().getPositionType().getPositionEnName() != null
+                            ? event.getItem().getPositionType().getPositionEnName()
+                            : messageBundle.getMessage("msgNotNamePosition")
+                            + " / "
+                            + event.getItem().getPositionType().getPositionRuName() != null ?
+                            event.getItem().getPositionType().getPositionRuName()
+                            : messageBundle.getMessage("msgNotNamePosition"));
+        } else {
+            retObject = setComponentsToOpenPositionsTable(event,
+                    messageBundle.getMessage("msgNotNamePosition")
+                            + " / "
+                            + messageBundle.getMessage("msgNotNamePosition"));
+        }
+
         return retObject;
     }
 
