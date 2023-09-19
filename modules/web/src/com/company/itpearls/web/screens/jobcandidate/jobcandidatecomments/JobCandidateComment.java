@@ -123,10 +123,11 @@ public class JobCandidateComment extends Screen {
                                         Image image = uiComponents.create(Image.class);
                                         image.setWidth("50px");
                                         image.setHeight("50px");
-                                        image.setSource(FileDescriptorResource.class).setFileDescriptor(openPosition.getProjectName().getProjectLogo());
+                                        image.setSource(FileDescriptorResource.class)
+                                                .setFileDescriptor(openPosition.getProjectName().getProjectLogo());
                                         return image.getSource();
                                     });
-/*                                    openPositionLookupField.setOptionIconProvider(openPosition -> {
+                                    openPositionLookupField.setOptionIconProvider(openPosition -> {
                                         if (openPosition.getOpenClose() != null) {
                                             if (openPosition.getOpenClose()) {
                                                 return CubaIcon.MINUS_CIRCLE.source();
@@ -136,7 +137,7 @@ public class JobCandidateComment extends Screen {
                                         } else {
                                             return CubaIcon.PLUS_CIRCLE.source();
                                         }
-                                    }); */
+                                    });
 
                                     return openPositionLookupField;
                                 })
