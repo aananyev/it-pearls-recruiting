@@ -4,8 +4,11 @@ import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.web.JobCandidateCommentEvent;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
@@ -52,6 +55,10 @@ public class JobCandidateCommentFragment extends ScreenFragment {
     private Notifications notifications;
     @Inject
     private HBoxLayout innerBox;
+    @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
+    private Events events;
 
     public IteractionList getIteractionList() {
         return iteractionList;
@@ -212,6 +219,8 @@ public class JobCandidateCommentFragment extends ScreenFragment {
     }
 
     private void reloadInteractions() {
+        UserSession userSession = userSessionSource.getUserSession();
+        events.publish(new JobCandidateCommentEvent(this, userSession.getUser()));
     }
 
     public void addCommentButtonInvoke() {

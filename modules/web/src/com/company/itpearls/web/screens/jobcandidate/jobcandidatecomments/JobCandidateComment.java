@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.JobCandidateCommentEvent;
 import com.company.itpearls.web.screens.fragments.jobcandidatecommentfragment.JobCandidateCommentFragment;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
@@ -15,6 +16,8 @@ import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -186,5 +189,11 @@ public class JobCandidateComment extends Screen {
         getCompleteSetJobCandidateScreenFlag = false;
         candidateCommentDl.load();
         setJobCandidateCommentList();
+    }
+
+    @Order(15)
+    @EventListener
+    protected void onCommentRefresh(JobCandidateCommentEvent event) {
+        reloadInteractions();
     }
 }
