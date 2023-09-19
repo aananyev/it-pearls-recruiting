@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.fragments.jobcandidatecommentfragment;
 
+import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
@@ -129,6 +130,18 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                                 + " Re: "
                                                 + (String) closeEvent.getValue("comment"));
                                 /* TODO тут надо сделать отправку сообщения что кому-то прилетел коммент */
+                                events.publish(new UiNotificationEvent(this,
+                                        iteractionList.getRecrutier().getName()
+                                                + ": "
+                                                + closeEvent.getValue("comment")
+                                                + ". \n\n"
+                                                + messageBundle.getMessage("msgJobCandidate")
+                                                + ": "
+                                                + iteractionList.getCandidate().getFullName()
+                                                + "\n"
+                                                + messageBundle.getMessage("msgFrom")
+                                                + " "
+                                                + userSession.getUser().getName()));
                             }
                         }).show();
             });

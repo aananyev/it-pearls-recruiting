@@ -12,6 +12,7 @@ import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.app.main.MainScreen;
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
@@ -55,49 +56,72 @@ public class ExtMainScreen extends MainScreen {
                     "where e.date < :date " +
                     "and e.recruter = :recruter " +
                     "and e.endDate > :date";
+    static final String QUERY_LIST_RECRUTERS = "select e from sec$User e where e.active = true";
+
     @Inject
     private MessageBundle messageBundle;
 
     @EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {
-        if (!event.getMessage().startsWith(EVENT_NOTIFICATION_CLOSE_POSITION)) {
-            if (event.getMessage().startsWith(EVENT_NOTIFICATIOM_OPEN_POSITION)) {
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withDescription(event.getMessage())
-                        .withHideDelayMs(10000)
-                        .withPosition(Notifications.Position.TOP_RIGHT)
-                        .withCaption("INFO")
-                        .withStyleName("open-position-notification-open")
-                        .withContentMode(ContentMode.HTML)
-                        .show();
-            } else {
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withDescription(event.getMessage())
-                        .withHideDelayMs(5000)
-                        .withPosition(Notifications.Position.TOP_RIGHT)
-                        .withCaption("INFO")
-                        .withContentMode(ContentMode.HTML)
-                        .show();
+        List<User> users = dataManager.load(User.class)
+                .query(QUERY_LIST_RECRUTERS)
+                .list();
+        Boolean searchUser = false;
+
+        for (User user : users) {
+            if (event.getMessage().startsWith(user.getName() + ":")) {
+                if (event.getMessage().startsWith(userSession.getUser().getName())) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withDescription(event.getMessage())
+                            .withCaption(messageBundle.getMessage("msgReceivedComment"))
+                            .withType(Notifications.NotificationType.WARNING)
+                            .show();
+
+                    searchUser = true;
+                }
             }
-        } else {
-            if (event.getMessage().startsWith(EVENT_NOTIFICATION_REMINDER)) {
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withCaption(event.getMessage())
-                        .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                        .withDescription("")
-                        .withContentMode(ContentMode.HTML)
-                        .withStyleName("notification-for-me")
-                        .withHideDelayMs(-1)
-                        .show();
+        }
+
+        if (!searchUser) {
+            if (!event.getMessage().startsWith(EVENT_NOTIFICATION_CLOSE_POSITION)) {
+                if (event.getMessage().startsWith(EVENT_NOTIFICATIOM_OPEN_POSITION)) {
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withDescription(event.getMessage())
+                            .withHideDelayMs(10000)
+                            .withPosition(Notifications.Position.TOP_RIGHT)
+                            .withCaption("INFO")
+                            .withStyleName("open-position-notification-open")
+                            .withContentMode(ContentMode.HTML)
+                            .show();
+                } else {
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withDescription(event.getMessage())
+                            .withHideDelayMs(5000)
+                            .withPosition(Notifications.Position.TOP_RIGHT)
+                            .withCaption("INFO")
+                            .withContentMode(ContentMode.HTML)
+                            .show();
+                }
             } else {
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withDescription(event.getMessage())
-                        .withCaption("WARNING")
-                        .withPosition(Notifications.Position.TOP_RIGHT)
-                        .withHideDelayMs(10000)
-                        .withContentMode(ContentMode.HTML)
-                        .withStyleName("open-position-notification-close")
-                        .show();
+                if (event.getMessage().startsWith(EVENT_NOTIFICATION_REMINDER)) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption(event.getMessage())
+                            .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                            .withDescription("")
+                            .withContentMode(ContentMode.HTML)
+                            .withStyleName("notification-for-me")
+                            .withHideDelayMs(-1)
+                            .show();
+                } else {
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withDescription(event.getMessage())
+                            .withCaption("WARNING")
+                            .withPosition(Notifications.Position.TOP_RIGHT)
+                            .withHideDelayMs(10000)
+                            .withContentMode(ContentMode.HTML)
+                            .withStyleName("open-position-notification-close")
+                            .show();
+                }
             }
         }
     }
