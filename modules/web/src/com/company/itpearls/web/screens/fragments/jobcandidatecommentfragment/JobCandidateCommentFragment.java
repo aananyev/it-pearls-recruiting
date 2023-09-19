@@ -12,11 +12,13 @@ import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
@@ -60,6 +62,8 @@ public class JobCandidateCommentFragment extends ScreenFragment {
     private UserSessionSource userSessionSource;
     @Inject
     private Events events;
+    @Inject
+    private UiComponents uiComponents;
 
     public IteractionList getIteractionList() {
         return iteractionList;
@@ -246,8 +250,32 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                         InputParameter.stringParameter("comment")
                                 .withCaption(messageBundle.getMessage("msgInputComment"))
                                 .withRequired(true),
-                        InputParameter.entityParameter("openPosition", OpenPosition.class)
-                                .withCaption(messageBundle.getMessage("msgOpenPosition"))
+                        InputParameter.parameter("openPosition")
+                                .withField(() -> {
+                                    LookupField<OpenPosition> openPositionLookupField
+                                            = uiComponents.create(LookupField.of(OpenPosition.class));
+
+                                    openPositionLookupField.setOptionsList(
+                                            dataManager.load(OpenPosition.class)
+                                                    .query("select e from itpearls_OpenPosition e where not e.openClose = true")
+                                                    .list());
+                                    openPositionLookupField.setWidthFull();
+                                    openPositionLookupField
+                                            .setCaption(messageBundle.getMessage("msgOpenPosition"));
+                                    openPositionLookupField.setOptionIconProvider(openPosition -> {
+                                        if (openPosition.getOpenClose() != null) {
+                                            if (openPosition.getOpenClose()) {
+                                                return CubaIcon.MINUS_CIRCLE.source();
+                                            } else {
+                                                return CubaIcon.PLUS_CIRCLE.source();
+                                            }
+                                        } else {
+                                            return CubaIcon.PLUS_CIRCLE.source();
+                                        }
+                                    });
+
+                                    return openPositionLookupField;
+                                })
                 )
                 .withActions(DialogActions.OK_CANCEL)
                 .withCloseListener(closeEvent -> {

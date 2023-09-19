@@ -8,10 +8,15 @@ import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Fragments;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
+import com.haulmont.cuba.gui.components.FileDescriptorResource;
+import com.haulmont.cuba.gui.components.Image;
+import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.ScrollBoxLayout;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -51,6 +56,8 @@ public class JobCandidateComment extends Screen {
     private Notifications notifications;
     @Inject
     private Metadata metadata;
+    @Inject
+    private UiComponents uiComponents;
 
     public JobCandidate getJobCandidate() {
         return jobCandidate;
@@ -100,9 +107,39 @@ public class JobCandidateComment extends Screen {
                         InputParameter.stringParameter("comment")
                                 .withCaption(messageBundle.getMessage("msgInputComment"))
                                 .withRequired(true),
-                        InputParameter.entityParameter("openPosition", OpenPosition.class)
-                                .withCaption(messageBundle.getMessage("msgOpenPosition"))
-                                .withRequired(false)
+                        InputParameter.parameter("openPosition")
+                                .withField(() -> {
+                                    LookupField<OpenPosition> openPositionLookupField
+                                            = uiComponents.create(LookupField.of(OpenPosition.class));
+
+                                    openPositionLookupField.setOptionsList(
+                                            dataManager.load(OpenPosition.class)
+                                                    .query("select e from itpearls_OpenPosition e where not e.openClose = true")
+                                                    .list());
+                                    openPositionLookupField.setWidthFull();
+                                    openPositionLookupField
+                                            .setCaption(messageBundle.getMessage("msgOpenPosition"));
+                                    openPositionLookupField.setOptionImageProvider(openPosition -> {
+                                        Image image = uiComponents.create(Image.class);
+                                        image.setWidth("50px");
+                                        image.setHeight("50px");
+                                        image.setSource(FileDescriptorResource.class).setFileDescriptor(openPosition.getProjectName().getProjectLogo());
+                                        return image.getSource();
+                                    });
+/*                                    openPositionLookupField.setOptionIconProvider(openPosition -> {
+                                        if (openPosition.getOpenClose() != null) {
+                                            if (openPosition.getOpenClose()) {
+                                                return CubaIcon.MINUS_CIRCLE.source();
+                                            } else {
+                                                return CubaIcon.PLUS_CIRCLE.source();
+                                            }
+                                        } else {
+                                            return CubaIcon.PLUS_CIRCLE.source();
+                                        }
+                                    }); */
+
+                                    return openPositionLookupField;
+                                })
                 )
                 .withActions(DialogActions.OK_CANCEL)
                 .withCloseListener(closeEvent -> {
