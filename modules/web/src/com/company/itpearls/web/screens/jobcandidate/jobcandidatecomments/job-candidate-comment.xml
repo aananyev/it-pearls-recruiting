@@ -6,7 +6,10 @@
     <data>
         <collection id="candidateCommentDc" class="com.company.itpearls.entity.IteractionList">
             <view extends="iteractionList-view">
-
+                <property name="candidate" view="jobCandidate-view">
+                    <property name="fileImageFace" view="_local"/>
+                    <property name="personPosition" view="_local"/>
+                </property>
             </view>
             <loader id="candidateCommentDl" cacheable="true">
                 <query>
@@ -28,13 +31,35 @@
             height="100%"
             expand="commentScrollBox"
             spacing="true">
+        <hbox width="AUTO"
+              height="AUTO"
+              spacing="true">
+            <image id="faceImage"
+                   width="100px"
+                   height="AUTO"
+                   scaleMode="SCALE_DOWN"
+                   dataContainer="candidateCommentDc"
+                   property="candidate.fileImageFace"/>
+            <vbox spacing="true"
+                  width="AUTO"
+                  height="AUTO">
+                <label id="jobCandidateLabel"
+                       dataContainer="candidateCommentDc"
+                       property="candidate.fullName"
+                       stylename="h3"/>
+                <label id="jobCandidatePositionLabel"
+                       dataContainer="candidateCommentDc"
+                       property="candidate.personPosition"
+                       stylename="h4"/>
+            </vbox>
+        </hbox>
         <button id="addCommentButton"
                 caption="msg://msgAddComment"
                 description="msg://msgAddCommentButtonDesc"
                 invoke="addCommentButtonInvoke"
                 icon="COMMENTING"
                 width="AUTO"
-                align="TOP_LEFT"/>
+                align="TOP_RIGHT"/>
         <scrollBox id="commentScrollBox"
                    orientation="vertical"
                    width="100%"

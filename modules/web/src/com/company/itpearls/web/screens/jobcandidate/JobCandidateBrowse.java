@@ -196,12 +196,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
                 }));
 
-/*         actionsWithCandidateButton.addAction(new BaseAction("addCommentAction")
+         actionsWithCandidateButton.addAction(new BaseAction("addCommentAction")
                 .withIcon(CubaIcon.COMMENTING.source())
                 .withCaption(messageBundle.getMessage("msgComment"))
                 .withHandler(actionPerformedEvent -> {
 
-                })); */
+                }));
 
         actionsWithCandidateButton.addAction(new BaseAction("viewCommentAction")
                 .withIcon(CubaIcon.COMMENTS.source())
@@ -214,6 +214,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 }));
 
         actionsWithCandidateButton.getAction("addCommentAction").setEnabled(false);
+        actionsWithCandidateButton.getAction("addCommentAction").setVisible(false);
         actionsWithCandidateButton.getAction("viewCommentAction").setEnabled(true);
     }
 

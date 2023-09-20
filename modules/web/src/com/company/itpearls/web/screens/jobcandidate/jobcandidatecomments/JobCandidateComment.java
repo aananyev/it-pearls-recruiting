@@ -12,10 +12,7 @@ import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
-import com.haulmont.cuba.gui.components.FileDescriptorResource;
-import com.haulmont.cuba.gui.components.Image;
-import com.haulmont.cuba.gui.components.LookupField;
-import com.haulmont.cuba.gui.components.ScrollBoxLayout;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -58,6 +55,12 @@ public class JobCandidateComment extends Screen {
     private Metadata metadata;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private Image faceImage;
+    @Inject
+    private Label<String> jobCandidateLabel;
+    @Inject
+    private Label<Position> jobCandidatePositionLabel;
 
     public JobCandidate getJobCandidate() {
         return jobCandidate;
@@ -92,6 +95,16 @@ public class JobCandidateComment extends Screen {
                 candidateCommentDl.setParameter("jobCandidate", this.jobCandidate);
                 candidateCommentDl.load();
                 completeSetJobCandidateFlag = true;
+
+                if (candidateCommentDc.getItems().get(0).getCandidate().getFileImageFace() != null) {
+                    faceImage.setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(candidateCommentDc.getItems().get(0).getCandidate().getFileImageFace());
+                } else {
+                    faceImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                }
+
+                jobCandidateLabel.setValue(candidateCommentDc.getItems().get(0).getCandidate().getFullName());
+                jobCandidatePositionLabel.setValue(candidateCommentDc.getItems().get(0).getCandidate().getPersonPosition());
             }
         }
     }
