@@ -34,6 +34,9 @@
                                 <c:where>e.inProcess = :actives</c:where>
                             </c:jpql>
                             <c:jpql>
+                                <c:where>e.removedFromReserve = :removedFromReserve</c:where>
+                            </c:jpql>
+                            <c:jpql>
                                 <c:where>e.jobCandidate.iteractionList in :iteractionList</c:where>
                             </c:jpql>
                         </and>
@@ -156,6 +159,8 @@
                 <checkBox id="inNotWorkCheckBox"
                           visible="false"
                           caption="msg://msgInWork"/>
+                <checkBox id="removedFromReserveCheckBox"
+                          caption="msg://msgRemovedFromReserve"/>
             </hbox>
         </groupBox>
         <hbox id="lookupActions" spacing="true" visible="false">

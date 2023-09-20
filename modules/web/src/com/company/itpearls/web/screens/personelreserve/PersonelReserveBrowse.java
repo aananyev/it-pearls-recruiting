@@ -93,6 +93,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     @Inject
     private CollectionLoader<PersonelReserve> personelReservesDl;
     private String personelReserveCloseComment;
+    @Inject
+    private CheckBox removedFromReserveCheckBox;
 
     @Subscribe("personelReservesTable")
     public void onPersonelReservesTableSelection(DataGrid.SelectionEvent<PersonelReserve> event) {
@@ -130,6 +132,18 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         allCandidatesCheckBox.setValue(true);
         activesCheckBox.setValue(true);
         inNotWorkCheckBox.setValue(true);
+        removedFromReserveCheckBox.setValue(false);
+    }
+
+    @Subscribe("removedFromReserveCheckBox")
+    public void onRemovedFromReserveCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (removedFromReserveCheckBox.getValue()) {
+            personelReservesDl.removeParameter("removedFromReserve");
+        } else {
+            personelReservesDl.setParameter("removedFromReserve", false);
+        }
+
+        personelReservesDl.load();
     }
 
     @Install(to = "personelReservesTable.fileImageFace", subject = "columnGenerator")
@@ -952,7 +966,11 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedAction -> {
                     personelReservesTable.setSelected(event.getItem());
                     selectForAction();
-                    personelReservesTable.scrollTo(event.getItem());
+                    try {
+                        personelReservesTable.scrollTo(event.getItem());
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
                 }));
 
         actionButton.addAction(new BaseAction("sendEmailAction")

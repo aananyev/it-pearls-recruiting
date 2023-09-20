@@ -61,6 +61,8 @@ public class PersonelReserveEdit extends StandardEditor<PersonelReserve> {
     public void onBeforeShow(BeforeShowEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             dateField.setValue(new Date());
+            getEditedEntity().setInProcess(true);
+            getEditedEntity().setRemovedFromReserve(false);
         }
 
         setCandidatePicImage();
