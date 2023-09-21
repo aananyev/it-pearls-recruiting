@@ -3443,10 +3443,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (vacancyPopupPickerField.getValue() != null) {
                 comment.setVacancy(vacancyPopupPickerField.getValue());
             } else {
-                comment.setVacancy(dataManager
-                        .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'",
-                                OpenPosition.class)
-                        .one());
+                try {
+                    comment.setVacancy(dataManager
+                            .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'",
+                                    OpenPosition.class)
+                            .one());
+                } catch (Exception e) {
+                    notifications.create(Notifications.NotificationType.ERROR)
+                            .withType(Notifications.NotificationType.ERROR)
+                            .withCaption(messageBundle.getMessage("msgError"))
+                            .withDescription(messageBundle.getMessage("msgNotFindDefaultOpenPosition"))
+                            .withHideDelayMs(15000)
+                            .show();
+                }
             }
 
             jobCandidateDc.getItem().getIteractionList().add(comment);

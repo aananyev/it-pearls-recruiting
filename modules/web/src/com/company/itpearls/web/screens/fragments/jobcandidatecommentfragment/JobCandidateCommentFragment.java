@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.fragments.jobcandidatecommentfragment;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
@@ -25,6 +26,8 @@ import com.haulmont.cuba.security.global.UserSession;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @UiController("itpearls_JobCandidateCommentFragment")
 @UiDescriptor("job-candidate-comment-fragment.xml")
@@ -64,6 +67,10 @@ public class JobCandidateCommentFragment extends ScreenFragment {
     private Events events;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private Label<String> starLabel;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
 
     public IteractionList getIteractionList() {
         return iteractionList;
@@ -84,6 +91,10 @@ public class JobCandidateCommentFragment extends ScreenFragment {
             if (iteractionList.getVacancy() != null) {
                 vacancyLabel.setValue(!iteractionList.getVacancy().getVacansyName().equals("Default")
                         ? iteractionList.getVacancy().getVacansyName() : "");
+            }
+
+            if (iteractionList.getRating() != null) {
+                starLabel.setValue(starsAndOtherService.setStars(iteractionList.getRating() + 1));
             }
 
             if (iteractionList.getComment() != null) {
@@ -121,15 +132,35 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                         .withRequired(true),
                                 InputParameter.entityParameter("openPosition", OpenPosition.class)
                                         .withCaption(messageBundle.getMessage("msgOpenPosition"))
-                                        .withDefaultValue(iteractionList.getVacancy())
+                                        .withDefaultValue(iteractionList.getVacancy()),
+                                InputParameter.parameter("rating")
+                                        .withField(() -> {
+                                            LookupField<Integer> ratingField = uiComponents.create(LookupField.class);
+                                            ratingField.setWidthFull();
+                                            ratingField.setCaption(messageBundle.getMessage("msgRating"));
+
+                                            Map<String, Integer> map = new LinkedHashMap<>();
+                                            map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
+                                            map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
+                                            map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
+                                            map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
+                                            map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+
+                                            ratingField.setOptionsMap(map);
+
+                                            return ratingField;
+                                        })
+                                        .withRequired(true)
                         )
                         .withActions(DialogActions.OK_CANCEL)
                         .withCloseListener(closeEvent -> {
                             if (closeEvent
                                     .getCloseAction()
                                     .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                                Integer rating = closeEvent.getValue("rating");
                                 createComment(iteractionList,
                                         closeEvent.getValue("openPosition"),
+                                        rating,
                                         iteractionList.getRecrutier().getName()
                                                 + " Re: "
                                                 + (String) closeEvent.getValue("comment"));
@@ -159,21 +190,41 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                 .withCaption(messageBundle.getMessage("msgComment"))
                                 .withRequired(true),
                         InputParameter.entityParameter("openPosition", OpenPosition.class)
-                                .withDefaultValue(iteractionList.getVacancy()))
+                                .withDefaultValue(iteractionList.getVacancy()),
+                        InputParameter.parameter("rating")
+                                .withField(() -> {
+                                    LookupField<Integer> ratingField = uiComponents.create(LookupField.class);
+                                    ratingField.setWidthFull();
+                                    ratingField.setCaption(messageBundle.getMessage("msgRating"));
+
+                                    Map<String, Integer> map = new LinkedHashMap<>();
+                                    map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
+                                    map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
+                                    map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
+                                    map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
+                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+
+                                    ratingField.setOptionsMap(map);
+
+                                    return ratingField;
+                                })
+                                .withRequired(true)
+                )
                 .withActions(DialogActions.OK_CANCEL)
                 .withCloseListener(inputDialogCloseEvent -> {
                     if (inputDialogCloseEvent.closedWith(DialogOutcome.OK)) {
                         String inputComment = inputDialogCloseEvent.getValue("comment");
                         OpenPosition inputOpenPosition = inputDialogCloseEvent.getValue("openPosition");
 
-                        createComment(iteractionList, inputOpenPosition, inputComment);
+                        Integer rating = inputDialogCloseEvent.getValue("rating");
+                        createComment(iteractionList, inputOpenPosition, rating, inputComment);
                     }
 
                 })
                 .show();
     }
 
-    private void createComment(IteractionList iteractionList, OpenPosition openPosition, String inputComment) {
+    private void createComment(IteractionList iteractionList, OpenPosition openPosition, Integer rating, String inputComment) {
         Iteraction iteractionComment = null;
 
         try {
@@ -192,6 +243,7 @@ public class JobCandidateCommentFragment extends ScreenFragment {
             numberInteraction = numberInteraction.add(BigDecimal.ONE);
 
             IteractionList comment = metadata.create(IteractionList.class);
+            comment.setRating(rating);
             if (iteractionList != null) {
                 comment.setCandidate(iteractionList.getCandidate());
             } else {
@@ -214,7 +266,6 @@ public class JobCandidateCommentFragment extends ScreenFragment {
             comment.setRecrutierName(userSession.getUser().getName());
             comment.setCurrentPriority(0);
             comment.setIteractionType(iteractionComment);
-            comment.setRating(0);
             comment.setNumberIteraction(numberInteraction);
 
             if (openPosition != null) {
@@ -254,6 +305,7 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                 .withField(() -> {
                                     LookupField<OpenPosition> openPositionLookupField
                                             = uiComponents.create(LookupField.of(OpenPosition.class));
+                                    openPositionLookupField.setPopupWidth("800px");
 
                                     openPositionLookupField.setOptionsList(
                                             dataManager.load(OpenPosition.class)
@@ -275,15 +327,35 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                     });
 
                                     return openPositionLookupField;
+                                }),
+                        InputParameter.parameter("rating")
+                                .withField(() -> {
+                                    LookupField<Integer> ratingField = uiComponents.create(LookupField.class);
+                                    ratingField.setWidthFull();
+                                    ratingField.setCaption(messageBundle.getMessage("msgRating"));
+
+                                    Map<String, Integer> map = new LinkedHashMap<>();
+                                    map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
+                                    map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
+                                    map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
+                                    map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
+                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+
+                                    ratingField.setOptionsMap(map);
+
+                                    return ratingField;
                                 })
+                                .withRequired(true)
                 )
                 .withActions(DialogActions.OK_CANCEL)
                 .withCloseListener(closeEvent -> {
                     if (closeEvent
                             .getCloseAction()
                             .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                        Integer rating = closeEvent.getValue("rating");
                         createComment(null,
                                 closeEvent.getValue("openPosition"),
+                                rating,
                                 "Re: " + (String) closeEvent.getValue("comment"));
                     }
                 })

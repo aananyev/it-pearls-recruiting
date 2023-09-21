@@ -20,9 +20,14 @@
                        stylename="tailName"/>
                 <label id="vacancyLabel"
                        stylename="tailVacancy"/>
-                <label id="textLabel"
-                       align="BOTTOM_RIGHT"
-                       stylename="table-wordwrap"/>
+                <hbox spacing="true">
+                    <label id="starLabel"
+                           width="AUTO"
+                           align="BOTTOM_RIGHT"/>
+                    <label id="textLabel"
+                           align="BOTTOM_RIGHT"
+                           stylename="table-wordwrap"/>
+                </hbox>
                 <label id="dateLabel"
                        align="BOTTOM_RIGHT"
                        stylename="tailDate"/>

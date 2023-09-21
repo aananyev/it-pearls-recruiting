@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments;
 
+import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.JobCandidateCommentEvent;
 import com.company.itpearls.web.screens.fragments.jobcandidatecommentfragment.JobCandidateCommentFragment;
@@ -24,6 +25,8 @@ import org.springframework.core.annotation.Order;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @UiController("itpearls_JobCandidateComment")
 @UiDescriptor("job-candidate-comment.xml")
@@ -61,6 +64,8 @@ public class JobCandidateComment extends Screen {
     private Label<String> jobCandidateLabel;
     @Inject
     private Label<Position> jobCandidatePositionLabel;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
 
     public JobCandidate getJobCandidate() {
         return jobCandidate;
@@ -130,6 +135,7 @@ public class JobCandidateComment extends Screen {
                                                     .query("select e from itpearls_OpenPosition e where not e.openClose = true")
                                                     .list());
                                     openPositionLookupField.setWidthFull();
+                                    openPositionLookupField.setPopupWidth("800px");
                                     openPositionLookupField
                                             .setCaption(messageBundle.getMessage("msgOpenPosition"));
                                     openPositionLookupField.setOptionImageProvider(openPosition -> {
@@ -153,15 +159,35 @@ public class JobCandidateComment extends Screen {
                                     });
 
                                     return openPositionLookupField;
+                                }),
+                        InputParameter.parameter("rating")
+                                .withField(() -> {
+                                    LookupField<Integer> ratingField = uiComponents.create(LookupField.class);
+                                    ratingField.setWidthFull();
+                                    ratingField.setCaption(messageBundle.getMessage("msgRating"));
+
+                                    Map<String, Integer> map = new LinkedHashMap<>();
+                                    map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
+                                    map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
+                                    map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
+                                    map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
+                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+
+                                    ratingField.setOptionsMap(map);
+
+                                    return ratingField;
                                 })
+                                .withRequired(true)
                 )
                 .withActions(DialogActions.OK_CANCEL)
                 .withCloseListener(closeEvent -> {
                     if (closeEvent
                             .getCloseAction()
                             .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                        Integer rating = closeEvent.getValue("rating");
                         createComment(null,
                                 closeEvent.getValue("openPosition"),
+                                rating,
                                 "Re: " + (String) closeEvent.getValue("comment"));
                     }
                 })
@@ -169,7 +195,10 @@ public class JobCandidateComment extends Screen {
 
     }
 
-    private void createComment(IteractionList iteractionList, OpenPosition openPosition, String inputComment) {
+    private void createComment(IteractionList iteractionList,
+                               OpenPosition openPosition,
+                               Integer rating,
+                               String inputComment) {
         Iteraction iteractionComment = null;
 
         try {
@@ -188,6 +217,7 @@ public class JobCandidateComment extends Screen {
             numberInteraction = numberInteraction.add(BigDecimal.ONE);
 
             IteractionList comment = metadata.create(IteractionList.class);
+            comment.setRating(rating);
             if (iteractionList != null) {
                 comment.setCandidate(iteractionList.getCandidate());
             } else {
@@ -197,8 +227,26 @@ public class JobCandidateComment extends Screen {
             }
 
             comment.setDateIteraction(new Date());
+            if (openPosition == null) {
+                try {
+                    openPosition = dataManager
+                            .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'",
+                                    OpenPosition.class)
+                            .one();
+                } catch (Exception e) {
+                    notifications.create(Notifications.NotificationType.ERROR)
+                            .withType(Notifications.NotificationType.ERROR)
+                            .withCaption(messageBundle.getMessage("msgError"))
+                            .withDescription(messageBundle.getMessage("msgNotFindDefaultOpenPosition"))
+                            .withHideDelayMs(15000)
+                            .show();
+                }
+            }
+
+
             comment.setCurrentOpenClose(openPosition.getOpenClose() != null ?
                     openPosition.getOpenClose() : false);
+
             comment.setRecrutier((ExtUser) userSession.getUser());
 
             if (inputComment == null) {
@@ -210,7 +258,6 @@ public class JobCandidateComment extends Screen {
             comment.setRecrutierName(userSession.getUser().getName());
             comment.setCurrentPriority(0);
             comment.setIteractionType(iteractionComment);
-            comment.setRating(0);
             comment.setNumberIteraction(numberInteraction);
 
             if (openPosition != null) {
