@@ -3739,4 +3739,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retBox.add(image);
         return retBox;
     }
+
+    public String convertToText(String text) {
+        String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
+        String break_line = "break_line";
+
+        String str = text
+                .replaceAll("<br>", break_line + break_line)
+                .replaceAll("<li>", "<li> - ")
+                .replaceAll("</p>", "</p>" + break_line + break_line)
+                .replaceAll("</li>", "</li>" + break_line)
+                .replaceAll("</dd>", "</dd>" + break_line)
+                .replaceAll("</dt>", "</dt>" + break_line)
+                .replaceAll("</dl>", "</dl>" + break_line)
+                .replaceAll("</div>", "</div>" + break_line + break_line);
+        str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
+
+        return str.replaceAll("\n", breakLine[0]);
+    }
 }

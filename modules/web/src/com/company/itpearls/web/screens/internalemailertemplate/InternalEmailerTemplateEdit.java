@@ -4,9 +4,11 @@ import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
@@ -44,6 +46,14 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private CollectionLoader<InternalEmailTemplate> emailTemplatesDl;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private CheckBox onlyMySubscribeCheckBox;
+    @Inject
+    private CollectionContainer<InternalEmailTemplate> emailTemplatesDc;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private CheckBox showSharedTemplatesCheckBox;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -53,6 +63,22 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
         initEmailTemplateField();
+        setOnlyMySubscribeCheckBox();
+        setShowSharedTemplatesCheckBox();
+    }
+
+    private void setShowSharedTemplatesCheckBox() {
+        showSharedTemplatesCheckBox.addValueChangeListener(booleanValueChangeEvent -> {
+            if (booleanValueChangeEvent.getValue()) {
+                emailTemplatesDl.setParameter("shareTemplate", true);
+                emailTemplatesDl.removeParameter("templateAuthor");
+            } else {
+                emailTemplatesDl.removeParameter("shareTemplate");
+                emailTemplatesDl.setParameter("templateAuthor", userSession.getUser());
+            }
+
+            emailTemplatesDl.load();
+        });
     }
 
     private void initEmailTemplateField() {
@@ -92,24 +118,29 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     @Subscribe("emailTemplateField")
     public void onEmailTemplateFieldValueChange(HasValue.ValueChangeEvent<InternalEmailTemplate> event) {
         if (event.getValue() != null) {
-            Boolean flag = false;
-            if (bodyEmailField.getValue() != null) {
-                if (!bodyEmailField.getValue().equals("")) {
-                    createTextMessage();
+            reloadTemplate();
+        }
+    }
 
-                    flag = true;
-                }
-            }
+    private void reloadTemplate() {
+        Boolean flag = false;
 
-            if (!flag) {
-                dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
-                        .withCaption(messageBundle.getMessage("msgWarning"))
-                        .withMessage(messageBundle.getMessage("msgReplaceTextMessage"))
-                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                        .withHandler(e -> createTextMessage()),
-                                new DialogAction(DialogAction.Type.NO))
-                        .show();
+        if (bodyEmailField.getValue() != null) {
+            if (!bodyEmailField.getValue().equals("")) {
+                createTextMessage();
+
+                flag = true;
             }
+        }
+
+        if (!flag) {
+            dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(messageBundle.getMessage("msgReplaceTextMessage"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                    .withHandler(e -> createTextMessage()),
+                            new DialogAction(DialogAction.Type.NO))
+                    .show();
         } else {
             dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
                     .withCaption(messageBundle.getMessage("msgWarning"))
@@ -121,6 +152,7 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                     .show();
         }
     }
+
 
     private void createTextMessage() {
         bodyEmailField.setValue(emailGenerationService
@@ -188,6 +220,8 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                                         new DialogAction((DialogAction.Type.NO)))
                                 .show();
                     }
+
+                    reloadTemplate();
                 })
                 .build()
                 .show();
@@ -202,5 +236,43 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
         }
 
         return iteractionList;
+    }
+
+
+    private void setOnlyMySubscribeCheckBox() {
+        onlyMySubscribeCheckBox.setValue(true);
+        emailTemplatesDl.setParameter("subscriber", userSession.getUser());
+        emailTemplatesDl.load();
+
+        if (emailTemplatesDc.getItems().size() == 0) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withHideDelayMs(10000)
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+        }
+
+        onlyMySubscribeCheckBox.addValueChangeListener(e -> {
+            if (e.getValue()) {
+                emailTemplatesDl.setParameter("subscriber", userSession.getUser());
+                emailTemplatesDl.load();
+
+                if (emailTemplatesDc.getItems().size() == 0) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption(messageBundle.getMessage("msgWarning"))
+                            .withDescription(messageBundle.getMessage("msgNoSubscribeVacansies"))
+                            .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                            .withHideDelayMs(10000)
+                            .withType(Notifications.NotificationType.WARNING)
+                            .show();
+                }
+            } else {
+                emailTemplatesDl.removeParameter("subscriber");
+                emailTemplatesDl.load();
+            }
+
+        });
     }
 }

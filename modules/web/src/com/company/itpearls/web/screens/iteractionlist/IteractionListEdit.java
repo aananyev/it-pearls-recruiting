@@ -542,7 +542,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     if (getEditedEntity().getIteractionType().getTextEmailToSend() != null) {
                         if (getEditedEntity().getCandidate().getEmail() != null) {
 
-                            String message = preparingMessage(getEditedEntity());
+                            String message = preparingMessage(getEditedEntity().getIteractionType().getTextEmailToSend(), getEditedEntity().getCandidate(), getEditedEntity().getVacancy(), userSession.getUser());
 
                             screenBuilders.editor(InternalEmailer.class, this)
                                     .withScreenClass(InternalEmailerEdit.class)
@@ -560,6 +560,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         }
+    }
+
+    private String preparingMessage(String textEmailToSend, JobCandidate candidate, OpenPosition vacancy, User user) {
+        return emailGenerationService.preparingMessage(textEmailToSend, candidate, vacancy, (ExtUser) user);
     }
 
     private String preparingMessage(IteractionList newsItem) {

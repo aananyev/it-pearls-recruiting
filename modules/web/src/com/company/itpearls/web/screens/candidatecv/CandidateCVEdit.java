@@ -47,6 +47,7 @@ import java.util.*;
 @LoadDataBeforeShow
 public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
+
     private static final String NEED_LETTER_NOTIFICATION = "НЕОБХОДИМО ЗАПОЛНИТЬ ШАБЛОН В СОПРОВОДИТЕЛЬНОМ ПИСЬМЕ " +
             "ПО ТРЕБОВАНИЮ ЗАКАЗЧИКА";
     private static final String EXTENSION_PDF = "pdf";
@@ -120,10 +121,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private FileUploadingAPI fileUploadingAPI;
     @Inject
     private DataManager dataManager;
-    @Inject
-    private InstanceContainer<CandidateCV> candidateCVDc;
-    @Inject
-    private Metadata metadata;
     @Inject
     private DataContext dataContext;
     @Inject
@@ -416,6 +413,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setOnlyMySubscribeCheckBox();
+        convertTextCV();
 
 /*        if (candidateCVRichTextArea.getValue() != null) {
             textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
@@ -457,6 +455,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         setLetterRecommendation();
 //        setVisibleLogo();
         setCandidatePicImage();
+    }
+
+    private void convertTextCV() {
+        convertToText();
     }
 
     @Subscribe
@@ -828,6 +830,24 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
     }
 
+    public String convertToText(String text) {
+        String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
+        String break_line = "break_line";
+
+        String str = text
+                .replaceAll("<br>", break_line + break_line)
+                .replaceAll("<li>", "<li> - ")
+                .replaceAll("</p>", "</p>" + break_line + break_line)
+                .replaceAll("</li>", "</li>" + break_line)
+                .replaceAll("</dd>", "</dd>" + break_line)
+                .replaceAll("</dt>", "</dt>" + break_line)
+                .replaceAll("</dl>", "</dl>" + break_line)
+                .replaceAll("</div>", "</div>" + break_line + break_line);
+        str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
+
+        return str.replaceAll("\n", breakLine[0]);
+    }
+
     public void loadToCVTextArea() {
         Document doc = null;
         try {
@@ -838,6 +858,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             Elements elements = doc.select("div#mw-content-text.mw-content-ltr"); */
             String retStr = webLoadService.getCVWebPage(textFieldIOriginalCV.getValue());
+            String text = convertToText(retStr);
 
             if (candidateCVRichTextArea.getValue() == null) {
                 candidateCVRichTextArea.setValue(retStr.replaceAll("\n", breakLine[0])
@@ -846,7 +867,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
                         .withMessage("Заменить старый текст резюме на новый?")
                         .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                            candidateCVRichTextArea.setValue(retStr.replaceAll("\n", breakLine[0]));
+                            candidateCVRichTextArea.setValue(text.replaceAll("\n", breakLine[0]));
                         }), new DialogAction(DialogAction.Type.NO))
                         .show();
             }
@@ -862,28 +883,30 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     Boolean flagHTML = true;
 
     public void convertToText() {
-        if (flagHTML) {
-            String break_line = "break_line";
+        if (candidateCVRichTextArea.getValue() != null) {
+            if (flagHTML) {
+                String break_line = "break_line";
 
-            String str = candidateCVRichTextArea.getValue()
-                    .replaceAll("<br>", break_line + break_line)
-                    .replaceAll("<li>", "<li> - ")
-                    .replaceAll("</p>", "</p>" + break_line + break_line)
-                    .replaceAll("</li>", "</li>" + break_line)
-                    .replaceAll("</dd>", "</dd>" + break_line)
-                    .replaceAll("</dt>", "</dt>" + break_line)
-                    .replaceAll("</dl>", "</dl>" + break_line)
-                    .replaceAll("</div>", "</div>" + break_line + break_line);
-            str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
+                String str = candidateCVRichTextArea.getValue()
+                        .replaceAll("<br>", break_line + break_line)
+                        .replaceAll("<li>", "<li> - ")
+                        .replaceAll("</p>", "</p>" + break_line + break_line)
+                        .replaceAll("</li>", "</li>" + break_line)
+                        .replaceAll("</dd>", "</dd>" + break_line)
+                        .replaceAll("</dt>", "</dt>" + break_line)
+                        .replaceAll("</dl>", "</dl>" + break_line)
+                        .replaceAll("</div>", "</div>" + break_line + break_line);
+                str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
 
-            candidateCVRichTextArea.setValue(str.replaceAll("\n", breakLine[0]));
-            flagHTML = false;
-        } else {
-            candidateCVRichTextArea.setValue(getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]));
-            flagHTML = true;
+                candidateCVRichTextArea.setValue(str.replaceAll("\n", breakLine[0]));
+                flagHTML = false;
+            } else {
+                candidateCVRichTextArea.setValue(getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]));
+                flagHTML = true;
+            }
+
+            setColorHighlightingCompetencies();
         }
-
-        setColorHighlightingCompetencies();
     }
 
 
