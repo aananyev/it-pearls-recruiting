@@ -68,15 +68,15 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-
+    <layout expand="editActions"
+            spacing="true">
         <suggestionPickerField id="jobCandidateField"
                                inputPrompt="mainMsg://msgStartInput"
                                minSearchStringLength="3"
                                rowspan="1"
                                colspan="1"
                                caption="msg://msgCandidate"
-                               width="100%"
+                               width="50%"
                                required="true"
                                dataContainer="personelReserveDc"
                                property="jobCandidate">
@@ -96,39 +96,38 @@
             </query>
         </suggestionPickerField>
         <hbox width="100%" spacing="true" expand="form">
-        <form id="form" dataContainer="personelReserveDc">
-            <column width="350px">
-                <lookupPickerField id="reactutierField" optionsContainer="reactutiersDc" property="recruter"/>
-                <dateField id="dateField" property="date"/>
-                <textField id="termOfPlacementField" property="termOfPlacement"/>
-                <dateField id="endDateField" property="endDate"/>
-                <lookupPickerField id="personPositionField" optionsContainer="personPositionsDc"
-                                   property="personPosition"/>
-                <lookupPickerField id="openPositionField" optionsContainer="openPositionsDc" property="openPosition">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="open" type="picker_open"/>
-                        <action id="clear" type="picker_clear"/>
-                    </actions>
-                </lookupPickerField>
-                <checkBox id="onlyMySubscribeCheckBox"
-                          align="TOP_RIGHT"
-                          width="AUTO"
-                          description="msg://msgOnlyMySebscribeDec"
-                          caption="msg://msgOnlyMySubscribe"/>
-            </column>
-        </form>
+            <form id="form"
+                  dataContainer="personelReserveDc"
+                  width="50%">
+                <column width="50%">
+                    <lookupPickerField id="personPositionField"
+                                       optionsContainer="personPositionsDc"
+                                       property="personPosition"/>
+                    <dateField id="dateField"
+                               property="date"/>
+                    <dateField id="endDateField"
+                               property="endDate"/>
+                    <textField id="termOfPlacementField"
+                               visible="true"
+                               property="termOfPlacement"/>
+                    <lookupPickerField id="reactutierField"
+                                       optionsContainer="reactutiersDc"
+                                       property="recruter"/>
+                </column>
+            </form>
             <vbox id="picVBox" width="200px">
                 <image id="candidatePic"
                        dataContainer="personelReserveDc"
                        property="jobCandidate.fileImageFace"
                        width="100%"
+                       height="100%"
                        visible="true"
                        align="TOP_RIGHT"
                        stylename="widget-border"
                        scaleMode="FILL"/>
                 <image id="candidateDefaultPic"
                        width="100%"
+                       height="100%"
                        visible="false"
                        align="TOP_RIGHT"
                        stylename="widget-border"
@@ -137,6 +136,27 @@
                 </image>
             </vbox>
         </hbox>
+        <vbox spacing="true"
+              stylename="card"
+              width="50%"
+              margin="true">
+            <lookupPickerField id="openPositionField"
+                               caption="msg://msgOpenPosition"
+                               optionsContainer="openPositionsDc"
+                               width="100%"
+                               property="openPosition">
+                <actions>
+                    <action id="lookup" type="picker_lookup"/>
+                    <action id="open" type="picker_open"/>
+                    <action id="clear" type="picker_clear"/>
+                </actions>
+            </lookupPickerField>
+            <checkBox id="onlyMySubscribeCheckBox"
+                      align="TOP_RIGHT"
+                      width="AUTO"
+                      description="msg://msgOnlyMySebscribeDec"
+                      caption="msg://msgOnlyMySubscribe"/>
+        </vbox>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>

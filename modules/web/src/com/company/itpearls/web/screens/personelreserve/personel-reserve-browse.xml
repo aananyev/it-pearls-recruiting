@@ -108,6 +108,8 @@
                         property="date"
                         width="100px"/>
                 <column id="termOfPlacement"
+                        collapsible="true"
+                        collapsed="true"
                         property="termOfPlacement"
                         width="150px"/>
                 <column id="endDate"

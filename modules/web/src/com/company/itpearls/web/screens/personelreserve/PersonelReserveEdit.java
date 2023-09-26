@@ -1,15 +1,16 @@
 package com.company.itpearls.web.screens.personelreserve;
 
-import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.*;
 import com.google.gson.GsonBuilder;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.PersonelReserve;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
@@ -46,6 +47,12 @@ public class PersonelReserveEdit extends StandardEditor<PersonelReserve> {
     private MessageBundle messageBundle;
     @Inject
     private DateField<Date> endDateField;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private LookupPickerField<ExtUser> reactutierField;
+    @Inject
+    private LookupPickerField<Position> personPositionField;
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
@@ -77,11 +84,64 @@ public class PersonelReserveEdit extends StandardEditor<PersonelReserve> {
                 if (dateField.getValue() != null) {
                     GregorianCalendar dateCalendar = new GregorianCalendar();
                     dateCalendar.setTime(dateField.getValue());
-                    dateCalendar.add(1, Calendar.MONTH);
+                    dateCalendar.add(Calendar.MONTH, 1);
 
                     endDateField.setValue(dateCalendar.getTime());
                 }
             }
+
+            if (reactutierField.getValue() == null) {
+                reactutierField.setValue((ExtUser) userSession.getUser());
+            }
+        }
+
+        dateField.addValidator(value -> {
+            if (value != null) {
+                if (value != null && endDateField.getValue() != null && value.after(endDateField.getValue())) {
+                    throw new ValidationException(messageBundle.getMessage("msgStartDateAfterEndDate"));
+                }
+            } else {
+                throw new ValidationException(messageBundle.getMessage("msgStartDateIsNull"));
+            }
+        });
+
+        endDateField.addValidator(value -> {
+            if (value != null) {
+                if (dateField.getValue() != null && dateField.getValue().after(value)) {
+                    throw new ValidationException(messageBundle.getMessage("msgStartDateAfterEndDate"));
+                }
+            } else {
+                throw new ValidationException(messageBundle.getMessage("msgEndDateIsNull"));
+            }
+        });
+    }
+
+    @Subscribe("jobCandidateField")
+    public void onJobCandidateFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
+       if (event.getValue() != null) {
+           if (event.getValue().getPersonPosition() != null) {
+               personPositionField.setValue(event.getValue().getPersonPosition());
+           }
+       }
+    }
+
+
+    @Subscribe("dateField")
+    public void onDateFieldValueChange(HasValue.ValueChangeEvent<Date> event) {
+        if (endDateField.getValue() == null) {
+            dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                    .withType(Dialogs.MessageType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(messageBundle.getMessage("msgSetEndDate"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        GregorianCalendar calendar = new GregorianCalendar();
+
+                        calendar.setTime(dateField.getValue());
+                        calendar.add(Calendar.MONTH, 1);
+                        endDateField.setValue(calendar.getTime());
+
+                    }), new DialogAction(DialogAction.Type.NO))
+                    .show();
         }
     }
 
@@ -156,5 +216,4 @@ public class PersonelReserveEdit extends StandardEditor<PersonelReserve> {
             }
         });
     }
-
 }
