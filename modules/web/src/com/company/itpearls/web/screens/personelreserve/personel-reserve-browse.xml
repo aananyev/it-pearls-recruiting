@@ -40,7 +40,7 @@
                                 <c:where>e.jobCandidate.iteractionList in :iteractionList</c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>:currentDate between e.date and e.endDate</c:where>
+                                <c:where>(:currentDate between e.date and e.endDate or e.date is null and @dateAfter(e.endDate, :currentDate))</c:where>
                             </c:jpql>
                         </and>
                     </condition>

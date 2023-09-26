@@ -227,38 +227,40 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
             for (IteractionList iteractionList :
                     entity.getItem().getJobCandidate().getIteractionList()) {
-                if (iteractionList
-                        .getDateIteraction()
-                        .after(entity.getItem().getDate())) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+                if (entity.getItem().getDate() != null) {
+                    if (iteractionList
+                            .getDateIteraction()
+                            .after(entity.getItem().getDate())) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
 
-                    retLabel.setStyleName("pic-center-large-red");
-                    retLabel.setIconFromSet(CubaIcon.SIGN_IN);
-                    String vacancy = "";
+                        retLabel.setStyleName("pic-center-large-red");
+                        retLabel.setIconFromSet(CubaIcon.SIGN_IN);
+                        String vacancy = "";
 
-                    if (iteractionList.getVacancy() != null) {
-                        if (iteractionList.getVacancy().getVacansyName() != null) {
-                            iteractionList.getVacancy().getVacansyName();
+                        if (iteractionList.getVacancy() != null) {
+                            if (iteractionList.getVacancy().getVacansyName() != null) {
+                                iteractionList.getVacancy().getVacansyName();
+                            }
                         }
-                    }
 
-                    retLabel.setDescription(messageBundle.getMessage("msgInWork")
-                            + " "
-                            + vacancy
-                            + "\n\n"
-                            + messageBundle.getMessage("msgLastInteraction")
-                            + " \'"
-                            + (iteractionList.getIteractionType() != null
-                            ? iteractionList.getIteractionType().getIterationName() + "\' " : "")
-                            + "\' "
-                            + messageBundle.getMessage("msgFrom")
-                            + " "
-                            + sdf.format(iteractionList.getDateIteraction()));
-                    break;
-                } else {
-                    retLabel.setStyleName("pic-center-large-green");
-                    retLabel.setIconFromSet(CubaIcon.CIRCLE_O);
-                    retLabel.setDescription(messageBundle.getMessage("msgNotWork"));
+                        retLabel.setDescription(messageBundle.getMessage("msgInWork")
+                                + " "
+                                + vacancy
+                                + "\n\n"
+                                + messageBundle.getMessage("msgLastInteraction")
+                                + " \'"
+                                + (iteractionList.getIteractionType() != null
+                                ? iteractionList.getIteractionType().getIterationName() + "\' " : "")
+                                + "\' "
+                                + messageBundle.getMessage("msgFrom")
+                                + " "
+                                + sdf.format(iteractionList.getDateIteraction()));
+                        break;
+                    } else {
+                        retLabel.setStyleName("pic-center-large-green");
+                        retLabel.setIconFromSet(CubaIcon.CIRCLE_O);
+                        retLabel.setDescription(messageBundle.getMessage("msgNotWork"));
+                    }
                 }
             }
 
@@ -1352,6 +1354,15 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         newReserveLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         newReserveLabel.setWidthAuto();
         newReserveLabel.setHeightAuto();
+        newReserveLabel.setVisible(false);
+
+        Label futureReserveLabel = uiComponents.create(Label.class);
+        futureReserveLabel.setValue(messageBundle.getMessage("msgFutureReserve"));
+        futureReserveLabel.setStyleName("button_table_blue");
+        futureReserveLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        futureReserveLabel.setWidthAuto();
+        futureReserveLabel.setHeightAuto();
+        futureReserveLabel.setVisible(false);
 
         if (event.getItem().getSelectedForAction() != null) {
             if (event.getItem().getSelectionSymbolForActions() == null) {
@@ -1387,6 +1398,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     case FLAG_GREEN:
                         star.setIconFromSet(CubaIcon.FLAG);
                         star.setStyleName(StdSelectionsColor.FLAG_GREEN.getId());
+                        break;
                     default:
                         star.setIconFromSet(CubaIcon.STAR);
                         star.setStyleName(StdSelectionsColor.STAR_YELLOW.getId());
@@ -1399,18 +1411,32 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
         retHBox.add(star);
         retHBox.add(newReserveLabel);
+        retHBox.add(futureReserveLabel);
         retHBox.add(jobCandidateLabel);
         retHBox.expand(jobCandidateLabel);
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
-        gregorianCalendar.setTime(new Date());
-        gregorianCalendar.add(Calendar.DAY_OF_MONTH, 3);
         Date currentDate = new Date();
 
-        if (currentDate.before(gregorianCalendar.getTime())) {
-            newReserveLabel.setVisible(true);
-        } else {
-            newReserveLabel.setVisible(false);
+        if (event.getItem().getDate() != null) {
+            gregorianCalendar.setTime(event.getItem().getDate());
+
+            gregorianCalendar.add(Calendar.DAY_OF_MONTH, 3);
+
+            if (currentDate.before(gregorianCalendar.getTime())) {
+                newReserveLabel.setVisible(true);
+            } else {
+                newReserveLabel.setVisible(false);
+            }
+
+            futureReserveLabel.setVisible(false);
+        }
+
+        if (event.getItem().getDate() != null) {
+            if (event.getItem().getDate().after(currentDate)) {
+                futureReserveLabel.setVisible(true);
+                newReserveLabel.setVisible(false);
+            }
         }
 
         return retHBox;
