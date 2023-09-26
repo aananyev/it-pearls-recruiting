@@ -1005,6 +1005,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(personelReserve);
                     sendEmailButtonInvoke();
+                    selectForAction();
                     personelReservesTable.scrollTo(personelReserve);
                 }));
 
@@ -1028,6 +1029,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setSelected(personelReserve);
                     createInteractionButtonInvoke();
+                    selectForAction();
                 }));
 
         actionButton.addAction(new BaseAction("viewInteractionAction")

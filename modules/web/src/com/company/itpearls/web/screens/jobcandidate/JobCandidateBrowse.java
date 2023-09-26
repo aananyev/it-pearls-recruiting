@@ -35,6 +35,7 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.cos.COSName;
@@ -53,6 +54,7 @@ import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import java.awt.image.RenderedImage;
 import java.io.*;
 import java.math.BigDecimal;
@@ -123,6 +125,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private FileStorageService fileStorageService;
 
+    static final String QUERY_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
     private final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK
             = "select e " +
@@ -161,9 +164,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         initActionButton(actionsWithCandidateButton);
     }
 
+    private PersonelReserve currentPersonelReserve = null;
+
     private void initActionButton(PopupButton actionsWithCandidateButton) {
         actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserve")
-                .withIcon(CubaIcon.SUPERSCRIPT.source())
+                .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
                 .withCaption(messageBundle.getMessage("msgAddPersonalReserve"))
                 .withHandler(actionPerformedEvent -> {
                     screenBuilders.editor(PersonelReserve.class, this)
@@ -176,9 +181,30 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 event.setRemovedFromReserve(false);
                                 event.setInProcess(true);
                             })
+                            .withAfterCloseListener(afterCloseEvent -> {
+                                if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                                    currentPersonelReserve = afterCloseEvent.getScreen().getEditedEntity();
+
+                                    if (currentPersonelReserve.getOpenPosition() != null)
+                                        addPersonalReserveInteraction(currentPersonelReserve.getJobCandidate(), currentPersonelReserve.getOpenPosition());
+                                    else
+                                        addPersonalReserveInteraction(currentPersonelReserve.getJobCandidate(), getDefaultOpenPosition());
+                                }
+                            })
                             .build()
                             .show();
                     jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
+                }));
+
+        actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserveWithoutConfirm")
+                .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgAddPersonalReserveWithoutConfirm"))
+                .withHandler(actionPerformedEvent -> {
+                    if (jobCandidatesTable.getSingleSelected() != null) {
+                        putCandidatesToPersonelReserve(jobCandidatesTable.getSingleSelected(), getDefaultOpenPosition());
+
+                        jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
+                    }
                 }));
 
         actionsWithCandidateButton.addAction(new BaseAction("sendEmailAction")
@@ -196,7 +222,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
                 }));
 
-         actionsWithCandidateButton.addAction(new BaseAction("addCommentAction")
+        actionsWithCandidateButton.addAction(new BaseAction("addCommentAction")
                 .withIcon(CubaIcon.COMMENTING.source())
                 .withCaption(messageBundle.getMessage("msgComment"))
                 .withHandler(actionPerformedEvent -> {
@@ -218,8 +244,223 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         actionsWithCandidateButton.getAction("viewCommentAction").setEnabled(true);
     }
 
+    private static final String QUERY_GET_PERSONEL_RESERVE =
+            "select e from itpearls_PersonelReserve e " +
+                    "where e.jobCandidate = :jobCandidate " +
+                    "and " +
+                    "(e.endDate > :currDate or e.endDate is null)";
+
+    private void putCandidatesToPersonelReserve(JobCandidate jobCandidate, OpenPosition openPosition) {
+
+        PersonelReserve personelReserveCheck = null;
+
+        try {
+            personelReserveCheck = dataManager.load(PersonelReserve.class)
+                    .query(QUERY_GET_PERSONEL_RESERVE)
+                    .view("personelReserve-view")
+                    .parameter("jobCandidate", jobCandidate)
+                    .parameter("currDate", new Date())
+                    .one();
+        } catch (IllegalStateException e) {
+            personelReserveCheck = null;
+        }
+
+        if (personelReserveCheck == null) {
+            addPersonaLReserveMonth(jobCandidate, openPosition);
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ")
+                    .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
+                            + ": " + jobCandidate.getFullName()
+                            + "\n" + messageBundle.getMessage("msgRecruterOwner")
+                            + " " + personelReserveCheck.getRecruter().getName()
+                            + "\n" + messageBundle.getMessage("msgEndDateReserve")
+                            + " " + (personelReserveCheck.getEndDate() != null
+                            ? sdf.format(personelReserveCheck.getEndDate())
+                            : messageBundle.getMessage("msgUnlimited")))
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
+    private static final String QUERY_GET_DEFAULT_VACANCY =
+            "select e from itpearls_OpenPosition e " +
+                    "where e.vacansyName like \'Default\'";
+    private final String QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION =
+            "select e " +
+                    "from itpearls_Iteraction e " +
+                    "where e.signPersonalReservePut = true";
+
+    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+                                                     String subject,
+                                                     String comment,
+                                                     Date date,
+                                                     JobCandidate jobCandidate,
+                                                     User user,
+                                                     Boolean priority) {
+        try {
+            OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
+
+            openPositionNews.setOpenPosition(editedEntity);
+            openPositionNews.setAuthor(user);
+            openPositionNews.setDateNews(date);
+            openPositionNews.setSubject(subject);
+            openPositionNews.setComment(comment);
+            openPositionNews.setCandidates(jobCandidate);
+            openPositionNews.setPriorityNews(priority != null ? priority : false);
+
+            CommitContext commitContext = new CommitContext();
+            commitContext.addInstanceToCommit(openPositionNews);
+            dataManager.commit(commitContext);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private BigDecimal getCountIteraction() {
+        IteractionList e = dataManager.load(IteractionList.class)
+                .query("select e from itpearls_IteractionList e where e.numberIteraction = " +
+                        "(select max(f.numberIteraction) from itpearls_IteractionList f)")
+                .view("iteractionList-view")
+                .cacheable(true)
+                .one();
+
+        return e.getNumberIteraction().add(BigDecimal.ONE);
+    }
+
+    private void addPersonalReserveInteraction(JobCandidate jobCandidate,
+                                               OpenPosition openPosition) {
+
+        OpenPosition defaultPosition = null;
+        Iteraction interactionType = null;
+        IteractionList iteractionList = metadata.create(IteractionList.class);
+
+        try {
+            defaultPosition = dataManager
+                    .loadValue(QUERY_GET_DEFAULT_VACANCY, OpenPosition.class)
+                    .one();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            interactionType = dataManager.load(Iteraction.class)
+                    .query(QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION)
+                    .cacheable(true)
+                    .view("iteraction-view")
+                    .one();
+        } catch (NoResultException e) {
+            e.printStackTrace();
+        }
+
+        if (interactionType != null) {
+            iteractionList.setCandidate(jobCandidate);
+            iteractionList.setDateIteraction(new Date());
+            iteractionList.setRating(4);
+
+            if (openPosition != null) {
+                iteractionList.setVacancy(openPosition);
+                iteractionList.setCurrentOpenClose(openPosition.getOpenClose());
+                iteractionList.setCurrentPriority(openPosition.getPriority());
+            } else {
+                if (defaultPosition != null) {
+                    iteractionList.setVacancy(defaultPosition);
+                    iteractionList.setCurrentOpenClose(defaultPosition.getOpenClose());
+                    iteractionList.setCurrentPriority(defaultPosition.getPriority());
+                } else {
+                    notifications.create(Notifications.NotificationType.ERROR)
+                            .withCaption(messageBundle.getMessage("msg://msgError"))
+                            .withDescription(messageBundle.getMessage("msgNotDefaultInteraction"))
+                            .withType(Notifications.NotificationType.ERROR)
+                            .show();
+                }
+            }
+
+            iteractionList.setRecrutierName(userSession.getUser().getName());
+            iteractionList.setRecrutier((ExtUser) userSession.getUser());
+            iteractionList.setNumberIteraction(getCountIteraction());
+            iteractionList.setIteractionType(interactionType);
+
+            dataManager.commit(iteractionList);
+
+            if (openPosition != null) {
+                setOpenPositionNewsAutomatedMessage(openPosition,
+                        iteractionList.getIteractionType().getIterationName(),
+                        messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
+                        iteractionList.getDateIteraction(),
+                        jobCandidate,
+                        userSession.getUser(),
+                        interactionType.getSignPriorityNews());
+            } else {
+                setOpenPositionNewsAutomatedMessage(defaultPosition,
+                        iteractionList.getIteractionType().getIterationName(),
+                        messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
+                        iteractionList.getDateIteraction(),
+                        jobCandidate,
+                        userSession.getUser(),
+                        interactionType.getSignPriorityNews());
+
+            }
+
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msg://msgError"))
+                    .withDescription(messageBundle.getMessage("msgNotSignPersonalReserveInteractions"))
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
+    private void addPersonaLReserveMonth(JobCandidate jobCandidate, OpenPosition selectedOpenPosition) {
+        PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
+        // сначала итерацию, а уж потом остальное
+        addPersonalReserveInteraction(jobCandidate, selectedOpenPosition);
+
+        personelReserve.setDate(new Date());
+        personelReserve.setJobCandidate(jobCandidate);
+        personelReserve.setRecruter((ExtUser) userSessionSource.getUserSession().getUser());
+        personelReserve.setInProcess(true);
+
+        int noOfDays = 30;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_YEAR, noOfDays);
+        Date endDate = calendar.getTime();
+        personelReserve.setEndDate(endDate);
+
+        personelReserve.setPersonPosition(jobCandidate.getPersonPosition());
+
+        personelReserve.setOpenPosition(selectedOpenPosition);
+
+        dataManager.commit(personelReserve);
+    }
+
+    private OpenPosition getDefaultOpenPosition() {
+        OpenPosition openPositionDefault = null;
+
+        try {
+            openPositionDefault = dataManager.load(OpenPosition.class)
+                    .query(QUERY_DEFAULT_OPEN_POSITION)
+                    .view("openPosition-view")
+                    .one();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgNotFindDefaultOpenPosition"))
+                    .show();
+        }
+
+        return openPositionDefault;
+    }
+
     @Install(to = "jobCandidatesTable.actionsWithCandidate", subject = "columnGenerator")
-    private Component jobCandidatesTableActionsWithCandidateColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+    private Component jobCandidatesTableActionsWithCandidateColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
         retHBox.setWidthFull();
         retHBox.setHeightFull();
@@ -329,7 +570,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
-    private String jobCandidatesTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+    private String jobCandidatesTableLastIteractionColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         IteractionList iteractionList = getLastIteraction(event.getItem());
 
         String date = null;
@@ -434,12 +676,30 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Boolean checkBlockCandidate = jobCandidate.getBlockCandidate() == null ? false : jobCandidate.getBlockCandidate();
 
         if (!checkBlockCandidate) {
-            return iteractionList != null ?
-                    simpleDateFormat.format(iteractionList.getDateIteraction())
-                            + "\n"
-                            + iteractionList.getIteractionType().getIterationName()
-                            + "\n"
-                            + recrutierName : "";
+            if (iteractionList != null) {
+                if (iteractionList.getIteractionType() != null) {
+                    return iteractionList != null ?
+                            simpleDateFormat.format(iteractionList.getDateIteraction())
+                                    + "\n"
+                                    + iteractionList.getIteractionType().getIterationName()
+                                    + "\n"
+                                    + recrutierName : "";
+                } else {
+                    return iteractionList != null ?
+                            simpleDateFormat.format(iteractionList.getDateIteraction())
+                                    + "\n"
+                                    + messageBundle.getMessage("msgInteractionUndefined")
+                                    + "\n"
+                                    + recrutierName : "";
+                }
+            } else {
+                return iteractionList != null ?
+                        simpleDateFormat.format(iteractionList.getDateIteraction())
+                                + "\n"
+                                + messageBundle.getMessage("msgInteractionUndefined")
+                                + "\n"
+                                + recrutierName : "";
+            }
         } else {
             return messageBundle.getMessage("msgInteractionProhibited");
         }
@@ -466,7 +726,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")
-    private Icons.Icon jobCandidatesTableResumeColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+    private Icons.Icon jobCandidatesTableResumeColumnGenerator
+            (DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         String retStr = "";
 
         try {
@@ -503,7 +764,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     @Install(to = "jobCandidatesTable", subject = "detailsGenerator")
-    private Component jobCandidatesTableDetailsGenerator(JobCandidate entity) throws IOException, ClassNotFoundException {
+    private Component jobCandidatesTableDetailsGenerator(JobCandidate entity) throws
+            IOException, ClassNotFoundException {
         VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
         mainLayout.setWidth("100%");
         mainLayout.setMargin(true);
@@ -1259,6 +1521,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             if (personelReserve.getSelectedForAction() != null) {
                 if (personelReserve.getSelectedForAction()) {
                     flagSelected = true;
+                    retLabel.setIconFromSet(CubaIcon.STAR);
+                    break;
                 }
             }
         }
