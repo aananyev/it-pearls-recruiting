@@ -1,0 +1,1 @@
+alter table ITPEARLS_PERSONEL_RESERVE add column SELECTION_SYMBOL_FOR_ACTIONS integer ;

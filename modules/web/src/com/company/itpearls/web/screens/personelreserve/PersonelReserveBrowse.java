@@ -10,6 +10,7 @@ import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
+import com.company.itpearls.web.screens.jobcandidate.JobCanidateDetailScreenFragment;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -25,12 +26,16 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 import javax.inject.Inject;
+import javax.xml.crypto.Data;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 @UiController("itpearls_PersonelReserve.browse")
@@ -95,12 +100,21 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private String personelReserveCloseComment;
     @Inject
     private CheckBox removedFromReserveCheckBox;
+    @Inject
+    private PopupButton actionsButton;
+    @Inject
+    private Button closePersonalReserveButton;
+    @Inject
+    private CheckBox showBetweenAndOther;
 
     @Subscribe("personelReservesTable")
     public void onPersonelReservesTableSelection(DataGrid.SelectionEvent<PersonelReserve> event) {
         viewJobCandidateCardButton.setEnabled(personelReservesTable.getSingleSelected() != null);
 
         if (personelReservesTable.getSingleSelected() != null) {
+            actionsButton.setEnabled(true);
+            closePersonalReserveButton.setEnabled(true);
+
             if (personelReservesTable.getSingleSelected().getJobCandidate().getEmail() != null) {
                 if (!personelReservesTable.getSingleSelected().getJobCandidate().getEmail().equals("")) {
                     sendEmailButton.setEnabled(true);
@@ -112,6 +126,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
             }
         } else {
             sendEmailButton.setEnabled(false);
+            actionsButton.setEnabled(false);
+            closePersonalReserveButton.setEnabled(false);
         }
     }
 
@@ -120,11 +136,16 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 //        candidateImageColumnRenderer();
         initInWorkColumnRenderer();
         initStatusColumnRenderer();
+        initActionsPopupButton();
 
         personelReservesTable.setItemClickAction(new BaseAction("itemClickAction")
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setDetailsVisible(personelReservesTable.getSingleSelected(), true);
                 }));
+    }
+
+    private void initActionsPopupButton() {
+        setActionToActionPopupButton(actionsButton, null);
     }
 
     @Subscribe
@@ -376,7 +397,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         return tableWordWrapStyle;
     }
 
-    @Install(to = "personelReservesTable", subject = "detailsGenerator")
+/*    @Install(to = "personelReservesTable", subject = "detailsGenerator")
     private Component personelReservesTableDetailsGenerator(PersonelReserve entity) {
         VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
         mainLayout.setWidth("100%");
@@ -448,7 +469,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         Component newIteraction = createNewIteractionButton(entity);
         Component copyLastIteraction = createButtonCopyLastIteraction(entity);
         Component listIteraction = createListIteractionButton(entity);
-        Component cvSimpleBrowseButton = createCvSimpleBrowse(entity.getJobCandidate());
+        Component cvSimpleBrowseButton = createCvSimpleBrowse(entity);
         Component popupButtonCopyLastInteraction = createPopupButtonCopyLastInteraction(entity.getJobCandidate());
 
         Label<String> cvLabelHeader = uiComponents.create(Label.NAME);
@@ -509,7 +530,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         mainLayout.expand(fragment);
 
         return mainLayout;
-    }
+    } */
 
 
     private Component editLastResume(JobCandidate entity) {
@@ -598,7 +619,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .show();
     }
 
-    private Component createPopupButtonCopyLastInteraction(JobCandidate entity) {
+    private Component createPopupButtonCopyLastInteraction(PersonelReserve entity) {
         PopupButton lastInteractionPopupButton = uiComponents.create(PopupButton.class);
         lastInteractionPopupButton.setDescription("Копировать последнее взаимодействие с кандидатом");
         lastInteractionPopupButton.setIconFromSet(CubaIcon.FILE_TEXT);
@@ -606,8 +627,10 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         personelReservesTable.addSelectionListener(e -> {
             if (personelReservesTable.getSingleSelected() == null) {
                 lastInteractionPopupButton.setEnabled(false);
+                actionsButton.setEnabled(false);
             } else {
                 lastInteractionPopupButton.setEnabled(true);
+                actionsButton.setEnabled(true);
             }
         });
 
@@ -667,7 +690,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         }
     }
 
-    private Component createCvSimpleBrowse(JobCandidate entity) {
+    private Component createCvSimpleBrowse(PersonelReserve entity) {
         Button cvSimpleBrowseButton = uiComponents.create(Button.class);
         cvSimpleBrowseButton.setDescription("Копировать резюме кандидата");
         cvSimpleBrowseButton.setIconFromSet(CubaIcon.FILE_TEXT_O);
@@ -680,8 +703,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     candidateCVDl.load();
 
                     CandidateCVSimpleBrowse candidateCVSimpleBrowse = screens.create(CandidateCVSimpleBrowse.class);
-                    candidateCVSimpleBrowse.setSelectedCandidate(entity);
-                    candidateCVSimpleBrowse.setJobCandidate(entity);
+                    candidateCVSimpleBrowse.setSelectedCandidate(entity.getJobCandidate());
+                    candidateCVSimpleBrowse.setJobCandidate(entity.getJobCandidate());
                     screens.show(candidateCVSimpleBrowse);
 
                 }));
@@ -886,19 +909,6 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
             return null;
     }
 
-
-    private Component createCloseButton(PersonelReserve entity) {
-        Button closeButton = uiComponents.create(Button.class);
-        closeButton.setDescription("Закрыть");
-        closeButton.setIcon("icons/close.png");
-        BaseAction closeAction = new BaseAction("closeAction")
-                .withHandler(actionPerformedEvent ->
-                        personelReservesTable.setDetailsVisible(entity, false))
-                .withCaption("");
-        closeButton.setAction(closeAction);
-        return closeButton;
-    }
-
     public void closePersonalReserveButtonInvoke() {
         Iteraction iteractionPersonalReserveDelete = null;
 
@@ -959,36 +969,54 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         actionButton.setIconFromSet(CubaIcon.BARS);
         actionButton.setWidthAuto();
         actionButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        actionButton.setShowActionIcons(true);
 
-        actionButton.addAction(new BaseAction("selectedForActionAction")
+        setActionToActionPopupButton(actionButton, event.getItem());
+
+        retBox.add(actionButton);
+
+        return retBox;
+    }
+
+    private void setActionToActionPopupButton(PopupButton actionButton, PersonelReserve personelReserve) {
+
+/*        actionButton.addAction(new BaseAction("selectedForActionAction")
                 .withIcon(CubaIcon.STAR.source())
                 .withCaption(messageBundle.getMessage("msgSelectForAction"))
                 .withHandler(actionPerformedAction -> {
-                    personelReservesTable.setSelected(event.getItem());
+                    personelReservesTable.setSelected(personelReserve);
                     selectForAction();
                     try {
-                        personelReservesTable.scrollTo(event.getItem());
+                        personelReservesTable.scrollTo(personelReserve);
                     } catch (IllegalArgumentException e) {
                         e.printStackTrace();
                     }
-                }));
+                })); */
+
+
+        final String separator = "----------";
+
 
         actionButton.addAction(new BaseAction("sendEmailAction")
                 .withIcon(CubaIcon.ENVELOPE.source())
                 .withCaption(messageBundle.getMessage("msgEmail"))
                 .withHandler(actionPerformedEvent -> {
-                    personelReservesTable.setSelected(event.getItem());
+                    personelReservesTable.setSelected(personelReserve);
                     sendEmailButtonInvoke();
-                    personelReservesTable.scrollTo(event.getItem());
+                    personelReservesTable.scrollTo(personelReserve);
                 }));
+
+
+        actionButton.addAction(new BaseAction("separator2Action")
+                .withCaption(separator));
 
         actionButton.addAction(new BaseAction("openCardAction")
                 .withIcon(CubaIcon.CHILD.source())
                 .withCaption(messageBundle.getMessage("msgJobCandidate"))
                 .withHandler(actionPerformedEvent -> {
-                    personelReservesTable.setSelected(event.getItem());
+                    personelReservesTable.setSelected(personelReserve);
                     viewJobCandidateCardButtonInvoke();
-                    personelReservesTable.scrollTo(event.getItem());
+                    personelReservesTable.scrollTo(personelReserve);
                 }));
 
 
@@ -996,7 +1024,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withIcon(CubaIcon.BATH.source())
                 .withCaption(messageBundle.getMessage("msgCreateInteraction"))
                 .withHandler(actionPerformedEvent -> {
-                    personelReservesTable.setSelected(event.getItem());
+                    personelReservesTable.setSelected(personelReserve);
                     createInteractionButtonInvoke();
                 }));
 
@@ -1004,58 +1032,186 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withIcon(CubaIcon.VIEW_ACTION.source())
                 .withCaption(messageBundle.getMessage("msgViewInteraction"))
                 .withHandler(actionPerformedEvent -> {
-                    personelReservesTable.setSelected(event.getItem());
+                    personelReservesTable.setSelected(personelReserve);
                     viewInteractionButtonInvoke();
-                    personelReservesTable.scrollTo(event.getItem());
+                    personelReservesTable.scrollTo(personelReserve);
                 }));
 
-        if (event.getItem().getRemovedFromReserve() != null) {
-            if (event.getItem().getRemovedFromReserve() != true) {
+
+        actionButton.addAction(new BaseAction("separator3Action")
+                .withCaption(separator));
+
+        if (personelReserve != null) {
+            if (personelReserve.getRemovedFromReserve() != null) {
+                if (personelReserve.getRemovedFromReserve() != true) {
+                    actionButton.addAction(new BaseAction("clearPersonalReserveAction")
+                            .withIcon(CubaIcon.CANCEL.source())
+                            .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
+                            .withHandler(actionPerformedEvent -> {
+                                personelReservesTable.setSelected(personelReserve);
+                                closePersonalReserveButtonInvoke();
+                                personelReservesTable.scrollTo(personelReserve);
+                            }));
+                }
+            } else {
                 actionButton.addAction(new BaseAction("clearPersonalReserveAction")
                         .withIcon(CubaIcon.CANCEL.source())
                         .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
                         .withHandler(actionPerformedEvent -> {
-                            personelReservesTable.setSelected(event.getItem());
+                            personelReservesTable.setSelected(personelReserve);
                             closePersonalReserveButtonInvoke();
-                            personelReservesTable.scrollTo(event.getItem());
+                            personelReservesTable.scrollTo(personelReserve);
                         }));
             }
-        } else {
-            actionButton.addAction(new BaseAction("clearPersonalReserveAction")
-                    .withIcon(CubaIcon.CANCEL.source())
-                    .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
-                    .withHandler(actionPerformedEvent -> {
-                        personelReservesTable.setSelected(event.getItem());
-                        closePersonalReserveButtonInvoke();
-                        personelReservesTable.scrollTo(event.getItem());
-                    }));
-        }
 
-        if (event.getItem().getRemovedFromReserve() != null) {
-            if (event.getItem().getRemovedFromReserve() != true) {
+            if (personelReserve.getRemovedFromReserve() != null) {
+                if (personelReserve.getRemovedFromReserve() != true) {
+                    actionButton.addAction(new BaseAction("clearPersonalReserveWithCommentAction")
+                            .withIcon(CubaIcon.PICKERFIELD_CLEAR_READONLY.source())
+                            .withCaption(messageBundle.getMessage("msgClosePersonalReserveWithComment"))
+                            .withHandler(actionPerformedEvent -> {
+                                personelReservesTable.setSelected(personelReserve);
+                                closePersonalReserveButtonWithCommentInvoke();
+                                personelReservesTable.scrollTo(personelReserve);
+                            }));
+                }
+            } else {
                 actionButton.addAction(new BaseAction("clearPersonalReserveWithCommentAction")
                         .withIcon(CubaIcon.PICKERFIELD_CLEAR_READONLY.source())
                         .withCaption(messageBundle.getMessage("msgClosePersonalReserveWithComment"))
                         .withHandler(actionPerformedEvent -> {
-                            personelReservesTable.setSelected(event.getItem());
+                            personelReservesTable.setSelected(personelReservesTable.getSingleSelected());
                             closePersonalReserveButtonWithCommentInvoke();
-                            personelReservesTable.scrollTo(event.getItem());
+                            personelReservesTable.scrollTo(personelReservesTable.getSingleSelected());
                         }));
             }
-        } else {
-            actionButton.addAction(new BaseAction("clearPersonalReserveWithCommentAction")
-                    .withIcon(CubaIcon.PICKERFIELD_CLEAR_READONLY.source())
-                    .withCaption(messageBundle.getMessage("msgClosePersonalReserveWithComment"))
-                    .withHandler(actionPerformedEvent -> {
-                        personelReservesTable.setSelected(event.getItem());
-                        closePersonalReserveButtonWithCommentInvoke();
-                        personelReservesTable.scrollTo(event.getItem());
-                    }));
         }
 
-        retBox.add(actionButton);
+        actionButton.addAction(new BaseAction("separator1Action")
+                .withCaption(separator));
 
-        return retBox;
+        actionButton.addAction(new BaseAction("selectedForActionActionStarRed")
+                .withIcon(CubaIcon.STAR.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionStarRed"))
+                .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
+                    selectForAction(StdSelections.STAR_RED);
+                    try {
+                        personelReservesTable.scrollTo(personelReserve);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionStarYellow")
+                .withIcon(CubaIcon.STAR.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionStarYellow"))
+                .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
+                    selectForAction(StdSelections.STAR_YELLOW);
+                    try {
+                        personelReservesTable.scrollTo(personelReserve);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionStarGreen")
+                .withIcon(CubaIcon.STAR.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionStarGreen"))
+                .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
+                    selectForAction(StdSelections.STAR_GREEN);
+                    try {
+                        personelReservesTable.scrollTo(personelReserve);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionFlagRed")
+                .withIcon(CubaIcon.FLAG.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionFlagRed"))
+                .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
+                    selectForAction(StdSelections.FLAG_RED);
+                    try {
+                        personelReservesTable.scrollTo(personelReserve);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionFlagYellow")
+                .withIcon(CubaIcon.FLAG.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionFlagYellow"))
+                .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
+                    selectForAction(StdSelections.FLAG_YELLOW);
+                    try {
+                        personelReservesTable.scrollTo(personelReserve);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionFlagGreen")
+                .withIcon(CubaIcon.FLAG.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionFlagGreen"))
+                .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
+                    selectForAction(StdSelections.FLAG_GREEN);
+                    try {
+                        personelReservesTable.scrollTo(personelReserve);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("clearSelection")
+                .withIcon(CubaIcon.PICKERFIELD_CLEAR.source())
+                .withCaption(messageBundle.getMessage("msgClearSelection"))
+                .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
+                    clearSelection();
+                    try {
+                        personelReservesTable.scrollTo(personelReserve);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+
+                }));
+
+    }
+
+    private void clearSelection() {
+        PersonelReserve personelReserve = personelReservesTable.getSingleSelected();
+        personelReserve.setSelectedForAction(null);
+        personelReserve.setSelectionSymbolForActions(null);
+        dataManager.commit(personelReserve);
+
+        personelReservesDl.load();
+        personelReservesTable.repaint();
+        try {
+            personelReservesTable.setSelected(personelReserve);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void selectForAction(StdSelections star) {
+        PersonelReserve personelReserve = personelReservesTable.getSingleSelected();
+        personelReserve.setSelectedForAction(true);
+        personelReserve.setSelectionSymbolForActions(star.getId());
+        dataManager.commit(personelReserve);
+
+        personelReservesDl.load();
+        personelReservesTable.repaint();
+        try {
+            personelReservesTable.setSelected(personelReserve);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void closePersonalReserveButtonWithCommentInvoke() {
@@ -1190,20 +1346,231 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         star.setAlignment(Component.Alignment.MIDDLE_LEFT);
         star.setStyleName("pic-center-large-orange");
 
+        Label newReserveLabel = uiComponents.create(Label.class);
+        newReserveLabel.setValue(messageBundle.getMessage("msgNewReserve"));
+        newReserveLabel.setStyleName("button_table_red");
+        newReserveLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        newReserveLabel.setWidthAuto();
+        newReserveLabel.setHeightAuto();
+
         if (event.getItem().getSelectedForAction() != null) {
-            if (event.getItem().getSelectedForAction()) {
-                star.setVisible(true);
+            if (event.getItem().getSelectionSymbolForActions() == null) {
+                if (event.getItem().getSelectedForAction()) {
+                    star.setVisible(true);
+                } else {
+                    star.setVisible(false);
+                }
             } else {
-                star.setVisible(false);
+                StdSelections s = StdSelections.fromId(event.getItem().getSelectionSymbolForActions());
+
+                switch (s) {
+                    case STAR_RED:
+                        star.setIconFromSet(CubaIcon.STAR);
+                        star.setStyleName(StdSelectionsColor.STAR_RED.getId());
+                        break;
+                    case STAR_YELLOW:
+                        star.setIconFromSet(CubaIcon.STAR);
+                        star.setStyleName(StdSelectionsColor.STAR_YELLOW.getId());
+                        break;
+                    case STAR_GREEN:
+                        star.setIconFromSet(CubaIcon.STAR);
+                        star.setStyleName(StdSelectionsColor.STAR_GREEN.getId());
+                        break;
+                    case FLAG_RED:
+                        star.setIconFromSet(CubaIcon.FLAG);
+                        star.setStyleName(StdSelectionsColor.FLAG_RED.getId());
+                        break;
+                    case FLAG_YELLOW:
+                        star.setIconFromSet(CubaIcon.FLAG);
+                        star.setStyleName(StdSelectionsColor.FLAG_YELLOW.getId());
+                        break;
+                    case FLAG_GREEN:
+                        star.setIconFromSet(CubaIcon.FLAG);
+                        star.setStyleName(StdSelectionsColor.FLAG_GREEN.getId());
+                    default:
+                        star.setIconFromSet(CubaIcon.STAR);
+                        star.setStyleName(StdSelectionsColor.STAR_YELLOW.getId());
+                        break;
+                }
             }
         } else {
             star.setVisible(false);
         }
 
         retHBox.add(star);
+        retHBox.add(newReserveLabel);
         retHBox.add(jobCandidateLabel);
         retHBox.expand(jobCandidateLabel);
 
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.add(Calendar.DAY_OF_MONTH, 3);
+        Date currentDate = new Date();
+
+        if (currentDate.before(gregorianCalendar.getTime())) {
+            newReserveLabel.setVisible(true);
+        } else {
+            newReserveLabel.setVisible(false);
+        }
+
         return retHBox;
     }
+
+    @Subscribe
+    public void onBeforeShow1(BeforeShowEvent event) {
+        personelReservesDl.setParameter("currentDate", new Date());
+        personelReservesDl.load();
+
+        showBetweenAndOther.setValue(true);
+    }
+
+    @Subscribe("showBetweenAndOther")
+    public void onShowBetweenAndOtherValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue()) {
+            personelReservesDl.setParameter("currentDate", new Date());
+        } else {
+            personelReservesDl.removeParameter("currentDate");
+        }
+
+        personelReservesDl.load();
+    }
+
+/*    @Install(to = "personelReservesTable", subject = "detailsGenerator")
+    private Component personelReservesTableDetailsGenerator(PersonelReserve entity) throws IOException, ClassNotFoundException {
+        VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
+        mainLayout.setWidth("100%");
+        mainLayout.setMargin(true);
+
+        JobCanidateDetailScreenFragment jobCanidateDetailScreenFragment = fragments.create(this,
+                JobCanidateDetailScreenFragment.class);
+        jobCanidateDetailScreenFragment.setJobCandidate(entity.getJobCandidate());
+
+        HBoxLayout headerBox = uiComponents.create(HBoxLayout.NAME);
+        headerBox.setWidthAuto();
+        headerBox.setWidth("100%");
+        headerBox.setHeight("100%");
+
+        FlowBoxLayout footerBox = uiComponents.create(FlowBoxLayout.NAME);
+        footerBox.setWidthAuto();
+        footerBox.setHeight("100%");
+        footerBox.setSpacing(false);
+
+        HBoxLayout header2Box = uiComponents.create(HBoxLayout.NAME);
+        header2Box.setWidth("100%");
+        header2Box.setHeight("100%");
+
+        Label<String> infoLabel = uiComponents.create(Label.NAME);
+        infoLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        infoLabel.setHtmlEnabled(true);
+        infoLabel.setStyleName("h3");
+        infoLabel.setValue("Информация о кандидате:");
+
+        Boolean checkBlockCandidate = false;
+        if (personelReservesTable.getSingleSelected() != null) {
+            checkBlockCandidate = !(personelReservesTable.getSingleSelected().getJobCandidate().getBlockCandidate() == null
+                    ? false : personelReservesTable.getSingleSelected().getJobCandidate().getBlockCandidate());
+        }
+
+        Label<String> candidateStatusLabel = uiComponents.create(Label.NAME);
+        candidateStatusLabel.setHtmlEnabled(true);
+        candidateStatusLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        candidateStatusLabel.setStyleName(checkBlockCandidate ? "h2" : "h2-red");
+        candidateStatusLabel.setValue(checkBlockCandidate ? "Нормально" : "Заблокирован");
+
+        Label<String> candidateTitle = uiComponents.create(Label.NAME);
+        candidateTitle.setHtmlEnabled(true);
+        candidateTitle.setStyleName("h3");
+        candidateTitle.setValue("Кандидат:");
+
+        Component suitableButton = findSuitableButton(entity.getJobCandidate());
+
+        Label<String> iteractionLabelHeader = uiComponents.create(Label.NAME);
+        iteractionLabelHeader.setHtmlEnabled(true);
+        iteractionLabelHeader.setStyleName("h3");
+        iteractionLabelHeader.setValue("Взаимодействия:");
+
+        Label<String> resumeLabelHeader = uiComponents.create(Label.NAME);
+        resumeLabelHeader.setHtmlEnabled(true);
+        resumeLabelHeader.setStyleName("h3");
+        resumeLabelHeader.setValue("Взаимодействия:");
+
+        Component closeButton = createCloseButton(entity);
+        Component editButton = createEditButton(entity);
+        Component newIteraction = createNewIteractionButton(entity);
+        Component copyLastIteraction = createButtonCopyLastIteraction(entity);
+        Component listIteraction = createListIteractionButton(entity);
+        Component cvSimpleBrowseButton = createCvSimpleBrowse(entity);
+        Component popupButtonCopyLastInteraction = createPopupButtonCopyLastInteraction(entity);
+
+        Label<String> cvLabelHeader = uiComponents.create(Label.NAME);
+        cvLabelHeader.setHtmlEnabled(true);
+        cvLabelHeader.setStyleName("h3");
+        cvLabelHeader.setValue("Резюме:");
+
+        Component newResumeButton = addNewResume(entity.getJobCandidate());
+        Component editLastResumeButton = editLastResume(entity.getJobCandidate());
+
+        headerBox.add(infoLabel);
+        headerBox.add(candidateStatusLabel);
+
+        headerBox.add(candidateTitle);
+        headerBox.add(editButton);
+
+        if (suitableButton != null)
+            headerBox.add(suitableButton);
+
+        headerBox.add(iteractionLabelHeader);
+        headerBox.add(newIteraction);
+        headerBox.add(copyLastIteraction);
+        headerBox.add(listIteraction);
+        headerBox.add(popupButtonCopyLastInteraction);
+
+        headerBox.add(cvLabelHeader);
+        headerBox.add(newResumeButton);
+        headerBox.add(editLastResumeButton);
+        headerBox.add(cvSimpleBrowseButton);
+
+        headerBox.add(closeButton);
+        headerBox.expand(infoLabel);
+        headerBox.setSpacing(true);
+
+        mainLayout.add(headerBox);
+        mainLayout.add(header2Box);
+
+        jobCanidateDetailScreenFragment.setVisibleLogo();
+        jobCanidateDetailScreenFragment.setLastSalaryLabel("Зарплатные ожидания");
+        jobCanidateDetailScreenFragment.setStatistics();
+        jobCanidateDetailScreenFragment.setLinkButtonTelegrem();
+        jobCanidateDetailScreenFragment.setLinkButtonTelegremGroup();
+        jobCanidateDetailScreenFragment.setLinkButtonEmail();
+        jobCanidateDetailScreenFragment.setLinkButtonSkype();
+        jobCanidateDetailScreenFragment.setStatisticsLabel();
+
+        Fragment fragment = jobCanidateDetailScreenFragment.getFragment();
+        fragment.setWidth("100%");
+        fragment.setAlignment(Component.Alignment.BOTTOM_LEFT);
+        mainLayout.add(fragment);
+
+        Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
+        if (skillBoxFragment.generateSkillLabels(getLastCVText(
+                personelReservesTable.getSingleSelected().getJobCandidate()))) {
+            mainLayout.add(skillBoxFragment.getFragment());
+        }
+
+        mainLayout.expand(fragment);
+
+        return mainLayout;
+    }
+
+    private Component createCloseButton(PersonelReserve entity) {
+        Button closeButton = uiComponents.create(Button.class);
+        closeButton.setDescription(messageBundle.getMessage("msgClose"));
+        closeButton.setIcon("icons/close.png");
+        BaseAction closeAction = new BaseAction("closeAction")
+                .withHandler(actionPerformedEvent ->
+                        personelReservesTable.setDetailsVisible(entity, false))
+                .withCaption("");
+        closeButton.setAction(closeAction);
+        return closeButton;
+    } */
 }

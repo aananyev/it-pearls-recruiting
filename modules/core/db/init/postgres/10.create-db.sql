@@ -988,10 +988,11 @@ create table ITPEARLS_PERSONEL_RESERVE (
     PERSON_POSITION_ID uuid,
     OPEN_POSITION_ID uuid,
     IN_PROCESSED boolean,
-    DATE_ timestamp,
+    DATE_ date,
     TERM_OF_PLACEMENT integer,
     END_DATE date,
     SELECTED_FOR_ACTION boolean,
+    SELECTION_SYMBOL_FOR_ACTIONS integer,
     REMOVED_FROM_RESERVE boolean,
     --
     primary key (ID)

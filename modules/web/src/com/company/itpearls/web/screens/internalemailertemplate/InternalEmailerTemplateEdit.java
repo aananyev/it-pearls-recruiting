@@ -153,6 +153,27 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
         }
     }
 
+    private void createTextMessage(OpenPosition openPosition) {
+        bodyEmailField.setValue(emailGenerationService
+                .preparingMessage(emailTemplateField.getValue().getTemplateText(),
+                        toEmailField.getValue(),
+                        (ExtUser) userSession.getUser()
+                ));
+
+        subjectEmailField.setValue(emailGenerationService
+                .preparingMessage(emailTemplateField.getValue().getTemplateSubj(),
+                        toEmailField.getValue(),
+                        openPosition,
+                        (ExtUser) userSession.getUser()
+                ));
+
+        if (openPosition != null) {
+            currentOpenPosition = openPosition;
+            openPositionLabel.setValue(openPosition.getVacansyName());
+            bodyEmailField.setValue(emailGenerationService.preparingMessage(bodyEmailField.getValue(),
+                    currentOpenPosition));
+        }
+    }
 
     private void createTextMessage() {
         bodyEmailField.setValue(emailGenerationService
@@ -206,7 +227,7 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                                 .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
                                                 .withHandler(event -> {
                                                     clearAllFields();
-                                                    createTextMessage();
+                                                    createTextMessage(openPosition);
                                                     currentOpenPosition = openPosition;
 
                                                     if (openPosition != null) {
@@ -220,8 +241,6 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                                         new DialogAction((DialogAction.Type.NO)))
                                 .show();
                     }
-
-                    reloadTemplate();
                 })
                 .build()
                 .show();

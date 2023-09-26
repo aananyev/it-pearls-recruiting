@@ -35,7 +35,7 @@ public class PersonelReserve extends StandardEntity {
     @Column(name = "IN_PROCESSED")
     private Boolean inProcess;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(name = "DATE_")
     private Date date;
 
@@ -49,8 +49,19 @@ public class PersonelReserve extends StandardEntity {
     @Column(name = "SELECTED_FOR_ACTION")
     private Boolean selectedForAction;
 
+    @Column(name = "SELECTION_SYMBOL_FOR_ACTIONS")
+    private Integer selectionSymbolForActions;
+
     @Column(name = "REMOVED_FROM_RESERVE")
     private Boolean removedFromReserve;
+
+    public Integer getSelectionSymbolForActions() {
+        return selectionSymbolForActions;
+    }
+
+    public void setSelectionSymbolForActions(Integer selectionSymbolForActions) {
+        this.selectionSymbolForActions = selectionSymbolForActions;
+    }
 
     public void setRecruter(ExtUser recruter) {
         this.recruter = recruter;

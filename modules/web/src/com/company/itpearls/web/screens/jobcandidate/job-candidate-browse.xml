@@ -182,8 +182,9 @@
                 <popupButton id="actionsWithCandidateButton"
                              caption="msg://msgActions"
                              enable="false"
+                             showActionIcons="true"
                              description="msg://msgActionsDesc"
-                             icon="ADD_ACTION"
+                             icon="BARS"
                              width="AUTO">
                     <actions>
                         <action id="addPersonalReserve" icon="SUPERSCRIPT"/>

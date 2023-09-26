@@ -225,6 +225,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHBox.setHeightFull();
 
         PopupButton actionPopupButton = uiComponents.create(PopupButton.class);
+        actionPopupButton.setShowActionIcons(true);
         actionPopupButton.setIconFromSet(CubaIcon.BARS);
         actionPopupButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
         actionPopupButton.addPopupVisibilityListener(e -> {

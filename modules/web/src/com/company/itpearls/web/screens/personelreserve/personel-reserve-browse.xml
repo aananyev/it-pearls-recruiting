@@ -39,10 +39,14 @@
                             <c:jpql>
                                 <c:where>e.jobCandidate.iteractionList in :iteractionList</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>:currentDate between e.date and e.endDate</c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
             </loader>
+            <instance id="jobCandidatesDc" property="jobCandidate"/>
         </collection>
     </data>
     <dialogMode height="600"
@@ -123,10 +127,12 @@
                 <button id="editBtn"
                         action="personelReservesTable.edit"/>
                 <button id="removeBtn"
+                        visible="false"
                         action="personelReservesTable.remove"/>
                 <button id="viewJobCandidateCardButton"
                         width="AUTO"
                         icon="CHILD"
+                        visible="false"
                         caption="msg://msgJobCandidate"
                         description="msg://msgJobCandidateDesc"
                         enable="false"
@@ -134,15 +140,24 @@
                 <button id="sendEmailButton"
                         width="AUTO"
                         icon="ENVELOPE_O"
+                        visible="false"
                         caption="msg://msgEmail"
                         description="msg://msgEmailDesc"
                         enable="false"
                         invoke="sendEmailButtonInvoke"/>
                 <button id="closePersonalReserveButton"
+                        visible="true"
                         width="AUTO"
+                        enable="false"
                         icon="CLOSE"
                         caption="msg://msgClosePersonalReserve"
                         invoke="closePersonalReserveButtonInvoke"/>
+                <popupButton id="actionsButton"
+                             showActionIcons="true"
+                             icon="BARS"
+                             enable="false"
+                             caption="msg://msgActions"
+                             description="msg://msgActionsDesc"/>
             </buttonsPanel>
         </dataGrid>
         <groupBox id="filtersHBox"
@@ -161,6 +176,8 @@
                           caption="msg://msgInWork"/>
                 <checkBox id="removedFromReserveCheckBox"
                           caption="msg://msgRemovedFromReserve"/>
+                <checkBox id="showBetweenAndOther"
+                          caption="msg://msgShowBetweenAndOther"/>
             </hbox>
         </groupBox>
         <hbox id="lookupActions" spacing="true" visible="false">
