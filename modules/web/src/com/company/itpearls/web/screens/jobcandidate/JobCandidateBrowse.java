@@ -1486,15 +1486,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Label genPersonalReserveLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setVisible(false);
-        retLabel.setIconFromSet(CubaIcon.STAR_O);
-        retLabel.setStyleName("pic-center-large-orange");
+        retLabel.setStyleName("star-center-large-yellow");
         retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
 
         final String QUERY_CHECK_PERSONAL_RESERVE = "select e from itpearls_PersonelReserve e " +
                 "where e.jobCandidate = :jobCandidate "
 //                + "and e.inProcess = true "
-                + "and @dateAfter(e.endDate, now) "
-                + "and @dateBefore(e.date, now) "
+                + "and @dateAfter(e.endDate, now-1) "
+                + "and @dateBefore(e.date, now+1) "
 //                + "and not e.removedFromReserve = true"
                 ;
         List<PersonelReserve> personelReserves = dataManager.load(PersonelReserve.class)
@@ -1544,9 +1543,69 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             retLabel.setVisible(false);
         }
 
+        if (personelReserves.size() > 0) {
+            retLabel.setIconFromSet(getStarIconPersonalReserve(personelReserves.get(0)));
+            retLabel.setStyleName(getStarIconPersonalReserveStyle(personelReserves.get(0)));
+        } else {
+            retLabel.setIconFromSet(CubaIcon.STAR);
+        }
 
         return retLabel;
     }
+
+
+    private CubaIcon getStarIconPersonalReserve(PersonelReserve personelReserve) {
+        StdSelections s = StdSelections.fromId(personelReserve.getSelectionSymbolForActions());
+        CubaIcon retIcon;
+
+        if (s != null) {
+            switch (s) {
+                case STAR_RED:
+                case STAR_YELLOW:
+                case STAR_GREEN:
+                    retIcon = CubaIcon.STAR;
+                    break;
+                case FLAG_RED:
+                case FLAG_YELLOW:
+                case FLAG_GREEN:
+                    retIcon = CubaIcon.FLAG;
+                    break;
+                default:
+                    retIcon = CubaIcon.STAR;
+                    break;
+            }
+        } else {
+            retIcon = CubaIcon.STAR;
+        }
+
+        return retIcon;
+    }
+
+    private String getStarIconPersonalReserveStyle(PersonelReserve personelReserve) {
+        StdSelections s = StdSelections.fromId(personelReserve.getSelectionSymbolForActions());
+
+        if (s != null) {
+            switch (s) {
+                case STAR_RED:
+                    return StdSelectionsColor.STAR_RED.getId();
+                case STAR_YELLOW:
+                    return StdSelectionsColor.STAR_YELLOW.getId();
+                case STAR_GREEN:
+                    return StdSelectionsColor.STAR_GREEN.getId();
+                case FLAG_RED:
+                    return StdSelectionsColor.FLAG_RED.getId();
+                case FLAG_YELLOW:
+                    return StdSelectionsColor.FLAG_YELLOW.getId();
+                case FLAG_GREEN:
+                    return StdSelectionsColor.FLAG_GREEN.getId();
+                default:
+                    return StdSelectionsColor.STAR_YELLOW.getId();
+            }
+        } else {
+            return StdSelectionsColor.STAR_YELLOW.getId();
+        }
+    }
+
 
     private Label getPhoneCandidateLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Label retLabel = uiComponents.create(Label.class);

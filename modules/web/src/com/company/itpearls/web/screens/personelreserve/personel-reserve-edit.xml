@@ -141,6 +141,7 @@
               width="50%"
               margin="true">
             <lookupPickerField id="openPositionField"
+                               dataContainer="personelReserveDc"
                                caption="msg://msgOpenPosition"
                                optionsContainer="openPositionsDc"
                                width="100%"
