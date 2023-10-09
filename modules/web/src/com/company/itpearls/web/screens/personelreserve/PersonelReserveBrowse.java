@@ -994,10 +994,13 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                         e.printStackTrace();
                     }
                 })); */
+        final String separatorChar = "⎯";
 
+        String separator = separatorChar.repeat(15);
 
-        final String separator = "----------";
-
+/*
+        final String separator = "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014";
+*/
 
         actionButton.addAction(new BaseAction("sendEmailAction")
                 .withIcon(CubaIcon.ENVELOPE.source())
@@ -1012,6 +1015,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
         actionButton.addAction(new BaseAction("separator2Action")
                 .withCaption(separator));
+        actionButton.getAction("separator2Action").setEnabled(false);
 
         actionButton.addAction(new BaseAction("openCardAction")
                 .withIcon(CubaIcon.CHILD.source())
@@ -1044,6 +1048,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
         actionButton.addAction(new BaseAction("separator3Action")
                 .withCaption(separator));
+        actionButton.getAction("separator3Action").setEnabled(false);
 
         if (personelReserve != null) {
             if (personelReserve.getRemovedFromReserve() != null) {
@@ -1089,10 +1094,25 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                             personelReservesTable.scrollTo(personelReservesTable.getSingleSelected());
                         }));
             }
+        } else {
+            actionButton.addAction(new BaseAction("clearPersonalReserveAction")
+                    .withIcon(CubaIcon.CANCEL.source())
+                    .withCaption(messageBundle.getMessage("msgClosePersonalReserve"))
+                    .withHandler(actionPerformedEvent -> {
+                        closePersonalReserveButtonInvoke();
+                    }));
+
+            actionButton.addAction(new BaseAction("clearPersonalReserveWithCommentAction")
+                    .withIcon(CubaIcon.PICKERFIELD_CLEAR_READONLY.source())
+                    .withCaption(messageBundle.getMessage("msgClosePersonalReserveWithComment"))
+                    .withHandler(actionPerformedEvent -> {
+                        closePersonalReserveButtonWithCommentInvoke();
+                    }));
         }
 
         actionButton.addAction(new BaseAction("separator1Action")
                 .withCaption(separator));
+        actionButton.getAction("separator1Action").setEnabled(false);
 
         actionButton.addAction(new BaseAction("selectedForActionActionStarRed")
                 .withIcon(CubaIcon.STAR.source())
