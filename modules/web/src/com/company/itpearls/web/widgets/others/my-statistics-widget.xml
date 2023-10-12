@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data>
+        <instance id="userDc" class="com.company.itpearls.entity.ExtUser">
+            <view extends="extUser-view"/>
+            <loader id="userDl">
+                <query>
+                    <![CDATA[select e from itpearls_ExtUser e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.login = :login</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </instance>
+    </data>
+    <layout spacing="true" width="100%">
+        <hbox id="mainHBox"
+              expand="photosNameHBox"
+              width="100%">
+            <hbox id="photosNameHBox"
+                  spacing="true"
+                  width="100%">
+                <hbox width="AUTO" spacing="true">
+                    <image id="myPhotoImage"
+                           align="BOTTOM_LEFT"
+                           scaleMode="SCALE_DOWN"
+                           width="70px"
+                           height="70px"/>
+                    <label id="myNameLabel"
+                           align="MIDDLE_LEFT"
+                           stylename="h3"/>
+                </hbox>
+            </hbox>
+            <vbox spacing="false"
+                  stylename="card"
+                  width="AUTO">
+                <label id="currentTimeLabel"
+                       align="MIDDLE_CENTER"
+                       visible="false"
+                       stylename="h1"/>
+                <label id="currentDateLabel"
+                       align="MIDDLE_CENTER"
+                       stylename="h3"/>
+                <label id="currentDayOfWeekLabel"
+                       align="MIDDLE_CENTER"
+                       stylename="h3"/>
+            </vbox>
+        </hbox>
+        <vbox spacing="true" height="AUTO" align="TOP_LEFT">
+            <hbox spacing="true">
+                <label value="msg://msgWarkDay"/>
+                <label id="workTimeTodayLabel"
+                       width="AUTO"
+                       height="AUTO"/>
+                <label value="msg://mshHours"/>
+            </hbox>
+            <hbox spacing="true">
+                <label value="msg://msgInterviewSheduledToday"/>
+                <label id="interviewSheduledTodayLabel"
+                       width="AUTO"
+                       height="AUTO"/>
+            </hbox>
+            <hbox spacing="true">
+                <label value="msg://msgInterviewsConductedToday"/>
+                <label id="interviewsConductedTodayLabel"
+                       width="AUTO"
+                       height="AUTO"/>
+            </hbox>
+            <label id="offerMonthsLabel"
+                   stylename="h4"/>
+        </vbox>
+    </layout>
+</fragment>
