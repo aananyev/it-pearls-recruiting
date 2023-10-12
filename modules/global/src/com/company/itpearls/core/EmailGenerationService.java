@@ -5,7 +5,7 @@ import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.OpenPosition;
 
-import javax.xml.crypto.Data;
+import java.util.Date;
 import java.util.HashMap;
 
 public interface EmailGenerationService {
@@ -17,12 +17,12 @@ public interface EmailGenerationService {
 
     String preparingMessage(String text,
                             ExtUser user,
-                            Data addDate);
+                            Date addDate);
 
     String preparingMessage(String text,
                             JobCandidate jobCandidate,
                             ExtUser user,
-                            Data addDate);
+                            Date addDate);
 
     String preparingMessage(String text,
                             OpenPosition openPosition);
@@ -36,7 +36,7 @@ public interface EmailGenerationService {
                             JobCandidate jobCandidate,
                             OpenPosition openPosition,
                             ExtUser user,
-                            Data addDate);
+                            Date addDate);
 
     String preparingMessage(IteractionList newsItem);
 

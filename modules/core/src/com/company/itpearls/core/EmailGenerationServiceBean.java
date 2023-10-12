@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.inject.Inject;
 import javax.xml.crypto.Data;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
@@ -29,7 +30,7 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
     @Override
     public String preparingMessage(String text,
                                    ExtUser user,
-                                   Data addDate) {
+                                   Date addDate) {
         return preparingMessage(text, null, null, user, addDate);
     }
 
@@ -37,7 +38,7 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
     public String preparingMessage(String text,
                                    JobCandidate jobCandidate,
                                    ExtUser user,
-                                   Data addDate) {
+                                   Date addDate) {
         return preparingMessage(text, jobCandidate, null, user, addDate);
     }
 
@@ -60,7 +61,7 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                    JobCandidate jobCandidate,
                                    OpenPosition openPosition,
                                    ExtUser user,
-                                   Data addDate) {
+                                   Date addDate) {
         HashMap<String, String> emailKeys = generateKeys();
 
         if (text != null) {

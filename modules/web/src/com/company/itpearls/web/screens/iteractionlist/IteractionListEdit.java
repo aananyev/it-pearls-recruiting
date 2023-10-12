@@ -24,6 +24,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import javax.xml.crypto.Data;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -542,7 +543,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     if (getEditedEntity().getIteractionType().getTextEmailToSend() != null) {
                         if (getEditedEntity().getCandidate().getEmail() != null) {
 
-                            String message = preparingMessage(getEditedEntity().getIteractionType().getTextEmailToSend(), getEditedEntity().getCandidate(), getEditedEntity().getVacancy(), userSession.getUser());
+                            String message = preparingMessage(getEditedEntity().getIteractionType().getTextEmailToSend(),
+                                    getEditedEntity().getCandidate(),
+                                    getEditedEntity().getVacancy(),
+                                    userSession.getUser(),
+                                    getEditedEntity().getAddDate());
 
                             screenBuilders.editor(InternalEmailer.class, this)
                                     .withScreenClass(InternalEmailerEdit.class)
@@ -560,6 +565,19 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
         }
+    }
+
+
+    private String preparingMessage(String textEmailToSend,
+                                    JobCandidate candidate,
+                                    OpenPosition vacancy,
+                                    User user,
+                                    Date dateAdd) {
+        return emailGenerationService.preparingMessage(textEmailToSend,
+                candidate,
+                vacancy,
+                (ExtUser) user,
+                dateAdd);
     }
 
     private String preparingMessage(String textEmailToSend, JobCandidate candidate, OpenPosition vacancy, User user) {
