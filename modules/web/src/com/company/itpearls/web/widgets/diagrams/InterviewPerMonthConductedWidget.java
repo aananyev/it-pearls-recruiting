@@ -17,10 +17,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-@UiController("itpearls_InterviewsPerMonthsWidget")
-@UiDescriptor("interviews-per-months-widget.xml")
-@DashboardWidget(name="Interview per months assigned")
-public class InterviewsPerMonthsWidget extends ScreenFragment {
+@UiController("itpearls_InterviewPerMonthConductedWidget")
+@UiDescriptor("interview-per-month-conducted-widget.xml")
+@DashboardWidget(name="Interview per months conducted")
+public class InterviewPerMonthConductedWidget extends ScreenFragment {
     @Inject
     private AngularGaugeChart gaugeChart;
     @Inject
@@ -35,7 +35,7 @@ public class InterviewsPerMonthsWidget extends ScreenFragment {
 
     private void setAssignedInterviewToday() {
         final String query = "select e from itpearls_IteractionList e " +
-                "where e.iteractionType.signOurInterviewAssigned = true and e.recrutier = :recrutier " +
+                "where e.iteractionType.signOurInterview = true and e.recrutier = :recrutier " +
                 "and e.dateIteraction between :startDate and :endDate";
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
@@ -53,12 +53,5 @@ public class InterviewsPerMonthsWidget extends ScreenFragment {
                 .size())));
 
         gaugeChart.setArrows(arrows);
-/*                dataManager
-                        .load(IteractionList.class)
-                        .query(query)
-                        .parameter("recrutier", userSession.getUser())
-                        .view("iteractionList-view")
-                        .list()
-                        .size())); */
     }
 }
