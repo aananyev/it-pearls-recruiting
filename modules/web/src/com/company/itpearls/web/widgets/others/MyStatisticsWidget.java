@@ -37,51 +37,24 @@ import java.util.concurrent.TimeUnit;
 @DashboardWidget(name = "My Statistics")
 public class MyStatisticsWidget extends ScreenFragment {
     @Inject
-    private Label<String> myNameLabel;
-    @Inject
     private UserSession userSession;
     @Inject
-    private Image myPhotoImage;
-    @Inject
     private DataManager dataManager;
-    @Inject
-    private InstanceLoader<ExtUser> userDl;
-    @Inject
-    private InstanceContainer<ExtUser> userDc;
     @Inject
     private Label<String> workTimeTodayLabel;
     @Inject
     private Label<String> interviewSheduledTodayLabel;
     @Inject
     private Label<String> interviewsConductedTodayLabel;
-    @Inject
-    private Label<String> myGroupLabel;
 
     @Subscribe
     public void onInit(InitEvent event) {
-
-        try {
-            userDl.setParameter("login", userSession.getUser().getLogin());
-            userDl.load();
-
-            ExtUser curUser = userDc.getItem();
-            myPhotoImage.setSource(FileDescriptorResource.class)
-                    .setFileDescriptor(curUser.getFileImageFace());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        setRecruterName();
         setOffersCounter();
         setWorkTimeToday();
         setCunductedInterviewToday();
         setAssignedInterviewToday();
-        setUserGroup();
     }
 
-    private void setUserGroup() {
-        myGroupLabel.setValue(userSession.getUser().getGroup().getName());
-    }
 
     private void setCunductedInterviewToday() {
         final String query = "select e from itpearls_IteractionList e " +
@@ -143,7 +116,4 @@ public class MyStatisticsWidget extends ScreenFragment {
     private void setOffersCounter() {
     }
 
-    private void setRecruterName() {
-        myNameLabel.setValue(userSession.getUser().getName());
-    }
 }

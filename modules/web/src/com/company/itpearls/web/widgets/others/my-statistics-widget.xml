@@ -1,23 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
-          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
-    <data>
-        <instance id="userDc" class="com.company.itpearls.entity.ExtUser">
-            <view extends="extUser-view"/>
-            <loader id="userDl">
-                <query>
-                    <![CDATA[select e from itpearls_ExtUser e]]>
-                    <condition>
-                        <and>
-                            <c:jpql>
-                                <c:where>e.login = :login</c:where>
-                            </c:jpql>
-                        </and>
-                    </condition>
-                </query>
-            </loader>
-        </instance>
-    </data>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
     <layout spacing="true" width="100%">
         <hbox id="mainHBox"
               expand="photosNameHBox"
@@ -25,21 +7,7 @@
             <hbox id="photosNameHBox"
                   spacing="true"
                   width="100%">
-                <hbox width="AUTO" spacing="true">
-                    <image id="myPhotoImage"
-                           align="BOTTOM_LEFT"
-                           scaleMode="SCALE_DOWN"
-                           width="70px"
-                           height="70px"/>
-                    <vbox spacing="true">
-                    <label id="myNameLabel"
-                           align="MIDDLE_LEFT"
-                           stylename="h3"/>
-                        <label id="myGroupLabel"
-                               align="MIDDLE_LEFT"
-                               stylename="h4"/>
-                    </vbox>
-                </hbox>
+
             </hbox>
         </hbox>
         <vbox spacing="true" height="AUTO" align="TOP_LEFT">

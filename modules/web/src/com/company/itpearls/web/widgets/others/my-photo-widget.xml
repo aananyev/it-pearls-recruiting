@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data>
+        <instance id="userDc" class="com.company.itpearls.entity.ExtUser">
+            <view extends="extUser-view"/>
+            <loader id="userDl">
+                <query>
+                    <![CDATA[select e from itpearls_ExtUser e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.login = :login</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </instance>
+    </data>
+    <layout width="100%">
+        <hbox width="100%" spacing="true">
+            <image id="myPhotoImage"
+                   align="BOTTOM_LEFT"
+                   scaleMode="SCALE_DOWN"
+                   width="100%"
+                   height="AUTO"/>
+
+        </hbox>
+    </layout>
+</fragment>

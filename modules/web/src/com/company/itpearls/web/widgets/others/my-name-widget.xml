@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout width="100%">
+        <vbox spacing="true" width="100%">
+            <label id="myNameLabel"
+                   align="TOP_CENTER"
+                   stylename="h3"/>
+            <label id="myGroupLabel"
+                   align="TOP_CENTER"
+                   stylename="h4"/>
+        </vbox>
+    </layout>
+</fragment>
