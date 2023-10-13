@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout>
+        <vbox spacing="false"
+              width="AUTO">
+            <label id="currentTimeLabel"
+                   align="MIDDLE_CENTER"
+                   visible="false"
+                   stylename="h1"/>
+            <label id="currentDateLabel"
+                   align="MIDDLE_CENTER"
+                   stylename="h3"/>
+            <label id="currentDayOfWeekLabel"
+                   align="MIDDLE_CENTER"
+                   stylename="h3"/>
+        </vbox>
+    </layout>
+</fragment>

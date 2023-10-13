@@ -31,25 +31,16 @@
                            scaleMode="SCALE_DOWN"
                            width="70px"
                            height="70px"/>
+                    <vbox spacing="true">
                     <label id="myNameLabel"
                            align="MIDDLE_LEFT"
                            stylename="h3"/>
+                        <label id="myGroupLabel"
+                               align="MIDDLE_LEFT"
+                               stylename="h4"/>
+                    </vbox>
                 </hbox>
             </hbox>
-            <vbox spacing="false"
-                  stylename="card"
-                  width="AUTO">
-                <label id="currentTimeLabel"
-                       align="MIDDLE_CENTER"
-                       visible="false"
-                       stylename="h1"/>
-                <label id="currentDateLabel"
-                       align="MIDDLE_CENTER"
-                       stylename="h3"/>
-                <label id="currentDayOfWeekLabel"
-                       align="MIDDLE_CENTER"
-                       stylename="h3"/>
-            </vbox>
         </hbox>
         <vbox spacing="true" height="AUTO" align="TOP_LEFT">
             <hbox spacing="true">

@@ -51,28 +51,20 @@ public class MyStatisticsWidget extends ScreenFragment {
     @Inject
     private Label<String> workTimeTodayLabel;
     @Inject
-    private Label<String> currentTimeLabel;
-    @Inject
-    private Label<String> currentDateLabel;
-    @Inject
-    private Label<String> currentDayOfWeekLabel;
-    @Inject
-    private BackgroundWorker backgroundWorker;
-    @Inject
     private Label<String> interviewSheduledTodayLabel;
     @Inject
     private Label<String> interviewsConductedTodayLabel;
+    @Inject
+    private Label<String> myGroupLabel;
 
     @Subscribe
     public void onInit(InitEvent event) {
 
         try {
-        userDl.setParameter("login", userSession.getUser().getLogin());
-        userDl.load();
+            userDl.setParameter("login", userSession.getUser().getLogin());
+            userDl.load();
 
-//            ExtUser curUser = dataManager.load(ExtUser.class).query("select e from itpearls_ExtUser e where e.login = :login").parameter("login", userSession.getUser().getLogin()).one();
             ExtUser curUser = userDc.getItem();
-
             myPhotoImage.setSource(FileDescriptorResource.class)
                     .setFileDescriptor(curUser.getFileImageFace());
         } catch (Exception e) {
@@ -82,11 +74,13 @@ public class MyStatisticsWidget extends ScreenFragment {
         setRecruterName();
         setOffersCounter();
         setWorkTimeToday();
-        setCurrentTime();
-        setCurrentDate();
-        setCurrentDayOfWeek();
         setCunductedInterviewToday();
         setAssignedInterviewToday();
+        setUserGroup();
+    }
+
+    private void setUserGroup() {
+        myGroupLabel.setValue(userSession.getUser().getGroup().getName());
     }
 
     private void setCunductedInterviewToday() {
@@ -117,27 +111,11 @@ public class MyStatisticsWidget extends ScreenFragment {
                         .size()));
     }
 
-    private void setCurrentDayOfWeek() {
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
-        currentDayOfWeekLabel.setValue(sdf.format(new Date()));
-    }
-
-    private void setCurrentDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
-        currentDateLabel.setValue(sdf.format(new Date()));
-    }
-
-    private void setCurrentTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("H:m");
-        currentTimeLabel.setValue(sdf.format(new Date()));
-    }
-
     private void setWorkTimeToday() {
         workTimeTodayLabel.setValue(getWorkTime(Calendar.DAY_OF_MONTH));
     }
 
     private String getWorkTime(int dayOfMonth) {
-        String retStr = null;
         String query = null;
 
         switch (dayOfMonth) {
@@ -150,13 +128,13 @@ public class MyStatisticsWidget extends ScreenFragment {
 
         List<SessionLogEntry> sessionLogEntry =
                 dataManager.loadValue(query, SessionLogEntry.class)
-                .parameter("user", userSession.getUser())
-                .list();
+                        .parameter("user", userSession.getUser())
+                        .list();
         int countTime = 0;
 
         for (SessionLogEntry sle : sessionLogEntry) {
             Date finishedTs = sle.getFinishedTs() != null ? sle.getFinishedTs() : new Date();
-            countTime += (int)(finishedTs.getTime() - sle.getStartedTs().getTime()) / 60000 / 60;
+            countTime += (int) (finishedTs.getTime() - sle.getStartedTs().getTime()) / 60000 / 60;
         }
 
         return String.valueOf(countTime);
