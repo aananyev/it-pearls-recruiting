@@ -1,4 +1,4 @@
-package com.company.itpearls.web.widgets.Diagrams;
+package com.company.itpearls.web.widgets.diagrams;
 
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
@@ -10,14 +10,11 @@ import com.haulmont.charts.gui.data.MapDataItem;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.gui.WindowParam;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import org.graalvm.compiler.debug.DebugContext;
 import org.graalvm.compiler.graph.Graph;
-import org.graalvm.compiler.options.OptionValues;
 
 import javax.inject.Inject;
 import java.util.*;

@@ -1,25 +1,19 @@
-package com.company.itpearls.web.widgets.Diagrams;
+package com.company.itpearls.web.widgets.diagrams;
 
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
-import com.google.common.collect.ImmutableMap;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.charts.gui.amcharts.model.Color;
 import com.haulmont.charts.gui.amcharts.model.Title;
 import com.haulmont.charts.gui.components.charts.SerialChart;
 import com.haulmont.charts.gui.data.*;
-import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.LoadContext;
-import com.haulmont.cuba.core.global.ValueLoadContext;
 import com.haulmont.cuba.gui.WindowParam;
-import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import jdk.jfr.ValueDescriptor;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;

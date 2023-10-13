@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
+<layout width="100%">
+        <chart:gaugeChart id="gaugeChart" caption="msg://msgInterviewPerMonth"
+                          height="100%"
+                          width="100%">
+            <chart:axes>
+                <chart:axis axisAlpha="0.2"
+                            axisThickness="1"
+                            bottomText="msg://msgInterviewAssigned"
+                            bottomTextYOffset="-1"
+                            endValue="30"
+                            tickAlpha="0.2"
+                            valueInterval="5">
+                    <chart:bands>
+                        <chart:band color="#cc4748"
+                                    endValue="10"
+                                    startValue="0"/>
+                        <chart:band color="#fdd400"
+                                    endValue="20"
+                                    startValue="10"/>
+                        <chart:band color="#84b761"
+                                    endValue="30"
+                                    innerRadius="95%"
+                                    startValue="20"/>
+                    </chart:bands>
+                </chart:axis>
+            </chart:axes>
+            <chart:arrows>
+                <chart:arrow id="arrowArrows" value="60"/>
+            </chart:arrows>
+            <chart:export/>
+        </chart:gaugeChart>
+    </layout>
+</fragment>
