@@ -3,14 +3,14 @@
           xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
     <layout width="100%">
         <chart:gaugeChart id="gaugeChart"
-                          caption="msg://msgInterviewPerMonth"
+                          caption="msg://msgJobOfferToday"
                           height="100%"
                           creditsPosition="BOTTOM_RIGHT"
                           width="100%">
             <chart:axes>
                 <chart:axis axisAlpha="0.2"
                             axisThickness="1"
-                            bottomText="msg://msgInterviewConducted"
+                            bottomText="msg://msgJobOfferToday"
                             bottomTextYOffset="-1"
                             endValue="30"
                             tickAlpha="0.2"

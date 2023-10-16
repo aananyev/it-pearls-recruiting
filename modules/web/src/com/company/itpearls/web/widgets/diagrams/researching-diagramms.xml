@@ -8,6 +8,7 @@
                            dataDateFormat="DD.MM"
                            balloonDateFormat="dd.MM"
                            categoryField="date"
+                           creditsPosition="BOTTOM_RIGHT"
                            height="100%"
                            width="100%">
             <chart:balloon adjustBorderColor="true"

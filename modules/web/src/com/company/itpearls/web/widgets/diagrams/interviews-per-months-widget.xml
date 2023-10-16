@@ -4,6 +4,7 @@
 <layout width="100%">
         <chart:gaugeChart id="gaugeChart" caption="msg://msgInterviewPerMonth"
                           height="100%"
+                          creditsPosition="BOTTOM_RIGHT"
                           width="100%">
             <chart:axes>
                 <chart:axis axisAlpha="0.2"

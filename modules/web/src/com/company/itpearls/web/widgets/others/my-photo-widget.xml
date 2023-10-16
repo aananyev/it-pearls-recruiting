@@ -26,6 +26,7 @@
             <image id="myPhotoImage"
                    align="BOTTOM_LEFT"
                    scaleMode="SCALE_DOWN"
+                   stylename="round-photo-150px"
                    width="100%"
                    height="AUTO"/>
 

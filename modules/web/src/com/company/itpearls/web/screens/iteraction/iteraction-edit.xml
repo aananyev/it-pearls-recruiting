@@ -131,6 +131,10 @@ order by e.number]]>
                                   caption="msg://msgSignViewOnlyManagers"
                                   dataContainer="iteractionDc"
                                   property="signViewOnlyManager"/>
+                        <checkBox id="signStartCaseCheckBox"
+                                  caption="msg://mshSignStartCase"
+                                  dataContainer="iteractionDc"
+                                  property="signStartCase"/>
                         <checkBox id="signEndCaseCheckBox"
                                   caption="msg://mshSignEndCase"
                                   dataContainer="iteractionDc"

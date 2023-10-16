@@ -122,6 +122,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_PERSONAL_RESERVE_REMOVE", unique = true)
     private Boolean signPersonalReserveRemove;
 
+    @Column(name = "SIGN_START_CASE")
+    private Boolean signStartCase;
+
     @Column(name = "SIGN_END_CASE")
     private Boolean signEndCase;
 
@@ -165,6 +168,14 @@ public class Iteraction extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WORK_STATUS_ID")
     private EmployeeWorkStatus workStatus;
+
+    public Boolean getSignStartCase() {
+        return signStartCase;
+    }
+
+    public void setSignStartCase(Boolean signStartCase) {
+        this.signStartCase = signStartCase;
+    }
 
     public Boolean getSignPersonalReserveDelete() {
         return signPersonalReserveDelete;
