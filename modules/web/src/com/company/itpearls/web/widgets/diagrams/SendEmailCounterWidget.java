@@ -43,7 +43,7 @@ public class SendEmailCounterWidget extends ScreenFragment {
         gregorianCalendar.add(GregorianCalendar.DAY_OF_MONTH, -1);
 
         List<GaugeArrow> arrows = new ArrayList();
-        arrows.add(new GaugeArrow().setValue(Double.valueOf(dataManager
+        Double arrowData = Double.valueOf(dataManager
                 .load(IteractionList.class)
                 .query(query)
                 .parameter("recrutier", userSession.getUser())
@@ -51,7 +51,13 @@ public class SendEmailCounterWidget extends ScreenFragment {
                 .parameter("startDate", gregorianCalendar.getTime())
                 .view("iteractionList-view")
                 .list()
-                .size())));
+                .size());
+
+        if (arrowData > gaugeChart.getAxes().get(0).getEndValue()) {
+            gaugeChart.getAxes().get(0).setEndValue((arrowData / 10 + 1) * 10);
+        }
+
+        arrows.add(new GaugeArrow().setValue(arrowData));
 
         gaugeChart.setArrows(arrows);
     }

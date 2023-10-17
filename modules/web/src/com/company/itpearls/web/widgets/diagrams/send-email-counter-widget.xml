@@ -3,7 +3,6 @@
           xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
 <layout width="100%">
         <chart:gaugeChart id="gaugeChart"
-                          caption="msg://msgSendEmailCounter"
                           height="100%"
                           creditsPosition="BOTTOM_RIGHT"
                           width="100%">

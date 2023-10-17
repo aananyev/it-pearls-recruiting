@@ -3,7 +3,6 @@
           xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
     <layout width="100%">
         <chart:gaugeChart id="gaugeChart"
-                          caption="msg://msgInterviewPerMonth"
                           height="100%"
                           creditsPosition="BOTTOM_RIGHT"
                           width="100%">
@@ -12,7 +11,7 @@
                             axisThickness="1"
                             bottomText="msg://msgInterviewConducted"
                             bottomTextYOffset="-1"
-                            endValue="30"
+                            endValue="40"
                             tickAlpha="0.2"
                             valueInterval="5">
                     <chart:bands>
@@ -26,6 +25,10 @@
                                     endValue="30"
                                     innerRadius="95%"
                                     startValue="20"/>
+                        <chart:band color="blue"
+                                    endValue="40"
+                                    innerRadius="95%"
+                                    startValue="30"/>
                     </chart:bands>
                 </chart:axis>
             </chart:axes>
