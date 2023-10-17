@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout width="100%" spacing="false">
+        <vbox spacing="true">
+            <label value="msg://msgGrade"
+                   stylename="h4" visible="false"
+                   align="TOP_CENTER"/>
+            <hbox align="TOP_CENTER" spacing="true">
+                <label id="gradeLabel"
+                       align="MIDDLE_CENTER"
+                       stylename="h3"/>
+                <label id="gradeGrowthLabel"
+                       icon="font-icon:ARROW_CIRCLE_O_UP"
+                       align="MIDDLE_CENTER"
+                       visible="false"/>
+                <label id="gradeFallLabel"
+                       icon="font-icon:ARROW_CIRCLE_O_DOWN"
+                       align="MIDDLE_CENTER"
+                       visible="false"/>
+                <label id="helpIconLabel"
+                       icon="QUESTION_CIRCLE_O"
+                       align="MIDDLE_CENTER"
+                       description="msg://msgHelpIconDesc"/>
+            </hbox>
+        </vbox>
+    </layout>
+</fragment>
