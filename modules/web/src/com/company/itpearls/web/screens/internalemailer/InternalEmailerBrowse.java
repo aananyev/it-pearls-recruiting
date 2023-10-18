@@ -26,7 +26,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
     @Install(to = "emailersTable.replyInternalEmailerColumn", subject = "columnGenerator")
     private Component emailersTableReplyInternalEmailerColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
-        final String QUERY_GET_REPLY = "select e from itpearls_InternalEmailerTemplate e where e.replyInternalEmailer = :replyInternalEmailer";
+        final String QUERY_GET_REPLY = "select e from itpearls_InternalEmailer e " +
+                "where e.replyInternalEmailer = :replyInternalEmailer";
 
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setHeightFull();
@@ -34,21 +35,22 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
         Label replyLabel = uiComponents.create(Label.class);
         replyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        replyLabel.setIconFromSet(CubaIcon.MAIL_REPLY);
         replyLabel.setStyleName("h1-green");
 
         if (dataManager
-                .load(InternalEmailerTemplate.class)
+                .load(InternalEmailer.class)
                 .query(QUERY_GET_REPLY)
-                .parameter("replyInternalEmailer", emailersTable.getSingleSelected())
-                .view("internalEmailerTemplate-view")
-                .list().size() > 0) {
-            replyLabel.setVisible(false);
-        } else {
+                .parameter("replyInternalEmailer", event.getItem())
+                .view("internalEmailer-view")
+                .list()
+                .size() > 0) {
             replyLabel.setVisible(true);
+            replyLabel.setIconFromSet(CubaIcon.MAIL_REPLY);
+            retHbox.add(replyLabel);
+        } else {
+            replyLabel.setVisible(false);
         }
 
-        retHbox.add(replyLabel);
 
         return retHbox;
     }

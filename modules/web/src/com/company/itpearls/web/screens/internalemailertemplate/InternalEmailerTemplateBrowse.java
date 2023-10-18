@@ -71,14 +71,20 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
     }
 
     private void resendEmailAction(Action.ActionPerformedEvent actionPerformedEvent) {
-        screenBuilders.editor(InternalEmailerTemplate.class, this)
+        screenBuilders.editor(InternalEmailer.class, this)
+                .withScreenClass(InternalEmailerTemplateEdit.class)
+                .newEntity()
                 .withInitializer(event -> {
                     event.setToEmail(emailersTable.getSingleSelected().getToEmail());
                     event.setReplyInternalEmailer(emailersTable.getSingleSelected());
                 })
-                .newEntity()
+                .withAfterCloseListener(afterCloseEvent -> {
+                    emailersTable.setSelected(emailersTable.getSingleSelected());
+                    emailersTable.repaint();
+                })
                 .withOpenMode(OpenMode.DIALOG)
                 .build()
                 .show();
     }
+
 }

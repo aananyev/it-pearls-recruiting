@@ -47,6 +47,12 @@
                 dataLoader="internalEmailTemplatesDl">
             <properties include=".*"/>
         </filter>
+        <button id="showEmailWithTemplatesButton"
+                caption="msg://msgShowEmails"
+                description="msg://msgShowEmailsDesc" width="AUTO"
+                icon="ENVELOPE_SQUARE"
+                invoke="showEmailWithTemplatesButtonInvoke"
+                align="BOTTOM_LEFT"/>
         <groupTable id="internalEmailTemplatesTable"
                     width="100%"
                     stylename="table-wordwrap-linehight-200"

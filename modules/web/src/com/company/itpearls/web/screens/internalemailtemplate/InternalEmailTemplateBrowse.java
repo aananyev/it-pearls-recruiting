@@ -114,4 +114,15 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
 
         screen.show();
     }
+
+
+    public void showEmailWithTemplatesButtonInvoke() {
+        InternalEmailerTemplateBrowse screen = screenBuilders.screen(this)
+                .withScreenClass(InternalEmailerTemplateBrowse.class)
+                .withOpenMode(OpenMode.NEW_TAB)
+                .build();
+
+        screen.setCurrentUser();
+        screen.show();
+    }
 }
