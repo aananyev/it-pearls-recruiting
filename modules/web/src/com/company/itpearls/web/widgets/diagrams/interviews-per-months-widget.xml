@@ -16,16 +16,20 @@
                             valueInterval="5">
                     <chart:bands>
                         <chart:band color="#cc4748"
+                                    balloonText="Junior"
                                     endValue="10"
                                     startValue="0"/>
                         <chart:band color="#fdd400"
+                                    balloonText="Regular"
                                     endValue="20"
                                     startValue="10"/>
                         <chart:band color="#84b761"
+                                    balloonText="Master"
                                     endValue="30"
                                     innerRadius="95%"
                                     startValue="20"/>
                         <chart:band color="blue"
+                                    balloonText="GrandMaster"
                                     endValue="40"
                                     innerRadius="95%"
                                     startValue="30"/>

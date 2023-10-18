@@ -67,6 +67,7 @@
                 <column id="templateOpenPosition" width="450px"/>
                 <column id="templatePosition" width="300px"/>
                 <column id="templateAuthor"/>
+                <column id="sendedMessageColumn" width="80px" generator="sendedMessageColumn"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

@@ -1,9 +1,13 @@
 package com.company.itpearls.web.screens.internalemailtemplate;
 
 import com.company.itpearls.entity.InternalEmailerTemplate;
+import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateBrowse;
 import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.InternalEmailTemplate;
@@ -25,6 +29,10 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
     private GroupTable<InternalEmailTemplate> internalEmailTemplatesTable;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private MessageBundle messageBundle;
+    @Inject
+    private ScreenBuilders screenBuilders;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -64,9 +72,9 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
         if (entity.getTemplateOpenPosition() != null) {
             image.setSource(FileDescriptorResource.class)
                     .setFileDescriptor(entity
-                    .getTemplateOpenPosition()
-                    .getProjectName()
-                    .getProjectLogo());
+                            .getTemplateOpenPosition()
+                            .getProjectName()
+                            .getProjectLogo());
         } else {
             image.setSource(ThemeResource.class)
                     .setPath("icons/no-company.png");
@@ -75,5 +83,35 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
         retHBox.add(image);
 
         return retHBox;
+    }
+
+    public Component sendedMessageColumn(Entity entity) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        PopupButton actionButton = uiComponents.create(PopupButton.class);
+        actionButton.setIconFromSet(CubaIcon.BARS);
+        actionButton.setWidthAuto();
+        actionButton.setHeightAuto();
+        actionButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        actionButton.addAction(new BaseAction("viewSendedEmail")
+                .withCaption(messageBundle.getMessage("msgViewSendedMessage"))
+                .withHandler(actionPerformedEvent -> viewSendedEmailAction(actionPerformedEvent)));
+
+        retHBox.add(actionButton);
+        return retHBox;
+    }
+
+    private void viewSendedEmailAction(Action.ActionPerformedEvent actionPerformedEvent) {
+        InternalEmailerTemplateBrowse screen = screenBuilders.screen(this)
+                .withScreenClass(InternalEmailerTemplateBrowse.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        screen.setEmailTemplateFilter(internalEmailTemplatesTable.getSingleSelected());
+        screen.setCurrentUser();
+
+        screen.show();
     }
 }
