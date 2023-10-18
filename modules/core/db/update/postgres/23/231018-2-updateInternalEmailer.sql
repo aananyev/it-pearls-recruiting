@@ -1,0 +1,1 @@
+alter table ITPEARLS_INTERNAL_EMAILER add column REPLY_INTERNAL_EMAILER_ID uuid ;

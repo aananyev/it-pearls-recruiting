@@ -294,4 +294,8 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
 
         });
     }
+
+    public void setToEmailField(JobCandidate jobCandidate) {
+        toEmailField.setValue(jobCandidate);
+    }
 }

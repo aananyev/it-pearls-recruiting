@@ -3,6 +3,8 @@ package com.company.itpearls.web.screens.internalemailertemplate;
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.InternalEmailTemplate;
 import com.company.itpearls.entity.InternalEmailer;
+import com.company.itpearls.entity.InternalEmailerTemplate;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
@@ -29,12 +31,19 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
     private ScreenBuilders screenBuilders;
     @Inject
     private UserSession userSession;
+    @Inject
+    private DataGrid<InternalEmailerTemplate> emailersTable;
+    @Inject
+    private DataManager dataManager;
+
+
+
 
     @Install(to = "emailersTable.actionButtonColumn", subject = "columnGenerator")
     private Component emailersTableActionButtonColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setWidthFull();
-        retHbox.setWidthAuto();
+        retHbox.setHeightFull();
 
         PopupButton actionButton = uiComponents.create(PopupButton.class);
         actionButton.setIconFromSet(CubaIcon.BARS);
@@ -62,6 +71,14 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
     }
 
     private void resendEmailAction(Action.ActionPerformedEvent actionPerformedEvent) {
-
+        screenBuilders.editor(InternalEmailerTemplate.class, this)
+                .withInitializer(event -> {
+                    event.setToEmail(emailersTable.getSingleSelected().getToEmail());
+                    event.setReplyInternalEmailer(emailersTable.getSingleSelected());
+                })
+                .newEntity()
+                .withOpenMode(OpenMode.DIALOG)
+                .build()
+                .show();
     }
 }

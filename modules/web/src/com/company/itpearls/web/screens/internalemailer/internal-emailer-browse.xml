@@ -42,6 +42,11 @@
                 <column property="draftEmail"
                         id="draftEmail"
                         width="60px"/>
+                <column id="replyInternalEmailerColumn"
+                        width="40px"
+                        caption="msg://msgReply">
+                    <componentRenderer/>
+                </column>
                 <column id="toEmail"
                         width="250px"
                         minimumWidth="170px"

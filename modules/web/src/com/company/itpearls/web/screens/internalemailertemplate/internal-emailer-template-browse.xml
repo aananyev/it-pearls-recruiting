@@ -37,7 +37,9 @@
                   width="100%"
                   dataContainer="emailersDc">
             <columns>
-                <column id="actionButtonColumn" width="60px" caption="msg://msgActions">
+                <column id="actionButtonColumn"
+                        width="80px"
+                        caption="msg://msgActions">
                     <componentRenderer/>
                 </column>
             </columns>

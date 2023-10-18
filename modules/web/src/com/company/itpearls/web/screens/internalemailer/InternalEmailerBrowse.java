@@ -1,8 +1,11 @@
 package com.company.itpearls.web.screens.internalemailer;
 
+import com.company.itpearls.entity.InternalEmailerTemplate;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.InternalEmailer;
 import com.haulmont.cuba.gui.screen.LookupComponent;
@@ -16,6 +19,39 @@ import javax.inject.Inject;
 public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private DataGrid<InternalEmailer> emailersTable;
+
+    @Install(to = "emailersTable.replyInternalEmailerColumn", subject = "columnGenerator")
+    private Component emailersTableReplyInternalEmailerColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
+        final String QUERY_GET_REPLY = "select e from itpearls_InternalEmailerTemplate e where e.replyInternalEmailer = :replyInternalEmailer";
+
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setHeightFull();
+        retHbox.setWidthFull();
+
+        Label replyLabel = uiComponents.create(Label.class);
+        replyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        replyLabel.setIconFromSet(CubaIcon.MAIL_REPLY);
+        replyLabel.setStyleName("h1-green");
+
+        if (dataManager
+                .load(InternalEmailerTemplate.class)
+                .query(QUERY_GET_REPLY)
+                .parameter("replyInternalEmailer", emailersTable.getSingleSelected())
+                .view("internalEmailerTemplate-view")
+                .list().size() > 0) {
+            replyLabel.setVisible(false);
+        } else {
+            replyLabel.setVisible(true);
+        }
+
+        retHbox.add(replyLabel);
+
+        return retHbox;
+    }
 
     @Install(to = "emailersTable.toEmail", subject = "columnGenerator")
     private Component emailersTableToEmailColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {

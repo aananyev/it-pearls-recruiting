@@ -1066,6 +1066,7 @@ create table ITPEARLS_INTERNAL_EMAILER (
     --
     -- from itpearls_InternalEmailerTemplate
     EMAIL_TEMPLATE_ID uuid,
+    REPLY_INTERNAL_EMAILER_ID uuid,
     --
     primary key (ID)
 )^

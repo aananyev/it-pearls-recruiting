@@ -30,6 +30,11 @@ public class InternalEmailer extends StandardEntity {
     @NotNull
     private JobCandidate toEmail;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "REPLY_INTERNAL_EMAILER_ID")
+    private InternalEmailer replyInternalEmailer;
+
     @Column(name = "SUBJECT_EMAIL")
     private String subjectEmail;
 
@@ -49,6 +54,14 @@ public class InternalEmailer extends StandardEntity {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "DATE_SEND_EMAIL")
     private Date dateSendEmail;
+
+    public InternalEmailer getReplyInternalEmailer() {
+        return replyInternalEmailer;
+    }
+
+    public void setReplyInternalEmailer(InternalEmailer replyInternalEmailer) {
+        this.replyInternalEmailer = replyInternalEmailer;
+    }
 
     public Date getDateSendEmail() {
         return dateSendEmail;
