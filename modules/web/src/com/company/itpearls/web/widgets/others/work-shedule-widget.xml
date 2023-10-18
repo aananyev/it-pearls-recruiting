@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout width="100%">
+        <label id="workTimeLabel"
+               align="MIDDLE_CENTER"
+               width="AUTO"
+               icon="CALENDAR_CHECK_O"
+               stylename="h3"/>
+    </layout>
+</fragment>
