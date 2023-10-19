@@ -1,8 +1,6 @@
 package com.company.itpearls.web.screens.internalemailer;
 
-import com.company.itpearls.entity.InternalEmailerTemplate;
-import com.company.itpearls.entity.StdSelections;
-import com.company.itpearls.entity.StdSelectionsColor;
+import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
@@ -13,8 +11,8 @@ import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.InternalEmailer;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
 
@@ -23,6 +21,8 @@ import javax.inject.Inject;
 @LookupComponent("emailersTable")
 @LoadDataBeforeShow
 public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
+    @Inject
+    private CheckBox onlyMyLettersCheckBox;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -35,6 +35,24 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private MessageBundle messageBundle;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private UserSession userSession;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        onlyMyLettersCheckBox.setValue(true);
+    }
+
+    @Subscribe("onlyMyLettersCheckBox")
+    public void onOnlyMyLettersCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (onlyMyLettersCheckBox.getValue()) {
+            emailersDl.setParameter("fromEmail", userSession.getUser());
+        } else {
+            emailersDl.removeParameter("fromEmail");
+        }
+
+        emailersDl.load();
+    }
 
     @Install(to = "emailersTable.replyInternalEmailerColumn", subject = "columnGenerator")
     private Component emailersTableReplyInternalEmailerColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {

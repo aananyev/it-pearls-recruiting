@@ -86,6 +86,16 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         if (jobCandidate != null) {
             toEmailField.setValue(jobCandidate);
         }
+
+        checkSended();
+    }
+
+    private void checkSended() {
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            if (getEditedEntity().getDateSendEmail() != null) {
+                sendAndCloseButton.setEnabled(false);
+            }
+        }
     }
 
     private void setSender(ExtUser user) {

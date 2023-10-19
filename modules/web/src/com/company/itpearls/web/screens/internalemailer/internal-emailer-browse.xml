@@ -18,6 +18,13 @@
             <loader id="emailersDl">
                 <query>
                     <![CDATA[select e from itpearls_InternalEmailer e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.fromEmail = :fromEmail</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -87,6 +94,10 @@
                 <button id="editBtn" action="emailersTable.edit"/>
             </buttonsPanel>
         </dataGrid>
+        <checkBox id="onlyMyLettersCheckBox"
+                  caption="msg://msgOnlyMyEmails"
+                  description="msg://msgOnlyMyEmailsDesc"
+                  width="AUTO"/>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
