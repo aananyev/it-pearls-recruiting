@@ -3654,3 +3654,12 @@ server started
 2023-10-19 20:06:35.341 +04 [23009] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-10-19 20:06:36.058 +04 [23012] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-10-19 20:06:36.161 +04 [23014] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down...2023-10-19 20:16:42.053 +04 [15922] LOG:  received fast shutdown request
+.2023-10-19 20:16:42.053 +04 [15922] LOG:  aborting any active transactions
+2023-10-19 20:16:42.054 +04 [23075] FATAL:  terminating connection due to administrator command
+2023-10-19 20:16:42.054 +04 [23077] FATAL:  terminating connection due to administrator command
+2023-10-19 20:16:42.056 +04 [15922] LOG:  background worker "logical replication launcher" (PID 15929) exited with exit code 1
+2023-10-19 20:16:42.069 +04 [15924] LOG:  shutting down
+2023-10-19 20:16:42.105 +04 [15922] LOG:  database system is shut down
+ done
+server stopped

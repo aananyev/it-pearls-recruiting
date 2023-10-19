@@ -33,6 +33,13 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
     private MessageBundle messageBundle;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private CheckBox templateFromJobSubscribeCheckBox;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        templateFromJobSubscribeCheckBox.setValue(true);
+    }
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -124,5 +131,16 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
 
         screen.setCurrentUser();
         screen.show();
+    }
+
+    @Subscribe("templateFromJobSubscribeCheckBox")
+    public void onTemplateFromJobSubscribeCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue()) {
+            internalEmailTemplatesDl.setParameter("subscriber", userSession.getUser());
+        } else {
+            internalEmailTemplatesDl.removeParameter("subscriber");
+        }
+
+        internalEmailTemplatesDl.load();
     }
 }

@@ -105,6 +105,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected Boolean noSubscribe = false;
     private List<Iteraction> mostPopular = new ArrayList<>();
     private Boolean afterCommitSign = true;
+    private Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
     @Inject
     private EmailGenerationService emailGenerationService;
@@ -113,7 +114,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private Label<String> currentPriorityLabel;
 
-    private Map<String, Integer> priorityMap = new LinkedHashMap<>();
     @Inject
     private Image trafficLighterImage;
     @Inject
