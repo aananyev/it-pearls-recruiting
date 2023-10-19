@@ -426,4 +426,16 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
     }
+
+    public void setToEmailField(JobCandidate jobCandidate) {
+        toEmailField.setValue(jobCandidate);
+    }
+
+    public void setReplyInternalEmailer(InternalEmailer internalEmailer) {
+        getEditedEntity().setReplyInternalEmailer(internalEmailer);
+    }
+
+    public InternalEmailer getInternalEmailer() {
+        return getEditedEntity();
+    }
 }

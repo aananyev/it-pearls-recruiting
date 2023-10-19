@@ -1058,15 +1058,18 @@ create table ITPEARLS_INTERNAL_EMAILER (
     DRAFT_EMAIL boolean,
     FROM_EMAIL_ID uuid not null,
     TO_EMAIL_ID uuid not null,
+    REPLY_INTERNAL_EMAILER_ID uuid,
     SUBJECT_EMAIL varchar(255),
     BODY_EMAIL text not null,
     BODY_HTML boolean,
     DATE_CREATE_EMAIL timestamp not null,
     DATE_SEND_EMAIL timestamp,
+    SELECTED_FOR_ACTION boolean,
+    SELECTION_SYMBOL_FOR_ACTIONS integer,
+    REMOVED_FROM_RESERVE boolean,
     --
     -- from itpearls_InternalEmailerTemplate
     EMAIL_TEMPLATE_ID uuid,
-    REPLY_INTERNAL_EMAILER_ID uuid,
     --
     primary key (ID)
 )^

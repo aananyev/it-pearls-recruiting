@@ -298,4 +298,8 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     public void setToEmailField(JobCandidate jobCandidate) {
         toEmailField.setValue(jobCandidate);
     }
+
+    public InternalEmailerTemplate getInternalEmailerTemplate() {
+        return (InternalEmailerTemplate) getEditedEntity();
+    }
 }

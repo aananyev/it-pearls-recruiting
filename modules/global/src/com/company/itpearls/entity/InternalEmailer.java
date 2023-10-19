@@ -55,6 +55,39 @@ public class InternalEmailer extends StandardEntity {
     @Column(name = "DATE_SEND_EMAIL")
     private Date dateSendEmail;
 
+    @Column(name = "SELECTED_FOR_ACTION")
+    private Boolean selectedForAction;
+
+    @Column(name = "SELECTION_SYMBOL_FOR_ACTIONS")
+    private Integer selectionSymbolForActions;
+
+    @Column(name = "REMOVED_FROM_RESERVE")
+    private Boolean removedFromReserve;
+
+    public Boolean getRemovedFromReserve() {
+        return removedFromReserve;
+    }
+
+    public void setRemovedFromReserve(Boolean removedFromReserve) {
+        this.removedFromReserve = removedFromReserve;
+    }
+
+    public Integer getSelectionSymbolForActions() {
+        return selectionSymbolForActions;
+    }
+
+    public void setSelectionSymbolForActions(Integer selectionSymbolForActions) {
+        this.selectionSymbolForActions = selectionSymbolForActions;
+    }
+
+    public Boolean getSelectedForAction() {
+        return selectedForAction;
+    }
+
+    public void setSelectedForAction(Boolean selectedForAction) {
+        this.selectedForAction = selectedForAction;
+    }
+
     public InternalEmailer getReplyInternalEmailer() {
         return replyInternalEmailer;
     }

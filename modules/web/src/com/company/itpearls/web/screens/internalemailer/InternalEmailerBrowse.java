@@ -1,11 +1,17 @@
 package com.company.itpearls.web.screens.internalemailer;
 
 import com.company.itpearls.entity.InternalEmailerTemplate;
+import com.company.itpearls.entity.StdSelections;
+import com.company.itpearls.entity.StdSelectionsColor;
+import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.InternalEmailer;
 import com.haulmont.cuba.gui.screen.LookupComponent;
@@ -23,6 +29,12 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private DataManager dataManager;
     @Inject
     private DataGrid<InternalEmailer> emailersTable;
+    @Inject
+    private CollectionLoader<InternalEmailer> emailersDl;
+    @Inject
+    private MessageBundle messageBundle;
+    @Inject
+    private ScreenBuilders screenBuilders;
 
     @Install(to = "emailersTable.replyInternalEmailerColumn", subject = "columnGenerator")
     private Component emailersTableReplyInternalEmailerColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
@@ -36,6 +48,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         Label replyLabel = uiComponents.create(Label.class);
         replyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         replyLabel.setStyleName("h1-green");
+
+        Label selectionLabel = setSelectionLabel(event.getItem());
 
         if (dataManager
                 .load(InternalEmailer.class)
@@ -51,8 +65,65 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
             replyLabel.setVisible(false);
         }
 
+        retHbox.add(selectionLabel);
+
 
         return retHbox;
+    }
+
+    private Label setSelectionLabel(InternalEmailer item) {
+        Label star = uiComponents.create(Label.class);
+        star.setIconFromSet(CubaIcon.STAR);
+        star.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        star.setStyleName("pic-center-large-orange");
+
+
+        if (item.getSelectedForAction() != null) {
+            if (item.getSelectionSymbolForActions() == null) {
+                if (item.getSelectedForAction()) {
+                    star.setVisible(true);
+                } else {
+                    star.setVisible(false);
+                }
+            } else {
+                StdSelections s = StdSelections.fromId(item.getSelectionSymbolForActions());
+
+                switch (s) {
+                    case STAR_RED:
+                        star.setIconFromSet(CubaIcon.STAR);
+                        star.setStyleName(StdSelectionsColor.STAR_RED.getId());
+                        break;
+                    case STAR_YELLOW:
+                        star.setIconFromSet(CubaIcon.STAR);
+                        star.setStyleName(StdSelectionsColor.STAR_YELLOW.getId());
+                        break;
+                    case STAR_GREEN:
+                        star.setIconFromSet(CubaIcon.STAR);
+                        star.setStyleName(StdSelectionsColor.STAR_GREEN.getId());
+                        break;
+                    case FLAG_RED:
+                        star.setIconFromSet(CubaIcon.FLAG);
+                        star.setStyleName(StdSelectionsColor.FLAG_RED.getId());
+                        break;
+                    case FLAG_YELLOW:
+                        star.setIconFromSet(CubaIcon.FLAG);
+                        star.setStyleName(StdSelectionsColor.FLAG_YELLOW.getId());
+                        break;
+                    case FLAG_GREEN:
+                        star.setIconFromSet(CubaIcon.FLAG);
+                        star.setStyleName(StdSelectionsColor.FLAG_GREEN.getId());
+                        break;
+                    default:
+                        star.setIconFromSet(CubaIcon.STAR);
+                        star.setStyleName(StdSelectionsColor.STAR_YELLOW.getId());
+                        break;
+                }
+            }
+        } else {
+            star.setVisible(false);
+        }
+
+        return star;
     }
 
     @Install(to = "emailersTable.toEmail", subject = "columnGenerator")
@@ -108,5 +179,174 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         retHBox.expand(label);
 
         return retHBox;
+    }
+
+
+    private void selectForAction(StdSelections star) {
+        InternalEmailer internalEmailer = emailersTable.getSingleSelected();
+        internalEmailer.setSelectedForAction(true);
+        internalEmailer.setSelectionSymbolForActions(star.getId());
+        dataManager.commit(internalEmailer);
+
+        emailersDl.load();
+        emailersTable.repaint();
+        try {
+            emailersTable.setSelected(internalEmailer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void clearSelection() {
+        InternalEmailer internalEmailer = emailersTable.getSingleSelected();
+        internalEmailer.setSelectedForAction(null);
+        internalEmailer.setSelectionSymbolForActions(null);
+        dataManager.commit(internalEmailer);
+
+        emailersDl.load();
+        emailersTable.repaint();
+        try {
+            emailersTable.setSelected(internalEmailer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setActionToActionPopupButton(PopupButton actionButton, InternalEmailer internalEmailer) {
+        final String separatorChar = "⎯";
+        String separator = separatorChar.repeat(15);
+
+        actionButton.addAction(new BaseAction("separator2Action")
+                .withCaption(separator));
+        actionButton.getAction("separator2Action").setEnabled(false);
+
+        actionButton.addAction(new BaseAction("selectedForActionActionStarRed")
+                .withIcon(CubaIcon.STAR.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionStarRed"))
+                .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+                    selectForAction(StdSelections.STAR_RED);
+                    try {
+                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionStarYellow")
+                .withIcon(CubaIcon.STAR.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionStarYellow"))
+                .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+                    selectForAction(StdSelections.STAR_YELLOW);
+                    try {
+                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionStarGreen")
+                .withIcon(CubaIcon.STAR.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionStarGreen"))
+                .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+                    selectForAction(StdSelections.STAR_GREEN);
+                    try {
+                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionFlagRed")
+                .withIcon(CubaIcon.FLAG.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionFlagRed"))
+                .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+                    selectForAction(StdSelections.FLAG_RED);
+                    try {
+                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionFlagYellow")
+                .withIcon(CubaIcon.FLAG.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionFlagYellow"))
+                .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+                    selectForAction(StdSelections.FLAG_YELLOW);
+                    try {
+                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("selectedForActionActionFlagGreen")
+                .withIcon(CubaIcon.FLAG.source())
+                .withCaption(messageBundle.getMessage("msgSelectForActionFlagGreen"))
+                .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+                    selectForAction(StdSelections.FLAG_GREEN);
+                    try {
+                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }));
+
+        actionButton.addAction(new BaseAction("clearSelection")
+                .withIcon(CubaIcon.PICKERFIELD_CLEAR.source())
+                .withCaption(messageBundle.getMessage("msgClearSelection"))
+                .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+                    clearSelection();
+                    try {
+                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
+
+                }));
+    }
+
+    @Install(to = "emailersTable.actionButtonColumn", subject = "columnGenerator")
+    private Component emailersTableActionButtonColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidthFull();
+        retHbox.setHeightFull();
+
+        PopupButton actionButton = uiComponents.create(PopupButton.class);
+        actionButton.setIconFromSet(CubaIcon.BARS);
+        actionButton.setShowActionIcons(true);
+        actionButton.setWidthAuto();
+        actionButton.setHeightAuto();
+        actionButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        actionButton.addAction(new BaseAction("replyEmail")
+                .withCaption(messageBundle.getMessage("msgReplyEmail"))
+                .withHandler(actionPerformedEvent -> resendEmailAction(event.getItem())));
+
+        setActionToActionPopupButton(actionButton, event.getItem());
+
+        retHbox.add(actionButton);
+
+        return retHbox;
+    }
+
+    protected void resendEmailAction(InternalEmailer internalEmailer) {
+        screenBuilders.editor(InternalEmailer.class, this)
+                .newEntity()
+                .withInitializer(emailer -> {
+                    emailersTable.setSelected(internalEmailer);
+                    emailer.setReplyInternalEmailer(internalEmailer);
+                    emailer.setToEmail(internalEmailer.getToEmail());
+                })
+                .withOpenMode(OpenMode.DIALOG)
+                .build()
+                .show();
     }
 }

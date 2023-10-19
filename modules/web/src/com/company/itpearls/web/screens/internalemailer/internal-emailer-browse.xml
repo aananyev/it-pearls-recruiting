@@ -73,6 +73,12 @@
                         id="dateSendEmail"
                         width="140px"
                         maximumWidth="140px"/>
+                <column id="actionButtonColumn"
+                        width="100px"
+                        minimumWidth="80px"
+                        caption="msg://msgActions">
+                    <componentRenderer/>
+                </column>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

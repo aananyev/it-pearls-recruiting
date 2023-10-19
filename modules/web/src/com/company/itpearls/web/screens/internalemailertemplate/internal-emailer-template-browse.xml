@@ -37,12 +37,7 @@
                   width="100%"
                   dataContainer="emailersDc">
             <columns>
-                <column id="actionButtonColumn"
-                        width="100px"
-                        minimumWidth="80px"
-                        caption="msg://msgActions">
-                    <componentRenderer/>
-                </column>
+
             </columns>
         </dataGrid>
 
