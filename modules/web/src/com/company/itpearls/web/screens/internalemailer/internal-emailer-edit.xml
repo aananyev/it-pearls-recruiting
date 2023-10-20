@@ -27,7 +27,7 @@
         </instance>
     </data>
     <dialogMode height="600"
-                width="800"/>
+                width="1000"/>
     <layout expand="bodyEmailField" spacing="true">
         <checkBox id="draftEmailField"
                   caption="msg://msgDraftEmail"

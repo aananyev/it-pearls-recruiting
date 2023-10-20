@@ -61,17 +61,6 @@ public class InternalEmailer extends StandardEntity {
     @Column(name = "SELECTION_SYMBOL_FOR_ACTIONS")
     private Integer selectionSymbolForActions;
 
-    @Column(name = "REMOVED_FROM_RESERVE")
-    private Boolean removedFromReserve;
-
-    public Boolean getRemovedFromReserve() {
-        return removedFromReserve;
-    }
-
-    public void setRemovedFromReserve(Boolean removedFromReserve) {
-        this.removedFromReserve = removedFromReserve;
-    }
-
     public Integer getSelectionSymbolForActions() {
         return selectionSymbolForActions;
     }

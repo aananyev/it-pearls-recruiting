@@ -33,11 +33,6 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
         emailersDl.load();
     }
 
-    public void setCurrentUser() {
-        emailersDl.setParameter("user", (ExtUser) userSession.getUser());
-        emailersDl.load();
-    }
-
     @Override
     protected void resendEmailAction(InternalEmailer internalEmailer) {
         screenBuilders.editor(InternalEmailerTemplate.class, this)

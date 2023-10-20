@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://internalEmailTemplateEdit.caption"
         focusComponent="templateNameField"
         messagesPack="com.company.itpearls.web.screens.internalemailtemplate">
@@ -17,10 +18,23 @@
             </view>
             <loader/>
         </instance>
-        <collection id="templateOpenPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="_minimal">
+        <collection id="templateOpenPositionsDc"
+                    class="com.company.itpearls.entity.OpenPosition" view="_minimal">
             <loader id="templateOpenPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
         </collection>
@@ -65,7 +79,19 @@
                                    width="50%"
                                    dataContainer="internalEmailTemplateDc"
                                    optionsContainer="templateOpenPositionsDc"
-                                   property="templateOpenPosition"/>
+                                   property="templateOpenPosition">
+                    <actions>
+                        <action id="lookup"
+                                type="picker_lookup"/>
+                        <action id="open"
+                                type="picker_open"/>
+                    </actions>
+                </lookupPickerField>
+                <checkBox id="onlyMySubscribeCheckBox"
+                          align="TOP_LEFT"
+                          width="AUTO"
+                          description="msg://msgOnlyMySebscribeDec"
+                          caption="msg://msgOnlyMySubscribe"/>
                 <lookupPickerField id="templatePositionField"
                                    caption="msg://msgTemplatePosition"
                                    dataContainer="internalEmailTemplateDc"

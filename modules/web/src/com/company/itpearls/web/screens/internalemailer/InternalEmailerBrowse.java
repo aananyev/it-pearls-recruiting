@@ -359,9 +359,16 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         screenBuilders.editor(InternalEmailer.class, this)
                 .newEntity()
                 .withInitializer(emailer -> {
-                    emailersTable.setSelected(internalEmailer);
+                    if (internalEmailer != null) {
+                        emailersTable.setSelected(internalEmailer);
+                    }
+
                     emailer.setReplyInternalEmailer(internalEmailer);
                     emailer.setToEmail(internalEmailer.getToEmail());
+                    emailer.setSelectedForAction(internalEmailer.getSelectedForAction() != null
+                            ? internalEmailer.getSelectedForAction() : false);
+                    emailer.setSelectionSymbolForActions(internalEmailer.getSelectionSymbolForActions() != null
+                            ? internalEmailer.getSelectionSymbolForActions() : 0);
                 })
                 .withOpenMode(OpenMode.DIALOG)
                 .build()

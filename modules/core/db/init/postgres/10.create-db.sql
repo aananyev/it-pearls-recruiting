@@ -1066,7 +1066,6 @@ create table ITPEARLS_INTERNAL_EMAILER (
     DATE_SEND_EMAIL timestamp,
     SELECTED_FOR_ACTION boolean,
     SELECTION_SYMBOL_FOR_ACTIONS integer,
-    REMOVED_FROM_RESERVE boolean,
     --
     -- from itpearls_InternalEmailerTemplate
     EMAIL_TEMPLATE_ID uuid,

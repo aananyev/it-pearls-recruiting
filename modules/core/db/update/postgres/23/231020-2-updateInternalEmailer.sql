@@ -1,0 +1,1 @@
+alter table ITPEARLS_INTERNAL_EMAILER rename column removed_from_reserve to removed_from_reserve__u21609 ;

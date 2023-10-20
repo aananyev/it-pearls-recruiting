@@ -8,11 +8,22 @@
         <collection id="emailersDc"
                     class="com.company.itpearls.entity.InternalEmailerTemplate">
             <view extends="internalEmailerTemplate-view">
-                <property name="fromEmail" view="_local">
-                    <property name="fileImageFace" view="_local"/>
+                <property name="emailTemplate"
+                          view="internalEmailTemplate-view">
+                    <property name="templateOpenPosition" view="_local">
+                        <property name="projectName" view="_local">
+                            <property name="projectLogo" view="_local"/>
+                        </property>
+                    </property>
+                </property>
+                <property name="fromEmail"
+                          view="_local">
+                    <property name="fileImageFace"
+                              view="_local"/>
                 </property>
                 <property name="toEmail" view="_local">
-                    <property name="fileImageFace" view="_local"/>
+                    <property name="fileImageFace"
+                              view="_local"/>
                 </property>
             </view>
             <loader id="emailersDl">
@@ -24,7 +35,7 @@
                                 <c:where>e.emailTemplate = :emailTemplate</c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.fromEmail = :user</c:where>
+                                <c:where>e.fromEmail = :fromEmail</c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -37,7 +48,10 @@
                   width="100%"
                   dataContainer="emailersDc">
             <columns>
-
+                <column id="templateColumn"
+                        property="emailTemplate"
+                        width="200px"
+                        collapsible="true"/>
             </columns>
         </dataGrid>
 

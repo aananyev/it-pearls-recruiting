@@ -117,7 +117,6 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
                 .build();
 
         screen.setEmailTemplateFilter(internalEmailTemplatesTable.getSingleSelected());
-        screen.setCurrentUser();
 
         screen.show();
     }
@@ -129,7 +128,6 @@ public class InternalEmailTemplateBrowse extends StandardLookup<InternalEmailTem
                 .withOpenMode(OpenMode.NEW_TAB)
                 .build();
 
-        screen.setCurrentUser();
         screen.show();
     }
 
