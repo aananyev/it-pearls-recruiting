@@ -4,17 +4,23 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
+import com.haulmont.cuba.gui.model.InstanceContainer;
+import com.haulmont.cuba.gui.model.InstanceLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.util.Date;
 
 @UiController("itpearls_InternalEmailer.browse")
 @UiDescriptor("internal-emailer-browse.xml")
@@ -37,6 +43,14 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private ScreenBuilders screenBuilders;
     @Inject
     private UserSession userSession;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private DataContext dataContext;
+    @Inject
+    private InstanceContainer<JobCandidate> jobCandidateDc;
+    @Inject
+    private InstanceLoader<JobCandidate> jobCandidateDl;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -62,6 +76,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setHeightFull();
         retHbox.setWidthFull();
+        retHbox.setSpacing(true);
 
         Label replyLabel = uiComponents.create(Label.class);
         replyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
@@ -234,6 +249,18 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         final String separatorChar = "⎯";
         String separator = separatorChar.repeat(15);
 
+        actionButton.addAction(new BaseAction("editJobCandidateCard")
+        .withCaption(messageBundle.getMessage("msgCandidate"))
+        .withHandler(actionPerformedEvent -> editJobCandidateAction(internalEmailer)));
+
+        actionButton.addAction(new BaseAction("replyEmail")
+                .withCaption(messageBundle.getMessage("msgReplyEmail"))
+                .withHandler(actionPerformedEvent -> resendEmailAction(internalEmailer)));
+
+        actionButton.addAction(new BaseAction("addInteraction")
+        .withCaption(messageBundle.getMessage("msgAddInteraction"))
+        .withHandler(actionPerformedEvent -> addNewInteractionAction(internalEmailer)));
+
         actionButton.addAction(new BaseAction("separator2Action")
                 .withCaption(separator));
         actionButton.getAction("separator2Action").setEnabled(false);
@@ -331,6 +358,33 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 }));
     }
 
+    private void editJobCandidateAction(InternalEmailer internalEmailer) {
+        emailersTable.setSelected(internalEmailer);
+
+        jobCandidateDl.setParameter("jobCandidate", internalEmailer.getToEmail());
+        jobCandidateDl.load();
+
+        screenBuilders.editor(JobCandidate.class, this)
+                .editEntity(jobCandidateDc.getItem())
+                .build()
+                .show();
+    }
+
+    protected void addNewInteractionAction(InternalEmailer internalEmailer) {
+        emailersTable.setSelected(internalEmailer);
+        screenBuilders.editor(IteractionList.class, this)
+                .withParentDataContext(dataContext)
+                .withInitializer(event -> {
+                    event.setCandidate(internalEmailer.getToEmail());
+                    event.setRecrutier(internalEmailer.getFromEmail());
+                    event.setRecrutierName(internalEmailer.getFromEmail().getName());
+                    event.setDateIteraction(new Date());
+                })
+                .newEntity()
+                .build()
+                .show();
+    }
+
     @Install(to = "emailersTable.actionButtonColumn", subject = "columnGenerator")
     private Component emailersTableActionButtonColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
@@ -344,9 +398,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         actionButton.setHeightAuto();
         actionButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-        actionButton.addAction(new BaseAction("replyEmail")
-                .withCaption(messageBundle.getMessage("msgReplyEmail"))
-                .withHandler(actionPerformedEvent -> resendEmailAction(event.getItem())));
 
         setActionToActionPopupButton(actionButton, event.getItem());
 

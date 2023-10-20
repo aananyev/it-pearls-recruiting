@@ -13,6 +13,9 @@
                     <property name="templateOpenPosition" view="_local">
                         <property name="projectName" view="_local">
                             <property name="projectLogo" view="_local"/>
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
                         </property>
                     </property>
                 </property>
@@ -43,6 +46,8 @@
             </loader>
         </collection>
     </data>
+    <dialogMode height="600"
+                width="1000"/>
     <layout>
         <dataGrid id="emailersTable"
                   width="100%"

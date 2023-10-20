@@ -495,13 +495,20 @@
         </property>
         <property name="fromEmail" view="_local"/>
         <property name="toEmail" view="_local">
-            <property name="iteractionList" view="_local"/>
+            <property name="fileImageFace" view="_local"/>
         </property>
     </view>
     <view entity="itpearls_InternalEmailer" name="internalEmailer-view" extends="_local">
-        <property name="fromEmail" view="_local"/>
+        <property name="fromEmail" view="_local">
+            <property name="fileImageFace" view="_local"/>
+        </property>
         <property name="toEmail" view="_local">
+            <property name="fileImageFace" view="_local"/>
             <property name="personPosition" view="_local"/>
+            <property name="iteractionList" view="_local">
+                <property name="iteractionType" view="_local"/>
+                <property name="vacancy" view="openPosition-view"/>
+            </property>
         </property>
     </view>
     <view entity="itpearls_InternalEmailTemplate" name="internalEmailTemplate-view" extends="_local">

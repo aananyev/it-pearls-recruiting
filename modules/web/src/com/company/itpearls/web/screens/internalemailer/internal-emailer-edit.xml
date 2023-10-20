@@ -26,7 +26,7 @@
             <loader/>
         </instance>
     </data>
-    <dialogMode height="600"
+    <dialogMode height="700"
                 width="1000"/>
     <layout expand="bodyEmailField" spacing="true">
         <checkBox id="draftEmailField"

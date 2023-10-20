@@ -15,6 +15,7 @@ import com.company.itpearls.web.screens.internalemailer.InternalEmailerBrowse;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.util.Date;
 
 @UiController("itpearls_InternalEmailerTemplate.browse")
 @UiDescriptor("internal-emailer-template-browse.xml")
@@ -24,13 +25,27 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
-    private UserSession userSession;
-    @Inject
     private DataGrid<InternalEmailerTemplate> emailersTable;
 
     public void setEmailTemplateFilter(InternalEmailTemplate internalEmailTemplate) {
         emailersDl.setParameter("emailTemplate", internalEmailTemplate);
         emailersDl.load();
+    }
+
+    @Override
+    protected void addNewInteractionAction(InternalEmailer internalEmailer) {
+        emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+        screenBuilders.editor(IteractionList.class, this)
+                .withInitializer(event -> {
+                    event.setCandidate(internalEmailer.getToEmail());
+                    event.setRecrutier(internalEmailer.getFromEmail());
+                    event.setRecrutierName(internalEmailer.getFromEmail().getName());
+                    event.setDateIteraction(new Date());
+                    event.setVacancy(((InternalEmailerTemplate)internalEmailer).getEmailTemplate().getTemplateOpenPosition());
+                })
+                .newEntity()
+                .build()
+                .show();
     }
 
     @Override

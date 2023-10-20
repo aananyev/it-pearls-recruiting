@@ -80,8 +80,8 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
+    <dialogMode height="700"
+                width="1000"/>
     <layout>
         <checkBox id="draftEmailField" ext:index="0"
                   dataContainer="internalEmailerTemplateDc"/>

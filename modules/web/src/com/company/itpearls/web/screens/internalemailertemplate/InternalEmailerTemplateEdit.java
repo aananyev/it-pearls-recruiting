@@ -38,8 +38,6 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private UserSession userSession;
     @Inject
     private ScreenBuilders screenBuilders;
-
-    private OpenPosition currentOpenPosition = null;
     @Inject
     private Label<String> openPositionLabel;
     @Inject
@@ -54,6 +52,8 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private Notifications notifications;
     @Inject
     private CheckBox showSharedTemplatesCheckBox;
+
+    private OpenPosition currentOpenPosition = null;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
