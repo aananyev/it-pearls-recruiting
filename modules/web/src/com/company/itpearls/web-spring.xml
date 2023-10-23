@@ -27,6 +27,8 @@
                 <entry key="itpearls_SendNotificationsService"
                        value="com.company.itpearls.core.SendNotificationsService"/>
                 <entry key="itpearls_SendEmailService" value="com.company.itpearls.service.SendEmailService"/>
+                <entry key="itpearls_OpenPositionNewsService"
+                       value="com.company.itpearls.service.OpenPositionNewsService"/>
             </map>
         </property>
     </bean>

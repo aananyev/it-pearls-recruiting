@@ -1,12 +1,14 @@
 package com.company.itpearls.web.screens.internalemailer;
 
 import com.company.itpearls.entity.*;
-import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
+import com.company.itpearls.service.OpenPositionNewsService;
+import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -20,6 +22,10 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 @UiController("itpearls_InternalEmailer.browse")
@@ -51,6 +57,30 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private InstanceContainer<JobCandidate> jobCandidateDc;
     @Inject
     private InstanceLoader<JobCandidate> jobCandidateDl;
+
+    private static final String QUERY_GET_PERSONEL_RESERVE =
+            "select e from itpearls_PersonelReserve e " +
+                    "where e.jobCandidate = :jobCandidate " +
+                    "and " +
+                    "(e.endDate > :currDate or e.endDate is null)";
+    private static final String QUERY_GET_DEFAULT_VACANCY =
+            "select e from itpearls_OpenPosition e " +
+                    "where e.vacansyName like \'Default\'";
+    private final String QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION =
+            "select e " +
+                    "from itpearls_Iteraction e " +
+                    "where e.signPersonalReservePut = true";
+    static final String QUERY_DEFAULT_OPEN_POSITION =
+            "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
+
+    private PersonelReserve currentPersonelReserve = null;
+
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
+    private OpenPositionNewsService openPositionNewsService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -250,16 +280,59 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         String separator = separatorChar.repeat(15);
 
         actionButton.addAction(new BaseAction("editJobCandidateCard")
-        .withCaption(messageBundle.getMessage("msgCandidate"))
-        .withHandler(actionPerformedEvent -> editJobCandidateAction(internalEmailer)));
+                .withIcon(CubaIcon.USER.source())
+                .withCaption(messageBundle.getMessage("msgCandidate"))
+                .withHandler(actionPerformedEvent -> editJobCandidateAction(internalEmailer)));
 
         actionButton.addAction(new BaseAction("replyEmail")
+                .withIcon(CubaIcon.REPLY.source())
                 .withCaption(messageBundle.getMessage("msgReplyEmail"))
                 .withHandler(actionPerformedEvent -> resendEmailAction(internalEmailer)));
 
         actionButton.addAction(new BaseAction("addInteraction")
-        .withCaption(messageBundle.getMessage("msgAddInteraction"))
-        .withHandler(actionPerformedEvent -> addNewInteractionAction(internalEmailer)));
+                .withIcon(CubaIcon.REORDER.source())
+                .withCaption(messageBundle.getMessage("msgAddInteraction"))
+                .withHandler(actionPerformedEvent -> addNewInteractionAction(internalEmailer)));
+
+        actionButton.addAction(new BaseAction("addPersonalReserve")
+                .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgAddPersonalReserve"))
+                .withHandler(actionPerformedEvent -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+
+                    screenBuilders.editor(PersonelReserve.class, this)
+                            .withScreenClass(PersonelReserveEdit.class)
+                            .newEntity()
+                            .withInitializer(event -> {
+                                event = setToPersonelReserve(event);
+
+                            })
+                            .withAfterCloseListener(afterCloseEvent -> {
+                                if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                                    currentPersonelReserve = afterCloseEvent.getScreen().getEditedEntity();
+
+                                    if (currentPersonelReserve.getOpenPosition() != null)
+                                        addPersonalReserveInteraction(currentPersonelReserve.getJobCandidate(), currentPersonelReserve.getOpenPosition());
+                                    else
+                                        addPersonalReserveInteraction(currentPersonelReserve.getJobCandidate(), getDefaultOpenPosition());
+                                }
+                            })
+                            .build()
+                            .show();
+                    emailersTable.scrollTo(emailersTable.getSingleSelected());
+                }));
+
+        actionButton.addAction(new BaseAction("addPersonalReserveWithoutConfirm")
+                .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgAddPersonalReserveWithoutConfirm"))
+                .withHandler(actionPerformedEvent -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
+                    if (emailersTable.getSingleSelected() != null) {
+                        putCandidatesToPersonelReserve(emailersTable.getSingleSelected());
+
+                        emailersTable.scrollTo(emailersTable.getSingleSelected());
+                    }
+                }));
 
         actionButton.addAction(new BaseAction("separator2Action")
                 .withCaption(separator));
@@ -357,6 +430,202 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
                 }));
     }
+
+    protected void putCandidatesToPersonelReserve(InternalEmailer singleSelected) {
+        putCandidatesToPersonelReserve(singleSelected, getDefaultOpenPosition());
+    }
+
+    protected PersonelReserve setToPersonelReserve(PersonelReserve event) {
+        event.setRecruter((ExtUser) userSession.getUser());
+        event.setJobCandidate(emailersTable.getSingleSelected().getToEmail());
+        event.setSelectionSymbolForActions(emailersTable
+                .getSingleSelected()
+                .getSelectionSymbolForActions());
+        event.setPersonPosition(emailersTable
+                .getSingleSelected()
+                .getToEmail()
+                .getPersonPosition());
+        event.setRemovedFromReserve(false);
+        event.setInProcess(true);
+        return event;
+    }
+
+    protected OpenPosition getDefaultOpenPosition() {
+        OpenPosition openPositionDefault = null;
+
+        try {
+            openPositionDefault = dataManager.load(OpenPosition.class)
+                    .query(QUERY_DEFAULT_OPEN_POSITION)
+                    .view("openPosition-view")
+                    .one();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withType(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgNotFindDefaultOpenPosition"))
+                    .show();
+        }
+
+        return openPositionDefault;
+    }
+
+
+    protected void putCandidatesToPersonelReserve(InternalEmailer internalEmailer, OpenPosition openPosition) {
+
+        PersonelReserve personelReserveCheck = null;
+
+        try {
+            personelReserveCheck = dataManager.load(PersonelReserve.class)
+                    .query(QUERY_GET_PERSONEL_RESERVE)
+                    .view("personelReserve-view")
+                    .parameter("jobCandidate", internalEmailer.getToEmail())
+                    .parameter("currDate", new Date())
+                    .one();
+        } catch (IllegalStateException e) {
+            personelReserveCheck = null;
+        }
+
+        if (personelReserveCheck == null) {
+            addPersonaLReserveMonth(internalEmailer, openPosition);
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
+                            + ": " + internalEmailer.getToEmail().getFullName()
+                            + "\n" + messageBundle.getMessage("msgRecruterOwner")
+                            + " " + personelReserveCheck.getRecruter().getName()
+                            + "\n" + messageBundle.getMessage("msgEndDateReserve")
+                            + " " + (personelReserveCheck.getEndDate() != null
+                            ? sdf.format(personelReserveCheck.getEndDate())
+                            : messageBundle.getMessage("msgUnlimited")))
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
+    protected void addPersonalReserveInteraction(JobCandidate jobCandidate,
+                                                 OpenPosition openPosition) {
+
+        OpenPosition defaultPosition = null;
+        Iteraction interactionType = null;
+        IteractionList iteractionList = metadata.create(IteractionList.class);
+
+        try {
+            defaultPosition = dataManager
+                    .loadValue(QUERY_GET_DEFAULT_VACANCY, OpenPosition.class)
+                    .one();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            interactionType = dataManager.load(Iteraction.class)
+                    .query(QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION)
+                    .cacheable(true)
+                    .view("iteraction-view")
+                    .one();
+        } catch (NoResultException e) {
+            e.printStackTrace();
+        }
+
+        if (interactionType != null) {
+            iteractionList.setCandidate(jobCandidate);
+            iteractionList.setDateIteraction(new Date());
+            iteractionList.setRating(4);
+
+            if (openPosition != null) {
+                iteractionList.setVacancy(openPosition);
+                iteractionList.setCurrentOpenClose(openPosition.getOpenClose());
+                iteractionList.setCurrentPriority(openPosition.getPriority());
+            } else {
+                if (defaultPosition != null) {
+                    iteractionList.setVacancy(defaultPosition);
+                    iteractionList.setCurrentOpenClose(defaultPosition.getOpenClose());
+                    iteractionList.setCurrentPriority(defaultPosition.getPriority());
+                } else {
+                    notifications.create(Notifications.NotificationType.ERROR)
+                            .withCaption(messageBundle.getMessage("msg://msgError"))
+                            .withDescription(messageBundle.getMessage("msgNotDefaultInteraction"))
+                            .withType(Notifications.NotificationType.ERROR)
+                            .show();
+                }
+            }
+
+            iteractionList.setRecrutierName(userSession.getUser().getName());
+            iteractionList.setRecrutier((ExtUser) userSession.getUser());
+            iteractionList.setNumberIteraction(getCountIteraction());
+            iteractionList.setIteractionType(interactionType);
+
+            dataManager.commit(iteractionList);
+
+            if (openPosition != null) {
+                openPositionNewsService.setOpenPositionNewsAutomatedMessage(openPosition,
+                        iteractionList.getIteractionType().getIterationName(),
+                        messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
+                        iteractionList.getDateIteraction(),
+                        jobCandidate,
+                        userSession.getUser(),
+                        interactionType.getSignPriorityNews());
+            } else {
+                openPositionNewsService.setOpenPositionNewsAutomatedMessage(defaultPosition,
+                        iteractionList.getIteractionType().getIterationName(),
+                        messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
+                        iteractionList.getDateIteraction(),
+                        jobCandidate,
+                        userSession.getUser(),
+                        interactionType.getSignPriorityNews());
+
+            }
+
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msg://msgError"))
+                    .withDescription(messageBundle.getMessage("msgNotSignPersonalReserveInteractions"))
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
+    private BigDecimal getCountIteraction() {
+        IteractionList e = dataManager.load(IteractionList.class)
+                .query("select e from itpearls_IteractionList e where e.numberIteraction = " +
+                        "(select max(f.numberIteraction) from itpearls_IteractionList f)")
+                .view("iteractionList-view")
+                .cacheable(true)
+                .one();
+
+        return e.getNumberIteraction().add(BigDecimal.ONE);
+    }
+
+    private void addPersonaLReserveMonth(InternalEmailer internalEmailer, OpenPosition selectedOpenPosition) {
+        PersonelReserve personelReserve = metadata.create(PersonelReserve.class);
+        // сначала итерацию, а уж потом остальное
+        addPersonalReserveInteraction(internalEmailer.getToEmail(), selectedOpenPosition);
+
+        personelReserve.setDate(new Date());
+        personelReserve.setJobCandidate(internalEmailer.getToEmail());
+        personelReserve.setSelectionSymbolForActions(internalEmailer.getSelectionSymbolForActions());
+        personelReserve.setRecruter((ExtUser) userSessionSource.getUserSession().getUser());
+        personelReserve.setInProcess(true);
+
+        int noOfDays = 30;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_YEAR, noOfDays);
+        Date endDate = calendar.getTime();
+        personelReserve.setEndDate(endDate);
+
+        personelReserve.setPersonPosition(internalEmailer.getToEmail().getPersonPosition());
+
+        personelReserve.setOpenPosition(selectedOpenPosition);
+
+        dataManager.commit(personelReserve);
+    }
+
 
     private void editJobCandidateAction(InternalEmailer internalEmailer) {
         emailersTable.setSelected(internalEmailer);

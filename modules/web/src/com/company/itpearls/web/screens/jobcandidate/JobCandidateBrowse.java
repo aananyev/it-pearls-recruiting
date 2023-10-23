@@ -5,6 +5,7 @@ import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
+import com.company.itpearls.service.OpenPositionNewsService;
 import com.company.itpearls.web.screens.SelectedCloseAction;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
@@ -13,19 +14,15 @@ import com.company.itpearls.web.screens.fragments.OnlyTextPersonPosition;
 import com.company.itpearls.web.screens.fragments.OnlyTextPersonPositionLoadPdf;
 import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
-import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
 import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments.JobCandidateComment;
-import com.company.itpearls.web.screens.loadfromfilescreen.LoadFromFileScreen;
 import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
 import com.haulmont.cuba.core.app.FileStorageService;
-import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
-import com.haulmont.cuba.gui.app.core.file.FileUploadDialog;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
@@ -49,9 +46,6 @@ import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.poi.extractor.POITextExtractor;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
@@ -154,6 +148,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private OnlyTextPersonPositionLoadPdf screenOnlytextLoadFromPdf;
     @Inject
     private PopupButton actionsWithCandidateButton;
+    @Inject
+    private OpenPositionNewsService openPositionNewsService;
 
     @Subscribe
     public void onInit1(InitEvent event) {
@@ -293,7 +289,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     "from itpearls_Iteraction e " +
                     "where e.signPersonalReservePut = true";
 
-    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+/*    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
                                                      String subject,
                                                      String comment,
                                                      Date date,
@@ -317,7 +313,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    } */
 
     private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load(IteractionList.class)
@@ -386,7 +382,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             dataManager.commit(iteractionList);
 
             if (openPosition != null) {
-                setOpenPositionNewsAutomatedMessage(openPosition,
+                openPositionNewsService.setOpenPositionNewsAutomatedMessage(openPosition,
                         iteractionList.getIteractionType().getIterationName(),
                         messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
                         iteractionList.getDateIteraction(),
@@ -394,7 +390,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                         userSession.getUser(),
                         interactionType.getSignPriorityNews());
             } else {
-                setOpenPositionNewsAutomatedMessage(defaultPosition,
+                openPositionNewsService.setOpenPositionNewsAutomatedMessage(defaultPosition,
                         iteractionList.getIteractionType().getIterationName(),
                         messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
                         iteractionList.getDateIteraction(),
@@ -1489,6 +1485,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Label getCVLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Label retLabel = uiComponents.create(Label.class);
+        retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
+
         String retStr = "";
         String retStrStyle = "";
         String retStrDesc = "";
@@ -1499,6 +1497,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     retStr = "FILE";
                     retStrStyle = "pic-center-large-red";
                     retStrDesc = messageBundle.getMessage("msgNoResumeAttached");
+                    retLabel.setVisible(false);
                 } else {
                     retStr = "FILE_TEXT";
                     retStrStyle = "pic-center-large-green";
@@ -1508,6 +1507,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 retStr = "FILE";
                 retStrStyle = "pic-center-large-red";
                 retStrDesc = messageBundle.getMessage("msgNoResumeAttached");
+                retLabel.setVisible(false);
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
