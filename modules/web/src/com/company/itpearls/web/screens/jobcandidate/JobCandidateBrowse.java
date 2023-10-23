@@ -1452,7 +1452,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
 
         Label contactsStatusLabel = uiComponents.create(Label.class);
-        contactsStatusLabel.setIconFromSet(getContactsStatusIcon(event));
+        CubaIcon icon = getContactsStatusIcon(event);
+        if (icon != null)
+            contactsStatusLabel.setIconFromSet(icon);
         contactsStatusLabel.setStyleName(getContactsStatusStyle(event));
         contactsStatusLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         if (contactsInfoStyle.equals("pic-center-large-grey")) { // костыль, лениво рефакторить пока
@@ -1469,6 +1471,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Label skypeLabel = genSkypeLabel(event);
         Label emailLabel = getEmailLabel(event);
         Label blackListLabel = getBlackList(event);
+        Label cvLabel = getCVLabel(event);
 
         retHBox.add(blackListLabel);
         retHBox.add(employeeStatusLabel);
@@ -1478,9 +1481,44 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHBox.add(emailLabel);
         retHBox.add(telegramCLabel);
         retHBox.add(skypeLabel);
+        retHBox.add(cvLabel);
         retHBox.add(commentCandidateLabel);
 
         return retHBox;
+    }
+
+    private Label getCVLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        String retStr = "";
+        String retStrStyle = "";
+        String retStrDesc = "";
+
+        try {
+            if (event.getItem().getCandidateCv() != null) {
+                if (event.getItem().getCandidateCv().size() == 0) {
+                    retStr = "FILE";
+                    retStrStyle = "pic-center-large-red";
+                    retStrDesc = messageBundle.getMessage("msgNoResumeAttached");
+                } else {
+                    retStr = "FILE_TEXT";
+                    retStrStyle = "pic-center-large-green";
+                    retStrDesc = messageBundle.getMessage("msgResumeAttached");
+                }
+            } else {
+                retStr = "FILE";
+                retStrStyle = "pic-center-large-red";
+                retStrDesc = messageBundle.getMessage("msgNoResumeAttached");
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } finally {
+
+            retLabel.setIconFromSet(CubaIcon.valueOf(retStr));
+            retLabel.setStyleName(retStrStyle);
+            retLabel.setDescription(retStrDesc);
+
+            return retLabel;
+        }
     }
 
     private Label genPersonalReserveLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -1826,10 +1864,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     retStr = "BOMB";
                     break;
                 case 2: // yellow
-                    retStr = "BOMB";
+//                    retStr = "BOMB";
                     break;
                 case 3: // green
-                    retStr = "BOMB";
+//                    retStr = "BOMB";
                     break;
                 case 4: // to client
                     retStr = "BOMB";
@@ -1848,7 +1886,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             }
         }
 
-        return CubaIcon.valueOf(retStr);
+        return retStr.equals("") ? null : CubaIcon.valueOf(retStr);
     }
 
 

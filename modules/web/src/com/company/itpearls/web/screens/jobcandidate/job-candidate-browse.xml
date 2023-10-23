@@ -125,6 +125,8 @@
                         minimumWidth="150px"
                         property="cityOfResidence"/>
                 <column id="resume"
+                        collapsible="true"
+                        collapsed="true"
                         caption="msg://msgResume"
                         width="60px">
                     <iconRenderer/>
