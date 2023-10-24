@@ -50,17 +50,33 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
     protected PersonelReserve setToPersonelReserve(PersonelReserve event) {
         event.setRecruter((ExtUser) userSession.getUser());
         event.setJobCandidate(emailersTable.getSingleSelected().getToEmail());
+        event.setSelectedForAction(emailersTable
+                .getSingleSelected()
+                .getSelectedForAction() != null ?
+                emailersTable
+                        .getSingleSelected()
+                        .getSelectedForAction() : false);
         event.setSelectionSymbolForActions(emailersTable
                 .getSingleSelected()
-                .getSelectionSymbolForActions());
-        event.setOpenPosition(emailersTable
+                .getSelectionSymbolForActions() != null ? emailersTable
                 .getSingleSelected()
-                .getEmailTemplate()
-                .getTemplateOpenPosition());
-        event.setPersonPosition(emailersTable
-                .getSingleSelected()
-                .getToEmail()
-                .getPersonPosition());
+                .getSelectionSymbolForActions() : 0);
+        if (emailersTable.getSingleSelected().getEmailTemplate() != null) {
+            if (emailersTable.getSingleSelected().getEmailTemplate().getTemplateOpenPosition() != null) {
+                event.setOpenPosition(emailersTable
+                        .getSingleSelected()
+                        .getEmailTemplate()
+                        .getTemplateOpenPosition());
+            }
+        }
+
+        if (emailersTable.getSingleSelected().getToEmail().getPersonPosition() != null) {
+            event.setPersonPosition(emailersTable
+                    .getSingleSelected()
+                    .getToEmail()
+                    .getPersonPosition());
+        }
+
         event.setRemovedFromReserve(false);
         event.setInProcess(true);
         return event;

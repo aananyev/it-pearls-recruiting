@@ -294,6 +294,10 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .withCaption(messageBundle.getMessage("msgAddInteraction"))
                 .withHandler(actionPerformedEvent -> addNewInteractionAction(internalEmailer)));
 
+        actionButton.addAction(new BaseAction("separator1Action")
+                .withCaption(separator));
+        actionButton.getAction("separator1Action").setEnabled(false);
+
         actionButton.addAction(new BaseAction("addPersonalReserve")
                 .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
                 .withCaption(messageBundle.getMessage("msgAddPersonalReserve"))
@@ -608,6 +612,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
         personelReserve.setDate(new Date());
         personelReserve.setJobCandidate(internalEmailer.getToEmail());
+        personelReserve.setSelectedForAction(internalEmailer.getSelectedForAction());
         personelReserve.setSelectionSymbolForActions(internalEmailer.getSelectionSymbolForActions());
         personelReserve.setRecruter((ExtUser) userSessionSource.getUserSession().getUser());
         personelReserve.setInProcess(true);
@@ -624,6 +629,17 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         personelReserve.setOpenPosition(selectedOpenPosition);
 
         dataManager.commit(personelReserve);
+
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withHideDelayMs(10000)
+                .withCaption(messageBundle.getMessage("msgInfo"))
+                .withContentMode(ContentMode.HTML)
+                .withDescription(messageBundle.getMessage("msgCandidateAddedToPersonalReserve")
+                        + " <br><b>"
+                        + internalEmailer.getToEmail().getFullName()
+                        + "</b>")
+                .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                .show();
     }
 
 
