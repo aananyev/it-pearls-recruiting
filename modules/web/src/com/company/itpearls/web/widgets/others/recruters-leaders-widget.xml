@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout width="100%" height="100%">
+        <vbox id="leadersTableWidgetVBox"
+              width="100%"
+              height="AUTO"
+              expand="leadersTableWidget"
+              spacing="false">
+            <scrollBox id="leadersTableWidget"
+                       orientation="vertical"
+                       width="100%"
+                       height="AUTO"/>
+        </vbox>
+    </layout>
+</fragment>

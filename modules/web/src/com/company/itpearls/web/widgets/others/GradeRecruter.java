@@ -1,7 +1,9 @@
 package com.company.itpearls.web.widgets.others;
 
+import com.company.itpearls.core.RecruterStatService;
+import com.company.itpearls.entity.ExtUser;
+import com.company.itpearls.entity.GradeCode;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
-import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.screen.*;
@@ -26,6 +28,8 @@ public class GradeRecruter extends ScreenFragment {
     private Label<String> gradeGrowthLabel;
     @Inject
     private Label<String> gradeFallLabel;
+    @Inject
+    private RecruterStatService recruterStatService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -51,7 +55,7 @@ public class GradeRecruter extends ScreenFragment {
                         + "@between(e.dateIteraction, now-30, now+1, day) and "
                         + "(e.iteractionType.signOurInterviewAssigned = true or e.iteractionType.signOurInterview = true)";
 
-        final String QUERY_INTERVIEWS_COUNT_INTERVAL_YESTERDAY =
+/*        final String QUERY_INTERVIEWS_COUNT_INTERVAL_YESTERDAY =
                 "select count(e) from itpearls_IteractionList e " +
                         "where e.recrutier = :recrutier and "
                         + "@between(e.dateIteraction, now-31, now, day) and "
@@ -59,7 +63,8 @@ public class GradeRecruter extends ScreenFragment {
 
         int countInteraction = dataManager.loadValue(QUERY_INTERVIEWS_COUNT_INTERVAL, Integer.class)
                 .parameter("recrutier", userSession.getUser())
-                .one();
+                .one(); */
+        int countInteraction = recruterStatService.countInteraction((ExtUser) userSession.getUser());
 
         int countInteractionYesterday = dataManager.loadValue(QUERY_INTERVIEWS_COUNT_INTERVAL, Integer.class)
                 .parameter("recrutier", userSession.getUser())
@@ -69,17 +74,17 @@ public class GradeRecruter extends ScreenFragment {
         int codeGradeYesterday = 0;
 
         if (countInteraction < 10) {
-            gradeLabel.setValue("Junior");
+            gradeLabel.setValue(String.valueOf(GradeCode.JUNIOR));
         } else {
             if (countInteraction < 20) {
-                gradeLabel.setValue("Regular");
+                gradeLabel.setValue(String.valueOf(GradeCode.REGULAR));
                 codeGrade = 1;
             } else {
                 if (countInteraction < 30) {
-                    gradeLabel.setValue("Master");
+                    gradeLabel.setValue(String.valueOf(GradeCode.MASTER));
                     codeGrade = 2;
                 } else {
-                    gradeLabel.setValue("Grand Master");
+                    gradeLabel.setValue(String.valueOf(GradeCode.GRAND_MASTER));
                     codeGrade = 3;
                 }
             }

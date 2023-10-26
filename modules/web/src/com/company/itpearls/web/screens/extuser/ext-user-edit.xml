@@ -53,6 +53,8 @@
                                             <field id="timeZone" custom="true"/>
                                             <field id="ipMask"/>
                                             <field id="active"/>
+                                            <field id="statistics"/>
+                                            <field id="dashboards"/>
                                         </column>
                                     </fieldGroup>
                                 </row>

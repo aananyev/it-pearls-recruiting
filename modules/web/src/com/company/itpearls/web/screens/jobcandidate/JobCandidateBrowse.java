@@ -229,6 +229,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withIcon(CubaIcon.COMMENTS.source())
                 .withCaption(messageBundle.getMessage("msgViewComments"))
                 .withHandler(actionPerformedAction -> {
+                    jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
                     JobCandidateComment screen = screens.create(JobCandidateComment.class);
 //                    jobCandidatesTable.setSelected(((JobCandidate)actionPerformedAction.getSource()));
                     screen.setJobCandidate(jobCandidatesTable.getSingleSelected());

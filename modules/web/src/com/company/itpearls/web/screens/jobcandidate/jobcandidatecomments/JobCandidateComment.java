@@ -101,11 +101,17 @@ public class JobCandidateComment extends Screen {
                 candidateCommentDl.load();
                 completeSetJobCandidateFlag = true;
 
-                if (candidateCommentDc.getItems().get(0).getCandidate().getFileImageFace() != null) {
-                    faceImage.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(candidateCommentDc.getItems().get(0).getCandidate().getFileImageFace());
-                } else {
-                    faceImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                if (candidateCommentDc.getItems().size() > 0) {
+                    if (candidateCommentDc.getItems().get(0) != null) {
+                        if (candidateCommentDc.getItems().get(0).getCandidate() != null) {
+                            if (candidateCommentDc.getItems().get(0).getCandidate().getFileImageFace() != null) {
+                                faceImage.setSource(FileDescriptorResource.class)
+                                        .setFileDescriptor(candidateCommentDc.getItems().get(0).getCandidate().getFileImageFace());
+                            } else {
+                                faceImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                            }
+                        }
+                    }
                 }
 
                 jobCandidateLabel.setValue(candidateCommentDc.getItems().get(0).getCandidate().getFullName());

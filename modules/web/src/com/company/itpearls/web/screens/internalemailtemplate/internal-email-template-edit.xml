@@ -19,7 +19,10 @@
             <loader/>
         </instance>
         <collection id="templateOpenPositionsDc"
-                    class="com.company.itpearls.entity.OpenPosition" view="_minimal">
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="openPosition-view">
+                <property name="projectName" view="_local"/>
+            </view>
             <loader id="templateOpenPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e]]>
@@ -77,6 +80,9 @@
                 <lookupPickerField id="templateOpenPositionField"
                                    caption="msg://msgOpenPosition"
                                    width="50%"
+                                   responsive="true"
+                                   inputPrompt="msg://msgSelectOpenPosition"
+                                   buffered="true"
                                    dataContainer="internalEmailTemplateDc"
                                    optionsContainer="templateOpenPositionsDc"
                                    property="templateOpenPosition">

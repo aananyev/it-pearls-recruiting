@@ -50,7 +50,6 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
                 .get();
 
         Elements elements = doc.select("div#mw-content-text.mw-content-ltr");
-//        Elements elements = doc.select("div[id=content]");
 
         skillCommentRichTextArea.setValue(elements.html());
 
@@ -64,7 +63,7 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
 
         try {
             urlString = "https://" + getPicFromWiki().substring(2);
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | StringIndexOutOfBoundsException e) {
             e.printStackTrace();
         }
 

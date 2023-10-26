@@ -62,6 +62,28 @@ public class ExtUser extends User {
     @Column(name = "IMAP_PASSWORD", length = 128)
     private String imapPassword;
 
+    @Column(name = "STATISTICS_")
+    private Boolean statistics;
+
+    @Column(name = "DASHBOARDS")
+    private Boolean dashboards;
+
+    public Boolean getDashboards() {
+        return dashboards;
+    }
+
+    public void setDashboards(Boolean dashboards) {
+        this.dashboards = dashboards;
+    }
+
+    public Boolean getStatistics() {
+        return statistics;
+    }
+
+    public void setStatistics(Boolean statistics) {
+        this.statistics = statistics;
+    }
+
     public String getImapUser() {
         return imapUser;
     }
