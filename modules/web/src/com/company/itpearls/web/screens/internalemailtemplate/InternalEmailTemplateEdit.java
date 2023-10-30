@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.internalemailtemplate;
 
 import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.Position;
 import com.company.itpearls.web.StandartPriorityVacancy;
 import com.haulmont.cuba.core.global.Resources;
 import com.haulmont.cuba.gui.Notifications;
@@ -56,6 +57,8 @@ public class InternalEmailTemplateEdit extends StandardEditor<InternalEmailTempl
     private UiComponents uiComponents;
     @Inject
     private Resources resources;
+    @Inject
+    private LookupPickerField<Position> templatePositionField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -73,6 +76,15 @@ public class InternalEmailTemplateEdit extends StandardEditor<InternalEmailTempl
         } else {
             return CubaIcon.MINUS_CIRCLE.source();
         }
+    }
+
+    @Subscribe("templateOpenPositionField")
+    public void onTemplateOpenPositionFieldValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
+       if (event.getValue() != null) {
+           if (event.getValue().getPositionType() != null) {
+               templatePositionField.setValue(event.getValue().getPositionType());
+           }
+       }
     }
 
     @Install(to = "templateOpenPositionField", subject = "optionStyleProvider")

@@ -87,6 +87,7 @@
               icon="RUBLE"/>
         <item screen="itpearls_EmployeeWorkStatus.browse"
               caption="mainMsg://menu_config.itpearls_EmployeeWorkStatus.browse" icon="HOURGLASS_START"/>
+        <item screen="itpearls_SignIcons.browse" caption="mainMsg://menu_config.itpearls_SignIcons.browse"/>
     </menu>
     <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-hadbook">
         <item bean="itpearls_MemoForCandidatesBean" beanMethod="runReport" caption="mainMsg://msgMemoForCandidates"

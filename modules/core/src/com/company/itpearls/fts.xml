@@ -157,5 +157,8 @@
         <entity class="com.company.itpearls.entity.MyActiveCandidateExclude">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.SignIcons">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

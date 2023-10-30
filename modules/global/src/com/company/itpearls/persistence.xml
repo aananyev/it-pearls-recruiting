@@ -56,5 +56,6 @@
         <class>com.company.itpearls.entity.Employee</class>
         <class>com.company.itpearls.entity.EmployeeWorkStatus</class>
         <class>com.company.itpearls.entity.MyActiveCandidateExclude</class>
+        <class>com.company.itpearls.entity.SignIcons</class>
     </persistence-unit>
 </persistence>

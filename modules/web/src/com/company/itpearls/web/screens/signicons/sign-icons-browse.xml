@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://signIconsBrowse.caption"
+        focusComponent="signIconsesTable"
+        messagesPack="com.company.itpearls.web.screens.signicons">
+    <data readOnly="true">
+        <collection id="signIconsesDc"
+                    class="com.company.itpearls.entity.SignIcons">
+            <view extends="_local"/>
+            <loader id="signIconsesDl">
+                <query>
+                    <![CDATA[select e from itpearls_SignIcons e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.user = :user</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="signIconsesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="signIconsesTable"
+                dataLoader="signIconsesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="signIconsesTable"
+                    width="100%"
+                    dataContainer="signIconsesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="iconSample"
+                        generator="iconSampleGenerator"
+                        width="50px"/>
+                <column id="titleEnd"/>
+                <column id="titleRu"/>
+                <column id="iconName"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="signIconsesTable.create"/>
+                <button id="editBtn" action="signIconsesTable.edit"/>
+                <button id="removeBtn" action="signIconsesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>
