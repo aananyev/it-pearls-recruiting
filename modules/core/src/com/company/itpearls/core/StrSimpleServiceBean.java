@@ -58,4 +58,16 @@ public class StrSimpleServiceBean implements StrSimpleService {
 
         return builder.toString();
     }
+
+    final static String extraCharacters = " []{}<>?,./;\\:\"!@#$%^&*()_+=\'";
+    public String deleteExtraCharacters(String inputStr) {
+
+        for (int i = 0  ; i < extraCharacters.length() ; i++) {
+            char a = extraCharacters.charAt(i);
+
+            inputStr.replace(a, '_');
+        }
+
+        return inputStr;
+    }
 }

@@ -19,6 +19,9 @@ public class SignIcons extends StandardEntity {
     @Column(name = "TITLE_RU", length = 25)
     private String titleRu;
 
+    @Column(name = "TITLE_DESCRIPTION")
+    private String titleDescription;
+
     @Column(name = "ICON_NAME", length = 40)
     private String iconName;
 
@@ -30,6 +33,14 @@ public class SignIcons extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
     private ExtUser user;
+
+    public String getTitleDescription() {
+        return titleDescription;
+    }
+
+    public void setTitleDescription(String titleDescription) {
+        this.titleDescription = titleDescription;
+    }
 
     public ExtUser getUser() {
         return user;

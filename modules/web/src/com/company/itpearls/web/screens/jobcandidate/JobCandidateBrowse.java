@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.StarsAndOtherService;
+import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.OpenPositionNewsService;
@@ -150,6 +151,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private PopupButton actionsWithCandidateButton;
     @Inject
     private OpenPositionNewsService openPositionNewsService;
+    @Inject
+    private CollectionLoader<SignIcons> signIconsDl;
+    @Inject
+    private CollectionContainer<SignIcons> signIconsDc;
+    @Inject
+    private StrSimpleService strSimpleService;
 
     @Subscribe
     public void onInit1(InitEvent event) {
@@ -163,6 +170,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private PersonelReserve currentPersonelReserve = null;
 
     private void initActionButton(PopupButton actionsWithCandidateButton) {
+        final String separatorChar = "⎯";
+        String separator = separatorChar.repeat(20);
+
         actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserve")
                 .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
                 .withCaption(messageBundle.getMessage("msgAddPersonalReserve"))
@@ -203,6 +213,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     }
                 }));
 
+        actionsWithCandidateButton.addAction(new BaseAction("separator1Action")
+                .withCaption(separator));
+
         actionsWithCandidateButton.addAction(new BaseAction("sendEmailAction")
                 .withIcon(CubaIcon.ENVELOPE.source())
                 .withCaption(messageBundle.getMessage("msgSendEmail"))
@@ -235,6 +248,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     screen.setJobCandidate(jobCandidatesTable.getSingleSelected());
                     screen.show();
                 }));
+
+        actionsWithCandidateButton.addAction(new BaseAction("separator2Action")
+                .withCaption(separator));
+
+        for (SignIcons icons : signIconsDc.getItems()) {
+            actionsWithCandidateButton.addAction(new BaseAction(
+                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+            .withIcon(icons.getIconName())
+            .withCaption(icons.getTitleRu())
+            .withDescription(icons.getTitleDescription())
+            .withHandler(actionPerformedAction -> {
+
+            }));
+        }
 
         actionsWithCandidateButton.getAction("addCommentAction").setEnabled(false);
         actionsWithCandidateButton.getAction("addCommentAction").setVisible(false);
@@ -499,6 +526,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         employees = dataManager.load(Employee.class)
                 .view("employee-view")
                 .list();
+
+        initSignIconsDataContainer();
+    }
+
+    private void initSignIconsDataContainer() {
+        signIconsDl.setParameter("user", (ExtUser) userSession.getUser());
+        signIconsDl.load();
     }
 
     @Subscribe("checkBoxOnWork")
@@ -1462,6 +1496,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         Label employeeStatusLabel = genEmployeeStatusLabel(event);
         Label personalReserveLabel = genPersonalReserveLabel(event);
+        Label signIconLabel = getSignIconLabel(event);
         Label commentCandidateLabel = getCommentCandidateLabel(event);
         Label phoneCandidateLabel = getPhoneCandidateLabel(event);
         Label telegramCLabel = genTelegramLabel(event);
@@ -1472,6 +1507,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         retHBox.add(blackListLabel);
         retHBox.add(employeeStatusLabel);
+        retHBox.add(signIconLabel);
         retHBox.add(personalReserveLabel);
         retHBox.add(contactsStatusLabel);
         retHBox.add(phoneCandidateLabel);
@@ -1482,6 +1518,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHBox.add(commentCandidateLabel);
 
         return retHBox;
+    }
+
+    private Label getSignIconLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
+
+
+
+        return retLabel;
     }
 
     private Label getCVLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {

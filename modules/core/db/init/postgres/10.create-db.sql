@@ -1236,6 +1236,7 @@ create table ITPEARLS_SIGN_ICONS (
     --
     TITLE_END varchar(25),
     TITLE_RU varchar(25),
+    TITLE_DESCRIPTION varchar(255),
     ICON_NAME varchar(40),
     ICON_COLOR varchar(10),
     USER_ID uuid,
