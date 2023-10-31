@@ -6,6 +6,7 @@ import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -98,6 +99,27 @@ public class SignIconsBrowse extends StandardLookup<SignIcons> {
                 color, color);
 
         styles.add(style);
+    }
+
+    private DataGrid parentDatagrid = null;
+    private Entity parentEntity = null;
+
+    public void setParentJobCandidateTable(DataGrid dataGrid) {
+        this.parentDatagrid = dataGrid;
+        this.parentEntity = dataGrid.getSingleSelected();
+    }
+
+    @Subscribe
+    public void onAfterClose(AfterCloseEvent event) {
+        if (this.parentDatagrid != null) {
+            parentDatagrid.repaint();
+
+            if (parentEntity != null) {
+                parentDatagrid.setSelected(parentEntity);
+                parentDatagrid.scrollTo(parentEntity);
+            }
+        }
+
     }
 
     @Install(to = "signIconsesTable", subject = "styleProvider")

@@ -20,6 +20,7 @@ import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments.JobCandidateComment;
 import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
+import com.company.itpearls.web.screens.signicons.SignIconsBrowse;
 import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
@@ -280,15 +281,32 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withDescription("msgEditSignIconsActionDesc")
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
-                    screenBuilders.lookup(SignIcons.class, this)
+                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
                             .withOpenMode(OpenMode.DIALOG)
-                            .build()
-                            .show();
+                            .build();
+                    screen.setParentJobCandidateTable(jobCandidatesTable);
+
+                    screen.show();
                 }));
 
         actionsWithCandidateButton.getAction("addCommentAction").setEnabled(false);
         actionsWithCandidateButton.getAction("addCommentAction").setVisible(false);
         actionsWithCandidateButton.getAction("viewCommentAction").setEnabled(true);
+    }
+
+    @Subscribe(id = "signIconsDc", target = Target.DATA_CONTAINER)
+    public void onSignIconsDcCollectionChange(CollectionContainer.CollectionChangeEvent<SignIcons> event) {
+        List<JobCandidateSignIcon> jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidatesTable.getSingleSelected())
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcons.size() > 0) {
+            actionsWithCandidateButton.getAction("removeSignAction").setEnabled(true);
+        } else {
+            actionsWithCandidateButton.getAction("removeSignAction").setEnabled(false);
+        }
     }
 
     private void removeSignAction(JobCandidate jobCandidate) {
@@ -302,6 +320,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             for (JobCandidateSignIcon jcsi : jobCandidateSignIcons) {
                 dataManager.remove(jcsi);
             }
+
+            actionsWithCandidateButton.getAction("removeSignAction").setEnabled(false);
+        } else {
+            actionsWithCandidateButton.getAction("removeSignAction").setEnabled(true);
         }
 
         jobCandidatesTable.repaint();
@@ -1602,6 +1624,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         if (jobCandidateSignIcons.size() > 0) {
             retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
             retLabel.setIcon(jobCandidateSignIcons.get(0).getSignIcon().getIconName());
+
+            if (jobCandidateSignIcons.get(0).getSignIcon().getTitleDescription() != null) {
+                retLabel.setDescription(jobCandidateSignIcons.get(0).getSignIcon().getTitleDescription());
+            } else {
+                retLabel.setDescription(jobCandidateSignIcons.get(0).getSignIcon().getTitleRu());
+            }
+
             injectColorCss(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
             retLabel.setStyleName("pic-center-large-"
                     + jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
