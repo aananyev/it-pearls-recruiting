@@ -2,6 +2,8 @@ package com.company.itpearls.web.screens.mainscreen;
 
 import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.SignIconService;
+import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.PersonelReserve;
@@ -60,6 +62,25 @@ public class ExtMainScreen extends MainScreen {
 
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private SignIconService signIconService;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        signIconsChecksAndGenerate();
+    }
+
+    private void signIconsChecksAndGenerate() {
+        if (signIconService.checkUserIcons()) {
+            signIconService.createDefaultIcons((ExtUser) userSession.getUser());
+
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .withCaption(messageBundle.getMessage("msgInfo"))
+                    .withDescription(messageBundle.getMessage("msgCreateDefaultSing"))
+                    .show();
+        }
+    }
 
     @EventListener
     public void onUiNotificationEvent(UiNotificationEvent event) {

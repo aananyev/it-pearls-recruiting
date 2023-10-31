@@ -45,7 +45,7 @@ public class SignIconsBrowse extends StandardLookup<SignIcons> {
         signIconsesDl.setParameter("user", userSession.getUser());
         signIconsesDl.load();
 
-        if (checkUserIcons()) {
+/*        if (checkUserIcons()) {
             createDefaultIcons();
 
             notifications.create(Notifications.NotificationType.TRAY)
@@ -53,7 +53,7 @@ public class SignIconsBrowse extends StandardLookup<SignIcons> {
                     .withCaption(messageBundle.getMessage("msgInfo"))
                     .withDescription(messageBundle.getMessage("msgCreateDefaultSing"))
                     .show();
-        }
+        } */
     }
 
     private void createDefaultIcons() {

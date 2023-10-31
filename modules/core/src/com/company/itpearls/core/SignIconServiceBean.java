@@ -23,6 +23,8 @@ public class SignIconServiceBean implements SignIconService {
     final static String iconColor[] = {"FF0000", "FFA500", "008000",
             "FF0000","FFA500", "008000"};
 
+    final static String QUERY_USER_SIGN_ICONS = "select e from itpearls_SignIcons e where e.user = :user";
+
     @Inject
     private DataManager dataManager;
     @Inject
@@ -53,6 +55,19 @@ public class SignIconServiceBean implements SignIconService {
             signIcons.setUser((ExtUser) userSessionSource.getUserSession().getUser());
 
             dataManager.commit(signIcons);
+        }
+    }
+
+    public boolean checkUserIcons() {
+        if (dataManager.load(SignIcons.class)
+                .query(QUERY_USER_SIGN_ICONS)
+                .parameter("user", userSessionSource.getUserSession().getUser())
+                .view("signIcons-view")
+                .list()
+                .size() == 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

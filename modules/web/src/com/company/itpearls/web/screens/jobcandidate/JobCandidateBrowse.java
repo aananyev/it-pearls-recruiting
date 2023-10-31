@@ -171,7 +171,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private void initActionButton(PopupButton actionsWithCandidateButton) {
         final String separatorChar = "⎯";
-        String separator = separatorChar.repeat(20);
+        String separator = separatorChar.repeat(22);
 
         actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserve")
                 .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
@@ -255,13 +255,27 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         for (SignIcons icons : signIconsDc.getItems()) {
             actionsWithCandidateButton.addAction(new BaseAction(
                     strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
-            .withIcon(icons.getIconName())
-            .withCaption(icons.getTitleRu())
-            .withDescription(icons.getTitleDescription())
-            .withHandler(actionPerformedAction -> {
+                    .withIcon(icons.getIconName())
+                    .withCaption(icons.getTitleRu())
+                    .withDescription(icons.getTitleDescription())
+                    .withHandler(actionPerformedAction -> {
 
-            }));
+                    }));
         }
+
+        actionsWithCandidateButton.addAction(new BaseAction("separator3Action")
+                .withCaption(separator));
+
+        actionsWithCandidateButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
+                .withDescription("msgEditSignIconsActionDesc")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(actionPerformedAction -> {
+                    screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build()
+                            .show();
+                }));
 
         actionsWithCandidateButton.getAction("addCommentAction").setEnabled(false);
         actionsWithCandidateButton.getAction("addCommentAction").setVisible(false);
@@ -1523,7 +1537,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Label getSignIconLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
-
 
 
         return retLabel;

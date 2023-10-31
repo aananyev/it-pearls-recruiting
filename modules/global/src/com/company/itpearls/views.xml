@@ -565,4 +565,5 @@
         <property name="openPosition" view="_local"/>
         <property name="user" view="_local"/>
     </view>
+    <view entity="itpearls_SignIcons" name="signIcons-view" extends="_local"/>
 </views>

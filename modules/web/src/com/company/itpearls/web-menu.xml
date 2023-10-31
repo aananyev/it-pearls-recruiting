@@ -27,15 +27,6 @@
                   caption="mainMsg://menu_config.itpearls_InternalEmailTemplate.browse" icon="ENVELOPE_SQUARE"/>
         </menu>
     </menu>
-    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
-        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
-              icon="font-icon:ADDRESS_BOOK_O"/>
-        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
-              icon="GROUP"/>
-        <item screen="itpearls_ApplicationRecruitment.browse"
-              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
-        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
-    </menu>
     <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
         <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
               icon="COMPASS"/>
@@ -50,6 +41,15 @@
     <menu id="application-recruiting" icon="COMPASS" insertAfter="application-outstaffing">
         <item screen="itpearls_OpenPositionRecruiting.browse" caption="mainMsg://msgOpenPositionRecruiting"
               icon="COMPASS" openType="NEW_TAB"/>
+    </menu>
+    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
+        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
+              icon="font-icon:ADDRESS_BOOK_O"/>
+        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
+              icon="GROUP"/>
+        <item screen="itpearls_ApplicationRecruitment.browse"
+              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
+        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
     </menu>
     <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
@@ -87,7 +87,8 @@
               icon="RUBLE"/>
         <item screen="itpearls_EmployeeWorkStatus.browse"
               caption="mainMsg://menu_config.itpearls_EmployeeWorkStatus.browse" icon="HOURGLASS_START"/>
-        <item screen="itpearls_SignIcons.browse" caption="mainMsg://menu_config.itpearls_SignIcons.browse"/>
+        <item screen="itpearls_SignIcons.browse" caption="mainMsg://menu_config.itpearls_SignIcons.browse"
+              icon="FONTICONS"/>
     </menu>
     <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-hadbook">
         <item bean="itpearls_MemoForCandidatesBean" beanMethod="runReport" caption="mainMsg://msgMemoForCandidates"

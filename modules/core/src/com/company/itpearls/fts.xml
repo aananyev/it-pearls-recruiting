@@ -160,5 +160,8 @@
         <entity class="com.company.itpearls.entity.SignIcons">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.JobCandidateSignIcon">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

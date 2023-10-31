@@ -8,4 +8,6 @@ public interface SignIconService {
     public void createDefaultIcons(ExtUser user);
 
     public void createDefaultIcons(ExtUser user, String iconsSet[]);
+
+    public boolean checkUserIcons();
 }
