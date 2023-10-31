@@ -35,6 +35,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.server.Page;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessRead;
@@ -259,7 +260,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .withCaption(icons.getTitleRu())
                     .withDescription(icons.getTitleDescription())
                     .withHandler(actionPerformedAction -> {
-
+                        setSignIcons(icons, jobCandidatesTable.getSingleSelected());
                     }));
         }
 
@@ -280,6 +281,34 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         actionsWithCandidateButton.getAction("addCommentAction").setEnabled(false);
         actionsWithCandidateButton.getAction("addCommentAction").setVisible(false);
         actionsWithCandidateButton.getAction("viewCommentAction").setEnabled(true);
+    }
+
+    private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
+            "select e from itpearls_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate";
+
+    private void setSignIcons(SignIcons icons, JobCandidate jobCandidate) {
+        List<JobCandidateSignIcon> jobCandidateSignIcon;
+
+        jobCandidateSignIcon = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidate)
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcon.size() == 0) {
+            JobCandidateSignIcon jcsi = metadata.create(JobCandidateSignIcon.class);
+            jcsi.setJobCandidate(jobCandidate);
+            jcsi.setSignIcon(icons);
+            jcsi.setUser((ExtUser) userSession.getUser());
+
+            dataManager.commit(jcsi);
+        } else {
+            jobCandidateSignIcon.get(0).setSignIcon(icons);
+            dataManager.commit(jobCandidateSignIcon.get(0));
+        }
+
+
+
     }
 
     private static final String QUERY_GET_PERSONEL_RESERVE =
@@ -1536,10 +1565,37 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private Label getSignIconLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Label retLabel = uiComponents.create(Label.class);
-        retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
 
+        List<JobCandidateSignIcon> jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", event.getItem())
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if(jobCandidateSignIcons.size() > 0) {
+            retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
+            retLabel.setIcon(jobCandidateSignIcons.get(0).getSignIcon().getIconName());
+            injectColorCss(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+            retLabel.setStyleName("pic-center-large-"
+                    + jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+        }
 
         return retLabel;
+    }
+
+    protected void injectColorCss(String color) {
+        Page.Styles styles = Page.getCurrent().getStyles();
+        String style = String.format(
+                ".pic-center-large-%s {" +
+                        "color: #%s;" +
+                        "text-align: center;" +
+                        "text-color: gray;" +
+                        "font-size: large;" +
+                        "margin: 0 auto;" +
+                        "}",
+                color, color);
+
+        styles.add(style);
     }
 
     private Label getCVLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {

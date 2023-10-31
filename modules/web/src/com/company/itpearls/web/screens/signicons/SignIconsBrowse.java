@@ -34,10 +34,6 @@ public class SignIconsBrowse extends StandardLookup<SignIcons> {
     @Inject
     private CollectionLoader<SignIcons> signIconsesDl;
     @Inject
-    private Notifications notifications;
-    @Inject
-    private MessageBundle messageBundle;
-    @Inject
     private UiComponents uiComponents;
 
     @Subscribe

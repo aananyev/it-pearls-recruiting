@@ -10,6 +10,7 @@ import com.company.itpearls.entity.PersonelReserve;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -70,9 +71,16 @@ public class ExtMainScreen extends MainScreen {
         signIconsChecksAndGenerate();
     }
 
+
+    private void createDefaultIcons() {
+        final String icon[] = {CubaIcon.STAR.source(), CubaIcon.STAR.source(), CubaIcon.STAR.source(),
+                CubaIcon.FLAG.source(), CubaIcon.FLAG.source(), CubaIcon.FLAG.source()};
+        signIconService.createDefaultIcons((ExtUser) userSession.getUser(), icon);
+    }
+
     private void signIconsChecksAndGenerate() {
         if (signIconService.checkUserIcons()) {
-            signIconService.createDefaultIcons((ExtUser) userSession.getUser());
+            createDefaultIcons();
 
             notifications.create(Notifications.NotificationType.TRAY)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)

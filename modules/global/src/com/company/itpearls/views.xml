@@ -566,4 +566,9 @@
         <property name="user" view="_local"/>
     </view>
     <view entity="itpearls_SignIcons" name="signIcons-view" extends="_local"/>
+    <view entity="itpearls_JobCandidateSignIcon" name="jobCandidateSignIcon-view" extends="_local">
+        <property name="jobCandidate" view="_local"/>
+        <property name="signIcon" view="_local"/>
+        <property name="user" view="_local"/>
+    </view>
 </views>
