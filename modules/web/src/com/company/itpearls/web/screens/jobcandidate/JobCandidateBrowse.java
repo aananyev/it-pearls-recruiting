@@ -264,6 +264,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     }));
         }
 
+        actionsWithCandidateButton.addAction(new BaseAction("removeSignAction")
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgRemoveSignAction"))
+                .withDescription(messageBundle.getMessage("msgRemoveSignActionDesc"))
+                .withHandler(actionPerformedAction -> {
+                    removeSignAction(jobCandidatesTable.getSingleSelected());
+                }));
+
         actionsWithCandidateButton.addAction(new BaseAction("separator3Action")
                 .withCaption(separator));
 
@@ -281,6 +289,24 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         actionsWithCandidateButton.getAction("addCommentAction").setEnabled(false);
         actionsWithCandidateButton.getAction("addCommentAction").setVisible(false);
         actionsWithCandidateButton.getAction("viewCommentAction").setEnabled(true);
+    }
+
+    private void removeSignAction(JobCandidate jobCandidate) {
+        List<JobCandidateSignIcon> jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidate)
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcons.size() > 0) {
+            for (JobCandidateSignIcon jcsi : jobCandidateSignIcons) {
+                dataManager.remove(jcsi);
+            }
+        }
+
+        jobCandidatesTable.repaint();
+        jobCandidatesTable.setSelected(jobCandidate);
+        jobCandidatesTable.scrollTo(jobCandidate);
     }
 
     private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
@@ -307,8 +333,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             dataManager.commit(jobCandidateSignIcon.get(0));
         }
 
-
-
+        jobCandidatesTable.repaint();
+        jobCandidatesTable.setSelected(jobCandidate);
+        jobCandidatesTable.scrollTo(jobCandidate);
     }
 
     private static final String QUERY_GET_PERSONEL_RESERVE =
@@ -1572,7 +1599,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .view("jobCandidateSignIcon-view")
                 .list();
 
-        if(jobCandidateSignIcons.size() > 0) {
+        if (jobCandidateSignIcons.size() > 0) {
             retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
             retLabel.setIcon(jobCandidateSignIcons.get(0).getSignIcon().getIconName());
             injectColorCss(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
