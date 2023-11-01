@@ -36,7 +36,7 @@
                     <property name="positionType" view="_local"/>
                 </property>
             </view>
-            <loader id="emailTemplatesDl">
+            <loader id="emailTemplatesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_InternalEmailTemplate e order by e.templateName]]>
                     <condition>
@@ -54,6 +54,11 @@
                                     where k.reacrutier = :subscriber
                                     and k.closed = false
                                     and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    not (e.templateOpenPosition.openClose = :openClose)
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -134,6 +139,11 @@
                                   width="AUTO"
                                   caption="msg://msgShowSharedTemplates"
                                   description="msg://msgShowSharedTemplatesDesc"/>
+                        <checkBox id="showTemplateClosedVacancyCheckBox"
+                                  align="TOP_RIGHT"
+                                  width="AUTO"
+                                  caption="msg://msgShowTemplateClosedVacancyCheckBox"
+                                  description="msg://msgshowTemplateClosedVacancyCheckBoxDesc"/>
                     </hbox>
                 </vbox>
                 <button id="selectOpenPositionButton"

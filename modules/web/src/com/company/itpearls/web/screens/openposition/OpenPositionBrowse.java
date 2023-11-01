@@ -2739,21 +2739,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 Boolean endCase = false;
 
                 for (IteractionList il : jc.getIteractionList()) {
-                    if (il.getVacancy().equals(closeVacancy)) {
-                        if (!sendCV) {
-                            if (il.getIteractionType() != null) {
-                                if (il.getIteractionType().getSignSendToClient() != null) {
-                                    if (il.getIteractionType().getSignSendToClient()) {
-                                        sendCV = true;
+                    if (il.getVacancy() != null) {
+                        if (il.getVacancy().equals(closeVacancy)) {
+                            if (!sendCV) {
+                                if (il.getIteractionType() != null) {
+                                    if (il.getIteractionType().getSignSendToClient() != null) {
+                                        if (il.getIteractionType().getSignSendToClient()) {
+                                            sendCV = true;
+                                        }
                                     }
                                 }
-                            }
-                        } else {
-                            if (!endCase) {
-                                if (il.getIteractionType().getSignEndCase() != null) {
-                                    if (il.getIteractionType().getSignEndCase()) {
-                                        endCase = true;
-                                        break;
+                            } else {
+                                if (!endCase) {
+                                    if (il.getIteractionType().getSignEndCase() != null) {
+                                        if (il.getIteractionType().getSignEndCase()) {
+                                            endCase = true;
+                                            break;
+                                        }
                                     }
                                 }
                             }

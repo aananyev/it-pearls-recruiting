@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.personelreserve;
 
 import com.company.itpearls.core.InteractionService;
+import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
@@ -11,6 +12,7 @@ import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.Iter
 import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.company.itpearls.web.screens.jobcandidate.JobCanidateDetailScreenFragment;
+import com.company.itpearls.web.screens.signicons.SignIconsBrowse;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -26,6 +28,7 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.server.Page;
 import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 import javax.inject.Inject;
@@ -85,6 +88,9 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     static final String QUERY_ITERACTION_DELETE_PERSONAL_RESERVE = "select e from itpearls_Iteraction e where e.signPersonalReserveDelete = true";
     static final String QUERY_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
     static final String QUERY_MAX_NUMBER_INTERACTION = "select max(e.numberIteraction) from itpearls_IteractionList e";
+    private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
+            "select e from itpearls_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate";
+
 
     private CollectionContainer<IteractionList> iteractionListDc;
     private CollectionLoader<IteractionList> iteractionListDl;
@@ -106,6 +112,12 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private Button closePersonalReserveButton;
     @Inject
     private CheckBox showBetweenAndOther;
+    @Inject
+    private CollectionContainer<SignIcons> signIconsDc;
+    @Inject
+    private CollectionLoader<SignIcons> signIconsDl;
+    @Inject
+    private StrSimpleService strSimpleService;
 
     @Subscribe("personelReservesTable")
     public void onPersonelReservesTableSelection(DataGrid.SelectionEvent<PersonelReserve> event) {
@@ -154,6 +166,14 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         activesCheckBox.setValue(true);
         inNotWorkCheckBox.setValue(true);
         removedFromReserveCheckBox.setValue(false);
+
+        initSignIconsDataContainer();
+    }
+
+
+    private void initSignIconsDataContainer() {
+        signIconsDl.setParameter("user", (ExtUser) userSession.getUser());
+        signIconsDl.load();
     }
 
     @Subscribe("removedFromReserveCheckBox")
@@ -378,11 +398,6 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
         personelReservesDl.load();
     }
-
-/*    @Install(to = "personelReservesTable.jobCandidate", subject = "styleProvider")
-    private String personelReservesTableJobCandidateStyleProvider(PersonelReserve personelReserve) {
-        return tableWordWrapStyle;
-    } */
 
     @Install(to = "personelReservesTable.recruter", subject = "styleProvider")
     private String personelReservesTableRecruterStyleProvider(PersonelReserve personelReserve) {
@@ -1206,6 +1221,87 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
                 }));
 
+
+
+        for (SignIcons icons : signIconsDc.getItems()) {
+            actionButton.addAction(new BaseAction(
+                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    .withIcon(icons.getIconName())
+                    .withCaption(icons.getTitleRu())
+                    .withDescription(icons.getTitleDescription())
+                    .withHandler(actionPerformedAction -> {
+                        setSignIcons(icons, personelReservesTable.getSingleSelected());
+                    }));
+        }
+
+        actionButton.addAction(new BaseAction("removeSignAction")
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgRemoveSignAction"))
+                .withDescription(messageBundle.getMessage("msgRemoveSignActionDesc"))
+                .withHandler(actionPerformedAction -> {
+                    removeSignAction(personelReservesTable.getSingleSelected());
+                }));
+
+        actionButton.addAction(new BaseAction("separator3Action")
+                .withCaption(separator));
+
+        actionButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
+                .withDescription("msgEditSignIconsActionDesc")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(actionPerformedAction -> {
+                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build();
+                    screen.setParentJobCandidateTable(personelReservesTable);
+
+                    screen.show();
+                }));
+
+    }
+
+    private void removeSignAction(PersonelReserve personelReserve) {
+        List<JobCandidateSignIcon> jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", personelReserve.getJobCandidate())
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcons.size() > 0) {
+            for (JobCandidateSignIcon jcsi : jobCandidateSignIcons) {
+                dataManager.remove(jcsi);
+            }
+        }
+
+        personelReservesTable.repaint();
+        personelReservesTable.setSelected(personelReserve);
+        personelReservesTable.scrollTo(personelReserve);
+    }
+
+    private void setSignIcons(SignIcons icons, PersonelReserve personelReserve) {
+        List<JobCandidateSignIcon> jobCandidateSignIcon;
+
+        jobCandidateSignIcon = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", personelReserve.getJobCandidate())
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcon.size() == 0) {
+            JobCandidateSignIcon jcsi = metadata.create(JobCandidateSignIcon.class);
+            jcsi.setJobCandidate(personelReserve.getJobCandidate());
+            jcsi.setSignIcon(icons);
+            jcsi.setUser((ExtUser) userSession.getUser());
+
+            dataManager.commit(jcsi);
+        } else {
+            jobCandidateSignIcon.get(0).setSignIcon(icons);
+            dataManager.commit(jobCandidateSignIcon.get(0));
+        }
+
+        personelReservesTable.repaint();
+        personelReservesTable.setSelected(personelReserve);
+        personelReservesTable.scrollTo(personelReserve);
     }
 
     private void clearSelection() {
@@ -1353,6 +1449,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         retHBox.setHeightFull();
         retHBox.setSpacing(true);
 
+        Label signIconLabel = getSignIconLabel(event.getItem().getJobCandidate());
+
         Label jobCandidateLabel = uiComponents.create(Label.class);
         jobCandidateLabel.setWidthFull();
         jobCandidateLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
@@ -1431,6 +1529,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
             star.setVisible(false);
         }
 
+        retHBox.add(signIconLabel);
         retHBox.add(star);
         retHBox.add(newReserveLabel);
         retHBox.add(futureReserveLabel);
@@ -1462,6 +1561,48 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         }
 
         return retHBox;
+    }
+
+    private Label getSignIconLabel(JobCandidate jobCandidate) {
+        Label retLabel = uiComponents.create(Label.class);
+
+        List<JobCandidateSignIcon> jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidate)
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcons.size() > 0) {
+            retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            retLabel.setIcon(jobCandidateSignIcons.get(0).getSignIcon().getIconName());
+
+            if (jobCandidateSignIcons.get(0).getSignIcon().getTitleDescription() != null) {
+                retLabel.setDescription(jobCandidateSignIcons.get(0).getSignIcon().getTitleDescription());
+            } else {
+                retLabel.setDescription(jobCandidateSignIcons.get(0).getSignIcon().getTitleRu());
+            }
+
+            injectColorCss(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+            retLabel.setStyleName("pic-center-large-"
+                    + jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+        }
+
+        return retLabel;
+    }
+
+    protected void injectColorCss(String color) {
+        Page.Styles styles = Page.getCurrent().getStyles();
+        String style = String.format(
+                ".pic-center-large-%s {" +
+                        "color: #%s;" +
+                        "text-align: center;" +
+                        "text-color: gray;" +
+                        "font-size: large;" +
+                        "margin: 0 auto;" +
+                        "}",
+                color, color);
+
+        styles.add(style);
     }
 
     @Subscribe

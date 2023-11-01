@@ -43,6 +43,23 @@
                 </query>
             </loader>
         </instance>
+        <collection id="signIconsDc" class="com.company.itpearls.entity.SignIcons">
+            <view extends="_local">
+                <property name="user" view="_local"/>
+            </view>
+            <loader id="signIconsDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_SignIcons e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.user = :user</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="1000"/>

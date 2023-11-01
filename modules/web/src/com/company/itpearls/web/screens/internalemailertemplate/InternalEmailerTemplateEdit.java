@@ -54,6 +54,7 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
     private CheckBox showSharedTemplatesCheckBox;
 
     private OpenPosition currentOpenPosition = null;
+    private InternalEmailTemplate emailTemplate = null;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -65,6 +66,12 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
         initEmailTemplateField();
         setOnlyMySubscribeCheckBox();
         setShowSharedTemplatesCheckBox();
+        saveEmailTemplate();
+    }
+
+    private void saveEmailTemplate() {
+        if (emailTemplateField.getValue() != null)
+            this.emailTemplate = emailTemplateField.getValue();
     }
 
     private void setShowSharedTemplatesCheckBox() {
@@ -173,6 +180,8 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
             bodyEmailField.setValue(emailGenerationService.preparingMessage(bodyEmailField.getValue(),
                     currentOpenPosition));
         }
+
+        this.emailTemplate = emailTemplateField.getValue();
     }
 
     private void createTextMessage() {
@@ -195,6 +204,8 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
             bodyEmailField.setValue(emailGenerationService.preparingMessage(bodyEmailField.getValue(),
                     currentOpenPosition));
         }
+
+        this.emailTemplate = emailTemplateField.getValue();
     }
 
     private void clearAllFields() {
@@ -301,5 +312,14 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
 
     public InternalEmailerTemplate getInternalEmailerTemplate() {
         return (InternalEmailerTemplate) getEditedEntity();
+    }
+
+    @Subscribe("showTemplateClosedVacancyCheckBox")
+    public void onShowTemplateClosedVacancyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue()) {
+            emailTemplatesDl.setParameter("openClose", true);
+        } else {
+            emailTemplatesDl.removeParameter("openClose");
+        }
     }
 }

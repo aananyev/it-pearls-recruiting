@@ -1,8 +1,10 @@
 package com.company.itpearls.web.screens.internalemailer;
 
+import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.OpenPositionNewsService;
 import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
+import com.company.itpearls.web.screens.signicons.SignIconsBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
@@ -13,13 +15,11 @@ import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataContext;
-import com.haulmont.cuba.gui.model.InstanceContainer;
-import com.haulmont.cuba.gui.model.InstanceLoader;
+import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.server.Page;
 
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @UiController("itpearls_InternalEmailer.browse")
 @UiDescriptor("internal-emailer-browse.xml")
@@ -72,6 +73,9 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                     "where e.signPersonalReservePut = true";
     static final String QUERY_DEFAULT_OPEN_POSITION =
             "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
+    private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
+            "select e from itpearls_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate";
+
 
     private PersonelReserve currentPersonelReserve = null;
 
@@ -81,10 +85,17 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private UserSessionSource userSessionSource;
     @Inject
     private OpenPositionNewsService openPositionNewsService;
+    @Inject
+    private StrSimpleService strSimpleService;
+    @Inject
+    private CollectionContainer<SignIcons> signIconsDc;
+    @Inject
+    private CollectionLoader<SignIcons> signIconsDl;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         onlyMyLettersCheckBox.setValue(true);
+        initSignIconsDataContainer();
     }
 
     @Subscribe("onlyMyLettersCheckBox")
@@ -113,6 +124,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         replyLabel.setStyleName("h1-green");
 
         Label selectionLabel = setSelectionLabel(event.getItem());
+        Label signIconLabel = getSignIconLabel(event.getItem().getToEmail());
 
         if (dataManager
                 .load(InternalEmailer.class)
@@ -128,6 +140,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
             replyLabel.setVisible(false);
         }
 
+        retHbox.add(signIconLabel);
         retHbox.add(selectionLabel);
 
 
@@ -433,6 +446,93 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                     }
 
                 }));
+
+        actionButton.addAction(new BaseAction("separator2Action")
+                .withCaption(separator));
+
+        for (SignIcons icons : signIconsDc.getItems()) {
+            actionButton.addAction(new BaseAction(
+                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    .withIcon(icons.getIconName())
+                    .withCaption(icons.getTitleRu())
+                    .withDescription(icons.getTitleDescription())
+                    .withHandler(actionPerformedAction -> {
+                        setSignIcons(icons, emailersTable.getSingleSelected());
+                    }));
+        }
+
+        actionButton.addAction(new BaseAction("removeSignAction")
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgRemoveSignAction"))
+                .withDescription(messageBundle.getMessage("msgRemoveSignActionDesc"))
+                .withHandler(actionPerformedAction -> {
+                    removeSignAction(emailersTable.getSingleSelected());
+                }));
+
+        actionButton.addAction(new BaseAction("separator3Action")
+                .withCaption(separator));
+
+        actionButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
+                .withDescription("msgEditSignIconsActionDesc")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(actionPerformedAction -> {
+                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build();
+                    screen.setParentJobCandidateTable(emailersTable);
+
+                    screen.show();
+                }));
+    }
+
+    private void removeSignAction(InternalEmailer internalEmailer) {
+        List<JobCandidateSignIcon> jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", internalEmailer.getToEmail())
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcons.size() > 0) {
+            for (JobCandidateSignIcon jcsi : jobCandidateSignIcons) {
+                dataManager.remove(jcsi);
+            }
+        }
+
+        emailersTable.repaint();
+        emailersTable.setSelected(internalEmailer);
+        emailersTable.scrollTo(internalEmailer);
+    }
+
+    private void setSignIcons(SignIcons icons, InternalEmailer internalEmailer) {
+        List<JobCandidateSignIcon> jobCandidateSignIcon;
+
+        jobCandidateSignIcon = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", internalEmailer.getToEmail())
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcon.size() == 0) {
+            JobCandidateSignIcon jcsi = metadata.create(JobCandidateSignIcon.class);
+            jcsi.setJobCandidate(internalEmailer.getToEmail());
+            jcsi.setSignIcon(icons);
+            jcsi.setUser((ExtUser) userSession.getUser());
+
+            dataManager.commit(jcsi);
+        } else {
+            jobCandidateSignIcon.get(0).setSignIcon(icons);
+            dataManager.commit(jobCandidateSignIcon.get(0));
+        }
+
+        emailersTable.repaint();
+        emailersTable.setSelected(internalEmailer);
+        emailersTable.scrollTo(internalEmailer);
+    }
+
+    private void initSignIconsDataContainer() {
+        signIconsDl.setParameter("user", (ExtUser) userSession.getUser());
+        signIconsDl.load();
     }
 
     protected void putCandidatesToPersonelReserve(InternalEmailer singleSelected) {
@@ -603,6 +703,48 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .one();
 
         return e.getNumberIteraction().add(BigDecimal.ONE);
+    }
+
+    private Label getSignIconLabel(JobCandidate jobCandidate) {
+        Label retLabel = uiComponents.create(Label.class);
+
+        List<JobCandidateSignIcon> jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidate)
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        if (jobCandidateSignIcons.size() > 0) {
+            retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            retLabel.setIcon(jobCandidateSignIcons.get(0).getSignIcon().getIconName());
+
+            if (jobCandidateSignIcons.get(0).getSignIcon().getTitleDescription() != null) {
+                retLabel.setDescription(jobCandidateSignIcons.get(0).getSignIcon().getTitleDescription());
+            } else {
+                retLabel.setDescription(jobCandidateSignIcons.get(0).getSignIcon().getTitleRu());
+            }
+
+            injectColorCss(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+            retLabel.setStyleName("pic-center-large-"
+                    + jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+        }
+
+        return retLabel;
+    }
+
+    protected void injectColorCss(String color) {
+        Page.Styles styles = Page.getCurrent().getStyles();
+        String style = String.format(
+                ".pic-center-large-%s {" +
+                        "color: #%s;" +
+                        "text-align: center;" +
+                        "text-color: gray;" +
+                        "font-size: large;" +
+                        "margin: 0 auto;" +
+                        "}",
+                color, color);
+
+        styles.add(style);
     }
 
     private void addPersonaLReserveMonth(InternalEmailer internalEmailer, OpenPosition selectedOpenPosition) {
