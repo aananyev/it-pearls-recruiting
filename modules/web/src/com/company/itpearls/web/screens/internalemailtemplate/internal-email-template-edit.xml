@@ -23,7 +23,7 @@
             <view extends="openPosition-view">
                 <property name="projectName" view="_local"/>
             </view>
-            <loader id="templateOpenPositionsDl">
+            <loader id="templateOpenPositionsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e]]>
                     <condition>
@@ -49,15 +49,15 @@
             </loader>
         </collection>
         <collection id="templateAuthorsDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
-            <loader id="templateAuthorsDl">
+            <loader id="templateAuthorsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from sec$User e]]>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
+    <dialogMode height="700"
+                width="1000"/>
     <layout expand="textAreaGroupBox"
             spacing="true">
         <hbox expand="mainDataVBox"

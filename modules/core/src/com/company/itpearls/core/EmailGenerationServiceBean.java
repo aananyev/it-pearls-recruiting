@@ -82,6 +82,12 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                         retStr = strSimpleService.replaceAll(retStr,
                                 emailKeys.get(EmailKeys.TIME.getId()),
                                 simpleDateFormat1.format(addDate));
+                    } else {
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.DATE.getId()),
+                                "<font color=\"red\">"
+                                        + emailKeys.get(EmailKeys.DATE.getId())
+                                        + "</font>");
                     }
 
                     if (jobCandidate != null) {
@@ -89,18 +95,36 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.FIRST_NAME.getId()),
                                     jobCandidate.getFirstName());
+                        } else {
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.FIRST_NAME.getId()),
+                                    "<font color=\"red\">"
+                                            + emailKeys.get(EmailKeys.FIRST_NAME.getId())
+                                            + "</font>");
                         }
 
                         if (jobCandidate.getFirstName() != null) {
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.MIDDLE_NAME.getId()),
                                     jobCandidate.getMiddleName());
+                        } else {
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.MIDDLE_NAME.getId()),
+                                    "<font color=\"red\">"
+                                            + emailKeys.get(EmailKeys.MIDDLE_NAME.getId())
+                                            + "</font>");
                         }
 
                         if (jobCandidate.getMiddleName() != null) {
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.SECOND_NAME.getId()),
                                     jobCandidate.getSecondName());
+                        } else {
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.SECOND_NAME.getId()),
+                                    "<font color=\"red\">"
+                                            + emailKeys.get(EmailKeys.SECOND_NAME.getId())
+                                            + "</font>");
                         }
                     }
 
@@ -122,7 +146,19 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                 retStr = strSimpleService.replaceAll(retStr,
                                         emailKeys.get(EmailKeys.POSITION.getId()),
                                         openPosition.getPositionType().getPositionEnName());
+                            } else {
+                                retStr = strSimpleService.replaceAll(retStr,
+                                        emailKeys.get(EmailKeys.POSITION.getId()),
+                                        "<font color=\"red\">"
+                                                + emailKeys.get(EmailKeys.POSITION.getId())
+                                                + "</font>");
                             }
+                        } else {
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.POSITION.getId()),
+                                    "<font color=\"red\">"
+                                            + emailKeys.get(EmailKeys.POSITION.getId())
+                                            + "</font>");
                         }
 
                         if (openPosition.getProjectName() != null) {
@@ -130,8 +166,13 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                 retStr = strSimpleService.replaceAll(retStr,
                                         emailKeys.get(EmailKeys.PROJECT.getId()),
                                         openPosition.getProjectName().getProjectName());
+                            } else {
+                                retStr = strSimpleService.replaceAll(retStr,
+                                        emailKeys.get(EmailKeys.PROJECT.getId()),
+                                        "<font color=\"red\">"
+                                                + emailKeys.get(EmailKeys.PROJECT.getId())
+                                                + "</font>");
                             }
-
 
                             if (openPosition.getProjectName().getProjectDepartment() != null) {
                                 if (openPosition.getProjectName().getProjectDepartment().getCompanyName() != null) {
@@ -139,22 +180,108 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                         retStr = strSimpleService.replaceAll(retStr,
                                                 emailKeys.get(EmailKeys.COMPANY.getId()),
                                                 openPosition.getProjectName().getProjectDepartment().getCompanyName().getComanyName());
+                                    } else {
+                                        retStr = strSimpleService.replaceAll(retStr,
+                                                emailKeys.get(EmailKeys.COMPANY.getId()),
+                                                "<font color=\"red\">"
+                                                        + emailKeys.get(EmailKeys.COMPANY.getId())
+                                                        + "</font>");
                                     }
+                                } else {
+                                    retStr = strSimpleService.replaceAll(retStr,
+                                            emailKeys.get(EmailKeys.COMPANY.getId()),
+                                            "<font color=\"red\">"
+                                                    + emailKeys.get(EmailKeys.COMPANY.getId())
+                                                    + "</font>");
                                 }
 
                                 if (openPosition.getProjectName().getProjectDepartment().getDepartamentRuName() != null) {
                                     retStr = strSimpleService.replaceAll(retStr,
                                             emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
                                             openPosition.getProjectName().getProjectDepartment().getDepartamentRuName());
+                                } else {
+                                    retStr = strSimpleService.replaceAll(retStr,
+                                            emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
+                                            "<font color=\"red\">"
+                                                    + emailKeys.get(EmailKeys.DEPARTAMENT.getId())
+                                                    + "</font>");
                                 }
+                            } else {
+                                retStr = strSimpleService.replaceAll(retStr,
+                                        emailKeys.get(EmailKeys.COMPANY.getId()),
+                                        "<font color=\"red\">"
+                                                + emailKeys.get(EmailKeys.COMPANY.getId())
+                                                + "</font>");
                             }
+                        } else {
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.COMPANY.getId()),
+                                    "<font color=\"red\">"
+                                            + emailKeys.get(EmailKeys.COMPANY.getId())
+                                            + "</font>");
+
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
+                                    "<font color=\"red\">"
+                                            + emailKeys.get(EmailKeys.DEPARTAMENT.getId())
+                                            + "</font>");
+
+                            retStr = strSimpleService.replaceAll(retStr,
+                                    emailKeys.get(EmailKeys.PROJECT.getId()),
+                                    "<font color=\"red\">"
+                                            + emailKeys.get(EmailKeys.PROJECT.getId())
+                                            + "</font>");
+
                         }
+                    } else {
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()),
+                                "<font color=\"red\">"
+                                        + emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId())
+                                        + "</font>");
+
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.SALARY_MIN.getId()),
+                                "<font color=\"red\">"
+                                        + emailKeys.get(EmailKeys.SALARY_MIN.getId())
+                                        + "</font>");
+
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.SALARY_MAX.getId()),
+                                "<font color=\"red\">"
+                                        + emailKeys.get(EmailKeys.SALARY_MAX.getId())
+                                        + "</font>");
+
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.COMPANY.getId()),
+                                "<font color=\"red\">"
+                                        + emailKeys.get(EmailKeys.COMPANY.getId())
+                                        + "</font>");
+
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
+                                "<font color=\"red\">"
+                                        + emailKeys.get(EmailKeys.DEPARTAMENT.getId())
+                                        + "</font>");
+
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.POSITION.getId()),
+                                "<font color=\"red\">"
+                                        + emailKeys.get(EmailKeys.POSITION.getId())
+                                        + "</font>");
+
                     }
 
                     if (user != null) {
                         retStr = strSimpleService.replaceAll(retStr,
                                 emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()),
                                 user.getName());
+                    } else {
+                        retStr = strSimpleService.replaceAll(retStr,
+                                emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()),
+                                "<font color=\"red\">"
+                                        + emailKeys.get(EmailKeys.RESEARCHER_NAME.getId())
+                                        + "</font>");
                     }
                 } catch (NullPointerException e) {
                     log.error("Error", e);

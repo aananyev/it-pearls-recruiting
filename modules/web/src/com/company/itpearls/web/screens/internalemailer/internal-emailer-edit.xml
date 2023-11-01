@@ -71,6 +71,7 @@
                         </actions>
                         <query entityClass="com.company.itpearls.entity.JobCandidate"
                                escapeValueForLike="true"
+                               view="jobCandidate-view"
                                searchStringFormat="%$searchString%">
                             select e
                             from itpearls_JobCandidate e

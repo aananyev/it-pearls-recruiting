@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.internalemailertemplate;
 import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -14,6 +15,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.util.List;
 
 @UiController("itpearls_InternalEmailerTemplate.edit")
 @UiDescriptor("internal-emailer-template-edit.xml")
@@ -90,6 +92,15 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
 
     private void initEmailTemplateField() {
         emailTemplateField.setOptionImageProvider(this::emailTemplateImageProvider);
+
+        emailTemplateField.addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                if (event.getValue().getTemplateOpenPosition() != null) {
+                    openPositionLabel.setValue(event.getValue().getTemplateOpenPosition().getVacansyName());
+                    openPositionLabel.setDescription(event.getValue().getTemplateOpenPosition().getComment());
+                }
+            }
+        });
     }
 
     protected Resource emailTemplateImageProvider(InternalEmailTemplate internalEmailTemplate) {
@@ -122,41 +133,47 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
         emailTemplatesDl.load();
     }
 
+    private Boolean closeScreen = false;
+
+    @Subscribe
+    public void onBeforeClose(BeforeCloseEvent event) {
+        closeScreen = true;
+    }
+
     @Subscribe("emailTemplateField")
     public void onEmailTemplateFieldValueChange(HasValue.ValueChangeEvent<InternalEmailTemplate> event) {
         if (event.getValue() != null) {
-            reloadTemplate();
+            if (!closeScreen) {
+                reloadTemplate();
+            }
         }
     }
 
     private void reloadTemplate() {
-        Boolean flag = false;
 
-        if (bodyEmailField.getValue() != null) {
-            if (!bodyEmailField.getValue().equals("")) {
-                createTextMessage();
-
-                flag = true;
-            }
-        }
-
-        if (!flag) {
-            dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
-                    .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withMessage(messageBundle.getMessage("msgReplaceTextMessage"))
-                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                    .withHandler(e -> createTextMessage()),
-                            new DialogAction(DialogAction.Type.NO))
-                    .show();
+        if (bodyEmailField.getValue() == null) {
+            createTextMessage();
         } else {
-            dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
-                    .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withMessage(messageBundle.getMessage("msgClearAllFields"))
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                    .withHandler(e -> clearAllFields()),
-                            new DialogAction(DialogAction.Type.NO))
-                    .show();
+            if (bodyEmailField.getValue().equals("")) {
+                createTextMessage();
+            } else {
+                dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withMessage(messageBundle.getMessage("msgReplaceTextMessage"))
+                        .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                        .withHandler(e -> createTextMessage()),
+                                new DialogAction(DialogAction.Type.NO))
+                        .show();
+/*            } else{
+                dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withMessage(messageBundle.getMessage("msgClearAllFields"))
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                                        .withHandler(e -> clearAllFields()),
+                                new DialogAction(DialogAction.Type.NO))
+                        .show(); */
+            }
         }
     }
 
@@ -177,6 +194,7 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
         if (openPosition != null) {
             currentOpenPosition = openPosition;
             openPositionLabel.setValue(openPosition.getVacansyName());
+            openPositionLabel.setDescription(openPosition.getComment());
             bodyEmailField.setValue(emailGenerationService.preparingMessage(bodyEmailField.getValue(),
                     currentOpenPosition));
         }
@@ -201,6 +219,7 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
         if (emailTemplateField.getValue().getTemplateOpenPosition() != null) {
             currentOpenPosition = emailTemplateField.getValue().getTemplateOpenPosition();
             openPositionLabel.setValue(emailTemplateField.getValue().getTemplateOpenPosition().getVacansyName());
+            openPositionLabel.setDescription(emailTemplateField.getValue().getTemplateOpenPosition().getComment());
             bodyEmailField.setValue(emailGenerationService.preparingMessage(bodyEmailField.getValue(),
                     currentOpenPosition));
         }
@@ -230,6 +249,7 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                         currentOpenPosition = openPosition;
 
                         openPositionLabel.setValue(currentOpenPosition.getVacansyName());
+                        openPositionLabel.setDescription(currentOpenPosition.getComment());
                     } else {
                         dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
                                 .withType(Dialogs.MessageType.CONFIRMATION)

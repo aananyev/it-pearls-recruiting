@@ -69,7 +69,7 @@
         <collection id="fromEmailsDc"
                     class="com.company.itpearls.entity.ExtUser"
                     view="_minimal">
-            <loader id="fromEmailsDl">
+            <loader id="fromEmailsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_ExtUser e]]>
                 </query>
@@ -78,7 +78,8 @@
         <collection id="toEmailsDc"
                     class="com.company.itpearls.entity.JobCandidate"
                     view="_minimal">
-            <loader id="toEmailsDl">
+            <loader id="toEmailsDl"
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e]]>
                 </query>
@@ -111,10 +112,12 @@
                 </vbox>
             </hbox>
         </groupBox>
-        <vbox id="templatesVBox" ext:index="1">
+        <vbox id="templatesVBox" ext:index="3">
             <label id="openPositionLabel"
                    value="msg://msgOpenPositionUndefined"
                    width="AUTO"
+                   htmlEnabled="true"
+                   descriptionAsHtml="true"
                    stylename="h3"/>
             <hbox spacing="true"
                   width="100%"
@@ -123,11 +126,17 @@
                       spacing="true"
                       width="AUTO">
                     <lookupPickerField id="emailTemplateField"
+                                       responsive="true"
                                        optionsContainer="emailTemplatesDc"
                                        dataContainer="internalEmailerTemplateDc"
                                        width="100%"
                                        caption="msg://msgEmailTemplate"
-                                       property="emailTemplate"/>
+                                       property="emailTemplate">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                        </actions>
+                    </lookupPickerField>
                     <hbox spacing="true" align="TOP_RIGHT">
                         <checkBox id="onlyMySubscribeCheckBox"
                                   align="TOP_RIGHT"
@@ -149,7 +158,7 @@
                 <button id="selectOpenPositionButton"
                         icon="COMPASS"
                         width="AUTO"
-                        align="TOP_RIGHT"
+                        align="MIDDLE_RIGHT"
                         caption="msg://msgSelectOpenPosition"
                         invoke="selectOpenPositionButton"/>
             </hbox>

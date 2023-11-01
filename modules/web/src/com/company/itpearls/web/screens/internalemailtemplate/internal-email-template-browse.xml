@@ -45,7 +45,7 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="800"/>
+                width="1000"/>
     <layout expand="internalEmailTemplatesTable"
             spacing="true">
         <checkBox id="viewOtherCheckBox"
@@ -84,7 +84,9 @@
                 <column id="templateOpenPosition" width="450px"/>
                 <column id="templatePosition" width="300px"/>
                 <column id="templateAuthor"/>
-                <column id="sendedMessageColumn" width="80px" generator="sendedMessageColumn"/>
+                <column id="sendedMessageColumn"
+                        width="80px"
+                        generator="sendedMessageColumn"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
