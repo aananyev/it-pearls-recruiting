@@ -123,7 +123,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         replyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         replyLabel.setStyleName("h1-green");
 
-        Label selectionLabel = setSelectionLabel(event.getItem());
+//        Label selectionLabel = setSelectionLabel(event.getItem());
         Label signIconLabel = getSignIconLabel(event.getItem().getToEmail());
 
         if (dataManager
@@ -141,8 +141,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         }
 
         retHbox.add(signIconLabel);
-        retHbox.add(selectionLabel);
-
+//        retHbox.add(selectionLabel);
 
         return retHbox;
     }
@@ -355,7 +354,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .withCaption(separator));
         actionButton.getAction("separator2Action").setEnabled(false);
 
-        actionButton.addAction(new BaseAction("selectedForActionActionStarRed")
+/*        actionButton.addAction(new BaseAction("selectedForActionActionStarRed")
                 .withIcon(CubaIcon.STAR.source())
                 .withCaption(messageBundle.getMessage("msgSelectForActionStarRed"))
                 .withHandler(actionPerformedAction -> {
@@ -448,7 +447,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 }));
 
         actionButton.addAction(new BaseAction("separator2Action")
-                .withCaption(separator));
+                .withCaption(separator)); */
 
         for (SignIcons icons : signIconsDc.getItems()) {
             actionButton.addAction(new BaseAction(
@@ -457,6 +456,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                     .withCaption(icons.getTitleRu())
                     .withDescription(icons.getTitleDescription())
                     .withHandler(actionPerformedAction -> {
+                        emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
                         setSignIcons(icons, emailersTable.getSingleSelected());
                     }));
         }
@@ -466,6 +466,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .withCaption(messageBundle.getMessage("msgRemoveSignAction"))
                 .withDescription(messageBundle.getMessage("msgRemoveSignActionDesc"))
                 .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
                     removeSignAction(emailersTable.getSingleSelected());
                 }));
 
@@ -477,6 +478,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .withDescription("msgEditSignIconsActionDesc")
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
+                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
                     SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
                             .withOpenMode(OpenMode.DIALOG)
                             .build();

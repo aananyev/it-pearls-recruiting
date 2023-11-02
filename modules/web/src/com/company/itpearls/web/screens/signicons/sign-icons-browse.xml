@@ -43,7 +43,6 @@
                 <column id="iconSample"
                         generator="iconSampleGenerator"
                         width="50px"/>
-                <column id="titleEnd"/>
                 <column id="titleRu"/>
                 <column id="iconName"/>
             </columns>

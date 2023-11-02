@@ -1129,7 +1129,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withCaption(separator));
         actionButton.getAction("separator1Action").setEnabled(false);
 
-        actionButton.addAction(new BaseAction("selectedForActionActionStarRed")
+/*        actionButton.addAction(new BaseAction("selectedForActionActionStarRed")
                 .withIcon(CubaIcon.STAR.source())
                 .withCaption(messageBundle.getMessage("msgSelectForActionStarRed"))
                 .withHandler(actionPerformedAction -> {
@@ -1220,7 +1220,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     }
 
                 }));
-
+*/
 
 
         for (SignIcons icons : signIconsDc.getItems()) {
@@ -1230,6 +1230,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                     .withCaption(icons.getTitleRu())
                     .withDescription(icons.getTitleDescription())
                     .withHandler(actionPerformedAction -> {
+                        personelReservesTable.setSelected(personelReserve);
                         setSignIcons(icons, personelReservesTable.getSingleSelected());
                     }));
         }
@@ -1239,6 +1240,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withCaption(messageBundle.getMessage("msgRemoveSignAction"))
                 .withDescription(messageBundle.getMessage("msgRemoveSignActionDesc"))
                 .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
                     removeSignAction(personelReservesTable.getSingleSelected());
                 }));
 
@@ -1250,6 +1252,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withDescription("msgEditSignIconsActionDesc")
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
+                    personelReservesTable.setSelected(personelReserve);
                     SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
                             .withOpenMode(OpenMode.DIALOG)
                             .build();
@@ -1463,10 +1466,10 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 + event.getItem().getJobCandidate().getCityOfResidence().getCityRuName());
         jobCandidateLabel.setStyleName("table-wordwrap");
 
-        Label star = uiComponents.create(Label.class);
-        star.setIconFromSet(CubaIcon.STAR);
-        star.setAlignment(Component.Alignment.MIDDLE_LEFT);
-        star.setStyleName("pic-center-large-orange");
+//        Label star = uiComponents.create(Label.class);
+//        star.setIconFromSet(CubaIcon.STAR);
+//        star.setAlignment(Component.Alignment.MIDDLE_LEFT);
+//        star.setStyleName("pic-center-large-orange");
 
         Label newReserveLabel = uiComponents.create(Label.class);
         newReserveLabel.setValue(messageBundle.getMessage("msgNewReserve"));
@@ -1484,7 +1487,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         futureReserveLabel.setHeightAuto();
         futureReserveLabel.setVisible(false);
 
-        if (event.getItem().getSelectedForAction() != null) {
+/*        if (event.getItem().getSelectedForAction() != null) {
             if (event.getItem().getSelectionSymbolForActions() == null) {
                 if (event.getItem().getSelectedForAction()) {
                     star.setVisible(true);
@@ -1527,10 +1530,10 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
             }
         } else {
             star.setVisible(false);
-        }
+        } */
 
         retHBox.add(signIconLabel);
-        retHBox.add(star);
+//        retHBox.add(star);
         retHBox.add(newReserveLabel);
         retHBox.add(futureReserveLabel);
         retHBox.add(jobCandidateLabel);

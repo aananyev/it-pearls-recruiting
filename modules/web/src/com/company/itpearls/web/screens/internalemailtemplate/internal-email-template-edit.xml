@@ -82,7 +82,6 @@
                                    width="50%"
                                    responsive="true"
                                    inputPrompt="msg://msgSelectOpenPosition"
-                                   buffered="true"
                                    dataContainer="internalEmailTemplateDc"
                                    optionsContainer="templateOpenPositionsDc"
                                    property="templateOpenPosition">

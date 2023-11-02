@@ -1587,7 +1587,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         Label employeeStatusLabel = genEmployeeStatusLabel(event);
-        Label personalReserveLabel = genPersonalReserveLabel(event);
+//        Label personalReserveLabel = genPersonalReserveLabel(event);
         Label signIconLabel = getSignIconLabel(event);
         Label commentCandidateLabel = getCommentCandidateLabel(event);
         Label phoneCandidateLabel = getPhoneCandidateLabel(event);
@@ -1600,7 +1600,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHBox.add(blackListLabel);
         retHBox.add(employeeStatusLabel);
         retHBox.add(signIconLabel);
-        retHBox.add(personalReserveLabel);
+//        retHBox.add(personalReserveLabel);
         retHBox.add(contactsStatusLabel);
         retHBox.add(phoneCandidateLabel);
         retHBox.add(emailLabel);
