@@ -78,6 +78,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
 
     private PersonelReserve currentPersonelReserve = null;
+    static final String separatorChar = "⎯";
+    final static String separator = separatorChar.repeat(22);
 
     @Inject
     private Notifications notifications;
@@ -91,11 +93,71 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private CollectionContainer<SignIcons> signIconsDc;
     @Inject
     private CollectionLoader<SignIcons> signIconsDl;
+    @Inject
+    private PopupButton signFilterButton;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         onlyMyLettersCheckBox.setValue(true);
         initSignIconsDataContainer();
+        initSignFilterPopupButton();
+    }
+
+
+    private void initSignFilterPopupButton() {
+//        final String separatorChar = "⎯";
+//        String separator = separatorChar.repeat(22);
+
+        for (SignIcons icons : signIconsDc.getItems()) {
+            signFilterButton.addAction(new BaseAction(
+                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    .withIcon(icons.getIconName())
+                    .withCaption(icons.getTitleRu())
+                    .withDescription(icons.getTitleDescription())
+                    .withHandler(actionPerformedAction -> {
+                        setSignFilter(icons);
+                    }));
+        }
+
+        signFilterButton.addAction(new BaseAction("separator1Action")
+                .withCaption(separator));
+
+        signFilterButton.addAction(new BaseAction(
+                strSimpleService.deleteExtraCharacters("removeFilterSignAction"))
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgRemoveSignIconFilterDesc"))
+                .withDescription(messageBundle.getMessage("msgRemoveSignIconFilterDesc"))
+                .withHandler(actionPerformedAction -> {
+                    removeSignFilterAction();
+                }));
+
+        signFilterButton.addAction(new BaseAction("separator3Action")
+                .withCaption(separator));
+
+        signFilterButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
+                .withDescription("msgEditSignIconsActionDesc")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(actionPerformedAction -> {
+                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build();
+                    screen.setParentJobCandidateTable(emailersTable);
+
+                    screen.show();
+                }));
+    }
+
+
+    private void removeSignFilterAction() {
+        emailersDl.removeParameter("signIcon");
+        emailersDl.load();
+    }
+
+    private void setSignFilter(SignIcons icons) {
+        removeSignFilterAction();
+        emailersDl.setParameter("signIcon", icons);
+        emailersDl.load();
     }
 
     @Subscribe("onlyMyLettersCheckBox")
@@ -479,7 +541,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
                     emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
-                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                    SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
                             .withOpenMode(OpenMode.DIALOG)
                             .build();
                     screen.setParentJobCandidateTable(emailersTable);

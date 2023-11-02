@@ -24,6 +24,13 @@
                             <c:jpql>
                                 <c:where>e.fromEmail = :fromEmail</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.toEmail in (select l.jobCandidate
+                                    from itpearls_JobCandidateSignIcon l
+                                    where l.signIcon = :signIcon)
+                                </c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -128,8 +135,15 @@
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="emailersTable.create"/>
-                <button id="editBtn" action="emailersTable.edit"/>
+                <button id="createBtn"
+                        action="emailersTable.create"/>
+                <button id="editBtn"
+                        action="emailersTable.edit"/>
+                <popupButton id="signFilterButton"
+                             showActionIcons="true"
+                             caption="msg://msgSignFilter"
+                             enable="true"
+                             icon="FILTER"/>
             </buttonsPanel>
         </dataGrid>
         <checkBox id="onlyMyLettersCheckBox"

@@ -118,6 +118,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private CollectionLoader<SignIcons> signIconsDl;
     @Inject
     private StrSimpleService strSimpleService;
+    @Inject
+    private PopupButton signFilterButton;
 
     @Subscribe("personelReservesTable")
     public void onPersonelReservesTableSelection(DataGrid.SelectionEvent<PersonelReserve> event) {
@@ -168,6 +170,63 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
         removedFromReserveCheckBox.setValue(false);
 
         initSignIconsDataContainer();
+        initSignFilterPopupButton();
+    }
+
+    static final String separatorChar = "⎯";
+    final static String separator = separatorChar.repeat(22);
+
+    private void initSignFilterPopupButton() {
+        for (SignIcons icons : signIconsDc.getItems()) {
+            signFilterButton.addAction(new BaseAction(
+                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    .withIcon(icons.getIconName())
+                    .withCaption(icons.getTitleRu())
+                    .withDescription(icons.getTitleDescription())
+                    .withHandler(actionPerformedAction -> {
+                        setSignFilter(icons);
+                    }));
+        }
+
+        signFilterButton.addAction(new BaseAction("separator1Action")
+                .withCaption(separator));
+
+        signFilterButton.addAction(new BaseAction(
+                strSimpleService.deleteExtraCharacters("removeFilterSignAction"))
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgRemoveSignIconFilterDesc"))
+                .withDescription(messageBundle.getMessage("msgRemoveSignIconFilterDesc"))
+                .withHandler(actionPerformedAction -> {
+                    removeSignFilterAction();
+                }));
+
+        signFilterButton.addAction(new BaseAction("separator3Action")
+                .withCaption(separator));
+
+        signFilterButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
+                .withDescription("msgEditSignIconsActionDesc")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(actionPerformedAction -> {
+                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build();
+                    screen.setParentJobCandidateTable(personelReservesTable);
+
+                    screen.show();
+                }));
+    }
+
+
+    private void removeSignFilterAction() {
+        personelReservesDl.removeParameter("signIcon");
+        personelReservesDl.load();
+    }
+
+    private void setSignFilter(SignIcons icons) {
+        removeSignFilterAction();
+        personelReservesDl.setParameter("signIcon", icons);
+        personelReservesDl.load();
     }
 
 
@@ -1253,7 +1312,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
                     personelReservesTable.setSelected(personelReserve);
-                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                    SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
                             .withOpenMode(OpenMode.DIALOG)
                             .build();
                     screen.setParentJobCandidateTable(personelReservesTable);

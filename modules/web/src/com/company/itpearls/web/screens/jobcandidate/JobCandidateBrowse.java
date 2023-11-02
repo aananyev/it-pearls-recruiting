@@ -143,6 +143,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private static final String EXTENSION_DOCX = "docx";
     private String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
 
+    static final String separatorChar = "⎯";
+    final static String separator = separatorChar.repeat(22);
+
 
     @Inject
     private FileUploadingAPI fileUploadingAPI;
@@ -174,8 +177,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private PersonelReserve currentPersonelReserve = null;
 
     private void initActionButton(PopupButton actionsWithCandidateButton) {
-        final String separatorChar = "⎯";
-        String separator = separatorChar.repeat(22);
+//        final String separatorChar = "⎯";
+//        String separator = separatorChar.repeat(22);
 
         actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserve")
                 .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
@@ -626,6 +629,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private void initSignFilterPopupButton() {
+//        final String separatorChar = "⎯";
+//        String separator = separatorChar.repeat(22);
+
         for (SignIcons icons : signIconsDc.getItems()) {
             signFilterButton.addAction(new BaseAction(
                     strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
@@ -637,6 +643,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     }));
         }
 
+        signFilterButton.addAction(new BaseAction("separator1Action")
+                .withCaption(separator));
+
         signFilterButton.addAction(new BaseAction(
                 strSimpleService.deleteExtraCharacters("removeFilterSignAction"))
                 .withIcon(CubaIcon.REMOVE_ACTION.source())
@@ -644,6 +653,22 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withDescription(messageBundle.getMessage("msgRemoveSignIconFilterDesc"))
                 .withHandler(actionPerformedAction -> {
                     removeSignFilterAction();
+                }));
+
+        signFilterButton.addAction(new BaseAction("separator3Action")
+                .withCaption(separator));
+
+        signFilterButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
+                .withDescription("msgEditSignIconsActionDesc")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(actionPerformedAction -> {
+                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build();
+                    screen.setParentJobCandidateTable(jobCandidatesTable);
+
+                    screen.show();
                 }));
     }
 

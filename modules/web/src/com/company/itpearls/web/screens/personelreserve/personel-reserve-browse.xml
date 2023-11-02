@@ -28,19 +28,36 @@
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e.recruter = :recruter</c:where>
+                                <c:where>
+                                    e.recruter = :recruter
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.inProcess = :actives</c:where>
+                                <c:where>
+                                    e.inProcess = :actives
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.removedFromReserve = :removedFromReserve</c:where>
+                                <c:where>
+                                    e.removedFromReserve = :removedFromReserve
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.jobCandidate.iteractionList in :iteractionList</c:where>
+                                <c:where>
+                                    e.jobCandidate.iteractionList in :iteractionList
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>(:currentDate between e.date and e.endDate or e.date is null and @dateAfter(e.endDate, :currentDate))</c:where>
+                                <c:where>
+                                    (:currentDate between e.date and e.endDate or e.date is null and @dateAfter(e.endDate, :currentDate))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.jobCandidate in (select l.jobCandidate
+                                    from itpearls_JobCandidateSignIcon l
+                                    where l.signIcon = :signIcon)
+                                </c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -177,6 +194,11 @@
                              enable="false"
                              caption="msg://msgActions"
                              description="msg://msgActionsDesc"/>
+                <popupButton id="signFilterButton"
+                             showActionIcons="true"
+                             caption="msg://msgSignFilter"
+                             enable="true"
+                             icon="FILTER"/>
             </buttonsPanel>
         </dataGrid>
         <groupBox id="filtersHBox"

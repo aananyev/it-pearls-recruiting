@@ -224,6 +224,7 @@
                         icon="ENVELOPE_O"
                         invoke="onSendEmail"/>
                 <popupButton id="signFilterButton"
+                             showActionIcons="true"
                              caption="msg://msgSignFilter"
                              enable="true"
                              icon="FILTER"/>
