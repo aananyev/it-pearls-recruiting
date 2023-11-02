@@ -9,6 +9,7 @@
                   class="com.company.itpearls.entity.InternalEmailTemplate">
             <view extends="_local">
                 <property name="templateOpenPosition" view="_local">
+                    <property name="positionType" view="_local"/>
                     <property name="projectName" view="_local">
                         <property name="projectLogo" view="_local"/>
                     </property>
@@ -80,6 +81,7 @@
                 <lookupPickerField id="templateOpenPositionField"
                                    caption="msg://msgOpenPosition"
                                    width="50%"
+                                   icon="REMOVE_ACTION"
                                    responsive="true"
                                    inputPrompt="msg://msgSelectOpenPosition"
                                    dataContainer="internalEmailTemplateDc"

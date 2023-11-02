@@ -159,6 +159,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CollectionContainer<SignIcons> signIconsDc;
     @Inject
     private StrSimpleService strSimpleService;
+    @Inject
+    private PopupButton signFilterButton;
 
     @Subscribe
     public void onInit1(InitEvent event) {
@@ -620,6 +622,40 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .list();
 
         initSignIconsDataContainer();
+        initSignFilterPopupButton();
+    }
+
+    private void initSignFilterPopupButton() {
+        for (SignIcons icons : signIconsDc.getItems()) {
+            signFilterButton.addAction(new BaseAction(
+                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    .withIcon(icons.getIconName())
+                    .withCaption(icons.getTitleRu())
+                    .withDescription(icons.getTitleDescription())
+                    .withHandler(actionPerformedAction -> {
+                        setSignFilter(icons);
+                    }));
+        }
+
+        signFilterButton.addAction(new BaseAction(
+                strSimpleService.deleteExtraCharacters("removeFilterSignAction"))
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgRemoveSignIconFilterDesc"))
+                .withDescription(messageBundle.getMessage("msgRemoveSignIconFilterDesc"))
+                .withHandler(actionPerformedAction -> {
+                    removeSignFilterAction();
+                }));
+    }
+
+    private void removeSignFilterAction() {
+        jobCandidatesDl.removeParameter("signIcon");
+        jobCandidatesDl.load();
+    }
+
+    private void setSignFilter(SignIcons icons) {
+        removeSignFilterAction();
+        jobCandidatesDl.setParameter("signIcon", icons);
+        jobCandidatesDl.load();
     }
 
     private void initSignIconsDataContainer() {

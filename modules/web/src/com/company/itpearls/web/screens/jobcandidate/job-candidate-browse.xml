@@ -63,6 +63,13 @@
                                     where g.candidate = :candidateCV)
                                 </c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                   e in (select l.jobCandidate
+                                    from itpearls_JobCandidateSignIcon l
+                                    where l.signIcon = :signIcon)
+                                </c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -216,6 +223,10 @@
                         visible="false"
                         icon="ENVELOPE_O"
                         invoke="onSendEmail"/>
+                <popupButton id="signFilterButton"
+                             caption="msg://msgSignFilter"
+                             enable="true"
+                             icon="FILTER"/>
             </buttonsPanel>
         </dataGrid>
         <hbox align="MIDDLE_LEFT"
