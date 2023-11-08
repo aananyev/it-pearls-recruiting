@@ -556,6 +556,7 @@
                                                    required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                     </actions>
                                 </lookupPickerField>
                             </row>
@@ -590,6 +591,7 @@
                                                        required="true">
                                         <actions>
                                             <action id="lookup" type="picker_lookup"/>
+                                            <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                         </actions>
                                     </lookupPickerField>
                                     <button id="addPositions"
@@ -849,6 +851,7 @@
                                    width="AUTO">
                     <actions>
                         <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                     </actions>
                 </lookupPickerField>
                 <dataGrid id="jobCandidateIteractionListTable"

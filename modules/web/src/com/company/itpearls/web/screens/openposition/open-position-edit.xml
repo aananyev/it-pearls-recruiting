@@ -397,6 +397,8 @@
                                         <actions>
                                             <action id="lookup"
                                                     type="picker_lookup"/>
+                                            <action id="open"
+                                                    type="picker_open" icon="EDIT_ACTION"/>
                                         </actions>
                                     </lookupPickerField>
                                     <lookupPickerField id="companyDepartamentField"
@@ -408,6 +410,8 @@
                                         <actions>
                                             <action id="lookup"
                                                     type="picker_lookup"/>
+                                            <action id="open"
+                                                    type="picker_open" icon="EDIT_ACTION"/>
                                         </actions>
                                     </lookupPickerField>
                                 </hbox>
@@ -423,6 +427,8 @@
                                         <actions>
                                             <action id="lookup"
                                                     type="picker_lookup"/>
+                                            <action id="open"
+                                                    type="picker_open" icon="EDIT_ACTION"/>
                                         </actions>
                                     </lookupPickerField>
                                     <hbox spacing="true"

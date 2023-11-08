@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.OpenPositionNews;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.core.global.ValueLoadContext;
@@ -196,5 +197,40 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
                 )
                 .show();
 
+    }
+
+    public Component projectLogoColumnGenerator(Entity entity) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightAuto();
+
+        Image image = uiComponents.create(Image.class);
+        image.setDescriptionAsHtml(true);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("50px");
+        image.setHeight("50px");
+        image.setStyleName("icon-no-border-50px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (((RecrutiesTasks)entity).getOpenPosition().getProjectName() != null) {
+            if (((RecrutiesTasks)entity).getOpenPosition().getProjectName().getProjectDescription() != null) {
+                image.setDescription("<h4>"
+                        + ((RecrutiesTasks)entity).getOpenPosition().getProjectName().getProjectName()
+                        + "</h4><br><br>"
+                        + ((RecrutiesTasks)entity).getOpenPosition().getProjectName().getProjectDescription());
+            }
+
+            if (((RecrutiesTasks)entity).getOpenPosition().getProjectName().getProjectLogo() != null) {
+                image.setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(((RecrutiesTasks)entity).getOpenPosition()
+                                .getProjectName()
+                                .getProjectLogo());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        }
+
+        retHBox.add(image);
+        return retHBox;
     }
 }

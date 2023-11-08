@@ -17,7 +17,16 @@
                     <property name="templateAuthor" view="_local"/>
                 </property>
                 <property name="fromEmail" view="_local"/>
-                <property name="toEmail" view="_local"/>
+                <property name="toEmail" view="_local">
+                    <property name="candidateCv" view="_local"/>
+                    <property name="personPosition" view="_local"/>
+                    <property name="iteractionList" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
+                    <property name="socialNetwork" view="_local"/>
+                    <property name="cityOfResidence" view="_local"/>
+                    <property name="laborAgreement" view="_local"/>
+                    <property name="currentCompany" view="_local"/>
+                </property>
             </view>
             <loader/>
         </instance>
@@ -100,7 +109,12 @@
                     <textField id="fromEmailTextAddressField"/>
                     <suggestionPickerField id="toEmailField"
                                            property="toEmail"
-                                           dataContainer="internalEmailerTemplateDc"/>
+                                           dataContainer="internalEmailerTemplateDc">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                        </actions>
+                    </suggestionPickerField>
                 </vbox>
                 <vbox id="dateFieldVBox">
                     <dateField id="dateCreateEmailField"
@@ -134,7 +148,7 @@
                                        property="emailTemplate">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
-                            <action id="open" type="picker_open"/>
+                            <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                         </actions>
                     </lookupPickerField>
                     <hbox spacing="true" align="TOP_RIGHT">

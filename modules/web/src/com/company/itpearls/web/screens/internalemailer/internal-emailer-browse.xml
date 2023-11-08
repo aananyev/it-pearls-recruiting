@@ -11,9 +11,10 @@
                 <property name="fromEmail" view="_local">
                     <property name="fileImageFace" view="_local"/>
                 </property>
-                <property name="toEmail" view="jobCandidate-view">
+                <property name="toEmail" view="_local">
                     <property name="fileImageFace" view="_local"/>
                     <property name="personPosition" view="_local"/>
+                    <property name="candidateCv" view="candidateCV-view"/>
                 </property>
             </view>
             <loader id="emailersDl" cacheable="true">
@@ -36,20 +37,21 @@
                 </query>
             </loader>
         </collection>
-        <instance id="jobCandidateDc" class="com.company.itpearls.entity.JobCandidate">
+<!--        <instance id="jobCandidateDc" class="com.company.itpearls.entity.JobCandidate">
             <view extends="jobCandidate-view"/>
             <loader id="jobCandidateDl">
-                <query>select e from itpearls_JobCandidate e
-                <condition>
-                    <and>
-                        <c:jpql>
-                            <c:where>e = :jobCandidate</c:where>
-                        </c:jpql>
-                    </and>
-                </condition>
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidate e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e = :jobCandidate</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
                 </query>
             </loader>
-        </instance>
+        </instance> -->
         <collection id="signIconsDc" class="com.company.itpearls.entity.SignIcons">
             <view extends="_local">
                 <property name="user" view="_local"/>
@@ -93,7 +95,7 @@
                         id="draftEmail"
                         width="60px"/>
                 <column id="replyInternalEmailerColumn"
-                        width="40px"
+                        width="80px"
                         caption="msg://msgReply">
                     <componentRenderer/>
                 </column>

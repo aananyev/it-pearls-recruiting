@@ -3,7 +3,6 @@ package com.company.itpearls.web.screens.internalemailertemplate;
 import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
-import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -15,7 +14,6 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.util.List;
 
 @UiController("itpearls_InternalEmailerTemplate.edit")
 @UiDescriptor("internal-emailer-template-edit.xml")

@@ -9,7 +9,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
-@Table(name = "ITPEARLS_INTERNAL_EMAILER")
+@Table(name = "ITPEARLS_INTERNAL_EMAILER", indexes = {
+        @Index(name = "IDX_ITPEARLS_INTERNAL_EMAILER_TO_EMAIL", columnList = "TO_EMAIL_ID"),
+        @Index(name = "IDX_ITPEARLS_INTERNAL_EMAILER_FROM_EMAIL", columnList = "FROM_EMAIL_ID"),
+        @Index(name = "IDX_ITPEARLS_INTERNAL_EMAILER_EMAIL_TEMPLATE", columnList = "EMAIL_TEMPLATE_ID"),
+        @Index(name = "IDX_ITPEARLS_INTERNAL_EMAILER_REPLY_INTERNAL_EMAILER", columnList = "REPLY_INTERNAL_EMAILER_ID")
+})
 @Entity(name = "itpearls_InternalEmailer")
 @NamePattern("from: %s to: %s (%s)|fromEmail,toEmail,dateSendEmail")
 public class InternalEmailer extends StandardEntity {

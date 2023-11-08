@@ -86,7 +86,10 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         if (jobCandidate != null) {
             toEmailField.setValue(jobCandidate);
         }
+    }
 
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
         checkSended();
     }
 
@@ -99,7 +102,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     }
 
     private void setSender(ExtUser user) {
-        String userEmail = System.getProperty(EMAIL_SMTPUSER);
+//        String userEmail = System.getProperty(EMAIL_SMTPUSER);
         fromEmailTextAddressField.setValue(user.getName() + " \"" + user.getEmail() + "\"");
         fromEmailTextAddressField.setDescription("SMTP server: " + user.getSmtpServer() + ":" + user.getSmtpPort() + "\n" +
                 "POP3 server: " + user.getPop3Server() + ":" + user.getPop3Port() + "\n" +

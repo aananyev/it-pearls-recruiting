@@ -9,7 +9,11 @@ import com.haulmont.cuba.security.entity.User;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@Table(name = "ITPEARLS_INTERNAL_EMAIL_TEMPLATE")
+@Table(name = "ITPEARLS_INTERNAL_EMAIL_TEMPLATE", indexes = {
+        @Index(name = "IDX_ITPEARLS_INTERNAL_EMAIL_TEMPLATE_OPEN_POSITION", columnList = "TEMPLATE_OPEN_POSITION_ID"),
+        @Index(name = "IDX_ITPEARLS_INTERNAL_EMAIL_TEMPLATE_AUTHOR", columnList = "TEMPLATE_AUTHOR_ID"),
+        @Index(name = "IDX_ITPEARLS_INTERNAL_EMAIL_TEMPLATE_POSITION", columnList = "TEMPLATE_POSITION_ID")
+})
 @Entity(name = "itpearls_InternalEmailTemplate")
 @NamePattern("%s / %s|templateName,templateAuthor")
 public class InternalEmailTemplate extends StandardEntity {

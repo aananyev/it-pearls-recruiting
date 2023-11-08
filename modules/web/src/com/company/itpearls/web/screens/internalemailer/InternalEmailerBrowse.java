@@ -14,6 +14,10 @@ import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -54,32 +58,31 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private Metadata metadata;
     @Inject
     private DataContext dataContext;
-    @Inject
-    private InstanceContainer<JobCandidate> jobCandidateDc;
-    @Inject
-    private InstanceLoader<JobCandidate> jobCandidateDl;
+//    @Inject
+//    private InstanceContainer<JobCandidate> jobCandidateDc;
+//    @Inject
+//    private InstanceLoader<JobCandidate> jobCandidateDl;
 
     private static final String QUERY_GET_PERSONEL_RESERVE =
-            "select e from itpearls_PersonelReserve e " +
-                    "where e.jobCandidate = :jobCandidate " +
-                    "and " +
-                    "(e.endDate > :currDate or e.endDate is null)";
+            "select e from itpearls_PersonelReserve e where e.jobCandidate = :jobCandidate and (e.endDate > :currDate or e.endDate is null)";
     private static final String QUERY_GET_DEFAULT_VACANCY =
-            "select e from itpearls_OpenPosition e " +
-                    "where e.vacansyName like \'Default\'";
+            "select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'";
     private final String QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION =
-            "select e " +
-                    "from itpearls_Iteraction e " +
-                    "where e.signPersonalReservePut = true";
+            "select e from itpearls_Iteraction e where e.signPersonalReservePut = true";
     static final String QUERY_DEFAULT_OPEN_POSITION =
             "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
     private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
             "select e from itpearls_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate";
-
+    private static final String QUERY_GET_REPLY =
+            "select e from itpearls_InternalEmailer e where e.replyInternalEmailer = :replyInternalEmailer";
+    private static final String QUERY_GET_COUNT_INTERACTION =
+            "select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)";
 
     private PersonelReserve currentPersonelReserve = null;
     static final String separatorChar = "⎯";
     final static String separator = separatorChar.repeat(22);
+    final static String pic_center_large = "pic-center-large-";
+    final static String pic_center_large_inject_css = ".pic-center-large-%s {color: #%s; text-align: center; text-color: gray; font-size: large; margin: 0 auto;}";
 
     @Inject
     private Notifications notifications;
@@ -105,12 +108,11 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
 
     private void initSignFilterPopupButton() {
-//        final String separatorChar = "⎯";
-//        String separator = separatorChar.repeat(22);
-
         for (SignIcons icons : signIconsDc.getItems()) {
+            StringBuilder sb = new StringBuilder(icons.getTitleEnd());
+            sb.append(strAction);
             signFilterButton.addAction(new BaseAction(
-                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    strSimpleService.deleteExtraCharacters(sb.toString()))
                     .withIcon(icons.getIconName())
                     .withCaption(icons.getTitleRu())
                     .withDescription(icons.getTitleDescription())
@@ -139,7 +141,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .withDescription("msgEditSignIconsActionDesc")
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
-                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                    SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
                             .withOpenMode(OpenMode.DIALOG)
                             .build();
                     screen.setParentJobCandidateTable(emailersTable);
@@ -171,41 +173,85 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         emailersDl.load();
     }
 
+    @Inject
+    protected BackgroundWorker backgroundWorker;
+
     @Install(to = "emailersTable.replyInternalEmailerColumn", subject = "columnGenerator")
     private Component emailersTableReplyInternalEmailerColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
-        final String QUERY_GET_REPLY = "select e from itpearls_InternalEmailer e " +
-                "where e.replyInternalEmailer = :replyInternalEmailer";
-
-        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
-        retHbox.setHeightFull();
-        retHbox.setWidthFull();
-        retHbox.setSpacing(true);
-
-        Label replyLabel = uiComponents.create(Label.class);
-        replyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        replyLabel.setStyleName("h1-green");
-
-//        Label selectionLabel = setSelectionLabel(event.getItem());
-        Label signIconLabel = getSignIconLabel(event.getItem().getToEmail());
-
-        if (dataManager
-                .load(InternalEmailer.class)
-                .query(QUERY_GET_REPLY)
-                .parameter("replyInternalEmailer", event.getItem())
-                .view("internalEmailer-view")
-                .list()
-                .size() > 0) {
-            replyLabel.setVisible(true);
-            replyLabel.setIconFromSet(CubaIcon.MAIL_REPLY);
-            retHbox.add(replyLabel);
-        } else {
-            replyLabel.setVisible(false);
-        }
-
-        retHbox.add(signIconLabel);
-//        retHbox.add(selectionLabel);
+        HBoxLayout retHbox = getReplyHBox(event);
 
         return retHbox;
+    }
+
+    private HBoxLayout getReplyHBox(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
+        final HBoxLayout[] retHbox = {uiComponents.create(HBoxLayout.class)};
+        retHbox[0].setHeightFull();
+        retHbox[0].setWidthFull();
+        retHbox[0].setSpacing(true);
+
+        final ProgressBar[] progressBar = {uiComponents.create(ProgressBar.class)};
+        progressBar[0].setWidthFull();
+        progressBar[0].setHeightAuto();
+        progressBar[0].setIndeterminate(true);
+        progressBar[0].setVisible(true);
+        progressBar[0].setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retHbox[0].add(progressBar[0]);
+
+        final Label[] replyLabel = {uiComponents.create(Label.class)};
+        replyLabel[0].setAlignment(Component.Alignment.MIDDLE_CENTER);
+        replyLabel[0].setStyleName("h1-green");
+        replyLabel[0].setVisible(false);
+
+        final Label[] signIconLabel = {uiComponents.create(Label.class)};
+        retHbox[0].add(signIconLabel[0]);
+
+        BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(10, this) {
+            List<InternalEmailer> internalEmailer;
+
+            @Override
+            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
+
+                internalEmailer = dataManager
+                        .load(InternalEmailer.class)
+                        .query(QUERY_GET_REPLY)
+                        .parameter("replyInternalEmailer", event.getItem())
+                        .cacheable(true)
+                        .view("internalEmailer-view")
+                        .list();
+
+                signIconLabel[0] = getSignIconLabel(signIconLabel[0], event.getItem().getToEmail());
+
+                return null;
+            }
+
+            @Override
+            public void canceled() {
+                progressBar[0].setVisible(false);
+
+                replyLabel[0].setVisible(true);
+                replyLabel[0].setIconFromSet(CubaIcon.CANCEL);
+                retHbox[0].add(replyLabel);
+            }
+
+            @Override
+            public void done(Void result) {
+                progressBar[0].setVisible(false);
+
+                if (internalEmailer.size() > 0) {
+                    replyLabel[0].setVisible(true);
+                    replyLabel[0].setIconFromSet(CubaIcon.MAIL_REPLY);
+                    retHbox[0].add(replyLabel);
+                } else {
+                    replyLabel[0].setVisible(false);
+                }
+            }
+        };
+
+        BackgroundTaskHandler taskHandler = backgroundWorker.handle(task);
+        taskHandler.execute();
+
+
+        return retHbox[0];
     }
 
     private Label setSelectionLabel(InternalEmailer item) {
@@ -283,6 +329,15 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         }
     }
 
+    private final static String width_50px = "50px";
+    private final static String width_20px = "20px";
+    private final static String height_50px = "50px";
+    private final static String height_20px = "20px";
+    private final static String icons_no_company_png = "icons/no-company.png";
+    private final static String icons_no_programmer_jpeg = "icons/no-programmer.jpeg";
+    private final static String style_table_wordwrap = "table-wordwrap";
+    private final static String style_circle_20px = "circle-20px";
+
     private HBoxLayout generateImageWithLabel(FileDescriptor fileDescriptor, String name) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
         retHBox.setWidthFull();
@@ -290,8 +345,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         retHBox.setSpacing(true);
 
         Image image = uiComponents.create(Image.class);
-        image.setWidth("20px");
-        image.setHeight("20px");
+        image.setWidth(width_20px);
+        image.setHeight(height_20px);
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
         image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
 
@@ -300,14 +355,14 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                     .setFileDescriptor(fileDescriptor);
         } else {
             image.setSource(ThemeResource.class)
-                    .setPath("icons/no-programmer.jpeg");
+                    .setPath(icons_no_programmer_jpeg);
         }
 
-        image.setStyleName("circle-20px");
+        image.setStyleName(style_circle_20px);
 
         Label label = uiComponents.create(Label.class);
         label.setValue(name);
-        label.setStyleName("table-wordwrap");
+        label.setStyleName(style_table_wordwrap);
         label.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
         retHBox.add(image);
@@ -349,10 +404,11 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         }
     }
 
-    private void setActionToActionPopupButton(PopupButton actionButton, InternalEmailer internalEmailer) {
-        final String separatorChar = "⎯";
-        String separator = separatorChar.repeat(15);
+    //    final String separatorChar = "⎯";
+//    String separator = separatorChar.repeat(15);
+    final static String strAction = "Action";
 
+    private void setActionToActionPopupButton(PopupButton actionButton, InternalEmailer internalEmailer) {
         actionButton.addAction(new BaseAction("editJobCandidateCard")
                 .withIcon(CubaIcon.USER.source())
                 .withCaption(messageBundle.getMessage("msgCandidate"))
@@ -416,104 +472,11 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .withCaption(separator));
         actionButton.getAction("separator2Action").setEnabled(false);
 
-/*        actionButton.addAction(new BaseAction("selectedForActionActionStarRed")
-                .withIcon(CubaIcon.STAR.source())
-                .withCaption(messageBundle.getMessage("msgSelectForActionStarRed"))
-                .withHandler(actionPerformedAction -> {
-                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
-                    selectForAction(StdSelections.STAR_RED);
-                    try {
-                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-                }));
-
-        actionButton.addAction(new BaseAction("selectedForActionActionStarYellow")
-                .withIcon(CubaIcon.STAR.source())
-                .withCaption(messageBundle.getMessage("msgSelectForActionStarYellow"))
-                .withHandler(actionPerformedAction -> {
-                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
-                    selectForAction(StdSelections.STAR_YELLOW);
-                    try {
-                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-                }));
-
-        actionButton.addAction(new BaseAction("selectedForActionActionStarGreen")
-                .withIcon(CubaIcon.STAR.source())
-                .withCaption(messageBundle.getMessage("msgSelectForActionStarGreen"))
-                .withHandler(actionPerformedAction -> {
-                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
-                    selectForAction(StdSelections.STAR_GREEN);
-                    try {
-                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-                }));
-
-        actionButton.addAction(new BaseAction("selectedForActionActionFlagRed")
-                .withIcon(CubaIcon.FLAG.source())
-                .withCaption(messageBundle.getMessage("msgSelectForActionFlagRed"))
-                .withHandler(actionPerformedAction -> {
-                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
-                    selectForAction(StdSelections.FLAG_RED);
-                    try {
-                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-                }));
-
-        actionButton.addAction(new BaseAction("selectedForActionActionFlagYellow")
-                .withIcon(CubaIcon.FLAG.source())
-                .withCaption(messageBundle.getMessage("msgSelectForActionFlagYellow"))
-                .withHandler(actionPerformedAction -> {
-                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
-                    selectForAction(StdSelections.FLAG_YELLOW);
-                    try {
-                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-                }));
-
-        actionButton.addAction(new BaseAction("selectedForActionActionFlagGreen")
-                .withIcon(CubaIcon.FLAG.source())
-                .withCaption(messageBundle.getMessage("msgSelectForActionFlagGreen"))
-                .withHandler(actionPerformedAction -> {
-                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
-                    selectForAction(StdSelections.FLAG_GREEN);
-                    try {
-                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-                }));
-
-        actionButton.addAction(new BaseAction("clearSelection")
-                .withIcon(CubaIcon.PICKERFIELD_CLEAR.source())
-                .withCaption(messageBundle.getMessage("msgClearSelection"))
-                .withHandler(actionPerformedAction -> {
-                    emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);
-                    clearSelection();
-                    try {
-                        emailersTable.scrollTo((InternalEmailerTemplate) internalEmailer);
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-
-                }));
-
-        actionButton.addAction(new BaseAction("separator2Action")
-                .withCaption(separator)); */
-
         for (SignIcons icons : signIconsDc.getItems()) {
+            StringBuffer sb = new StringBuffer(icons.getTitleEnd());
+            sb.append(strAction);
             actionButton.addAction(new BaseAction(
-                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    strSimpleService.deleteExtraCharacters(sb.toString()))
                     .withIcon(icons.getIconName())
                     .withCaption(icons.getTitleRu())
                     .withDescription(icons.getTitleDescription())
@@ -555,6 +518,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", internalEmailer.getToEmail())
                 .view("jobCandidateSignIcon-view")
+                .cacheable(true)
                 .list();
 
         if (jobCandidateSignIcons.size() > 0) {
@@ -574,6 +538,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         jobCandidateSignIcon = dataManager.load(JobCandidateSignIcon.class)
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", internalEmailer.getToEmail())
+                .cacheable(true)
                 .view("jobCandidateSignIcon-view")
                 .list();
 
@@ -625,6 +590,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
             openPositionDefault = dataManager.load(OpenPosition.class)
                     .query(QUERY_DEFAULT_OPEN_POSITION)
                     .view("openPosition-view")
+                    .cacheable(true)
                     .one();
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -650,6 +616,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                     .view("personelReserve-view")
                     .parameter("jobCandidate", internalEmailer.getToEmail())
                     .parameter("currDate", new Date())
+                    .cacheable(true)
                     .one();
         } catch (IllegalStateException e) {
             personelReserveCheck = null;
@@ -695,6 +662,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                     .query(QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION)
                     .cacheable(true)
                     .view("iteraction-view")
+                    .cacheable(true)
                     .one();
         } catch (NoResultException e) {
             e.printStackTrace();
@@ -760,8 +728,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
     private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load(IteractionList.class)
-                .query("select e from itpearls_IteractionList e where e.numberIteraction = " +
-                        "(select max(f.numberIteraction) from itpearls_IteractionList f)")
+                .query(QUERY_GET_COUNT_INTERACTION)
                 .view("iteractionList-view")
                 .cacheable(true)
                 .one();
@@ -769,16 +736,19 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         return e.getNumberIteraction().add(BigDecimal.ONE);
     }
 
-    private Label getSignIconLabel(JobCandidate jobCandidate) {
-        Label retLabel = uiComponents.create(Label.class);
+    private Label getSignIconLabel(Label retLabel, JobCandidate jobCandidate) {
 
         List<JobCandidateSignIcon> jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", jobCandidate)
                 .view("jobCandidateSignIcon-view")
+                .cacheable(true)
                 .list();
 
         if (jobCandidateSignIcons.size() > 0) {
+            StringBuilder sb = new StringBuilder(pic_center_large);
+            sb.append(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+
             retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
             retLabel.setIcon(jobCandidateSignIcons.get(0).getSignIcon().getIconName());
 
@@ -789,8 +759,11 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
             }
 
             injectColorCss(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
-            retLabel.setStyleName("pic-center-large-"
-                    + jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+            retLabel.setStyleName(sb.toString());
+
+            retLabel.setVisible(true);
+        } else {
+            retLabel.setVisible(false);
         }
 
         return retLabel;
@@ -798,15 +771,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
     protected void injectColorCss(String color) {
         Page.Styles styles = Page.getCurrent().getStyles();
-        String style = String.format(
-                ".pic-center-large-%s {" +
-                        "color: #%s;" +
-                        "text-align: center;" +
-                        "text-color: gray;" +
-                        "font-size: large;" +
-                        "margin: 0 auto;" +
-                        "}",
-                color, color);
+        String style = String.format(pic_center_large_inject_css, color, color);
 
         styles.add(style);
     }
@@ -852,11 +817,12 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private void editJobCandidateAction(InternalEmailer internalEmailer) {
         emailersTable.setSelected(internalEmailer);
 
-        jobCandidateDl.setParameter("jobCandidate", internalEmailer.getToEmail());
-        jobCandidateDl.load();
+//        jobCandidateDl.setParameter("jobCandidate", internalEmailer.getToEmail());
+//        jobCandidateDl.load();
 
         screenBuilders.editor(JobCandidate.class, this)
-                .editEntity(jobCandidateDc.getItem())
+//                .editEntity(jobCandidateDc.getItem())
+                .editEntity(internalEmailer.getToEmail())
                 .build()
                 .show();
     }
@@ -888,7 +854,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         actionButton.setWidthAuto();
         actionButton.setHeightAuto();
         actionButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
 
         setActionToActionPopupButton(actionButton, event.getItem());
 

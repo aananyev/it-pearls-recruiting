@@ -18,7 +18,11 @@ import java.util.List;
 @Table(name = "ITPEARLS_JOB_CANDIDATE", indexes = {
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FULL_NAME", columnList = "FULL_NAME"),
         @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FIRST_NAME", columnList = "FIRST_NAME"),
-        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_SECOND_NAME", columnList = "SECOND_NAME")
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_SECOND_NAME", columnList = "SECOND_NAME"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CITY_OF_RESIDENCE", columnList = "CITY_OF_RESIDENCE_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_PERSON_POSITION", columnList = "PERSON_POSITION_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_CURRENT_COMPANY", columnList = "CURRENT_COMPANY_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_FILE_IMAGE_FACE", columnList = "FILE_IMAGE_FACE")
 })
 @Entity(name = "itpearls_JobCandidate")
 public class JobCandidate extends StandardEntity {

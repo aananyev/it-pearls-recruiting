@@ -4,7 +4,11 @@ import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.*;
 
-@Table(name = "ITPEARLS_JOB_CANDIDATE_SIGN_ICON")
+@Table(name = "ITPEARLS_JOB_CANDIDATE_SIGN_ICON", indexes = {
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_SIGN_ICON_JOB_CANDIDATE", columnList = "JOB_CANDIDATE_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_SIGN_ICON_SIGN_ICON", columnList = "SIGN_ICON_ID"),
+        @Index(name = "IDX_ITPEARLS_JOB_CANDIDATE_SIGN_ICON_USER", columnList = "USER_ID")
+})
 @Entity(name = "itpearls_JobCandidateSignIcon")
 public class JobCandidateSignIcon extends StandardEntity {
     private static final long serialVersionUID = 1390032645510438237L;

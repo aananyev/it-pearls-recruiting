@@ -334,7 +334,7 @@
                                                        property="candidate">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
-                                        <action id="open" type="picker_open"/>
+                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                     </actions>
                                     <query entityClass="com.company.itpearls.entity.JobCandidate"
                                            escapeValueForLike="true"
@@ -358,7 +358,7 @@
                                             <action id="lookup"
                                                     type="picker_lookup"/>
                                             <action id="open"
-                                                    type="picker_open"/>
+                                                    type="picker_open" icon="EDIT_ACTION"/>
                                         </actions>
                                     </lookupPickerField>
                                     <checkBox id="onlyMySubscribeCheckBox"

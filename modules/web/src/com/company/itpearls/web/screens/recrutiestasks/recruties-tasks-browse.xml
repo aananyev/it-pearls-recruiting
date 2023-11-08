@@ -11,6 +11,11 @@
                 <property name="reacrutier" view="_minimal">
                     <property name="group" view="_minimal"/>
                 </property>
+                <property name="openPosition" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectLogo" view="_local"/>
+                    </property>
+                </property>
             </view>
             <loader id="recrutiesTasksesDl">
                 <query>
@@ -70,9 +75,11 @@
                 <group>
                     <column id="reacrutier"/>
                 </group>
-                <column id="group"
-                        width="120px"
-                        caption="msg://msgUserGroup"/>
+                <column id="projectLogoColumn"
+                        caption=""
+                        width="80px"
+                        align="CENTER"
+                        generator="projectLogoColumnGenerator"/>
                 <column id="openPosition.vacansyName"/>
                 <column id="openPosition.projectName"/>
                 <column id="planForPeriod"

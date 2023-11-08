@@ -1,10 +1,6 @@
 package com.company.itpearls.web.screens.internalemailertemplate;
 
 import com.company.itpearls.entity.*;
-import com.company.itpearls.service.OpenPositionNewsService;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -13,7 +9,6 @@ import com.company.itpearls.web.screens.internalemailer.InternalEmailerBrowse;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import java.util.Date;
 
 @UiController("itpearls_InternalEmailerTemplate.browse")
@@ -35,7 +30,6 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
 
     @Override
     protected void putCandidatesToPersonelReserve(InternalEmailer singleSelected) {
-
         if (((InternalEmailerTemplate) singleSelected)
                 .getEmailTemplate().getTemplateOpenPosition() == null) {
             putCandidatesToPersonelReserve(singleSelected, getDefaultOpenPosition());
