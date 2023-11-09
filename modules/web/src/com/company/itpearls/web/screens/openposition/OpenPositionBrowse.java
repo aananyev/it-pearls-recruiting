@@ -60,9 +60,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private final static String h4_tag = "<h4>";
     private final static String h4_tag_a = "</h4>";
     private final static String br_tag_a = "</br>";
+    private final static String width_30px = "30px";
     private final static String width_50px = "50px";
     private final static String style_icon_no_border_50px = "icon-no-border-50px";
     private final static String style_table_wordwrap = "table-wordwrap";
+    private final static String style_circle_30px = "circle-30px";
 
     private final static String icons_no_company_png = "icons/no-company.png";
     private final static String icons_traffic_lights_gray_png = "icons/traffic-lights_gray.png";
@@ -76,6 +78,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             "where e.openClose = false and " +
             "e.priority >= :priority";
     static final String QUERY_PARENT_OPENPOSITION = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+    static final String QUERY_AVERAGE_RATING =
+            "select avg(e.rating) from itpearls_OpenPositionComment e " +
+                    "where e.openPosition = :openPosition and not e.rating is null";
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -213,7 +218,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private static final String QUERY_USER = "select e from sec$User e where e.active = true";
     static final String QUERY_GET_SUBSCRIBER =
             "select e from itpearls_RecrutiesTasks e where e.openPosition = :openPosition and e.reacrutier = :reacrutier and :current_date between e.startDate and e.endDate";
-
+    final static String QUERY_CANDIDATES_FROM_CONSIDERATION = "select e from itpearls_JobCandidate e " +
+            "where e.iteractionList in (" +
+            "select f from itpearls_IteractionList f " +
+            "where f.candidate = e and f.iteractionType.signSendToClient = true and f.vacancy = :vacancy)";
 
     @Inject
     private Button groupSubscribe;
@@ -1919,7 +1927,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             LinkButton label = uiComponents.create(LinkButton.NAME);
 
-            String opDescriptiom = "<b><u>Проекты:</u></b><br>";
+//            String opDescriptiom = "<b><u>Проекты:</u></b><br>";
+            StringBuilder sb = new StringBuilder("<b><u>Проекты:</u></b><br>");
 
             for (OpenPosition op1 : openPositions) {
                 if (op1.getPositionType() != null) {
@@ -1927,7 +1936,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
                         if (op.getKey().equals(op1.getPositionType().getPositionRuName()) &&
                                 (!op1.getOpenClose() || op1.getOpenClose() == null)) {
-                            opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
+                            sb.append(op1.getProjectName().getProjectName()).append("<br>");
+
+//                            opDescriptiom = opDescriptiom + op1.getProjectName().getProjectName() + "<br>";
 
                             if (notLowerRatingLookupField.getValue() != null) {
                                 if ((int) notLowerRatingLookupField.getValue() >= 0) {
@@ -1952,7 +1963,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             label.setCaption(op.getKey().toString() + " (" + countOp.toString() + ")");
             label.setDescriptionAsHtml(true);
-            label.setDescription(opDescriptiom);
+            label.setDescription(sb.toString());
             label.addClickListener(clickEvent -> {
                 OpenPosition opRet = null;
 
@@ -2192,23 +2203,29 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.cityPositionList", subject = "descriptionProvider")
     private String openPositionsTableCityPositionListDescriptionProvider(OpenPosition openPosition) {
-        String outStr = "";
+//        String outStr = "";
+        StringBuilder sb = new StringBuilder();
 
         if (openPosition.getCityPosition() != null) {
-            outStr = openPosition.getCityPosition().getCityRuName();
+//            outStr = openPosition.getCityPosition().getCityRuName();
+            sb.append(openPosition.getCityPosition().getCityRuName());
         }
 
         if (openPosition.getCities() != null) {
             for (City s : openPosition.getCities()) {
-                if (!outStr.equals("")) {
+/*                if (!outStr.equals("")) {
                     outStr = outStr + ",";
+                }*/
+                if (sb.length() != 0) {
+                    sb.append(",");
                 }
 
-                outStr = outStr + s.getCityRuName();
+//                outStr = outStr + s.getCityRuName();
+                sb.append(s.getCityRuName());
             }
         }
 
-        return outStr;
+        return sb.toString();
     }
 
     @Subscribe("openPositionsTable")
@@ -2295,7 +2312,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (!getTemplateLetter(openPosition).equals("")) {
             return "open-position-pic-center-large-green";
         } else {
-            return  "open-position-pic-center-large-red";
+            return "open-position-pic-center-large-red";
         }
     }
 
@@ -2440,7 +2457,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
     private String getIDStatistics(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder();
 
         GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
         Date endDate = gregorianCalendar.getTime();
@@ -2457,14 +2475,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (iteractionIntegerKeyValue.size() != 0) {
             for (KeyValueEntity entity : iteractionIntegerKeyValue) {
-                retStr += entity.getValue("sum") + " / ";
+//                retStr += entity.getValue("sum") + " / ";
+                sb.append(entity.getValue("sum").toString()).append(" / ");
 
             }
 
-            retStr = retStr.substring(0, retStr.length() - 3);
+//            retStr = retStr.substring(0, retStr.length() - 3);
+            sb.deleteCharAt(sb.length() - 1);
         }
 
-        return retStr;
+        return sb.toString();
     }
 
     @Install(to = "openPositionsTable.idStatistics", subject = "descriptionProvider")
@@ -2786,9 +2806,62 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.vacansyName", subject = "columnGenerator")
     private Object openPositionsTableVacansyNameColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, event.getItem().getVacansyName());
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+        retHBox.setHeightFull();
 
-        return retObject;
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, event.getItem().getVacansyName());
+        retObject.setWidthFull();
+
+        Image image = setProjectOwnerImage(event.getItem().getProjectName().getProjectOwner());
+        retHBox.add(retObject);
+        retHBox.add(image);
+        retHBox.expand(retObject);
+
+        return retHBox;
+    }
+
+    private Image setProjectOwnerImage(Person projectOwner) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(projectOwner.getFirstName())
+                .append(" ")
+                .append(projectOwner.getSecondName());
+        if (projectOwner.getPersonPosition() != null) {
+            sb.append(" / ")
+                    .append(projectOwner.getPersonPosition().getPositionRuName());
+        }
+        if (projectOwner.getCompanyDepartment() != null) {
+            sb.append(" / ")
+                    .append(projectOwner.getCompanyDepartment().getDepartamentRuName());
+            if (projectOwner.getCompanyDepartment().getCompanyName() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getCompanyDepartment().getCompanyName().getComanyName());
+            }
+        }
+
+        if (projectOwner.getCityOfResidence() != null) {
+            sb.append(" / ")
+                    .append(projectOwner.getCityOfResidence().getCityRuName());
+        }
+
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setWidth(width_30px);
+        retImage.setHeight(width_30px);
+        retImage.setStyleName(style_circle_30px);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retImage.setDescription(sb.toString());
+
+        if (projectOwner.getFileImageFace() != null) {
+            retImage
+                    .setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(projectOwner.getFileImageFace());
+        } else {
+            retImage.setVisible(false);
+        }
+
+        return retImage;
     }
 
     @Install(to = "openPositionsTable.folder", subject = "descriptionProvider")
@@ -2856,7 +2929,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .parameter("parentOpenPosition", openPosition)
                 .view("openPosition-view")
                 .list().size() > 0) {
-            return  "open-position-pic-center-large-gray";
+            return "open-position-pic-center-large-gray";
         } else {
             Boolean positionIsClosed = openPosition.getOpenClose() != null
                     ? openPosition.getOpenClose() : false;
@@ -2865,17 +2938,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 if (openPosition.getPriority() != null) {
                     switch (openPosition.getPriority()) {
                         case PRIORITY_DRAFT:
-                            return  "open-position-pic-center-x-large-gray";
+                            return "open-position-pic-center-x-large-gray";
                         case PRIORITY_PAUSED:
-                            return  "open-position-pic-center-x-large-gray";
+                            return "open-position-pic-center-x-large-gray";
                         case PRIORITY_LOW:
-                            return  "open-position-pic-center-x-large-blue";
+                            return "open-position-pic-center-x-large-blue";
                         case PRIORITY_NORMAL:
-                            return  "open-position-pic-center-x-large-green";
+                            return "open-position-pic-center-x-large-green";
                         case PRIORITY_HIGH:
                             return "open-position-pic-center-x-large-orange";
                         case PRIORITY_CRITICAL:
-                            return  "open-position-pic-center-x-large-red";
+                            return "open-position-pic-center-x-large-red";
                         default:
                             return "open-position-pic-center-x-large-gray";
                     }
@@ -2900,10 +2973,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         OpenPosition closeVacancy = openPositionsTable.getSingleSelected();
 
         if (!closeVacancy.getOpenClose()) {
-            final String QUERY_CANDIDATES_FROM_CONSIDERATION = "select e from itpearls_JobCandidate e " +
-                    "where e.iteractionList in (" +
-                    "select f from itpearls_IteractionList f " +
-                    "where f.candidate = e and f.iteractionType.signSendToClient = true and f.vacancy = :vacancy)";
 
             List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
                     .query(QUERY_CANDIDATES_FROM_CONSIDERATION)
@@ -2953,13 +3022,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             if (jobCandidatesNotEnded.size() > 0) {
                 for (JobCandidate jc : jobCandidatesNotEnded) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(messageBundle.getMessage("msgInConsideration"))
+                            .append(" ")
+                            .append(closeVacancy.getVacansyName());
                     notifications.create(Notifications.NotificationType.WARNING)
                             .withType(Notifications.NotificationType.TRAY)
                             .withPosition(Notifications.Position.BOTTOM_RIGHT)
                             .withCaption(jc.getFullName())
                             .withHideDelayMs(15000)
-                            .withDescription(messageBundle.getMessage("msgInConsideration") + " "
-                                    + closeVacancy.getVacansyName())
+                            .withDescription(sb.toString())
                             .show();
                     dialogMessage.append(jc.getFullName());
                     dialogMessage.append(", ");
@@ -3128,7 +3200,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
             image.setWidth("30px");
-            image.setStyleName("circle-30px");
+            image.setStyleName(style_circle_30px);
             image.setDescription(user.getReacrutier().getName());
 
             try {
@@ -3221,9 +3293,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Object avgRating(OpenPosition openPosition) {
         BigDecimal avgRating = null;
 
-        final String QUERY_AVERAGE_RATING =
-                "select avg(e.rating) from itpearls_OpenPositionComment e " +
-                        "where e.openPosition = :openPosition and not e.rating is null";
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
         retBox.setHeightFull();

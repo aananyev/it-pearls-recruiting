@@ -67,6 +67,10 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     private String cuba_email_smtpUser = "";
     private String cuba_email_smtpPassword = "";
 
+    final static String QUERY_GET_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
+    final static String QUERY_GET_INTERACTION_SIGN_EMAIL_SEND = "select e from itpearls_Iteraction e where e.signEmailSend = true";
+    final static String QUERY_GEM_MAX_NUMBER_INTERACTION = "select max(e.numberIteraction) from itpearls_IteractionList e";
+
     protected JobCandidate jobCandidate = null;
     @Inject
     private Metadata metadata;
@@ -102,11 +106,34 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     }
 
     private void setSender(ExtUser user) {
+        StringBuilder sb1 = new StringBuilder();
+        sb1.append(user.getName())
+                .append(" \"")
+                .append(user.getEmail())
+                .append("\"");
 //        String userEmail = System.getProperty(EMAIL_SMTPUSER);
-        fromEmailTextAddressField.setValue(user.getName() + " \"" + user.getEmail() + "\"");
-        fromEmailTextAddressField.setDescription("SMTP server: " + user.getSmtpServer() + ":" + user.getSmtpPort() + "\n" +
+//        fromEmailTextAddressField.setValue(user.getName() + " \"" + user.getEmail() + "\"");
+        fromEmailTextAddressField.setValue(sb1.toString());
+
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append("SMTP server: ")
+                .append(user.getSmtpServer())
+                .append(":")
+                .append(user.getSmtpPort())
+                .append("\n")
+                .append("POP3 server: ")
+                .append(user.getPop3Server())
+                .append(":")
+                .append(user.getPop3Port())
+                .append("\n")
+                .append("IMAP server: ")
+                .append(user.getImapServer())
+                .append(":")
+                .append(user.getImapPort());
+/*        fromEmailTextAddressField.setDescription("SMTP server: " + user.getSmtpServer() + ":" + user.getSmtpPort() + "\n" +
                 "POP3 server: " + user.getPop3Server() + ":" + user.getPop3Port() + "\n" +
-                "IMAP server: " + user.getImapServer() + ":" + user.getImapPort());
+                "IMAP server: " + user.getImapServer() + ":" + user.getImapPort());*/
+        fromEmailTextAddressField.setDescription(sb2.toString());
     }
 
     @Install(to = "toEmailField", subject = "optionIconProvider")
@@ -276,7 +303,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     }
 
     private OpenPosition getDefaultOpenPosition() {
-        String QUERY_GET_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
         OpenPosition openPosition = null;
 
         try {
@@ -297,7 +323,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     }
 
     private Iteraction getInteractionSignEmailSend() {
-        String QUERY_GET_INTERACTION_SIGN_EMAIL_SEND = "select e from itpearls_Iteraction e where e.signEmailSend = true";
         Iteraction retInteraction = null;
 
         try {
@@ -318,7 +343,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     }
 
     private BigDecimal getMaxNumberInteraction() {
-        String QUERY_GEM_MAX_NUMBER_INTERACTION = "select max(e.numberIteraction) from itpearls_IteractionList e";
 
         try {
             return dataManager.loadValue(QUERY_GEM_MAX_NUMBER_INTERACTION, BigDecimal.class)
@@ -365,15 +389,24 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                 .build();
 
         try {
+            StringBuilder sb = new StringBuilder();
+            sb.append(messageBundle.getMessage("msgLetterToRecipient"))
+                    .append(" ")
+                    .append(toEmailField.getValue().getEmail())
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgSendSucessfully"));
+
             emailService.sendEmail(emailInfo);
             notifications.create()
                     .withType(Notifications.NotificationType.WARNING)
                     .withCaption(messageBundle.getMessage("msgInfo"))
-                    .withDescription(messageBundle.getMessage("msgLetterToRecipient")
+                    .withDescription(sb.toString()
+/*                            messageBundle.getMessage("msgLetterToRecipient")
                             + " "
                             + toEmailField.getValue().getEmail()
                             + " "
-                            + messageBundle.getMessage("msgSendSucessfully"))
+                            + messageBundle.getMessage("msgSendSucessfully") */
+                    )
                     .withHideDelayMs(5000)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .show();
