@@ -1,9 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.core.InteractionService;
-import com.company.itpearls.core.ParseCVService;
-import com.company.itpearls.core.StarsAndOtherService;
-import com.company.itpearls.core.StrSimpleService;
+import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.OpenPositionNewsService;
@@ -164,6 +161,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private StrSimpleService strSimpleService;
     @Inject
     private PopupButton signFilterButton;
+    @Inject
+    private WebBrowserTools webBrowserTools;
 
     @Subscribe
     public void onInit1(InitEvent event) {
@@ -1648,7 +1647,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         Label employeeStatusLabel = genEmployeeStatusLabel(event);
-//        Label personalReserveLabel = genPersonalReserveLabel(event);
         Label signIconLabel = getSignIconLabel(event);
         Label commentCandidateLabel = getCommentCandidateLabel(event);
         Label phoneCandidateLabel = getPhoneCandidateLabel(event);
@@ -1657,11 +1655,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Label emailLabel = getEmailLabel(event);
         Label blackListLabel = getBlackList(event);
         Label cvLabel = getCVLabel(event);
+        List<Image> snImages = getSNLabels(event);
 
         retHBox.add(blackListLabel);
         retHBox.add(employeeStatusLabel);
         retHBox.add(signIconLabel);
-//        retHBox.add(personalReserveLabel);
         retHBox.add(contactsStatusLabel);
         retHBox.add(phoneCandidateLabel);
         retHBox.add(emailLabel);
@@ -1670,7 +1668,42 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHBox.add(cvLabel);
         retHBox.add(commentCandidateLabel);
 
+        for (Image image : snImages) {
+            retHBox.add(image);
+        }
+
         return retHBox;
+    }
+
+    private List<Image> getSNLabels(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        List<Image> retImage = new ArrayList<>();
+
+        for (SocialNetworkURLs snt : event.getItem().getSocialNetwork()) {
+            if (snt.getNetworkURLS() != null) {
+                Image image = uiComponents.create(Image.class);
+                image.setDescriptionAsHtml(true);
+                image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+                image.setWidth("20px");
+                image.setHeight("20px");
+                image.setStyleName("icon-no-border-30px");
+                image.setAlignment(Component.Alignment.BOTTOM_CENTER);
+                image.setDescription(snt.getNetworkURLS());
+                image.addClickListener(e -> webBrowserTools.showWebPage(snt.getNetworkURLS(), null));
+
+                if (snt.getSocialNetworkURL().getLogo() != null) {
+                    image
+                            .setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(snt.getSocialNetworkURL().getLogo());
+                } else {
+                    image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+
+                }
+
+                retImage.add(image);
+            }
+        }
+
+        return retImage;
     }
 
     private Label getSignIconLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {

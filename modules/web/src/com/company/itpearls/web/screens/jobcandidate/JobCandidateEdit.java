@@ -13,7 +13,6 @@ import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.itpearls.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
@@ -22,9 +21,7 @@ import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.DataGridItems;
 import com.haulmont.cuba.gui.components.data.ValueSource;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -1285,7 +1282,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
             socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
 
-            socialNetworkTable.getColumn("linkToWeb").setColumnGenerator(event -> {
+ /*           socialNetworkTable.getColumn("linkToWeb").setColumnGenerator(event -> {
                 Link link = uiComponents.create(Link.NAME);
                 if (!PersistenceHelper.isNew(getEditedEntity())) {
                     if (event.getItem().getNetworkURLS() != null) {
@@ -1321,7 +1318,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
 
                 return link;
-            });
+            });*/
 
             trimTelegramName();
             enableDisableContacts();
@@ -2789,42 +2786,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Install(to = "socialNetworkTable.linkToWeb", subject = "columnGenerator")
     private Component socialNetworkTableLinkToWebColumnGenerator
             (DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
-        Link link = uiComponents.create(Link.NAME);
+        LinkButton linkButton = uiComponents.create(LinkButton.class);
+        linkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        linkButton.setCaption(messageBundle.getMessage("msgGoTo"));
+        linkButton.setWidthAuto();
+        linkButton.setHeightAuto();
 
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
-            if (event.getItem().getNetworkURLS() != null) {
-                String urlS = "";
-                if (!event.getItem().getNetworkURLS().contains("http")) {
-                    URI uri = null;
-                    URL url = null;
-
-                    try {
-                        uri = new URI("https", event.getItem().getNetworkURLS(), null, null);
-                        url = uri.toURL();
-                    } catch (URISyntaxException | MalformedURLException e) {
-                        log.error("Error", e);
-                    }
-
-                    if (url != null) {
-                        urlS = url.toString();
-                    } else {
-                        urlS = "";
-                    }
-                }
-
-                link.setUrl(urlS);
-                link.setCaption("Перейти");
-                link.setTarget("_blank");
-                link.setWidthAuto();
-                link.setVisible(true);
-            } else {
-                link.setVisible(false);
-            }
+        if (event.getItem().getNetworkURLS() != null) {
+            linkButton.addClickListener(e -> webBrowserTools.showWebPage(event.getItem().getNetworkURLS(), null));
         } else {
-            link.setVisible(false);
+            linkButton.setVisible(false);
         }
 
-        return link;
+        return linkButton;
     }
 
     public void openPositionDescription() {
@@ -3756,5 +3730,39 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
 
         return str.replaceAll("\n", breakLine[0]);
+    }
+
+    @Install(to = "socialNetworkTable.socialNetworkLogoColumn", subject = "columnGenerator")
+    private Component socialNetworkTableSocialNetworkLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<h4>")
+                .append(event.getItem().getSocialNetworkURL().getSocialNetwork())
+                .append("</h4><br><br>")
+                .append((event.getItem().getSocialNetworkURL().getComment() != null
+                        ? event.getItem().getSocialNetworkURL().getComment() : ""));
+
+        Image image = uiComponents.create(Image.class);
+        image.setDescriptionAsHtml(true);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("30px");
+        image.setHeight("30px");
+        image.setStyleName("icon-no-border-30px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        image.setDescription(sb.toString());
+
+        if (event.getItem().getSocialNetworkURL().getLogo() != null) {
+            image.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(event.getItem().getSocialNetworkURL()
+                            .getLogo());
+        } else {
+            image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+
+        retBox.add(image);
+        return retBox;
     }
 }

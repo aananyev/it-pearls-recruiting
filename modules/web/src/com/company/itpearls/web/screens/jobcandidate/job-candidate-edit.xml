@@ -49,7 +49,9 @@
                     </property>
                 </property>
                 <property name="socialNetwork" view="_local">
-                    <property name="socialNetworkURL" view="_local"/>
+                    <property name="socialNetworkURL" view="_local">
+                        <property name="logo" view="_local"/>
+                    </property>
                 </property>
                 <property name="laborAgreement" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
@@ -760,6 +762,11 @@
                               editorEnabled="true"
                               dataContainer="jobCandidateSocialNetworksDc">
                         <columns>
+                            <column id="socialNetworkLogoColumn"
+                                    width="50px"
+                                    caption="">
+                                <componentRenderer/>
+                            </column>
                             <column id="networkName"
                                     editable="false"
                                     property="socialNetworkURL.socialNetwork"
