@@ -37,21 +37,6 @@
                 </query>
             </loader>
         </collection>
-<!--        <instance id="jobCandidateDc" class="com.company.itpearls.entity.JobCandidate">
-            <view extends="jobCandidate-view"/>
-            <loader id="jobCandidateDl">
-                <query>
-                    <![CDATA[select e from itpearls_JobCandidate e]]>
-                    <condition>
-                        <and>
-                            <c:jpql>
-                                <c:where>e = :jobCandidate</c:where>
-                            </c:jpql>
-                        </and>
-                    </condition>
-                </query>
-            </loader>
-        </instance> -->
         <collection id="signIconsDc" class="com.company.itpearls.entity.SignIcons">
             <view extends="_local">
                 <property name="user" view="_local"/>

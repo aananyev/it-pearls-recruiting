@@ -201,12 +201,15 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         replyLabel[0].setAlignment(Component.Alignment.MIDDLE_CENTER);
         replyLabel[0].setStyleName("h1-green");
         replyLabel[0].setVisible(false);
+        retHbox[0].add(replyLabel);
 
         final Label[] signIconLabel = {uiComponents.create(Label.class)};
+        signIconLabel[0].setVisible(false);
         retHbox[0].add(signIconLabel[0]);
 
         BackgroundTask<Integer, Void> task = new BackgroundTask<Integer, Void>(10, this) {
             List<InternalEmailer> internalEmailer;
+            List<JobCandidateSignIcon> jobCandidateSignIcons;
 
             @Override
             public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
@@ -219,7 +222,16 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                         .view("internalEmailer-view")
                         .list();
 
-                signIconLabel[0] = getSignIconLabel(signIconLabel[0], event.getItem().getToEmail());
+//                signIconLabel[0] = getSignIconLabel(signIconLabel[0], event.getItem().getToEmail());
+
+                jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                        .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                        .parameter("jobCandidate", event.getItem().getToEmail())
+                        .view("jobCandidateSignIcon-view")
+                        .cacheable(true)
+                        .list();
+
+
 
                 return null;
             }
@@ -230,7 +242,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
                 replyLabel[0].setVisible(true);
                 replyLabel[0].setIconFromSet(CubaIcon.CANCEL);
-                retHbox[0].add(replyLabel);
+//                retHbox[0].add(replyLabel);
             }
 
             @Override
@@ -240,16 +252,36 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 if (internalEmailer.size() > 0) {
                     replyLabel[0].setVisible(true);
                     replyLabel[0].setIconFromSet(CubaIcon.MAIL_REPLY);
-                    retHbox[0].add(replyLabel);
+//                    retHbox[0].add(replyLabel);
                 } else {
                     replyLabel[0].setVisible(false);
+                }
+
+                if (jobCandidateSignIcons.size() > 0) {
+                    StringBuilder sb = new StringBuilder(pic_center_large);
+                    sb.append(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+
+                    signIconLabel[0].setAlignment(Component.Alignment.MIDDLE_CENTER);
+                    signIconLabel[0].setIcon(jobCandidateSignIcons.get(0).getSignIcon().getIconName());
+
+                    if (jobCandidateSignIcons.get(0).getSignIcon().getTitleDescription() != null) {
+                        signIconLabel[0].setDescription(jobCandidateSignIcons.get(0).getSignIcon().getTitleDescription());
+                    } else {
+                        signIconLabel[0].setDescription(jobCandidateSignIcons.get(0).getSignIcon().getTitleRu());
+                    }
+
+                    injectColorCss(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+                    signIconLabel[0].setStyleName(sb.toString());
+
+                    signIconLabel[0].setVisible(true);
+                } else {
+                    signIconLabel[0].setVisible(false);
                 }
             }
         };
 
         BackgroundTaskHandler taskHandler = backgroundWorker.handle(task);
         taskHandler.execute();
-
 
         return retHbox[0];
     }
