@@ -2472,15 +2472,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void addShortDescription() {
         if (openPositionRichTextArea.getValue() != null) {
             List<SkillTree> skillTrees = pdfParserService.parseSkillTree(Jsoup.parse(openPositionRichTextArea.getValue()).text());
-            String retStr = "";
+//            String retStr = "";
+            StringBuilder sb = new StringBuilder();
 
             for (SkillTree skillTree : skillTrees) {
                 if (skillTree.getSkillTree() != null) {
-                    retStr = skillTree.getSkillName() + ";" + retStr;
+                    sb.insert(0, skillTree.getSkillName()).append(";");
+//                    retStr = skillTree.getSkillName() + ";" + retStr;
                 }
             }
 
-            shortDescriptionTextArea.setValue(retStr);
+            shortDescriptionTextArea.setValue(sb.toString());
         }
     }
 
@@ -2595,10 +2597,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private String generateVacancyName() {
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder();
 
         if (gradeLookupPickerField.getValue() != null) {
-            retStr = gradeLookupPickerField.getValue().getGradeName() + " ";
+            sb.append(gradeLookupPickerField.getValue().getGradeName())
+                    .append(" ");
+//            retStr = gradeLookupPickerField.getValue().getGradeName() + " ";
         } else {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -2612,9 +2617,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         if (positionTypeField.getValue() != null) {
-            retStr += positionTypeField.getValue().getPositionRuName()
+            sb.append(positionTypeField.getValue().getPositionRuName())
+                    .append(" / ")
+                    .append(positionTypeField.getValue().getPositionEnName());
+/*            retStr += positionTypeField.getValue().getPositionRuName()
                     + " / "
-                    + positionTypeField.getValue().getPositionEnName();
+                    + positionTypeField.getValue().getPositionEnName(); */
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -2630,7 +2638,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         if (projectNameField.getValue() != null) {
-            retStr += " (" + projectNameField.getValue().getProjectName();
+            sb.append(" (")
+                    .append(projectNameField.getValue().getProjectName());
+//            retStr += " (" + projectNameField.getValue().getProjectName();
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -2646,7 +2656,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         if (cityOpenPositionField.getValue() != null) {
-            retStr += ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+            sb.append(", ")
+                    .append(cityOpenPositionField.getValue().getCityRuName())
+                    .append(")");
+//            retStr += ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -2661,7 +2674,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             return "";
         }
 
-        return retStr;
+        return sb.toString();
     }
 
     public void setSalaryFieldButtonInvoke() {

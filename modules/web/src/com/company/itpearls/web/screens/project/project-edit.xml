@@ -43,8 +43,7 @@
             </loader>
         </collection>
         <collection id="projectDepartmentsDc"
-                    class="com.company.itpearls.entity.CompanyDepartament"
-                    view="_local">
+                    class="com.company.itpearls.entity.CompanyDepartament">
             <view extends="_local">
                 <property name="companyName" view="_local">
                     <property name="fileCompanyLogo" view="_local"/>

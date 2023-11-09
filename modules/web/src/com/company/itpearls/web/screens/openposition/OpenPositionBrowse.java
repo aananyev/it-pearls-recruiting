@@ -527,19 +527,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         switch (openPosition.getRemoteWork()) {
             case -1:
-                sb.deleteCharAt(0).append(messageBundle.getMessage("msgUndefined"));
+                sb = new StringBuilder();
+                sb.append(messageBundle.getMessage("msgUndefined"));
 //                retStr = messageBundle.getMessage("msgUndefined");
                 break;
             case 0:
-                sb.deleteCharAt(0).append(messageBundle.getMessage("msgWorkInOffice"));
+                sb = new StringBuilder();
+                sb.append(messageBundle.getMessage("msgWorkInOffice"));
 //                retStr = messageBundle.getMessage("msgWorkInOffice");
                 break;
             case 1:
-                sb.deleteCharAt(0).append(messageBundle.getMessage("msgRemoteWork"));
+                sb = new StringBuilder();
+                sb.append(messageBundle.getMessage("msgRemoteWork"));
 //                retStr = messageBundle.getMessage("msgRemoteWork");
                 break;
             case 2:
-                sb.deleteCharAt(0).append(messageBundle.getMessage("msgHybridWorkDesc"));
+                sb = new StringBuilder();
+                sb.append(messageBundle.getMessage("msgHybridWorkDesc"));
 //                retStr = messageBundle.getMessage("msgHybridWorkDesc");
                 break;
         }
@@ -871,7 +875,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return sb1.append(openPosition.getProjectName().getProjectName())
                 .append("\n\nВладелец проекта: ")
                 .append(projectOwner)
-                .append("\n\n")
+                .append("\n\n<br><br>")
                 .append(a)
                 .toString();
 //        return openPosition.getProjectName().getProjectName()
@@ -1416,7 +1420,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private String getSalaryMinMaxStr(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        String retStr = "";
+//        String retStr = "";
         StringBuilder sb = new StringBuilder();
 
         try {
@@ -1474,23 +1478,26 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }
             } catch (NullPointerException | StringIndexOutOfBoundsException e) {
 //                retStr = "";
-                sb.delete(0, sb.length());
+                sb = new StringBuilder();
             }
 
             if (openPosition.getSalaryMin() == null || openPosition.getSalaryMin().equals("")) {
                 if (openPosition.getSalaryMax() == null || openPosition.getSalaryMax().equals("")) {
                     if (openPosition.getOutstaffingCost() != null && !openPosition.getOutstaffingCost().equals("")) {
-                        sb.delete(0, sb.length()).append(messageBundle.getMessage("msgUndefined"));
+                        sb = new StringBuilder();
+                        sb.append(messageBundle.getMessage("msgUndefined"));
 //                        retStr = messageBundle.getMessage("msgUndefined");
                     } else {
-                        sb.delete(0, sb.length()).append(messageBundle.getMessage("msgNotPrice"));
+                        sb = new StringBuilder();
+                        sb.append(messageBundle.getMessage("msgNotPrice"));
 //                        retStr = messageBundle.getMessage("msgNotPrice");
                     }
                 }
             }
 
         } else {
-            sb.delete(0, sb.length()).append(messageBundle.getMessage("msgAtRequestOfCandidate"));
+            sb = new StringBuilder();
+            sb.append(messageBundle.getMessage("msgAtRequestOfCandidate"));
 //            retStr = messageBundle.getMessage("msgAtRequestOfCandidate");
         }
 
@@ -1519,12 +1526,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     + " т.р."; */
         } catch (NullPointerException | StringIndexOutOfBoundsException e) {
 //            retStr = "";
-            sb.delete(0, sb.length());
+            sb = new StringBuilder();
         }
 
         if (salaryMin.intValue() == 0) {
 //            retStr = "неопределено";
-            sb.delete(0, sb.length()).append("неопределено");
+            sb = new StringBuilder();
+            sb.append("неопределено");
         }
 
         //       return retStr;
@@ -1553,14 +1561,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 //                    (openPosition.getOutstaffingCost() != null ?
 //                            "\nПредельная ставка заказчика: " + openPosition.getOutstaffingCost() + " руб./час" : "");
         } catch (NullPointerException e) {
-            sb.delete(0, sb.length());
+            sb = new StringBuilder();
 //            retStr = "";
         }
 
         if (openPosition.getSalaryCandidateRequest() != null
                 ? openPosition.getSalaryCandidateRequest() : false) {
-            sb.delete(0, sb.length())
-                    .append(messageBundle.getMessage("msgSalaryExpectation"));
+            sb = new StringBuilder();
+            sb.append(messageBundle.getMessage("msgSalaryExpectation"));
 //            retStr = messageBundle.getMessage("msgSalaryExpectation");
         }
 
@@ -2867,14 +2875,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.folder", subject = "descriptionProvider")
     private String openPositionsTableFolderDescriptionProvider(OpenPosition openPosition) {
         String QUERY = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder();
 
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY)
                 .parameter("parentOpenPosition", openPosition)
                 .view("openPosition-view")
                 .list().size() > 0) {
-            retStr = null;
+//            retStr = null;
+            sb = new StringBuilder();
         } else {
             Boolean positionIsClosed = openPosition.getOpenClose() != null
                     ? openPosition.getOpenClose() : false;
@@ -2883,40 +2893,51 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 if (openPosition.getPriority() != null) {
                     switch (openPosition.getPriority()) {
                         case PRIORITY_DRAFT:
-                            retStr = "DRAFT PRIORITY";
+                            sb.append("DRAFT PRIORITY");
+//                            retStr = "DRAFT PRIORITY";
                             break;
                         case PRIORITY_PAUSED:
-                            retStr = "PAUSED PRIORITY";
+                            sb.append("PAUSED PRIORITY");
+//                            retStr = "PAUSED PRIORITY";
                             break;
                         case PRIORITY_LOW:
-                            retStr = "LOW PRIORITY";
+                            sb.append("LOW PRIORITY");
+//                            retStr = "LOW PRIORITY";
                             break;
                         case PRIORITY_NORMAL:
-                            retStr = "NORMAL PRIORITY";
+                            sb.append("NORMAL PRIORITY");
+//                            retStr = "NORMAL PRIORITY";
                             break;
                         case PRIORITY_HIGH:
-                            retStr = "HIGH PRIORITY";
+                            sb.append("HIGH PRIORITY");
+//                            retStr = "HIGH PRIORITY";
                             break;
                         case PRIORITY_CRITICAL:
-                            retStr = "CRITICAL PRIORITY";
+                            sb.append("CRITICAL PRIORITY");
+//                            retStr = "CRITICAL PRIORITY";
                             break;
                         default:
-                            retStr = "NOT DEFINED";
+                            sb.append("NOT DEFINED");
+//                            retStr = "NOT DEFINED";
                             break;
                     }
 
                 } else {
-                    retStr = "NOT DEFINED";
+                    sb.append("NOT DEFINED");
+//                    retStr = "NOT DEFINED";
                 }
             } else {
-                retStr = "POSITION IS CLOSED";
+                sb.append("POSITION IS CLOSED");
+//                retStr = "POSITION IS CLOSED";
             }
         }
 
         if (openPosition.getPriorityComment() != null)
-            retStr += "\n\nКомментарий: " + openPosition.getPriorityComment();
+            sb.append("\n\nКомментарий: ")
+                    .append(openPosition.getPriorityComment());
+//            retStr += "\n\nКомментарий: " + openPosition.getPriorityComment();
 
-        return retStr;
+        return sb.toString();
     }
 
     @Install(to = "openPositionsTable.folder", subject = "styleProvider")

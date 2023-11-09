@@ -33,6 +33,11 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="snLogoColumn"
+                        collapsed="false"
+                        caption=""
+                        generator="snLogoGenerator"
+                        width="70px"/>
                 <column id="socialNetwork"/>
                 <column id="socialNetworkURL"/>
                 <column id="comment"/>

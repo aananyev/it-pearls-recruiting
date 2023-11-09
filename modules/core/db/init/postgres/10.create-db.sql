@@ -647,6 +647,7 @@ create table ITPEARLS_SOCIAL_NETWORK_TYPE (
     SOCIAL_NETWORK varchar(30) not null,
     SOCIAL_NETWORK_URL varchar(80),
     COMMENT_ varchar(255),
+    LOGO_ID uuid,
     --
     primary key (ID)
 )^

@@ -367,7 +367,9 @@
         <property name="fileType" view="_minimal"/>
     </view>
     <view entity="itpearls_FileType" name="fileType-view" extends="_local"/>
-    <view entity="itpearls_SocialNetworkType" name="socialNetworkType-view" extends="_local"/>
+    <view entity="itpearls_SocialNetworkType" name="socialNetworkType-view" extends="_local">
+        <property name="logo" view="_local"/>
+    </view>
     <view entity="itpearls_SubscribeCandidateAction" name="subscribeCandidateAction-view" extends="_local">
         <property name="candidate" view="_local"/>
         <property name="subscriber" view="_local"/>

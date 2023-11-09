@@ -12,15 +12,58 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="socialNetworkTypeDc">
-            <column width="250px">
-                <textField id="socialNetworkField" property="socialNetwork" required="true"/>
-                <textField id="socialNetworkURLField" property="socialNetworkURL" required="true"/>
-                <textField id="commentField" property="comment"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
+    <layout expand="editHBox" spacing="true" width="100%" height="100%">
+        <hbox id="editHBox" spacing="true" width="100%" height="100%" expand="form">
+            <form id="form" dataContainer="socialNetworkTypeDc">
+                <column width="400px">
+                    <textField id="socialNetworkField"
+                               property="socialNetwork"
+                               required="true"/>
+                    <textField id="socialNetworkURLField"
+                               property="socialNetworkURL"
+                               required="true"/>
+                    <textField id="commentField"
+                               property="comment"/>
+                </column>
+            </form>
+            <vbox id="dropZone"
+                  spacing="true"
+                  width="200px"
+                  height="266px"
+                  align="TOP_RIGHT"
+                  expand="picVBox"
+                  stylename="dropzone-container">
+                <vbox id="picVBox">
+                    <image id="snLogoFileImage"
+                           dataContainer="socialNetworkTypeDc"
+                           property="logo"
+                           width="100%"
+                           visible="true"
+                           align="TOP_RIGHT"
+                           height="100%"
+                           stylename="widget-border"
+                           scaleMode="FILL"/>
+                    <image id="snDefaultLogoFileImage"
+                           width="100%"
+                           visible="false"
+                           align="TOP_RIGHT"
+                           height="100%"
+                           stylename="widget-border"
+                           scaleMode="FILL">
+                        <theme path="icons/no-company.png"/>
+                    </image>
+                </vbox>
+                <upload id="snLogoFileUpload"
+                        fileStoragePutMode="IMMEDIATE"
+                        dataContainer="socialNetworkTypeDc"
+                        align="BOTTOM_CENTER"
+                        showFileName="false"
+                        dropZone="dropZone"
+                        showClearButton="true"
+                        property="logo"/>
+            </vbox>
+        </hbox>
+        <hbox id="editActions" spacing="true" width="AUTO" height="AUTO" align="BOTTOM_RIGHT">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>
