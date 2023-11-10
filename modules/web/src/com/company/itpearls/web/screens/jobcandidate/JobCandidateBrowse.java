@@ -956,6 +956,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         JobCanidateDetailScreenFragment jobCanidateDetailScreenFragment = fragments.create(this,
                 JobCanidateDetailScreenFragment.class);
         jobCanidateDetailScreenFragment.setJobCandidate(entity);
+        jobCanidateDetailScreenFragment.setVisibleContactsLabels();
 
         HBoxLayout headerBox = uiComponents.create(HBoxLayout.NAME);
         headerBox.setWidthAuto();

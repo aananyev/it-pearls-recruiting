@@ -2796,6 +2796,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             linkButton.addClickListener(e -> webBrowserTools.showWebPage(event.getItem().getNetworkURLS(), null));
         } else {
             linkButton.setVisible(false);
+            linkButton.setEnabled(false);
         }
 
         return linkButton;

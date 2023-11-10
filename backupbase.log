@@ -3485,3 +3485,52 @@ waiting for server to shut down...2023-11-09 23:24:00.118 +04 [15845] LOG:  rece
 2023-11-09 23:24:00.144 +04 [15845] LOG:  database system is shut down
  done
 server stopped
+waiting for server to start....2023-11-09 23:34:26.682 +04 [22010] LOG:  listening on IPv6 address "::1", port 5432
+2023-11-09 23:34:26.682 +04 [22010] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2023-11-09 23:34:26.682 +04 [22010] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2023-11-09 23:34:26.711 +04 [22011] LOG:  database system was interrupted; last known up at 2023-11-09 23:29:06 +04
+2023-11-09 23:34:26.899 +04 [22011] LOG:  redo starts at 2E/15000028
+2023-11-09 23:34:26.907 +04 [22011] LOG:  consistent recovery state reached at 2E/150D1E98
+2023-11-09 23:34:26.907 +04 [22011] LOG:  redo done at 2E/150D1E98
+2023-11-09 23:34:26.908 +04 [22011] LOG:  last completed transaction was at log time 2023-11-09 23:33:21.913416+04
+2023-11-09 23:34:26.988 +04 [22010] LOG:  database system is ready to accept connections
+ done
+server started
+waiting for server to shut down...2023-11-10 09:52:35.692 +04 [22010] LOG:  received fast shutdown request
+.2023-11-10 09:52:35.694 +04 [22010] LOG:  aborting any active transactions
+2023-11-10 09:52:35.695 +04 [22010] LOG:  background worker "logical replication launcher" (PID 22017) exited with exit code 1
+2023-11-10 09:52:35.695 +04 [22012] LOG:  shutting down
+2023-11-10 09:52:35.706 +04 [22010] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2023-11-10 10:02:05.728 +04 [23326] LOG:  listening on IPv6 address "::1", port 5432
+2023-11-10 10:02:05.728 +04 [23326] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2023-11-10 10:02:05.729 +04 [23326] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2023-11-10 10:02:05.762 +04 [23327] LOG:  database system was interrupted; last known up at 2023-11-10 09:57:45 +04
+2023-11-10 10:02:06.065 +04 [23327] LOG:  redo starts at 2E/1A000028
+2023-11-10 10:02:06.082 +04 [23327] LOG:  consistent recovery state reached at 2E/1A0D52C8
+2023-11-10 10:02:06.082 +04 [23327] LOG:  redo done at 2E/1A0D52C8
+2023-11-10 10:02:06.083 +04 [23327] LOG:  last completed transaction was at log time 2023-11-10 10:00:50.184298+04
+2023-11-10 10:02:06.154 +04 [23326] LOG:  database system is ready to accept connections
+ done
+server started
+2023-11-10 10:02:20.692 +04 [23362] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:02:20.740 +04 [23364] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:02:21.022 +04 [23366] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:02:21.413 +04 [23369] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:02:21.501 +04 [23371] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:06:52.901 +04 [23631] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:06:52.912 +04 [23633] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:06:53.030 +04 [23635] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:06:53.147 +04 [23637] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:06:53.228 +04 [23639] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:23:34.433 +04 [24003] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:23:34.452 +04 [24005] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:23:34.872 +04 [24007] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:23:35.538 +04 [24010] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:23:35.648 +04 [24012] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:56:41.360 +04 [24542] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:56:41.367 +04 [24544] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:56:41.494 +04 [24546] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:56:41.589 +04 [24548] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-10 10:56:41.639 +04 [24550] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

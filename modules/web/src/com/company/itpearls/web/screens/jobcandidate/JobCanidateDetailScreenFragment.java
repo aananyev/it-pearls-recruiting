@@ -1,9 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.entity.CandidateCV;
-import com.company.itpearls.entity.IteractionList;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WebBrowserTools;
@@ -31,18 +28,10 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private CollectionContainer<JobCandidate> jobCandidatesDc;
     @Inject
     private Label<String> salaryExpectationLabel;
-
-    private static final String MANAGER_GROUP = "Менеджмент";
-    private static final String RECRUTIER_GROUP = "Хантинг";
-    private static final String RESEARCHER_GROUP = "Ресерчинг";
-    protected JobCandidate jobCandidate = null;
-
     @Inject
     private Label<String> lastResearcherLabel;
     @Inject
     private LinkButton telegrammLinkButton;
-
-
     @Inject
     private Label<String> lastIteractionLabel;
     @Inject
@@ -65,8 +54,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private LinkButton skypeLinkButton;
     @Inject
     private LinkButton emailLinkButton;
-
-    List<IteractionList> iteractionList = new ArrayList<>();
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -75,9 +62,88 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private HBoxLayout statisticsHLabelBox;
     @Inject
     private Image candidateFaceDefaultImage;
+    @Inject
+    private HBoxLayout emailHBox;
+    @Inject
+    private HBoxLayout phoneHbox;
+    @Inject
+    private HBoxLayout mobilePhoneHBox;
+    @Inject
+    private HBoxLayout skypeHBox;
+    @Inject
+    private HBoxLayout telegramHBox;
+    @Inject
+    private HBoxLayout telegramGroupHBox;
+    @Inject
+    private HBoxLayout wiberNameHBox;
+    @Inject
+    private HBoxLayout whatsupNameHBox;
+    @Inject
+    private FlowBoxLayout socialNetworkFlowBox;
+
+    private static final String MANAGER_GROUP = "Менеджмент";
+    private static final String RECRUTIER_GROUP = "Хантинг";
+    private static final String RESEARCHER_GROUP = "Ресерчинг";
+    protected JobCandidate jobCandidate = null;
+    private List<IteractionList> iteractionList = new ArrayList<>();
+    private static final String QUERY_ALL_CV = "select e from itpearls_CandidateCV e " +
+            "where e.candidate = :candidate ";
+    private static final String QUERY_ALL_ITERACIONS = "select e from itpearls_IteractionList e " +
+            "where e.candidate = :candidate " +
+            "order by e.dateIteraction desc";
+    private static final String QUERY_LAST_SALARY = "select e from itpearls_IteractionList e where e.iteractionType = " +
+            "(select f from itpearls_Iteraction f where f.iterationName like :iteractionName) and " +
+            "e.candidate = :candidate";
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
+
+        createSocialNetworkFlowBox();
+    }
+
+    private void createSocialNetworkFlowBox() {
+        if (jobCandidate.getSocialNetwork() != null) {
+            socialNetworkFlowBox.setVisible(true);
+
+            List<Image> snImages = getSNLabels(jobCandidate);
+
+            for (Image image : snImages) {
+                socialNetworkFlowBox.add(image);
+            }
+        } else {
+            socialNetworkFlowBox.setVisible(false);
+        }
+    }
+
+    private List<Image> getSNLabels(JobCandidate event) {
+        List<Image> retImage = new ArrayList<>();
+
+        for (SocialNetworkURLs snt : event.getSocialNetwork()) {
+            if (snt.getNetworkURLS() != null) {
+                Image image = uiComponents.create(Image.class);
+                image.setDescriptionAsHtml(true);
+                image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+                image.setWidth("20px");
+                image.setHeight("20px");
+                image.setStyleName("icon-no-border-30px");
+                image.setAlignment(Component.Alignment.BOTTOM_CENTER);
+                image.setDescription(snt.getNetworkURLS());
+                image.addClickListener(e -> webBrowserTools.showWebPage(snt.getNetworkURLS(), null));
+
+                if (snt.getSocialNetworkURL().getLogo() != null) {
+                    image
+                            .setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(snt.getSocialNetworkURL().getLogo());
+                } else {
+                    image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+
+                }
+
+                retImage.add(image);
+            }
+        }
+
+        return retImage;
     }
 
     public void setLinkButtonTelegrem() {
@@ -148,16 +214,22 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
     @Subscribe("telegrammLinkButton")
     public void onTelegrammLinkButtonClick(Button.ClickEvent event) {
-        String retStr = event.getButton().getCaption();
+        StringBuilder sb = new StringBuilder();
+        sb.append("http://t.me/")
+                .append(event.getButton()
+                        .getCaption());
 
-        webBrowserTools.showWebPage("http://t.me/" + retStr, null);
+        webBrowserTools.showWebPage(sb.toString(), null);
     }
 
 
     @Subscribe("skypeLinkButton")
     public void onSkypeLinkButtonClick(Button.ClickEvent event) {
-        webBrowserTools.showWebPage("skype:" + event.getButton().getCaption() + "?chat", null);
-
+        StringBuilder sb = new StringBuilder();
+        sb.append("skype:")
+                .append(event.getButton().getCaption())
+                .append("?chat");
+        webBrowserTools.showWebPage(sb.toString(), null);
     }
 
     public void setLastSalaryLabel(String iteractionName) {
@@ -313,8 +385,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     }
 
     private String getResumeCount() {
-        String QUERY_ALL_CV = "select e from itpearls_CandidateCV e " +
-                "where e.candidate = :candidate ";
+
         String retStr = "";
 
         try {
@@ -333,9 +404,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     }
 
     private List<IteractionList> getAllCandidateIteractions() {
-        String QUERY_ALL_ITERACIONS = "select e from itpearls_IteractionList e " +
-                "where e.candidate = :candidate " +
-                "order by e.dateIteraction desc";
 
         List<IteractionList> iteractionLists = new ArrayList<>();
 
@@ -353,10 +421,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
     private IteractionList getStatistics(String iteractionName) {
 
-        String QUERY_LAST_SALARY = "select e from itpearls_IteractionList e where e.iteractionType = " +
-                "(select f from itpearls_Iteraction f where f.iterationName like :iteractionName) and " +
-                "e.candidate = :candidate";
-
         IteractionList iteractionList = null;
 
         try {
@@ -373,9 +437,9 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         return iteractionList;
     }
 
-    static private String DESC_DATE_ITERACTION = "Даты процессинга кандидата: начало с ним работы и дата последнего взаимодействия";
-    static private String DESC_DAYS_LAST_ITERCATION = "Дней с даты последнего взаимодействия";
-    static private String DESC_DAYS_ON_LAST_PROJECT = "Количество дней на рассмотрении последнего проекта";
+    static private final String DESC_DATE_ITERACTION = "Даты процессинга кандидата: начало с ним работы и дата последнего взаимодействия";
+    static private final String DESC_DAYS_LAST_ITERCATION = "Дней с даты последнего взаимодействия";
+    static private final String DESC_DAYS_ON_LAST_PROJECT = "Количество дней на рассмотрении последнего проекта";
 
     public void setStatisticsLabel() {
         if (iteractionList.size() != 0) {
@@ -479,7 +543,6 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         }
 
         return null;
-
     }
 
     private Label getCountAfrerClientInterview() {
@@ -580,27 +643,23 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     }
 
     private String getStyleOnlastProcess(Calendar cal, Calendar cal1, Calendar cal2) {
-        String style;
-
         if (cal.after(cal1)) {
             if (iteractionList.get(0).getRecrutier() != null) {
                 if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
-                    style = "button_table_gray";
+                    return "button_table_gray";
                 } else {
-                    style = "button_table_yellow";
+                    return "button_table_yellow";
                 }
             } else {
-                style = "button_table_gray";
+                return  "button_table_gray";
             }
         } else {
             if (cal1.after(cal2)) {
-                style = "button_table_gray";
+                return "button_table_gray";
             } else {
-                style = "button_table_red";
+                return  "button_table_red";
             }
         }
-
-        return style;
     }
 
     private Label getCountDaysLastProject() {
@@ -769,27 +828,38 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     }
 
     private String getStyleOnTime(Calendar cal, Calendar cal1, Calendar cal2) {
-        String style;
-
         if (cal.after(cal1)) {
             if (iteractionList.get(0).getRecrutier() != null) {
                 if (!iteractionList.get(0).getRecrutier().equals(userSession.getUser())) {
-                    style = "button_table_red";
+                    return "button_table_red";
                 } else {
-                    style = "button_table_yellow";
+                    return "button_table_yellow";
                 }
             } else {
-                style = "button_table_gray";
+                return "button_table_gray";
             }
         } else {
             if (cal1.after(cal2)) {
-                style = "button_table_gray";
+                return "button_table_gray";
             } else {
-                style = "button_table_green";
-
+                return  "button_table_green";
             }
         }
+    }
 
-        return style;
+    @Subscribe
+    public void onInit(InitEvent event) {
+        setVisibleContactsLabels();
+    }
+
+    public void setVisibleContactsLabels() {
+        emailHBox.setVisible(jobCandidate.getEmail() != null);
+        phoneHbox.setVisible(jobCandidate.getPhone() != null);
+        mobilePhoneHBox.setVisible(jobCandidate.getMobilePhone() != null);
+        skypeHBox.setVisible(jobCandidate.getSkypeName() != null);
+        telegramHBox.setVisible(jobCandidate.getTelegramName() != null);
+        telegramGroupHBox.setVisible(jobCandidate.getTelegramGroup() != null);
+        wiberNameHBox.setVisible(jobCandidate.getWiberName() != null);
+        whatsupNameHBox.setVisible(jobCandidate.getWhatsupName() != null);
     }
 }

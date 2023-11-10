@@ -107,7 +107,7 @@
                            align="BOTTOM_LEFT"
                            stylename="h3"
                            value="msg://msgCandidateContacts"/>
-                    <hbox spacing="true">
+                    <hbox id="emailHBox" spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
@@ -116,7 +116,7 @@
                                     align="BOTTOM_LEFT"
                                     description="msg://msgEmail"/>
                     </hbox>
-                    <hbox spacing="true">
+                    <hbox id="phoneHbox" spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
@@ -127,7 +127,7 @@
                                dataContainer="jobCandidatesDc"
                                property="phone"/>
                     </hbox>
-                    <hbox spacing="true">
+                    <hbox id="mobilePhoneHBox" spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
@@ -138,7 +138,7 @@
                                dataContainer="jobCandidatesDc"
                                property="mobilePhone"/>
                     </hbox>
-                    <hbox spacing="true">
+                    <hbox id="skypeHBox" spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
@@ -147,7 +147,7 @@
                                     align="BOTTOM_LEFT"
                                     description="msg://msgSkype"/>
                     </hbox>
-                    <hbox spacing="true">
+                    <hbox id="telegramHBox" spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
@@ -156,7 +156,7 @@
                                     align="BOTTOM_LEFT"
                                     description="msg://msgTelegram"/>
                     </hbox>
-                    <hbox spacing="true">
+                    <hbox id="telegramGroupHBox" spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
@@ -165,7 +165,7 @@
                                     align="BOTTOM_LEFT"
                                     description="msg://msgTelegramGroup"/>
                     </hbox>
-                    <hbox spacing="true">
+                    <hbox id="wiberNameHBox" spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
@@ -176,7 +176,7 @@
                                stylename="job-candidate-fragment-label"
                                property="wiberName"/>
                     </hbox>
-                    <hbox spacing="true">
+                    <hbox id="whatsupNameHBox" spacing="true">
                         <label align="BOTTOM_LEFT"
                                stylename="bold"
                                width="100px"
@@ -187,6 +187,10 @@
                                stylename="job-candidate-fragment-label"
                                property="whatsupName"/>
                     </hbox>
+                    <flowBox id="socialNetworkFlowBox"
+                             width="100%"
+                             height="AUTO"
+                             spacing="true"/>
                 </vbox>
                 <vbox id="jobCandidateIteractionInfoVBox" width="25%">
                     <label id="jobCandidateIteractionLabel"
