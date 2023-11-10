@@ -123,8 +123,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                 Image image = uiComponents.create(Image.class);
                 image.setDescriptionAsHtml(true);
                 image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-                image.setWidth("20px");
-                image.setHeight("20px");
+                image.setWidth("25px");
+                image.setHeight("25px");
                 image.setStyleName("icon-no-border-30px");
                 image.setAlignment(Component.Alignment.BOTTOM_CENTER);
                 image.setDescription(snt.getNetworkURLS());

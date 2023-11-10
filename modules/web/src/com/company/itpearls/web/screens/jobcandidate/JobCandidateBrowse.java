@@ -119,12 +119,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private FileStorageService fileStorageService;
 
-    static final String QUERY_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
-    private final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
-    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK
-            = "select e " +
-            "from itpearls_SocialNetworkType e " +
-            "where e.socialNetwork = :other";
+    private static final String QUERY_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
+    private static final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
+    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from itpearls_SocialNetworkType e where e.socialNetwork = :other";
+    private static final String QUERY_GET_LASTRECRUTIER = "select e from itpearls_IteractionList e where e.candidate = :candidate order by e.numberIteraction desc";
 
     private CollectionContainer<IteractionList> iteractionListDc;
     private CollectionLoader<IteractionList> iteractionListDl;
@@ -135,13 +133,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private OnlyTextPersonPosition screenOnlytext;
     private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
     private List<Employee> employees;
+
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
-    private String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
+    private static final String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
 
-    static final String separatorChar = "⎯";
-    final static String separator = separatorChar.repeat(22);
+    private static final String separatorChar = "⎯";
+    private static final String separator = separatorChar.repeat(22);
 
 
     @Inject
@@ -285,7 +284,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withDescription("msgEditSignIconsActionDesc")
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
-                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                    SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
                             .withOpenMode(OpenMode.DIALOG)
                             .build();
                     screen.setParentJobCandidateTable(jobCandidatesTable);
@@ -304,6 +303,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", jobCandidatesTable.getSingleSelected())
                 .view("jobCandidateSignIcon-view")
+                .cacheable(true)
                 .list();
 
         if (jobCandidateSignIcons.size() > 0) {
@@ -318,6 +318,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", jobCandidate)
                 .view("jobCandidateSignIcon-view")
+                .cacheable(true)
                 .list();
 
         if (jobCandidateSignIcons.size() > 0) {
@@ -345,6 +346,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", jobCandidate)
                 .view("jobCandidateSignIcon-view")
+                .cacheable(true)
                 .list();
 
         if (jobCandidateSignIcon.size() == 0) {
@@ -380,6 +382,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .view("personelReserve-view")
                     .parameter("jobCandidate", jobCandidate)
                     .parameter("currDate", new Date())
+                    .cacheable(true)
                     .one();
         } catch (IllegalStateException e) {
             personelReserveCheck = null;
@@ -662,7 +665,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withDescription("msgEditSignIconsActionDesc")
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
-                    SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                    SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
                             .withOpenMode(OpenMode.DIALOG)
                             .build();
                     screen.setParentJobCandidateTable(jobCandidatesTable);
@@ -703,54 +706,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("%")
+                .append(userSession.getUser().getLogin())
+                .append("%");
         if (checkBoxShowOnlyMy.getValue()) {
-            jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+//            jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+            jobCandidatesDl.setParameter("userName", sb.toString());
         } else {
             jobCandidatesDl.removeParameter("userName");
         }
 
         jobCandidatesDl.load();
     }
-
-/*    @Install(to = "jobCandidatesTable.status", subject = "styleProvider")
-    private String jobCandidatesTableStatusStyleProvider(JobCandidate jobCandidate) {
-        Integer s = getPictString(jobCandidate);
-        String retStr = "";
-
-        if (s != null) {
-            switch (s) {
-                case 0: // WHITE
-                    retStr = "pic-center-large-grey";
-                    break;
-                case 1: // red
-                    retStr = "pic-center-large-red";
-                    break;
-                case 2: // yellow
-                    retStr = "pic-center-large-yellow";
-                    break;
-                case 3: // green
-                    retStr = "pic-center-large-green";
-                    break;
-                case 4: // to client
-                    retStr = "pic-center-large-grey";
-                    break;
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
-                case 10: // recruiting
-                    retStr = "pic-center-large-grey";
-                    break;
-                default:
-                    retStr = "pic-center-large";
-                    break;
-            }
-        }
-
-        return retStr;
-    } */
-
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
     private String jobCandidatesTableLastIteractionColumnGenerator
@@ -765,7 +733,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             e.printStackTrace();
         }
 
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder();
         Boolean checkBlockCandidate = event.getItem().getBlockCandidate() == null ? false : event.getItem().getBlockCandidate();
 
         if (checkBlockCandidate != null) {
@@ -786,37 +755,47 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     if (calendar.after(calendar1)) {
                         if (iteractionList.getRecrutier() != null) {
                             if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
-                                retStr = "button_table_red";
+//                                retStr = "button_table_red";
+                                sb.append("button_table_red");
                             } else {
-                                retStr = "button_table_yellow";
+//                                retStr = "button_table_yellow";
+                                sb.append("button_table_yellow");
                             }
                         }
                     } else {
-                        retStr = "button_table_green";
+//                        retStr = "button_table_green";
+                        sb.append("button_table_green");
                     }
                 } else {
-                    retStr = "button_table_white";
+//                    retStr = "button_table_white";
+                    sb.append("button_table_white");
                 }
             } else {
-                retStr = "button_table_black";
+//                retStr = "button_table_black";
+                sb.append("button_table_black");
             }
         } else {
-            retStr = "button_table_green";
+//            retStr = "button_table_green";
+            sb.append("button_table_green");
         }
 
-        return
+        return sb.insert(0, "<div class=\"")
+                .append("\">")
+                .append((date != null ? date : "нет"))
+                .append("</div>")
+                .toString();
+
+/*        return
                 "<div class=\"" +
                         retStr
                         + "\">" +
                         (date != null ? date : "нет")
                         + "</div>"
-                ;
+                ; */
     }
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "styleProvider")
     private String jobCandidatesTableLastIteractionStyleProvider(JobCandidate jobCandidate) {
-        String retStr = null;
-
         IteractionList iteractionList = getLastIteraction(jobCandidate);
 
         if (iteractionList != null) {
@@ -828,15 +807,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
             if (calendar.after(calendar1)) {
                 if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
-                    retStr = "button_table_red";
+                    return "button_table_red";
                 } else {
-                    retStr = "button_table_yellow";
+                    return "button_table_yellow";
                 }
             } else {
-                retStr = "button_table_green";
+                return "button_table_green";
             }
-
-            return retStr;
         } else {
             return "button_table_yellow";
         }
@@ -857,31 +834,52 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
         Boolean checkBlockCandidate = jobCandidate.getBlockCandidate() == null ? false : jobCandidate.getBlockCandidate();
+        StringBuilder sb = new StringBuilder();
 
         if (!checkBlockCandidate) {
             if (iteractionList != null) {
                 if (iteractionList.getIteractionType() != null) {
                     return iteractionList != null ?
+                            sb
+                                    .append(simpleDateFormat.format(iteractionList.getDateIteraction()))
+                                    .append("\n")
+                                    .append(iteractionList.getIteractionType().getIterationName())
+                                    .append("\n")
+                                    .append(recrutierName)
+                                    .toString() : "";
+/*                    return iteractionList != null ?
                             simpleDateFormat.format(iteractionList.getDateIteraction())
                                     + "\n"
                                     + iteractionList.getIteractionType().getIterationName()
                                     + "\n"
-                                    + recrutierName : "";
+                                    + recrutierName : ""; */
                 } else {
                     return iteractionList != null ?
+                            sb.append(simpleDateFormat.format(iteractionList.getDateIteraction()))
+                                    .append("\n")
+                                    .append(messageBundle.getMessage("msgInteractionUndefined"))
+                                    .append("\n")
+                                    .append(recrutierName).toString() : "";
+/*                    return iteractionList != null ?
                             simpleDateFormat.format(iteractionList.getDateIteraction())
                                     + "\n"
                                     + messageBundle.getMessage("msgInteractionUndefined")
                                     + "\n"
-                                    + recrutierName : "";
+                                    + recrutierName : ""; */
                 }
             } else {
                 return iteractionList != null ?
+                        sb.append(simpleDateFormat.format(iteractionList.getDateIteraction()))
+                                .append("\n")
+                                .append(messageBundle.getMessage("msgInteractionUndefined"))
+                                .append("\n")
+                                .append(recrutierName).toString() : "";
+/*                return iteractionList != null ?
                         simpleDateFormat.format(iteractionList.getDateIteraction())
                                 + "\n"
                                 + messageBundle.getMessage("msgInteractionUndefined")
                                 + "\n"
-                                + recrutierName : "";
+                                + recrutierName : ""; */
             }
         } else {
             return messageBundle.getMessage("msgInteractionProhibited");
@@ -932,23 +930,31 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.resume", subject = "styleProvider")
     private String jobCandidatesTableResumeStyleProvider(JobCandidate jobCandidate) {
-        String retStr = "";
-
         if (dataManager.loadValues(QUERY_RESUME)
                 .parameter("candidate", jobCandidate)
                 .list()
                 .size() == 0) {
-            retStr = "pic-center-large-red";
+            return "pic-center-large-red";
         } else {
-            retStr = "pic-center-large-green";
+            return "pic-center-large-green";
         }
-
-        return retStr;
     }
+
+    private JobCandidate jobCandidateFragment = null;
 
     @Install(to = "jobCandidatesTable", subject = "detailsGenerator")
     private Component jobCandidatesTableDetailsGenerator(JobCandidate entity) throws
             IOException, ClassNotFoundException {
+
+        if (jobCandidateFragment != null) {
+            jobCandidatesTable.setDetailsVisible(jobCandidateFragment, false);
+            jobCandidatesTable.repaint();
+            jobCandidatesTable.setSelected(entity);
+        }
+
+        jobCandidatesTable.scrollTo(entity);
+        jobCandidateFragment = entity;
+
         VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
         mainLayout.setWidth("100%");
         mainLayout.setMargin(true);
@@ -1253,6 +1259,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .cacheable(true)
                 .parameter("candidate", entity)
                 .view("candidateCV-view")
+                .cacheable(true)
                 .list().size() != 0) {
             Button suitableButton = uiComponents.create(Button.class);
             suitableButton.setDescription("Подобрать вакансию по резюме");
@@ -1508,6 +1515,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .view("iteractionList-view")
                     .parameter("iteractionName", iteractionName)
                     .parameter("candidate", jobCandidatesTable.getSingleSelected())
+                    .cacheable(true)
                     .one();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1527,68 +1535,17 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         statistics.add(vBoxLayout);
     }
 
-    private String getLastProject(List<IteractionList> iteractionList) {
-        String retStr = "";
-
-        for (IteractionList a : iteractionList) {
-            if (a.getVacancy().getProjectName() != null)
-                retStr = a.getVacancy().getProjectName().getProjectName();
-            else
-                retStr = "";
-        }
-
-        return retStr;
-    }
-
-    private String getLastContacter(List<IteractionList> iteractionList, String contecter) {
-        for (IteractionList a : iteractionList) {
-            if (a.getRecrutier().getGroup().getName() != null) {
-                if (a.getRecrutier().getGroup().getName().equals(contecter)) {
-                    return a.getRecrutier().getName();
-                }
-            }
-        }
-
-        return "";
-    }
-
-
-    private String getLastVacansy(List<IteractionList> iteractionList) {
-        for (IteractionList a : iteractionList) {
-            return a.getVacancy() != null ? a.getVacancy().getVacansyName() : "";
-        }
-
-        return "";
-    }
-
-    private String getLastIteraction(List<IteractionList> iteractionList, String contecter) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-
-        for (IteractionList a : iteractionList) {
-            if (a.getRecrutier().getGroup().getName() != null) {
-                if (a.getRecrutier().getGroup().getName().equals(contecter)) {
-                    return simpleDateFormat.format(a.getDateIteraction());
-                }
-            }
-        }
-
-        return "";
-    }
-
     private List<IteractionList> getIteractionLists(JobCandidate singleSelected) {
-        String QUERY_GET_LASTRECRUTIER = "select e from itpearls_IteractionList e " +
-                "where e.candidate = :candidate " +
-                "order by e.numberIteraction desc";
 
         List<IteractionList> listIteracion = dataManager.load(IteractionList.class)
                 .query(QUERY_GET_LASTRECRUTIER)
                 .cacheable(true)
                 .parameter("candidate", singleSelected)
                 .view("iteractionList-job-candidate")
+                .cacheable(true)
                 .list();
 
         return listIteracion;
-
     }
 
     private Component createEditButton(JobCandidate entity) {
@@ -1607,17 +1564,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         editButton.setAction(editAction);
         return editButton;
     }
-
-    private Label<String> setContacts(String labelName) {
-        Label<String> label = uiComponents.create(Label.NAME);
-
-        if (labelName != null) {
-            label.setValue(labelName);
-        }
-
-        return label;
-    }
-
 
     private Component createCloseButton(JobCandidate entity) {
         Button closeButton = uiComponents.create(Button.class);
@@ -1714,6 +1660,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", event.getItem())
                 .view("jobCandidateSignIcon-view")
+                .cacheable(true)
                 .list();
 
         if (jobCandidateSignIcons.size() > 0) {
@@ -1787,77 +1734,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
-    private Label genPersonalReserveLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        Label retLabel = uiComponents.create(Label.class);
-        retLabel.setVisible(false);
-        retLabel.setStyleName("star-center-large-yellow");
-        retLabel.setAlignment(Component.Alignment.BOTTOM_CENTER);
-
-        final String QUERY_CHECK_PERSONAL_RESERVE = "select e from itpearls_PersonelReserve e " +
-                "where e.jobCandidate = :jobCandidate "
-//                + "and e.inProcess = true "
-                + "and @dateAfter(e.endDate, now-1) "
-                + "and @dateBefore(e.date, now+1) "
-//                + "and not e.removedFromReserve = true"
-                ;
-        List<PersonelReserve> personelReserves = dataManager.load(PersonelReserve.class)
-                .query(QUERY_CHECK_PERSONAL_RESERVE)
-                .parameter("jobCandidate", event.getItem())
-                .view("personelReserve-view")
-                .list();
-
-        Boolean flagSelected = false;
-        Boolean flag = false;
-
-        for (PersonelReserve personelReserve : personelReserves) {
-            if (personelReserve.getRemovedFromReserve() != null) {
-                if (!personelReserve.getRemovedFromReserve()) {
-                    flag = true;
-                    break;
-                }
-            } else {
-                flag = true;
-            }
-        }
-
-        for (PersonelReserve personelReserve : personelReserves) {
-            if (personelReserve.getSelectedForAction() != null) {
-                if (personelReserve.getSelectedForAction()) {
-                    flagSelected = true;
-                    retLabel.setIconFromSet(CubaIcon.STAR);
-                    break;
-                }
-            }
-        }
-
-        if (personelReserves.size() > 0) {
-            if (flag) {
-                if (flagSelected) {
-                    retLabel.setIconFromSet(CubaIcon.STAR);
-                }
-
-                retLabel.setVisible(true);
-                retLabel.setDescription(messageBundle.getMessage("msgPersonalReserve")
-                        + " "
-                        + personelReserves.get(0).getRecruter().getName());
-            } else {
-                retLabel.setVisible(false);
-            }
-        } else {
-            retLabel.setVisible(false);
-        }
-
-        if (personelReserves.size() > 0) {
-            retLabel.setIconFromSet(getStarIconPersonalReserve(personelReserves.get(0)));
-            retLabel.setStyleName(getStarIconPersonalReserveStyle(personelReserves.get(0)));
-        } else {
-            retLabel.setIconFromSet(CubaIcon.STAR);
-        }
-
-        return retLabel;
-    }
-
-
     private CubaIcon getStarIconPersonalReserve(PersonelReserve personelReserve) {
         StdSelections s = StdSelections.fromId(personelReserve.getSelectionSymbolForActions());
         CubaIcon retIcon;
@@ -1909,7 +1785,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             return StdSelectionsColor.STAR_YELLOW.getId();
         }
     }
-
 
     private Label getPhoneCandidateLabel(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         Label retLabel = uiComponents.create(Label.class);
@@ -2156,45 +2031,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
 
-/*    @Install(to = "jobCandidatesTable.status", subject = "columnGenerator")
-    private Icons.Icon jobCandidatesTableStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        Integer s = getPictString(event.getItem());
-        String retStr = "";
-
-        if (s != null) {
-            switch (s) {
-                case 0: // WHITE
-                    retStr = "QUESTION_CIRCLE";
-                    break;
-                case 1: // red
-                    retStr = "BOMB";
-                    break;
-                case 2: // yellow
-                    retStr = "BOMB";
-                    break;
-                case 3: // green
-                    retStr = "BOMB";
-                    break;
-                case 4: // to client
-                    retStr = "BOMB";
-                    break;
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
-                case 10: // recruiting
-                    retStr = "BOMB";
-                    break;
-                default:
-                    retStr = "QUESTION_CIRCLE";
-                    break;
-            }
-        }
-
-        return CubaIcon.valueOf(retStr);
-    } */
-
     private Integer getPictString(JobCandidate jobCandidate) {
         // если только имя и отчество - красный сигнал светофора
         // если имя, день рождения и один из контактов - желтый
@@ -2261,7 +2097,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         jobCandidatesTable.getColumn("lastIteraction").setStyleProvider(e -> {
             IteractionList iteractionList = getLastIteraction(e);
-            String retStr = "";
 
             if (iteractionList != null) {
                 Calendar calendar = Calendar.getInstance();
@@ -2277,26 +2112,22 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 if (calendar.after(calendar1)) {
                     if (iteractionList.getRecrutier() != null) {
                         if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
-                            retStr = "button_table_red";
+                            return "button_table_red";
                         } else {
-                            retStr = "button_table_yellow";
+                            return "button_table_yellow";
                         }
                     } else {
-                        retStr = "button_table_white";
+                        return "button_table_white";
                     }
                 } else {
-                    retStr = "button_table_green";
+                    return "button_table_green";
                 }
             } else {
-                retStr = "button_table_white";
+                return "button_table_white";
             }
-
-            return retStr;
         });
 
 
-//        jobCandidatesTable.getColumn("lastIteraction")
-//                .setRenderer(jobCandidatesTableLastIteractionRenderer);
         jobCandidatesTable.getColumn("lastIteraction")
                 .setRenderer(jobCandidatesTable.createRenderer(DataGrid.HtmlRenderer.class));
 
@@ -2398,19 +2229,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.personPosition", subject = "descriptionProvider")
     private String jobCandidatesTablePersonPositionDescriptionProvider(JobCandidate jobCandidate) {
-        String retStr = "";
+        StringBuilder sb = new StringBuilder();
 
         if (jobCandidate.getPositionList() != null) {
             for (JobCandidatePositionLists s : jobCandidate.getPositionList()) {
-                if (!retStr.equals("")) {
-                    retStr = retStr + ",";
+                if (!sb.toString().equals("")) {
+                    sb.append(",");
                 }
 
-                retStr = retStr + s.getPositionList().getPositionRuName();
+                sb.append(s.getPositionList().getPositionRuName());
             }
         }
 
-        return retStr;
+        return sb.toString();
     }
 
     @Install(to = "jobCandidatesTable.rating", subject = "columnGenerator")
@@ -2441,32 +2272,44 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.rating", subject = "styleProvider")
     private String jobCandidatesTableRatingStyleProvider(JobCandidate jobCandidate) {
-        String retStr = "rating";
+//        String retStr = "rating";
+        StringBuilder sb = new StringBuilder("rating");
+
         String avg = avgRating(jobCandidate);
         if (!avg.equals("")) {
             String s = avg.substring(0, 1);
 
             switch (s) {
                 case "1":
-                    retStr = retStr + "_red_" + s;
+                    sb.append("_red_")
+                            .append(s);
+//                    retStr = retStr + "_red_" + s;
                     break;
                 case "2":
-                    retStr = retStr + "_orange" + s;
+                    sb.append("_orange_")
+                            .append(s);
+//                    retStr = retStr + "_orange" + s;
                     break;
                 case "3":
-                    retStr = retStr + "_yellow_" + s;
+                    sb.append("_yellow_")
+                            .append(s);
+//                    retStr = retStr + "_yellow_" + s;
                     break;
                 case "4":
-                    retStr = retStr + "_green_" + s;
+                    sb.append("_green_")
+                            .append(s);
+//                    retStr = retStr + "_green_" + s;
                     break;
                 case "5":
-                    retStr = retStr + "_blue_" + s;
+                    sb.append("_blue_")
+                            .append(s);
+//                    retStr = retStr + "_blue_" + s;
                     break;
                 default:
                     break;
             }
 
-            return retStr;
+            return sb.toString();
         } else
             return null;
     }
@@ -2812,6 +2655,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .query(QUERY_GET_OTHER_SOCIAL_NETWORK)
                     .parameter("other", "Other")
                     .view("socialNetworkType-view")
+                    .cacheable(true)
                     .one();
         } catch (IllegalStateException e) {
             e.printStackTrace();
