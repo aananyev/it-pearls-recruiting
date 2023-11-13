@@ -538,6 +538,11 @@ rating_battery_yellow_3:before {
     box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
 }
 
+.open_position_sign_label_black {
+    font_size: small;
+    color: black;
+}
+
 @mixin com_company_itpearls-halo-ext {
 
 .rating_box {

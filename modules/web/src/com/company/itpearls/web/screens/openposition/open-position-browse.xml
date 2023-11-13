@@ -36,6 +36,7 @@
                     <property name="projectDescription"/>
                 </property>
                 <property name="templateLetter"/>
+                <property name="someFiles" view="_minimal"/>
             </view>
             <loader id="openPositionsDl">
                 <query>
@@ -192,7 +193,7 @@
                     exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
                 <column id="folder"
                         maximumWidth="100px"
-                        resizable="false"
+                        resizable="true"
                         collapsible="false"
                         collapsed="false"
                         width="100px"
