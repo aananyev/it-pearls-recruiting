@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.signicons;
 
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.ColorPicker;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
@@ -28,6 +30,10 @@ public class SignIconsEdit extends StandardEditor<SignIcons> {
     private InstanceContainer<SignIcons> signIconsDc;
     @Inject
     private Label<String> labelNameLabel;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private TextField<String> titleEndField;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -67,5 +73,20 @@ public class SignIconsEdit extends StandardEditor<SignIcons> {
             injectColorCss((String) event.getValue());
             iconSampleLabel.setStyleName("pic-center-large-" + event.getValue());
         }
+    }
+
+    public void selectIconButtonInvoke() {
+        SignIconsSelecter selectIcon = (SignIconsSelecter) screenBuilders.screen(this)
+                .withScreenClass(SignIconsSelecter.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        selectIcon.addAfterCloseListener(e -> {
+            iconNameField.setValue(selectIcon.getIconSelected());
+            iconSampleLabel.setIcon(iconNameField.getValue());
+            titleEndField.setValue(iconNameField.getValue());
+        });
+
+        selectIcon.show();
     }
 }

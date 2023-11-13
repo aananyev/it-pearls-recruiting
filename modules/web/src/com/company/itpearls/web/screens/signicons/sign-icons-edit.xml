@@ -10,20 +10,31 @@
             <loader/>
         </instance>
     </data>
-    <dialogMode height="600"
-                width="800"/>
+    <dialogMode height="800"
+                width="1000"/>
     <layout expand="editActions" spacing="true">
         <hbox spacing="true">
-        <label id="iconSampleLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
+            <label id="iconSampleLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
             <label id="labelNameLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
         </hbox>
         <form id="form" dataContainer="signIconsDc">
             <column width="350px">
-                <textField id="titleEndField" property="titleEnd">
+                <textField id="titleEndField" property="titleEnd" editable="false">
                     <validator class="com.haulmont.cuba.gui.components.validators.StringValidator"/>
                 </textField>
                 <textField id="titleRuField" property="titleRu"/>
-                <textField id="iconNameField" property="iconName"/>
+                <hbox spacing="true"
+                      expand="iconNameField">
+                    <textField id="iconNameField"
+                               dataContainer="signIconsDc"
+                               align="MIDDLE_LEFT"
+                               property="iconName"/>
+                    <button id="selectIconButton"
+                            width="AUTO"
+                            align="MIDDLE_RIGHT"
+                            icon="FONTICONS"
+                            invoke="selectIconButtonInvoke"/>
+                </hbox>
                 <colorPicker id="iconColorColorPicker" property="iconColor" width="AUTO"/>
                 <textArea id="titleDescription" property="titleDescription" width="100%"/>
             </column>

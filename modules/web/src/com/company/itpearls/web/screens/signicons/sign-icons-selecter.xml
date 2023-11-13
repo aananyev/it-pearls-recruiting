@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://signIconsSelecter.caption"
+        messagesPack="com.company.itpearls.web.screens.signicons">
+    <dialogMode height="300"
+                width="400"/>
+    <layout>
+        <flowBox id="cubaIconsFlowBix" width="AUTO" height="AUTO" spacing="true"/>
+    </layout>
+</window>
