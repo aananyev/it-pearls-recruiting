@@ -2818,11 +2818,31 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retHBox.setWidthFull();
         retHBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
         retHBox.setHeightFull();
+        retHBox.setSpacing(true);
+
+        Label newVacancyLabel = uiComponents.create(Label.class);
+        newVacancyLabel.setValue(messageBundle.getMessage("msgNewReserve"));
+        newVacancyLabel.setStyleName("button_table_red");
+        newVacancyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        newVacancyLabel.setWidthAuto();
+        newVacancyLabel.setHeightAuto();
+
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.add(Calendar.DAY_OF_MONTH, -3);
+        if (event.getItem().getLastOpenDate() != null) {
+            if (event.getItem().getLastOpenDate().before(gregorianCalendar.getTime())) {
+                newVacancyLabel.setVisible(false);
+            } else {
+                newVacancyLabel.setVisible(true);
+            }
+        }
 
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, event.getItem().getVacansyName());
         retObject.setWidthFull();
 
         Image image = setProjectOwnerImage(event.getItem().getProjectName().getProjectOwner());
+        retHBox.add(newVacancyLabel);
         retHBox.add(retObject);
         retHBox.add(image);
         retHBox.expand(retObject);

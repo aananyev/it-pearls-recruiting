@@ -67,9 +67,9 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     private String cuba_email_smtpUser = "";
     private String cuba_email_smtpPassword = "";
 
-    final static String QUERY_GET_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
-    final static String QUERY_GET_INTERACTION_SIGN_EMAIL_SEND = "select e from itpearls_Iteraction e where e.signEmailSend = true";
-    final static String QUERY_GEM_MAX_NUMBER_INTERACTION = "select max(e.numberIteraction) from itpearls_IteractionList e";
+    private final static String QUERY_GET_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
+    private final static String QUERY_GET_INTERACTION_SIGN_EMAIL_SEND = "select e from itpearls_Iteraction e where e.signEmailSend = true";
+    private final static String QUERY_GEM_MAX_NUMBER_INTERACTION = "select max(e.numberIteraction) from itpearls_IteractionList e";
 
     protected JobCandidate jobCandidate = null;
     @Inject
@@ -165,13 +165,16 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     }
 
     private void sendEmail() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Отправить Email адресату ")
+                .append(toEmailField.getValue().getFullName())
+                .append(" (")
+                .append(toEmailField.getValue().getEmail())
+                .append(") ?");
+
         dialogs.createOptionDialog()
                 .withCaption("Send EMAIL")
-                .withMessage("Отправить Email адресату "
-                        + toEmailField.getValue().getFullName()
-                        + " ("
-                        + toEmailField.getValue().getEmail()
-                        + ") ?")
+                .withMessage(sb.toString())
                 .withType(Dialogs.MessageType.CONFIRMATION)
                 .withActions(new DialogAction(DialogAction.Type.YES).withHandler(e ->
                         {

@@ -172,28 +172,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private static final String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
     private static final String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
-    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK
-            = "select e " +
-            "from itpearls_SocialNetworkType e " +
-            "where e.socialNetwork = :other";
+    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from itpearls_SocialNetworkType e where e.socialNetwork = :other";
+    private static final String QUERY_GET_CANDIDATE_CV = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
     private static final String TELEGRAM_NAME_URL = "http://t.me/";
+    private static final String QUERY_GET_LAST_ITERACTION = "select e from itpearls_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
 
     List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
     IteractionList lastIteraction = null;
 
-    String QUERY_GET_LAST_ITERACTION = "select e " +
-            "from itpearls_IteractionList e " +
-            "where e.candidate = :candidate and " +
-            "e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
     @Inject
     private Button blockCandidateButton;
-    //    @Named("tabSheetSocialNetworks.jobCandidateCard")
-//    private VBoxLayout jobCandidateCard;
-//    @Named("tabSheetSocialNetworks.tabContactInfo")
-//    private VBoxLayout tabContactInfo;
-//    @Named("tabSheetSocialNetworks.tabCandidate")
-//    private VBoxLayout tabCandidate;
     @Inject
     private Label<String> iteractionListLabelCandidate;
     @Inject
@@ -420,15 +409,30 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void setCreatedUpdatedLabel() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        StringBuilder sb = new StringBuilder();
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            String retStr = ("Создано: " + getEditedEntity().getCreatedBy()
-                    + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") ")
+            sb.append("Создано: ")
+                    .append(getEditedEntity().getCreatedBy())
+                    .append(" (")
+                    .append(simpleDateFormat.format(getEditedEntity().getCreateTs()))
+                    .append(") ");
+
+            if (getEditedEntity().getUpdatedBy() != null) {
+                sb.append("/ Изменено: ")
+                        .append(getEditedEntity().getUpdatedBy())
+                        .append(" (")
+                        .append(simpleDateFormat.format(getEditedEntity().getUpdateTs()))
+                        .append(") ");
+            }
+
+/*            String retStr = "Создано: " + getEditedEntity().getCreatedBy()
+                    + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") "
                     + (getEditedEntity().getUpdatedBy() != null ?
                     ("/ Изменено: " + getEditedEntity().getUpdatedBy() + " ("
-                            + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ") : "");
+                            + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ") : ""); */
 
-            createdUpdatedLabel.setValue(retStr);
+            createdUpdatedLabel.setValue(sb.toString());
         }
     }
 
@@ -1470,39 +1474,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 return Jsoup.parse(retStr).text();
             });
 
-/*                jobCandidateIteractionListTable.getColumn("projectName").setDescriptionProvider(iteractionList -> {
-                    String retStr = "";
-
-                    try {
-                        retStr = "Ответственный за проект: ";
-
-                        if (iteractionList.getVacancy() != null) {
-                            if (iteractionList.getVacancy().getProjectName() != null) {
-                                if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
-                                    if (iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName() != null) {
-                                        retStr = retStr + iteractionList.getVacancy().getProjectName().getProjectOwner().getFirstName();
-                                    }
-                                }
-                            }
-                        }
-
-                        if (iteractionList.getVacancy() != null) {
-                            if (iteractionList.getVacancy().getProjectName() != null) {
-                                if (iteractionList.getVacancy().getProjectName().getProjectOwner() != null) {
-                                    if (iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName() != null) {
-                                        retStr = retStr + " " + iteractionList.getVacancy().getProjectName().getProjectOwner().getSecondName();
-                                    }
-                                }
-                            }
-                        }
-                    } catch (IllegalStateException | NullPointerException e) {
-                        log.error("Error", e);
-                    }
-
-                    return Jsoup.parse(retStr).text();
-                }); */
-
-
             jobCandidateIteractionListTable.getColumn("rating").setColumnGenerator(event -> {
                 return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
             });
@@ -1790,6 +1761,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .parameter("candidate", getEditedEntity())
                     .cacheable(true)
                     .view("iteractionList-view")
+                    .cacheable(true)
                     .one();
         } catch (IllegalStateException e) {
             e.printStackTrace();
@@ -1865,13 +1837,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     "e.vacancy = :vacancy", BigDecimal.class)
                     .parameter("candidate", getEditedEntity())
                     .parameter("vacancy", openPosition)
-                    .one().add(BigDecimal.ONE);
+                    .one()
+                    .add(BigDecimal.ONE);
         } else {
             return dataManager.loadValue("select count(e.numberIteraction) " +
                     "from itpearls_IteractionList e " +
                     "where e.candidate = :candidate", BigDecimal.class)
                     .parameter("candidate", getEditedEntity())
-                    .one().add(BigDecimal.ONE);
+                    .one()
+                    .add(BigDecimal.ONE);
         }
     }
 
@@ -1920,15 +1894,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-/*    private void setLaborAgreement() {
-        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.OUSTAFF_NAMAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
-            outstaffingMainVBox.setVisible(true);
-        } else {
-            outstaffingMainVBox.setVisible(false);
-        }
-    } */
-
     private void setLastProjectTable() {
         lastProjectDl.setParameter("candidate", getEditedEntity());
         lastProjectDl.load();
@@ -1961,24 +1926,35 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("emailLinkButton")
     public void onEmailLinkButtonClick(Button.ClickEvent event) {
-        webBrowserTools.showWebPage("mailto:" + event.getButton().getCaption(), null);
+        StringBuilder sb = new StringBuilder();
+        sb.append("mailto:")
+                .append(event.getButton().getCaption());
+        webBrowserTools.showWebPage(sb.toString(), null);
     }
 
     @Subscribe("telegrammLinkButton")
     public void onTelegrammLinkButtonClick(Button.ClickEvent event) {
-        String retStr = event.getButton().getCaption();
+//        String retStr = event.getButton().getCaption();
+        StringBuilder sb = new StringBuilder(event.getButton().getCaption());
 
-        if (retStr.charAt(0) != '@') {
-            webBrowserTools.showWebPage(TELEGRAM_NAME_URL + retStr, null);
+        if (sb.toString().charAt(0) != '@') {
+            sb.insert(0, TELEGRAM_NAME_URL);
+            webBrowserTools.showWebPage(sb.toString(), null);
         } else {
-            retStr = retStr.substring(1);
-            webBrowserTools.showWebPage(TELEGRAM_NAME_URL + retStr.substring(1, retStr.length() - 1), null);
+            sb = new StringBuilder(sb.substring(1));
+//            retStr = retStr.substring(1);
+            sb.insert(0, TELEGRAM_NAME_URL);
+            webBrowserTools.showWebPage(sb.toString(), null);
         }
     }
 
     @Subscribe("skypeLinkButton")
     public void onSkypeLinkButtonClick(Button.ClickEvent event) {
-        webBrowserTools.showWebPage("skype:" + event.getButton().getCaption() + "?chat", null);
+        StringBuilder sb = new StringBuilder();
+        sb.append("skype:")
+                .append(event.getButton().getCaption())
+                .append("?chat");
+        webBrowserTools.showWebPage(sb.toString(), null);
     }
 
     private void setLinkButtonEmail() {
@@ -1992,7 +1968,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .create(SelectPersonPositions.class);
 
         selectPersonPositions.setJobCandidate(getEditedEntity());
-
 
         if (getEditedEntity().getPositionList() != null) {
             for (JobCandidatePositionLists p : getEditedEntity().getPositionList()) {
@@ -2034,34 +2009,38 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setPositionsLabel() {
-        String outStr = "";
-        String description = "";
+//        String outStr = "";
+//        String description = "";
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sbDesc = new StringBuilder();
 
         if (getEditedEntity().getPositionList() != null) {
             for (JobCandidatePositionLists s : getEditedEntity().getPositionList()) {
-                if (!outStr.equals("")) {
-                    outStr = outStr + ",";
-                    description = description + "\n";
+                if (!sb.toString().equals("")) {
+                    sb.append(",");
+//                   outStr = outStr + ",";
+                    sbDesc.append("\n");
+//                    description = description + "\n";
                 }
 
-                outStr = outStr + s.getPositionList().getPositionRuName();
-                description = description + s.getPositionList().getPositionRuName();
+                sb.append(s.getPositionList().getPositionRuName());
+//                outStr = outStr + s.getPositionList().getPositionRuName();
+                sbDesc.append(s.getPositionList().getPositionRuName());
+//                description = description + s.getPositionList().getPositionRuName();
             }
 
         }
 
-        if (!outStr.equals("")) {
-            positionsLabel.setValue(outStr);
-            positionsLabel.setDescription(description);
+        if (!sb.toString().equals("")) {
+            positionsLabel.setValue(sb.toString());
+            positionsLabel.setDescription(sbDesc.toString());
         }
     }
 
     public void copyCVJobCandidate() {
         if (jobCandidateCandidateCvTable != null) {
             if (jobCandidateCandidateCvTable.getSingleSelected() == null) {
-                String QUERY_GET_CANDIDATE_CV = "select e " +
-                        "from itpearls_CandidateCV e " +
-                        "where e.candidate = :candidate";
+
 
                 CandidateCV candidateCV = null;
 
@@ -3102,9 +3081,26 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "suggestVacancyTable", subject = "itemDescriptionProvider")
     private String suggestVacancyTableItemDescriptionProvider(OpenPosition openPosition, String string) {
-        String retStr = "<b>Вакансия:</b><br><br>";
+//        String retStr = "<b>Вакансия:</b><br><br>";
+        StringBuilder sb = new StringBuilder("<b>Вакансия:</b><br><br>");
 
-        retStr += "<i>" + openPosition.getVacansyName() + "</i><br>"
+        sb.append("<i>")
+                .append(openPosition.getVacansyName())
+                .append("</i><br>")
+                .append("<i>Проект: </i>")
+                .append(openPosition.getProjectName().getProjectName())
+                .append("<br><i>Ответственный за проект у заказчика:</i>")
+                .append(openPosition.getProjectName().getProjectOwner().getSecondName())
+                .append(" ")
+                .append(openPosition.getProjectName().getProjectOwner().getFirstName())
+                .append("<br><i>Ответственный за проект на нашей стороне: </i>")
+                .append(openPosition.getOwner().getName())
+                .append("<br><i>Дата открытия вакансии: ")
+                .append(openPosition.getLastOpenDate())
+                .append("<br><br><i>Описание вакансии: </i><br>")
+                .append(openPosition.getComment());
+
+/*        retStr += "<i>" + openPosition.getVacansyName() + "</i><br>"
                 + "<i>Проект: </i>" + openPosition.getProjectName().getProjectName()
                 + "<br><i>Ответственный за проект у заказчика:</i>"
                 + openPosition.getProjectName().getProjectOwner().getSecondName()
@@ -3113,9 +3109,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 + openPosition.getOwner().getName()
                 + "<br><i>Дата открытия вакансии: "
                 + openPosition.getLastOpenDate()
-                + "<br><br><i>Описание вакансии: </i><br>" + openPosition.getComment();
+                + "<br><br><i>Описание вакансии: </i><br>" + openPosition.getComment();*/
 
-        return retStr;
+        return sb.toString();
     }
 
     @Install(to = "suggestVacancyTable.notSendedIconColumn", subject = "columnGenerator")
@@ -3166,15 +3162,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableToVacancyDescriptionProvider(CandidateCV candidateCV) {
-        String retStr = (candidateCV.getToVacancy() != null ? candidateCV.getToVacancy().getVacansyName() : "");
+//        String retStr = (candidateCV.getToVacancy() != null ? candidateCV.getToVacancy().getVacansyName() : "");
+        StringBuilder sb = new StringBuilder((candidateCV.getToVacancy() != null ? candidateCV.getToVacancy().getVacansyName() : ""));
 
         if (candidateCV.getToVacancy() != null) {
             if (candidateCV.getToVacancy().getLastOpenDate() != null) {
-                retStr += "\nОткрыта: \n" + candidateCV.getToVacancy().getLastOpenDate();
+                sb.append("\nОткрыта: \n")
+                        .append(candidateCV.getToVacancy().getLastOpenDate());
+//                retStr += "\nОткрыта: \n" + candidateCV.getToVacancy().getLastOpenDate();
             }
         }
 
-        return retStr;
+        return sb.toString();
     }
 
     @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "styleProvider")
@@ -3184,21 +3183,26 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "jobCandidateCandidateCvTable.resumePosition", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableResumePositionDescriptionProvider(CandidateCV candidateCV) {
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder();
 
         if (candidateCV.getResumePosition() != null) {
             if (candidateCV.getResumePosition().getPositionRuName() != null) {
                 if (candidateCV.getResumePosition().getPositionEnName() != null) {
-                    return candidateCV.getResumePosition().getPositionRuName()
+                    sb.append(candidateCV.getResumePosition().getPositionRuName())
+                            .append(" / ")
+                            .append(candidateCV.getResumePosition().getPositionEnName());
+/*                    return candidateCV.getResumePosition().getPositionRuName()
                             + " / "
-                            + candidateCV.getResumePosition().getPositionEnName();
+                            + candidateCV.getResumePosition().getPositionEnName(); */
                 } else {
-                    return candidateCV.getResumePosition().getPositionRuName();
+                    sb.append(candidateCV.getResumePosition().getPositionRuName());
+//                    return candidateCV.getResumePosition().getPositionRuName();
                 }
             }
         }
 
-        return retStr;
+        return sb.length() != 0 ? sb.toString() : "";
     }
 
     @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "styleProvider")
