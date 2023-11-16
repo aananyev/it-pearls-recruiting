@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.candidatecv;
 
 import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.PdfParserService;
+import com.company.itpearls.core.ResumeRecognitionService;
 import com.company.itpearls.core.WebLoadService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.SelectedCloseAction;
@@ -132,6 +133,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private StringBuffer textResumeStringBuffer = null;
     @Inject
     private Image candidateFaceDefaultImage;
+    @Inject
+    private ResumeRecognitionService resumeRecognitionService;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -212,13 +215,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public List<RenderedImage> getImagesFromResources(PDResources resources) throws IOException {
         List<RenderedImage> images = new ArrayList<>();
 
-        for (COSName xObjectName : resources.getXObjectNames()) {
-            PDXObject xObject = resources.getXObject(xObjectName);
+        if (resources != null) {
+            if (resources.getXObjectNames() != null) {
+                for (COSName xObjectName : resources.getXObjectNames()) {
+                    PDXObject xObject = resources.getXObject(xObjectName);
 
-            if (xObject instanceof PDFormXObject) {
-                images.addAll(getImagesFromResources(((PDFormXObject) xObject).getResources()));
-            } else if (xObject instanceof PDImageXObject) {
-                images.add(((PDImageXObject) xObject).getImage());
+                    if (xObject instanceof PDFormXObject) {
+                        images.addAll(getImagesFromResources(((PDFormXObject) xObject).getResources()));
+                    } else if (xObject instanceof PDImageXObject) {
+                        images.add(((PDImageXObject) xObject).getImage());
+                    }
+                }
             }
         }
 
@@ -227,7 +234,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        if(getEditedEntity().getCandidate().getFileImageFace() == null) {
+        if (getEditedEntity().getCandidate().getFileImageFace() == null) {
             if (getEditedEntity().getFileImageFace() != null) {
                 getEditedEntity().getCandidate().setFileImageFace(getEditedEntity().getFileImageFace());
             }
@@ -464,10 +471,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+            if (candidateCVRichTextArea.getValue() != null) {
+                getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+            }
         } else {
             if (candidateCVRichTextArea.getValue() != null) {
                 StringBuffer newTextResume = new StringBuffer(candidateCVRichTextArea.getValue());
+
                 if (textResumeStringBuffer.compareTo(newTextResume) != 0) {
                     getEditedEntity().setContactInfoChecked(false);
 
@@ -622,10 +632,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         setColorHighlightingCompetencies();
     }
 
+
+
     private void setTemplateLetter() {
-        String templateLetter = "";
 
         if (getEditedEntity().getLetter() == null) {
+            String templateLetter = "";
+
+            templateLetter = resumeRecognitionService.setTemplateLetter(getEditedEntity().getToVacancy());
+
+
+/*        if (getEditedEntity().getLetter() == null) {
             if (candidateCVFieldOpenPosition.getValue() != null) {
                 if (candidateCVFieldOpenPosition.getValue().getProjectName() != null) {
                     if (candidateCVFieldOpenPosition.getValue().getProjectName().getProjectDepartment() != null) {
@@ -657,9 +674,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                             + candidateCVFieldOpenPosition.getValue().getTemplateLetter()
                             + "\n<br>";
                 }
-            }
+            } */
 
             letterRichTextArea.setValue(templateLetter);
+
 
             if (!templateLetter.equals("")) {
                 questionLetterRichTextArea.setVisible(true);

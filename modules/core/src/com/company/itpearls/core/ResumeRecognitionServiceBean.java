@@ -1,6 +1,7 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.CandidateCV;
+import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.core.global.DataManager;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
@@ -106,5 +107,37 @@ public class ResumeRecognitionServiceBean implements ResumeRecognitionService {
         }
 
         return null;
+    }
+
+    @Override
+    public String setTemplateLetter(OpenPosition openPosition) {
+        StringBuilder retSb = new StringBuilder();
+
+        if (openPosition != null) {
+            if (openPosition.getProjectName() != null) {
+                if (openPosition.getProjectName().getProjectDepartment() != null) {
+                    if (openPosition
+                            .getProjectName()
+                            .getProjectDepartment()
+                            .getTemplateLetter() != null) {
+                        retSb.append(openPosition.getProjectName().getProjectDepartment().getTemplateLetter())
+                                .append("\n<br>");
+                    }
+                }
+            }
+
+            if (openPosition.getProjectName().getTemplateLetter() != null) {
+                retSb.append(openPosition.getProjectName().getTemplateLetter())
+                        .append("\n<br>");
+            }
+
+            if (openPosition.getTemplateLetter() != null) {
+                retSb.append(openPosition.getTemplateLetter())
+                        .append("\n<br>");
+            }
+        }
+
+
+        return retSb.toString();
     }
 }

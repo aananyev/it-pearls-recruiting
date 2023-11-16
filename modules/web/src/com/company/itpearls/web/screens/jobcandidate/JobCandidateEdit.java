@@ -1,12 +1,10 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-import com.company.itpearls.core.InteractionService;
-import com.company.itpearls.core.ParseCVService;
-import com.company.itpearls.core.PdfParserService;
-import com.company.itpearls.core.StarsAndOtherService;
+import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
@@ -32,6 +30,7 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tools.ant.MagicNames;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 
@@ -256,6 +255,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Button addSocialNetworkListsButton;
     @Inject
     private LookupPickerField vacancyFilterLookupPickerField;
+    @Inject
+    private ResumeRecognitionService resumeRecognitionService;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -466,49 +467,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         return isEmptySN;
     }
-
-/*    @Subscribe
-    public void onBeforeCommitChanges2(BeforeCommitChangesEvent event) {
-
-        CommitContext commitContext = new CommitContext(getEditedEntity());
-
-        setupSocialNetworkURLs(commitContext);
-//        setupIteractionListCommit(commitContext);
-//        setupCandidateCVCommit(commitContext);
-
-        dataManager.commit(commitContext);
-    }
-
-    private void setupCandidateCVCommit(CommitContext commitContext) {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (jobCandidateCandidateCvsDc.getItems().size() != 0) {
-                for (CandidateCV candidateCV : jobCandidateCandidateCvsDc.getItems()) {
-                    commitContext.addInstanceToCommit(candidateCV);
-                }
-            }
-        }
-    }
-
-    private void setupIteractionListCommit(CommitContext commitContext) {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (jobCandidateIteractionDc.getItems().size() != 0) {
-                for (IteractionList iteractionList : jobCandidateIteractionDc.getItems()) {
-                    commitContext.addInstanceToCommit(iteractionList);
-                }
-            }
-        }
-    }
-
-    private void setupSocialNetworkURLs(CommitContext commitContext) {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
-                commitContext.addInstanceToCommit(s);
-            }
-        }
-    } */
-
-    private AtomicReference<Boolean> returnE = new AtomicReference<>(false);
-
 
     private String setFullName(String firstName, String middleName, String secondName) {
         String fullName = "", localFirstName = "", localMiddleName = "", localSecondName = "";
@@ -935,15 +893,28 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         JobCandidate jobCandidate = checkDublicateCandidate();
 
         if (jobCandidate != null && PersistenceHelper.isNew(getEditedEntity())) {
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("В базе уже присутствует кандидат ")
+                    .append(firstNameField.getValue())
+                    .append(" ")
+                    .append(secondNameField.getValue())
+                    .append("\n с заимаемой позицией ")
+                    .append(personPositionField.getValue().getPositionRuName())
+                    .append(" из города ")
+                    .append(jobCityCandidateField.getValue().getCityRuName())
+                    .append(".")
+                    .append("\nПродолжить сохранение?");
             dialogs.createOptionDialog()
-                    .withCaption("ВНИМАНИЕ!")
-                    .withMessage("В базе уже присутствует кандидат "
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(sb.toString())
+/*                    .withMessage("В базе уже присутствует кандидат "
                             + firstNameField.getValue() + " " + secondNameField.getValue()
                             + "\n с заимаемой позицией "
                             + personPositionField.getValue().getPositionRuName()
                             + " из города "
                             + jobCityCandidateField.getValue().getCityRuName() + "."
-                            + "\nПродолжить сохранение?")
+                            + "\nПродолжить сохранение?") */
                     .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
                         event.resume();
                         // вернуться и не закомитить
@@ -1179,7 +1150,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onButtonSubscribeClick() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()
-                    .withCaption("WARNING!")
+                    .withCaption(messageBundle.getMessage("msgWarning"))
                     .withMessage("Записать изменения?")
                     .withActions(
                             new DialogAction(DialogAction.Type.YES, DialogAction.Status.PRIMARY)
@@ -1585,38 +1556,64 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
             });
 
-            jobCandidateCandidateCvTable.getColumn("letter").setDescriptionProvider(candidateCV -> {
+            jobCandidateCandidateCvTable.getColumn("letter")
+                    .setDescriptionProvider(candidateCV -> {
                 String returnData = candidateCV.getLetter() != null ? Jsoup.parse(candidateCV.getLetter()).text() : "";
                 return returnData;
             });
 
-            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setDescriptionProvider(candidateCV -> {
+            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile")
+                    .setDescriptionProvider(candidateCV -> {
                 return candidateCV.getLinkOriginalCv();
             });
 
-            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setColumnGenerator(event -> {
+            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile")
+                    .setColumnGenerator(event -> {
                 return event.getItem().getLinkOriginalCv() != null ?
                         CubaIcon.valueOf("FILE_TEXT") :
                         CubaIcon.valueOf("FILE");
             });
 
-            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setColumnGenerator(event -> {
+            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile")
+                    .setColumnGenerator(event -> {
                 return event.getItem().getLinkItPearlsCV() != null ?
                         CubaIcon.valueOf("FILE_TEXT") :
                         CubaIcon.valueOf("FILE");
             });
 
-            jobCandidateCandidateCvTable.getColumn("letter").setColumnGenerator(event -> {
-                return event.getItem().getLetter() != null ?
-                        CubaIcon.valueOf("FILE_TEXT") :
-                        CubaIcon.valueOf("FILE");
+            jobCandidateCandidateCvTable.getColumn("letter")
+                    .setColumnGenerator(event -> {
+                        if (event.getItem().getLetter() != null) {
+                            if (!Jsoup.parse(event.getItem().getLetter()).text().equals("")) {
+
+                                if (event.getItem().getToVacancy() != null) {
+                                    String letterTemplate = resumeRecognitionService.setTemplateLetter(event.getItem().getToVacancy());
+                                    String letter = event.getItem().getLetter();
+
+                                    if (!Jsoup.parse(event.getItem().getLetter()).text()
+                                            .equals(Jsoup.parse(letterTemplate).text())) {
+                                        return CubaIcon.valueOf("FILE_TEXT");
+                                    } else {
+                                        return CubaIcon.valueOf("FILE");
+                                    }
+                                } else {
+                                    return CubaIcon.valueOf("FILE");
+                                }
+                            } else {
+                                return CubaIcon.valueOf("FILE");
+                            }
+                        } else {
+                            return CubaIcon.valueOf("FILE");
+                        }
             });
 
-            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setDescriptionProvider(candidateCV -> {
+            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile")
+                    .setDescriptionProvider(candidateCV -> {
                 return candidateCV.getLinkItPearlsCV();
             });
 
-            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile").setStyleProvider(candidateCV -> {
+            jobCandidateCandidateCvTable.getColumn("iconITPearlsCVFile")
+                    .setStyleProvider(candidateCV -> {
                 String style = "";
 
                 if (candidateCV.getLinkItPearlsCV() != null) {
@@ -1628,15 +1625,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 return style;
             });
 
-            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile").setStyleProvider(candidateCV -> {
+            jobCandidateCandidateCvTable.getColumn("iconOriginalCVFile")
+                    .setStyleProvider(candidateCV -> {
                 return (candidateCV.getLinkOriginalCv() != null ? "pic-center-large-green" : "pic-center-large-red");
             });
 
-            jobCandidateCandidateCvTable.getColumn("letter").setStyleProvider(candidateCV -> {
+            jobCandidateCandidateCvTable.getColumn("letter")
+                    .setStyleProvider(candidateCV -> {
                 return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
             });
 
-            jobCandidateCandidateCvTable.getColumn("candidateITPearlsCVColumn").setColumnGenerator(event -> {
+            jobCandidateCandidateCvTable.getColumn("candidateITPearlsCVColumn")
+                    .setColumnGenerator(event -> {
                 Link link = uiComponents.create(Link.NAME);
 
                 if (event.getItem().getLinkItPearlsCV() != null) {
@@ -1654,7 +1654,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 return link;
             });
 
-            jobCandidateCandidateCvTable.getColumn("candidateOriginalCVColumn").setColumnGenerator(event -> {
+            jobCandidateCandidateCvTable.getColumn("candidateOriginalCVColumn")
+                    .setColumnGenerator(event -> {
                 Link link = uiComponents.create(Link.NAME);
 
                 if (event.getItem().getLinkOriginalCv() != null) {
@@ -2359,79 +2360,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 }
 
                 if (!flagSFromCV) {
-                    String messageSN = messageBundle.getMessage("msgAddNewSocialNetwork")
+                    StringBuilder sb = new StringBuilder(messageBundle.getMessage("msgAddNewSocialNetwork"));
+                    sb.append(" ")
+                            .append(sFromCV)
+                            .append("? ");
+
+/*                    String messageSN = messageBundle.getMessage("msgAddNewSocialNetwork")
                             + " "
                             + sFromCV
-                            + "? ";
+                            + "? ";*/
 
                     List<String> urls = new ArrayList<>();
-                    urls.add(messageSN);
+                    urls.add(sb.toString());
                     urls.add(sFromCV);
 
                     messageSocial.put(sFromCV, urls);
                 }
-
-                /* String socialOld = null;
-                String aSocialOld = null;
-
-                for (SocialNetworkURLs social : getEditedEntity().getSocialNetwork()) {
-                    if (social.getSocialNetworkURL() != null) {
-                        socialOld = social.getNetworkURLS();
-                        if (social.getSocialNetworkURL().getSocialNetworkURL() != null)
-                            aSocialOld = social.getSocialNetworkURL().getSocialNetworkURL();
-                    }
-                }
-
-                String hostCandidateFromCV = "";
-                String hostSocialFromCandidate = "";
-
-                try {
-                    URI uriCandidate = new URI(sFromCV);
-                    URI uriSocial = new URI(aSocialOld != null ? aSocialOld : null);
-
-                    hostCandidateFromCV = uriCandidate != null ? uriCandidate.getHost() : null;
-                    hostSocialFromCandidate = uriSocial != null ? uriSocial.getHost() : null;
-
-                    if (hostCandidateFromCV != null && hostSocialFromCandidate != null) {
-                        if (hostCandidateFromCV.equals(hostSocialFromCandidate)) {
-
-                            if (hostCandidateFromCV != null) {
-                                String messageSN = "";
-
-                                if (socialOld != null) {
-                                    // убрать новая - старая
-                                    URI uriOld = new URI(socialOld);
-                                    String a = uriOld.getRawPath();
-                                    if (!sFromCV.equals(socialOld)) {
-                                        flag = true;
-                                        messageSN = "Ссылка на социальную сеть старая "
-                                                + socialOld
-                                                + " новая "
-                                                + sFromCV + " ";
-
-                                        List<String> urls = new ArrayList<>();
-                                        urls.add(messageSN);
-                                        urls.add(socialOld);
-                                        urls.add(sFromCV);
-
-                                        messageSocial.put(hostSocialFromCandidate, urls);
-                                    }
-                                } else {
-                                    messageSN = "Добавить новую ссылку: " + sFromCV + "? ";
-
-                                    List<String> urls = new ArrayList<>();
-                                    urls.add(messageSN);
-                                    urls.add(socialOld);
-                                    urls.add(sFromCV);
-
-                                    messageSocial.put(hostSocialFromCandidate, urls);
-                                }
-                            }
-                        }
-                    }
-                } catch (URISyntaxException e) {
-                    log.error("Error", e);
-                }*/
             }
         }
 
@@ -2465,6 +2409,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .withCaption(entry.getValue().get(0)).withRequired(true));
                 }
             }
+
+/*            dialog.withValidator(context -> {
+                Boolean flg = false;
+                if ((Boolean) context.getValue("newPhone")
+                        || (Boolean) context.getValue("newEmail")) {
+                    flg = true;
+                }
+
+                for (Map.Entry<String, List<String>> entry : messageSocial.entrySet())
+            }); */
 
             dialog.withCloseListener(closeEvent -> {
                 if (closeEvent.closedWith(DialogOutcome.OK)) {

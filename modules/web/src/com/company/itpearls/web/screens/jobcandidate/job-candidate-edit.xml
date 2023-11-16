@@ -104,6 +104,9 @@
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="_local">
                 <property name="positionType" view="_local"/>
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
+                </property>
             </view>
             <loader id="openPositionDl"
                     cacheable="true">

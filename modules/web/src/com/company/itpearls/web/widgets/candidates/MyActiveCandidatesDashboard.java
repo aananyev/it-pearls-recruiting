@@ -70,12 +70,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private Boolean generatedWidget = false;
     private int candidatesCount = 0;
 
-    final static String QUERY_MY_CANIDATE_EXCLUDE = "select e from itpearls_MyActiveCandidateExclude e " +
-            "where e.jobCandidate = :jobCandidate and e.user = :user";
+    final static String QUERY_MY_CANIDATE_EXCLUDE = "select e from itpearls_MyActiveCandidateExclude e where e.jobCandidate = :jobCandidate and e.user = :user";
 
-    final static String QUERY_EXCLUDE_CANDIDATES = "select e from itpearls_OpenPosition e " +
-            "where e.positionType = :positionType and not e.openClose = true " +
-            "and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
+    final static String QUERY_EXCLUDE_CANDIDATES = "select e from itpearls_OpenPosition e where e.positionType = :positionType and not e.openClose = true and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
     @Inject
     private GroupBoxLayout excludeCandidatesLineGroupBox;
     @Inject
@@ -282,11 +279,19 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         candidateLinkButton.setStyleName("h4");
         candidateLinkButton.setHeightFull();
         candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        candidateLinkButton.setCaption(jobCandidate.getFullName()
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(jobCandidate.getFullName())
+                .append(" / ")
+                .append(jobCandidate.getPersonPosition().getPositionRuName())
+                .append(" / ")
+                .append(jobCandidate.getCityOfResidence().getCityRuName());
+        candidateLinkButton.setCaption(sb.toString());
+/*        candidateLinkButton.setCaption(jobCandidate.getFullName()
                 + " / "
                 + jobCandidate.getPersonPosition().getPositionRuName()
                 + " / "
-                + jobCandidate.getCityOfResidence().getCityRuName());
+                + jobCandidate.getCityOfResidence().getCityRuName());*/
 
         candidateLinkButton.addClickListener(e -> {
             screenBuilders.editor(JobCandidate.class, this)
@@ -320,11 +325,19 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         LinkButton candidateLinkButton = uiComponents.create(LinkButton.class);
         candidateLinkButton.setStyleName("h4");
         candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        candidateLinkButton.setCaption(jobCandidate.getFullName()
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(jobCandidate.getFullName())
+                .append(" / ")
+                .append(jobCandidate.getPersonPosition().getPositionRuName())
+                .append(" / ")
+                .append(jobCandidate.getCityOfResidence().getCityRuName());
+        candidateLinkButton.setCaption(sb.toString());
+/*        candidateLinkButton.setCaption(jobCandidate.getFullName()
                 + " / "
                 + jobCandidate.getPersonPosition().getPositionRuName()
                 + " / "
-                + jobCandidate.getCityOfResidence().getCityRuName());
+                + jobCandidate.getCityOfResidence().getCityRuName());*/
 
         candidateLinkButton.addClickListener(e -> {
             screenBuilders.editor(JobCandidate.class, this)
@@ -540,7 +553,12 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         projectDetailLabel.setHeightAuto();
         projectDetailLabel.setStyleName("detail-candidate-card-wordwrap");
         projectDetailLabel.setDescriptionAsHtml(true);
-        projectDetailLabel.setDescription(openPosition.getVacansyName() + "<br><br>" + openPosition.getComment());
+        StringBuilder sb = new StringBuilder();
+        sb.append(openPosition.getVacansyName())
+                .append("<br><br>")
+                .append(openPosition.getComment());
+        projectDetailLabel.setDescription(sb.toString());
+//        projectDetailLabel.setDescription(openPosition.getVacansyName() + "<br><br>" + openPosition.getComment());
 
         return projectDetailLabel;
     }
@@ -581,12 +599,18 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
-            newVacanciesLabel.setDescription(newVacanciesLabel.getDescription()
+            StringBuilder sb = new StringBuilder();
+            sb.append(newVacanciesLabel.getDescription())
+                    .append("\n")
+                    .append(messageBundle.getMessage("msgLastOpenDate"))
+                    .append(": ")
+                    .append(sdf.format(openPosition.getLastOpenDate()));
+            newVacanciesLabel.setDescription(sb.toString());
+/*            newVacanciesLabel.setDescription(newVacanciesLabel.getDescription()
                     + "\n"
                     + messageBundle.getMessage("msgLastOpenDate")
                     + ": "
-                    + sdf.format(openPosition.getLastOpenDate()));
+                    + sdf.format(openPosition.getLastOpenDate()));*/
         }
 
         return newVacanciesLabel;
@@ -607,13 +631,26 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             retLinkButton.setStyleName("detail-candidate-card-wordwrap");
         }
 
-        retLinkButton.setDescription(description
-                + "\n\n"
-                + openPosition.getVacansyName()
-                + "\n\n"
-                + openPosition.getProjectName().getProjectOwner().getSecondName()
-                + " "
-                + openPosition.getProjectName().getProjectOwner().getFirstName());
+        StringBuilder sb = new StringBuilder();
+        sb.append(description)
+                .append("\n\n")
+                .append(openPosition.getVacansyName());
+
+        if (openPosition.getProjectName() != null) {
+            if (openPosition.getProjectName().getProjectOwner() != null) {
+                if (openPosition.getProjectName().getProjectOwner().getSecondName() != null) {
+                    sb.append("\n\n");
+                    sb.append(openPosition.getProjectName().getProjectOwner().getSecondName());
+                }
+
+                if (openPosition.getProjectName().getProjectOwner().getFirstName() != null) {
+                    sb.append("\n\n");
+                    sb.append(openPosition.getProjectName().getProjectOwner().getFirstName());
+                }
+            }
+        }
+
+        retLinkButton.setDescription(sb.toString());
         retLinkButton.setAlignment(Component.Alignment.MIDDLE_LEFT);
         retLinkButton.setWidthFull();
 
@@ -663,10 +700,24 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
         if (openPosition.getProjectName() != null) {
             if (openPosition.getProjectName().getProjectDescription() != null) {
-                projectLogoImage.setDescription("<h4>"
-                        + openPosition.getProjectName().getProjectName()
-                        + "</h4><br><br>"
-                        + openPosition.getProjectName().getProjectDescription());
+                StringBuilder sb = new StringBuilder();
+                sb.append("<h4>");
+
+                if (openPosition.getProjectName() != null) {
+                    if (openPosition.getProjectName().getProjectName() != null) {
+                        sb.append(openPosition.getProjectName().getProjectName());
+                    }
+                }
+
+                sb.append("</h4><br><br>");
+
+                if (openPosition.getProjectName() != null) {
+                    if (openPosition.getProjectName().getProjectDescription() != null) {
+                        sb.append(openPosition.getProjectName().getProjectDescription());
+                    }
+                }
+
+                projectLogoImage.setDescription(sb.toString());
             }
 
             if (openPosition.getProjectName().getProjectLogo() != null) {
@@ -754,15 +805,10 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         reinitInteractionListDataContainer();
     }
 
-    private Set<OpenPosition> getProcessedOpenPosition(JobCandidate jobCandidate) {
-        String QUERY_CASE_OPEN_POSITION
-                = "select e "
-                + "from itpearls_IteractionList e "
-                + "where not (e.iteractionType.signEndCase = true) "
-                + "and e.candidate = :candidate "
-                + "and not (e.vacancy.openClose = true)";
-        //+ "and not (e.vacancy.projectName.defaultProject = true)";
+    private final static String QUERY_CASE_OPEN_POSITION
+            = "select e from itpearls_IteractionList e where not (e.iteractionType.signEndCase = true) and e.candidate = :candidate and not (e.vacancy.openClose = true)";
 
+    private Set<OpenPosition> getProcessedOpenPosition(JobCandidate jobCandidate) {
         List<IteractionList> caseClosedInteraction = dataManager.load(IteractionList.class)
                 .query(QUERY_CASE_OPEN_POSITION)
                 .parameter("candidate", jobCandidate)
@@ -793,10 +839,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         return retOpenPosition;
     }
 
-    private Set<OpenPosition> getOpportunityOpenPosition(JobCandidate jobCandidate) {
-        final String QUERY_OPPORTUNITY = "select e from itpearls_OpenPosition e " +
-                "where e.positionType = :positionType and not e.openClose = true";
+    private static final String QUERY_OPPORTUNITY = "select e from itpearls_OpenPosition e where e.positionType = :positionType and not e.openClose = true";
 
+    private Set<OpenPosition> getOpportunityOpenPosition(JobCandidate jobCandidate) {
         List<OpenPosition> opportunityOpenPosition = dataManager.load(OpenPosition.class)
                 .query(QUERY_OPPORTUNITY)
                 .parameter("positionType", jobCandidate.getPersonPosition())
@@ -826,11 +871,10 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         return retOpenPosition;
     }
 
+    private static final String QUERY_CASE_CLOSED_OPEN_POSITION
+            = "select e from itpearls_IteractionList e where e.iteractionType.signEndCase = true and e.candidate = :candidate";
+
     private Set<OpenPosition> getCaseClosedOpenPosition(JobCandidate jobCandidate) {
-        String QUERY_CASE_CLOSED_OPEN_POSITION
-                = "select e " +
-                "from itpearls_IteractionList e " +
-                "where e.iteractionType.signEndCase = true and e.candidate = :candidate";
 
         List<IteractionList> caseClosedInteraction = dataManager.load(IteractionList.class)
                 .query(QUERY_CASE_CLOSED_OPEN_POSITION)

@@ -2,6 +2,7 @@ package com.company.itpearls.core;
 
 import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.Company;
+import com.company.itpearls.entity.OpenPosition;
 
 import java.util.Set;
 
@@ -17,4 +18,6 @@ public interface ResumeRecognitionService {
     String parseSecondName(String cvText);
 
     String parseMiddleName(String cvText);
+
+    String setTemplateLetter(OpenPosition openPosition);
 }

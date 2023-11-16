@@ -6,8 +6,18 @@
         messagesPack="com.company.itpearls.web.screens.project" icon="ARCHIVE">
     <data readOnly="true">
         <collection id="projectsDc"
-                    class="com.company.itpearls.entity.Project"
-                    view="project-view">
+                    class="com.company.itpearls.entity.Project">
+            <view extends="project-view">
+                <property name="projectDepartment" view="_local">
+                    <property name="companyName" view="_local"/>
+                </property>
+                <property name="projectOwner" view="_local">
+                    <property name="personPosition" view="_local"/>
+                    <property name="companyDepartment" view="_local"/>
+                    <property name="cityOfResidence" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
+                </property>
+            </view>
             <loader id="projectsDl">
                 <query>
                     <![CDATA[select e from itpearls_Project e
@@ -44,6 +54,7 @@
         <treeDataGrid id="projectsTable"
                       width="100%"
                       height="100%"
+                      bodyRowHeight="60px"
                       hierarchyProperty="projectTree"
                       dataContainer="projectsDc">
             <actions>
@@ -57,17 +68,34 @@
                         collapsible="true"
                         collapsed="false"
                         caption=""
-                        width="70px"
-                        minimumWidth="50px">
+                        width="100px"
+                        maximumWidth="100px">
                     <componentRenderer/>
                 </column>
-                <column id="projectIsClosed" caption="msg://msgProjectIsClosed" property="projectIsClosed"/>
-                <column id="projectName" caption="msg://msgProjectName" property="projectName"/>
-                <column id="startProjectDate" caption="msg://msgProjectStartDate" property="startProjectDate"/>
-                <column id="endProjectDate" caption="msg://msgProjectEndDate" property="endProjectDate"/>
+                <column id="projectIsClosed"
+                        collapsible="true"
+                        collapsed="true"
+                        minimumWidth="400px"
+                        caption="msg://msgProjectIsClosed"
+                        property="projectIsClosed"/>
+                <column id="projectName"
+                        caption="msg://msgProjectName"
+                        property="projectName">
+                    <componentRenderer/>
+                </column>
+                <column id="startProjectDate"
+                        width="100px"
+                        caption="msg://msgProjectStartDate"
+                        property="startProjectDate"/>
+                <column id="endProjectDate"
+                        width="100px"
+                        caption="msg://msgProjectEndDate"
+                        property="endProjectDate"/>
                 <column id="projectDepartment" caption="msg://msgProjectDepartament" property="projectDepartment"/>
-                <column id="projectOwner" caption="msg://msgProjectOwner" property="projectOwner"/>
-                <column id="iconProjectDesc" caption="msg://msgIconCaption">
+                <column id="iconProjectDesc"
+                        caption="msg://msgIconCaption"
+                        collapsible="true"
+                        collapsed="true">
                     <iconRenderer/>
                 </column>
             </columns>
