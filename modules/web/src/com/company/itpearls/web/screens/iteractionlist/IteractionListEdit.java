@@ -301,18 +301,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (vacancyFiels.getValue().getProjectName().getProjectDepartment() != null)
                     if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName() != null)
                         if (vacancyFiels.getValue().getProjectName().getProjectDepartment().getCompanyName().getCompanyShortName() != null) {
-                            String labetText = "<h3><b>" +
-                                    vacancyFiels.getValue()
+                            String labetText = new StringBuilder()
+                                    .append("<h3><b>")
+                                    .append(
+                                            vacancyFiels.getValue()
+                                                    .getProjectName()
+                                                    .getProjectDepartment()
+                                                    .getCompanyName()
+                                                    .getCompanyShortName())
+                                    .append("</b> / ")
+                                    .append(vacancyFiels.getValue()
                                             .getProjectName()
                                             .getProjectDepartment()
-                                            .getCompanyName()
-                                            .getCompanyShortName() +
-                                    "</b> / " +
-                                    vacancyFiels.getValue()
-                                            .getProjectName()
-                                            .getProjectDepartment()
-                                            .getDepartamentRuName() +
-                                    "</h3>";
+                                            .getDepartamentRuName()).append("</h3>")
+                                    .toString();
 
                             companyLabel.setValue(labetText);
 
@@ -323,10 +325,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             BigDecimal a = new BigDecimal("0.0");
 
             // проверка на наличие записей по этой вакансии
-            BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) " +
-                    "from itpearls_IteractionList e " +
-                    "where e.candidate = :candidate and " +
-                    "e.vacancy = :vacancy", BigDecimal.class)
+            BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) from itpearls_IteractionList e where e.candidate = :candidate and e.vacancy = :vacancy",
+                    BigDecimal.class)
                     .parameter("candidate", getEditedEntity().getCandidate())
                     .parameter("vacancy", getEditedEntity().getVacancy())
                     .one();
@@ -345,9 +345,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 iteractionTypesLc.setParameter("number", "001");
 
                 dialogs.createMessageDialog()
-                        .withCaption("ВНИМАНИЕ!")
-                        .withMessage("С кандидатом начат новый процесс. " +
-                                "Начните взаимодействие с ним с типом из группы \"001 Ресерчинг\"")
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withMessage("С кандидатом начат новый процесс. Начните взаимодействие с ним с типом из группы \"001 Ресерчинг\"")
                         .withModal(true)
                         .show();
             } else {
@@ -362,8 +361,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (PersistenceHelper.isNew(getEditedEntity())) {
                     dialogs.createOptionDialog()
                             .withCaption("WARNING")
-                            .withMessage("Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\n" +
-                                    "Отменить действие?")
+                            .withMessage("Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\nОтменить действие?")
                             .withActions(new DialogAction(DialogAction.Type.YES,
                                             Action.Status.PRIMARY).withHandler(e -> {
                                         this.vacancyFiels.setValue(null);
@@ -390,10 +388,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             askFlag = true;
 
             Integer a = dataManager
-                    .loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e " +
-                            "where e.reacrutier = :recrutier and " +
-                            "e.openPosition = :openPosition and " +
-                            ":nowDate between e.startDate and e.endDate", Integer.class)
+                    .loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e where e.reacrutier = :recrutier and e.openPosition = :openPosition and :nowDate between e.startDate and e.endDate",
+                            Integer.class)
                     .parameter("recrutier", userSession.getUser())
                     .parameter("openPosition", op)
                     .parameter("nowDate", new Date())
@@ -403,9 +399,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 if (vacancyFiels.getValue() != null) {
 
                     dialogs.createOptionDialog()
-                            .withCaption("ВНИМАНИЕ !")
-                            .withMessage("Вы не подписаны на вакансию " + op.getVacansyName() +
-                                    ".\nПодписаться до будущего понедельника?")
+                            .withCaption(messageBundle.getMessage("msgWarning"))
+                            .withMessage(new StringBuilder()
+                                    .append("Вы не подписаны на вакансию ")
+                                    .append(op.getVacansyName())
+                                    .append(".\nПодписаться до будущего понедельника?")
+                                    .toString())
                             .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                                         screenBuilders.editor(RecrutiesTasks.class, this)
                                                 .newEntity()
@@ -441,8 +440,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load(IteractionList.class)
-                .query("select e from itpearls_IteractionList e where e.numberIteraction = " +
-                        "(select max(f.numberIteraction) from itpearls_IteractionList f)")
+                .query("select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)")
                 .view("iteractionList-view")
                 .cacheable(true)
                 .one();
@@ -489,12 +487,16 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         } else {
             if (PersistenceHelper.isNew(getEditedEntity())) {
-                String msg = "С этим кандидатом " + oldIteraction.getRecrutier().getName() + " контактировал " +
-                        oldIteraction.getDateIteraction().toString() + " МЕНЕЕ МЕСЯЦА НАЗАД!";
+                String msg = new StringBuilder()
+                        .append("С этим кандидатом ")
+                        .append(oldIteraction.getRecrutier().getName())
+                        .append(" контактировал ")
+                        .append(oldIteraction.getDateIteraction().toString())
+                        .append(" МЕНЕЕ МЕСЯЦА НАЗАД!").toString();
 
                 notifications.create()
                         .withType(Notifications.NotificationType.HUMANIZED)
-                        .withCaption("ВНИМАНИЕ!!!")
+                        .withCaption(messageBundle.getMessage("msgWarning"))
                         .withDescription(msg)
                         .withPosition(Notifications.Position.MIDDLE_CENTER)
                         .show();
@@ -711,7 +713,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         for (Employee employee : employeeDc.getItems()) {
                             if (employee.getJobCandidate().equals(getEditedEntity().getCandidate())) {
                                 currentEmployee = employee;
-                                if(checkCandidateIsEmployee(employee.getJobCandidate())) {
+                                if (checkCandidateIsEmployee(employee.getJobCandidate())) {
                                     notifications.create(Notifications.NotificationType.ERROR)
                                             .withType(Notifications.NotificationType.ERROR)
                                             .withCaption(messageBundle.getMessage("msgError"))
@@ -743,12 +745,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             if (employee.getJobCandidate().equals(getEditedEntity().getCandidate())) {
                                 currentEmployee = employee;
                                 // а если он уже уволен?
-                                if(!checkCandidateIsEmployee(employee.getJobCandidate())) {
+                                if (!checkCandidateIsEmployee(employee.getJobCandidate())) {
                                     notifications.create(Notifications.NotificationType.ERROR)
-                                    .withType(Notifications.NotificationType.ERROR)
-                                    .withCaption(messageBundle.getMessage("msgError"))
-                                    .withDescription(messageBundle.getMessage("msgCandidateNotInStaff"))
-                                    .show();
+                                            .withType(Notifications.NotificationType.ERROR)
+                                            .withCaption(messageBundle.getMessage("msgError"))
+                                            .withDescription(messageBundle.getMessage("msgCandidateNotInStaff"))
+                                            .show();
                                 }
 
                                 break;
@@ -776,10 +778,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    private Boolean checkCandidateIsEmployee(JobCandidate jobCandidate) {
-        final String QUERY_CHECK_CANDIDATE_EMPLOYEE = "select e.workStatus.inStaff from itpearls_Employee e " +
-                "where e.jobCandidate = :jobCandidate";
+    private static final String QUERY_CHECK_CANDIDATE_EMPLOYEE = "select e.workStatus.inStaff from itpearls_Employee e where e.jobCandidate = :jobCandidate";
 
+    private Boolean checkCandidateIsEmployee(JobCandidate jobCandidate) {
         Boolean inStaff = null;
 
         try {
@@ -795,12 +796,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     Boolean setChainFlag = false;
 
+    private static final String QUERY_CHAIN = "select e from itpearls_IteractionList e where e.vacancy = :vacancy and e.candidate = :candidate";
+
     private void setChainInteraction(BeforeCommitChangesEvent event) {
         if (!setChainFlag) {
-            String QUERY_CHAIN = "select e from itpearls_IteractionList e " +
-                    "where e.vacancy = :vacancy " +
-                    "and e.candidate = :candidate";
-
             List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
                     .query(QUERY_CHAIN)
                     .parameter("vacancy", vacancyFiels.getValue())
@@ -876,10 +875,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private void sendMessages() {
         if (candidateField.getValue() != null) {
             LoadContext<SubscribeCandidateAction> loadContext = LoadContext.create(SubscribeCandidateAction.class)
-                    .setQuery(LoadContext.createQuery("select e from itpearls_SubscribeCandidateAction e " +
-                            "where e.candidate = :candidate and " +
-                            "e.subscriber = :subscriber and " +
-                            ":curDate between e.startDate and e.endDate")
+                    .setQuery(LoadContext.createQuery("select e from itpearls_SubscribeCandidateAction e where e.candidate = :candidate and e.subscriber = :subscriber and :curDate between e.startDate and e.endDate")
                             .setCacheable(true)
                             .setParameter("candidate", candidateField.getValue())
                             .setParameter("subscriber", userSession.getUser())
@@ -889,8 +885,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             if (dataManager.getCount(loadContext) != 0) {
                 if (candidateField.getValue() != null && iteractionTypeField.getValue() != null) {
                     EmailInfo emailInfo = new EmailInfo(userSession.getUser().getEmail(),
-                            candidateField.getValue().getFullName() + " : " +
-                                    iteractionTypeField.getValue().getIterationName(), null,
+                            new StringBuilder()
+                                    .append(candidateField.getValue().getFullName())
+                                    .append(" : ")
+                                    .append(iteractionTypeField.getValue().getIterationName())
+                                    .toString(), null,
                             "com/company/itpearls/templates/iteraction.html",
                             Collections.singletonMap("IteractionList", getEditedEntity()));
 
@@ -922,15 +921,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                         case 5: // Определенным адресам (список)
                                             break;
                                         case 6: // всем
-                                            events.publish(new UiNotificationEvent(this,
-                                                    "<img src=\"VAADIN/themes/halo/" + iteractionTypeField.getValue().getPic() +
-                                                            "\"> <b>"
-                                                            + getEditedEntity().getCandidate().getFullName()
-                                                            + " : "
-                                                            + getEditedEntity().getIteractionType().getIterationName()
-                                                            + "</b><br><svg width=\"100%\" align=\"right\"><i>"
-                                                            + userSession.getUser().getName()
-                                                            + "</i></svg>"));
+                                            events.publish(new UiNotificationEvent(this, new StringBuilder()
+                                                    .append("<img src=\"VAADIN/themes/halo/")
+                                                    .append(iteractionTypeField.getValue().getPic())
+                                                    .append("\"> <b>")
+                                                    .append(getEditedEntity().getCandidate().getFullName())
+                                                    .append(" : ")
+                                                    .append(getEditedEntity().getIteractionType().getIterationName())
+                                                    .append("</b><br><svg width=\"100%\" align=\"right\"><i>")
+                                                    .append(userSession.getUser().getName())
+                                                    .append("</i></svg>")
+                                                    .toString()));
                                             afterCommitSendMessage = true;
                                             break;
                                         default:
@@ -965,13 +966,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         // проверка прошлого взаимодействия
         try {
             if (candidateField.getValue() != null) {
-                numberIteraction = dataManager.loadValue("select e.numberIteraction " +
-                        "from itpearls_IteractionList e " +
-                        "where e.candidate = :candidate and " +
-                        "e.numberIteraction = " +
-                        "(select max(f.numberIteraction) " +
-                        "from itpearls_IteractionList f " +
-                        "where f.candidate = :candidate)", BigDecimal.class)
+                numberIteraction = dataManager
+                        .loadValue("select e.numberIteraction from itpearls_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)", BigDecimal.class)
                         .parameter("candidate", candidateField.getValue())
                         .one();
             }
@@ -986,9 +982,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (numberIteraction != null) {
             // больше месяца назад?
             try {
-                oldIteraction = dataManager.load(IteractionList.class).query("select e " +
-                        "from itpearls_IteractionList e " +
-                        "where e.numberIteraction = :number")
+                oldIteraction = dataManager.load(IteractionList.class)
+                        .query("select e from itpearls_IteractionList e where e.numberIteraction = :number")
                         .parameter("number", numberIteraction)
                         .view("iteractionList-view")
                         .cacheable(true)
@@ -1017,10 +1012,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         try {
             if (candidateField.getValue() != null) {
-                d = dataManager.loadValue(
-                        "select count(e) " +
-                                "from itpearls_IteractionList e " +
-                                "where e.candidate = :candidate",
+                d = dataManager
+                        .loadValue(
+                        "select count(e) from itpearls_IteractionList e where e.candidate = :candidate",
                         Integer.class)
                         .parameter("candidate", candidateField.getValue())
                         .one();
@@ -1034,21 +1028,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private void copyPrevionsItems() {
         // а вдруг позиция уже закрыта? надо разрешить в вакансию писать даже закрытые
-        openPositionsDl.setQuery("select e from itpearls_OpenPosition e " +
-                "order by e.vacansyName");
+        openPositionsDl
+                .setQuery("select e from itpearls_OpenPosition e order by e.vacansyName");
         openPositionsDl.load();
         // вакансия
         // а вдруг в результате экспорта не были заполнены поля
         IteractionList duplicateIteraction = null;
         try {
             duplicateIteraction = dataManager.load(IteractionList.class)
-                    .query("select e " +
-                            "from itpearls_IteractionList e " +
-                            "where e.candidate = :candidate and " +
-                            "e.numberIteraction = " +
-                            "(select max(f.numberIteraction) " +
-                            "from itpearls_IteractionList f " +
-                            "where f.candidate = :candidate)")
+                    .query("select e from itpearls_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)")
                     .parameter("candidate", getEditedEntity().getCandidate())
                     .view("iteractionList-view")
                     .cacheable(true)
@@ -1141,15 +1129,21 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             retHBox.setStyleName("label_button_mostpopular_green");
 
             Label numberLabel = uiComponents.create(Label.class);
-            numberLabel.setValue((i + 1) + ".");
+            numberLabel.setValue(new StringBuilder()
+                    .append(i + 1)
+                    .append(".")
+                    .toString());
             numberLabel.setWidthAuto();
             numberLabel.setStyleName("label_button_mostpopular_green");
             numberLabel.setHtmlEnabled(true);
 
             LinkButton mostPopularLabel = uiComponents.create(LinkButton.NAME);
-            mostPopularLabel.setCaption(mostPopular.get(i).getIterationName() + "<div style=\"overflow:hidden;>\"(" + i + ")</div>");
-//            mostPopularLabel.setCaption(mostPopular.get(i).getIterationName() + "<p style=\"color:green\">(" + i + ")</p>");
-//            mostPopularLabel.setCaption(mostPopular.get(i).getIterationName());
+            mostPopularLabel.setCaption(new StringBuilder()
+                    .append(mostPopular.get(i).getIterationName())
+                    .append("<div style=\"overflow:hidden;>\"(")
+                    .append(i)
+                    .append(")</div>")
+                    .toString());
             mostPopularLabel.setStyleName("label_button_mostpopular_green");
             mostPopularLabel.setCaptionAsHtml(true);
             mostPopularLabel.setWidthAuto();
@@ -1171,15 +1165,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
+    private static final String QUERY_MOST_POPULAR = "select e.iteractionType, count(e.iteractionType) from itpearls_IteractionList e where (e.dateIteraction between :endDate and :startDate) and e.iteractionType is not null and e.recrutier = :user group by e.iteractionType order by count(e.iteractionType) desc";
+
     public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
-        String QUERY = "select e.iteractionType, count(e.iteractionType) "
-                + "from itpearls_IteractionList e "
-                + "where "
-                + "(e.dateIteraction between :endDate and :startDate) and "
-                + "e.iteractionType is not null and "
-                + "e.recrutier = :user "
-                + "group by e.iteractionType "
-                + "order by count(e.iteractionType) desc";
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.setTime(new Date());
@@ -1188,7 +1176,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         gregorianCalendar.add(Calendar.MONTH, -1);
         Date endDate = gregorianCalendar.getTime();
 
-        List<KeyValueEntity> list = dataManager.loadValues(QUERY)
+        List<KeyValueEntity> list = dataManager.loadValues(QUERY_MOST_POPULAR)
                 .properties("iteractionType", "count")
                 .parameter("user", user)
                 .parameter("startDate", startDate)
@@ -1270,7 +1258,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         String vacansyPosition = null;
         String dialogStartMessage = "ВНИМАНИЕ! В вакансии заявлена позиция:<br>";
         String dialogEndMessage = "<br><br>Вы хотите выбрать другую вакансию?";
-        String dialogMessage = "";
+//        String dialogMessage = "";
+        StringBuilder dialogMessageSB = new StringBuilder();
 
         try {
             if (candidateField.getValue() != null) {
@@ -1305,11 +1294,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             if (vacancyFiels.getValue() != null) {
                 if ((!candidatePosition.equals(vacansyPosition)) &&
                         candidatePosition != null) {
-                    dialogMessage =
-                            "<br>- позиция <b><i>"
-                                    + vacansyPosition
-                                    + "</i></b>, а кандидат в настоящее время занимает позицию <b><i>"
-                                    + candidatePosition + "</i></b>";
+                    dialogMessageSB.append(new StringBuilder()
+                            .append("<br>- позиция <b><i>")
+                            .append(vacansyPosition)
+                            .append("</i></b>, а кандидат в настоящее время занимает позицию <b><i>")
+                            .append(candidatePosition)
+                            .append("</i></b>")
+                            .toString());
                 }
             }
         }
@@ -1337,34 +1328,43 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         if (vacansyCity != null && candidateCity != null) {
-            String cities = "";
+//            String cities = "";
+            StringBuilder sb = new StringBuilder();
 
             if (vacancyFiels.getValue().getCities() != null) {
                 for (City c : event.getValue().getCities()) {
                     if (candidateCity.equals(c.getCityRuName())) {
-                        cities = "";
+                        sb.append("");
+//                        cities = "";
                         break;
                     } else {
-                        cities = cities + ", " + c.getCityRuName();
+                        sb.append(", ")
+                                .append(c.getCityRuName());
+//                        cities = cities + ", " + c.getCityRuName();
                     }
                 }
             }
 
-            if (!vacansyCity.equals(candidateCity) && remoteWork == 0 && !cities.equals("")) {
-                dialogMessage = dialogMessage
-                        + "<br>- локация <b><i>"
-                        + vacansyCity
-                        + (!cities.equals("") ? "" : ", " + cities)
-                        + "</i></b>, а кандидат находится в настоящее время кандидат находится в городе <b><i>"
-                        + candidateCity + "</i></b>";
+            if (!vacansyCity.equals(candidateCity) && remoteWork == 0 && !sb.toString().equals("")) {
+                dialogMessageSB
+                        .append("<br>- локация <b><i>")
+                        .append(vacansyCity)
+                        .append(!sb.toString().equals("") ? "" : ", " + sb.toString())
+                        .append("</i></b>, а кандидат находится в настоящее время кандидат находится в городе <b><i>")
+                        .append(candidateCity)
+                        .append("</i></b>");
             }
         }
 
-        if (!dialogMessage.equals("")) {
+        if (!dialogMessageSB.toString().equals("")) {
             dialogs.createOptionDialog()
                     .withContentMode(ContentMode.HTML)
                     .withType(Dialogs.MessageType.WARNING)
-                    .withMessage(dialogStartMessage + dialogMessage + dialogEndMessage)
+                    .withMessage(new StringBuilder()
+                            .append(dialogStartMessage)
+                            .append(dialogMessageSB)
+                            .append(dialogEndMessage)
+                            .toString())
                     .withActions(new DialogAction(DialogAction.Type.YES,
                                     Action.Status.PRIMARY).withHandler(e -> {
                                 vacancyFiels.setValue(null);
@@ -1399,11 +1399,26 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private void setRatingField() {
         Map<String, Integer> map = new LinkedHashMap<>();
-        map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
-        map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
-        map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
-        map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
-        map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(1))
+                .append(" Полный негатив")
+                .toString(), 0);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(2))
+                .append(" Сомнительно")
+                .toString(), 1);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(3))
+                .append(" Нейтрально")
+                .toString(), 2);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(4))
+                .append(" Положительно")
+                .toString(), 3);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(5))
+                .append(" Отлично!")
+                .toString(), 4);
         ratingField.setOptionsMap(map);
 
         ratingField.addValueChangeListener(e -> {
@@ -1435,8 +1450,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             }
 
-            String rating_style = "rating_" + rating_color + "_"
-                    + String.valueOf(ratingField.getValue() != null ? ((int) ratingField.getValue()) + 1 : 1);
+            String rating_style = new StringBuilder()
+                    .append("rating_")
+                    .append(rating_color)
+                    .append("_")
+                    .append(String.valueOf(ratingField.getValue() != null ? ((int) ratingField.getValue()) + 1 : 1))
+                    .toString();
 
 //            ratingField.setStyleName(rating_style);
             ratingLabel.setStyleName(rating_style);
@@ -1459,7 +1478,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Install(to = "ratingField", subject = "optionStyleProvider")
     private String ratingFieldOptionStyleProvider(Object object) {
         int a = ratingField.getValue() != null ? (int) ratingField.getValue() : 0;
-        return "rating_star_" + (a + 1);
+        return new StringBuilder().append("rating_star_").append(a + 1).toString();
     }
 
     Boolean beforeCommitFlag = false;
@@ -1488,10 +1507,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
     }
 
-    private void setStatusOfVacancyLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
-        String QUERY
-                = "select v from itpearls_OpenPosition v where not (v.openClose = true) and v.positionType = :positionType";
+    final String QUERY_STATUS_OF_VACANCY
+            = "select v from itpearls_OpenPosition v where not (v.openClose = true) and v.positionType = :positionType";
 
+    private void setStatusOfVacancyLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
         if (event.getValue() != null) {
             if (event.getValue().getOpenClose()) {
                 statusOfVacansyLabel.setValue("ЗАКРЫТА");
@@ -1500,7 +1519,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
                 List<OpenPosition> alternatives = dataManager
                         .load(OpenPosition.class)
-                        .query(QUERY)
+                        .query(QUERY_STATUS_OF_VACANCY)
                         .view("openPosition-view")
                         .parameter("positionType", event.getValue().getPositionType())
                         .list();
@@ -1509,14 +1528,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     alternativeVacancyLinkButton.setVisible(true);
                     alternativeVacancyLinkButton.addStyleName("transition-red");
 
-                    String description = "<b>Альтернативные вакансии для кандидата:</b></br><ul>";
+//                    String description = "<b>Альтернативные вакансии для кандидата:</b></br><ul>";
+                    StringBuilder descriptionSB = new StringBuilder("<b>Альтернативные вакансии для кандидата:</b></br><ul>");
                     for (OpenPosition openPosition : alternatives) {
-                        description += "<li>" + openPosition.getVacansyName();
+//                        description += "<li>" + openPosition.getVacansyName();
+                        descriptionSB.append("<li>")
+                                .append(openPosition.getVacansyName());
                     }
 
-                    description += "</ul>";
+//                    description += "</ul>";
+                    descriptionSB.append("</ul>");
 
-                    alternativeVacancyLinkButton.setDescription(description);
+                    alternativeVacancyLinkButton.setDescription(descriptionSB.toString());
                 } else {
                     alternativeVacancyLinkButton.setVisible(false);
                 }
@@ -1664,7 +1687,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         if (iteractionTypeField.getValue().getFindToDic()) {
                             Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
                                     .newEntity()
-                                    .withScreenId(calledClass + ".edit")
+                                    .withScreenId(new StringBuilder()
+                                            .append(calledClass)
+                                            .append(".edit")
+                                            .toString())
                                     .withLaunchMode(OpenMode.NEW_TAB)
                                     .withInitializer(e -> {
                                     })
@@ -1674,7 +1700,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         } else {
                             Screen a = screenBuilders.editor(metadata.getClassNN(calledClass).getJavaClass(), this)
                                     .newEntity()
-                                    .withScreenId(calledClass + ".edit")
+                                    .withScreenId(new StringBuilder()
+                                            .append(calledClass)
+                                            .append(".edit")
+                                            .toString())
                                     .withLaunchMode(OpenMode.NEW_TAB)
                                     .withInitializer(e -> {
                                         // e.setValue( "exchange", exchangeBean );
@@ -1780,11 +1809,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (event.getValue() != null) {
             String retStr = commentField.getValue() != null ? commentField.getValue() : "";
 
-            commentField.setValue((commentField.getValue() != null ? retStr
-                    + "\n" : "")
-                    + iteractionTypeField.getValue().getIterationName()
-                    + ": "
-                    + sdf.format(addDate.getValue()));
+            commentField.setValue(new StringBuilder(
+                    commentField.getValue() != null ? new StringBuilder()
+                            .append(retStr)
+                            .append("\n")
+                            .toString() : "")
+                    .append(iteractionTypeField.getValue().getIterationName())
+                    .append(": ")
+                    .append(sdf.format(addDate.getValue()))
+                    .toString());
         }
     }
 
@@ -1793,11 +1826,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (event.getValue() != null) {
             String retStr = commentField.getValue() != null ? commentField.getValue() : "";
 
-            commentField.setValue((commentField.getValue() != null ? retStr
-                    + "\n" : "")
-                    + iteractionTypeField.getValue().getIterationName()
-                    + ": "
-                    + event.getValue());
+            commentField.setValue(new StringBuilder(
+                    commentField.getValue() != null ? new StringBuilder()
+                            .append(retStr)
+                            .append("\n")
+                            .toString() : "")
+                    .append(iteractionTypeField.getValue().getIterationName())
+                    .append(": ")
+                    .append(event.getValue()).toString());
         }
     }
 
@@ -1806,11 +1842,15 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (event.getValue() != null) {
             String retStr = commentField.getValue() != null ? commentField.getValue() : "";
 
-            commentField.setValue((commentField.getValue() != null ? retStr
-                    + "\n" : "")
-                    + iteractionTypeField.getValue().getIterationName()
-                    + ": "
-                    + event.getValue());
+            commentField.setValue(new StringBuilder(commentField.getValue() != null ?
+                    new StringBuilder()
+                            .append(retStr)
+                            .append("\n")
+                            .toString() : "")
+                    .append(iteractionTypeField.getValue().getIterationName())
+                    .append(": ")
+                    .append(event.getValue())
+                    .toString());
         }
     }
 
@@ -1823,18 +1863,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         retImage.setWidth("30px");
 
-            if (openPosition.getProjectName() != null) {
-                if (openPosition.getProjectName().getProjectLogo() != null) {
-                    return retImage.createResource(FileDescriptorResource.class)
-                            .setFileDescriptor(
-                                    openPosition
-                                            .getProjectName()
-                                            .getProjectLogo());
-                } else {
-                    return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
-                }
+        if (openPosition.getProjectName() != null) {
+            if (openPosition.getProjectName().getProjectLogo() != null) {
+                return retImage.createResource(FileDescriptorResource.class)
+                        .setFileDescriptor(
+                                openPosition
+                                        .getProjectName()
+                                        .getProjectLogo());
             } else {
                 return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
             }
+        } else {
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+        }
     }
 }

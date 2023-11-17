@@ -209,7 +209,10 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
     @Subscribe("emailLinkButton")
     public void onEmailLinkButtonClick(Button.ClickEvent event) {
-        webBrowserTools.showWebPage("mailto:" + event.getButton().getCaption(), null);
+        webBrowserTools.showWebPage(new StringBuilder()
+                .append("mailto:")
+                .append(event.getButton().getCaption())
+                .toString(), null);
     }
 
     @Subscribe("telegrammLinkButton")
@@ -265,8 +268,14 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                     if (iteraction.getRecrutier().getGroup().getName() != null)
                         if (iteraction.getDateIteraction() != null)
                             if (iteraction.getRecrutier().getGroup().getName().equals(RECRUTIER_GROUP)) {
-                                String lastRecrutier = iteraction.getRecrutier().getName() + " ("
-                                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+//                                String lastRecrutier = iteraction.getRecrutier().getName() + " ("
+//                                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+                                String lastRecrutier = new StringBuilder()
+                                        .append(iteraction.getRecrutier().getName())
+                                        .append(" (")
+                                        .append(simpleDateFormat.format(iteraction.getDateIteraction()))
+                                        .append(")")
+                                        .toString();
 
                                 lastRecruterLabel.setValue(lastRecrutier);
                                 lastRecruterLabel.setDescription(lastRecrutier);
@@ -281,8 +290,14 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                     if (iteraction.getRecrutier().getGroup().getName() != null)
                         if (iteraction.getDateIteraction() != null)
                             if (iteraction.getRecrutier().getGroup().getName().equals(RESEARCHER_GROUP)) {
-                                String lastResearcher = iteraction.getRecrutier().getName() + " ("
-                                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+//                                String lastResearcher = iteraction.getRecrutier().getName() + " ("
+//                                        + simpleDateFormat.format(iteraction.getDateIteraction()) + ")";
+                                String lastResearcher = new StringBuilder()
+                                        .append(iteraction.getRecrutier().getName())
+                                        .append(" (")
+                                        .append(simpleDateFormat.format(iteraction.getDateIteraction()))
+                                        .append(")")
+                                        .toString();
                                 lastResearcherLabel.setValue(lastResearcher);
                                 lastRecruterLabel.setDescription(lastResearcher);
                                 break;
@@ -290,20 +305,25 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         }
         // последнее взаимодействие
         if (iteractionList.size() != 0) {
-            String lastIteraction = "";
+//            String lastIteraction = "";
+            StringBuilder lastIteractionSb = new StringBuilder();
 
             if (iteractionList.get(0).getIteractionType() != null) {
                 if (iteractionList.get(0).getIteractionType().getIterationName() != null) {
-                    lastIteraction = iteractionList.get(0).getIteractionType().getIterationName();
+//                    lastIteraction = iteractionList.get(0).getIteractionType().getIterationName();
+                    lastIteractionSb.append(iteractionList.get(0).getIteractionType().getIterationName());
                 }
             }
 
             if (iteractionList.get(0).getDateIteraction() != null) {
-                lastIteraction += "(" + simpleDateFormat.format((iteractionList.get(0).getDateIteraction())) + ")";
+//                lastIteraction += "(" + simpleDateFormat.format((iteractionList.get(0).getDateIteraction())) + ")";
+                lastIteractionSb.append("(")
+                        .append(simpleDateFormat.format((iteractionList.get(0).getDateIteraction())))
+                        .append(")");
             }
 
-            lastIteractionLabel.setValue(lastIteraction);
-            lastIteractionLabel.setDescription(lastIteraction);
+            lastIteractionLabel.setValue(lastIteractionSb.toString());
+            lastIteractionLabel.setDescription(lastIteractionSb.toString());
 
             if (candidateFaceImage == null) {
                 String width = String.valueOf(lastIteractionLabel.getWidth() + 20);
@@ -527,7 +547,11 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
 
                         if (days != 0) {
-                            countAfterSendCVToClient.setValue("CV у заказчика: " + days + " дней");
+                            countAfterSendCVToClient.setValue(new StringBuilder()
+                                    .append("CV у заказчика: ")
+                                    .append(days)
+                                    .append(" дней")
+                                    .toString());
                             countAfterSendCVToClient.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
                         } else {
                             countAfterSendCVToClient.setValue("Сегодня CV отправлено");
@@ -576,7 +600,11 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
 
                         if (days != 0) {
-                            countAfrerClientInterview.setValue("Интервью заказчика: " + days + " дней");
+                            countAfrerClientInterview.setValue(new StringBuilder()
+                                    .append("Интервью заказчика: ")
+                                    .append(days)
+                                    .append(" дней")
+                                    .toString());
                             countAfrerClientInterview.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
                         } else {
                             countAfrerClientInterview.setValue("Сегодня интервью у заказчика");
@@ -624,7 +652,11 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
 
                         if (days != 0) {
-                            countAfterITPearlsInterview.setValue("Локальное интервью: " + days + " дней");
+                            countAfterITPearlsInterview.setValue(new StringBuilder()
+                                    .append("Локальное интервью: ")
+                                    .append(days)
+                                    .append(" дней")
+                                    .toString());
                             countAfterITPearlsInterview.setStyleName(getStyleOnlastProcess(calendar, calendar1, calendar2));
                         } else {
                             countAfterITPearlsInterview.setValue("Сегодня локальное интервью");
@@ -651,13 +683,13 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                     return "button_table_yellow";
                 }
             } else {
-                return  "button_table_gray";
+                return "button_table_gray";
             }
         } else {
             if (cal1.after(cal2)) {
                 return "button_table_gray";
             } else {
-                return  "button_table_red";
+                return "button_table_red";
             }
         }
     }
@@ -715,7 +747,11 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
             long daysOnProject = ChronoUnit.DAYS.between(d3, d1);
 
-            countDaysOnLastProject.setValue("На последнем проекте " + daysOnProject + " дней");
+            countDaysOnLastProject.setValue(new StringBuilder()
+                    .append("На последнем проекте ")
+                    .append(daysOnProject)
+                    .append(" дней")
+                    .toString());
             countDaysOnLastProject.setDescription(DESC_DAYS_ON_LAST_PROJECT);
 
             statisticsHLabelBox.add(countDaysOnLastProject);
@@ -732,10 +768,12 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         Label startIteraction = uiComponents.create(Label.NAME);
         if (iteractionList.get(iteractionList.size() - 1).getDateIteraction() != null
                 && iteractionList.get(0).getDateIteraction() != null) {
-            startIteraction.setValue("Даты: c "
-                    + simpleDateFormat.format(iteractionList.get(iteractionList.size() - 1).getDateIteraction())
-                    + " по "
-                    + simpleDateFormat.format(iteractionList.get(0).getDateIteraction()));
+            startIteraction.setValue(new StringBuilder()
+                    .append("Даты: c ")
+                    .append(simpleDateFormat.format(iteractionList.get(iteractionList.size() - 1).getDateIteraction()))
+                    .append(" по ")
+                    .append(simpleDateFormat.format(iteractionList.get(0).getDateIteraction()))
+                    .toString());
         }
         startIteraction.setAlignment(Component.Alignment.MIDDLE_LEFT);
         startIteraction.setDescription(DESC_DATE_ITERACTION);
@@ -771,7 +809,10 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         long days = ChronoUnit.DAYS.between(d2, d1) - 30;
 
         if (days > 0) {
-            lastItercationDayCount.setValue("Свободен " + days + " дней");
+            lastItercationDayCount.setValue(new StringBuilder().append("Свободен ")
+                    .append(days)
+                    .append(" дней")
+                    .toString());
             lastItercationDayCount.setAlignment(Component.Alignment.MIDDLE_LEFT);
             lastItercationDayCount.setStyleName(getStyleOnTime(calendar, calendar1, calendar2));
             lastItercationDayCount.setDescription(DESC_DAYS_LAST_ITERCATION);
@@ -842,7 +883,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             if (cal1.after(cal2)) {
                 return "button_table_gray";
             } else {
-                return  "button_table_green";
+                return "button_table_green";
             }
         }
     }

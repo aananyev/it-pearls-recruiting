@@ -189,10 +189,16 @@ public class InternalEmailTemplateEdit extends StandardEditor<InternalEmailTempl
 
     private void setEmailKeys() {
         HashMap<String, String> emailKeys = emailGenerationService.generateKeys();
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder("");
 
         for (Map.Entry<String, String> entry : emailKeys.entrySet()) {
-            retStr = retStr + entry.getKey() + " - " + entry.getValue() + "<br>";
+//            retStr = retStr + entry.getKey() + " - " + entry.getValue() + "<br>";
+            sb.append(entry.getKey())
+                    .append(" - ")
+                    .append(entry.getValue())
+                    .append("<br>");
+
         }
 
         commentKeysOptionList.setOptionsMap(emailKeys);
@@ -206,10 +212,10 @@ public class InternalEmailTemplateEdit extends StandardEditor<InternalEmailTempl
     @Subscribe("commentKeysOptionList")
     public void onCommentKeysOptionListDoubleClick(OptionsList.DoubleClickEvent event) {
 
-        String text = event.getItem() + " " +
-                templateTextField.getValue();
-
-        templateTextField.setValue(text);
+        templateTextField.setValue(new StringBuilder()
+                .append(event.getItem())
+                .append(" ")
+                .append(templateTextField.getValue()).toString());
     }
 
     @Subscribe

@@ -7,37 +7,44 @@ public class StarsAndOtherServiceBean implements StarsAndOtherService {
     @Override
     public String setStars(int stars) {
 //        String retStr = "\u2605";
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder("");
 
         for (int i = 1; i <= 5; i++) {
             if (i <= stars)
-                retStr = retStr + "\u2605";
+                sb.append("\u2605");
+//                retStr = retStr + "\u2605";
             else
-                retStr = retStr + "\u2606";
+                sb.append("\u2606");
+//                retStr = retStr + "\u2606";
         }
 
-        return retStr;
+        return sb.toString();
     }
 
     @Override
     public String noneStars() {
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder("");
 
         for (int i = 1; i <= 5; i++) {
-            retStr = retStr + "\u25C7";
+//            retStr = retStr + "\u25C7";
+            sb.append("\u25C7");
         }
 
-        return retStr;
+        return sb.toString();
     }
 
     @Override
     public String setBlackRectangle(int blackRenctangle) {
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder("");
 
         for (int i = 1; i <= blackRenctangle; i++) {
-                retStr = retStr + "\u25AE";
+            sb.append("\u25AE");
+//                retStr = retStr + "\u25AE";
         }
 
-        return retStr;
+        return sb.toString();
     }
 }

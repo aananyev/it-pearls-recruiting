@@ -180,9 +180,15 @@ public class ParseCVServiceBean implements ParseCVService {
                                     startHTMLSymbolMatcher.start());
                         }
 
-                        Pattern endHTMLSymbol = Pattern.compile("[\\s>;\"]"
-                                        + parseString.toString() + "[<&]",
+                        Pattern endHTMLSymbol = Pattern.compile(new StringBuilder()
+                                        .append("[\\s>;\"]")
+                                        .append(parseString.toString())
+                                        .append("[<&]").toString(),
                                 Pattern.CASE_INSENSITIVE);
+
+//                        Pattern endHTMLSymbol = Pattern.compile("[\\s>;\"]"
+//                                        + parseString.toString() + "[<&]",
+//                                Pattern.CASE_INSENSITIVE);
                         Matcher endHTMLSymbolMatcher = endHTMLSymbol.matcher(cv);
 
                         if (endHTMLSymbolMatcher.find()) {
@@ -194,7 +200,11 @@ public class ParseCVServiceBean implements ParseCVService {
                                     endHTMLSymbolMatcher.start());
                         }
 
-                        Pattern startLine = Pattern.compile("^" + parseString.toString() + "\\s",
+                        Pattern startLine = Pattern.compile(
+                                new StringBuilder().append("^")
+                                        .append(parseString.toString())
+                                        .append("\\s")
+                                        .toString(),
                                 Pattern.CASE_INSENSITIVE);
                         Matcher startLineMathcer = startLine.matcher(cv);
 
@@ -203,7 +213,11 @@ public class ParseCVServiceBean implements ParseCVService {
                                     startLineMathcer.start());
                         }
 
-                        Pattern endLine = Pattern.compile("\\s" + parseString.toString() + "[$]",
+                        Pattern endLine = Pattern.compile(
+                                new StringBuilder().append("\\s")
+                                        .append(parseString.toString())
+                                        .append("[$]")
+                                        .toString(),
                                 Pattern.CASE_INSENSITIVE);
                         Matcher endLineMatcher = endLine.matcher(cv);
 
@@ -212,7 +226,11 @@ public class ParseCVServiceBean implements ParseCVService {
                                     endLineMatcher.start());
                         }
 
-                        Pattern middleLine = Pattern.compile("\\s" + parseString.toString() + "\\s",
+                        Pattern middleLine = Pattern.compile(new StringBuilder()
+                                        .append("\\s")
+                                        .append(parseString.toString())
+                                        .append("\\s")
+                                        .toString(),
                                 Pattern.CASE_INSENSITIVE);
                         Matcher middleLineMatcher = middleLine.matcher(cv);
 
@@ -239,8 +257,6 @@ public class ParseCVServiceBean implements ParseCVService {
                             },
                             LinkedHashMap::new
                     ));
-
-            HashMap<String, Integer> retHashMap = new HashMap<>();
 
             Map.Entry<String, Integer> entry = sortedMap.entrySet().iterator().next();
 
@@ -307,7 +323,11 @@ public class ParseCVServiceBean implements ParseCVService {
                                             endString.toString().length() - 1));
                         }
 
-                        Pattern startLine = Pattern.compile("^" + parseString.toString() + "\\s",
+                        Pattern startLine = Pattern.compile(new StringBuilder()
+                                        .append("^")
+                                        .append(parseString.toString())
+                                        .append("\\s")
+                                        .toString(),
                                 Pattern.CASE_INSENSITIVE);
                         Matcher startLineMathcer = startLine.matcher(cv);
 
@@ -315,7 +335,11 @@ public class ParseCVServiceBean implements ParseCVService {
                             retStrSet.add(startLineMathcer.group().trim());
                         }
 
-                        Pattern endLine = Pattern.compile("\\s" + parseString.toString() + "$",
+                        Pattern endLine = Pattern.compile(new StringBuilder()
+                                        .append("\\s")
+                                        .append(parseString.toString())
+                                        .append("$")
+                                        .toString(),
                                 Pattern.CASE_INSENSITIVE);
                         Matcher endLineMatcher = endLine.matcher(cv);
 
@@ -323,7 +347,11 @@ public class ParseCVServiceBean implements ParseCVService {
                             retStrSet.add(endLineMatcher.group());
                         }
 
-                        Pattern middleLine = Pattern.compile("\\s" + parseString.toString() + "\\s",
+                        Pattern middleLine = Pattern.compile(new StringBuilder()
+                                        .append("\\s")
+                                        .append(parseString.toString())
+                                        .append("\\s")
+                                        .toString(),
                                 Pattern.CASE_INSENSITIVE);
                         Matcher middleLineMatcher = middleLine.matcher(cv);
 
@@ -495,17 +523,17 @@ public class ParseCVServiceBean implements ParseCVService {
     public List<String> extractUrls(String input) {
         List<String> result = new ArrayList<String>();
 
-        Pattern pattern = Pattern.compile(
-                "\\b(((ht|f)tp(s?)\\:\\/\\/|~\\/|\\/)|www.)" +
-                        "(\\w+:\\w+@)?(([-\\w]+\\.)+(com|org|net|gov" +
-                        "|mil|biz|info|mobi|name|aero|jobs|museum" +
-                        "|travel|[a-z]{2}))(:[\\d]{1,5})?" +
-                        "(((\\/([-\\w~!$+|.,=]|%[a-f\\d]{2})+)+|\\/)+|\\?|#)?" +
-                        "((\\?([-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?" +
-                        "([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)" +
-                        "(&(?:[-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?" +
-                        "([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)*)*" +
-                        "(#([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)?\\b");
+        Pattern pattern = Pattern.compile(new StringBuilder()
+                .append("\\b(((ht|f)tp(s?)\\:\\/\\/|~\\/|\\/)|www.)")
+                .append("(\\w+:\\w+@)?(([-\\w]+\\.)+(com|org|net|gov")
+                .append("|mil|biz|info|mobi|name|aero|jobs|museum")
+                .append("|travel|[a-z]{2}))(:[\\d]{1,5})?")
+                .append("(((\\/([-\\w~!$+|.,=]|%[a-f\\d]{2})+)+|\\/)+|\\?|#)?")
+                .append("((\\?([-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?")
+                .append("([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)")
+                .append("(&(?:[-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?")
+                .append("([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)*)*")
+                .append("(#([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)?\\b").toString());
 
         Matcher matcher = pattern.matcher(input);
         while (matcher.find()) {
@@ -642,17 +670,20 @@ public class ParseCVServiceBean implements ParseCVService {
             String keyWithStyle;
 
             if (skillContains(skillTreesFromOpenPosition, skillTree)) {
-                keyWithStyle = "<b><font color=\""
-                        + color
-                        + "\" face=\"sans-serif\">"
-                        + skillTree.getSkillName()
-                        + "</font></b>";
+                keyWithStyle = new StringBuilder()
+                        .append("<b><font color=\"")
+                        .append(color)
+                        .append("\" face=\"sans-serif\">")
+                        .append(skillTree.getSkillName())
+                        .append("</font></b>").toString();
             } else {
-                keyWithStyle = "<b><font color=\""
-                        + colorIfExist
-                        + "\" face=\"sans-serif\">"
-                        + skillTree.getSkillName()
-                        + "</font></b>";
+                keyWithStyle = new StringBuilder()
+                        .append("<b><font color=\"")
+                        .append(colorIfExist)
+                        .append("\" face=\"sans-serif\">")
+                        .append(skillTree.getSkillName())
+                        .append("</font></b>")
+                        .toString();
             }
 
             if (!retStr.contains(keyWithStyle)) {
@@ -680,11 +711,13 @@ public class ParseCVServiceBean implements ParseCVService {
         List<SkillTree> skillTrees = pdfParserService.parseSkillTree(htmlText);
 
         for (SkillTree skillTree : skillTrees) {
-            String keyWithStyle = "<b><font color=\""
-                    + color
-                    + "\">"
-                    + skillTree.getSkillName()
-                    + "</font></b>";
+            String keyWithStyle = new StringBuilder()
+                    .append("<b><font color=\"")
+                    .append(color)
+                    .append("\">")
+                    .append(skillTree.getSkillName())
+                    .append("</font></b>")
+                    .toString();
             if (!retStr.toLowerCase().contains(keyWithStyle.toLowerCase())) {
                 retStr = retStr.replaceAll("" + skillTree.getSkillName(), keyWithStyle);
             }
@@ -700,11 +733,13 @@ public class ParseCVServiceBean implements ParseCVService {
         List<Company> companies = parseCompaniesPriv(htmlText);
 
         for (Company company : companies) {
-            String keyWithStyle = "<b><font color=\""
-                    + color
-                    + "\">"
-                    + company.getComanyName()
-                    + "</font></b>";
+            String keyWithStyle = new StringBuilder()
+                    .append("<b><font color=\"")
+                    .append(color)
+                    .append("\">")
+                    .append(company.getComanyName())
+                    .append("</font></b>")
+                    .toString();
             if (!retStr.contains(keyWithStyle)) {
                 retStr = retStr.replaceAll("" + company.getComanyName(), keyWithStyle);
             }
@@ -720,11 +755,13 @@ public class ParseCVServiceBean implements ParseCVService {
         List<Position> positions = parsePositions(htmlText);
 
         for (Position position : positions) {
-            String keyWithStyle = "<b><font color=\""
-                    + color
-                    + "\">"
-                    + position.getPositionEnName()
-                    + "</font></b>";
+            String keyWithStyle = new StringBuilder()
+                    .append("<b><font color=\"")
+                    .append(color)
+                    .append("\">")
+                    .append(position.getPositionEnName())
+                    .append("</font></b>")
+                    .toString();
             if (!retStr.contains(keyWithStyle)) {
                 retStr = retStr.replaceAll("" + position.getPositionEnName(), keyWithStyle);
             }

@@ -3820,3 +3820,125 @@ server started
 2023-11-16 12:41:18.740 +04 [61600] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-11-16 12:41:19.144 +04 [61602] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-11-16 12:41:19.226 +04 [61604] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:32.448 +04 [62186] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:32.460 +04 [62188] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:32.873 +04 [62190] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:32.956 +04 [62194] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:34.795 +04 [62198] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:39.447 +04 [62202] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:39.454 +04 [62204] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:39.459 +04 [62206] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:39.487 +04 [62208] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:13:48.118 +04 [62229] ERROR:  column "interaction_list_id" contains null values
+2023-11-16 13:13:48.118 +04 [62229] STATEMENT:  
+	-- update ITPEARLS_INTERNAL_EMAILER set INTERACTION_LIST_ID = <default_value> ;
+	-- alter table ITPEARLS_INTERNAL_EMAILER alter column INTERACTION_LIST_ID set not null ;
+	alter table ITPEARLS_INTERNAL_EMAILER add column INTERACTION_LIST_ID uuid not null 
+2023-11-16 13:14:09.496 +04 [62232] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:09.519 +04 [62234] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:12.924 +04 [62237] ERROR:  column "interaction_list_id" contains null values
+2023-11-16 13:14:12.924 +04 [62237] STATEMENT:  
+	-- update ITPEARLS_INTERNAL_EMAILER set INTERACTION_LIST_ID = <default_value> ;
+	-- alter table ITPEARLS_INTERNAL_EMAILER alter column INTERACTION_LIST_ID set not null ;
+	alter table ITPEARLS_INTERNAL_EMAILER add column INTERACTION_LIST_ID uuid not null 
+2023-11-16 13:14:22.441 +04 [62238] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:22.450 +04 [62240] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:25.026 +04 [62242] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:25.107 +04 [62244] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:26.396 +04 [62246] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:28.053 +04 [62248] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:28.060 +04 [62250] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:28.067 +04 [62252] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:14:28.186 +04 [62254] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:17:23.305 +04 [62408] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:17:23.425 +04 [62410] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:17:25.485 +04 [62428] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:17:25.768 +04 [62434] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 13:17:25.855 +04 [62436] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:12:59.119 +04 [63972] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:12:59.137 +04 [63974] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:12:59.376 +04 [63976] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:12:59.983 +04 [63978] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:13:00.161 +04 [63980] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:03.945 +04 [64258] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:03.959 +04 [64260] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:04.150 +04 [64264] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:04.207 +04 [64266] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:05.483 +04 [64269] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:07.627 +04 [64271] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:07.634 +04 [64273] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:07.639 +04 [64275] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:07.674 +04 [64277] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:29.763 +04 [64305] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:29.773 +04 [64307] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:29.904 +04 [64309] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:29.980 +04 [64311] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:22:30.013 +04 [64313] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:26:18.620 +04 [64540] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:26:18.635 +04 [64542] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:26:18.764 +04 [64544] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:26:18.798 +04 [64546] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:26:18.839 +04 [64548] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:32:22.359 +04 [64962] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:32:22.371 +04 [64964] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:32:22.515 +04 [64966] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:32:22.935 +04 [64968] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:32:23.021 +04 [64975] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:48.740 +04 [65272] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:48.763 +04 [65274] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:49.057 +04 [65277] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:49.107 +04 [65279] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:50.443 +04 [65286] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:57.464 +04 [65289] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:57.470 +04 [65291] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:57.475 +04 [65293] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:43:57.501 +04 [65295] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:44:26.784 +04 [65327] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:44:26.792 +04 [65329] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:44:26.942 +04 [65331] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:44:27.098 +04 [65333] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 20:44:27.204 +04 [65335] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 21:07:05.140 +04 [65756] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 21:07:05.155 +04 [65758] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 21:07:05.576 +04 [65760] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 21:07:05.826 +04 [65762] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 21:07:05.904 +04 [65764] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:41:07.937 +04 [66663] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:41:07.959 +04 [66665] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:41:08.736 +04 [66667] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:41:09.175 +04 [66669] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:41:09.306 +04 [66671] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:49:00.470 +04 [66907] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:49:00.480 +04 [66909] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:49:00.685 +04 [66911] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:49:00.811 +04 [66913] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 22:49:00.863 +04 [66915] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down....2023-11-16 22:54:44.090 +04 [59664] LOG:  received fast shutdown request
+2023-11-16 22:54:44.091 +04 [59664] LOG:  aborting any active transactions
+2023-11-16 22:54:44.096 +04 [59664] LOG:  background worker "logical replication launcher" (PID 59675) exited with exit code 1
+2023-11-16 22:54:44.098 +04 [59670] LOG:  shutting down
+2023-11-16 22:54:44.126 +04 [59664] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2023-11-16 23:02:22.452 +04 [67194] LOG:  listening on IPv6 address "::1", port 5432
+2023-11-16 23:02:22.452 +04 [67194] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2023-11-16 23:02:22.453 +04 [67194] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2023-11-16 23:02:22.477 +04 [67195] LOG:  database system was interrupted; last known up at 2023-11-16 22:59:50 +04
+2023-11-16 23:02:22.679 +04 [67195] LOG:  redo starts at 2E/5C000028
+2023-11-16 23:02:22.689 +04 [67195] LOG:  consistent recovery state reached at 2E/5C07C980
+2023-11-16 23:02:22.689 +04 [67195] LOG:  redo done at 2E/5C07C980
+2023-11-16 23:02:22.690 +04 [67195] LOG:  last completed transaction was at log time 2023-11-16 23:01:19.955128+04
+2023-11-16 23:02:22.774 +04 [67194] LOG:  database system is ready to accept connections
+ done
+server started
+2023-11-16 23:02:41.654 +04 [67224] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 23:02:41.709 +04 [67226] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 23:02:52.016 +04 [67232] ERROR:  column "interaction_list_id" does not exist
+2023-11-16 23:02:52.016 +04 [67232] STATEMENT:  alter table ITPEARLS_INTERNAL_EMAILER rename column interaction_list_id to interaction_list_id__u37333 
+2023-11-16 23:03:00.923 +04 [67251] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-16 23:03:00.932 +04 [67253] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-17 11:35:50.811 +04 [70018] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-17 11:35:50.839 +04 [70020] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-17 11:35:51.403 +04 [70022] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-17 11:35:51.900 +04 [70024] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-11-17 11:35:52.047 +04 [70026] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

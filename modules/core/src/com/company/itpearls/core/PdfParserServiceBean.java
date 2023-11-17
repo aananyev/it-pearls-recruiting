@@ -60,12 +60,13 @@ public class PdfParserServiceBean implements PdfParserService {
         return images;
     }
 
+    private final static String QUERY_SKILL_TREE =
+            "select e " +
+                    "from itpearls_SkillTree e " +
+                    "order by e.skillName";
+
     @Override
     public List<SkillTree> parseSkillTree(String inputText) {
-        String QUERY_SKILL_TREE =
-                "select e " +
-                        "from itpearls_SkillTree e " +
-                        "order by e.skillName";
 
         List<SkillTree> candidateSkills = new ArrayList<>();
 

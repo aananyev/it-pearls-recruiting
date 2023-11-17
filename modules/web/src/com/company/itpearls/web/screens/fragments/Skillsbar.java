@@ -118,10 +118,12 @@ public class Skillsbar extends ScreenFragment {
                                     labelSkill.setDescriptionAsHtml(true);
 
                                     if (skillCounter.get(st) < 2) {
-                                        String counter = st.getSkillName()
-                                                + " ("
-                                                + skillCounter.get(st)
-                                                + ")";
+                                        String counter = new StringBuilder()
+                                                .append(st.getSkillName())
+                                                .append(" (")
+                                                .append(skillCounter.get(st))
+                                                .append(")")
+                                                .toString();
 
                                         labelSkill.setValue(counter);
                                         labelSkill.setStyleName(getStyleForSkillPriority(st));
@@ -130,11 +132,12 @@ public class Skillsbar extends ScreenFragment {
                                         counterOfPub++;
                                         skillsFlowBox.add(labelSkill);
                                     } else {
-                                        String counter = "<b>"
-                                                + st.getSkillName()
-                                                + " ("
-                                                + skillCounter.get(st)
-                                                + ")</b>";
+                                        String counter = new StringBuilder()
+                                                .append("<b>")
+                                                .append(st.getSkillName())
+                                                .append(" (")
+                                                .append(skillCounter.get(st))
+                                                .append(")</b>").toString();
 
                                         labelSkill.setValue(counter);
                                         labelSkill.setStyleName(getStyleForSkillPriority(st));

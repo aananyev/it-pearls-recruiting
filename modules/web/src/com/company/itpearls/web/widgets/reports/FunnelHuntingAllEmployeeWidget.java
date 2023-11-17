@@ -37,13 +37,13 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
     private List<String> listIteractionForCheck = new ArrayList<String>();
     private List<ExtUser> reaearchers = new ArrayList<>();
 
-    private String ITRKT_NEW_CONTACT = "Новый контакт";
-    private String ITRKT_POPOSE_JOB = "Предложение работы";
-    private String ITRKT_ASSIGN_ITPEARKS_INTERVIEW = "Назначено собеседование с рекрутером IT Pearls";
-    private String ITRKT_PREPARE_ITPEARKS_INTERVIEW = "Прошел собеседование с рекрутером IT Pearls";
-    private String ITRKT_ASSIGN_TECH_INTERVIEW = "Назначено техническое собеседование";
-    private String ITRKT_PREPARE_TECH_INTERVIEW = "Прошел техническое собеседование";
-    private String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
+    private static final String ITRKT_NEW_CONTACT = "Новый контакт";
+    private static final String ITRKT_POPOSE_JOB = "Предложение работы";
+    private static final String ITRKT_ASSIGN_ITPEARKS_INTERVIEW = "Назначено собеседование с рекрутером IT Pearls";
+    private static final String ITRKT_PREPARE_ITPEARKS_INTERVIEW = "Прошел собеседование с рекрутером IT Pearls";
+    private static final String ITRKT_ASSIGN_TECH_INTERVIEW = "Назначено техническое собеседование";
+    private static final String ITRKT_PREPARE_TECH_INTERVIEW = "Прошел техническое собеседование";
+    private static final String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
 
     private String labelHeight = "15px";
     private String sizeColumn = "115px";
@@ -70,10 +70,16 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
     }
 
     private void setWidgetTitle() {
-        String title = "Статистика за: ";
+        final String title = "Статистика за: ";
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        StringBuilder sb = new StringBuilder();
+        sb.append(title)
+                .append(df.format(startDate))
+                .append(" - ")
+                .append(df.format(endDate));
 
-        widgetTitle.setValue(title + df.format(startDate) + " - " + df.format(endDate));
+//        widgetTitle.setValue(title + df.format(startDate) + " - " + df.format(endDate));
+        widgetTitle.setValue(sb.toString());
     }
 
     private void getResearchersList() {
@@ -138,7 +144,7 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
                 else
                     styleCount = 2;
 
-                String queryCounter = "select count(e) from itpearls_IteractionList e " +
+                final String queryCounter = "select count(e) from itpearls_IteractionList e " +
                         "where e.dateIteraction between :startDate and :endDate and " +
                         "e.recrutier = :recrutier and " +
                         "e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName )";

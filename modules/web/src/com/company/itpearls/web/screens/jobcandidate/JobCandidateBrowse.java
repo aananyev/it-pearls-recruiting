@@ -259,7 +259,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         for (SignIcons icons : signIconsDc.getItems()) {
             actionsWithCandidateButton.addAction(new BaseAction(
-                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+//                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    strSimpleService.deleteExtraCharacters(new StringBuilder()
+                            .append(icons.getTitleEnd())
+                            .append("Action").toString()))
                     .withIcon(icons.getIconName())
                     .withCaption(icons.getTitleRu())
                     .withDescription(icons.getTitleDescription())
@@ -636,7 +639,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         for (SignIcons icons : signIconsDc.getItems()) {
             signFilterButton.addAction(new BaseAction(
-                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+//                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
+                    strSimpleService.deleteExtraCharacters(new StringBuilder()
+                            .append(icons.getTitleEnd())
+                            .append("Action")
+                            .toString()))
                     .withIcon(icons.getIconName())
                     .withCaption(icons.getTitleRu())
                     .withDescription(icons.getTitleDescription())
@@ -1156,7 +1163,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             Integer count = 1;
             for (Iteraction iteraction : mostPopularInteraction) {
                 lastInteractionPopupButton.addAction(
-                        new BaseAction("setMostPopularInteractionPopupButton" + "-" + count++)
+                        new BaseAction(new StringBuilder()
+                                .append("setMostPopularInteractionPopupButton")
+                                .append("-")
+                                .append(count++)
+                                .toString())
                                 .withCaption(iteraction.getIterationName())
                                 .withHandler(actionPerformedEvent -> setMostPopularInteractionPopupButton(iteraction)));
             }
@@ -1475,11 +1486,18 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         if (iteractionList.size() != 0) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
-            dateIteraction.setValue(simpleDateFormat.format(iteractionList.get(0).getDateIteraction()) + ":");
+            dateIteraction.setValue(new StringBuilder()
+                    .append(simpleDateFormat.format(iteractionList.get(0).getDateIteraction()))
+                    .append(":")
+                    .toString());
             retLab.setValue(iteractionList.get(0).getIteractionType().getIterationName());
 
             if (iteractionList.get(0).getAddDate() != null) {
-                add.setValue(" (" + simpleDateFormat.format(iteractionList.get(0).getAddDate()) + ")");
+                add.setValue(new StringBuilder()
+                        .append(" (")
+                        .append(simpleDateFormat.format(iteractionList.get(0).getAddDate()))
+                        .append(")")
+                        .toString());
             }
         } else {
             return null;
@@ -1527,7 +1545,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         if (iteractionList != null) {
             Label<String> lastSalary = uiComponents.create(Label.NAME);
-            lastSalary.setValue("Зарплатные ожидания: " + iteractionList.getAddString());
+            lastSalary.setValue(new StringBuilder().append("Зарплатные ожидания: ")
+                    .append(iteractionList.getAddString())
+                    .toString());
             vBoxLayout.add(lastSalary);
         }
 
@@ -1674,8 +1694,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             }
 
             injectColorCss(jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
-            retLabel.setStyleName("pic-center-large-"
-                    + jobCandidateSignIcons.get(0).getSignIcon().getIconColor());
+            retLabel.setStyleName(new StringBuilder()
+                    .append("pic-center-large-")
+                    .append(jobCandidateSignIcons.get(0).getSignIcon().getIconColor())
+                    .toString());
         }
 
         return retLabel;

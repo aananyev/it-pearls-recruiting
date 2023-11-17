@@ -75,12 +75,20 @@ public class RecrutersLeadersWidget extends ScreenFragment {
             label.setWidthFull();
             label.setHeightAuto();
 
-            label.setValue(empl.getKey().getName()
+            StringBuilder sb = new StringBuilder();
+            sb.append(empl.getKey().getName())
+                    .append(" ")
+                    .append(recruterStatService.getGradeName(empl.getValue()))
+                    .append(" / ")
+                    .append(interviews.get(empl.getKey()));
+            label.setValue(sb.toString());
+
+/*            label.setValue(empl.getKey().getName()
                     + " "
                     + recruterStatService.getGradeName(empl.getValue())
                     + " / "
                     + interviews.get(empl.getKey()))
-            ;
+            ;*/
 
             leadersTableWidget.add(label);
 

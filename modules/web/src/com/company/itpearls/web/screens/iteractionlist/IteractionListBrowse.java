@@ -77,7 +77,12 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
     private void filterStagerField() {
         if (userSession.getUser().getGroup().getName().equals(StandartRoles.STAGER)) {
-            iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+            iteractionListsDl.setParameter("userName",
+                    new StringBuilder()
+                            .append("%")
+                            .append(userSession.getUser().getLogin())
+                            .append("%")
+                            .toString());
 
             checkBoxShowOnlyMy.setValue(true);
             checkBoxShowOnlyMy.setEditable(false);
@@ -101,7 +106,10 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         if (iteractionList.getAddInteger() != null)
             add = iteractionList.getAddInteger().toString();
 
-        return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
+        return new StringBuilder
+                (iteractionList.getComment() != null ? iteractionList.getComment() : "")
+                .append(add)
+                .toString();
     }
 
     private void filterInternalProject() {
@@ -122,7 +130,11 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (checkBoxShowOnlyMy.getValue()) {
-            iteractionListsDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+            iteractionListsDl.setParameter("userName", new StringBuilder()
+                    .append("%")
+                    .append(userSession.getUser().getLogin())
+                    .append("%")
+                    .toString());
         } else {
             iteractionListsDl.removeParameter("userName");
         }
@@ -135,7 +147,6 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
                 .newEntity()
                 .withInitializer(data -> {
                     if (iteractionListsTable.getSingleSelected() != null) {
-
                         data.setCandidate(iteractionListsTable.getSingleSelected().getCandidate());
                         data.setVacancy(iteractionListsTable.getSingleSelected().getVacancy());
                     }
@@ -212,7 +223,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Install(to = "iteractionListsTable.rating", subject = "columnGenerator")
     private String iteractionListsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
 
-        return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
+        return event.getItem().getRating() != null ?
+                starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
     }
 
     @Install(to = "iteractionListsTable.rating", subject = "styleProvider")
@@ -221,20 +233,29 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     }
 
     public void onButtonCopyToClibboard() {
-        String clipboardText = "";
+//        String clipboardText = "";
+        StringBuilder sb = new StringBuilder();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
         if (iteractionListsTable.getSelected() != null) {
             for (IteractionList i : iteractionListsTable.getSelected()) {
-                clipboardText = clipboardText + i.getCandidate().getFullName() + "," +
+                sb.append(i.getCandidate().getFullName())
+                        .append(",")
+                        .append(simpleDateFormat.format(i.getDateIteraction()))
+                        .append(",")
+                        .append(i.getVacancy().getVacansyName())
+                        .toString();
+/*                clipboardText = clipboardText + i.getCandidate().getFullName() + "," +
                         simpleDateFormat.format(i.getDateIteraction()) + "," +
-                        i.getVacancy().getVacansyName();
+                        i.getVacancy().getVacansyName(); */
             }
         }
 
-        JavaScript.getCurrent().execute("navigator.clipboard.writeText('" +
-                clipboardText
-                + "');");
+        JavaScript.getCurrent().execute(new StringBuilder()
+                .append("navigator.clipboard.writeText('")
+                .append(sb)
+                .append("');")
+                .toString());
         notifications.create().withCaption("Copied to clipboard").show();
     }
 

@@ -74,7 +74,16 @@ public class FunnelHuntingWidget extends ScreenFragment {
         String title = "Статистика по ресерчерам за: ";
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
-        widgetTitle.setValue(title + df.format(startDate) + " - " + df.format(endDate));
+//        widgetTitle.setValue(title + df.format(startDate) + " - " + df.format(endDate));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(title)
+                .append(df.format(startDate))
+                .append(" - ")
+                .append(df.format(endDate));
+
+        widgetTitle.setValue(sb.toString());
+
     }
 
     private void getResearchersList() {

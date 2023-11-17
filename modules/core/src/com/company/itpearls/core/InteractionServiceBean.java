@@ -14,16 +14,17 @@ public class InteractionServiceBean implements InteractionService {
     @Inject
     private DataManager dataManager;
 
+    private final static String QUERY = "select e.iteractionType, count(e.iteractionType) "
+            + "from itpearls_IteractionList e "
+            + "where "
+            + "(e.dateIteraction between :endDate and :startDate) and "
+            + "e.iteractionType is not null and "
+            + "e.recrutier = :user "
+            + "group by e.iteractionType "
+            + "order by count(e.iteractionType) desc";
+
     @Override
     public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
-        String QUERY = "select e.iteractionType, count(e.iteractionType) "
-                + "from itpearls_IteractionList e "
-                + "where "
-                + "(e.dateIteraction between :endDate and :startDate) and "
-                + "e.iteractionType is not null and "
-                + "e.recrutier = :user "
-                + "group by e.iteractionType "
-                + "order by count(e.iteractionType) desc";
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.setTime(new Date());

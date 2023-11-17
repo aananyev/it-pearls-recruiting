@@ -36,18 +36,18 @@ public class FunnelHuntingRecrutierWidget extends ScreenFragment {
     private List<String> listIteractionForCheck = new ArrayList<String>();
     private List<User> reaearchers = new ArrayList<>();
 
-    private String ITRKT_NEW_CONTACT = "Новый контакт";
-    private String ITRKT_POPOSE_JOB = "Предложение работы";
-    private String ITRKT_ASSIGN_ITPEARKS_INTERVIEW = "Назначено собеседование с рекрутером IT Pearls";
-    private String ITRKT_PREPARE_ITPEARKS_INTERVIEW = "Прошел собеседование с рекрутером IT Pearls";
-    private String ITRKT_ASSIGN_TECH_INTERVIEW = "Назначено техническое собеседование";
-    private String ITRKT_PREPARE_TECH_INTERVIEW = "Прошел техническое собеседование";
-    private String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
+    private static final String ITRKT_NEW_CONTACT = "Новый контакт";
+    private static final String ITRKT_POPOSE_JOB = "Предложение работы";
+    private static final String ITRKT_ASSIGN_ITPEARKS_INTERVIEW = "Назначено собеседование с рекрутером IT Pearls";
+    private static final String ITRKT_PREPARE_ITPEARKS_INTERVIEW = "Прошел собеседование с рекрутером IT Pearls";
+    private static final String ITRKT_ASSIGN_TECH_INTERVIEW = "Назначено техническое собеседование";
+    private static final String ITRKT_PREPARE_TECH_INTERVIEW = "Прошел техническое собеседование";
+    private static final String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
 
-    private String labelHeight = "15px";
-    private String sizeColumn = "115px";
-    private String HEADHUNTER = "Хантинг";
-    private String MANAGER = "Менеджмент";
+    private static final String labelHeight = "15px";
+    private static final String sizeColumn = "115px";
+    private static final String HEADHUNTER = "Хантинг";
+    private static final String MANAGER = "Менеджмент";
 
     @Inject
     private HBoxLayout boxWidgetTitle;
@@ -73,8 +73,14 @@ public class FunnelHuntingRecrutierWidget extends ScreenFragment {
     private void setWidgetTitle() {
         String title = "Статистика по рекрутерам за: ";
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        StringBuilder sb = new StringBuilder();
+        sb.append(title)
+                .append(df.format(startDate))
+                .append(" - ")
+                .append(df.format(endDate));
 
-        widgetTitle.setValue(title + df.format(startDate) + " - " + df.format(endDate));
+//        widgetTitle.setValue(title + df.format(startDate) + " - " + df.format(endDate));
+        widgetTitle.setValue(sb.toString());
     }
 
     private void getResearchersList() {

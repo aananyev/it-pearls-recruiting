@@ -11,7 +11,7 @@ import javax.inject.Inject;
 @Service(RecruterStatService.NAME)
 public class RecruterStatServiceBean implements RecruterStatService {
 
-    final String QUERY_INTERVIEWS_COUNT_INTERVAL =
+    private static final String QUERY_INTERVIEWS_COUNT_INTERVAL =
             "select count(e) from itpearls_IteractionList e " +
                     "where e.recrutier = :recrutier and "
                     + "@between(e.dateIteraction, now-30, now+1, day) and "

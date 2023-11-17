@@ -232,7 +232,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                         .list();
 
 
-
                 return null;
             }
 
@@ -661,14 +660,20 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
-                            + ": " + internalEmailer.getToEmail().getFullName()
-                            + "\n" + messageBundle.getMessage("msgRecruterOwner")
-                            + " " + personelReserveCheck.getRecruter().getName()
-                            + "\n" + messageBundle.getMessage("msgEndDateReserve")
-                            + " " + (personelReserveCheck.getEndDate() != null
-                            ? sdf.format(personelReserveCheck.getEndDate())
-                            : messageBundle.getMessage("msgUnlimited")))
+                    .withDescription(new StringBuilder()
+                            .append(messageBundle.getMessage("msgCanNotAddToPersonalReserve"))
+                            .append(": ")
+                            .append(internalEmailer.getToEmail().getFullName())
+                            .append("\n")
+                            .append(messageBundle.getMessage("msgRecruterOwner"))
+                            .append(" ")
+                            .append(personelReserveCheck.getRecruter().getName())
+                            .append("\n")
+                            .append(messageBundle.getMessage("msgEndDateReserve"))
+                            .append(" ")
+                            .append(personelReserveCheck.getEndDate() != null
+                                    ? sdf.format(personelReserveCheck.getEndDate())
+                                    : messageBundle.getMessage("msgUnlimited")).toString())
                     .withType(Notifications.NotificationType.ERROR)
                     .show();
         }
@@ -837,10 +842,12 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .withHideDelayMs(10000)
                 .withCaption(messageBundle.getMessage("msgInfo"))
                 .withContentMode(ContentMode.HTML)
-                .withDescription(messageBundle.getMessage("msgCandidateAddedToPersonalReserve")
-                        + " <br><b>"
-                        + internalEmailer.getToEmail().getFullName()
-                        + "</b>")
+                .withDescription(new StringBuilder()
+                        .append(messageBundle.getMessage("msgCandidateAddedToPersonalReserve"))
+                        .append(" <br><b>")
+                        .append(internalEmailer.getToEmail().getFullName())
+                        .append("</b>")
+                        .toString())
                 .withPosition(Notifications.Position.BOTTOM_RIGHT)
                 .show();
     }

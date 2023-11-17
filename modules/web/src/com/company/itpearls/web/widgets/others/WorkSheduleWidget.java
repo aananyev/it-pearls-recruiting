@@ -32,13 +32,22 @@ public class WorkSheduleWidget extends ScreenFragment {
 
     private void setWorkTimeToday() {
         int allWorkTimeInMonth = getWorkTime(Calendar.MONTH);
-        workTimeLabel.setDescription(messageBundle.getMessage("msgAvgWorkTime")
+        StringBuilder sb = new StringBuilder();
+        sb.append(messageBundle.getMessage("msgAvgWorkTime"))
+                .append(": ")
+                .append(String.valueOf(allWorkTimeInMonth / 30))
+                .append(" ")
+                .append(messageBundle.getMessage("msgHours"))
+                .append(" ")
+                .append(messageBundle.getMessage("msgPerDay"));
+        workTimeLabel.setDescription(sb.toString());
+/*        workTimeLabel.setDescription(messageBundle.getMessage("msgAvgWorkTime")
                 + ": "
                 + String.valueOf(allWorkTimeInMonth / 30)
                 + " "
                 + messageBundle.getMessage("msgHours")
                 + " "
-                + messageBundle.getMessage("msgPerDay"));
+                + messageBundle.getMessage("msgPerDay"));*/
 
         if (allWorkTimeInMonth < 4) {
             workTimeLabel.setValue("Part time");

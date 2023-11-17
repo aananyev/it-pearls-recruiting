@@ -17,13 +17,13 @@ import java.util.List;
 public class IteractionServiceBean implements IteractionService {
     @Inject
     private DataManager dataManager;
+    private static final String QUERY = "select e.iteractionType, count(e) " +
+            "from IteractionList e " +
+            "where (e.dateIteraction between :startDate and :endDate) and e.recrutier = :user " +
+            "group by e.iteractionType";
 
     @Override
     public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
-        String QUERY = "select e.iteractionType, count(e) " +
-                "from IteractionList e " +
-                "where (e.dateIteraction between :startDate and :endDate) and e.recrutier = :user " +
-                "group by e.iteractionType";
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.setTime(new Date());
@@ -41,14 +41,7 @@ public class IteractionServiceBean implements IteractionService {
                 .addProperty("coubt");
 
         List<KeyValueEntity> list = dataManager.loadValues(context);
-/*
-        List<KeyValueEntity> mostPopularIteraction = dataManager.loadValues(QUERY)
-                .properties("iteractionType", "count")
-                .parameter("user", user)
-                .parameter("startDate", startDate)
-                .parameter("endDate", endDate)
-                .list();
-*/
+
         return null;
     }
 }

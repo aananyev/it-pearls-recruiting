@@ -72,16 +72,24 @@ public class ResearchingDiagramms extends ScreenFragment {
 
     private void setDiagramTitle() {
         List<Title> titles = new ArrayList<>();
-        titles.add(new Title().setText("Количество взаимодействий: " + iteractionName).setAlpha(1.0).setColor(Color.BLACK));
-        titles.add(new Title().setText(dateFormat.format(startDate) + " - " +
-                dateFormat.format(endDate)).setAlpha(1.0).setColor(Color.BROWN).setSize(12));
+        StringBuilder sb = new StringBuilder();
+        sb.append("Количество взаимодействий: ")
+                .append(iteractionName);
+        titles.add(new Title().setText(sb.toString()).setAlpha(1.0).setColor(Color.BLACK));
+
+        StringBuilder sb1 = new StringBuilder();
+        sb1.append(dateFormat.format(startDate))
+                .append(" - ")
+                .append(dateFormat.format(endDate));
+        titles.add(new Title().setText(sb1.toString())
+                .setAlpha(1.0).setColor(Color.BROWN).setSize(12));
 
         makeInterview.setTitles(titles);
     }
 
     private ListDataProvider valueGraphs() {
 
-        String QUERY_GET_ITERACTIONS = "select f from itpearls_Iteraction f where f.iterationName like :iteractionName";
+        final String QUERY_GET_ITERACTIONS = "select f from itpearls_Iteraction f where f.iterationName like :iteractionName";
         ListDataProvider dataProvider = new ListDataProvider();
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();

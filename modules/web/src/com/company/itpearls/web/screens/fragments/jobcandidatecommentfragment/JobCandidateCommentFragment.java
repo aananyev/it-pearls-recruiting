@@ -140,11 +140,26 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                             ratingField.setCaption(messageBundle.getMessage("msgRating"));
 
                                             Map<String, Integer> map = new LinkedHashMap<>();
-                                            map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
-                                            map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
-                                            map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
-                                            map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
-                                            map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+                                            map.put(new StringBuilder()
+                                                    .append(starsAndOtherService.setStars(1))
+                                                    .append(" Полный негатив")
+                                                    .toString(), 0);
+                                            map.put(new StringBuilder()
+                                                    .append(starsAndOtherService.setStars(2))
+                                                    .append(" Сомнительно")
+                                                    .toString(), 1);
+                                            map.put(new StringBuilder()
+                                                    .append(starsAndOtherService.setStars(3))
+                                                    .append(" Нейтрально")
+                                                    .toString(), 2);
+                                            map.put(new StringBuilder()
+                                                    .append(starsAndOtherService.setStars(4))
+                                                    .append(" Положительно")
+                                                    .toString(), 3);
+                                            map.put(new StringBuilder()
+                                                    .append(starsAndOtherService.setStars(5))
+                                                    .append(" Отлично!")
+                                                    .toString(), 4);
 
                                             ratingField.setOptionsMap(map);
 
@@ -160,23 +175,25 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                 Integer rating = closeEvent.getValue("rating");
                                 createComment(iteractionList,
                                         closeEvent.getValue("openPosition"),
-                                        rating,
-                                        iteractionList.getRecrutier().getName()
-                                                + " Re: "
-                                                + (String) closeEvent.getValue("comment"));
+                                        rating, new StringBuilder()
+                                                .append(iteractionList.getRecrutier().getName())
+                                                .append(" Re: ")
+                                                .append((String) closeEvent.getValue("comment"))
+                                                .toString());
                                 /* TODO тут надо сделать отправку сообщения что кому-то прилетел коммент */
-                                events.publish(new UiNotificationEvent(this,
-                                        iteractionList.getRecrutier().getName()
-                                                + ": "
-                                                + closeEvent.getValue("comment")
-                                                + ". \n\n"
-                                                + messageBundle.getMessage("msgJobCandidate")
-                                                + ": "
-                                                + iteractionList.getCandidate().getFullName()
-                                                + "\n"
-                                                + messageBundle.getMessage("msgFrom")
-                                                + " "
-                                                + userSession.getUser().getName()));
+                                events.publish(new UiNotificationEvent(this, new StringBuilder()
+                                        .append(iteractionList.getRecrutier().getName())
+                                        .append(": ")
+                                        .append(closeEvent.getValue("comment").toString())
+                                        .append(". \n\n")
+                                        .append(messageBundle.getMessage("msgJobCandidate"))
+                                        .append(": ")
+                                        .append(iteractionList.getCandidate().getFullName())
+                                        .append("\n")
+                                        .append(messageBundle.getMessage("msgFrom"))
+                                        .append(" ")
+                                        .append(userSession.getUser().getName())
+                                        .toString()));
                             }
                         }).show();
             });
