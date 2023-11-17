@@ -151,9 +151,11 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
 
     private void setCandidateHeaderLabel() {
         if (jobCandidateField.getValue() != null) {
-            jobCandidateLabel.setValue(jobCandidateField.getValue().getFullName()
-                    + " / "
-                    + jobCandidateField.getValue().getPersonPosition().getPositionEnName());
+            jobCandidateLabel.setValue(new StringBuilder()
+                    .append(jobCandidateField.getValue().getFullName())
+                    .append(" / ")
+                    .append(jobCandidateField.getValue().getPersonPosition().getPositionEnName())
+                    .toString());
         }
     }
 
@@ -363,12 +365,11 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         });
     }
 
+    private static final String QUERY_MIN_MAX_SALARY = "select e from itpearls_OpenPosition e where e.positionType = :position and (not e.openClose = true)";
+
     private void setMinMaxSalaryLabel() {
         openPositionsTable.addSelectionListener(e -> {
-            String QUERY_MIN_MAX_SALARY = "select e " +
-                    "from itpearls_OpenPosition e " +
-                    "where e.positionType = :position " +
-                    "and (not e.openClose = true)";
+
 
             if (openPositionsTable.getSingleSelected() != null) {
                 List<OpenPosition> openPositionList = dataManager.load(OpenPosition.class)
@@ -430,14 +431,18 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         try {
             int salMin = salaryMin.divide(BigDecimal.valueOf(1000)).intValue();
             if (salMin != 0) {
-                retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
-                        + " т.р./"
-                        + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
-                        + " т.р.";
+                retStr = new StringBuilder()
+                        .append(salaryMin.toString().substring(0, salaryMin.toString().length() - 3))
+                        .append(" т.р./")
+                        .append(salaryMax.toString().substring(0, salaryMax.toString().length() - 3))
+                        .append(" т.р.")
+                .toString();
             } else {
-                retStr = "До "
-                        + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
-                        + " т.р.";
+                retStr = new StringBuilder()
+                        .append("До ")
+                        .append(salaryMax.toString().substring(0, salaryMax.toString().length() - 3))
+                        .append(" т.р.")
+                .toString();
             }
         } catch (NullPointerException | StringIndexOutOfBoundsException e) {
             retStr = "";
@@ -479,10 +484,12 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
         String retStr = "";
 
         try {
-            retStr = salaryMin.toString().substring(0, salaryMin.toString().length() - 3)
-                    + " т.р./"
-                    + salaryMax.toString().substring(0, salaryMax.toString().length() - 3)
-                    + " т.р.";
+            retStr = new StringBuilder()
+                    .append(salaryMin.toString().substring(0, salaryMin.toString().length() - 3))
+                    .append(" т.р./")
+                    .append(salaryMax.toString().substring(0, salaryMax.toString().length() - 3))
+                    .append(" т.р.")
+                    .toString();
         } catch (NullPointerException e) {
             retStr = "";
         }
@@ -605,18 +612,26 @@ public class OpenPositionMasterBrowse extends StandardLookup<OpenPosition> {
     public void onOpenPositionsTableSelection1(DataGrid.SelectionEvent<Position> event) {
         if (openPositionsTable.getSelected().size() <= 1) {
             if (openPositionsTable.getSingleSelected() != null) {
-                selectPositionLabel.setValue(openPositionsTable.getSingleSelected().getPositionRuName()
-                        + " / "
-                        + openPositionsTable.getSingleSelected().getPositionEnName());
+                selectPositionLabel.setValue(new StringBuilder()
+                        .append(openPositionsTable.getSingleSelected().getPositionRuName())
+                        .append(" / ")
+                        .append(openPositionsTable.getSingleSelected().getPositionEnName())
+                        .toString());
             }
         } else {
-            String label = "";
+//            String label = "";
+            StringBuilder sb = new StringBuilder();
+
             for (Position p : openPositionsTable.getSelected()) {
-                label += p.getPositionRuName() + ",";
+                sb.append(p.getPositionRuName())
+                        .append(",");
+//                label += p.getPositionRuName() + ",";
             }
 
-            selectPositionLabel.setValue(label.substring(0, label.length() - 1));
-            selectPositionLabel.setDescription(label.substring(0, label.length() - 1));
+            selectPositionLabel.setValue(sb.toString().substring(0, sb.toString().length() - 1));
+            selectPositionLabel.setDescription(sb.toString().substring(0, sb.toString().length() - 1));
+ //           selectPositionLabel.setValue(label.substring(0, label.length() - 1));
+ //           selectPositionLabel.setDescription(label.substring(0, label.length() - 1));
         }
     }
 

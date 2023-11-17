@@ -111,8 +111,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                 .append(" \"")
                 .append(user.getEmail())
                 .append("\"");
-//        String userEmail = System.getProperty(EMAIL_SMTPUSER);
-//        fromEmailTextAddressField.setValue(user.getName() + " \"" + user.getEmail() + "\"");
         fromEmailTextAddressField.setValue(sb1.toString());
 
         StringBuilder sb2 = new StringBuilder();
@@ -130,9 +128,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                 .append(user.getImapServer())
                 .append(":")
                 .append(user.getImapPort());
-/*        fromEmailTextAddressField.setDescription("SMTP server: " + user.getSmtpServer() + ":" + user.getSmtpPort() + "\n" +
-                "POP3 server: " + user.getPop3Server() + ":" + user.getPop3Port() + "\n" +
-                "IMAP server: " + user.getImapServer() + ":" + user.getImapPort());*/
         fromEmailTextAddressField.setDescription(sb2.toString());
     }
 
@@ -150,11 +145,14 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     public void onToEmailFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
         if (event.getValue().getEmail() != null) {
             sendAndCloseButton.setEnabled(true);
-            sendAndCloseButton.setDescription(messageBundle.getMessage("msgSendMessageToCandidate")
-                    + event.getValue().getEmail());
+            sendAndCloseButton.setDescription(new StringBuilder()
+                    .append(messageBundle.getMessage("msgSendMessageToCandidate"))
+                    .append(event.getValue().getEmail())
+                    .toString());
         } else {
             sendAndCloseButton.setEnabled(false);
-            sendAndCloseButton.setDescription(messageBundle.getMessage("msgNotPossibleSendEmail"));
+            sendAndCloseButton.setDescription(
+                    messageBundle.getMessage("msgNotPossibleSendEmail"));
         }
     }
 
@@ -223,9 +221,11 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             message.setFrom(new InternetAddress(SMTP_USERNAME));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(subject);
-            message.setContent(getMailHTMLHeader()
-                    + body
-                    + getMailHTMLFooter(), "text/html; charset=utf-8");
+            message.setContent(new StringBuilder()
+                    .append(getMailHTMLHeader())
+                    .append(body)
+                    .append(getMailHTMLFooter())
+                    .toString(), "text/html; charset=utf-8");
 
             message.setSentDate(new Date());
 
@@ -263,7 +263,11 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             notifications.create(Notifications.NotificationType.ERROR)
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
-                    .withDescription(messageBundle.getMessage("msgErrorSendEmail") + " " + e.getMessage())
+                    .withDescription(new StringBuilder()
+                            .append(messageBundle.getMessage("msgErrorSendEmail"))
+                            .append(" ")
+                            .append(e.getMessage())
+                            .toString())
                     .withHideDelayMs(15000)
                     .show();
         }
@@ -364,20 +368,21 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
 
 
     private String getMailHTMLFooter() {
-        return "</body>\n" +
-                "</html>";
+        return "</body>\n</html>";
     }
 
     private String getMailHTMLHeader() {
-        return "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n" +
-                "<html>\n" +
-                "<head>\n" +
-                "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n" +
-                "<title>...</title>\n" +
-                "<style type=\"text/css\">\n" +
-                "</style>\n" +
-                "</head>\n" +
-                "<body>";
+        return new StringBuilder()
+                .append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n")
+                .append("<html>\n")
+                .append("<head>\n")
+                .append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n")
+                .append("<title>...</title>\n")
+                .append("<style type=\"text/css\">\n")
+                .append("</style>\n")
+                .append("</head>\n")
+                .append("<body>")
+                .toString();
     }
 
     private void sendByEmailDefault() {
@@ -418,8 +423,10 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             notifications.create()
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
-                    .withDescription(messageBundle.getMessage("msgMailNotSend")
-                            + e.getCause())
+                    .withDescription(new StringBuilder()
+                            .append(messageBundle.getMessage("msgMailNotSend"))
+                            .append(e.getCause())
+                            .toString())
                     .show();
 
             commitChanges();

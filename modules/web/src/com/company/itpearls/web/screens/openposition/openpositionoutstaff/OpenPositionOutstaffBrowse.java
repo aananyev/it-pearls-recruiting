@@ -53,7 +53,7 @@ public class OpenPositionOutstaffBrowse extends OpenPositionBrowse {
 
     private void addAddToStaffTableButtonEnable() {
         openPositionsTable.addSelectionListener(e -> {
-                addToStaffTableButton.setEnabled(openPositionsTable.getSingleSelected() != null);
+            addToStaffTableButton.setEnabled(openPositionsTable.getSingleSelected() != null);
         });
     }
 
@@ -78,9 +78,11 @@ public class OpenPositionOutstaffBrowse extends OpenPositionBrowse {
                 commitContext.addInstanceToCommit(staffingTable);
                 dataManager.commit(commitContext);
 
-                String message = "Вакансия "
-                        + openPositionsTable.getSingleSelected().getVacansyName()
-                        + " добавлена в штатное расписание";
+                String message = new StringBuilder()
+                        .append("Вакансия ")
+                        .append(openPositionsTable.getSingleSelected().getVacansyName())
+                        .append(" добавлена в штатное расписание")
+                        .toString();
 
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withDescription(message)

@@ -162,15 +162,6 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                                         .withHandler(e -> createTextMessage()),
                                 new DialogAction(DialogAction.Type.NO))
                         .show();
-/*            } else{
-                dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
-                        .withCaption(messageBundle.getMessage("msgWarning"))
-                        .withMessage(messageBundle.getMessage("msgClearAllFields"))
-                        .withActions(
-                                new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
-                                        .withHandler(e -> clearAllFields()),
-                                new DialogAction(DialogAction.Type.NO))
-                        .show(); */
             }
         }
     }

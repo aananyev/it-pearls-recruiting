@@ -189,11 +189,9 @@ public class InternalEmailTemplateEdit extends StandardEditor<InternalEmailTempl
 
     private void setEmailKeys() {
         HashMap<String, String> emailKeys = emailGenerationService.generateKeys();
-//        String retStr = "";
         StringBuilder sb = new StringBuilder("");
 
         for (Map.Entry<String, String> entry : emailKeys.entrySet()) {
-//            retStr = retStr + entry.getKey() + " - " + entry.getValue() + "<br>";
             sb.append(entry.getKey())
                     .append(" - ")
                     .append(entry.getValue())

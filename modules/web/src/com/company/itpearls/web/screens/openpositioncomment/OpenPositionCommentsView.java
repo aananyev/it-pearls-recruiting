@@ -55,10 +55,11 @@ public class OpenPositionCommentsView extends Screen {
         setCommentOpenPositionScrollIteractionList(this.openPosition, commentsScrollBox);
     }
 
+    private static final String QUERY_OPEN_POSITION_INTERACTIONS =
+            "select e from itpearls_IteractionList e " +
+                    "where e.vacancy = :vacancy and e.iteractionType.signFeedback = true";
+
     public void setCommentOpenPositionScrollIteractionList(OpenPosition editedEntity, ScrollBoxLayout commentsScrollBox) {
-        final String QUERY_OPEN_POSITION_INTERACTIONS =
-                "select e from itpearls_IteractionList e " +
-                        "where e.vacancy = :vacancy and e.iteractionType.signFeedback = true";
         List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
                 .query(QUERY_OPEN_POSITION_INTERACTIONS)
                 .view("iteractionList-view")
@@ -123,9 +124,10 @@ public class OpenPositionCommentsView extends Screen {
             starsAndCommentHBox.setSpacing(true);
             Label candidateName = uiComponents.create(Label.class);
             candidateName.addStyleName("table-wordwrap");
-            candidateName.setValue(iteractionList.getCandidate().getFullName()
-                    + " / "
-                    + iteractionList.getCandidate().getPersonPosition().getPositionRuName());
+            candidateName.setValue(new StringBuilder()
+                    .append(iteractionList.getCandidate().getFullName())
+                    .append(" / ")
+                    .append(iteractionList.getCandidate().getPersonPosition().getPositionRuName()).toString());
 
             Label stars = uiComponents.create(Label.class);
             stars.addStyleName("table-wordwrap");
@@ -190,10 +192,11 @@ public class OpenPositionCommentsView extends Screen {
                             if (closeEvent
                                     .getCloseAction()
                                     .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
-                                replyButtonInvoke(e, "("
-                                        + name.getValue()
-                                        + ") Re:"
-                                        + (String) closeEvent.getValue("comment"));
+                                replyButtonInvoke(e, new StringBuilder()
+                                        .append("(")
+                                        .append(name.getValue())
+                                        .append(") Re:")
+                                        .append((String) closeEvent.getValue("comment")).toString());
                             }
                         })
                         .show();
@@ -393,10 +396,10 @@ public class OpenPositionCommentsView extends Screen {
     private void replyButtonInvoke(Button.ClickEvent e, String replyStr) {
         createComment(replyStr);
 
-        events.publish(new UiNotificationEvent(this,
-                messageBundle.getMessage("msgPublishOpenPositionComment")
-                        + ":"
-                        + openPosition.getVacansyName()));
+        events.publish(new UiNotificationEvent(this, new StringBuilder()
+                .append(messageBundle.getMessage("msgPublishOpenPositionComment"))
+                        .append(":")
+                        .append(openPosition.getVacansyName()).toString()));
     }
 
     private void createComment(String commentStr) {

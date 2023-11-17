@@ -262,8 +262,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setFullNameCandidate();
         // вдруг такой кандидат уже есть
         List<JobCandidate> candidates = dataManager.load(JobCandidate.class)
-                .query("select e from itpearls_JobCandidate e where e.firstName like :firstName and " +
-                        "e.secondName like :secondName")
+                .query("select e from itpearls_JobCandidate e where e.firstName like :firstName and e.secondName like :secondName")
                 .cacheable(true)
                 .parameter("firstName", firstNameField.getValue())
                 .parameter("secondName", secondNameField.getValue())
@@ -446,12 +445,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String BEFORE = "";
         String AFTER = "&nbsp";
 
-        jobTitleTitle.setValue(BEFORE + jobTitleTitle.getValue() + AFTER);
-        personPositionTitle.setValue(BEFORE + personPositionTitle.getRawValue() + AFTER);
-        emailTitle.setValue(BEFORE + emailTitle.getValue() + AFTER);
-        phoneTitle.setValue(BEFORE + phoneTitle.getValue() + AFTER);
-        telegramTitle.setValue(BEFORE + telegramTitle.getValue() + AFTER);
-        skypeTitle.setValue(BEFORE + skypeTitle.getValue() + AFTER);
+        jobTitleTitle.setValue(new StringBuilder().append(BEFORE).append(jobTitleTitle.getValue()).append(AFTER).toString());
+        personPositionTitle.setValue(new StringBuilder().append(BEFORE).append(personPositionTitle.getRawValue()).append(AFTER).toString());
+        emailTitle.setValue(new StringBuilder().append(BEFORE).append(emailTitle.getValue()).append(AFTER).toString());
+        phoneTitle.setValue(new StringBuilder().append(BEFORE).append(phoneTitle.getValue()).append(AFTER).toString());
+        telegramTitle.setValue(new StringBuilder().append(BEFORE).append(telegramTitle.getValue()).append(AFTER).toString());
+        skypeTitle.setValue(new StringBuilder(BEFORE).append(skypeTitle.getValue()).append(AFTER).toString());
     }
 
     protected boolean isRequiredAddresField() {
@@ -490,7 +489,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         else if (middleName != null)
             localMiddleName = middleName;
 
-        fullName = localSecondName + " " + localFirstName + " " + localMiddleName;
+        fullName = new StringBuilder().append(localSecondName)
+                .append(" ")
+                .append(localFirstName)
+                .append(" ")
+                .append(localMiddleName)
+                .toString();
 
         return fullName;
     }
@@ -1410,7 +1414,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             });
 
             jobCandidateIteractionListTable.getColumn("rating").setColumnGenerator(event -> {
-                return event.getItem().getRating() != null ? starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
+                return event.getItem().getRating() != null ?
+                        starsAndOtherService.setStars(event.getItem().getRating() + 1) : "";
             });
 
             jobCandidateIteractionListTable.addEditorCloseListener(event -> {
@@ -1433,7 +1438,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             add = iteractionList.getAddInteger().toString();
 
 
-                        return (iteractionList.getComment() != null ? iteractionList.getComment() : "") + add;
+                        return new StringBuilder(iteractionList.getComment() != null ?
+                                iteractionList.getComment() : "").append(add).toString();
                     });
 
             jobCandidateIteractionListTable.addSelectionListener(e -> {
@@ -1653,9 +1659,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void addMiddleNameSuggestField() {
-        String queryString = "select distinct e.middleName " +
-                "from itpearls_JobCandidate e " +
-                "order by e.middleName";
+        String queryString = "select distinct e.middleName from itpearls_JobCandidate e order by e.middleName";
 
         List<String> middleName = dataManager.loadValue(queryString, String.class)
                 .list();
@@ -1667,9 +1671,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void addSecondNameSuggestField() {
-        String queryString = "select distinct e.secondName " +
-                "from itpearls_JobCandidate e " +
-                "order by e.secondName";
+        String queryString = "select distinct e.secondName from itpearls_JobCandidate e order by e.secondName";
 
         List<String> secondName = dataManager.loadValue(queryString, String.class)
                 .list();
@@ -1681,9 +1683,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void addFirstNameSuggestField() {
-        String queryString = "select distinct e.firstName " +
-                "from itpearls_JobCandidate e " +
-                "order by e.firstName";
+        String queryString = "select distinct e.firstName from itpearls_JobCandidate e order by e.firstName";
 
         List<String> firstName = dataManager.loadValue(queryString, String.class)
                 .list();
@@ -3226,7 +3226,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             if (closeEvent
                                     .getCloseAction()
                                     .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
-                                replyButtonInvoke(e, "(" + ") Re:" + (String) closeEvent.getValue("comment"));
+                                replyButtonInvoke(e, new StringBuilder()
+                                        .append("(")
+                                        .append(") Re:")
+                                        .append((String) closeEvent.getValue("comment"))
+                                        .toString());
                             }
                         })
                         .show();
@@ -3557,16 +3561,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .getToVacancy()
                         .getProjectName()
                         .getProjectDescription() != null) {
-                    image.setDescription("<h4>"
-                            + event.getItem()
-                            .getToVacancy()
-                            .getProjectName()
-                            .getProjectName()
-                            + "</h4><br><br>"
-                            + event.getItem()
-                            .getToVacancy()
-                            .getProjectName()
-                            .getProjectDescription());
+                    image.setDescription(new StringBuilder()
+                            .append("<h4>")
+                            .append(event.getItem()
+                                    .getToVacancy()
+                                    .getProjectName()
+                                    .getProjectName())
+                            .append("</h4><br><br>")
+                            .append(event.getItem()
+                                    .getToVacancy()
+                                    .getProjectName()
+                                    .getProjectDescription()).toString());
                 }
 
                 if (event.getItem()
@@ -3610,16 +3615,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .getVacancy()
                         .getProjectName()
                         .getProjectDescription() != null) {
-                    image.setDescription("<h4>"
-                            + event.getItem()
-                            .getVacancy()
-                            .getProjectName()
-                            .getProjectName()
-                            + "</h4><br><br>"
-                            + event.getItem()
-                            .getVacancy()
-                            .getProjectName()
-                            .getProjectDescription());
+                    image.setDescription(new StringBuilder()
+                            .append("<h4>")
+                            .append(event.getItem()
+                                    .getVacancy()
+                                    .getProjectName()
+                                    .getProjectName())
+                            .append("</h4><br><br>")
+                            .append(event.getItem()
+                                    .getVacancy()
+                                    .getProjectName()
+                                    .getProjectDescription())
+                            .toString());
                 }
 
                 if (event.getItem()
@@ -3645,14 +3652,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         String break_line = "break_line";
 
         String str = text
-                .replaceAll("<br>", break_line + break_line)
+                .replaceAll("<br>", new StringBuilder().append(break_line).append(break_line).toString())
                 .replaceAll("<li>", "<li> - ")
-                .replaceAll("</p>", "</p>" + break_line + break_line)
-                .replaceAll("</li>", "</li>" + break_line)
-                .replaceAll("</dd>", "</dd>" + break_line)
-                .replaceAll("</dt>", "</dt>" + break_line)
-                .replaceAll("</dl>", "</dl>" + break_line)
-                .replaceAll("</div>", "</div>" + break_line + break_line);
+                .replaceAll("</p>", new StringBuilder().append("</p>").append(break_line).append(break_line).toString())
+                .replaceAll("</li>", new StringBuilder().append("</li>").append(break_line).toString())
+                .replaceAll("</dd>", new StringBuilder().append("</dd>").append(break_line).toString())
+                .replaceAll("</dt>", new StringBuilder().append("</dt>").append(break_line).toString())
+                .replaceAll("</dl>", new StringBuilder().append("</dl>").append(break_line).toString())
+                .replaceAll("</div>", new StringBuilder().append("</div>").append(break_line).append(break_line).toString());
         str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
 
         return str.replaceAll("\n", breakLine[0]);

@@ -98,7 +98,10 @@ public class ExtMainScreen extends MainScreen {
         Boolean searchUser = false;
 
         for (User user : users) {
-            if (event.getMessage().startsWith(user.getName() + ":")) {
+            if (event.getMessage().startsWith(new StringBuilder()
+                    .append(user.getName())
+                    .append(":")
+                    .toString())) {
                 if (event.getMessage().startsWith(userSession.getUser().getName())) {
                     notifications.create(Notifications.NotificationType.WARNING)
                             .withDescription(event.getMessage())
@@ -177,7 +180,7 @@ public class ExtMainScreen extends MainScreen {
             if (duffDate <= 7 && duffDate >= 0) {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withType(Notifications.NotificationType.TRAY)
-                        .withCaption("WARNING")
+                        .withCaption("msgWarning")
                         .withDescription("Через " + duffDate + " дней кончится резерв на кандидата " +
                                 pr.getJobCandidate().getFullName() + ".")
                         .withHideDelayMs(5000)
@@ -218,12 +221,15 @@ public class ExtMainScreen extends MainScreen {
                     if (list.getIteractionType().getNotificationNeedSend()) {
                         if (list.getIteractionType().getNotificationWhenSend() != null) {
                             String caption = EVENT_NOTIFICATION_REMINDER;
-                            String desription = "<font size=2><b>" + list.getCandidate().getFullName()
-                                    + " статус \""
-                                    + list.getIteractionType().getIterationName()
-                                    + "\" дата "
-                                    + simpleDateFormat.format(list.getAddDate())
-                                    + "</b></font>";
+                            String desription = new StringBuilder()
+                                    .append("<font size=2><b>")
+                                    .append(list.getCandidate().getFullName())
+                                    .append(" статус \"")
+                                    .append(list.getIteractionType().getIterationName())
+                                    .append("\" дата ")
+                                    .append(simpleDateFormat.format(list.getAddDate()))
+                                    .append("</b></font>")
+                                    .toString();
                             switch (list.getIteractionType().getNotificationWhenSend()) {
                                 case 1: // не отсылать сообщение
                                     break;

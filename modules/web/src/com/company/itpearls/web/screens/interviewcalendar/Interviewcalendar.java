@@ -119,7 +119,6 @@ public class Interviewcalendar extends Screen {
 
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setFirstDayOfWeek(java.util.Calendar.MONDAY);
-//            calendar.setTime( new Date() );
 
             int today = calendar.get(java.util.Calendar.DAY_OF_WEEK);
             calendar.add(java.util.Calendar.DAY_OF_WEEK, -today + java.util.Calendar.MONDAY);

@@ -76,6 +76,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private Map<String, Integer> mapCheckTrace = new LinkedHashMap<>();
     private Map<String, Integer> mapNotificationPeriod = new LinkedHashMap<>();
     private Map<String, Integer> mapWhenSendMessage = new LinkedHashMap<>();
+
     @Inject
     private HBoxLayout notificationSetupHBox;
     @Inject
@@ -126,8 +127,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         if (signViewOnlyManagersCheckBox.getValue() == null) {
             signViewOnlyManagersCheckBox.setValue(false);
         }
-
-
     }
 
     @Subscribe("checkBoxCalendar")
@@ -253,9 +252,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-/*        if( !PersistenceHelper.isNew( getEditedEntity() )) {
-            // embeddedPict.setIcon(getEditedEntity().getPic());
-        } */
 
         if (!PersistenceHelper.isNew(getEditedEntity()))
             labelItercationName.setValue(getEditedEntity().getIterationName());
@@ -288,13 +284,19 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         });
 
         HashMap<String, String> emailKeys = emailGenerationService.generateKeys();
-        String retStr = "";
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder();
 
         for (Map.Entry<String, String> entry : emailKeys.entrySet()) {
-            retStr = retStr + entry.getKey() + " - " + entry.getValue() + "<br>";
+            sb.append(entry.getKey())
+                    .append(" - ")
+                    .append(entry.getValue())
+                    .append("<br>")
+                    .toString();
+//            retStr = retStr + entry.getKey() + " - " + entry.getValue() + "<br>";
         }
 
-        commentKeysRichTextArea.setValue(retStr);
+        commentKeysRichTextArea.setValue(sb.toString());
 
     }
 

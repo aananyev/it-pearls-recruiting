@@ -58,10 +58,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private Metadata metadata;
     @Inject
     private DataContext dataContext;
-//    @Inject
-//    private InstanceContainer<JobCandidate> jobCandidateDc;
-//    @Inject
-//    private InstanceLoader<JobCandidate> jobCandidateDl;
 
     private static final String QUERY_GET_PERSONEL_RESERVE =
             "select e from itpearls_PersonelReserve e where e.jobCandidate = :jobCandidate and (e.endDate > :currDate or e.endDate is null)";
@@ -222,8 +218,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                         .view("internalEmailer-view")
                         .list();
 
-//                signIconLabel[0] = getSignIconLabel(signIconLabel[0], event.getItem().getToEmail());
-
                 jobCandidateSignIcons = dataManager.load(JobCandidateSignIcon.class)
                         .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                         .parameter("jobCandidate", event.getItem().getToEmail())
@@ -241,7 +235,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
                 replyLabel[0].setVisible(true);
                 replyLabel[0].setIconFromSet(CubaIcon.CANCEL);
-//                retHbox[0].add(replyLabel);
             }
 
             @Override
@@ -251,7 +244,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 if (internalEmailer.size() > 0) {
                     replyLabel[0].setVisible(true);
                     replyLabel[0].setIconFromSet(CubaIcon.MAIL_REPLY);
-//                    retHbox[0].add(replyLabel);
                 } else {
                     replyLabel[0].setVisible(false);
                 }
@@ -435,8 +427,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         }
     }
 
-    //    final String separatorChar = "⎯";
-//    String separator = separatorChar.repeat(15);
     final static String strAction = "Action";
 
     private void setActionToActionPopupButton(PopupButton actionButton, InternalEmailer internalEmailer) {
@@ -856,11 +846,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private void editJobCandidateAction(InternalEmailer internalEmailer) {
         emailersTable.setSelected(internalEmailer);
 
-//        jobCandidateDl.setParameter("jobCandidate", internalEmailer.getToEmail());
-//        jobCandidateDl.load();
-
         screenBuilders.editor(JobCandidate.class, this)
-//                .editEntity(jobCandidateDc.getItem())
                 .editEntity(internalEmailer.getToEmail())
                 .build()
                 .show();

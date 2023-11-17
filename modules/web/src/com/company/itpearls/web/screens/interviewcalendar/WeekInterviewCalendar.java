@@ -106,9 +106,12 @@ public class WeekInterviewCalendar extends Screen {
             DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, userSession.getLocale());
 
             notifications.create()
-                    .withCaption(df.format(dateCalendarEventClickEvent.getCalendarEvent().getStart()) + ": " +
-                            getTime(dateCalendarEventClickEvent.getCalendarEvent().getStart()) + " - " +
-                            getTime(dateCalendarEventClickEvent.getCalendarEvent().getEnd()))
+                    .withCaption(new StringBuilder()
+                            .append(df.format(dateCalendarEventClickEvent.getCalendarEvent().getStart()))
+                            .append(": ")
+                            .append(getTime(dateCalendarEventClickEvent.getCalendarEvent().getStart()))
+                            .append(" - ")
+                            .append(getTime(dateCalendarEventClickEvent.getCalendarEvent().getEnd())).toString())
                     .withDescription(dateCalendarEventClickEvent.getCalendarEvent().getDescription())
                     .withType(Notifications.NotificationType.TRAY)
                     .withHtmlSanitizer(false)
@@ -116,17 +119,8 @@ public class WeekInterviewCalendar extends Screen {
 
             String a = getCandidateName(dateCalendarEventClickEvent.getCalendarEvent().getCaption());
 
-/*            JobCandidate jobCandidate = dataManager.load(JobCandidate.class)
-                    .query("select e from itpearls_JobCandidate e where e.fullName = \'"+a+"\'")
-                    .view("jobCandidate-view")
-                    .one(); */
-
             IteractionList iteractionList = dataManager.load(IteractionList.class)
-                    .query("select e " +
-                            "from itpearls_IteractionList e " +
-                            "where e.addDate = :dateIteraction and e.candidate = " +
-                            "(select f from itpearls_JobCandidate f " +
-                            "where f.fullName like :candidate)")
+                    .query("select e from itpearls_IteractionList e where e.addDate = :dateIteraction and e.candidate = (select f from itpearls_JobCandidate f where f.fullName like :candidate)")
                     .parameter("dateIteraction", dateCalendarEventClickEvent.getCalendarEvent().getStart())
                     .parameter("candidate", getCandidateName(dateCalendarEventClickEvent.getCalendarEvent().getCaption()))
                     .view("iteractionList-view")
@@ -205,16 +199,23 @@ public class WeekInterviewCalendar extends Screen {
                 calendarEvent.setStyleName(list.getIteractionType().getCalendarItemStyle());
 
             if (list.getIteractionType().getCalendarItemDescription() != null)
-                calendarEvent.setDescription(typeIteraction +
-                        (list.getVacancy().getProjectName() != null ? list.getVacancy().getProjectName() + ":" : "") +
-                        list.getIteractionType().getCalendarItemDescription() +
-                        "\n" + nameCandidate +
-                        list.getCandidate().getFullName() + "");
+                calendarEvent.setDescription(new StringBuilder()
+                        .append(typeIteraction)
+                        .append(list.getVacancy().getProjectName() != null ? list.getVacancy().getProjectName() + ":" : "")
+                        .append(list.getIteractionType().getCalendarItemDescription())
+                        .append("\n")
+                        .append(nameCandidate)
+                        .append(list.getCandidate().getFullName())
+                        .append("")
+                        .toString());
             else
-                calendarEvent.setDescription(typeIteraction +
-                        (list.getVacancy().getProjectName() != null ? list.getVacancy().getProjectName() + ":\n" : "") +
-                        nameCandidate +
-                        list.getCandidate().getFullName() + "");
+                calendarEvent.setDescription(new StringBuilder()
+                        .append(typeIteraction)
+                        .append(list.getVacancy().getProjectName() != null ? list.getVacancy().getProjectName() + ":\n" : "")
+                        .append(nameCandidate)
+                        .append(list.getCandidate().getFullName())
+                        .append("")
+                        .toString());
 
             calendarEvent.setAllDay(false);
 

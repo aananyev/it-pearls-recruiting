@@ -101,11 +101,9 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
         setRemoteLabel();
     }
 
+    private static final String QUERY_SUBSCRIBERS = "select e from itpearls_RecrutiesTasks e where e.endDate >= :currentDate and e.openPosition = :openPosition";
+
     public void setSubscribersRecruters() {
-        final String QUERY_SUBSCRIBERS = "select e "
-                + "from itpearls_RecrutiesTasks e "
-                + "where e.endDate >= :currentDate and "
-                + "e.openPosition = :openPosition";
 
         List<RecrutiesTasks> tasks = dataManager.load(RecrutiesTasks.class)
                 .query(QUERY_SUBSCRIBERS)

@@ -61,6 +61,8 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
     private UiComponents uiComponents;
     @Inject
     private Button viewOpenPosition;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -101,9 +103,8 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
             s.show();
         } else {
             notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("ВНИМАНИЕ!")
-                    .withDescription("Для проверки навыков кандидата по резюме " +
-                            "\nнеобходимозаполнить поле \"Вакансия\".")
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription("Для проверки навыков кандидата по резюме \nнеобходимозаполнить поле \"Вакансия\".")
                     .show();
         }
     }
@@ -213,7 +214,6 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
             labelBattery.setStyleName("rating_battery_blue_5");
         }
 
-
         return labelBattery;
     }
 
@@ -231,56 +231,6 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
         });
     }
 
-/*    @Install(to = "suitableCheckDataGrid.relevance", subject = "columnGenerator")
-    private String suitableCheckDataGridRelevanceColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        List<CandidateCV> candidateCVs = dataManager.load(CandidateCV.class)
-                .query("select e from itpearls_CandidateCV e where e.candidate = :candidate")
-                .parameter("candidate", jobCandidate)
-                .list();
-
-        List<SkillTree> skillTrees = new ArrayList<>();
-
-        if (candidateCVs != null) {
-            for (CandidateCV candidateCV : candidateCVs) {
-                List<SkillTree> st = new ArrayList<>();
-
-                if (candidateCV.getTextCV() != null) {
-                    st = pdfParserService.parseSkillTree(candidateCV.getTextCV());
-                }
-
-                skillTrees.addAll(st);
-            }
-        }
-
-        List<SkillTree> skillTreesJD = new ArrayList<>();
-
-        if (event.getItem().getComment() != null) {
-            skillTreesJD = pdfParserService.parseSkillTree(event.getItem().getComment());
-        }
-
-
-        Set<SkillTree> stJD = new HashSet<>(skillTreesJD);
-        skillTreesJD.clear();
-        skillTreesJD.addAll(stJD);
-
-        Set<SkillTree> stCV = new HashSet<>(skillTrees);
-        skillTrees.clear();
-        skillTrees.addAll(stCV);
-
-        Integer counter = 0;
-
-        for (SkillTree skillTree : skillTreesJD) {
-            for (SkillTree st : skillTrees) {
-                if (skillTree.equals(st))
-                    counter++;
-            }
-        }
-
-        String percent = (skillTreesJD.size() != 0 ? String.valueOf(counter * 100 / skillTreesJD.size()) : "...") + "%";
-
-        return percent;
-    } */
-
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         if (jobCandidate != null) {
@@ -296,10 +246,12 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
         openPositionDl.load();
 
         candidateNameLabel.setValue(jobCandidate.getFullName() + ", ");
-        positionNameLabel.setValue(jobCandidate.getPersonPosition().getPositionEnName()
-                + " / "
-                + jobCandidate.getPersonPosition().getPositionRuName()
-                + ", ");
+        positionNameLabel.setValue(new StringBuilder()
+                .append(jobCandidate.getPersonPosition().getPositionEnName())
+                .append(" / ")
+                .append(jobCandidate.getPersonPosition().getPositionRuName())
+                .append(", ")
+                .toString());
         cityOfResidenceLabel.setValue(jobCandidate.getCityOfResidence().getCityRuName());
 
         jobPositionLookupPickerField.setValue(jobCandidate.getPersonPosition());
@@ -476,27 +428,11 @@ public class FindSuitable extends StandardLookup<OpenPosition> {
 
         return style;
     }
-/*
-    @Subscribe("suitableCheckDataGrid")
-    public void onSuitableCheckDataGridItemClick(DataGrid.ItemClickEvent<OpenPosition> event) {
-        screenBuilders.editor(OpenPosition.class, this)
-                .withScreenClass(OpenPositionEdit.class)
-                .editEntity(event.getItem())
-                .build()
-                .show();
-    }*/
-
 
     public void viewOpenPositions() {
         screenBuilders.editor(OpenPosition.class, this)
                 .withScreenClass(OpenPositionEdit.class)
                 .editEntity(suitableCheckDataGrid.getSingleSelected())
-/*                .editEntity(dataManager.load(OpenPosition.class)
-                        .query("select e from itpearls_OpenPosition e where e = :openPosition")
-                        .view("openPosition-view")
-                        .parameter("openPosition", suitableCheckDataGrid.getSingleSelected())
-                        .one()
-                )*/
                 .build()
                 .show();
     }

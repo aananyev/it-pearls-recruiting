@@ -370,10 +370,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private static final String QUERY_GET_PERSONEL_RESERVE =
-            "select e from itpearls_PersonelReserve e " +
-                    "where e.jobCandidate = :jobCandidate " +
-                    "and " +
-                    "(e.endDate > :currDate or e.endDate is null)";
+            "select e from itpearls_PersonelReserve e where e.jobCandidate = :jobCandidate and (e.endDate > :currDate or e.endDate is null)";
 
     private void putCandidatesToPersonelReserve(JobCandidate jobCandidate, OpenPosition openPosition) {
 
@@ -397,7 +394,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
 
             notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption("ВНИМАНИЕ")
+                    .withCaption(messageBundle.getMessage("msgWarning"))
                     .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
                             + ": " + jobCandidate.getFullName()
                             + "\n" + messageBundle.getMessage("msgRecruterOwner")
@@ -412,43 +409,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private static final String QUERY_GET_DEFAULT_VACANCY =
-            "select e from itpearls_OpenPosition e " +
-                    "where e.vacansyName like \'Default\'";
+            "select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'";
     private final String QUERY_GET_SIGN_PERSONAL_RESERVE_PUT_INTERACTION =
-            "select e " +
-                    "from itpearls_Iteraction e " +
-                    "where e.signPersonalReservePut = true";
+            "select e from itpearls_Iteraction e where e.signPersonalReservePut = true";
 
-/*    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
-                                                     String subject,
-                                                     String comment,
-                                                     Date date,
-                                                     JobCandidate jobCandidate,
-                                                     User user,
-                                                     Boolean priority) {
-        try {
-            OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
-
-            openPositionNews.setOpenPosition(editedEntity);
-            openPositionNews.setAuthor(user);
-            openPositionNews.setDateNews(date);
-            openPositionNews.setSubject(subject);
-            openPositionNews.setComment(comment);
-            openPositionNews.setCandidates(jobCandidate);
-            openPositionNews.setPriorityNews(priority != null ? priority : false);
-
-            CommitContext commitContext = new CommitContext();
-            commitContext.addInstanceToCommit(openPositionNews);
-            dataManager.commit(commitContext);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    } */
 
     private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load(IteractionList.class)
-                .query("select e from itpearls_IteractionList e where e.numberIteraction = " +
-                        "(select max(f.numberIteraction) from itpearls_IteractionList f)")
+                .query("select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)")
                 .view("iteractionList-view")
                 .cacheable(true)
                 .one();
@@ -611,7 +579,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     public void onBeforeShow(BeforeShowEvent event) {
         jobCandidatesTable.setDescriptionAsHtml(true);
         if (userSession.getUser().getGroup().getName().equals("Стажер")) {
-            jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+            jobCandidatesDl.setParameter("userName", new StringBuilder()
+                    .append("%")
+                    .append(userSession.getUser().getLogin())
+                    .append("%")
+                    .toString());
 
             checkBoxShowOnlyMy.setValue(true);
             checkBoxShowOnlyMy.setEditable(false);
@@ -639,7 +611,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         for (SignIcons icons : signIconsDc.getItems()) {
             signFilterButton.addAction(new BaseAction(
-//                    strSimpleService.deleteExtraCharacters(icons.getTitleEnd() + "Action"))
                     strSimpleService.deleteExtraCharacters(new StringBuilder()
                             .append(icons.getTitleEnd())
                             .append("Action")
@@ -714,11 +685,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         StringBuilder sb = new StringBuilder();
-        sb.append("%")
-                .append(userSession.getUser().getLogin())
-                .append("%");
+
         if (checkBoxShowOnlyMy.getValue()) {
-//            jobCandidatesDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+            sb.append("%")
+                    .append(userSession.getUser().getLogin())
+                    .append("%");
             jobCandidatesDl.setParameter("userName", sb.toString());
         } else {
             jobCandidatesDl.removeParameter("userName");
@@ -791,14 +762,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .append((date != null ? date : "нет"))
                 .append("</div>")
                 .toString();
-
-/*        return
-                "<div class=\"" +
-                        retStr
-                        + "\">" +
-                        (date != null ? date : "нет")
-                        + "</div>"
-                ; */
     }
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "styleProvider")
@@ -1202,8 +1165,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             if (lastIteraction != null) {
                                 e.setVacancy(lastIteraction.getVacancy());
                                 e.setNumberIteraction(dataManager.loadValue(
-                                        "select max(e.numberIteraction) " +
-                                                "from itpearls_IteractionList e", BigDecimal.class)
+                                        "select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
                                         .one().add(BigDecimal.ONE));
                             }
                         }
@@ -1249,8 +1211,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 if (lastIteraction != null) {
                                     iteractionList1.setVacancy(lastIteraction.getVacancy());
                                     iteractionList1.setNumberIteraction(dataManager.loadValue(
-                                            "select max(e.numberIteraction) " +
-                                                    "from itpearls_IteractionList e", BigDecimal.class)
+                                            "select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
                                             .one().add(BigDecimal.ONE));
                                 }
                             })
@@ -1346,9 +1307,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                         } catch (NullPointerException e) {
                             notifications.create(Notifications.NotificationType.ERROR)
                                     .withCaption(messageBundle.getMessage("msgError"))
-                                    .withDescription("Не могу открыть форму резюме для редактирования.\n" +
-                                            "Зайдите в карточку кандидата " +
-                                            "и продолжите редактирование резюме во вкладке \"Резюме кандидата\"")
+                                    .withDescription("Не могу открыть форму резюме для редактирования.\nЗайдите в карточку кандидата и продолжите редактирование резюме во вкладке \"Резюме кандидата\"")
                                     .show();
 
                             e.printStackTrace();
@@ -1433,8 +1392,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         candidateCVDl.setContainer(candidateCVDc);
         iteractionListDl.setDataContext(dataContext);
         candidateCVDl.setView("candidateCV-view");
-        candidateCVDl.setQuery("select e from itpearls_CandidateCV e " +
-                "where e.candidate = :candidate order by e.datePost");
+        candidateCVDl.setQuery("select e from itpearls_CandidateCV e where e.candidate = :candidate order by e.datePost");
     }
 
     private void createDataComponents() {
@@ -1447,9 +1405,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         iteractionListDl.setContainer(iteractionListDc);
         iteractionListDl.setDataContext(dataContext);
         iteractionListDl.setView("iteractionList-view");
-        iteractionListDl.setQuery("select e from itpearls_IteractionList e " +
-                "where e.candidate = :candidate " +
-                "order by e.numberIteraction desc");
+        iteractionListDl.setQuery("select e from itpearls_IteractionList e where e.candidate = :candidate order by e.numberIteraction desc");
     }
 
     private Component createNewIteractionButton(JobCandidate entity) {
@@ -1705,14 +1661,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     protected void injectColorCss(String color) {
         Page.Styles styles = Page.getCurrent().getStyles();
-        String style = String.format(
-                ".pic-center-large-%s {" +
-                        "color: #%s;" +
-                        "text-align: center;" +
-                        "text-color: gray;" +
-                        "font-size: large;" +
-                        "margin: 0 auto;" +
-                        "}",
+        String style = String.format(new StringBuilder()
+                        .append(".pic-center-large-%s {")
+                        .append("color: #%s;")
+                        .append("text-align: center;")
+                        .append("text-color: gray;")
+                        .append("font-size: large;")
+                        .append("margin: 0 auto;")
+                        .append("}")
+                        .toString(),
                 color, color);
 
         styles.add(style);
@@ -2185,30 +2142,23 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             if (withCVCheckBox.getValue() != null) {
                 if (!withCVCheckBox.getValue()) {
                     if (ratingFieldNotLower.getValue() == null) {
-                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                                + "order by e.secondName, e.firstName");
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e order by e.secondName, e.firstName");
                     } else {
-                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                                + "where e in (select f.candidate "
-                                + "from itpearls_IteractionList f "
-                                + "where f.candidate = e) "
-                                + "and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= " + ratingFieldNotLower.getValue().toString() + ") "
-                                + "order by e.secondName, e.firstName");
+                        jobCandidatesDl.setQuery(new StringBuilder()
+                                .append("select e from itpearls_JobCandidate e where e in (select f.candidate from itpearls_IteractionList f where f.candidate = e) and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= ")
+                                .append(ratingFieldNotLower.getValue().toString())
+                                .append(") order by e.secondName, e.firstName")
+                                .toString());
                     }
                 } else {
                     if (ratingFieldNotLower.getValue() == null) {
-                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                                + "where e in (select g.candidate "
-                                + "from itpearls_CandidateCV g "
-                                + "where g.candidate = e) "
-                                + "order by e.secondName, e.firstName");
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e where e in (select g.candidate from itpearls_CandidateCV g where g.candidate = e) order by e.secondName, e.firstName");
                     } else {
-                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                                + "where e in (select g.candidate "
-                                + "from itpearls_CandidateCV g "
-                                + "where g.candidate = e) "
-                                + "and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= " + ratingFieldNotLower.getValue().toString() + ") "
-                                + "order by e.secondName, e.firstName");
+                        jobCandidatesDl.setQuery(new StringBuilder()
+                                .append("select e from itpearls_JobCandidate e where e in (select g.candidate from itpearls_CandidateCV g where g.candidate = e) and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= ")
+                                .append(ratingFieldNotLower.getValue().toString())
+                                .append(") order by e.secondName, e.firstName")
+                                .toString());
                     }
                 }
 
@@ -2338,53 +2288,56 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private void setRatingField() {
         Map<String, Integer> map = new LinkedHashMap<>();
-        map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
-        map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
-        map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
-        map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
-        map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(1))
+                .append(" Полный негатив")
+                .toString(), 0);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(2))
+                .append(" Сомнительно")
+                .toString(), 1);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(3))
+                .append(" Нейтрально")
+                .toString(), 2);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(4))
+                .append(" Положительно")
+                .toString(), 3);
+        map.put(new StringBuilder()
+                .append(starsAndOtherService.setStars(5))
+                .append(" Отлично!")
+                .toString(), 4);
         ratingFieldNotLower.setOptionsMap(map);
 
         ratingFieldNotLower.addValueChangeListener(e -> {
             if (ratingFieldNotLower.getValue() != null) {
                 if (withCVCheckBox.getValue() != null) {
                     if (!withCVCheckBox.getValue()) {
-                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                                + "order by e.secondName, e.firstName");
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e order by e.secondName, e.firstName");
                     } else {
-                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                                + "where e in (select f.candidate "
-                                + "from itpearls_IteractionList f "
-                                + "where f.candidate = e) "
-                                + "and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= " + ratingFieldNotLower.getValue().toString() + ") "
-                                + "order by e.secondName, e.firstName");
+                        jobCandidatesDl.setQuery(new StringBuilder()
+                                .append("select e from itpearls_JobCandidate e where e in (select f.candidate from itpearls_IteractionList f where f.candidate = e) and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= ")
+                                .append(ratingFieldNotLower.getValue().toString())
+                                .append(") order by e.secondName, e.firstName")
+                                .toString());
                     }
                 } else {
-                    jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                            + "order by e.secondName, e.firstName");
+                    jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e order by e.secondName, e.firstName");
                 }
             } else {
                 if (withCVCheckBox.getValue() != null) {
                     if (!withCVCheckBox.getValue()) {
-                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                                + "where e in (select g.candidate "
-                                + "from itpearls_CandidateCV g "
-                                + "where g.candidate = e) "
-                                + "order by e.secondName, e.firstName");
+                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e where e in (select g.candidate from itpearls_CandidateCV g where g.candidate = e) order by e.secondName, e.firstName");
                     } else {
-                        jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                                + "where e in (select g.candidate "
-                                + "from itpearls_CandidateCV g "
-                                + "where g.candidate = e) "
-                                + "and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= " + ratingFieldNotLower.getValue().toString() + ") "
-                                + "order by e.secondName, e.firstName");
+                        jobCandidatesDl.setQuery(new StringBuilder()
+                                .append("select e from itpearls_JobCandidate e where e in (select g.candidate from itpearls_CandidateCV g where g.candidate = e) and e in (select g.candidate from itpearls_IteractionList g where g.candidate = e and g.rating >= ")
+                                .append(ratingFieldNotLower.getValue().toString())
+                                .append(") order by e.secondName, e.firstName")
+                                .toString());
                     }
                 } else {
-                    jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e "
-                            + "where e in (select g.candidate "
-                            + "from itpearls_CandidateCV g "
-                            + "where g.candidate = e) "
-                            + "order by e.secondName, e.firstName");
+                    jobCandidatesDl.setQuery("select e from itpearls_JobCandidate e where e in (select g.candidate from itpearls_CandidateCV g where g.candidate = e) order by e.secondName, e.firstName");
                 }
             }
 
@@ -2407,38 +2360,20 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     public void onSendEmail() {
-        InternalEmailerTemplateEdit screen = (InternalEmailerTemplateEdit) screenBuilders.editor(InternalEmailerTemplate.class, this)
-                .newEntity()
-                .withInitializer(e -> {
-                    e.setFromEmail((ExtUser) userSession.getUser());
-                    e.setToEmail(jobCandidatesTable.getSingleSelected());
-                })
-                .build();
+        InternalEmailerTemplateEdit screen =
+                (InternalEmailerTemplateEdit) screenBuilders.editor(InternalEmailerTemplate.class, this)
+                        .newEntity()
+                        .withInitializer(e -> {
+                            e.setFromEmail((ExtUser) userSession.getUser());
+                            e.setToEmail(jobCandidatesTable.getSingleSelected());
+                        })
+                        .build();
         screen.setJobCandidate(jobCandidatesTable.getSingleSelected());
         screen.show();
     }
 
     protected FileDescriptor loadCVFileForQuickLoad() {
         AtomicReference<FileDescriptor> fileDescriptor = new AtomicReference<>();
-
-/*        FileUploadDialog dialog = (FileUploadDialog) screens.create("fileUploadDialog", OpenMode.DIALOG);
-
-        dialog.addCloseWithCommitListener(() -> {
-            UUID fileId = dialog.getFileId();
-            String fileName = dialog.getFileName();
-
-            File file = fileUploadingAPI.getFile(fileId);
-
-            fileDescriptor.set(fileUploadingAPI.getFileDescriptor(fileId, fileName));
-            try {
-                fileUploadingAPI.putFileIntoStorage(fileId, fileDescriptor.get());
-                dataManager.commit(fileDescriptor.get());
-            } catch (FileStorageException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        screens.show(dialog); */
 
         return fileDescriptor.get();
     }
@@ -2533,7 +2468,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             }
         } catch (FileStorageException | IOException | IllegalArgumentException e) {
             notifications.create(Notifications.NotificationType.ERROR)
-                    .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
+                    .withDescription(new StringBuilder()
+                            .append("Ошибка распознавания документа ")
+                            .append(fileDescriptor.getName())
+                            .toString())
                     .show();
 
             throw new RuntimeException(e);
@@ -2794,9 +2732,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 .withPosition(Notifications.Position.BOTTOM_RIGHT)
                                 .withHideDelayMs(15000)
                                 .withStyleName("create-jobcandidate-warning")
-                                .withDescription(messageBundle
-                                        .getMessage("msgAdditionalSocialNetwork")
-                                        + network)
+                                .withDescription(new StringBuilder()
+                                        .append(messageBundle.getMessage("msgAdditionalSocialNetwork"))
+                                        .append(network)
+                                        .toString())
                                 .show();
 
                     }
@@ -3002,31 +2941,36 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             Base64.Encoder encoder = Base64.getEncoder();
             String encodedString = encoder.encodeToString(image);
 
-            return getMailHTMLHeader()
-                    + "\n<img src=\"data:image/" + fd.getExtension() + ";base64, " +
-                    encodedString +
-                    "\"" +
-                    " width=\"220\" height=\"292\">\n"
-                    + getMailHTMLFooter();
+            return new StringBuilder()
+                    .append(getMailHTMLHeader())
+                    .append("\n<img src=\"data:image/")
+                    .append(fd.getExtension())
+                    .append(";base64, ")
+                    .append(encodedString)
+                    .append("\"")
+                    .append(" width=\"220\" height=\"292\">\n")
+                    .append(getMailHTMLFooter())
+                    .toString();
         } else
             return null;
     }
 
 
     private String getMailHTMLFooter() {
-        return "</body>\n" +
-                "</html>";
+        return "</body>\n</html>";
     }
 
     private String getMailHTMLHeader() {
-        return "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n" +
-                "<html>\n" +
-                "<head>\n" +
-                "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n" +
-                "<title></title>\n" +
-                "<style type=\"text/css\">\n" +
-                "</style>\n" +
-                "</head>\n" +
-                "<body>";
+        return new StringBuilder()
+                .append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n")
+                .append("<html>\n")
+                .append("<head>\n")
+                .append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n")
+                .append("<title></title>\n")
+                .append("<style type=\"text/css\">\n")
+                .append("</style>\n")
+                .append("</head>\n")
+                .append("<body>")
+                .toString();
     }
 }
