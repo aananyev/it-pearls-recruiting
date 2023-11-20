@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.signicons;
 
+import com.company.itpearls.core.StarsAndOtherService;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.ColorPicker;
@@ -18,6 +19,7 @@ import javax.inject.Inject;
 @EditedEntityContainer("signIconsDc")
 @LoadDataBeforeShow
 public class SignIconsEdit extends StandardEditor<SignIcons> {
+
     @Inject
     private TextField<String> iconNameField;
     @Inject
@@ -34,6 +36,8 @@ public class SignIconsEdit extends StandardEditor<SignIcons> {
     private ScreenBuilders screenBuilders;
     @Inject
     private TextField<String> titleEndField;
+    @Inject
+    private StarsAndOtherService starsAndOtherService;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -88,5 +92,14 @@ public class SignIconsEdit extends StandardEditor<SignIcons> {
         });
 
         selectIcon.show();
+    }
+
+    @Subscribe("titleRuField")
+    public void onTitleRuFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (titleRuField.getValue() != null) {
+            String outString =
+                    starsAndOtherService.cyrillicToLatin(titleRuField.getValue().replaceAll(" ", "_"));
+            titleEndField.setValue(outString);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.company.itpearls.core;
 
+import com.ibm.icu.text.Transliterator;
 import org.springframework.stereotype.Service;
 
 @Service(StarsAndOtherService.NAME)
@@ -46,5 +47,15 @@ public class StarsAndOtherServiceBean implements StarsAndOtherService {
         }
 
         return sb.toString();
+    }
+
+    public static final String CYRILLIC_TO_LATIN = "Cyrillic-Latin";
+
+    @Override
+    public String cyrillicToLatin(String inputString) {
+            String st = "привет мир";
+            Transliterator toLatinTrans = Transliterator.getInstance(CYRILLIC_TO_LATIN);
+            String result = toLatinTrans.transliterate(inputString);
+            return result;
     }
 }

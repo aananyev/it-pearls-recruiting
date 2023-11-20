@@ -11,6 +11,7 @@
                 <property name="personPosition" view="_local"/>
                 <property name="iteractionList"
                           view="_local">
+                    <property name="vacancy" view="_local"/>
                     <property name="iteractionType"
                               view="_local"/>
                     <property name="recrutier" view="_local"/>
@@ -29,15 +30,27 @@
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e in
+                                    (select n.candidate
+                                    from itpearls_IteractionList n
+                                    where n.vacancy = :vacancy and
+                                    n.iteractionType in
+                                    (select o from itpearls_Iteraction o
+                                    where o.signSendToClient = :signSendToClient))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
                                     (select l.candidate
                                     from itpearls_IteractionList l
-                                    where @dateBefore(l.dateIteraction, :dateBefore)</c:where>
+                                    where @dateBefore(l.dateIteraction, :dateBefore)
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e in
                                     (select m.candidate
                                     from itpearls_IteractionList m
-                                    where @dateAfter(m.dateIteraction, :dateAfter)</c:where>
+                                    where @dateAfter(m.dateIteraction, :dateAfter)
+                                </c:where>
                             </c:jpql>
                         </and>
                     </condition>
@@ -48,13 +61,18 @@
     <dialogMode height="600"
                 width="1100"
                 forceDialog="true"/>
-    <layout expand="iteractionListsTable"
+    <layout expand="datagridBox"
+            responsive="true"
             spacing="true">
-        <hbox spacing="false">
+        <hbox spacing="false"
+              responsive="true"
+              width="100%"
+              height="AUTO">
             <label id="vacancyLabel"
                    stylename="h3"/>
         </hbox>
         <vbox height="AUTO"
+              responsive="true"
               spacing="true"
               width="AUTO"
               align="TOP_LEFT">
@@ -67,9 +85,13 @@
                    width="AUTO"
                    visible="false"/>
         </vbox>
-        <hbox spacing="true">
+        <hbox spacing="true"
+              visible="false"
+              responsive="true"
+              height="AUTO">
             <radioButtonGroup id="beforeAnAfterRadioButtonsGroup"
                               orientation="horizontal"
+                              visible="false"
                               align="MIDDLE_CENTER"
                               width="AUTO"/>
             <label width="AUTO"
@@ -81,31 +103,38 @@
                               orientation="horizontal"
                               width="AUTO"/>
         </hbox>
+        <vbox id="datagridBox" height="100%" width="100%">
         <dataGrid id="iteractionListsTable"
+                  bodyRowHeight="60px" responsive="true"
                   width="100%"
+                  height="100%"
                   dataContainer="jobCandidatesDc">
             <columns>
+                <column id="fileImageFace"
+                        property="fileImageFace"
+                        maximumWidth="50px"
+                        width="50px">
+                    <componentRenderer/>
+                </column>
                 <column id="fullName"
                         sort="ASCENDING"
                         sortable="true"
                         property="fullName"/>
-                <column id="personPosition"
-                        property="personPosition"/>
-                <column id="active"
-                        caption="msg://msgActive"
-                        width="40px">
-                    <componentRenderer/>
-                </column>
                 <column id="lastInterationName"
                         caption="msg://msgLastInteractionType"
                         maximumWidth="300px"
                         width="300px">
                     <componentRenderer/>
                 </column>
-                <column id="lastInteractionDate"
-                        caption="msg://msgLastInteractionDate"
-                        maximumWidth="100px"
-                        width="100px">
+                <column id="lastIteraction"
+                        caption="msg://msgDateLastIteraction"
+                        maximumWidth="90px"
+                        minimumWidth="90px">
+                    <componentRenderer/>
+                </column>
+                <column id="active"
+                        caption="msg://msgActive"
+                        width="40px">
                     <componentRenderer/>
                 </column>
                 <column id="recruter"
@@ -127,7 +156,12 @@
                 </column>
             </columns>
         </dataGrid>
-        <button action="lookupCancelAction"
-                align="BOTTOM_RIGHT"/>
+        </vbox>
+        <vbox width="100%" height="AUTO">
+            <button action="lookupCancelAction"
+                    width="AUTO"
+                    height="AUTO"
+                    align="BOTTOM_RIGHT"/>
+        </vbox>
     </layout>
 </window>

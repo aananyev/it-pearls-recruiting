@@ -30,6 +30,10 @@
                 <property name="toEmail" view="_local">
                     <property name="fileImageFace"
                               view="_local"/>
+                    <property name="iteractionList" view="_local">
+                        <property name="iteractionType" view="_local"/>
+                        <property name="recrutier" view="_local"/>
+                    </property>
                 </property>
             </view>
             <loader id="emailersDl">
@@ -59,7 +63,9 @@
                 <column id="templateColumn"
                         property="emailTemplate"
                         width="200px"
-                        collapsible="true"/>
+                        collapsible="true">
+                    <componentRenderer/>
+                </column>
             </columns>
         </dataGrid>
 

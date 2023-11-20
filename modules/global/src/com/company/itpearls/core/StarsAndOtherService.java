@@ -8,4 +8,6 @@ public interface StarsAndOtherService {
     String setBlackRectangle(int blackRenctangle);
 
     String noneStars();
+
+    String cyrillicToLatin(String inputString);
 }

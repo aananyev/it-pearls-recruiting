@@ -3383,6 +3383,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .withHandler(e -> {
                     JobCandidateSimpleBrowse jobCandidateSimpleBrowse = screens.create(JobCandidateSimpleBrowse.class);
                     jobCandidateSimpleBrowse.setOpenPosition(event.getItem());
+                    jobCandidateSimpleBrowse.setSignSendToClent(true);
                     jobCandidateSimpleBrowse.setHeader(event.getItem());
 
                     screens.show(jobCandidateSimpleBrowse);

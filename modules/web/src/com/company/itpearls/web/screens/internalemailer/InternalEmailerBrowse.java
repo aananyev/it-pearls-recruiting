@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.internalemailer;
 
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.OpenPositionNewsService;
@@ -94,6 +95,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private CollectionLoader<SignIcons> signIconsDl;
     @Inject
     private PopupButton signFilterButton;
+    @Inject
+    private InteractionService interactionService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -888,22 +891,159 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     }
 
     protected void resendEmailAction(InternalEmailer internalEmailer) {
-        screenBuilders.editor(InternalEmailer.class, this)
-                .newEntity()
-                .withInitializer(emailer -> {
-                    if (internalEmailer != null) {
-                        emailersTable.setSelected(internalEmailer);
+        if (!internalEmailer.getToEmail().getBlockCandidate()) {
+            screenBuilders.editor(InternalEmailer.class, this)
+                    .newEntity()
+                    .withInitializer(emailer -> {
+                        if (internalEmailer != null) {
+                            emailersTable.setSelected(internalEmailer);
+                        }
+
+                        emailer.setReplyInternalEmailer(internalEmailer);
+                        emailer.setToEmail(internalEmailer.getToEmail());
+                        emailer.setSelectedForAction(internalEmailer.getSelectedForAction() != null
+                                ? internalEmailer.getSelectedForAction() : false);
+                        emailer.setSelectionSymbolForActions(internalEmailer.getSelectionSymbolForActions() != null
+                                ? internalEmailer.getSelectionSymbolForActions() : 0);
+                    })
+                    .withOpenMode(OpenMode.DIALOG)
+                    .build()
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("msgError"))
+                    .withDescription(messageBundle.getMessage("msgBlockCandidate"))
+                    .withPosition(Notifications.Position.MIDDLE_CENTER)
+                    .show();
+        }
+    }
+
+    @Install(to = "emailersTable.lastIteraction", subject = "columnGenerator")
+    private Component emailersTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
+        IteractionList iteractionList = interactionService.getLastIteraction(event.getItem().getToEmail());
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        String date = null;
+        String style = null;
+
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy").format(iteractionList.getDateIteraction());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        Boolean checkBlockCandidate = event.getItem().getToEmail().getBlockCandidate() == null
+                ? false : event.getItem().getToEmail().getBlockCandidate();
+
+        if (checkBlockCandidate != null) {
+            if (checkBlockCandidate != true) {
+                if (iteractionList != null) {
+                    Calendar calendar = Calendar.getInstance();
+
+                    if (iteractionList.getDateIteraction() != null) {
+                        calendar.setTime(iteractionList.getDateIteraction());
+                    } else {
+                        calendar.setTime(event.getItem().getCreateTs());
                     }
 
-                    emailer.setReplyInternalEmailer(internalEmailer);
-                    emailer.setToEmail(internalEmailer.getToEmail());
-                    emailer.setSelectedForAction(internalEmailer.getSelectedForAction() != null
-                            ? internalEmailer.getSelectedForAction() : false);
-                    emailer.setSelectionSymbolForActions(internalEmailer.getSelectionSymbolForActions() != null
-                            ? internalEmailer.getSelectionSymbolForActions() : 0);
-                })
-                .withOpenMode(OpenMode.DIALOG)
-                .build()
-                .show();
+                    calendar.add(Calendar.MONTH, 1);
+
+                    Calendar calendar1 = Calendar.getInstance();
+
+                    if (calendar.after(calendar1)) {
+                        if (iteractionList.getRecrutier() != null) {
+                            if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+//                                retStr = "button_table_red";
+                                style = "button_table_red";
+                            } else {
+//                                retStr = "button_table_yellow";
+                                style = "button_table_yellow";
+                            }
+                        }
+                    } else {
+//                        retStr = "button_table_green";
+                        style = "button_table_green";
+                    }
+                } else {
+//                    retStr = "button_table_white";
+                    style = "button_table_white";
+                }
+            } else {
+//                retStr = "button_table_black";
+                style = "button_table_black";
+            }
+        } else {
+//            retStr = "button_table_green";
+            style = "button_table_green";
+        }
+
+        retLabel.setValue(date != null ? date : "нет");
+        retLabel.setStyleName(style);
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retLabel.setDescription(iteractionList.getIteractionType().getIterationName());
+
+        retHBox.add(retLabel);
+
+        return retHBox;
     }
+
+    @Install(to = "emailersTable.subjectEmail", subject = "columnGenerator")
+    private Component emailersTableSubjectEmailColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retLabel.addStyleName("table-wordwrap");
+        retLabel.setValue(event.getItem().getSubjectEmail());
+
+        retHBox.add(retLabel);
+        return retHBox;
+    }
+
+    @Install(to = "emailersTable.dateCreateEmail", subject = "columnGenerator")
+    private Component emailersTableDateCreateEmailColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retLabel.addStyleName("table-wordwrap");
+        retLabel.setValue(event.getItem().getDateCreateEmail().toString());
+
+        retHBox.add(retLabel);
+        return retHBox;
+    }
+
+    @Install(to = "emailersTable.dateSendEmail", subject = "columnGenerator")
+    private Component emailersTableDateSendEmailColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retLabel.addStyleName("table-wordwrap");
+        retLabel.setValue(event.getItem().getDateSendEmail().toString());
+
+        retHBox.add(retLabel);
+        return retHBox;
+    }
+
 }

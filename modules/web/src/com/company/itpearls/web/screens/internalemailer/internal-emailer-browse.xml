@@ -14,7 +14,11 @@
                 <property name="toEmail" view="_local">
                     <property name="fileImageFace" view="_local"/>
                     <property name="personPosition" view="_local"/>
-                    <property name="candidateCv" view="candidateCV-view"/>
+                    <property name="candidateCv" view="_local"/>
+                    <property name="iteractionList" view="_local">
+                        <property name="iteractionType" view="_local"/>
+                        <property name="recrutier" view="_local"/>
+                    </property>
                 </property>
             </view>
             <loader id="emailersDl" cacheable="true">
@@ -100,18 +104,29 @@
                 </column>
                 <column property="subjectEmail"
                         id="subjectEmail"
-                        width="495px"
+                        width="400px"
                         minimumWidth="250px">
+                    <componentRenderer/>
                 </column>
                 <column property="dateCreateEmail"
                         sort="DESCENDING"
                         id="dateCreateEmail"
                         width="140px"
-                        maximumWidth="140px"/>
+                        maximumWidth="140px">
+                    <componentRenderer/>
+                </column>
                 <column property="dateSendEmail"
                         id="dateSendEmail"
                         width="140px"
-                        maximumWidth="140px"/>
+                        maximumWidth="140px">
+                    <componentRenderer/>
+                </column>
+                <column id="lastIteraction"
+                        caption="msg://msgDateLastIteraction"
+                        maximumWidth="90px"
+                        minimumWidth="90px">
+                    <componentRenderer/>
+                </column>
                 <column id="actionButtonColumn"
                         width="100px"
                         minimumWidth="80px"

@@ -1,6 +1,8 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.Iteraction;
+import com.company.itpearls.entity.IteractionList;
+import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.ValueLoadContext;
@@ -43,5 +45,26 @@ public class IteractionServiceBean implements IteractionService {
         List<KeyValueEntity> list = dataManager.loadValues(context);
 
         return null;
+    }
+
+    @Override
+    public IteractionList getLastIteraction(JobCandidate jobCandidate) {
+        if (jobCandidate.getIteractionList() != null) {
+            IteractionList maxIteraction = null;
+
+            for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
+                if (maxIteraction == null)
+                    maxIteraction = iteractionList;
+
+                if (iteractionList.getNumberIteraction() != null) {
+                    if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
+                        maxIteraction = iteractionList;
+                    }
+                }
+            }
+
+            return maxIteraction;
+        } else
+            return null;
     }
 }

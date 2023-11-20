@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.internalemailertemplate;
 
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
@@ -22,6 +23,8 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
     private DataGrid<InternalEmailerTemplate> emailersTable;
     @Inject
     private UserSession userSession;
+    @Inject
+    private UiComponents uiComponents;
 
     public void setEmailTemplateFilter(InternalEmailTemplate internalEmailTemplate) {
         emailersDl.setParameter("emailTemplate", internalEmailTemplate);
@@ -104,5 +107,22 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
                 .withOpenMode(OpenMode.DIALOG)
                 .build()
                 .show();
+    }
+
+    @Install(to = "emailersTable.templateColumn", subject = "columnGenerator")
+    private Component emailersTableTemplateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailerTemplate> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retLabel.addStyleName("table-wordwrap");
+        retLabel.setValue(event.getItem().getEmailTemplate().getTemplateName());
+
+        retHBox.add(retLabel);
+        return retHBox;
     }
 }

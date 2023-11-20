@@ -1,21 +1,28 @@
 package com.company.itpearls.web.screens.openposition;
 
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.entity.User;
+import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.collections.BagUtils;
 import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
@@ -26,6 +33,52 @@ import java.util.Map;
 @LookupComponent("iteractionListsTable")
 @LoadDataBeforeShow
 public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
+    @Inject
+    private DataGrid<JobCandidate> iteractionListsTable;
+    @Inject
+    private InteractionService interactionService;
+    @Inject
+    private UserSession userSession;
+    @Inject
+    private MessageBundle messageBundle;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        setFileImageCandidate(event);
+
+    }
+
+    private void setFileImageCandidate(BeforeShowEvent event) {
+        iteractionListsTable.addGeneratedColumn("fileImageFace", entity -> {
+            HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
+            Image image = uiComponents.create(Image.NAME);
+
+            if (entity.getItem().getFileImageFace() != null) {
+                try {
+                    image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
+                            "fileImageFace"));
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            }
+
+            image.setWidth("20px");
+            image.setStyleName("circle-20px");
+
+            image.setScaleMode(Image.ScaleMode.CONTAIN);
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            hBox.setWidthFull();
+            hBox.setHeightFull();
+            hBox.add(image);
+
+            return hBox;
+        });
+    }
+
     @Inject
     private CollectionLoader<JobCandidate> jobCandidateDl;
     JobCandidate jobCandidate = null;
@@ -143,9 +196,20 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
         jobCandidateDl.load();
     }
 
+    public void setSignSendToClent(Boolean signSendToClent) {
+        jobCandidateDl.setParameter("signSendToClient", true);
+        jobCandidateDl.load();
+    }
+
     @Install(to = "iteractionListsTable.active", subject = "columnGenerator")
     private Component iteractionListsTableActiveColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
         Label retLabel = uiComponents.create(Label.class);
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
         Boolean flag = false;
 
         for (IteractionList iteractionList : event.getItem().getIteractionList()) {
@@ -169,7 +233,9 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
             retLabel.setDescription("С кандидатом кейс НЕ завершен по этой вакансии");
         }
 
-        return retLabel;
+        retHBox.add(retLabel);
+
+        return retHBox;
     }
 
     @Install(to = "iteractionListsTable.lastInterationName", subject = "columnGenerator")
@@ -178,6 +244,9 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
         Date startDate = event.getItem().getIteractionList().get(0).getDateIteraction();
         String startInteractionName = null;
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+        retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         if (event.getItem().getIteractionList() != null) {
             if (event.getItem().getIteractionList().get(0) != null) {
@@ -194,6 +263,7 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
 
         if (startDate != null) {
             Label retLabel = uiComponents.create(Label.class);
+            retLabel.setStyleName("table-wordwrap");
 
             for (IteractionList iteractionList : event.getItem().getIteractionList()) {
                 if (iteractionList.getDateIteraction() != null) {
@@ -206,44 +276,11 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
 
 
             retLabel.setValue(startInteractionName);
-            retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
-
-            retBox.setWidthFull();
-            retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            retBox.add(retLabel);
-
-        }
-
-        return retBox;
-    }
-
-    @Install(to = "iteractionListsTable.lastInteractionDate", subject = "columnGenerator")
-    private Component iteractionListsTableLastInteractionDateColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-
-        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
-        Date startDate = event.getItem().getIteractionList().get(0).getDateIteraction();
-
-        if (startDate != null) {
-            Label retLabel = uiComponents.create(Label.class);
-
-            for (IteractionList iteractionList : event.getItem().getIteractionList()) {
-                if (iteractionList.getDateIteraction() != null) {
-                    if (startDate.before(iteractionList.getDateIteraction())) {
-                        startDate = iteractionList.getDateIteraction();
-                    }
-                }
-            }
-
-
-            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-            retLabel.setValue(sdf.format(startDate));
             retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            retBox.setWidthFull();
-            retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
             retBox.add(retLabel);
-
         }
+
         return retBox;
     }
 
@@ -308,25 +345,115 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
     @Install(to = "iteractionListsTable.jobCandidateCard", subject = "columnGenerator")
     private Component iteractionListsTableJobCandidateCardColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
-        Button retButton = uiComponents.create(Button.class);
-
-        retButton.setCaption("Просмотр");
-        retButton.setDescription("Просмотр и редактирование карточки кандидата");
-        retButton.setWidthAuto();
-        retButton.setHeightAuto();
-        retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        retButton.addClickListener(e -> {
-            screenBuilders.editor(JobCandidate.class, this)
-                    .editEntity(event.getItem())
-                    .build()
-                    .show();
-        });
-
         retBox.setHeightFull();
         retBox.setWidthFull();
         retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
+        PopupButton retButton = uiComponents.create(PopupButton.class);
+        retButton.setCaption("Просмотр");
+        retButton.setWidthAuto();
+        retButton.setHeightAuto();
+        retButton.setIcon(CubaIcon.BARS.source());
+        retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        retButton.addAction(new BaseAction("jobCandidateCardAction")
+                .withCaption(messageBundle.getMessage("msgJobCandidate"))
+                .withHandler(event1 -> {
+                    screenBuilders.editor(JobCandidate.class, this)
+                            .editEntity(event.getItem())
+                            .build()
+                            .show();
+                }));
+
+        retButton.addAction(new BaseAction("interationListAction")
+        .withCaption(messageBundle.getMessage("msgInteractionList"))
+        .withHandler(event1 -> {
+            IteractionListSimpleBrowse screen = screenBuilders.lookup(IteractionList.class, this)
+                    .withScreenClass(IteractionListSimpleBrowse.class)
+                    .build();
+            screen.setJobCandidate(event.getItem());
+            screen.setOpenPosition(this.openPosition);
+            screen.show();
+        }));
+
         retBox.add(retButton);
         return retBox;
+}
+
+    @Install(to = "iteractionListsTable.lastIteraction", subject = "columnGenerator")
+    private Component iteractionListsTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        IteractionList iteractionList = interactionService.getLastIteraction(event.getItem());
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        String date = null;
+        String style = null;
+
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy").format(iteractionList.getDateIteraction());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+//        String retStr = "";
+        StringBuilder sb = new StringBuilder();
+        Boolean checkBlockCandidate = event.getItem().getBlockCandidate() == null ? false : event.getItem().getBlockCandidate();
+
+        if (checkBlockCandidate != null) {
+            if (checkBlockCandidate != true) {
+                if (iteractionList != null) {
+                    Calendar calendar = Calendar.getInstance();
+
+                    if (iteractionList.getDateIteraction() != null) {
+                        calendar.setTime(iteractionList.getDateIteraction());
+                    } else {
+                        calendar.setTime(event.getItem().getCreateTs());
+                    }
+
+                    calendar.add(Calendar.MONTH, 1);
+
+                    Calendar calendar1 = Calendar.getInstance();
+
+                    if (calendar.after(calendar1)) {
+                        if (iteractionList.getRecrutier() != null) {
+                            if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+//                                retStr = "button_table_red";
+                                style = "button_table_red";
+                            } else {
+//                                retStr = "button_table_yellow";
+                                style = "button_table_yellow";
+                            }
+                        }
+                    } else {
+//                        retStr = "button_table_green";
+                        style = "button_table_green";
+                    }
+                } else {
+//                    retStr = "button_table_white";
+                    style = "button_table_white";
+                }
+            } else {
+//                retStr = "button_table_black";
+                style = "button_table_black";
+            }
+        } else {
+//            retStr = "button_table_green";
+            style = "button_table_green";
+        }
+
+        retLabel.setValue(date != null ? date : "нет");
+        retLabel.setStyleName(style);
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retLabel.setDescription(iteractionList.getIteractionType().getIterationName());
+
+        retHBox.add(retLabel);
+
+        return retHBox;
     }
 }

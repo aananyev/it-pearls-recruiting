@@ -701,7 +701,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
     private String jobCandidatesTableLastIteractionColumnGenerator
             (DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        IteractionList iteractionList = getLastIteraction(event.getItem());
+        IteractionList iteractionList = interactionService.getLastIteraction(event.getItem());
 
         String date = null;
 
@@ -766,7 +766,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "styleProvider")
     private String jobCandidatesTableLastIteractionStyleProvider(JobCandidate jobCandidate) {
-        IteractionList iteractionList = getLastIteraction(jobCandidate);
+        IteractionList iteractionList = interactionService.getLastIteraction(jobCandidate);
 
         if (iteractionList != null) {
             Calendar calendar = Calendar.getInstance();
@@ -791,7 +791,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "descriptionProvider")
     private String jobCandidatesTableLastIteractionDescriptionProvider(JobCandidate jobCandidate) {
-        IteractionList iteractionList = getLastIteraction(jobCandidate);
+        IteractionList iteractionList = interactionService.getLastIteraction(jobCandidate);
         String recrutierName = "";
 
         if (iteractionList != null) {
@@ -856,7 +856,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
-    private IteractionList getLastIteraction(JobCandidate jobCandidate) {
+/*    private IteractionList getLastIteraction(JobCandidate jobCandidate) {
         if (jobCandidate.getIteractionList() != null) {
             IteractionList maxIteraction = null;
 
@@ -874,7 +874,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             return maxIteraction;
         } else
             return null;
-    }
+    } */
 
     @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableResumeColumnGenerator
@@ -2075,7 +2075,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         });
 
         jobCandidatesTable.getColumn("lastIteraction").setStyleProvider(e -> {
-            IteractionList iteractionList = getLastIteraction(e);
+            IteractionList iteractionList = interactionService.getLastIteraction(e);
 
             if (iteractionList != null) {
                 Calendar calendar = Calendar.getInstance();
