@@ -1033,6 +1033,7 @@ create table ITPEARLS_INTERNAL_EMAIL_TEMPLATE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    DTYPE varchar(31),
     --
     TEMPLATE_NAME varchar(128) not null,
     TEMPLATE_SUBJ varchar(255),
@@ -1042,6 +1043,9 @@ create table ITPEARLS_INTERNAL_EMAIL_TEMPLATE (
     TEMPLATE_COMMENT varchar(255),
     TEMPLATE_AUTHOR_ID uuid not null,
     SHARE_TEMPLATE boolean,
+    --
+    -- from itpearls_InternalEmailTemplateInteraction
+    INTERACTION_ID uuid,
     --
     primary key (ID)
 )^

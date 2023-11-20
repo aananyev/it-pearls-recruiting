@@ -11,6 +11,7 @@ import com.company.itpearls.web.screens.openposition.openpositionfragments.OpenP
 import com.company.itpearls.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.openpositioncomment.OpenPositionCommentEdit;
 import com.company.itpearls.web.screens.openpositioncomment.OpenPositionCommentsView;
+import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksBrowse;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
@@ -75,12 +76,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private final static String icons_traffic_lights_red_png = "icons/traffic-lights_red.png";
     private final static String icons_remove_png = "icons/remove.png";
 
-    static final String QUERY_URGENTLY_POSITIONS =
+    private static final String QUERY_URGENTLY_POSITIONS =
             "select e from itpearls_OpenPosition e where e.openClose = false and e.priority >= :priority";
-    static final String QUERY_PARENT_OPENPOSITION =
+    private static final String QUERY_PARENT_OPENPOSITION =
             "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
-    static final String QUERY_AVERAGE_RATING =
+    private static final String QUERY_AVERAGE_RATING =
             "select avg(e.rating) from itpearls_OpenPositionComment e where e.openPosition = :openPosition and not e.rating is null";
+
+    private final static String separatorChar = "⎯";
+    private final static String separator = separatorChar.repeat(22);
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -1630,11 +1634,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")
     private String openPositionsTableRowStyleProvider(OpenPosition openPosition) {
-        Integer s = dataManager.loadValue("select count(e.reacrutier) " +
-                "from itpearls_RecrutiesTasks e " +
-                "where e.openPosition = :openPos and " +
-                "e.closed = false and " +
-                "e.endDate >= :currentDate", Integer.class)
+        Integer s = dataManager.loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e where e.openPosition = :openPos and e.closed = false and e.endDate >= :currentDate", Integer.class)
                 .parameter("openPos", openPosition)
                 .parameter("currentDate", new Date())
                 .one();
@@ -2589,37 +2589,37 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                 retStr = "REFRESH_ACTION";
                                 descriptionRetLabel = messageBundle.getMessage("msgDraftPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-gray";
-                            break;
+                                break;
                             case PRIORITY_PAUSED:
                                 retStr = "PAUSE_CIRCLE";
                                 descriptionRetLabel = messageBundle.getMessage("msgPausePriority");
                                 styleRetLabel = "open-position-pic-center-x-large-gray";
-                            break;
+                                break;
                             case PRIORITY_LOW:
                                 retStr = "ARROW_CIRCLE_DOWN";
                                 descriptionRetLabel = messageBundle.getMessage("msgLowPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-blue";
-                            break;
+                                break;
                             case PRIORITY_NORMAL:
                                 retStr = "LOOKUP_OK";
                                 descriptionRetLabel = messageBundle.getMessage("msgNormalPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-green";
-                            break;
+                                break;
                             case PRIORITY_HIGH:
                                 retStr = "ARROW_CIRCLE_UP";
                                 descriptionRetLabel = messageBundle.getMessage("msgHighPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-orange";
-                            break;
+                                break;
                             case PRIORITY_CRITICAL:
                                 retStr = "EXCLAMATION_CIRCLE";
                                 descriptionRetLabel = messageBundle.getMessage("msgCriticalPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-red";
-                            break;
+                                break;
                             default:
                                 retStr = "LOOKUP_OK";
                                 descriptionRetLabel = messageBundle.getMessage("msgPausePriority");
                                 styleRetLabel = "open-position-pic-center-x-large-gray";
-                            break;
+                                break;
                         }
                     }
                 } else {
@@ -3281,6 +3281,112 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     public void openCloseButtonWithCommentInvoke() {
         setRatingComment();
         openCloseButtonInvoke();
+    }
+
+    @Install(to = "openPositionsTable.openPositionActionButtonColumn", subject = "columnGenerator")
+    private Object openPositionsTableOpenPositionActionButtonColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        PopupButton actionPopupButton = uiComponents.create(PopupButton.class);
+        actionPopupButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        actionPopupButton.setWidthAuto();
+        actionPopupButton.setHeightAuto();
+        actionPopupButton.setIconFromSet(CubaIcon.BARS);
+        actionPopupButton.setShowActionIcons(true);
+        actionPopupButton.addPopupVisibilityListener(e -> {
+            openPositionsTable.setSelected(event.getItem());
+        });
+
+        initActionButton(actionPopupButton, event);
+        retHBox.add(actionPopupButton);
+
+        return retHBox;
+    }
+
+    private void initActionButton(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        initActionButtonJobCandidateSimpleBrowse(actionPopupButton, event);
+
+        initActionButtonSeparator(actionPopupButton, event);
+
+        initActionButtonSubscribe(actionPopupButton, event);
+
+        initActionButtonSeparator(actionPopupButton, "separator2Action");
+
+        initActionButtonReports(actionPopupButton, event);
+
+        initActionButtonSeparator(actionPopupButton, "separator3Action");
+
+        initActionButtonComments(actionPopupButton, event);
+    }
+
+    private void initActionButtonComments(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        actionPopupButton.addAction(new BaseAction("openPositionCommentAction")
+                .withIcon(CubaIcon.STAR_O.source())
+                .withCaption(messageBundle.getMessage("msgOpenPositionComment"))
+                .withHandler(event1 -> {
+                    setRatingComment();
+                }));
+
+        actionPopupButton.addAction(new BaseAction("viewRatingCommentAction")
+                .withIcon(CubaIcon.VIEW_ACTION.source())
+                .withCaption(messageBundle.getMessage("msgViewOpenPositionComment"))
+                .withHandler(event1 -> {
+                    openPositionCommentViewInvoke();
+                }));
+    }
+
+    private void initActionButtonReports(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        actionPopupButton.addAction(new BaseAction("msgReport")
+                .withIcon(CubaIcon.FILE_TEXT.source())
+                .withCaption(messageBundle.getMessage("msgReport"))
+                .withHandler(event1 -> {
+                    getMemoForCandidate();
+                }));
+    }
+
+    private void initActionButtonSubscribe(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        actionPopupButton.addAction(new BaseAction("subscribePositionAction")
+                .withIcon(CubaIcon.BOLT.source())
+                .withCaption(messageBundle.getMessage("msgSubscribeOpenPosition"))
+                .withHandler(event1 -> {
+                    subscribePosition();
+                }));
+
+        actionPopupButton.addAction(new BaseAction("subscribeListAction")
+        .withIcon(CubaIcon.CLONE.source())
+        .withCaption(messageBundle.getMessage("msgRecrutersTasks"))
+        .withHandler(event1 -> {
+            screenBuilders.lookup(RecrutiesTasks.class, this)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .build()
+                    .show();
+        }));
+    }
+
+    private void initActionButtonSeparator(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        actionPopupButton.addAction(new BaseAction("separator1Action")
+                .withCaption(separator));
+    }
+
+
+    private void initActionButtonSeparator(PopupButton actionPopupButton, String baseActionID) {
+        actionPopupButton.addAction(new BaseAction(baseActionID)
+                .withCaption(separator));
+    }
+
+    private void initActionButtonJobCandidateSimpleBrowse(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        actionPopupButton.addAction(new BaseAction("jobCandidateSimpleAction")
+                .withCaption(messageBundle.getMessage("msgJobCandidateSimpleBrowse"))
+                .withIcon(CubaIcon.USER_CIRCLE.source())
+                .withHandler(e -> {
+                    JobCandidateSimpleBrowse jobCandidateSimpleBrowse = screens.create(JobCandidateSimpleBrowse.class);
+                    jobCandidateSimpleBrowse.setOpenPosition(event.getItem());
+                    jobCandidateSimpleBrowse.setHeader(event.getItem());
+
+                    screens.show(jobCandidateSimpleBrowse);
+                }));
     }
 }
 

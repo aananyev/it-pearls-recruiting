@@ -161,13 +161,15 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
         return (!recrutiesTasks.getOpenPosition().getOpenClose() ? "icons/ok.png" : "icons/close.png");
     }
 
-    @Install(to = "recrutiesTasksesTable.group", subject = "columnGenerator")
+/*    @Install(to = "recrutiesTasksesTable.group", subject = "columnGenerator")
     private Component recrutiesTasksesTableGroupColumnGenerator(RecrutiesTasks recrutiesTasks) {
         String group = recrutiesTasks.getReacrutier().getGroup().getName();
         Label label = uiComponents.create(Label.NAME);
         label.setValue(group);
         return label;
-    }
+    } */
+
+
 
     public void unsubscribeFromVacancy() {
         dialogs.createOptionDialog(Dialogs.MessageType.WARNING)

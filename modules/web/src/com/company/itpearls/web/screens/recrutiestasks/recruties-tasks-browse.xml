@@ -48,7 +48,7 @@
         </collection>
     </data>
     <dialogMode height="600"
-                width="800"/>
+                width="1000"/>
     <layout expand="recrutiesTasksesTable"
             spacing="true">
         <filter id="filter"

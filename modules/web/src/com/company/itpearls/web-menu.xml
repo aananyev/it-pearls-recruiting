@@ -26,6 +26,9 @@
             <item screen="itpearls_InternalEmailTemplate.browse"
                   caption="mainMsg://menu_config.itpearls_InternalEmailTemplate.browse"
                   icon="ENVELOPE_SQUARE"/>
+            <item screen="itpearls_InternalEmailTemplateInteraction.browse"
+                  caption="mainMsg://menu_config.itpearls_InternalEmailTemplateInteraction.browse"
+                  icon="ENVELOPE_SQUARE"/>
         </menu>
     </menu>
     <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">

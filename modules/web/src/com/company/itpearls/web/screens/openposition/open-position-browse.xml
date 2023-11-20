@@ -377,10 +377,18 @@
                     <componentRenderer/>
                 </column>
                 <column id="candidateSendedColumn"
-                        collapsed="false"
+                        collapsed="true"
                         collapsible="true"
                         caption="msg://msgSendedCandidates"
                         width="120px"
+                        resizable="true">
+                    <componentRenderer/>
+                </column>
+                <column id="openPositionActionButtonColumn"
+                        collapsed="false"
+                        collapsible="true"
+                        caption=""
+                        width="100px"
                         resizable="true">
                     <componentRenderer/>
                 </column>
@@ -433,6 +441,7 @@
                         invoke="suggestCandidateButton"/>
                 <popupButton id="reportsPopupButton"
                              icon="FILE_TEXT"
+                             visible="false"
                              enable="false"
                              caption="msg://msgReports">
                     <actions>
@@ -445,6 +454,7 @@
                 </popupButton>
                 <popupButton id="setRatingButton"
                              caption="msg://msgOpenPositionComment"
+                             visible="true"
                              icon="font-icon:COMMENT"
                              enable="false">
                     <actions>

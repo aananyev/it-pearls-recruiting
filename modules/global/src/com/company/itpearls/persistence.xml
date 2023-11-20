@@ -58,5 +58,6 @@
         <class>com.company.itpearls.entity.MyActiveCandidateExclude</class>
         <class>com.company.itpearls.entity.SignIcons</class>
         <class>com.company.itpearls.entity.JobCandidateSignIcon</class>
+        <class>com.company.itpearls.entity.InternalEmailTemplateInteraction</class>
     </persistence-unit>
 </persistence>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        extends="com/company/itpearls/web/screens/internalemailtemplate/internal-email-template-browse.xml"
+        messagesPack="com.company.itpearls.web.screens.internalemailtemplate">
+    <data readOnly="true">
+        <collection id="internalEmailTemplatesDc"
+                    class="com.company.itpearls.entity.InternalEmailTemplateInteraction">
+            <view extends="_local">
+                <property name="interaction" view="_local"/>
+            </view>
+            <loader id="internalEmailTemplatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_InternalEmailTemplateInteraction e where not e.interaction is null]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <groupTable id="internalEmailTemplatesTable">
+            <columns>
+                <column id="interaction" ext:index="3"/>
+            </columns>
+        </groupTable>
+    </layout>
+</window>

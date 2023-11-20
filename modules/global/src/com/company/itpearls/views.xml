@@ -568,4 +568,9 @@
         <property name="signIcon" view="_local"/>
         <property name="user" view="_minimal"/>
     </view>
+    <view entity="itpearls_InternalEmailTemplateInteraction" name="internalEmailTemplateInteraction-view"
+          extends="_local">
+        <property name="interaction" view="_local"/>
+        <property name="templateAuthor" view="_local"/>
+    </view>
 </views>

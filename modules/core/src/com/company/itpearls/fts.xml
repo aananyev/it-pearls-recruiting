@@ -163,5 +163,8 @@
         <entity class="com.company.itpearls.entity.JobCandidateSignIcon">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.InternalEmailTemplateInteraction">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

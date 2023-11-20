@@ -1,0 +1,2 @@
+alter table ITPEARLS_INTERNAL_EMAIL_TEMPLATE add column INTERACTION_ID uuid ;
+alter table ITPEARLS_INTERNAL_EMAIL_TEMPLATE add column DTYPE varchar(31) ;

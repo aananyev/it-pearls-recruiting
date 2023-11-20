@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        extends="com/company/itpearls/web/screens/internalemailtemplate/internal-email-template-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.internalemailtemplate">
+    <data>
+        <instance id="internalEmailTemplateDc"
+                  class="com.company.itpearls.entity.InternalEmailTemplateInteraction">
+            <view extends="_local">
+                <property name="interaction" view="_local"/>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="iteractionTypesDc"
+                    class="com.company.itpearls.entity.Iteraction">
+            <view extends="_local">
+                <property name="workStatus" view="employeeWorkStatus-view"/>
+            </view>
+            <loader id="iteractionTypesLc"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_Iteraction e
+                    where e.iteractionTree is not null
+                    order by e.iterationName
+                        ]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e.iteractionTree.number like :number
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <lookupPickerField id="iteractionTypeField"
+                           optionsContainer="iteractionTypesDc"
+                           caption="msg://msgInteractionType"
+                           ext:index="1"
+                           width="100%"
+                           required="true"
+                           dataContainer="internalEmailTemplateDc"
+                           property="interaction"
+                           colspan="1">
+            <actions>
+                <action id="lookup"
+                        type="picker_lookup"/>
+            </actions>
+        </lookupPickerField>
+    </layout>
+</window>
