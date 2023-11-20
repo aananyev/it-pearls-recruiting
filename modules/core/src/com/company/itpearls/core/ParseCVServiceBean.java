@@ -494,8 +494,9 @@ public class ParseCVServiceBean implements ParseCVService {
         return deleteSystemChar(phone);
     }
 
-    private String deleteSystemChar(String input) {
-        String taboo = " ,.{}()[]-";
+    @Override
+    public String deleteSystemChar(String input) {
+        String taboo = " ,.{}()[]-\'\"";
         String newStr = "";
 
         if (input != null) {

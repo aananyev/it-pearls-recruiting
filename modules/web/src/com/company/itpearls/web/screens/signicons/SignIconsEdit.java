@@ -1,6 +1,8 @@
 package com.company.itpearls.web.screens.signicons;
 
+import com.company.itpearls.core.ParseCVService;
 import com.company.itpearls.core.StarsAndOtherService;
+import com.company.itpearls.entity.ExtUser;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.ColorPicker;
@@ -10,6 +12,7 @@ import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.SignIcons;
+import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Page;
 
 import javax.inject.Inject;
@@ -38,6 +41,10 @@ public class SignIconsEdit extends StandardEditor<SignIcons> {
     private TextField<String> titleEndField;
     @Inject
     private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private ParseCVService parseCVService;
+    @Inject
+    private UserSession userSession;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -98,8 +105,15 @@ public class SignIconsEdit extends StandardEditor<SignIcons> {
     public void onTitleRuFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         if (titleRuField.getValue() != null) {
             String outString =
-                    starsAndOtherService.cyrillicToLatin(titleRuField.getValue().replaceAll(" ", "_"));
+                    starsAndOtherService.deleteSystemChar(
+                            starsAndOtherService.cyrillicToLatin(
+                            titleRuField.getValue().replaceAll(" ", "_")));
             titleEndField.setValue(outString);
         }
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        getEditedEntity().setUser((ExtUser) userSession.getUser());
     }
 }

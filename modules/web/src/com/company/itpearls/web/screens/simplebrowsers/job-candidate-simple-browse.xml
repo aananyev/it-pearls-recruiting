@@ -70,6 +70,13 @@
               height="AUTO">
             <label id="vacancyLabel"
                    stylename="h3"/>
+            <image id="projectLogoImage"
+                   width="100px"
+                   height="100px"
+                   visible="true"
+                   align="TOP_RIGHT"
+                   stylename="widget-border"
+                   scaleMode="SCALE_DOWN"/>
         </hbox>
         <vbox height="AUTO"
               responsive="true"
@@ -119,7 +126,9 @@
                 <column id="fullName"
                         sort="ASCENDING"
                         sortable="true"
-                        property="fullName"/>
+                        property="fullName">
+                    <componentRenderer/>
+                </column>
                 <column id="lastInterationName"
                         caption="msg://msgLastInteractionType"
                         maximumWidth="300px"

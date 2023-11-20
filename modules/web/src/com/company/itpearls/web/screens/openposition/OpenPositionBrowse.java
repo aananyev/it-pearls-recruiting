@@ -11,9 +11,9 @@ import com.company.itpearls.web.screens.openposition.openpositionfragments.OpenP
 import com.company.itpearls.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.openpositioncomment.OpenPositionCommentEdit;
 import com.company.itpearls.web.screens.openpositioncomment.OpenPositionCommentsView;
-import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksBrowse;
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
+import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleBrowse;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;

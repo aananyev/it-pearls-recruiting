@@ -10,4 +10,6 @@ public interface StarsAndOtherService {
     String noneStars();
 
     String cyrillicToLatin(String inputString);
+
+    String deleteSystemChar(String string);
 }

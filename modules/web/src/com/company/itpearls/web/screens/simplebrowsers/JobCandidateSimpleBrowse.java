@@ -1,4 +1,4 @@
-package com.company.itpearls.web.screens.openposition;
+package com.company.itpearls.web.screens.simplebrowsers;
 
 import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.entity.JobCandidate;
@@ -17,10 +17,9 @@ import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import org.apache.commons.collections.BagUtils;
-import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -41,11 +40,36 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
     private UserSession userSession;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private Image projectLogoImage;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        setFileImageCandidate(event);
+        projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
 
+        setFileImageCandidate(event);
+    }
+
+    @Subscribe
+    public void onAfterShow1(AfterShowEvent event) {
+        setProjectLogoImage();
+    }
+
+    private void setProjectLogoImage() {
+        if (openPosition != null) {
+            if (openPosition.getProjectName() != null) {
+                if (openPosition.getProjectName().getProjectLogo() != null) {
+                    projectLogoImage.setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(openPosition.getProjectName().getProjectLogo());
+                } else {
+                    projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                }
+            } else {
+                projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        } else {
+            projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
     }
 
     private void setFileImageCandidate(BeforeShowEvent event) {
@@ -350,7 +374,6 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
         retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         PopupButton retButton = uiComponents.create(PopupButton.class);
-        retButton.setCaption("Просмотр");
         retButton.setWidthAuto();
         retButton.setHeightAuto();
         retButton.setIcon(CubaIcon.BARS.source());
@@ -454,6 +477,23 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
 
         retHBox.add(retLabel);
 
+        return retHBox;
+    }
+
+    @Install(to = "iteractionListsTable.fullName", subject = "columnGenerator")
+    private Component iteractionListsTableFullNameColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        retLabel.addStyleName("table-wordwrap");
+        retLabel.setValue(event.getItem().getFullName());
+
+        retHBox.add(retLabel);
         return retHBox;
     }
 }

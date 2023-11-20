@@ -39,6 +39,8 @@ public interface ParseCVService {
 
     String parsePhone(String cv);
 
+    String deleteSystemChar(String input);
+
     List<String> extractUrls(String input);
 
     String parseCityStr(String textCV);
