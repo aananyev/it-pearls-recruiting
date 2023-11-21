@@ -53,6 +53,7 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {
         setProjectLogoImage();
+        vacancyLabel.addStyleName("table-wordwrap");
     }
 
     private void setProjectLogoImage() {
@@ -213,6 +214,10 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
     }
 
     private OpenPosition openPosition;
+
+    public OpenPosition getOpenPosition() {
+        return openPosition;
+    }
 
     public void setOpenPosition(OpenPosition openPosition) {
         this.openPosition = openPosition;

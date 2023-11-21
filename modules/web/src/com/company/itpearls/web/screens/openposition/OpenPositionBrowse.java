@@ -14,6 +14,7 @@ import com.company.itpearls.web.screens.openpositioncomment.OpenPositionComments
 import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscribeBrowse;
 import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleBrowse;
+import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleMailBrowse;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -1002,7 +1003,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retButton.addClickListener(e -> {
             if (openPositionsTable.getSingleSelected() != null) {
-                JobCandidateSimpleBrowse jobCandidateSimpleBrowse = screens.create(JobCandidateSimpleBrowse.class);
+                JobCandidateSimpleBrowse jobCandidateSimpleBrowse
+                        = screens.create(JobCandidateSimpleBrowse.class);
                 jobCandidateSimpleBrowse.setOpenPosition(entity);
                 jobCandidateSimpleBrowse.setHeader(entity);
 
@@ -3296,6 +3298,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         actionPopupButton.setIconFromSet(CubaIcon.BARS);
         actionPopupButton.setShowActionIcons(true);
         actionPopupButton.addPopupVisibilityListener(e -> {
+//            openPositionsTable.setSelectionMode(DataGrid.SelectionMode.SINGLE);
             openPositionsTable.setSelected(event.getItem());
         });
 
@@ -3381,7 +3384,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .withCaption(messageBundle.getMessage("msgJobCandidateSimpleBrowse"))
                 .withIcon(CubaIcon.USER_CIRCLE.source())
                 .withHandler(e -> {
-                    JobCandidateSimpleBrowse jobCandidateSimpleBrowse = screens.create(JobCandidateSimpleBrowse.class);
+                    JobCandidateSimpleMailBrowse jobCandidateSimpleBrowse
+                            = screens.create(JobCandidateSimpleMailBrowse.class);
                     jobCandidateSimpleBrowse.setOpenPosition(event.getItem());
                     jobCandidateSimpleBrowse.setSignSendToClent(true);
                     jobCandidateSimpleBrowse.setHeader(event.getItem());

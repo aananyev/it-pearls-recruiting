@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        extends="com/company/itpearls/web/screens/simplebrowsers/job-candidate-simple-browse.xml"
+        messagesPack="com.company.itpearls.web.screens.simplebrowsers">
+    <data>
+        <collection id="internalEmailTemplateDc" class="com.company.itpearls.entity.InternalEmailTemplate">
+            <view extends="_local">
+                <property name="templateAuthor" view="_local"/>
+                <property name="templateOpenPosition" view="_local">
+                    <property name="positionType" view="_local"/>
+                </property>
+                <property name="templatePosition" view="_local"/>
+            </view>
+            <loader id="internalEmailTemplateDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_InternalEmailTemplate e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.templateOpenPosition in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.templateAuthor = :author
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.templatePosition = :positionType
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <vbox id="datagridBox">
+            <dataGrid id="iteractionListsTable"
+                      selectionMode="MULTI_CHECK">
+                <buttonsPanel>
+                    <button id="sendEmailTemplateButton"
+                            caption="msg://msgSendEmailTemplateButton"
+                            enable="false"
+                            icon="ENVELOPE"
+                            description="msg://msgSendEmailTemplateButtonDesc"
+                            invoke="sendEmailTemplateButtonInvoke"/>
+                </buttonsPanel>
+            </dataGrid>
+        </vbox>
+    </layout>
+</window>

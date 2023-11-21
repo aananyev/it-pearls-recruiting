@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/internalemailertemplate/internal-emailer-template-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.internalemailertemplate">
+    <layout>
+        <groupBox id="emailSettingGroupBox">
+            <hbox id="emailSettingHBox">
+                <vbox id="fromEmailHBox">
+                    <suggestionPickerField id="toEmailField" visible="false"/>
+                </vbox>
+            </hbox>
+        </groupBox>
+    </layout>
+</window>

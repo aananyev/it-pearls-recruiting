@@ -751,7 +751,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .getIteractionList()
                             .stream()
                             .filter(iteractionList ->
-                                    iteractionList.getVacancy().equals(vacancyFilterLookupPickerField.getValue()))
+                                    iteractionList.getVacancy() != null ?
+                                        iteractionList.getVacancy().equals(vacancyFilterLookupPickerField.getValue()) : false
+                            )
                             .collect(Collectors.toList());
 
                     jobCandidateIteractionDc.setDisconnectedItems(filtered);

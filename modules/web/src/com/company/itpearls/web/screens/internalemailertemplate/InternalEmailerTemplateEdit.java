@@ -331,4 +331,14 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
             emailTemplatesDl.removeParameter("openClose");
         }
     }
+
+    public InternalEmailTemplate getEmailTemplate() {
+        return emailTemplate;
+    }
+
+    public void setEmailTemplate(InternalEmailTemplate emailTemplate) {
+        this.emailTemplate = emailTemplate;
+
+        emailTemplateField.setValue(emailTemplate);
+    }
 }
