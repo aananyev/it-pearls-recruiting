@@ -272,6 +272,8 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
 
         Date startDate = event.getItem().getIteractionList().get(0).getDateIteraction();
         String startInteractionName = null;
+        String startInteractionNameDesc = null;
+
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
         retBox.setHeightFull();
@@ -280,12 +282,15 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
         if (event.getItem().getIteractionList() != null) {
             if (event.getItem().getIteractionList().get(0) != null) {
                 if (event.getItem().getIteractionList().get(0).getDateIteraction() != null) {
-                    startInteractionName = event
-                            .getItem()
-                            .getIteractionList()
-                            .get(0)
-                            .getIteractionType()
-                            .getIterationName();
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY");
+                    startInteractionName = new StringBuilder()
+                            .append(event
+                                    .getItem()
+                                    .getIteractionList()
+                                    .get(0)
+                                    .getIteractionType()
+                                    .getIterationName())
+                            .toString();
                 }
             }
         }
@@ -299,13 +304,17 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
                     if (startDate.before(iteractionList.getDateIteraction())) {
                         startDate = iteractionList.getDateIteraction();
                         startInteractionName = iteractionList.getIteractionType().getIterationName();
+                        if (iteractionList.getComment() != null) {
+                            startInteractionNameDesc = iteractionList.getComment();
+                        }
                     }
                 }
             }
 
-
             retLabel.setValue(startInteractionName);
-            retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            if (startInteractionNameDesc != null)
+                retLabel.setDescription(startInteractionNameDesc);
+            retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
             retBox.add(retLabel);
         }
@@ -394,19 +403,19 @@ public class JobCandidateSimpleBrowse extends StandardLookup<IteractionList> {
                 }));
 
         retButton.addAction(new BaseAction("interationListAction")
-        .withCaption(messageBundle.getMessage("msgInteractionList"))
-        .withHandler(event1 -> {
-            IteractionListSimpleBrowse screen = screenBuilders.lookup(IteractionList.class, this)
-                    .withScreenClass(IteractionListSimpleBrowse.class)
-                    .build();
-            screen.setJobCandidate(event.getItem());
-            screen.setOpenPosition(this.openPosition);
-            screen.show();
-        }));
+                .withCaption(messageBundle.getMessage("msgInteractionList"))
+                .withHandler(event1 -> {
+                    IteractionListSimpleBrowse screen = screenBuilders.lookup(IteractionList.class, this)
+                            .withScreenClass(IteractionListSimpleBrowse.class)
+                            .build();
+                    screen.setJobCandidate(event.getItem());
+                    screen.setOpenPosition(this.openPosition);
+                    screen.show();
+                }));
 
         retBox.add(retButton);
         return retBox;
-}
+    }
 
     @Install(to = "iteractionListsTable.lastIteraction", subject = "columnGenerator")
     private Component iteractionListsTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {

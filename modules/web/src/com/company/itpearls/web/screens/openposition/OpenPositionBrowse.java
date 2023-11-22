@@ -2848,8 +2848,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retHBox.setSpacing(true);
 
         Label newVacancyLabel = uiComponents.create(Label.class);
-        newVacancyLabel.setValue(messageBundle.getMessage("msgNewReserve"));
-        newVacancyLabel.setStyleName("button_table_red");
+        if (event.getItem().getSignDraft() != null) {
+            if (!event.getItem().getSignDraft()) {
+                newVacancyLabel.setValue(messageBundle.getMessage("msgNewReserve"));
+                newVacancyLabel.setStyleName("button_table_red");
+            } else {
+                newVacancyLabel.setValue(messageBundle.getMessage("msgDraft"));
+                newVacancyLabel.setStyleName("button_table_gray");
+            }
+        }
+
         newVacancyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         newVacancyLabel.setWidthAuto();
         newVacancyLabel.setHeightAuto();
@@ -2858,10 +2866,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         gregorianCalendar.setTime(new Date());
         gregorianCalendar.add(Calendar.DAY_OF_MONTH, -3);
         if (event.getItem().getLastOpenDate() != null) {
-            if (event.getItem().getLastOpenDate().before(gregorianCalendar.getTime())) {
-                newVacancyLabel.setVisible(false);
+            if (event.getItem().getSignDraft() != null) {
+                if (!event.getItem().getSignDraft()) {
+                    if (event.getItem().getLastOpenDate().before(gregorianCalendar.getTime())) {
+                        newVacancyLabel.setVisible(false);
+                    } else {
+                        newVacancyLabel.setVisible(true);
+                    }
+                } else {
+                    newVacancyLabel.setVisible(true);
+                }
             } else {
-                newVacancyLabel.setVisible(true);
+                if (event.getItem().getLastOpenDate().before(gregorianCalendar.getTime())) {
+                    newVacancyLabel.setVisible(false);
+                } else {
+                    newVacancyLabel.setVisible(true);
+                }
             }
         }
 

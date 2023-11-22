@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.simplebrowsers;
 
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.haulmont.cuba.core.global.Metadata;
@@ -39,11 +40,11 @@ public class JobCandidateSimpleMailBrowse extends JobCandidateSimpleBrowse {
     @Inject
     private CollectionContainer<InternalEmailTemplate> internalEmailTemplateDc;
     @Inject
-    private ScreenBuilders screenBuilders;
-    @Inject
     private Screens screens;
     @Inject
     private Metadata metadata;
+    @Inject
+    private InteractionService interactionService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -135,7 +136,20 @@ public class JobCandidateSimpleMailBrowse extends JobCandidateSimpleBrowse {
         if (event.getItem().getEmail() != null) {
             if (!event.getItem().getEmail().equals("")) {
                 retLabel.setIcon(CubaIcon.ENVELOPE_O.source());
-                retLabel.addStyleName("label_button_green");
+                if (interactionService.getLastIteraction(event.getItem()).getIteractionType() != null) {
+                    if (interactionService.getLastIteraction(event.getItem()).getIteractionType().getSignEmailSend() != null) {
+                        if (interactionService.getLastIteraction(event.getItem()).getIteractionType().getSignEmailSend()) {
+                            retLabel.addStyleName("label_button_gray");
+                        } else {
+                            retLabel.addStyleName("label_button_green");
+                        }
+                    } else {
+                        retLabel.addStyleName("label_button_green");
+                    }
+                } else {
+                    retLabel.addStyleName("label_button_green");
+                }
+
                 retLabel.setDescription(event.getItem().getEmail());
                 retLabel.addClickListener(event1 -> {
                     InternalEmailerTemplate internalEmailerTemplate = metadata.create(InternalEmailerTemplate.class);
