@@ -120,7 +120,12 @@ public class InternalEmailerTemplateBrowse extends InternalEmailerBrowse {
         retLabel.setHeightAuto();
         retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
         retLabel.addStyleName("table-wordwrap");
-        retLabel.setValue(event.getItem().getEmailTemplate().getTemplateName());
+
+        if (event.getItem().getEmailTemplate() != null) {
+            if (event.getItem().getEmailTemplate().getTemplateName() != null) {
+                retLabel.setValue(event.getItem().getEmailTemplate().getTemplateName());
+            }
+        }
 
         retHBox.add(retLabel);
         return retHBox;

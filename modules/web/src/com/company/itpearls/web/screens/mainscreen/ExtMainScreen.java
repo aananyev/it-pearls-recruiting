@@ -147,7 +147,7 @@ public class ExtMainScreen extends MainScreen {
                 } else {
                     notifications.create(Notifications.NotificationType.TRAY)
                             .withDescription(event.getMessage())
-                            .withCaption("WARNING")
+                            .withCaption(messageBundle.getMessage("msgWarning"))
                             .withPosition(Notifications.Position.TOP_RIGHT)
                             .withHideDelayMs(10000)
                             .withContentMode(ContentMode.HTML)
@@ -180,9 +180,14 @@ public class ExtMainScreen extends MainScreen {
             if (duffDate <= 7 && duffDate >= 0) {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withType(Notifications.NotificationType.TRAY)
-                        .withCaption("msgWarning")
-                        .withDescription("Через " + duffDate + " дней кончится резерв на кандидата " +
-                                pr.getJobCandidate().getFullName() + ".")
+                        .withCaption(messageBundle.getMessage("msgWarning"))
+                        .withDescription(new StringBuilder()
+                                .append("Через ")
+                                .append(duffDate)
+                                .append(" дней кончится резерв на кандидата ")
+                                .append(pr.getJobCandidate().getFullName())
+                                .append(".")
+                                .toString())
                         .withHideDelayMs(5000)
                         .withPosition(Notifications.Position.BOTTOM_RIGHT)
                         .withStyleName("personal-reserve-notification-close")
@@ -255,7 +260,11 @@ public class ExtMainScreen extends MainScreen {
                                     break;
                                 case 6: // всем
                                     if (checkNotificationNeeds(list)) {
-                                        events.publish(new UiNotificationEvent(this, caption + "<br>" + desription));
+                                        events.publish(new UiNotificationEvent(this, new StringBuilder()
+                                                .append(caption)
+                                                .append("<br>")
+                                                .append(desription)
+                                                .toString()));
                                     }
 
                                     break;

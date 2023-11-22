@@ -14,10 +14,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.screen.MessageBundle;
-import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.UiController;
-import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
@@ -123,4 +120,42 @@ public class JobCandidateSimpleMailBrowse extends JobCandidateSimpleBrowse {
             return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
         }
     }
+
+    @Install(to = "iteractionListsTable.mailColumn", subject = "columnGenerator")
+    private Component iteractionListsTableMailColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        LinkButton retLabel = uiComponents.create(LinkButton.class);
+        retLabel.setWidthAuto();
+        retLabel.setHeightAuto();
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem().getEmail() != null) {
+            if (!event.getItem().getEmail().equals("")) {
+                retLabel.setIcon(CubaIcon.ENVELOPE_O.source());
+                retLabel.addStyleName("label_button_green");
+                retLabel.setDescription(event.getItem().getEmail());
+                retLabel.addClickListener(event1 -> {
+                    InternalEmailerTemplate internalEmailerTemplate = metadata.create(InternalEmailerTemplate.class);
+                    internalEmailerTemplate.setFromEmail((ExtUser) userSession.getUser());
+
+                    InternalEmailerTemplateEdit emailerTemplateEdit = screens.create(InternalEmailerTemplateEdit.class);
+                    emailerTemplateEdit.setEntityToEdit(internalEmailerTemplate);
+                    emailerTemplateEdit.setJobCandidate(event.getItem());
+                    emailerTemplateEdit.show();
+                });
+            } else {
+                retLabel.setIcon(CubaIcon.MINUS_CIRCLE.source());
+                retLabel.addStyleName("label_button_red");
+            }
+        }
+
+        retHBox.add(retLabel);
+
+        return retHBox;
+    }
+
+
 }

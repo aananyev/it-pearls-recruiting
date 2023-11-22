@@ -11,6 +11,10 @@ import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WindowParam;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -77,6 +81,8 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private GroupBoxLayout excludeCandidatesLineGroupBox;
     @Inject
     private CheckBox cardDetailCheckBox;
+    @Inject
+    private ProgressBar progressBar;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -159,6 +165,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
         return period;
     }
+
+    @Inject
+    protected BackgroundWorker backgroundWorker;
 
     private void initCandidatesList() {
         Set<JobCandidate> jobCandidateSet = new HashSet<>();
@@ -333,11 +342,6 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                 .append(" / ")
                 .append(jobCandidate.getCityOfResidence().getCityRuName());
         candidateLinkButton.setCaption(sb.toString());
-/*        candidateLinkButton.setCaption(jobCandidate.getFullName()
-                + " / "
-                + jobCandidate.getPersonPosition().getPositionRuName()
-                + " / "
-                + jobCandidate.getCityOfResidence().getCityRuName());*/
 
         candidateLinkButton.addClickListener(e -> {
             screenBuilders.editor(JobCandidate.class, this)

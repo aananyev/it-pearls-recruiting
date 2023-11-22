@@ -46,6 +46,11 @@
         <vbox id="datagridBox">
             <dataGrid id="iteractionListsTable"
                       selectionMode="MULTI_CHECK">
+                <columns>
+                    <column id="mailColumn" ext:index="2" width="30px" caption="msg://msgMail">
+                        <componentRenderer/>
+                    </column>
+                </columns>
                 <buttonsPanel>
                     <button id="sendEmailTemplateButton"
                             caption="msg://msgSendEmailTemplateButton"

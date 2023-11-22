@@ -1040,7 +1040,9 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         retLabel.setHeightAuto();
         retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
         retLabel.addStyleName("table-wordwrap");
-        retLabel.setValue(event.getItem().getDateSendEmail().toString());
+        if (event.getItem().getDateSendEmail() != null) {
+            retLabel.setValue(event.getItem().getDateSendEmail().toString());
+        }
 
         retHBox.add(retLabel);
         return retHBox;

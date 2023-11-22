@@ -99,6 +99,10 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
                 }
             }
         });
+
+        if (getEmailTemplate() != null) {
+            emailTemplateField.setValue(getEmailTemplate());
+        }
     }
 
     protected Resource emailTemplateImageProvider(InternalEmailTemplate internalEmailTemplate) {
