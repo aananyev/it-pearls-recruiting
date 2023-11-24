@@ -1,8 +1,6 @@
 package com.company.itpearls.web.widgets.candidates;
 
 import com.company.itpearls.entity.*;
-import com.company.itpearls.web.InteractionListJobCandidateFullNameCollectionContainerSorter;
-import com.company.itpearls.web.JobCandidateFullNameCollectionContainerSorter;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
@@ -83,13 +81,6 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             = "select e from itpearls_OpenPosition e where e.positionType = :positionType and not e.openClose = true and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
     private static final String QUERY_CASE_CLOSED_OPEN_POSITION
             = "select e from itpearls_IteractionList e where e.iteractionType.signEndCase = true and e.candidate = :candidate";
-
-    @Subscribe
-    public void onInit(InitEvent event) {
-        InteractionListJobCandidateFullNameCollectionContainerSorter sorter = new
-                InteractionListJobCandidateFullNameCollectionContainerSorter(iteractionListsDc, iteractionListsDl);
-        iteractionListsDc.setSorter(sorter);
-    }
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {

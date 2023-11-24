@@ -31,12 +31,8 @@
                        value="com.company.itpearls.service.OpenPositionNewsService"/>
                 <entry key="itpearls_RecruterStatService" value="com.company.itpearls.core.RecruterStatService"/>
                 <entry key="itpearls_SignIconService" value="com.company.itpearls.core.SignIconService"/>
-                <entry key="itpearls_VkService" value="com.company.itpearls.core.VkService"/>
             </map>
         </property>
     </bean>
-
-    <bean id="cuba_SorterFactory" class="com.company.itpearls.web.JobCandidateFullNameSorterFactory"/>
-    <bean id="cuba_SorterFactory" class="com.company.itpearls.web.PersonelReserveJobCandidateFullNameSorterFactory"/>
 
 </beans>

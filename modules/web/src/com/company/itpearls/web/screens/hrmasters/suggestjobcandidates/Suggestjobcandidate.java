@@ -14,8 +14,9 @@ import com.haulmont.cuba.gui.data.GroupInfo;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
-import jdk.internal.jline.internal.Nullable;
 import org.jsoup.Jsoup;
+import org.springframework.lang.Nullable;
+
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;

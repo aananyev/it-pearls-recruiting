@@ -3,16 +3,13 @@ package com.company.itpearls.web.screens.personelreserve;
 import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
-import com.company.itpearls.web.PersonelReserveJobCandidateFullNameCollectionContainerSorter;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
-import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.FindSuitable;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
-import com.company.itpearls.web.screens.jobcandidate.JobCanidateDetailScreenFragment;
 import com.company.itpearls.web.screens.signicons.SignIconsBrowse;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
@@ -30,11 +27,8 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Page;
-import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 import javax.inject.Inject;
-import javax.xml.crypto.Data;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -159,10 +153,6 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setDetailsVisible(personelReservesTable.getSingleSelected(), true);
                 }));
-
-        PersonelReserveJobCandidateFullNameCollectionContainerSorter sorter
-                = new PersonelReserveJobCandidateFullNameCollectionContainerSorter(personelReservesDc, personelReservesDl);
-        personelReservesDc.setSorter(sorter);
     }
 
     private void initActionsPopupButton() {

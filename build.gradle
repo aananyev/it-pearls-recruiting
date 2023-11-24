@@ -47,9 +47,9 @@ dependencies {
     appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.14.1')
     appComponent('com.haulmont.addon.dashboard:dashboard-global:3.2.3')
     appComponent('com.haulmont.addon.helium:helium-global:0.4.0')
-    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
     appComponent("com.haulmont.fts:fts-global:$cubaVersion")
     appComponent("com.haulmont.reports:reports-global:$cubaVersion")
+    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
     appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
 }
 
@@ -94,9 +94,6 @@ configure(globalModule) {
         runtime 'io.jsonwebtoken:jjwt-jackson:0.11.5'
         compile 'com.ibm.icu:icu4j:4.8.1.1'
         compile 'commons-lang:commons-lang:2.6'
-        compile 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
-        compile 'com.google.code.gson:gson:2.10.1'
-        compile 'com.vk.api:sdk:1.0.6'
     }
 
     entitiesEnhancing {
@@ -125,7 +122,6 @@ configure(coreModule) {
         compileOnly(servletApi)
         jdbc(postgres)
         testRuntime(postgres)
-        compile 'com.vk.api:sdk:LATEST_VERSION'
     }
 
     task cleanConf(description: 'Cleans up conf directory', type: Delete) {
