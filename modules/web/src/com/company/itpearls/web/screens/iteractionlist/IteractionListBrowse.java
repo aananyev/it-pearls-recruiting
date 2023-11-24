@@ -1,10 +1,12 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.core.StarsAndOtherService;
+import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
@@ -20,6 +22,7 @@ import com.vaadin.ui.JavaScript;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
@@ -54,6 +57,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private Button clipBtn;
     @Inject
     private Button itercationListButton;
+    @Inject
+    private DataManager dataManager;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -314,5 +319,47 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
                 return null;
             }
         }
+    }
+
+    @Install(to = "iteractionListsTable", subject = "rowStyleProvider")
+    private String iteractionListsTableRowStyleProvider(IteractionList iteractionList) {
+        if (iteractionList.getVacancy() != null) {
+            OpenPosition openPosition = iteractionList.getVacancy();
+            Integer s = dataManager.loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e where e.openPosition = :openPos and e.closed = false and e.endDate >= :currentDate", Integer.class)
+                    .parameter("openPos", openPosition)
+                    .parameter("currentDate", new Date())
+                    .one();
+
+            if (openPosition.getSignDraft() == null ? true : !openPosition.getSignDraft()) {
+                if (openPosition.getInternalProject() != null) {
+                    if (openPosition.getInternalProject()) {
+                        if (s == 0) {
+                            return "open-position-internal-project";
+                        } else {
+                            return "open-position-internal-project-job-recrutier";
+                        }
+                    } else {
+                        if (s == 0)
+                            if ((openPosition.getCommandCandidate() != null ? openPosition.getCommandCandidate() : 2) != 1)
+                                return "open-position-empty-recrutier";
+                            else
+                                return "open-position-job-command";
+                        else
+                            return "open-position-job-recruitier";
+                    }
+                } else {
+                    if (openPosition.getCommandCandidate() != 1) {
+                        if (s == 0)
+                            return "open-position-empty-recrutier";
+                        else
+                            return "open-position-job-recruitier";
+                    } else
+                        return "open-position-job-command";
+                }
+            } else {
+                return "open-position-draft";
+            }
+        } else
+            return null;
     }
 }

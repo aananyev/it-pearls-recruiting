@@ -1,8 +1,12 @@
 package com.company.itpearls.web.widgets.candidates;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.InteractionListJobCandidateFullNameCollectionContainerSorter;
+import com.company.itpearls.web.JobCandidateFullNameCollectionContainerSorter;
+import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Dialogs;
@@ -10,11 +14,6 @@ import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WindowParam;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.executors.BackgroundTask;
-import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
-import com.haulmont.cuba.gui.executors.BackgroundWorker;
-import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -22,7 +21,6 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
@@ -57,6 +55,11 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private Metadata metadata;
     @Inject
     private Dialogs dialogs;
+    @Inject
+    private GroupBoxLayout excludeCandidatesLineGroupBox;
+    @Inject
+    private CheckBox cardDetailCheckBox;
+
 
     @WidgetParam
     @WindowParam
@@ -69,20 +72,24 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private Set<OpenPosition> caseClosedOpenPosition;
     private Set<OpenPosition> processedOpenPosition;
     private Set<OpenPosition> opportunityOpenPosition;
-    private Set<OpenPosition> wasOrNowOpenPosition = new HashSet<>();
+    private Set<OpenPosition> wasOrNowOpenPosition = new TreeSet<>(Comparator.comparing(OpenPosition::getVacansyName));
     private ScrollBoxLayout scrollBoxLayout;
     private Boolean generatedWidget = false;
     private int candidatesCount = 0;
 
-    final static String QUERY_MY_CANIDATE_EXCLUDE = "select e from itpearls_MyActiveCandidateExclude e where e.jobCandidate = :jobCandidate and e.user = :user";
+    private final static String QUERY_MY_CANIDATE_EXCLUDE
+            = "select e from itpearls_MyActiveCandidateExclude e where e.jobCandidate = :jobCandidate and e.user = :user";
+    private final static String QUERY_EXCLUDE_CANDIDATES
+            = "select e from itpearls_OpenPosition e where e.positionType = :positionType and not e.openClose = true and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
+    private static final String QUERY_CASE_CLOSED_OPEN_POSITION
+            = "select e from itpearls_IteractionList e where e.iteractionType.signEndCase = true and e.candidate = :candidate";
 
-    final static String QUERY_EXCLUDE_CANDIDATES = "select e from itpearls_OpenPosition e where e.positionType = :positionType and not e.openClose = true and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
-    @Inject
-    private GroupBoxLayout excludeCandidatesLineGroupBox;
-    @Inject
-    private CheckBox cardDetailCheckBox;
-    @Inject
-    private ProgressBar progressBar;
+    @Subscribe
+    public void onInit(InitEvent event) {
+        InteractionListJobCandidateFullNameCollectionContainerSorter sorter = new
+                InteractionListJobCandidateFullNameCollectionContainerSorter(iteractionListsDc, iteractionListsDl);
+        iteractionListsDc.setSorter(sorter);
+    }
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -166,11 +173,12 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         return period;
     }
 
-    @Inject
-    protected BackgroundWorker backgroundWorker;
+//    private final static String QUERY_EXCLUDE_CANDIDATES
+//            = "select e from itpearls_OpenPosition e where e.positionType = :positionType and not e.openClose = true and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
+
 
     private void initCandidatesList() {
-        Set<JobCandidate> jobCandidateSet = new HashSet<>();
+        Set<JobCandidate> jobCandidateSet = new TreeSet<>(Comparator.comparing(JobCandidate::getFullName));
         Map<JobCandidate, Map.Entry<Integer, Integer>> candidateProjectMap = new HashMap<JobCandidate, Map.Entry<Integer, Integer>>();
 
         candidatesCount = jobCandidateSet.size();
@@ -182,6 +190,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                         .parameter("positionType", interactionList.getCandidate().getPersonPosition())
                         .parameter("candidate", interactionList.getCandidate())
                         .view("openPosition-view")
+                        .cacheable(true)
                         .list();
 
                 if (whatToOfferCandidate.size() > 0) {
@@ -296,15 +305,11 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                 .append(" / ")
                 .append(jobCandidate.getCityOfResidence().getCityRuName());
         candidateLinkButton.setCaption(sb.toString());
-/*        candidateLinkButton.setCaption(jobCandidate.getFullName()
-                + " / "
-                + jobCandidate.getPersonPosition().getPositionRuName()
-                + " / "
-                + jobCandidate.getCityOfResidence().getCityRuName());*/
 
         candidateLinkButton.addClickListener(e -> {
             screenBuilders.editor(JobCandidate.class, this)
                     .editEntity(jobCandidate)
+                    .withScreenClass(JobCandidateEdit.class)
                     .build()
                     .show();
         });
@@ -391,11 +396,15 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                 .parameter("jobCandidate", jobCandidate)
                 .parameter("user", userSession.getUser())
                 .view("myActiveCandidateExclude-view")
+                .cacheable(true)
                 .list();
 
-        for (MyActiveCandidateExclude myActiveCandidateExclude : myActiveCandidateExcludes) {
+        CommitContext commitContext = new CommitContext(null, myActiveCandidateExcludes);
+        dataManager.commit(commitContext);
+
+/*        for (MyActiveCandidateExclude myActiveCandidateExclude : myActiveCandidateExcludes) {
             dataManager.remove(myActiveCandidateExclude);
-        }
+        }*/
 
         reinitInteractionListDataContainer();
     }
@@ -420,6 +429,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                 .parameter("jobCandidate", jobCandidate)
                 .parameter("user", userSession.getUser())
                 .view("myActiveCandidateExclude-view")
+                .cacheable(true)
                 .list();
 
         for (MyActiveCandidateExclude mace : myActiveCandidateExclude) {
@@ -610,11 +620,6 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                     .append(": ")
                     .append(sdf.format(openPosition.getLastOpenDate()));
             newVacanciesLabel.setDescription(sb.toString());
-/*            newVacanciesLabel.setDescription(newVacanciesLabel.getDescription()
-                    + "\n"
-                    + messageBundle.getMessage("msgLastOpenDate")
-                    + ": "
-                    + sdf.format(openPosition.getLastOpenDate()));*/
         }
 
         return newVacanciesLabel;
@@ -817,9 +822,10 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                 .query(QUERY_CASE_OPEN_POSITION)
                 .parameter("candidate", jobCandidate)
                 .view("iteractionList-view")
+                .cacheable(true)
                 .list();
 
-        Set<OpenPosition> retOpenPosition = new HashSet<>();
+        Set<OpenPosition> retOpenPosition = new TreeSet<>(Comparator.comparing(OpenPosition::getVacansyName));
 
         for (IteractionList iteractionList : caseClosedInteraction) {
             Boolean flag = false;
@@ -850,9 +856,10 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                 .query(QUERY_OPPORTUNITY)
                 .parameter("positionType", jobCandidate.getPersonPosition())
                 .view("openPosition-view")
+                .cacheable(true)
                 .list();
 
-        Set<OpenPosition> retOpenPosition = new HashSet<>();
+        Set<OpenPosition> retOpenPosition = new TreeSet<>(Comparator.comparing(OpenPosition::getVacansyName));
 
         for (OpenPosition openPosition : opportunityOpenPosition) {
             Boolean flag = false;
@@ -875,18 +882,16 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         return retOpenPosition;
     }
 
-    private static final String QUERY_CASE_CLOSED_OPEN_POSITION
-            = "select e from itpearls_IteractionList e where e.iteractionType.signEndCase = true and e.candidate = :candidate";
-
     private Set<OpenPosition> getCaseClosedOpenPosition(JobCandidate jobCandidate) {
 
         List<IteractionList> caseClosedInteraction = dataManager.load(IteractionList.class)
                 .query(QUERY_CASE_CLOSED_OPEN_POSITION)
                 .parameter("candidate", jobCandidate)
                 .view("iteractionList-view")
+                .cacheable(true)
                 .list();
 
-        Set<OpenPosition> retOpenPosition = new HashSet<>();
+        Set<OpenPosition> retOpenPosition = new TreeSet<>(Comparator.comparing(OpenPosition::getVacansyName));
 
         for (IteractionList iteractionList : caseClosedInteraction) {
             if (iteractionList.getVacancy() != null) {

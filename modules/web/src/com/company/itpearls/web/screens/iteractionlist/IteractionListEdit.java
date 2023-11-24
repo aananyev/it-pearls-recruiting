@@ -1856,6 +1856,19 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private void initVacancyFiels() {
         vacancyFiels.setOptionImageProvider(this::vacancyFielsImageProvider);
+        vacancyFiels.setOptionStyleProvider(this::vacancyFielsStyleProvider);
+    }
+
+    private String vacancyFielsStyleProvider(OpenPosition openPosition) {
+        if (openPosition.getSignDraft() != null) {
+            if (openPosition.getSignDraft()) {
+                return "open-position-draft";
+            } else {
+                return "open-position-empty-recrutier";
+            }
+        } else {
+            return "open-position-empty-recrutier";
+        }
     }
 
     protected Resource vacancyFielsImageProvider(OpenPosition openPosition) {

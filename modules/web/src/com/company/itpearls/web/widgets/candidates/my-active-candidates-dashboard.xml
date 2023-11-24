@@ -63,8 +63,7 @@
             <loader id="iteractionListsDl"
                     cacheable="true">
                 <query><![CDATA[select e
-                    from itpearls_IteractionList e
-                    order by e.candidate.fullName]]>
+                    from itpearls_IteractionList e]]>
                     <condition>
                         <and>
                             <c:jpql>

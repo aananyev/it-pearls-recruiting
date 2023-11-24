@@ -22,7 +22,7 @@
                 <property name="personPosition" view="_local"/>
                 <property name="openPosition" view="openPosition-view"/>
             </view>
-            <loader id="personelReservesDl">
+            <loader id="personelReservesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_PersonelReserve e]]>
                     <condition>

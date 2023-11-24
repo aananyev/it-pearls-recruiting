@@ -3,7 +3,10 @@ package com.company.itpearls.web.screens.openposition.openpositionviews;
 import com.company.itpearls.core.ParseCVService;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.screen.*;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -54,6 +57,8 @@ public class QuickViewOpenPositionDescription extends Screen {
     private VBoxLayout cvRequirementsTab;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private TextArea<String> jobDesxriptionTextArea;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -300,5 +305,19 @@ public class QuickViewOpenPositionDescription extends Screen {
                     .withDescription("Нечего копировать в буфер обмена")
                     .show();
         }
+    }
+
+    @Subscribe("copyToClipboard")
+    public void onCopyToClipboardClick(Button.ClickEvent event) {
+        notifications.create().withCaption("Copied to clipboard").show();
+    }
+
+    @Subscribe("jobDesxriptionRichTextArea")
+    public void onJobDesxriptionRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
+        jobDesxriptionTextArea.setValue(
+                Jsoup.parse(
+                        jobDescriptionEngRichTextArea.getValue() != null
+                                ? parseCVService.br2nl(companyDescriptionRichTextArea.getValue())
+                                : "").text());
     }
 }

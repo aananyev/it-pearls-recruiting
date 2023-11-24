@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.personelreserve;
 import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.PersonelReserveJobCandidateFullNameCollectionContainerSorter;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
@@ -120,6 +121,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     private StrSimpleService strSimpleService;
     @Inject
     private PopupButton signFilterButton;
+    @Inject
+    private CollectionContainer<PersonelReserve> personelReservesDc;
 
     @Subscribe("personelReservesTable")
     public void onPersonelReservesTableSelection(DataGrid.SelectionEvent<PersonelReserve> event) {
@@ -156,6 +159,10 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 .withHandler(actionPerformedEvent -> {
                     personelReservesTable.setDetailsVisible(personelReservesTable.getSingleSelected(), true);
                 }));
+
+        PersonelReserveJobCandidateFullNameCollectionContainerSorter sorter
+                = new PersonelReserveJobCandidateFullNameCollectionContainerSorter(personelReservesDc, personelReservesDl);
+        personelReservesDc.setSorter(sorter);
     }
 
     private void initActionsPopupButton() {

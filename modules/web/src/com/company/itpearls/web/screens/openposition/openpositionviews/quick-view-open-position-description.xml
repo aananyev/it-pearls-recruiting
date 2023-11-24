@@ -5,6 +5,9 @@
     <dialogMode height="600"
                 forceDialog="true"
                 width="800"/>
+    <facets>
+        <clipboardTrigger id="clipper" button="copyToClipboard" input="jobDesxriptionTextArea"/>
+    </facets>
     <layout expand="jobDescriptionViewVBox">
         <vbox id="jobDescriptionViewVBox"
               spacing="true"
@@ -21,6 +24,7 @@
                                   width="100%"
                                   editable="false"
                                   height="100%"/>
+                    <textArea id="jobDesxriptionTextArea" enable="false" visible="false"/>
                 </tab>
                 <tab id="jobDescriptionEngTab"
                      caption="msg://msgJobDescriptionEng">
@@ -63,13 +67,13 @@
                   visible="true"
                   align="TOP_RIGHT">
                 <checkBox id="copyAllToClipboardCheckBox"
+                          visible="false"
                           align="MIDDLE_RIGHT"
                           caption="msg://msgCopyAllToClipboard"/>
                 <button id="copyToClipboard"
                         icon="CLIPBOARD"
                         align="MIDDLE_RIGHT"
-                        caption="msg://msgCopyToClipboard"
-                        invoke="copyToClipboard"/>
+                        caption="msg://msgCopyToClipboard"/>
             </hbox>
         </vbox>
     </layout>
