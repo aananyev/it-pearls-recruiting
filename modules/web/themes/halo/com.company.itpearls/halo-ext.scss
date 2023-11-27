@@ -1743,4 +1743,11 @@ rating_battery_yellow_3:before {
     .my-active-candidate-dashboard-detail-bold {
           font-weight: bold;
     }
+
+    .gradient-text {
+      text-transform: uppercase;
+      background: linear-gradient(45deg, red 33%, blue 66%, orange);
+      white-space: nowrap;
+      color: black;
+    }
 }

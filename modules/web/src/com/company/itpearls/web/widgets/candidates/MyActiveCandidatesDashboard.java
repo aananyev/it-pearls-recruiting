@@ -1,20 +1,24 @@
 package com.company.itpearls.web.widgets.candidates;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
+import com.company.itpearls.web.screens.internalemailertemplate.InternalEmailerTemplateEdit;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.UiComponents;
-import com.haulmont.cuba.gui.WindowParam;
+import com.haulmont.cuba.gui.*;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
@@ -81,6 +85,16 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             = "select e from itpearls_OpenPosition e where e.positionType = :positionType and not e.openClose = true and not e in (select f.vacancy from itpearls_IteractionList f where f.candidate = :candidate)";
     private static final String QUERY_CASE_CLOSED_OPEN_POSITION
             = "select e from itpearls_IteractionList e where e.iteractionType.signEndCase = true and e.candidate = :candidate";
+    @Inject
+    private DataContext dataContext;
+    @Inject
+    private CollectionLoader<InternalEmailTemplate> internalEmailTemplateDl;
+    @Inject
+    private CollectionContainer<InternalEmailTemplate> internalEmailTemplateDc;
+    @Inject
+    private Screens screens;
+    @Inject
+    private Notifications notifications;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -286,7 +300,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
 
         LinkButton candidateLinkButton = uiComponents.create(LinkButton.class);
         candidateLinkButton.setStyleName("h4");
+        candidateLinkButton.addStyleName("table-wordwrap");
         candidateLinkButton.setHeightFull();
+        candidateLinkButton.setWidthAuto();
         candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         StringBuilder sb = new StringBuilder();
@@ -300,6 +316,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         candidateLinkButton.addClickListener(e -> {
             screenBuilders.editor(JobCandidate.class, this)
                     .editEntity(jobCandidate)
+                    .withParentDataContext(dataContext)
                     .withScreenClass(JobCandidateEdit.class)
                     .build()
                     .show();
@@ -328,7 +345,9 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         retHbox.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
         LinkButton candidateLinkButton = uiComponents.create(LinkButton.class);
-        candidateLinkButton.setStyleName("h4");
+        candidateLinkButton.addStyleName("h3");
+        candidateLinkButton.addStyleName("table-wordwrap");
+        candidateLinkButton.setWidth("300px");
         candidateLinkButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
         StringBuilder sb = new StringBuilder();
 
@@ -374,11 +393,169 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             undoRemoveCandidateFromConsideration(jobCandidate);
         });
 
+        Button sendEmailMessageButton = uiComponents.create(Button.class);
+        sendEmailMessageButton.setIcon(CubaIcon.ENVELOPE.source());
+
+        sendEmailMessageButton.setVisible(false); // TODO: пока не вызывается метод
+
+        sendEmailMessageButton.setDescription(messageBundle.getMessage("msgSendEmailDesc"));
+        sendEmailMessageButton.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+        sendEmailMessageButton.addClickListener(event -> {
+            sendEmailTemplateButtonInvoke(jobCandidate);
+        });
+
         retHbox.add(candidateLinkButton);
+        retHbox.add(sendEmailMessageButton);
         retHbox.add(undoRemoveCandidateFromConsideration);
         retHbox.add(removeCandidateFromConsideration);
 
         return retHbox;
+    }
+
+    public void sendEmailTemplateButtonInvoke(JobCandidate jobCandidate) {
+        internalEmailTemplateDl.setParameter("author", userSession.getUser());
+        internalEmailTemplateDl.setParameter("positionType", jobCandidate.getPersonPosition());
+        internalEmailTemplateDl.load();
+
+        if (internalEmailTemplateDc.getItems().size() > 0) {
+            dialogs.createInputDialog(this)
+                    .withCaption(messageBundle.getMessage("msgSelectTemplate"))
+                    .withParameters(
+                            InputParameter.parameter("emailTemplate")
+                                    .withField(() -> {
+                                        LookupPickerField<InternalEmailTemplate> internalEmailTemplatePickerField = uiComponents.create(LookupPickerField.class);
+                                        internalEmailTemplatePickerField.setCaption(messageBundle.getMessage("msgTemplate"));
+                                        internalEmailTemplatePickerField.setWidthFull();
+                                        internalEmailTemplatePickerField.setHeightAuto();
+                                        internalEmailTemplatePickerField.setNullOptionVisible(false);
+                                        internalEmailTemplatePickerField.setRequired(true);
+                                        internalEmailTemplatePickerField.setIcon(CubaIcon.ENVELOPE_SQUARE.source());
+                                        internalEmailTemplatePickerField.setOptionsList(internalEmailTemplateDc.getItems());
+                                        internalEmailTemplatePickerField.setOptionImageProvider(this::emailTemplateImageProvider);
+
+                                        return internalEmailTemplatePickerField;
+                                    }))
+                    .withActions(DialogActions.OK_CANCEL)
+                    .withCloseListener(closeEvent -> {
+                        if (closeEvent.closedWith(DialogOutcome.OK)) {
+                            InternalEmailTemplate internalEmailTemplate = closeEvent.getValue("emailTemplate");
+                            sendSelectedJobCandidatesWithMessages(jobCandidate, internalEmailTemplate);
+                        }
+                    })
+                    .show();
+        } else {
+            dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(messageBundle.getMessage("msgNotTemplate"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        sendSelectedJobCandidatesWithoutMessages(jobCandidate);
+                    }), new DialogAction(DialogAction.Type.NO))
+                    .show();
+        }
+    }
+
+    private void sendSelectedJobCandidatesWithoutMessages(JobCandidate jobCandidate) {
+        screenBuilders.editor(InternalEmailer.class, this)
+                .withParentDataContext(dataContext)
+                .newEntity()
+                .withInitializer(e -> {
+                    e.setToEmail(jobCandidate);
+                })
+                .build()
+                .show();
+    }
+
+    public void sendEmailTemplateButtonInvoke(JobCandidate jobCandidate, OpenPosition openPosition) {
+        internalEmailTemplateDl.setParameter("author", userSession.getUser());
+        internalEmailTemplateDl.setParameter("positionType", jobCandidate.getPersonPosition());
+        internalEmailTemplateDl.setParameter("openPosition", openPosition);
+        internalEmailTemplateDl.load();
+
+        if (internalEmailTemplateDc.getItems().size() > 0) {
+            dialogs.createInputDialog(this)
+                    .withCaption(messageBundle.getMessage("msgSelectTemplate"))
+                    .withParameters(
+                            InputParameter.parameter("emailTemplate")
+                                    .withField(() -> {
+
+
+                                        LookupPickerField<InternalEmailTemplate> internalEmailTemplatePickerField = uiComponents.create(LookupPickerField.class);
+                                        internalEmailTemplatePickerField.setCaption(messageBundle.getMessage("msgTemplate"));
+                                        internalEmailTemplatePickerField.setWidthFull();
+                                        internalEmailTemplatePickerField.setHeightAuto();
+                                        internalEmailTemplatePickerField.setNullOptionVisible(false);
+                                        internalEmailTemplatePickerField.setRequired(true);
+                                        internalEmailTemplatePickerField.setIcon(CubaIcon.ENVELOPE_SQUARE.source());
+                                        internalEmailTemplatePickerField.setOptionsList(internalEmailTemplateDc.getItems());
+                                        internalEmailTemplatePickerField.setOptionImageProvider(this::emailTemplateImageProvider);
+
+                                        return internalEmailTemplatePickerField;
+
+                                    }))
+                    .withActions(DialogActions.OK_CANCEL)
+                    .withCloseListener(closeEvent -> {
+                        if (closeEvent.closedWith(DialogOutcome.OK)) {
+                            InternalEmailTemplate internalEmailTemplate = closeEvent.getValue("emailTemplate");
+                            sendSelectedJobCandidatesWithMessages(jobCandidate, internalEmailTemplate);
+                        }
+                    })
+                    .show();
+        } else {
+            dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(messageBundle.getMessage("msgNotTemplate"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        sendSelectedJobCandidatesWithoutMessages(jobCandidate);
+                    }), new DialogAction(DialogAction.Type.NO))
+                    .show();
+        }
+    }
+
+    private void sendSelectedJobCandidatesWithMessages(JobCandidate jobCandidate, InternalEmailTemplate internalEmailTemplate) {
+        InternalEmailerTemplate internalEmailerTemplate = metadata.create(InternalEmailerTemplate.class);
+//        internalEmailerTemplate.setFromEmail((ExtUser) userSession.getUser());
+//        internalEmailerTemplate.setEmailTemplate(internalEmailTemplate);
+//        internalEmailerTemplate.setToEmail(jobCandidate);
+
+        InternalEmailerTemplateEdit emailerTemplateEdit = screens.create(InternalEmailerTemplateEdit.class);
+//        emailerTemplateEdit.setFromField((ExtUser) userSession.getUser());
+        emailerTemplateEdit.setEntityToEdit(internalEmailerTemplate);
+//        emailerTemplateEdit.setEmailTemplate(internalEmailTemplate);
+//        emailerTemplateEdit.setJobCandidate(jobCandidate);
+//        emailerTemplateEdit.setToEmailField(jobCandidate);
+
+        emailerTemplateEdit.show();
+
+/*        screenBuilders.editor(InternalEmailerTemplate.class, this)
+                .editEntity(internalEmailerTemplate)
+                .withParentDataContext(dataContext)
+                .build()
+                .show(); */
+    }
+
+    protected Resource emailTemplateImageProvider(InternalEmailTemplate internalEmailTemplate) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (internalEmailTemplate.getTemplateOpenPosition() != null) {
+            if (internalEmailTemplate.getTemplateOpenPosition().getProjectName() != null) {
+                if (internalEmailTemplate.getTemplateOpenPosition().getProjectName().getProjectLogo() != null) {
+                    return retImage.createResource(FileDescriptorResource.class)
+                            .setFileDescriptor(
+                                    internalEmailTemplate
+                                            .getTemplateOpenPosition()
+                                            .getProjectName()
+                                            .getProjectLogo());
+                } else {
+                    return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+                }
+            } else {
+                return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        } else {
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+        }
     }
 
     private void undoRemoveCandidateFromConsideration(JobCandidate jobCandidate) {
@@ -469,6 +646,14 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
                     salaryMinHBox,
                     salaryMaxHBox);
 
+            Button sendEmailMessageButton = uiComponents.create(Button.class);
+            sendEmailMessageButton.setIcon(getIconButtonSendEmail(myActiveCandidateExclude, jobCandidate, openPosition));
+            sendEmailMessageButton.setDescription(messageBundle.getMessage("msgSendEmailDesc"));
+            sendEmailMessageButton.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+            sendEmailMessageButton.addClickListener(event -> {
+                sendEmailTemplateButtonInvoke(jobCandidate, openPosition);
+            });
+
             internalHBox.add(newVacanciesLabel);
             internalHBox.add(projectLogoImage);
             internalHBox.add(retLinkButton);
@@ -480,6 +665,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
             internalVBox.add(cityOfVacancy);
             internalVBox.add(salaryMinHBox);
             internalVBox.add(salaryMaxHBox);
+            internalVBox.add(sendEmailMessageButton);
 
             retHBox.add(internalHBox);
             retHBox.add(internalVBox);
@@ -504,6 +690,47 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         retList.add(flagCandidateCloseAllProject);
 
         return retList;
+    }
+
+    private String getIconButtonSendEmail(List<MyActiveCandidateExclude> myActiveCandidateExclude, JobCandidate jobCandidate, OpenPosition openPosition) {
+        IteractionList lastIteraction = null;
+
+        for (MyActiveCandidateExclude mace : myActiveCandidateExclude) {
+            if (mace.getJobCandidate().equals(jobCandidate)) {
+                Date lastData = null;
+                if (mace.getJobCandidate().getIteractionList().size() > 0) {
+                    for (IteractionList iteractionList : mace.getJobCandidate().getIteractionList()) {
+                        if (iteractionList.getVacancy().equals(openPosition)) {
+                            if (lastData == null) {
+                                lastData = iteractionList.getDateIteraction();
+                                lastIteraction = iteractionList;
+                            } else {
+                                if (lastData.before(iteractionList.getDateIteraction())) {
+                                    lastData = iteractionList.getDateIteraction();
+                                    lastIteraction = iteractionList;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    return CubaIcon.ENVELOPE.source(); // нет вообще взаимодействий
+                }
+            }
+        }
+
+        if (lastIteraction != null) {
+            if (lastIteraction.getIteractionType().getSignEmailSend() != null) {
+                if (lastIteraction.getIteractionType().getSignEmailSend()) {
+                    return CubaIcon.ENVELOPE_OPEN.source(); // тут письмо было отправлено
+                } else {
+                   return CubaIcon.ENVELOPE_O.source(); // тут не отправлено
+                }
+            } else {
+               return CubaIcon.ENVELOPE_SQUARE.source(); // не отправка
+            }
+        } else {
+            return CubaIcon.ENVELOPE.source(); // нет вообще взаимодействий
+        }
     }
 
     private String getRemoteWorkStr(OpenPosition openPosition) {

@@ -10,6 +10,9 @@
                 <property name="templateAuthor" view="_local"/>
                 <property name="templateOpenPosition" view="_local">
                     <property name="positionType" view="_local"/>
+                    <property name="projectName" view="_local">
+                        <property name="projectLogo" view="_local"/>
+                    </property>
                 </property>
                 <property name="templatePosition" view="_local"/>
             </view>

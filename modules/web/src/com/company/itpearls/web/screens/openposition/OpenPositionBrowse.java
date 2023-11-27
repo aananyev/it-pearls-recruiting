@@ -885,6 +885,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         buttonsHBox.setSpacing(true);
         buttonsHBox.setWidthAuto();
+        buttonsHBox.setHeightFull();
         buttonsHBox.setAlignment(Component.Alignment.TOP_RIGHT);
 
         Component suitableButton = findSuitableButton(entity);
@@ -1593,10 +1594,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private Component createTitleFragment(OpenPosition entity) {
         Label<String> titleLabel = uiComponents.create(Label.NAME);
-        titleLabel.setStyleName("h3");
+        titleLabel.setStyleName("h4");
+        titleLabel.addStyleName("gradient-text");
         titleLabel.setDescription(entity.getVacansyName());
         titleLabel.setValue(entity.getVacansyName());
         titleLabel.setAlignment(Component.Alignment.BOTTOM_LEFT);
+        titleLabel.setWidth("100%");
 
         return titleLabel;
     }

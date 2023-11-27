@@ -2,6 +2,48 @@
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
           xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
     <data>
+        <collection id="internalEmailTemplateDc" class="com.company.itpearls.entity.InternalEmailTemplate">
+            <view extends="_local">
+                <property name="templateAuthor" view="_local"/>
+                <property name="templateOpenPosition" view="_local">
+                    <property name="positionType" view="_local"/>
+                    <property name="projectName" view="_local">
+                        <property name="projectLogo" view="_local"/>
+                    </property>
+                </property>
+                <property name="templatePosition" view="_local"/>
+            </view>
+            <loader id="internalEmailTemplateDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_InternalEmailTemplate e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.templateOpenPosition in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.templateAuthor = :author
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.templatePosition = :positionType
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.templateOpenPosition = :openPosition</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="_local">

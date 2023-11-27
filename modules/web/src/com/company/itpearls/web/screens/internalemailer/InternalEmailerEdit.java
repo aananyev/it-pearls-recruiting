@@ -487,6 +487,10 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         toEmailField.setValue(jobCandidate);
     }
 
+    public void setFromField(ExtUser extUser) {
+        fromEmailField.setValue(extUser);
+    }
+
     public void setReplyInternalEmailer(InternalEmailer internalEmailer) {
         getEditedEntity().setReplyInternalEmailer(internalEmailer);
     }

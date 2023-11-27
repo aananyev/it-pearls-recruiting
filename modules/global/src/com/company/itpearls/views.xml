@@ -558,6 +558,10 @@
         <property name="jobCandidate" view="_local">
             <property name="fileImageFace" view="_local"/>
             <property name="personPosition" view="_local"/>
+            <property name="iteractionList" view="_local">
+                <property name="iteractionType" view="_local"/>
+                <property name="vacancy" view="_local"/>
+            </property>
         </property>
         <property name="openPosition" view="_local"/>
         <property name="user" view="_local"/>
