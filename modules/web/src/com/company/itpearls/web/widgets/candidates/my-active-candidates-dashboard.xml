@@ -48,7 +48,7 @@
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="_local">
                 <property name="candidate"
-                          view="_local">
+                          view="jobCandidate-view">
                     <property name="socialNetwork"
                               view="_local"/>
                     <property name="cityOfResidence"

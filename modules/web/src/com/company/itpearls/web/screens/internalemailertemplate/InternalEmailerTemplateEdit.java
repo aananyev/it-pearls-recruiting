@@ -281,6 +281,9 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
         return iteractionList;
     }
 
+    public void setOnlyMySubscribeCheckBox(Boolean flag) {
+        onlyMySubscribeCheckBox.setValue(flag);
+    }
 
     private void setOnlyMySubscribeCheckBox() {
         onlyMySubscribeCheckBox.setValue(true);
