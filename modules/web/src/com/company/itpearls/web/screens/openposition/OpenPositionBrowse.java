@@ -1319,9 +1319,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (entity.getOpenClose() != null) {
                 if (!entity.getOpenClose()) {
                     openPositionsTable.setSelected(entity);
+                    openPositionsTable.scrollTo(entity);
                 }
             } else {
                 openPositionsTable.setSelected(entity);
+                openPositionsTable.scrollTo(entity);
             }
         }
 
@@ -1675,6 +1677,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsTable.setDetailsVisible(entity, false);
                     openPositionsTable.repaint();
                     openPositionsTable.setSelected(entity);
+                    openPositionsTable.scrollTo(entity);
                 })
                 .withCaption("");
         closeButton.setAction(closeAction);
@@ -1762,17 +1765,37 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .withIcon(CubaIcon.COMMENTING.source()));
 
         initActionButtonSeparator(openCloseButton, "separator1");
+        final String actionStr = "Action";
 
         for (Map.Entry entry : priorityMap.entrySet()) {
             openCloseButton.addAction(
                     new BaseAction(new StringBuilder().append(
                                     entry.getKey().toString())
-                            .append("Action")
+                            .append(actionStr)
                             .toString())
                             .withHandler(e -> {
+
                                 if (openPositionsTable.getSingleSelected() != null) {
-                                    String action = ((BaseAction)e.getComponent()).getId();
+                                    int newPriority = 0;
+
+                                    String action = e.getSource().getId();
                                     // openPositionsTable.getSingleSelected().setPriority();
+
+                                    for (Map.Entry entry1 : priorityMap.entrySet()) {
+                                        if (action.startsWith(entry1.getKey().toString())) {
+                                            newPriority = (int) entry1.getValue();
+                                            break;
+                                        }
+                                    }
+
+                                    OpenPosition openPosition = openPositionsTable.getSingleSelected();
+                                    openPosition.setPriority(newPriority);
+
+                                    dataManager.commit(openPosition);
+                                    openPositionsDl.load();
+                                    openPositionsTable.repaint();
+                                    openPositionsTable.setSelected(openPosition);
+                                    openPositionsTable.scrollTo(openPosition);
                                 }
                             })
                             .withIcon(getPriorityIcon((int) entry.getValue()))
@@ -3069,11 +3092,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (openPosition.getOpenClose() != null) {
                 if (!openPosition.getOpenClose()) {
                     openPositionsTable.setSelected(openPosition); // ERROR: IllegalStateException: Datasource doesn't contain items
+                    openPositionsTable.scrollTo(openPosition);
                     openCloseButton.setEnabled(true);
                     buttonSubscribe.setEnabled(true);
                 }
             } else {
                 openPositionsTable.setSelected(openPosition); // ERROR: IllegalStateException: Datasource doesn't contain items
+                openPositionsTable.scrollTo(openPosition);
                 openCloseButton.setEnabled(true);
                 buttonSubscribe.setEnabled(true);
             }
@@ -3390,6 +3415,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsDl.load();
                     openPositionsTable.repaint();
                     openPositionsTable.setSelected(selected);
+                    openPositionsTable.scrollTo(selected);
                 })
                 .withOpenMode(OpenMode.DIALOG)
                 .newEntity()
@@ -3454,6 +3480,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         actionPopupButton.addPopupVisibilityListener(e -> {
 //            openPositionsTable.setSelectionMode(DataGrid.SelectionMode.SINGLE);
             openPositionsTable.setSelected(event.getItem());
+            openPositionsTable.scrollTo(event.getItem());
         });
 
         initActionButton(actionPopupButton, event);
