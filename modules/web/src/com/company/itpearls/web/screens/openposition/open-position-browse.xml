@@ -405,8 +405,8 @@
                 <popupButton id="openCloseButton"
                              caption="msg://msgOpenClose"
                              enable="false"
-                             icon="DIALOG_CLOSE">
-                    <actions>
+                             icon="DIALOG_CLOSE"/>
+<!--                    <actions>
                         <action id="closeOpenPositionAction"
                                 caption="msg://msgCloseOpenPosition"
                                 icon="CLOSE"
@@ -416,7 +416,7 @@
                                 icon="COMMENTING"
                                 invoke="openCloseButtonWithCommentInvoke"/>
                     </actions>
-                </popupButton>
+                </popupButton> -->
                 <button id="buttonSubscribe"
                         caption="msg://mshSubscibe"
                         invoke="subscribePosition"

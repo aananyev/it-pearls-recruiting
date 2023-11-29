@@ -1478,8 +1478,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return sb.append((openPosition.getSalaryComment() != null ?
-                "\n\n" + openPosition.getSalaryComment()
-                : ""))
+                        "\n\n" + openPosition.getSalaryComment()
+                        : ""))
                 .toString();
     }
 
@@ -1698,12 +1698,25 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setUrgentlyPositios(3);
 
         clearUrgentFilter();
+    }
+
+    @Subscribe
+    public void onAfterShow2(AfterShowEvent event) {
         setButtonsEnableDisable();
     }
 
     private void setButtonsEnableDisable() {
         buttonSubscribe.setEnabled(false);
         reportsPopupButton.setEnabled(false);
+
+        openCloseButton.addAction(new BaseAction("closeOpenPositionAction")
+                .withCaption(messageBundle.getMessage("msgOpenClose"))
+                .withHandler(e -> openCloseButtonInvoke(e))
+                .withIcon(CubaIcon.CLOSE.source()));
+        openCloseButton.addAction(new BaseAction("closeOpenPositionWithCommentAction")
+                .withCaption(messageBundle.getMessage("msgCloseOpenPositionWithComment"))
+                .withHandler(e -> openCloseButtonWithCommentInvoke(e))
+                .withIcon(CubaIcon.COMMENTING.source()));
 
         openCloseButton.setEnabled(false);
         openPositionsTable.addSelectionListener(e -> {
@@ -1714,7 +1727,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
                 openCloseButton.setEnabled(false);
                 openCloseButton.setIconFromSet(CubaIcon.CLOSE);
-                openCloseButton.setCaption("Открыть / Закрыть");
+                openCloseButton.setCaption(messageBundle.getMessage("msgOpenClose"));
             } else {
                 setRatingButton.setEnabled(true);
             }
@@ -1728,11 +1741,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 if (e.getItem().getOpenClose()) {
                     openCloseButton.setEnabled(true);
                     openCloseButton.setIconFromSet(CubaIcon.YES);
-                    openCloseButton.setCaption("Открыть");
+                    openCloseButton.setCaption(messageBundle.getMessage("msgOpen"));
+                    openCloseButton.getAction("closeOpenPositionAction")
+                            .setCaption(messageBundle.getMessage("msgOpen"));
+                    openCloseButton.getAction("closeOpenPositionWithCommentAction")
+                            .setCaption(messageBundle.getMessage("msgOpenOpenPositionWithComment"));
                 } else {
                     openCloseButton.setEnabled(true);
                     openCloseButton.setIconFromSet(CubaIcon.CLOSE);
-                    openCloseButton.setCaption("Закрыть");
+                    openCloseButton.setCaption(messageBundle.getMessage("msgClose"));
+                    openCloseButton.getAction("closeOpenPositionAction")
+                            .setCaption(messageBundle.getMessage("msgClose"));
+                    openCloseButton.getAction("closeOpenPositionWithCommentAction")
+                            .setCaption(messageBundle.getMessage("msgCloseOpenPositionWithComment"));
                 }
             }
         });
@@ -2861,6 +2882,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
         }
 
+        if (event.getItem().getOpenClose() != null) {
+            if (event.getItem().getOpenClose()) {
+                newVacancyLabel.setValue(messageBundle.getMessage("msgClose"));
+                newVacancyLabel.setStyleName("button_table_gray");
+            }
+        }
+
         newVacancyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         newVacancyLabel.setWidthAuto();
         newVacancyLabel.setHeightAuto();
@@ -2942,11 +2970,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retImage;
     }
 
-    public void openCloseButtonInvoke() {
+    public void openCloseButtonInvoke(Action.ActionPerformedEvent e) {
         if (openPositionsTable.getSingleSelected() != null) {
-            removeCandidatesWithConsideration();
-            openCloseButtonClickListener(openPositionsTable.getSingleSelected(), openCloseButton);
+            if (((PopupButton) e.getComponent()).getAction("closeOpenPositionAction").getCaption()
+                    .equals(messageBundle.getMessage("msgClose"))) {
+
+                removeCandidatesWithConsideration();
+            }
+
+            OpenPosition openPosition = openPositionsTable.getSingleSelected();
+            openCloseButtonClickListener(openPosition, openCloseButton);
+            openPositionsDl.load();
             openPositionsTable.repaint();
+            openPositionsTable.setSelected(openPosition);
         }
     }
 
@@ -3257,6 +3293,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 })
                 .withAfterCloseListener(e1 -> {
                     OpenPosition selected = openPositionsTable.getSingleSelected();
+                    openPositionsDl.load();
                     openPositionsTable.repaint();
                     openPositionsTable.setSelected(selected);
                 })
@@ -3303,9 +3340,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retBox;
     }
 
-    public void openCloseButtonWithCommentInvoke() {
+    public void openCloseButtonWithCommentInvoke(Action.ActionPerformedEvent e) {
         setRatingComment();
-        openCloseButtonInvoke();
+        openCloseButtonInvoke(e);
     }
 
     @Install(to = "openPositionsTable.openPositionActionButtonColumn", subject = "columnGenerator")
@@ -3381,14 +3418,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }));
 
         actionPopupButton.addAction(new BaseAction("subscribeListAction")
-        .withIcon(CubaIcon.CLONE.source())
-        .withCaption(messageBundle.getMessage("msgRecrutersTasks"))
-        .withHandler(event1 -> {
-            screenBuilders.lookup(RecrutiesTasks.class, this)
-                    .withOpenMode(OpenMode.DIALOG)
-                    .build()
-                    .show();
-        }));
+                .withIcon(CubaIcon.CLONE.source())
+                .withCaption(messageBundle.getMessage("msgRecrutersTasks"))
+                .withHandler(event1 -> {
+                    screenBuilders.lookup(RecrutiesTasks.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build()
+                            .show();
+                }));
     }
 
     private void initActionButtonSeparator(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
