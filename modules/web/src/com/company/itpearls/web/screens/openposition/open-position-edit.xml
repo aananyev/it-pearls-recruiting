@@ -17,6 +17,12 @@
                 <property name="grade" view="_local"/>
                 <property name="laborAgreement" view="_minimal"/>
                 <property name="projectName" view="_minimal">
+                    <property name="projectOwner" view="_local">
+                        <property name="fileImageFace" view="_local"/>
+                        <property name="personPosition" view="_local"/>
+                        <property name="cityOfResidence" view="_local"/>
+                        <property name="companyDepartment" view="_local"/>
+                    </property>
                     <property name="projectIsClosed"/>
                     <property name="projectDepartment" view="_local">
                         <property name="companyName" view="_local">
@@ -48,7 +54,7 @@
         <collection id="procAttachmentsDc"
                     class="com.haulmont.bpm.entity.ProcAttachment"
                     view="procAttachment-browse">
-            <loader id="procAttachmentsDl">
+            <loader id="procAttachmentsDl" cacheable="true">
                 <query><![CDATA[select e from bpm$ProcAttachment e
                                 where e.procInstance.entity.entityId  = :entityId
                                 order by e.createTs]]>
@@ -59,7 +65,7 @@
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
             </view>
-            <loader id="openPositionParentDl">
+            <loader id="openPositionParentDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                     where (e.openClose is null or e.openClose=false) and not e.commandCandidate=0
@@ -71,7 +77,7 @@
                     class="com.company.itpearls.entity.Position">
             <view extends="position-view">
             </view>
-            <loader id="positionTypesLc">
+            <loader id="positionTypesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Position e
                     where e.positionRuName not like '%(не использовать)%'
@@ -83,7 +89,7 @@
                     class="com.company.itpearls.entity.OpenPositionNews">
             <view extends="openPositionNews-view">
             </view>
-            <loader id="openPositionNewsLc">
+            <loader id="openPositionNewsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPositionNews e
                     order by e.dateNews desc]]>
@@ -103,19 +109,39 @@
         <collection id="projectNamesDc"
                     class="com.company.itpearls.entity.Project">
             <view extends="project-view">
+                <property name="projectOwner" view="_local">
+                    <property name="personPosition" view="_local"/>
+                    <property name="companyDepartment" view="_local"/>
+                    <property name="cityOfResidence" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
+                </property>
             </view>
-            <loader id="projectNamesLc">
+            <loader id="projectNamesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Project e
                     where e.projectIsClosed is null
                     or e.projectIsClosed=false
                     order by e.projectName]]>
                     <condition>
-                        <c:jpql>
-                            <c:where>
-                                e.projectDepartment = :department
-                            </c:where>
-                        </c:jpql>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.projectDepartment = :department
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.projectIsClosed = :projectClosed
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select f.projectName
+                                    from itpearls_OpenPosition f
+                                    where not (f.openClose = :withOpenPosition)
+                                    and f.projectName = e)
+                                </c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
@@ -178,23 +204,43 @@
         <groupBox spacing="false"
                   collapsable="true"
                   collapsed="false"
+                  width="100%"
                   caption="msg://msgTitle">
-            <scrollBox scrollBars="horizontal"
-                       spacing="false">
-                <hbox spacing="true">
+                <hbox spacing="true"
+                      expand="labelOpenPosition"
+                      width="100%">
                     <label id="signDraftLabel"
                            value=""
+                           width="AUTO"
                            stylename="h2"/>
                     <label id="labelOpenPosition"
-                           stylename="h2"/>
+                           width="AUTO"
+                           stylename="table-wordwrap"/>
                     <label id="labelTopComissionRecrutier"
                            stylename="h4"
                            htmlEnabled="true"/>
                     <label id="labelTopComissionResearcher"
                            stylename="h4"
                            htmlEnabled="true"/>
+                    <image id="projectLogoImage"
+                           width="70px"
+                           height="70px"
+                           visible="true"
+                           align="TOP_RIGHT"
+                           stylename="widget-border"
+                           scaleMode="SCALE_DOWN">
+                        <theme path="icons/no-company.png"/>
+                    </image>
+                    <image id="projectOwnerImage" 
+                           width="70px"
+                           height="70px"
+                           visible="true"
+                           align="TOP_RIGHT"
+                           stylename="widget-border"
+                           scaleMode="SCALE_DOWN">
+                        <theme path="icons/no-programmer.jpeg"/>
+                    </image>
                 </hbox>
-            </scrollBox>
         </groupBox>
         <vbox id="tabSheetGroupBox"
               expand="tabSheetOpenPosition">
@@ -211,7 +257,7 @@
                                width="100%">
                         <vbox spacing="false" expand="vacancyNameHBox">
                             <hbox id="vacancyNameHBox"
-                                    spacing="true"
+                                  spacing="true"
                                   width="100%"
                                   expand="vacansyNameField">
                                 <textField id="vacansyIDTextField"
@@ -386,21 +432,29 @@
                                 <hbox id="hboxProject"
                                       spacing="true"
                                       width="100%">
-                                    <lookupPickerField id="projectNameField"
-                                                       optionsContainer="projectNamesDc"
-                                                       dataContainer="openPositionDc"
-                                                       property="projectName"
-                                                       nullOptionVisible="false"
-                                                       caption="msg://msgNamePosition"
-                                                       width="100%"
-                                                       required="true">
-                                        <actions>
-                                            <action id="lookup"
-                                                    type="picker_lookup"/>
-                                            <action id="open"
-                                                    type="picker_open" icon="EDIT_ACTION"/>
-                                        </actions>
-                                    </lookupPickerField>
+                                    <vbox spacing="true">
+                                        <lookupPickerField id="projectNameField"
+                                                           optionsContainer="projectNamesDc"
+                                                           dataContainer="openPositionDc"
+                                                           property="projectName"
+                                                           nullOptionVisible="false"
+                                                           caption="msg://msgNamePosition"
+                                                           width="100%"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup"
+                                                        type="picker_lookup"/>
+                                                <action id="open"
+                                                        type="picker_open" icon="EDIT_ACTION"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <hbox spacing="true">
+                                            <checkBox id="onlyOpenProjectCheckBox"
+                                                      caption="msg://msgOnlyOpenedProject"/>
+                                            <checkBox id="withOpenPositionCheckBox"
+                                                      caption="msg://msgWithOpenPosition"/>
+                                        </hbox>
+                                    </vbox>
                                     <lookupPickerField id="companyDepartamentField"
                                                        optionsContainer="companyDepartamentsDc"
                                                        caption="msg://msgDepartment"

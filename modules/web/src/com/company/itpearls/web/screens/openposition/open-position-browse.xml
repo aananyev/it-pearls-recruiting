@@ -457,6 +457,7 @@
                 </popupButton>
                 <popupButton id="setRatingButton"
                              caption="msg://msgOpenPositionComment"
+                             showActionIcons="true"
                              visible="true"
                              icon="font-icon:COMMENT"
                              enable="false">

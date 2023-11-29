@@ -200,8 +200,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CollectionLoader<OpenPositionNews> openPositionNewsLc;
     @Inject
-    private CollectionContainer<OpenPositionNews> openPositionNewsDc;
-    @Inject
     private DataGrid<OpenPositionNews> openPostionNewsDataGrid;
     @Inject
     private RichTextArea templateLetterRichTextArea;
@@ -233,8 +231,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private TextField<String> salaryCommentTextFiels;
     @Inject
-    private CollectionPropertyContainer<OpenPositionComment> commentsOpenPositionDc;
-    @Inject
     private ScrollBoxLayout commentsScrollBox;
     @Inject
     private StarsAndOtherService starsAndOtherService;
@@ -246,6 +242,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CollectionPropertyContainer<SomeFilesOpenPosition> someFilesesDc;
     @Inject
     private OpenPositionService openPositionService;
+    @Inject
+    private CheckBox onlyOpenProjectCheckBox;
+    @Inject
+    private CheckBox withOpenPositionCheckBox;
+    @Inject
+    private Image projectLogoImage;
+    @Inject
+    private Image projectOwnerImage;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -272,6 +276,55 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setOpenCloseStart();
         setCommentsOpenPositionScroll(getEditedEntity(), commentsScrollBox);
         setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
+
+        initProjectNameField();
+    }
+
+    private void initProjectNameField() {
+        projectNameField.setOptionImageProvider(this::projectFielsImageProvider);
+        companyDepartamentField.setOptionImageProvider(this::companyDepartamentFieldImageProvider);
+        companyNameField.setOptionImageProvider(this::companyNameFieldImageProvider);
+        withOpenPositionCheckBox.setValue(true);
+    }
+
+    private Resource companyNameFieldImageProvider(Company company) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (company.getFileCompanyLogo() != null) {
+            return retImage.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(company.getFileCompanyLogo());
+        } else {
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+    }
+
+    private Resource companyDepartamentFieldImageProvider(CompanyDepartament companyDepartament) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (companyDepartament.getCompanyName().getFileCompanyLogo() != null) {
+            return retImage.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(companyDepartament.getCompanyName().getFileCompanyLogo());
+        } else {
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+    }
+
+    protected Resource projectFielsImageProvider(Project project) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (project.getProjectLogo() != null) {
+            return retImage.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(project
+                            .getProjectLogo());
+        } else {
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+        }
     }
 
     private void setCommentOpenPositionScrollIteractionList(OpenPosition editedEntity, ScrollBoxLayout commentsScrollBox) {
@@ -307,6 +360,33 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    private void setProjectClosedFilter() {
+        if (onlyOpenProjectCheckBox.getValue()) {
+            projectNamesLc.removeParameter("projectClosed");
+            withOpenPositionCheckBox.setValue(false);
+        } else {
+            projectNamesLc.setParameter("projectClosed", false);
+        }
+
+        projectNamesLc.load();
+    }
+
+    @Subscribe("onlyOpenProjectCheckBox")
+    public void onOnlyOpenProjectCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        setProjectClosedFilter();
+    }
+
+    @Subscribe("withOpenPositionCheckBox")
+    public void onWithOpenPositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue()) {
+            projectNamesLc.setParameter("withOpenPosition", true);
+            onlyOpenProjectCheckBox.setValue(false);
+        } else {
+            projectNamesLc.removeParameter("withOpenPosition");
+        }
+
+        projectNamesLc.load();
+    }
 
     private VBoxLayout getCommentBox(IteractionList iteractionList) {
         VBoxLayout retBox = uiComponents.create(VBoxLayout.class);
@@ -2037,6 +2117,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                             " : " +
                                             projectNameField.getValue().getProjectName() +
                                             ")");
+                                    labelOpenPosition.addStyleName("h3");
                                 }
 
                                 // а еще вывести комиссию
@@ -2277,6 +2358,67 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         vacansyNameField.setValue(generatePositionNameInProject());
 
         setCompanyDepartmentFromProject();
+        setProjectImage(event);
+        setProjectOwnerImage(event);
+    }
+
+    private void setProjectOwnerImage(HasValue.ValueChangeEvent<Project> event) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(event.getValue().getProjectOwner().getFirstName())
+                .append(" ")
+                .append(event.getValue().getProjectOwner().getSecondName());
+        if (event.getValue().getProjectOwner().getPersonPosition() != null) {
+            sb.append(" / ")
+                    .append(event.getValue().getProjectOwner().getPersonPosition().getPositionRuName());
+        }
+        if (event.getValue().getProjectOwner().getCompanyDepartment() != null) {
+            sb.append(" / ")
+                    .append(event.getValue().getProjectOwner().getCompanyDepartment().getDepartamentRuName());
+            if (event.getValue().getProjectOwner().getCompanyDepartment().getCompanyName() != null) {
+                sb.append(" / ")
+                        .append(event.getValue().getProjectOwner().getCompanyDepartment().getCompanyName().getComanyName());
+            }
+        }
+
+        if (event.getValue().getProjectOwner().getCityOfResidence() != null) {
+            sb.append(" / ")
+                    .append(event.getValue().getProjectOwner().getCityOfResidence().getCityRuName());
+        }
+
+        projectOwnerImage.setDescription(sb.toString());
+
+        if (event.getValue() != null) {
+            if (event.getValue().getProjectName() != null) {
+                if (event.getValue().getProjectOwner().getFileImageFace() != null) {
+                    projectOwnerImage.setVisible(true);
+                    projectOwnerImage.setValueSource(
+                            new ContainerValueSource<>(openPositionDc, "projectName.projectOwner.fileImageFace"));
+                } else {
+                    projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                }
+            } else {
+                projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            }
+        } else {
+            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        }
+    }
+
+    private void setProjectImage(HasValue.ValueChangeEvent<Project> event) {
+        if (event.getValue() != null) {
+            if (event.getValue().getProjectName() != null) {
+                if (event.getValue().getProjectLogo() != null) {
+                    projectLogoImage.setValueSource(
+                            new ContainerValueSource<>(openPositionDc, "projectName.projectLogo"));
+                } else {
+                    projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                }
+            } else {
+                projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+        } else {
+            projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
     }
 
     private String generatePositionNameInProject() {
@@ -2662,9 +2804,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (cityOpenPositionField.getValue() != null) {
             sb.append(", ")
-                    .append(cityOpenPositionField.getValue().getCityRuName())
-                    .append(")");
-//            retStr += ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+                    .append(cityOpenPositionField.getValue().getCityRuName());
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
@@ -2678,6 +2818,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             return "";
         }
+
+        if (openPositionDc.getItem().getCities().size() > 0) {
+            for (City city : openPositionDc.getItem().getCities()) {
+                sb.append(", ")
+                        .append(city.getCityRuName());
+            }
+        }
+
+        sb.append(")");
 
         return sb.toString();
     }

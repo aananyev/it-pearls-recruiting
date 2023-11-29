@@ -1313,6 +1313,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             openPositionsTable.setDetailsVisible(entity, false);
             openPositionsDl.load();
+
+            openPositionsTable.repaint();
+
+            if (entity.getOpenClose() != null) {
+                if (!entity.getOpenClose()) {
+                    openPositionsTable.setSelected(entity);
+                }
+            } else {
+                openPositionsTable.setSelected(entity);
+            }
         }
 
         dataManager.commit(entity);
@@ -1759,6 +1769,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                     entry.getKey().toString())
                             .append("Action")
                             .toString())
+                            .withHandler(e -> {
+                                if (openPositionsTable.getSingleSelected() != null) {
+                                    String action = ((BaseAction)e.getComponent()).getId();
+                                    // openPositionsTable.getSingleSelected().setPriority();
+                                }
+                            })
                             .withIcon(getPriorityIcon((int) entry.getValue()))
                             .withCaption(entry.getKey().toString()));
         }
@@ -2644,11 +2660,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
     private Object openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         String retStr = "QUESTION_CIRCLE";
-        String styleRetLabel = "";
+        String styleRetLabel = "open-position-pic-center-x-large-gray";
         String descriptionRetLabel = "";
 
         VBoxLayout retHbox = uiComponents.create(VBoxLayout.NAME);
         Label retLabel = uiComponents.create(Label.NAME);
+
 
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY_PARENT_OPENPOSITION)
@@ -2656,7 +2673,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .view("openPosition-view")
                 .list().size() > 0) {
             retStr = "FOLDER";
-            styleRetLabel = "open-position-pic-center-large-gray";
+            styleRetLabel = "open-position-pic-center-x-large-gray";
 
         } else {
             Boolean positionIsClosed = columnGeneratorEvent.getItem().getOpenClose() != null
