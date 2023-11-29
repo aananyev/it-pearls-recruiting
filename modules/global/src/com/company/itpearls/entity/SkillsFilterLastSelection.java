@@ -3,7 +3,6 @@ package com.company.itpearls.entity;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 
@@ -38,14 +37,14 @@ public class SkillsFilterLastSelection extends StandardEntity {
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
-    private User user;
+    private ExtUser user;
 
-    public User getUser() {
-        return user;
+    public void setUser(ExtUser user) {
+        this.user = user;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public ExtUser getUser() {
+        return user;
     }
 
     public Boolean getJobCandidateSelection() {

@@ -7,7 +7,6 @@ import com.haulmont.cuba.core.entity.annotation.CaseConversion;
 import com.haulmont.cuba.core.entity.annotation.ConversionType;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -37,17 +36,25 @@ public class SomeFiles extends StandardEntity {
     @Column(name = "FILE_COMMENT")
     protected String fileComment;
 
-    @NotNull
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FILE_OWNER_ID")
-    protected User fileOwner;
+    @NotNull
+    protected ExtUser fileOwner;
 
     @NotNull
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FILE_TYPE_ID")
     protected FileType fileType;
+
+    public void setFileOwner(ExtUser fileOwner) {
+        this.fileOwner = fileOwner;
+    }
+
+    public ExtUser getFileOwner() {
+        return fileOwner;
+    }
 
     public String getFileLink() {
         return fileLink;
@@ -75,14 +82,6 @@ public class SomeFiles extends StandardEntity {
 
     public void setFileType(FileType fileType) {
         this.fileType = fileType;
-    }
-
-    public User getFileOwner() {
-        return fileOwner;
-    }
-
-    public void setFileOwner(User fileOwner) {
-        this.fileOwner = fileOwner;
     }
 
     public String getFileDescription() {

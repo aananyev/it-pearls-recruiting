@@ -7,7 +7,6 @@ import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
-import com.haulmont.cuba.security.entity.User;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
@@ -217,12 +216,20 @@ public class OpenPosition extends StandardEntity {
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
-    private User owner;
+    private ExtUser owner;
 
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "openPosition")
     private List<SomeFilesOpenPosition> someFiles;
+
+    public void setOwner(ExtUser owner) {
+        this.owner = owner;
+    }
+
+    public ExtUser getOwner() {
+        return owner;
+    }
 
     public List<SomeFilesOpenPosition> getSomeFiles() {
         return someFiles;
@@ -318,14 +325,6 @@ public class OpenPosition extends StandardEntity {
 
     public void setSignDraft(Boolean signDraft) {
         this.signDraft = signDraft;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setOwner(User owner) {
-        this.owner = owner;
     }
 
     public Date getLastOpenDate() {

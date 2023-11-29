@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
+import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.OpenPositionNews;
 import com.haulmont.cuba.core.entity.Entity;
@@ -188,7 +189,7 @@ public class RecrutiesTasksBrowse extends StandardLookup<RecrutiesTasks> {
                             openPositionNews.setPriorityNews(false);
                             openPositionNews.setOpenPosition(recrutiesTasks.getOpenPosition());
                             openPositionNews.setDateNews(new Date());
-                            openPositionNews.setAuthor(userSessionSource.getUserSession().getUser());
+                            openPositionNews.setAuthor((ExtUser) userSessionSource.getUserSession().getUser());
                             openPositionNews.setSubject(recrutiesTasks.getReacrutier().getName()
                                     + " отписан от вакансии");
                             dataManager.commit(openPositionNews);

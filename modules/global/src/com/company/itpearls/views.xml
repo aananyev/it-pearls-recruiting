@@ -360,11 +360,13 @@
         <property name="skillsList" view="_local"/>
     </view>
     <view entity="itpearls_SomeFiles" name="someFiles-view" extends="_local">
-        <property name="fileDescriptor" view="_minimal">
-            <property name="size"/>
+        <property name="fileDescriptor" view="_local">
         </property>
-        <property name="fileOwner" view="_minimal"/>
-        <property name="fileType" view="_minimal"/>
+        <property name="fileOwner" view="_local">
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="fileType" view="_local">
+        </property>
     </view>
     <view entity="itpearls_FileType" name="fileType-view" extends="_local"/>
     <view entity="itpearls_SocialNetworkType" name="socialNetworkType-view" extends="_local">

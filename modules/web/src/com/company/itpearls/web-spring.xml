@@ -27,10 +27,9 @@
                 <entry key="itpearls_SendNotificationsService"
                        value="com.company.itpearls.core.SendNotificationsService"/>
                 <entry key="itpearls_SendEmailService" value="com.company.itpearls.service.SendEmailService"/>
-                <entry key="itpearls_OpenPositionNewsService"
-                       value="com.company.itpearls.service.OpenPositionNewsService"/>
                 <entry key="itpearls_RecruterStatService" value="com.company.itpearls.core.RecruterStatService"/>
                 <entry key="itpearls_SignIconService" value="com.company.itpearls.core.SignIconService"/>
+                <entry key="itpearls_OpenPositionService" value="com.company.itpearls.core.OpenPositionService"/>
             </map>
         </property>
     </bean>

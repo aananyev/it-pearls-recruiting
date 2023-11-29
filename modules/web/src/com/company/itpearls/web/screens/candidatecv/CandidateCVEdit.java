@@ -703,7 +703,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setDatePost(new Date());
 
-            getEditedEntity().setOwner(userSession.getUser());
+            getEditedEntity().setOwner((ExtUser) userSession.getUser());
         } else {
             if (candidateCVRichTextArea.getValue() != null) {
                 textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());

@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.core.SendNotificationsService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
@@ -86,6 +87,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private final static String separatorChar = "⎯";
     private final static String separator = separatorChar.repeat(22);
+    @Inject
+    private OpenPositionService openPositionService;
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -467,6 +470,38 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .withHandler(actionPerformedEvent ->
                         openPositionsTable.setDetailsVisible(openPositionsTable.getSingleSelected(), true)));
 
+    }
+
+    protected String getPriorityIcon(int priority) {
+        String icon = null;
+
+        switch (priority) {
+            case PRIORITY_NONE:
+                icon = CubaIcon.CANCEL.source();
+                break;
+            case PRIORITY_DRAFT:
+                icon = icons_traffic_lights_gray_png;
+                break;
+            case PRIORITY_PAUSED: //"Paused"
+                icon = icons_remove_png;
+                break;
+            case PRIORITY_LOW: //"Low"
+                icon = icons_traffic_lights_blue_png;
+                break;
+            case PRIORITY_NORMAL: //"Normal"
+                icon = icons_traffic_lights_green_png;
+                break;
+            case PRIORITY_HIGH: //"High"
+                icon = icons_traffic_lights_yellow_png;
+                break;
+            case PRIORITY_CRITICAL: //"Critical"
+                icon = icons_traffic_lights_red_png;
+                break;
+            default:
+                break;
+        }
+
+        return icon;
     }
 
     @Install(to = "notLowerRatingLookupField", subject = "optionIconProvider")
@@ -1159,7 +1194,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
-    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+    /*private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
                                                      String subject,
                                                      String comment,
                                                      Date date,
@@ -1177,7 +1212,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         CommitContext commitContext = new CommitContext();
         commitContext.addInstanceToCommit(openPositionNews);
         dataManager.commit(commitContext);
-    }
+    } */
 
     private Component createOpenCloseButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
@@ -1231,11 +1266,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             events.publish(new UiNotificationEvent(this, sb.toString()));
 
-            setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+            openPositionService.setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                     "Закрылась вакансия",
                     "Закрыта вакансия",
                     new Date(),
-                    userSession.getUser());
+                    (ExtUser) userSession.getUser());
 
             entity.setOwner(null);
             entity.setLastOpenDate(null);
@@ -1253,26 +1288,26 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             events.publish(new UiNotificationEvent(this, sb.toString()));
 
-            setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+            openPositionService.setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                     "Открылась вакансия",
                     "Открыта вакансия",
                     new Date(),
-                    userSession.getUser());
+                    (ExtUser) userSession.getUser());
 
-            entity.setOwner(userSession.getUser());
+            entity.setOwner((ExtUser) userSession.getUser());
             entity.setLastOpenDate(new Date());
             entity.setPriority(PRIORITY_NORMAL);
 
             if (entity.getParentOpenPosition() != null) {
                 if (entity.getParentOpenPosition().getOpenClose()) {
                     entity.getParentOpenPosition().setOpenClose(false);
-                    setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected().getParentOpenPosition(),
+                    openPositionService.setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected().getParentOpenPosition(),
                             "Открыта дочерней вакансией "
                                     + openPositionsTable.getSingleSelected().getVacansyName(),
                             "Открыта ввиду открытия дочерней вакансии "
                                     + openPositionsTable.getSingleSelected().getVacansyName(),
                             new Date(),
-                            userSession.getUser());
+                            (ExtUser) userSession.getUser());
                 }
             }
 
@@ -1552,11 +1587,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             + "</i></svg>"));
 
             if (flagPriority) {
-                setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+                openPositionService.setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                         "Изменен приоритет вакансии на " + result.get(),
                         "Изменен приоритет вакансии на " + result.get(),
                         new Date(),
-                        userSession.getUser());
+                        (ExtUser) userSession.getUser());
             } else {
                 flagPriority = true;
             }
@@ -1702,13 +1737,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
+        initOpenCloseButton();
         setButtonsEnableDisable();
     }
 
-    private void setButtonsEnableDisable() {
-        buttonSubscribe.setEnabled(false);
-        reportsPopupButton.setEnabled(false);
-
+    private void initOpenCloseButton() {
         openCloseButton.addAction(new BaseAction("closeOpenPositionAction")
                 .withCaption(messageBundle.getMessage("msgOpenClose"))
                 .withHandler(e -> openCloseButtonInvoke(e))
@@ -1718,7 +1751,26 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .withHandler(e -> openCloseButtonWithCommentInvoke(e))
                 .withIcon(CubaIcon.COMMENTING.source()));
 
+        initActionButtonSeparator(openCloseButton, "separator1");
+
+        for (Map.Entry entry : priorityMap.entrySet()) {
+            openCloseButton.addAction(
+                    new BaseAction(new StringBuilder().append(
+                                    entry.getKey().toString())
+                            .append("Action")
+                            .toString())
+                            .withIcon(getPriorityIcon((int) entry.getValue()))
+                            .withCaption(entry.getKey().toString()));
+        }
+
         openCloseButton.setEnabled(false);
+
+    }
+
+    private void setButtonsEnableDisable() {
+        buttonSubscribe.setEnabled(false);
+        reportsPopupButton.setEnabled(false);
+
         openPositionsTable.addSelectionListener(e -> {
             if (e.getSelected() == null) {
                 buttonSubscribe.setEnabled(false);
@@ -1744,6 +1796,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openCloseButton.setCaption(messageBundle.getMessage("msgOpen"));
                     openCloseButton.getAction("closeOpenPositionAction")
                             .setCaption(messageBundle.getMessage("msgOpen"));
+                    openCloseButton.getAction("closeOpenPositionAction")
+                                    .setIcon(CubaIcon.OPENID.source());
                     openCloseButton.getAction("closeOpenPositionWithCommentAction")
                             .setCaption(messageBundle.getMessage("msgOpenOpenPositionWithComment"));
                 } else {
@@ -1752,6 +1806,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openCloseButton.setCaption(messageBundle.getMessage("msgClose"));
                     openCloseButton.getAction("closeOpenPositionAction")
                             .setCaption(messageBundle.getMessage("msgClose"));
+                    openCloseButton.getAction("closeOpenPositionAction")
+                            .setIcon(CubaIcon.CLOSE.source());
                     openCloseButton.getAction("closeOpenPositionWithCommentAction")
                             .setCaption(messageBundle.getMessage("msgCloseOpenPositionWithComment"));
                 }
@@ -2780,10 +2836,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retLabel.setIcon(CubaIcon.FILE_WORD_O.source());
 
-        if (columnGeneratorEvent.getItem().getComment().toLowerCase().startsWith("нет")) {
-            retLabel.setVisible(false);
+        if (columnGeneratorEvent.getItem() != null) {
+            if (columnGeneratorEvent.getItem().getComment() != null) {
+                if (columnGeneratorEvent.getItem().getComment().toLowerCase().startsWith("нет")) {
+                    retLabel.setVisible(false);
+                } else {
+                    retLabel.setVisible(true);
+                }
+            } else {
+                retLabel.setVisible(false);
+            }
         } else {
-            retLabel.setVisible(true);
+            retLabel.setVisible(false);
         }
 
         return retLabel;
@@ -2982,7 +3046,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             openCloseButtonClickListener(openPosition, openCloseButton);
             openPositionsDl.load();
             openPositionsTable.repaint();
-            openPositionsTable.setSelected(openPosition);
+            openCloseButton.setEnabled(false);
+            buttonSubscribe.setEnabled(false);
+
+            if (openPosition.getOpenClose() != null) {
+                if (!openPosition.getOpenClose()) {
+                    openPositionsTable.setSelected(openPosition); // ERROR: IllegalStateException: Datasource doesn't contain items
+                    openCloseButton.setEnabled(true);
+                    buttonSubscribe.setEnabled(true);
+                }
+            } else {
+                openPositionsTable.setSelected(openPosition); // ERROR: IllegalStateException: Datasource doesn't contain items
+                openCloseButton.setEnabled(true);
+                buttonSubscribe.setEnabled(true);
+            }
         }
     }
 

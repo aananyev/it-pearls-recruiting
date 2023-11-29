@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.hrmasters.skillsfilterjobcandidate;
 
+import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.StandartPrioritySkills;
@@ -185,6 +186,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Inject
     private PopupButton menuButton;
+    @Inject
+    private OpenPositionService openPositionService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -294,7 +297,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                 if (calendar.after(calendar1)) {
                     if (iteractionList.getRecrutier() != null) {
-                        if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                        if (!iteractionList.getRecrutier().equals((ExtUser) userSession.getUser())) {
                             retStr = "button_table_red";
                         } else {
                             retStr = "button_table_yellow";
@@ -1080,7 +1083,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     Calendar calendar1 = Calendar.getInstance();
 
                     if (calendar.after(calendar1)) {
-                        if (!iteractionList.getRecrutier().equals(userSession.getUser())) {
+                        if (!iteractionList.getRecrutier().equals((ExtUser) userSession.getUser())) {
                             retStr = "button_table_red";
                         } else {
                             retStr = "button_table_yellow";
@@ -1421,7 +1424,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
             List<RecrutiesTasks> recrutiesTasks = dataManager.load(RecrutiesTasks.class)
                     .query(QUERY_GET_FROM_SUBSCRIBERS)
-                    .parameter("reacrutier", userSession.getUser())
+                    .parameter("reacrutier", (ExtUser) userSession.getUser())
                     .parameter("openPosition", selectedOpenPosition)
                     .view("recrutiesTasks-view")
                     .list();
@@ -1579,20 +1582,20 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             dataManager.commit(iteractionList);
 
             if (openPosition != null) {
-                setOpenPositionNewsAutomatedMessage(openPosition,
+                openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,
                         iteractionList.getIteractionType().getIterationName(),
                         messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
                         iteractionList.getDateIteraction(),
                         jobCandidate,
-                        userSession.getUser(),
+                        (ExtUser) userSession.getUser(),
                         interactionType.getSignPriorityNews());
             } else {
-                setOpenPositionNewsAutomatedMessage(defaultPosition,
+                openPositionService.setOpenPositionNewsAutomatedMessage(defaultPosition,
                         iteractionList.getIteractionType().getIterationName(),
                         messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
                         iteractionList.getDateIteraction(),
                         jobCandidate,
-                        userSession.getUser(),
+                        (ExtUser) userSession.getUser(),
                         interactionType.getSignPriorityNews());
 
             }
@@ -1607,18 +1610,18 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
 
-    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+    /* private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
                                                      String subject,
                                                      String comment,
                                                      Date date,
                                                      JobCandidate jobCandidate,
-                                                     User user,
+                                                     ExtUser user,
                                                      Boolean priority) {
         try {
             OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
 
             openPositionNews.setOpenPosition(editedEntity);
-            openPositionNews.setAuthor(user);
+            openPositionNews.setAuthor((ExtUser) user);
             openPositionNews.setDateNews(date);
             openPositionNews.setSubject(subject);
             openPositionNews.setComment(comment);
@@ -1631,7 +1634,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    } */
 
     @Subscribe("menuButton.saveLast")
     public void onMenuButtonSaveLast(Action.ActionPerformedEvent event) {
@@ -1697,7 +1700,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                 skillsFilterLastSelection.setJobCandidates(jobCandidate);
                 skillsFilterLastSelection.setJobCandidateSelection(selected);
-                skillsFilterLastSelection.setUser(userSession.getUser());
+                skillsFilterLastSelection.setUser((ExtUser) userSession.getUser());
 
                 dataManager.commit(skillsFilterLastSelection);
             }
@@ -1724,7 +1727,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         List<SkillsFilterLastSelection> skillsFilterLastSelection =
                 dataManager.load(SkillsFilterLastSelection.class)
                         .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
-                        .parameter("user", userSession.getUser())
+                        .parameter("user", (ExtUser) userSession.getUser())
                         .view("skillsFilterLastSelection-view")
                         .list();
 
@@ -1754,7 +1757,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             skillsFilterLastSelection =
                     dataManager.load(SkillsFilterLastSelection.class)
                             .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
-                            .parameter("user", userSession.getUser())
+                            .parameter("user", (ExtUser) userSession.getUser())
                             .view("skillsFilterLastSelection-view")
                             .list();
         } catch (Exception e) {
@@ -1824,7 +1827,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     public void onBeforeShow(BeforeShowEvent event) {
         if (dataManager.load(SkillsFilterLastSelection.class)
                 .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
-                .parameter("user", userSession.getUser())
+                .parameter("user", (ExtUser) userSession.getUser())
                 .view("skillsFilterLastSelection-view")
                 .list().size() > 0) {
             foundLastSelection = true;

@@ -3,7 +3,6 @@ package com.company.itpearls.web.screens.jobcandidate;
 import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
-import com.company.itpearls.service.OpenPositionNewsService;
 import com.company.itpearls.web.screens.SelectedCloseAction;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
@@ -31,7 +30,6 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
-import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Page;
 import org.apache.commons.lang3.StringUtils;
@@ -151,8 +149,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private PopupButton actionsWithCandidateButton;
     @Inject
-    private OpenPositionNewsService openPositionNewsService;
-    @Inject
     private CollectionLoader<SignIcons> signIconsDl;
     @Inject
     private CollectionContainer<SignIcons> signIconsDc;
@@ -162,6 +158,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private PopupButton signFilterButton;
     @Inject
     private WebBrowserTools webBrowserTools;
+    @Inject
+    private OpenPositionService openPositionService;
 
     @Subscribe
     public void onInit1(InitEvent event) {
@@ -480,24 +478,22 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             dataManager.commit(iteractionList);
 
             if (openPosition != null) {
-                openPositionNewsService.setOpenPositionNewsAutomatedMessage(openPosition,
+                openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,
                         iteractionList.getIteractionType().getIterationName(),
                         messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
                         iteractionList.getDateIteraction(),
                         jobCandidate,
-                        userSession.getUser(),
+                        (ExtUser) userSession.getUser(),
                         interactionType.getSignPriorityNews());
             } else {
-                openPositionNewsService.setOpenPositionNewsAutomatedMessage(defaultPosition,
+                openPositionService.setOpenPositionNewsAutomatedMessage(defaultPosition,
                         iteractionList.getIteractionType().getIterationName(),
                         messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
                         iteractionList.getDateIteraction(),
                         jobCandidate,
-                        userSession.getUser(),
+                        (ExtUser) userSession.getUser(),
                         interactionType.getSignPriorityNews());
-
             }
-
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msg://msgError"))
@@ -2047,7 +2043,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .newEntity()
                 .withInitializer(e -> {
                     e.setCandidate(jobCandidatesTable.getSingleSelected());
-                    e.setSubscriber(userSession.getUser());
+                    e.setSubscriber((ExtUser) userSession.getUser());
                     e.setStartDate(new Date());
                 })
                 .withOpenMode(OpenMode.DIALOG)
@@ -2547,7 +2543,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                     CandidateCV candidateCV = metadata.create(CandidateCV.class);
                                     candidateCV.setResumePosition(e.getPersonPosition());
                                     candidateCV.setTextCV(((OnlyTextPersonPosition) screenOnlytext).getResultText());
-                                    candidateCV.setOwner(userSession.getUser());
+                                    candidateCV.setOwner((ExtUser) userSession.getUser());
                                     candidateCV.setCandidate(e);
                                     candidateCV.setDatePost(new Date());
 

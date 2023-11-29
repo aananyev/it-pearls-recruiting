@@ -1169,7 +1169,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                                 .newEntity()
                                                 .withInitializer(g -> {
                                                     g.setCandidate(getEditedEntity());
-                                                    g.setSubscriber(userSession.getUser());
+                                                    g.setSubscriber((ExtUser) userSession.getUser());
                                                     g.setStartDate(new Date());
                                                 })
                                                 .withOpenMode(OpenMode.DIALOG)
@@ -1189,7 +1189,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .withParentDataContext(dataContext)
                     .withInitializer(e -> {
                         e.setCandidate(getEditedEntity());
-                        e.setSubscriber(userSession.getUser());
+                        e.setSubscriber((ExtUser) userSession.getUser());
                         e.setStartDate(new Date());
                     })
                     .build()
@@ -2055,7 +2055,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             candidate.setLinkOriginalCv(jobCandidateCandidateCvTable.getSingleSelected().getLinkOriginalCv());
                             candidate.setLinkItPearlsCV(jobCandidateCandidateCvTable.getSingleSelected().getLinkItPearlsCV());
                             candidate.setLintToCloudFile(jobCandidateCandidateCvTable.getSingleSelected().getLintToCloudFile());
-                            candidate.setOwner(userSession.getUser());
+                            candidate.setOwner((ExtUser) userSession.getUser());
 
                             DataContext dataContext = getScreenData().getDataContext();
                             CandidateCV cv = dataContext.merge(candidate);

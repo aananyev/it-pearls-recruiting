@@ -6,7 +6,6 @@ import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -34,14 +33,14 @@ public class SubscribeCandidateAction extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SUBSCRIBER_ID")
-    protected User subscriber;
+    protected ExtUser subscriber;
 
-    public User getSubscriber() {
-        return subscriber;
+    public void setSubscriber(ExtUser subscriber) {
+        this.subscriber = subscriber;
     }
 
-    public void setSubscriber(User subscriber) {
-        this.subscriber = subscriber;
+    public ExtUser getSubscriber() {
+        return subscriber;
     }
 
     public JobCandidate getCandidate() {

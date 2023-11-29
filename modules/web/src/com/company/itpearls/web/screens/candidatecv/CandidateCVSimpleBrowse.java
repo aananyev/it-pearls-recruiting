@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.candidatecv;
 
+import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
@@ -113,7 +114,7 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
                 .withScreenClass(CandidateCVEdit.class)
                 .withInitializer(e -> {
                     e.setCandidate(candidateCVsTable.getSingleSelected().getCandidate());
-                    e.setOwner(userSession.getUser());
+                    e.setOwner((ExtUser) userSession.getUser());
                     e.setResumePosition(candidateCVsTable.getSingleSelected().getResumePosition());
                     e.setTextCV(candidateCVsTable.getSingleSelected().getTextCV());
                     e.setLetter(candidateCVsTable.getSingleSelected().getLetter());

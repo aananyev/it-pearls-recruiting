@@ -1,9 +1,9 @@
 package com.company.itpearls.web.screens.internalemailer;
 
 import com.company.itpearls.core.InteractionService;
+import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
-import com.company.itpearls.service.OpenPositionNewsService;
 import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
 import com.company.itpearls.web.screens.signicons.SignIconsBrowse;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -86,8 +86,6 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     @Inject
     private UserSessionSource userSessionSource;
     @Inject
-    private OpenPositionNewsService openPositionNewsService;
-    @Inject
     private StrSimpleService strSimpleService;
     @Inject
     private CollectionContainer<SignIcons> signIconsDc;
@@ -97,6 +95,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private PopupButton signFilterButton;
     @Inject
     private InteractionService interactionService;
+    @Inject
+    private OpenPositionService openPositionService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -729,20 +729,20 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
             dataManager.commit(iteractionList);
 
             if (openPosition != null) {
-                openPositionNewsService.setOpenPositionNewsAutomatedMessage(openPosition,
+                openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,
                         iteractionList.getIteractionType().getIterationName(),
                         messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
                         iteractionList.getDateIteraction(),
                         jobCandidate,
-                        userSession.getUser(),
+                        (ExtUser) userSession.getUser(),
                         interactionType.getSignPriorityNews());
             } else {
-                openPositionNewsService.setOpenPositionNewsAutomatedMessage(defaultPosition,
+                openPositionService.setOpenPositionNewsAutomatedMessage(defaultPosition,
                         iteractionList.getIteractionType().getIterationName(),
                         messageBundle.getMessage("msgJobCandidatePutToPersonalReserve"),
                         iteractionList.getDateIteraction(),
                         jobCandidate,
-                        userSession.getUser(),
+                        (ExtUser) userSession.getUser(),
                         interactionType.getSignPriorityNews());
 
             }

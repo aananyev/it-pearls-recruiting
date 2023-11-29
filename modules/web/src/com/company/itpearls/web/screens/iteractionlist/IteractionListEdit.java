@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.core.EmailGenerationService;
+import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.core.StrSimpleService;
 import com.company.itpearls.entity.*;
@@ -61,7 +62,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private LookupPickerField<OpenPosition> vacancyFiels;
     @Inject
-    private LookupPickerField<User> recrutierField;
+    private LookupPickerField<ExtUser> recrutierField;
     @Inject
     private EmailService emailService;
     @Inject
@@ -148,6 +149,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Image candidateImage;
     @Inject
     private InstanceContainer<IteractionList> iteractionListDc;
+    @Inject
+    private OpenPositionService openPositionService;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -831,18 +834,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onAfterCommitChanges1(AfterCommitChangesEvent event) {
         if (deleteTwiceEvent) {
             setSubscribe();
-            setOpenPositionNewsAutomatedMessage(vacancyFiels.getValue(),
+            openPositionService.setOpenPositionNewsAutomatedMessage(vacancyFiels.getValue(),
                     iteractionTypeField.getValue().getIterationName(),
                     commentField.getValue(),
                     dateIteractionField.getValue(),
                     candidateField.getValue(),
-                    recrutierField.getValue(),
+                    (ExtUser) recrutierField.getValue(),
                     iteractionTypeField.getValue().getSignPriorityNews());
             deleteTwiceEvent = false;
         }
     }
 
-    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+    /* private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
                                                      String subject,
                                                      String comment,
                                                      Date date,
@@ -866,7 +869,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    } */
 
     private void setSubscribe() {
         // подписать меня на все варианты позиций
@@ -1198,7 +1201,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            recrutierField.setValue(userSession.getUser());
+            recrutierField.setValue((ExtUser)userSession.getUser());
         }
     }
 
@@ -1759,7 +1762,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                                         .newEntity()
                                         .withInitializer(k -> {
                                             k.setCandidate(candidateField.getValue());
-                                            k.setSubscriber(userSession.getUser());
+                                            k.setSubscriber((ExtUser) userSession.getUser());
                                             k.setStartDate(new Date());
                                         })
                                         .withOpenMode(OpenMode.DIALOG)
@@ -1775,7 +1778,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .newEntity()
                     .withInitializer(e -> {
                         e.setCandidate(candidateField.getValue());
-                        e.setSubscriber(userSession.getUser());
+                        e.setSubscriber((ExtUser) userSession.getUser());
                         e.setStartDate(new Date());
                     })
                     .withOpenMode(OpenMode.DIALOG)

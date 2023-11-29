@@ -1,9 +1,8 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
 import com.company.itpearls.UiNotificationEvent;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.OpenPositionNews;
+import com.company.itpearls.core.OpenPositionService;
+import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
 import com.haulmont.cuba.core.app.EmailService;
@@ -14,7 +13,6 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.RecrutiesTasks;
 import com.haulmont.cuba.gui.util.OperationResult;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
@@ -79,6 +77,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private String GROUP_RECRUTING_NAME = "Рекрутинг";
     private String GROUP_MANAGEMENT_NAME = "Менеджмент";
     private String GROUP_ACCOUNTING_NAME = "Аккаунтинг";
+    @Inject
+    private OpenPositionService openPositionService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -179,7 +179,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
 
         if (deleteTwiceEvent) {
             if (recrutiesTasks.size() != 0) {
-                setOpenPositionNewsAutomatedMessage(openPositionField.getValue(),
+                openPositionService.setOpenPositionNewsAutomatedMessage(openPositionField.getValue(),
                         recrutiesTasksFieldUser.getValue().getName()
                                 + " подписался на вакансию c "
                                 + sdf.format(startDateField.getValue())
@@ -188,7 +188,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                         "",
                         new Date(),
                         null,
-                        recrutiesTasksFieldUser.getValue(),
+                        (ExtUser) recrutiesTasksFieldUser.getValue(),
                         true);
                 deleteTwiceEvent = false;
             } else {
@@ -212,7 +212,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     }
 
 
-    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+    /* private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
                                                      String subject,
                                                      String comment,
                                                      Date date,
@@ -237,7 +237,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    } */
 
     @Subscribe("windowCommitAndCloseButton")
     public void onWindowCommitAndCloseButtonClick(Button.ClickEvent event) {

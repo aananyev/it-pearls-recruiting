@@ -8,7 +8,6 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.*;
 import com.haulmont.cuba.core.global.DeletePolicy;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
@@ -43,7 +42,7 @@ public class CandidateCV extends StandardEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID")
-    protected User owner;
+    protected ExtUser owner;
 
     @Lob
     @Column(name = "TEXT_CV")
@@ -103,6 +102,14 @@ public class CandidateCV extends StandardEntity {
     @Column(name = "CONTACT_INFO_CHECKED")
     private Boolean contactInfoChecked;
 
+    public void setOwner(ExtUser owner) {
+        this.owner = owner;
+    }
+
+    public ExtUser getOwner() {
+        return owner;
+    }
+
     public void setSomeFiles(List<SomeFilesCandidateCV> someFiles) {
         this.someFiles = someFiles;
     }
@@ -149,14 +156,6 @@ public class CandidateCV extends StandardEntity {
 
     public void setOriginalFileCV(FileDescriptor originalFileCV) {
         this.originalFileCV = originalFileCV;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setOwner(User owner) {
-        this.owner = owner;
     }
 
     public String getLinkOriginalCv() {

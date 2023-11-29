@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.somefiles;
 
 import com.company.itpearls.entity.CandidateCV;
+import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.FileType;
 import com.company.itpearls.entity.SomeFiles;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -76,7 +77,7 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setFileOwner(userSessionSource.getUserSession().getUser());
+            getEditedEntity().setFileOwner((ExtUser) userSessionSource.getUserSession().getUser());
         }
     }
 

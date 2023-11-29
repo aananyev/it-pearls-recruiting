@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
@@ -205,7 +206,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private RichTextArea templateLetterRichTextArea;
     @Inject
-    private TextField<User> ownerTextField;
+    private TextField<ExtUser> ownerTextField;
     private String startVacansyName = null;
     @Inject
     private CheckBox signDraftCheckBox;
@@ -243,6 +244,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private VBoxLayout tabFiles;
     @Inject
     private CollectionPropertyContainer<SomeFilesOpenPosition> someFilesesDc;
+    @Inject
+    private OpenPositionService openPositionService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -802,7 +805,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 if (!onNeedExercise.equals(needExerciseCheckBox.getValue())) {
                     onNeedExercise = needExerciseCheckBox.getValue();
 
-                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                    openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             (needExerciseCheckBox.getValue().equals(Boolean.TRUE)
                                     ? "Необходимо выполнение тестового задания"
                                     : "Тестовое задание не нужно"),
@@ -810,7 +813,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                     ? Jsoup.parse(exerciseRichTextArea.getValue()).text()
                                     : ""),
                             new Date(),
-                            userSession.getUser());
+                            (ExtUser) userSession.getUser());
                 }
             }
         }
@@ -824,17 +827,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             if (startSalaryMinValue != null) {
                 if (!startSalaryMinValue.equals(openPositionFieldSalaryMin.getValue())) {
 
-                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                            "Изменены зарплатные предложение (MIN): старое "
-                                    + startSalaryMinValue.toString().substring(0, startSalaryMinValue.toString().length() - 3)
-                                    + " на новое "
-                                    + openPositionFieldSalaryMin.getValue(),
-                            "Изменены зарплатные предложение (MIN): старое "
-                                    + startSalaryMinValue.toString().substring(0, startSalaryMinValue.toString().length() - 3)
-                                    + " на новое "
-                                    + openPositionFieldSalaryMin.getValue(),
+                    openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            new StringBuilder()
+                                    .append("Изменены зарплатные предложение (MIN): старое ")
+                                    .append(startSalaryMinValue.toString().substring(0, startSalaryMinValue.toString().length() - 3))
+                                    .append(" на новое ")
+                                    .append(openPositionFieldSalaryMin.getValue()).toString(),
+                            new StringBuilder()
+                                    .append("Изменены зарплатные предложение (MIN): старое ")
+                                    .append(startSalaryMinValue.toString().substring(0, startSalaryMinValue.toString().length() - 3))
+                                    .append(" на новое ")
+                                    .append(openPositionFieldSalaryMin.getValue()).toString(),
                             new Date(),
-                            userSession.getUser());
+                            (ExtUser) userSession.getUser());
                     startSalaryMinValue = openPositionFieldSalaryMin.getValue();
                 }
             }
@@ -879,7 +884,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             if (startSalaryMaxValue != null) {
                 if (!startSalaryMaxValue.equals(openPositionFieldSalaryMax.getValue())) {
 
-                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                    openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             "Изменены зарплатные предложение (MAX): старое "
                                     + (startSalaryMaxValue.toString().length() >= 3
                                     ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
@@ -893,7 +898,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                     + " на новое "
                                     + openPositionFieldSalaryMax.getValue(),
                             new Date(),
-                            userSession.getUser());
+                            (ExtUser) userSession.getUser());
                     startSalaryMaxValue = openPositionFieldSalaryMin.getValue();
                 }
             }
@@ -908,11 +913,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             if (openPositionRichTextArea.getValue() != null) {
                 if (openPositionText != null) {
                     if (!openPositionText.equals(Jsoup.parse(openPositionRichTextArea.getValue()).text())) {
-                        setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                        openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                                 "Изменено описание вакансии",
                                 Jsoup.parse(openPositionRichTextArea.getValue()).text(),
                                 new Date(),
-                                userSession.getUser());
+                                (ExtUser) userSession.getUser());
                         openPositionText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
                     }
                 }
@@ -928,11 +933,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             if (startLetterText != null) {
                 if (!startLetterText.equals(Jsoup.parse(templateLetterRichTextArea.getValue()).text())) {
 
-                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                    openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             "Изменен шаблон сопроводительного письма",
                             Jsoup.parse(templateLetterRichTextArea.getValue()).text(),
                             new Date(),
-                            userSession.getUser());
+                            (ExtUser) userSession.getUser());
                     startLetterText = Jsoup.parse(templateLetterRichTextArea.getValue()).text();
                 }
             }
@@ -1077,25 +1082,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 Date lastOpenDate = new Date();
 
                 lastOpenVacancyDateField.setValue(lastOpenDate);
-                ownerTextField.setValue(userSession.getUser());
-                setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                ownerTextField.setValue((ExtUser) userSession.getUser());
+                openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                         "Открылась вакансия",
                         "Открыта вакансия",
                         new Date(),
-                        userSession.getUser());
+                        (ExtUser) userSession.getUser());
             } else {
                 if (openClosePositionCheckBox.getValue()) {
                     lastOpenVacancyDateField.setValue(null);
                     ownerTextField.setValue(null);
-                    setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                    openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             "Закрылась вакансия",
                             "Закрыта вакансия",
                             new Date(),
-                            userSession.getUser());
+                            (ExtUser) userSession.getUser());
                 }
             }
         } else {
-            setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+            openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                     "Открыта новая вакансия",
                     vacansyNameField.getValue() + "\n"
                             + positionTypeField.getValue().getPositionEnName() + " \\ "
@@ -1107,24 +1112,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             + (shortDescriptionTextArea.getValue() != null ?
                             Jsoup.parse(shortDescriptionTextArea.getValue()).text() : ""),
                     new Date(),
-                    userSession.getUser());
+                    (ExtUser) userSession.getUser());
         }
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!vacansyNameField.getValue().equals(startVacansyName)) {
-                setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                         userSession.getUser().getName()
                                 + " изменил наименование вакансии",
                         "Старое: " + startVacansyName
                                 + "<br>Новое: "
                                 + vacansyNameField.getValue(),
                         new Date(),
-                        userSession.getUser());
+                        (ExtUser) userSession.getUser());
             }
         }
     }
 
-    private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
+    /* private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
                                                      String subject,
                                                      String comment,
                                                      Date date,
@@ -1142,7 +1147,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         CommitContext commitContext = new CommitContext();
         commitContext.addInstanceToCommit(openPositionNews);
         dataManager.commit(commitContext);
-    }
+    } */
 
     @Subscribe("priorityNewsCheckBox")
     public void onPriorityNewsCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
@@ -1525,11 +1530,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                 .findFirst();
 
                         if (event.getValue() >= 0) {
-                            setOpenPositionNewsAutomatedMessage(getEditedEntity(),
+                            openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                                     "Изменен приоритет вакансии на " + result.get(),
                                     "Закрыта вакансия",
                                     new Date(),
-                                    userSession.getUser());
+                                    (ExtUser) userSession.getUser());
                         }
 
                         flagPriority = false;

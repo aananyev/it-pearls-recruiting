@@ -1,7 +1,6 @@
 package com.company.itpearls.entity;
 
 import com.haulmont.cuba.core.entity.StandardEntity;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -15,10 +14,10 @@ public class Setup extends StandardEntity {
     @Column(name = "PERAM_NAME", nullable = false, unique = true, length = 30)
     protected String paramName;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "PARAM_USER_ID")
-    protected User paramUser;
+    @NotNull
+    protected ExtUser paramUser;
 
     @Column(name = "PARAM_SET", length = 80)
     protected String paramSetStr;
@@ -26,12 +25,12 @@ public class Setup extends StandardEntity {
     @Column(name = "PARAM_SET_BOOL")
     protected Boolean paramSetBool;
 
-    public User getParamUser() {
-        return paramUser;
+    public void setParamUser(ExtUser paramUser) {
+        this.paramUser = paramUser;
     }
 
-    public void setParamUser(User paramUser) {
-        this.paramUser = paramUser;
+    public ExtUser getParamUser() {
+        return paramUser;
     }
 
     public Boolean getParamSetBool() {

@@ -5,7 +5,6 @@ import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
-import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -41,14 +40,22 @@ public class OpenPositionNews extends StandardEntity {
     private JobCandidate candidates;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
-    @NotNull
     @OnDelete(DeletePolicy.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "AUTHOR_ID")
-    private User author;
+    @NotNull
+    private ExtUser author;
 
     @Column(name = "PRIORITY_NEWS")
     private Boolean priorityNews;
+
+    public void setAuthor(ExtUser author) {
+        this.author = author;
+    }
+
+    public ExtUser getAuthor() {
+        return author;
+    }
 
     public JobCandidate getCandidates() {
         return candidates;
@@ -72,14 +79,6 @@ public class OpenPositionNews extends StandardEntity {
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public User getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
     }
 
     public String getComment() {

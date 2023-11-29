@@ -22,7 +22,9 @@
                         <property name="fileImageFace" view="_local"/>
                         <property name="cityOfResidence" view="_local"/>
                         <property name="companyDepartment" view="_local">
-                            <property name="companyName" view="_local"/>
+                            <property name="companyName" view="_local">
+                                <property name="fileCompanyLogo" view="_local"/>
+                            </property>
                         </property>
                         <property name="personPosition" view="_local"/>
                     </property>
@@ -403,6 +405,7 @@
                 <button id="removeBtn"
                         action="openPositionsTable.remove"/>
                 <popupButton id="openCloseButton"
+                             showActionIcons="true"
                              caption="msg://msgOpenClose"
                              enable="false"
                              icon="DIALOG_CLOSE"/>
