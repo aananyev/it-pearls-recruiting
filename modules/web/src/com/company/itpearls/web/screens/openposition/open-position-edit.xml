@@ -16,7 +16,8 @@
                 </property>
                 <property name="grade" view="_local"/>
                 <property name="laborAgreement" view="_minimal"/>
-                <property name="projectName" view="_minimal">
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
                     <property name="projectOwner" view="_local">
                         <property name="fileImageFace" view="_local"/>
                         <property name="personPosition" view="_local"/>

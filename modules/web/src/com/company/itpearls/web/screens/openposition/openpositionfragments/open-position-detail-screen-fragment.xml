@@ -140,6 +140,7 @@
                                 <hbox>
                                     <label id="projectTextField"
                                            align="BOTTOM_LEFT"
+                                           width="100%"
                                            stylename="table-wordwrap"
                                            dataContainer="openPositionsDc"
                                            property="projectName"/>

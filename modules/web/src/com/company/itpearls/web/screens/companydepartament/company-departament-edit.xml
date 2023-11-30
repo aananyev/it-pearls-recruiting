@@ -10,6 +10,7 @@
                 <property name="projectOfDepartment" view="_local"/>
                 <property name="companyName" view="_local">
                     <property name="fileCompanyLogo" view="_local"/>
+                    <property name="companyOwnership" view="_local"/>
                 </property>
                 <property name="departamentDirector" view="_local">
                     <property name="personPosition" view="_local"/>

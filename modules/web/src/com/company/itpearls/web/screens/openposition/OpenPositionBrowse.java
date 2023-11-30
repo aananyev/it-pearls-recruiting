@@ -34,6 +34,7 @@ import com.haulmont.reports.entity.Report;
 import com.haulmont.reports.gui.ReportGuiManager;
 import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
 import org.apache.commons.lang3.time.DateUtils;
+import org.eclipse.persistence.exceptions.QueryException;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -912,10 +913,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     protected GroupBoxLayout detailsGenerator(OpenPosition entity, OpenPositionDetailScreenFragment openPositionDetailScreenFragment) {
         GroupBoxLayout mainLayout = uiComponents.create(GroupBoxLayout.class);
+        mainLayout.setSpacing(true);
 
-        mainLayout.setWidth("100%");
+        mainLayout.setWidthFull();
 
         HBoxLayout titleBox = uiComponents.create(HBoxLayout.NAME);
+        titleBox.setSpacing(true);
         HBoxLayout buttonsHBox = uiComponents.create(HBoxLayout.NAME);
 
         buttonsHBox.setSpacing(true);
@@ -954,15 +957,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         buttonsHBox.add(closeButton);
 
+        titleBox.setWidthFull();
         titleBox.add(fragmentTitle);
         titleBox.add(buttonsHBox);
-        titleBox.setWidthFull();
 
         mainLayout.add(titleBox);
 
         openPositionDetailScreenFragment.setSubscribersRecruters();
         Fragment fragment = openPositionDetailScreenFragment.getFragment();
-        fragment.setWidth("100%");
+        fragment.setWidthFull();
         mainLayout.add(fragment);
 
         Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
@@ -1641,12 +1644,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private Component createTitleFragment(OpenPosition entity) {
         Label<String> titleLabel = uiComponents.create(Label.NAME);
-        titleLabel.setStyleName("h4");
-        titleLabel.addStyleName("gradient-text");
+        titleLabel.addStyleName("h4");
+        titleLabel.addStyleName(style_table_wordwrap);
         titleLabel.setDescription(entity.getVacansyName());
         titleLabel.setValue(entity.getVacansyName());
         titleLabel.setAlignment(Component.Alignment.BOTTOM_LEFT);
-        titleLabel.setWidth("100%");
+        titleLabel.setWidthFull();
 
         return titleLabel;
     }
@@ -3437,9 +3440,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         Label starLabel = uiComponents.create(Label.class);
 
-        avgRating = dataManager.loadValue(QUERY_AVERAGE_RATING, BigDecimal.class)
-                .parameter("openPosition", openPosition)
-                .one();
+        try {
+            avgRating = dataManager.loadValue(QUERY_AVERAGE_RATING, BigDecimal.class)
+                    .parameter("openPosition", openPosition)
+                    .one();
+        } catch (QueryException e) {
+            e.printStackTrace();
+        }
 
         if (avgRating != null) {
             int avgRatingInt = Integer.valueOf(avgRating.intValue()) + 1;

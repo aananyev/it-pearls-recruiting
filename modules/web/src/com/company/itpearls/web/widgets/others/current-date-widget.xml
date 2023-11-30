@@ -9,10 +9,10 @@
                    stylename="h1"/>
             <label id="currentDateLabel"
                    align="MIDDLE_CENTER"
-                   stylename="h3"/>
+                   stylename="h4"/>
             <label id="currentDayOfWeekLabel"
                    align="MIDDLE_CENTER"
-                   stylename="h3"/>
+                   stylename="h4"/>
         </vbox>
     </layout>
 </fragment>

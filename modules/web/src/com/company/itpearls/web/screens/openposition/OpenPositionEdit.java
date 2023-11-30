@@ -2819,10 +2819,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             return "";
         }
 
-        if (openPositionDc.getItem().getCities().size() > 0) {
-            for (City city : openPositionDc.getItem().getCities()) {
-                sb.append(", ")
-                        .append(city.getCityRuName());
+        if (openPositionDc.getItem() != null) {
+            if (openPositionDc.getItem().getCities() != null) {
+                if (openPositionDc.getItem().getCities().size() > 0) {
+                    for (City city : openPositionDc.getItem().getCities()) {
+                        sb.append(", ")
+                                .append(city.getCityRuName());
+                    }
+                }
             }
         }
 

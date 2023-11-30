@@ -26,6 +26,8 @@ public class MyNameWidget extends ScreenFragment {
     public void onInit(InitEvent event) {
         setUserGroup();
         setRecruterName();
+
+        myNameLabel.addStyleName("table-wordwrap");
     }
 
     private void setRecruterName() {
