@@ -477,7 +477,7 @@ create table ITPEARLS_OPEN_POSITION (
     NUMBER_POSITION integer,
     MORE10_NUMBER_POSITION boolean,
     WORK_EXPERIENCE integer not null,
-    COMMAND_EXPERIENCE integer not null,
+    COMMAND_EXPERIENCE integer,
     COMMENT_ text,
     COMMENT_EN text,
     SHORT_DESCRIPTION varchar(250),
@@ -500,6 +500,7 @@ create table ITPEARLS_OPEN_POSITION (
     NEED_MEMO_FOR_INTERVIEW boolean,
     MEMO_FOR_INTERVIEW text,
     OWNER_ID uuid,
+    CLOSING_DATE date,
     --
     primary key (ID)
 )^

@@ -1839,7 +1839,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openCloseButton.getAction("closeOpenPositionAction")
                             .setCaption(messageBundle.getMessage("msgOpen"));
                     openCloseButton.getAction("closeOpenPositionAction")
-                                    .setIcon(CubaIcon.OPENID.source());
+                            .setIcon(CubaIcon.OPENID.source());
                     openCloseButton.getAction("closeOpenPositionWithCommentAction")
                             .setCaption(messageBundle.getMessage("msgOpenOpenPositionWithComment"));
                 } else {
@@ -2770,6 +2770,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         signsHBox.setWidthAuto();
         signsHBox.setHeightAuto();
 
+        signsHBox.add(setSignClosingVecency(columnGeneratorEvent));
         signsHBox.add(setSignAttachments(columnGeneratorEvent));
         signsHBox.add(setSignTestCase(columnGeneratorEvent));
         signsHBox.add(setSignComment(columnGeneratorEvent));
@@ -2780,6 +2781,61 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retHbox.add(retLabel);
         retHbox.add(signsHBox);
         return retHbox;
+    }
+
+    private String getTimerClosingVacancyValue(Date closingDate) {
+        StringBuilder sb = new StringBuilder();
+
+        if (closingDate != null) {
+            long diffDate = closingDate.getTime() - new Date().getTime();
+            int days = (int) diffDate / (24 * 60 * 60 * 1000);
+            int hours = (int) ((diffDate - days * (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            int minutes = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000))) / (60 * 1000));
+            int seconds = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000) + minutes * (60 * 1000))) / 1000);
+
+            sb.append(days)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgDays"))
+                    .append(" ")
+                    .append(hours)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgHours"))
+                    .append(" ")
+                    .append(minutes)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgMinutes"))
+                    .append(" ")
+                    .append(seconds)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgSeconds"));
+
+            return sb.toString();
+        }
+
+        return "";
+    }
+
+    private Component setSignClosingVecency(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setWidth(width_20px);
+        retLabel.setHeight(width_20px);
+        retLabel.setStyleName("open_position_sign_label_black");
+
+        if (columnGeneratorEvent.getItem().getClosingDate() != null) {
+            if (columnGeneratorEvent.getItem().getClosingDate().after(new Date())) {
+                retLabel.setIcon(CubaIcon.CLOCK_O.source());
+                retLabel.setDescription(getTimerClosingVacancyValue(columnGeneratorEvent.getItem().getClosingDate()));
+            } else {
+                retLabel.setIcon(CubaIcon.STOP_CIRCLE.source());
+                retLabel.setDescription(messageBundle.getMessage("msgVacancyExpired"));
+            }
+
+            retLabel.setVisible(true);
+        } else {
+            retLabel.setVisible(false);
+        }
+
+        return retLabel;
     }
 
     private Label setSignRecrutersComment(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {

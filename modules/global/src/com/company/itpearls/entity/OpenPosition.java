@@ -116,7 +116,7 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "WORK_EXPERIENCE", nullable = false)
     protected Integer workExperience;
 
-    @Column(name = "COMMAND_EXPERIENCE", nullable = false)
+    @Column(name = "COMMAND_EXPERIENCE")
     protected Integer commandExperience;
 
     @Lob
@@ -222,6 +222,18 @@ public class OpenPosition extends StandardEntity {
     @OnDelete(DeletePolicy.CASCADE)
     @OneToMany(mappedBy = "openPosition")
     private List<SomeFilesOpenPosition> someFiles;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "CLOSING_DATE")
+    private Date closingDate;
+
+    public Date getClosingDate() {
+        return closingDate;
+    }
+
+    public void setClosingDate(Date closingDate) {
+        this.closingDate = closingDate;
+    }
 
     public void setOwner(ExtUser owner) {
         this.owner = owner;

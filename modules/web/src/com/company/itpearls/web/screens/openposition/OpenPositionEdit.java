@@ -18,6 +18,7 @@ import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -35,6 +36,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.Calendar;
 
 
 @UiController("itpearls_OpenPosition.edit")
@@ -42,6 +44,58 @@ import java.util.*;
 @EditedEntityContainer("openPositionDc")
 @LoadDataBeforeShow
 public class OpenPositionEdit extends StandardEditor<OpenPosition> {
+    @Inject
+    private Label<String> closedVacancyInfoLabel;
+    @Inject
+    private DateField<Date> closingDateDateField;
+    @Inject
+    private MessageBundle messageBundle;
+    @Inject
+    private Timer closedVacancyTimer;
+
+    @Subscribe("closedVacancyTimer")
+    public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
+        if (closingDateDateField.getValue() != null) {
+            closedVacancyInfoLabel.setValue(new StringBuilder()
+                    .append(messageBundle.getMessage("msgClosingVacancyAfter"))
+                    .append(" ")
+                    .append(getTimerClosingVacancyValue(closingDateDateField.getValue()))
+                    .toString());
+        }
+    }
+
+    private String getTimerClosingVacancyValue(Date closingDate) {
+        StringBuilder sb = new StringBuilder();
+
+        if (closingDate != null) {
+            long diffDate = closingDate.getTime() - new Date().getTime();
+            int days = (int) diffDate / (24 * 60 * 60 * 1000);
+            int hours = (int) ((diffDate - days * (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            int minutes = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000))) / (60 * 1000));
+            int seconds = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000) + minutes * (60 * 1000))) / 1000);
+
+           sb.append(days)
+                   .append(" ")
+                   .append(messageBundle.getMessage("msgDays"))
+                   .append(" ")
+                   .append(hours)
+                   .append(" ")
+                   .append(messageBundle.getMessage("msgHours"))
+                   .append(" ")
+                   .append(minutes)
+                   .append(" ")
+                   .append(messageBundle.getMessage("msgMinutes"))
+                   .append(" ")
+                   .append(seconds)
+                   .append(" ")
+                   .append(messageBundle.getMessage("msgSeconds"));
+
+           return sb.toString();
+        }
+
+        return "";
+    }
+
     private static final String QUERY_OUTSTAFF_RATES = "select e from itpearls_OutstaffingRates e where e.rate = :rate";
     @Inject
     private LookupPickerField<City> cityOpenPositionField;
@@ -221,8 +275,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CollectionContainer<Grade> gradeDc;
     @Inject
-    private MessageBundle messageBundle;
-    @Inject
     private TextField<BigDecimal> openPositionFieldSalaryIE;
     @Inject
     private TextField<String> vacansyIDTextField;
@@ -278,6 +330,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
 
         initProjectNameField();
+        initClosedVacancyTimerFacet();
+    }
+
+    private void initClosedVacancyTimerFacet() {
+        if (closingDateDateField.getValue() != null) {
+            closedVacancyTimer.start();
+        }
     }
 
     private void initProjectNameField() {
@@ -1598,6 +1657,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("priorityField")
     public void onPriorityFieldValueChange(HasValue.ValueChangeEvent<Integer> event) {
+        if (event.getValue().equals(OpenPositionPriority.LOW.getId())) {
+            setClosingWeek();
+        }
+
         if (priorityField.getValue() != null) {
             if (startPriorityStatus != null) {
                 if (!startPriorityStatus.equals(priorityField.getValue())) {
@@ -1623,6 +1686,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     }
                 }
             }
+        }
+    }
+
+    private void setClosingWeek() {
+        if (closingDateDateField.getValue() == null) {
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.add(7, Calendar.DAY_OF_WEEK);
+
+            closingDateDateField.setValue(calendar.getTime());
+            initClosedVacancyTimerFacet();
+
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withDescription(messageBundle.getMessage("msgSetClosingVacancyWeek"))
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withHideDelayMs(5000)
+                    .withPosition(Notifications.Position.DEFAULT)
+                    .show();
         }
     }
 

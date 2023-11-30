@@ -67,5 +67,4 @@ public class OpenPositionServiceBean implements OpenPositionService {
         commitContext.addInstanceToCommit(openPositionNews);
         dataManager.commit(commitContext);
     }
-
 }
