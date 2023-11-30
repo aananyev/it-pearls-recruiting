@@ -135,7 +135,7 @@ configure(coreModule) {
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
         host = 'localhost'
-        dbName = 'itpearls'
+        dbName = 'agromasters'
         dbms = 'postgres'
         dbUser = 'cuba'
         dbPassword = 'cuba'
@@ -143,7 +143,7 @@ configure(coreModule) {
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
         host = 'localhost'
-        dbName = 'itpearls'
+        dbName = 'agromasters'
         dbms = 'postgres'
         dbUser = 'cuba'
         dbPassword = 'cuba'
