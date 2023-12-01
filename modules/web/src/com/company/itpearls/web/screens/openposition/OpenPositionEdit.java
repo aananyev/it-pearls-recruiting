@@ -74,23 +74,23 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             int minutes = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000))) / (60 * 1000));
             int seconds = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000) + minutes * (60 * 1000))) / 1000);
 
-           sb.append(days)
-                   .append(" ")
-                   .append(messageBundle.getMessage("msgDays"))
-                   .append(" ")
-                   .append(hours)
-                   .append(" ")
-                   .append(messageBundle.getMessage("msgHours"))
-                   .append(" ")
-                   .append(minutes)
-                   .append(" ")
-                   .append(messageBundle.getMessage("msgMinutes"))
-                   .append(" ")
-                   .append(seconds)
-                   .append(" ")
-                   .append(messageBundle.getMessage("msgSeconds"));
+            sb.append(days)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgDays"))
+                    .append(" ")
+                    .append(hours)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgHours"))
+                    .append(" ")
+                    .append(minutes)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgMinutes"))
+                    .append(" ")
+                    .append(seconds)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgSeconds"));
 
-           return sb.toString();
+            return sb.toString();
         }
 
         return "";
@@ -1691,17 +1691,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setClosingWeek() {
         if (closingDateDateField.getValue() == null) {
-            GregorianCalendar calendar = new GregorianCalendar();
-            calendar.add(7, Calendar.DAY_OF_WEEK);
-
-            closingDateDateField.setValue(calendar.getTime());
-            initClosedVacancyTimerFacet();
-
-            notifications.create(Notifications.NotificationType.WARNING)
-                    .withDescription(messageBundle.getMessage("msgSetClosingVacancyWeek"))
+            dialogs.createOptionDialog()
                     .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withHideDelayMs(5000)
-                    .withPosition(Notifications.Position.DEFAULT)
+                    .withMessage(messageBundle.getMessage("msgSetClosingVacancyWeek"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                            .withHandler(e -> {
+                                GregorianCalendar calendar = new GregorianCalendar();
+                                calendar.add(7, Calendar.DAY_OF_WEEK);
+
+                                closingDateDateField.setValue(calendar.getTime());
+                                initClosedVacancyTimerFacet();
+
+                                notifications.create(Notifications.NotificationType.WARNING)
+                                        .withDescription(messageBundle.getMessage("msgSetClosingVacancyWeek"))
+                                        .withCaption(messageBundle.getMessage("msgWarning"))
+                                        .withHideDelayMs(5000)
+                                        .withPosition(Notifications.Position.DEFAULT)
+                                        .show();
+                            }), new DialogAction(DialogAction.Type.NO))
                     .show();
         }
     }

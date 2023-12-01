@@ -1575,11 +1575,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     Boolean flagPriority = true;
 
-    private Component createPriorityField(OpenPosition entity) {
+    private Component createPriorityField(OpenPosition openPosition) {
         LookupField retField = uiComponents.create(LookupField.NAME);
 
         retField.setOptionsMap(priorityMap);
-        retField.setValue(entity.getPriority());
+        retField.setValue(openPosition.getPriority());
         retField.setAlignment(Component.Alignment.TOP_RIGHT);
         retField.addValueChangeListener(f -> {
             int value = (int) retField.getValue();
@@ -1589,12 +1589,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .map(Map.Entry::getKey)
                     .findFirst();
 
-            openPositionsTable.getSingleSelected().setPriority((int) retField.getValue());
-            dataManager.commit(entity);
+            openPosition.setPriority((int) retField.getValue());
+
+            if (retField.getValue().equals(OpenPositionPriority.LOW.getId())) {
+                setClosingWeek(openPosition);
+            } else {
+                dataManager.commit(openPosition);
+                openPositionsDl.load();
+                openPositionsTable.repaint();
+                openPositionsTable.scrollTo(openPosition);
+            }
 
             events.publish(new UiNotificationEvent(this,
                     "Изменен приоритет вакансии <b>"
-                            + openPositionsTable.getSingleSelected().getVacansyName()
+                            + openPosition.getVacansyName()
                             + "</b> на <b>"
                             + result.get()
                             + "</b><br><svg align=\"right\" width=\"100%\"><i>"
@@ -1602,7 +1610,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             + "</i></svg>"));
 
             if (flagPriority) {
-                openPositionService.setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
+                openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,
                         "Изменен приоритет вакансии на " + result.get(),
                         "Изменен приоритет вакансии на " + result.get(),
                         new Date(),
@@ -1610,14 +1618,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             } else {
                 flagPriority = true;
             }
-
-            openPositionsDl.load();
         });
 
         retField.setLookupSelectHandler(e -> {
-            openPositionsTable.getSingleSelected().setPriority((int) retField.getValue());
-            dataManager.commit(entity);
-            openPositionsDl.load();
+            if (retField.getValue().equals(OpenPositionPriority.LOW.getId())) {
+                setClosingWeek(openPosition);
+            } else {
+                openPositionsTable.getSingleSelected().setPriority((int) retField.getValue());
+                dataManager.commit(openPosition);
+                openPositionsDl.load();
+                openPositionsTable.repaint();
+                openPositionsTable.scrollTo(openPosition);
+            }
         });
 
         retField.setOptionIconProvider(g -> {
@@ -1640,6 +1652,35 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         });
 
         return retField;
+    }
+
+    private void setClosingWeek(OpenPosition openPosition) {
+        if (openPosition.getClosingDate() == null) {
+            dialogs.createOptionDialog()
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(messageBundle.getMessage("msgSetClosingVacancyWeek"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                            .withHandler(e -> {
+                                GregorianCalendar calendar = new GregorianCalendar();
+                                calendar.add(7, Calendar.DAY_OF_WEEK);
+
+                                openPosition.setClosingDate(calendar.getTime());
+                                dataManager.commit(openPosition);
+
+                                openPositionsDl.load();
+                                openPositionsTable.repaint();
+                                openPositionsTable.setSelected(openPosition);
+                                openPositionsTable.scrollTo(openPosition);
+
+                                notifications.create(Notifications.NotificationType.WARNING)
+                                        .withDescription(messageBundle.getMessage("msgSetClosingVacancyWeek"))
+                                        .withCaption(messageBundle.getMessage("msgWarning"))
+                                        .withHideDelayMs(5000)
+                                        .withPosition(Notifications.Position.DEFAULT)
+                                        .show();
+                            }), new DialogAction(DialogAction.Type.NO))
+                    .show();
+        }
     }
 
     private Component createTitleFragment(OpenPosition entity) {
@@ -1794,11 +1835,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                     OpenPosition openPosition = openPositionsTable.getSingleSelected();
                                     openPosition.setPriority(newPriority);
 
-                                    dataManager.commit(openPosition);
-                                    openPositionsDl.load();
-                                    openPositionsTable.repaint();
-                                    openPositionsTable.setSelected(openPosition);
-                                    openPositionsTable.scrollTo(openPosition);
+                                    if (newPriority == OpenPositionPriority.LOW.getId()) {
+                                        setClosingWeek(openPosition);
+                                    } else {
+                                        dataManager.commit(openPosition);
+                                        openPositionsDl.load();
+                                        openPositionsTable.repaint();
+                                        openPositionsTable.setSelected(openPosition);
+                                        openPositionsTable.scrollTo(openPosition);
+                                    }
                                 }
                             })
                             .withIcon(getPriorityIcon((int) entry.getValue()))
