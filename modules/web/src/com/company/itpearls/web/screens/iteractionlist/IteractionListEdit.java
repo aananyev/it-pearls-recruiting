@@ -151,6 +151,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private InstanceContainer<IteractionList> iteractionListDc;
     @Inject
     private OpenPositionService openPositionService;
+    @Inject
+    private Label<String> closingDateVacancyLabel;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -329,7 +331,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
             // проверка на наличие записей по этой вакансии
             BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) from itpearls_IteractionList e where e.candidate = :candidate and e.vacancy = :vacancy",
-                    BigDecimal.class)
+                            BigDecimal.class)
                     .parameter("candidate", getEditedEntity().getCandidate())
                     .parameter("vacancy", getEditedEntity().getVacancy())
                     .one();
@@ -1017,8 +1019,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             if (candidateField.getValue() != null) {
                 d = dataManager
                         .loadValue(
-                        "select count(e) from itpearls_IteractionList e where e.candidate = :candidate",
-                        Integer.class)
+                                "select count(e) from itpearls_IteractionList e where e.candidate = :candidate",
+                                Integer.class)
                         .parameter("candidate", candidateField.getValue())
                         .one();
             }
@@ -1201,7 +1203,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            recrutierField.setValue((ExtUser)userSession.getUser());
+            recrutierField.setValue((ExtUser) userSession.getUser());
         }
     }
 
@@ -1488,6 +1490,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe("vacancyFiels")
     public void onVacancyFielsValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
+        setClosingDateLabel();
+
         if (!beforeCommitFlag) {
             vacancyFieldValueChange(event);
             setPriorityLabel(event);
@@ -1507,6 +1511,40 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             }
         } else {
             projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+    }
+
+    private void setClosingDateLabel() {
+        if (vacancyFiels.getValue().getClosingDate() != null) {
+            Date current = new Date();
+            closingDateVacancyLabel.addStyleName("table-textwrap");
+
+            if (current.after(vacancyFiels.getValue().getClosingDate())) {
+                closingDateVacancyLabel.addStyleName("h4-red");
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+                closingDateVacancyLabel.setValue(new StringBuilder()
+                        .append(messageBundle.getMessage("msgClosingDate"))
+                        .append(": ")
+                        .append(sdf.format(vacancyFiels.getValue().getClosingDate()))
+                        .append(" ")
+                        .append(messageBundle.getMessage("msgOverdue"))
+                        .toString());
+            } else {
+                closingDateVacancyLabel.addStyleName("h4-green");
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+                closingDateVacancyLabel.setValue(new StringBuilder()
+                        .append(messageBundle.getMessage("msgClosingDate"))
+                        .append(": ")
+                        .append(sdf.format(vacancyFiels.getValue().getClosingDate()))
+                        .toString());
+            }
+
+
+            closingDateVacancyLabel.setVisible(true);
+        } else {
+            closingDateVacancyLabel.setVisible(false);
         }
     }
 

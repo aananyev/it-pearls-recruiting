@@ -104,11 +104,25 @@
   justify-content: center;
 }
 
+.h4-red {
+    color: red;
+    font-size: $v-font-size--h4;
+    font-weight: bold;
+}
+
 .h2-red {
     color: red;
     font-size: $v-font-size--h2;
     font-weight: bold;
 }
+
+
+.h4-gray {
+    color: gray;
+    font-size: $v-font-size--h4;
+    font-weight: bold;
+}
+
 
 .h2-gray {
     color: gray;
@@ -141,6 +155,12 @@
     font-weight: bold;
 }
 
+.h4-green {
+    color: green;
+    font-size: $v-font-size--h4;
+    font-weight: bold;
+}
+
 .h3-green {
     color: green;
     font-size: $v-font-size--h3;
@@ -153,9 +173,21 @@
     font-weight: bold;
 }
 
+.h4-blue {
+    color: blue;
+    font-size: $v-font-size--h4;
+    font-weight: bold;
+}
+
 .h3-blue {
     color: blue;
     font-size: $v-font-size--h3;
+    font-weight: bold;
+}
+
+.h4-orange {
+    color: orange;
+    font-size: $v-font-size--h4;
     font-weight: bold;
 }
 

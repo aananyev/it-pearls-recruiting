@@ -30,6 +30,7 @@
                 <entry key="itpearls_RecruterStatService" value="com.company.itpearls.core.RecruterStatService"/>
                 <entry key="itpearls_SignIconService" value="com.company.itpearls.core.SignIconService"/>
                 <entry key="itpearls_OpenPositionService" value="com.company.itpearls.core.OpenPositionService"/>
+                <entry key="itpearls_TelegramService" value="com.company.itpearls.core.TelegramService"/>
             </map>
         </property>
     </bean>
