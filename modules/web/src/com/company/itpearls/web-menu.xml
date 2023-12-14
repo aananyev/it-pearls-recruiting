@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
-    <menu id="application-calendars"
-          insertBefore="application-hunting"
-          icon="CALENDAR">
-        <item screen="itpearls_Interviewcalendar"
-              icon="CALENDAR"/>
-        <item screen="itpearls_WeekInterviewCalendar"
-              icon="CALENDAR"/>
+    <separator insertAfter="emailtemplates$EmailTemplate.browse"/>
+    <item screen="itpearls_ApplicationSetup.browse" caption="mainMsg://menu_config.itpearls_ApplicationSetup.browse"/>
+    <menu id="application-calendars" icon="CALENDAR" insertBefore="application-hunting">
+        <item screen="itpearls_Interviewcalendar" icon="CALENDAR"/>
+        <item screen="itpearls_WeekInterviewCalendar" icon="CALENDAR"/>
     </menu>
     <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
         <item screen="itpearls_OpenPositionMaster.browse"
@@ -23,8 +21,7 @@
             <item screen="itpearls_InternalEmailerTemplate.browse"
                   caption="mainMsg://menu_config.itpearls_InternalEmailer.browse" icon="ENVELOPE" openType="NEW_TAB"/>
             <item screen="itpearls_InternalEmailTemplate.browse"
-                  caption="mainMsg://menu_config.itpearls_InternalEmailTemplate.browse"
-                  icon="ENVELOPE_SQUARE"/>
+                  caption="mainMsg://menu_config.itpearls_InternalEmailTemplate.browse" icon="ENVELOPE_SQUARE"/>
             <item screen="itpearls_InternalEmailTemplateInteraction.browse"
                   caption="mainMsg://menu_config.itpearls_InternalEmailTemplateInteraction.browse"
                   icon="ENVELOPE_SQUARE"/>

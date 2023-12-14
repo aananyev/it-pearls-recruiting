@@ -3,6 +3,7 @@ package com.company.itpearls.core;
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.OpenPosition;
+import com.haulmont.cuba.security.entity.User;
 
 import java.util.Date;
 
@@ -26,4 +27,12 @@ public interface OpenPositionService {
     OpenPosition createOpenPositionDefault();
 
     OpenPosition getOpenPositionDefault();
+
+    String getOpenPositionCloseShortMessage(OpenPosition entity, User user);
+
+    String getOpenPositionOpenShortMessage(OpenPosition entity, User user);
+
+    String getOpenPositionOpenLongMessage(OpenPosition entity, User user);
+
+    String getOpenPositionCloseLongMessage(OpenPosition entity, User user);
 }

@@ -32,6 +32,8 @@
                 <entry key="itpearls_OpenPositionService" value="com.company.itpearls.core.OpenPositionService"/>
                 <entry key="itpearls_TelegramService" value="com.company.itpearls.core.TelegramService"/>
                 <entry key="itpearls_ProjectService" value="com.company.itpearls.core.ProjectService"/>
+                <entry key="itpearls_ApplicationSetupService"
+                       value="com.company.itpearls.core.ApplicationSetupService"/>
             </map>
         </property>
     </bean>

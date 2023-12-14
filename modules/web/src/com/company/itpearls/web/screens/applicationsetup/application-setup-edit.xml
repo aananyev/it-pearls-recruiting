@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://applicationSetupEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.applicationsetup">
+    <data>
+        <instance id="applicationSetupDc"
+                  class="com.company.itpearls.entity.ApplicationSetup">
+            <view extends="_local">
+                <property name="applicationLogo" view="_local"/>
+                <property name="applicationIcon" view="_local"/>
+            </view>
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="applicationSetupDc">
+            <column width="350px">
+                <checkBox id="activeSetupField" property="activeSetup"/>
+                <upload id="applicationLogoField"
+                        fileStoragePutMode="IMMEDIATE"
+                        property="applicationLogo"
+                        showFileName="true"/>
+                <upload id="applicationIconField"
+                        fileStoragePutMode="IMMEDIATE"
+                        property="applicationIcon"
+                        showFileName="true"/>
+                <textField id="telegramTokenField"
+                           property="telegramToken"/>
+                <textField id="telegramChatOpenPositionField"
+                           property="telegramChatOpenPosition"/>
+                <textField id="telegramChatJobCandidateField"
+                           property="telegramChatJobCandidate"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

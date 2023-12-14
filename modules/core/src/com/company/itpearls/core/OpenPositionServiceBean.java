@@ -4,6 +4,8 @@ import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.security.entity.User;
+import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -103,5 +105,77 @@ public class OpenPositionServiceBean implements OpenPositionService {
         } finally {
             return openPosition;
         }
+    }
+
+    @Override
+    public String getOpenPositionCloseShortMessage(OpenPosition entity, User user) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Закрыта вакансия: ")
+                .append(entity.getVacansyName())
+                .append("<br><svg align=\"right\" width=\"100%\"><i>")
+                .append(user.getName())
+                .append("</i></svg>");
+
+        return sb.toString();
+    }
+
+    @Override
+    public String getOpenPositionOpenShortMessage(OpenPosition entity, User user) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Открыта вакансия: ")
+                .append(entity.getVacansyName())
+                .append("<br><svg align=\"right\" width=\"100%\"><i>")
+                .append(user.getName())
+                .append("</i></svg>");
+
+        return sb.toString();
+
+    }
+    @Override
+    public String getOpenPositionOpenLongMessage(OpenPosition entity, User user) {
+        StringBuilder sb = new StringBuilder(getOpenPositionOpenShortMessage(entity, user));
+
+        return new StringBuilder(Jsoup.parse(sb.toString()).text())
+               .append("\n\n")
+               .append(entity.getComment())
+               .append("\n\n")
+               .append("Salary")
+               .append(" ")
+               .append("from")
+               .append(" ")
+               .append(entity.getSalaryMin() != null ? entity.getSalaryMin() : "???")
+               .append(" ")
+               .append("to")
+               .append(" ")
+               .append(entity.getSalaryMax() != null ? entity.getSalaryMax() : "???")
+               .append(entity.getSalaryComment() != null ? " (" : "")
+               .append(entity.getSalaryComment() != null ? entity.getSalaryComment() : "")
+               .append(entity.getSalaryComment() != null ? ")" : "")
+               .toString();
+    }
+
+    @Override
+    public String getOpenPositionCloseLongMessage(OpenPosition entity, User user) {
+        StringBuilder sb = new StringBuilder(getOpenPositionOpenShortMessage(entity, user));
+
+        return new StringBuilder(Jsoup.parse(sb.toString()).text())
+                .append("\n\n")
+                .append(entity.getComment())
+                .append("\n\n")
+                .append("Salary")
+                .append(" ")
+                .append("from")
+                .append(" ")
+                .append(entity.getSalaryMin() != null ? entity.getSalaryMin() : "???")
+                .append(" ")
+                .append("to")
+                .append(" ")
+                .append(entity.getSalaryMax() != null ? entity.getSalaryMax() : "???")
+                .append(entity.getSalaryComment() != null ? " (" : "")
+                .append(entity.getSalaryComment() != null ? entity.getSalaryComment() : "")
+                .append(entity.getSalaryComment() != null ? ")" : "")
+                .toString();
     }
 }

@@ -166,5 +166,8 @@
         <entity class="com.company.itpearls.entity.InternalEmailTemplateInteraction">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.ApplicationSetup">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

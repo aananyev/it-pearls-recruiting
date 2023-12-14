@@ -592,4 +592,8 @@
         <property name="interaction" view="_local"/>
         <property name="templateAuthor" view="_local"/>
     </view>
+    <view entity="itpearls_ApplicationSetup" name="applicationSetup-view" extends="_local">
+        <property name="applicationLogo" view="_local"/>
+        <property name="applicationIcon" view="_local"/>
+    </view>
 </views>

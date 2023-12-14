@@ -1,10 +1,7 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
-import com.company.itpearls.core.OpenPositionService;
-import com.company.itpearls.core.PdfParserService;
-import com.company.itpearls.core.StarsAndOtherService;
-import com.company.itpearls.core.TelegramService;
+import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRegistrationForWork;
@@ -55,6 +52,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Timer closedVacancyTimer;
     @Inject
     private TelegramService telegramService;
+    @Inject
+    private ApplicationSetupService applicationSetupService;
 
     @Subscribe("closedVacancyTimer")
     public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
@@ -1276,19 +1275,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             telegramService.sendMessageToChat("6474655052:AAH59HeXfs7H6yxsWdpAoiJ91oXrvchDZ0s",
-//                    telegramService.sendMessageToChat("-1001546344456:AAH59HeXfs7H6yxsWdpAoiJ91oXrvchDZ0s",
-                            "-1001546344456", "Новая вакансия: " +
-                    vacansyNameField.getValue()
-            + "\n\n"
-            + openPositionRichTextArea.getValue()
-            + "\n\nЗарплатное предложение: от " + openPositionFieldSalaryMin.getValue()
-            + " до "
-            + openPositionFieldSalaryMax.getValue()
-            + " (" + salaryCommentTextFiels.getValue() + ")");
+                    applicationSetupService.getTelegramChatOpenPosition(),
+//                    "-1001546344456",
+                    "Новая вакансия: " +
+                            vacansyNameField.getValue()
+                            + "\n\n"
+                            + openPositionRichTextArea.getValue()
+                            + "\n\nЗарплатное предложение: от " + openPositionFieldSalaryMin.getValue()
+                            + " до "
+                            + openPositionFieldSalaryMax.getValue()
+                            + " (" + salaryCommentTextFiels.getValue() + ")");
         } else {
             telegramService.sendMessageToChat("6474655052:AAH59HeXfs7H6yxsWdpAoiJ91oXrvchDZ0s",
-//                    272980897, "Изменена вакансия: " +
-                    "-1001546344456", "Изменена вакансия: " +
+                    applicationSetupService.getTelegramChatOpenPosition(),
+//                    "-1001546344456",
+                    "Изменена вакансия: " +
                             vacansyNameField.getValue());
         }
     }

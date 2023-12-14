@@ -1,9 +1,7 @@
 package com.company.itpearls.web.screens.openposition;
 
 import com.company.itpearls.UiNotificationEvent;
-import com.company.itpearls.core.OpenPositionService;
-import com.company.itpearls.core.SendNotificationsService;
-import com.company.itpearls.core.StarsAndOtherService;
+import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
@@ -90,6 +88,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private final static String separator = separatorChar.repeat(22);
     @Inject
     private OpenPositionService openPositionService;
+    @Inject
+    private TelegramService telegramService;
+    @Inject
+    private ApplicationSetupService applicationSetupService;
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -1197,26 +1199,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
-    /*private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
-                                                     String subject,
-                                                     String comment,
-                                                     Date date,
-                                                     User user) {
-
-        OpenPositionNews openPositionNews = new OpenPositionNews();
-
-        openPositionNews.setOpenPosition(editedEntity);
-        openPositionNews.setAuthor(user);
-        openPositionNews.setDateNews(date);
-        openPositionNews.setSubject(subject);
-        openPositionNews.setComment(comment);
-        openPositionNews.setPriorityNews(true);
-
-        CommitContext commitContext = new CommitContext();
-        commitContext.addInstanceToCommit(openPositionNews);
-        dataManager.commit(commitContext);
-    } */
-
     private Component createOpenCloseButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
 
@@ -1260,20 +1242,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private void openCloseVacancy(OpenPosition entity) {
         if (entity.getOpenClose() || entity.getOpenClose() == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Закрыта вакансия: ")
-                    .append(entity.getVacansyName())
-                    .append("<br><svg align=\"right\" width=\"100%\"><i>")
-                    .append(userSession.getUser().getName())
-                    .append("</i></svg>");
 
-            events.publish(new UiNotificationEvent(this, sb.toString()));
+            events.publish(new UiNotificationEvent(this,
+                    openPositionService.getOpenPositionCloseShortMessage(entity,
+                            userSession.getUser())));
 
             openPositionService.setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                     "Закрылась вакансия",
                     "Закрыта вакансия",
                     new Date(),
                     (ExtUser) userSession.getUser());
+
+            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
+                    openPositionService.getOpenPositionCloseLongMessage(entity, userSession.getUser()));
 
             entity.setOwner(null);
             entity.setLastOpenDate(null);
@@ -1282,20 +1263,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             openPositionsDl.load();
 
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Открыта вакансия: ")
-                    .append(entity.getVacansyName())
-                    .append("<br><svg align=\"right\" width=\"100%\"><i>")
-                    .append(userSession.getUser().getName())
-                    .append("</i></svg>");
 
-            events.publish(new UiNotificationEvent(this, sb.toString()));
+            events.publish(new UiNotificationEvent(this,
+                    openPositionService.getOpenPositionOpenShortMessage(entity, userSession.getUser())));
 
             openPositionService.setOpenPositionNewsAutomatedMessage(openPositionsTable.getSingleSelected(),
                     "Открылась вакансия",
                     "Открыта вакансия",
                     new Date(),
                     (ExtUser) userSession.getUser());
+
+            telegramService.sendMessageToChat(applicationSetupService
+                            .getTelegramChatOpenPosition(),
+                    openPositionService
+                            .getOpenPositionOpenLongMessage(entity, userSession.getUser()));
 
             entity.setOwner((ExtUser) userSession.getUser());
             entity.setLastOpenDate(new Date());
@@ -1600,14 +1581,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 openPositionsTable.scrollTo(openPosition);
             }
 
+            StringBuilder sb = new StringBuilder()
+                    .append("Изменен приоритет вакансии <b>")
+                    .append(openPosition.getVacansyName())
+                    .append("</b> на <b>")
+                    .append(result.get())
+                    .append("</b><br><svg align=\"right\" width=\"100%\"><i>")
+                    .append(userSession.getUser().getName())
+                    .append("</i></svg>");
+
             events.publish(new UiNotificationEvent(this,
-                    "Изменен приоритет вакансии <b>"
-                            + openPosition.getVacansyName()
-                            + "</b> на <b>"
-                            + result.get()
-                            + "</b><br><svg align=\"right\" width=\"100%\"><i>"
-                            + userSession.getUser().getName()
-                            + "</i></svg>"));
+                    sb.toString()));
+
+            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
+                    Jsoup.parse(sb.toString()).text());
 
             if (flagPriority) {
                 openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,

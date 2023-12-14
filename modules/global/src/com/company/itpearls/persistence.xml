@@ -59,5 +59,6 @@
         <class>com.company.itpearls.entity.SignIcons</class>
         <class>com.company.itpearls.entity.JobCandidateSignIcon</class>
         <class>com.company.itpearls.entity.InternalEmailTemplateInteraction</class>
+        <class>com.company.itpearls.entity.ApplicationSetup</class>
     </persistence-unit>
 </persistence>

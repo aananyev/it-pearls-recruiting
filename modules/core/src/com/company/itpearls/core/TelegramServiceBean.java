@@ -1,7 +1,10 @@
 package com.company.itpearls.core;
 
+import com.jayway.jsonpath.JsonPath;
+import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -16,16 +19,29 @@ import java.nio.charset.StandardCharsets;
 public class TelegramServiceBean implements TelegramService {
 
     private static HttpURLConnection con;
+    @Inject
+    private ApplicationSetupService applicationSetupService;
+
     @Override
     public void sendMessageToChat(String tgToken, int chatId, String txt) {
         sendMessageToChat(tgToken, String.valueOf(chatId), txt);
     }
 
     @Override
+    public void sendMessageToChat(int chatId, String txt) {
+        sendMessageToChat(applicationSetupService.getTelegramToken(), String.valueOf(chatId), txt);
+    }
+
+    @Override
+    public void sendMessageToChat(String chatId, String txt) {
+        sendMessageToChat(applicationSetupService.getTelegramToken(), chatId, txt);
+    }
+
+    @Override
     public void sendMessageToChat(String tgToken, String chatId, String txt) {
-        String urlParameters = "chat_id="+chatId+"&text="+txt;
+        String urlParameters = "chat_id=" + chatId + "&text=" + Jsoup.parse(txt).text();
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-        String urlToken = "https://api.telegram.org/bot"+tgToken+"/sendMessage";
+        String urlToken = "https://api.telegram.org/bot" + tgToken + "/sendMessage";
 
         try {
             URL url = new URL(urlToken);
