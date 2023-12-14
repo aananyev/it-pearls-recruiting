@@ -9,7 +9,7 @@
               name="jdbc/CubaDS"
               password="cuba"
               type="javax.sql.DataSource"
-              url="jdbc:postgresql://localhost/itpearls"
+              url="jdbc:postgresql://localhost/agromasters"
               username="cuba"/>
     <!-- Database connection-->
 

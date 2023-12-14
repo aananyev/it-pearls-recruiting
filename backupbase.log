@@ -5441,3 +5441,5 @@ server started
 2023-12-13 22:44:44.142 +04 [22428] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-12-13 22:44:44.865 +04 [22431] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-12-13 22:44:44.956 +04 [22433] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 10:42:54.221 +04 [23781] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 10:42:54.228 +04 [23782] FATAL:  database "agromasters" does not exist

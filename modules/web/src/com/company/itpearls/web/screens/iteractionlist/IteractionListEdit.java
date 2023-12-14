@@ -1,10 +1,7 @@
 package com.company.itpearls.web.screens.iteractionlist;
 
 import com.company.itpearls.UiNotificationEvent;
-import com.company.itpearls.core.EmailGenerationService;
-import com.company.itpearls.core.OpenPositionService;
-import com.company.itpearls.core.StarsAndOtherService;
-import com.company.itpearls.core.StrSimpleService;
+import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
@@ -153,6 +150,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private OpenPositionService openPositionService;
     @Inject
     private Label<String> closingDateVacancyLabel;
+    @Inject
+    private InteractionService interactionService;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -443,7 +442,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         return r == null ? false : r;
     }
 
-    private BigDecimal getCountIteraction() {
+    /* private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load(IteractionList.class)
                 .query("select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)")
                 .view("iteractionList-view")
@@ -451,10 +450,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 .one();
 
         return e.getNumberIteraction().add(BigDecimal.ONE);
-    }
+    } */
 
     protected void setIteractionNumber() {
-        numberIteractionField.setValue(getCountIteraction());
+        numberIteractionField.setValue(interactionService.getCountInteraction().add(BigDecimal.ONE));
     }
 
     protected void setCurrentDate() {

@@ -9,12 +9,15 @@ import com.haulmont.cuba.security.entity.User;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service(InteractionService.NAME)
 public class InteractionServiceBean implements InteractionService {
     @Inject
     private DataManager dataManager;
+
+    private final static String QUERY_GET_MAX_NUMBER_INTERACTION = "select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)";
 
     private final static String QUERY = "select e.iteractionType, count(e.iteractionType) "
             + "from itpearls_IteractionList e "
@@ -75,4 +78,16 @@ public class InteractionServiceBean implements InteractionService {
             return null;
     }
 
+    @Override
+    public BigDecimal getCountInteraction() {
+        IteractionList e;
+
+        e = dataManager.load(IteractionList.class)
+                .query(QUERY_GET_MAX_NUMBER_INTERACTION)
+                .view("iteractionList-view")
+                .cacheable(true)
+                .one();
+
+        return e.getNumberIteraction();
+    }
 }
