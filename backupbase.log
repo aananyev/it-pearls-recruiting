@@ -5463,3 +5463,13 @@ waiting for server to start....2023-12-14 14:29:52.554 +04 [25601] LOG:  listeni
 server started
 2023-12-14 15:07:15.865 +04 [25816] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2023-12-14 15:07:15.872 +04 [25817] FATAL:  database "agromasters" does not exist
+2023-12-14 15:42:19.435 +04 [26328] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:42:19.489 +04 [26330] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:42:19.788 +04 [26332] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:42:21.127 +04 [26334] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:42:21.347 +04 [26336] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:51:20.446 +04 [49187] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:51:20.456 +04 [49189] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:51:20.606 +04 [49191] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:51:21.142 +04 [49197] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-14 15:51:21.210 +04 [49199] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

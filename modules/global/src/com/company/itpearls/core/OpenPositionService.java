@@ -22,4 +22,8 @@ public interface OpenPositionService {
                                              String comment,
                                              Date date,
                                              ExtUser user);
+
+    OpenPosition createOpenPositionDefault();
+
+    OpenPosition getOpenPositionDefault();
 }

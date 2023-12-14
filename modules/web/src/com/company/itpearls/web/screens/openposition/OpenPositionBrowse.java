@@ -2324,17 +2324,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .append("\n\n").toString();
         }
 
-        if (openPosition.getProjectName().getTemplateLetter() != null &&
-                openPosition.getProjectName().getTemplateLetter() != "") {
-            sb.append("Требования проекта: ")
-                    .append(Jsoup.parse(openPosition.getProjectName().getTemplateLetter()).text())
-                    .append("\n\n");
+        if (openPosition.getProjectName() != null) {
+            if (openPosition.getProjectName().getTemplateLetter() != null &&
+                    openPosition.getProjectName().getTemplateLetter() != "") {
+                sb.append("Требования проекта: ")
+                        .append(Jsoup.parse(openPosition.getProjectName().getTemplateLetter()).text())
+                        .append("\n\n");
+            }
         }
 
-        if (openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != null &&
-                openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != "") {
-            sb.append("Требования департамента: ")
-                    .append(Jsoup.parse(openPosition.getProjectName().getProjectDepartment().getTemplateLetter()).text());
+        if (openPosition.getProjectName() != null) {
+            if (openPosition.getProjectName().getProjectDepartment() != null) {
+                if (openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != null &&
+                        openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != "") {
+                    sb.append("Требования департамента: ")
+                            .append(Jsoup.parse(openPosition.getProjectName().getProjectDepartment().getTemplateLetter()).text());
+                }
+            }
         }
 
         return sb.toString();
@@ -3138,26 +3144,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private Image setProjectOwnerImage(Person projectOwner) {
         StringBuilder sb = new StringBuilder();
-        sb.append(projectOwner.getFirstName())
-                .append(" ")
-                .append(projectOwner.getSecondName());
-        if (projectOwner.getPersonPosition() != null) {
-            sb.append(" / ")
-                    .append(projectOwner.getPersonPosition().getPositionRuName());
-        }
-        if (projectOwner.getCompanyDepartment() != null) {
-            sb.append(" / ")
-                    .append(projectOwner.getCompanyDepartment().getDepartamentRuName());
-            if (projectOwner.getCompanyDepartment().getCompanyName() != null) {
-                sb.append(" / ")
-                        .append(projectOwner.getCompanyDepartment().getCompanyName().getComanyName());
-            }
-        }
-
-        if (projectOwner.getCityOfResidence() != null) {
-            sb.append(" / ")
-                    .append(projectOwner.getCityOfResidence().getCityRuName());
-        }
 
         Image retImage = uiComponents.create(Image.class);
         retImage.setWidth(width_30px);
@@ -3166,13 +3152,36 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         retImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
         retImage.setDescription(sb.toString());
+        retImage.setVisible(false);
 
-        if (projectOwner.getFileImageFace() != null) {
-            retImage
-                    .setSource(FileDescriptorResource.class)
-                    .setFileDescriptor(projectOwner.getFileImageFace());
-        } else {
-            retImage.setVisible(false);
+        if (projectOwner != null) {
+            sb.append(projectOwner.getFirstName())
+                    .append(" ")
+                    .append(projectOwner.getSecondName());
+            if (projectOwner.getPersonPosition() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getPersonPosition().getPositionRuName());
+            }
+            if (projectOwner.getCompanyDepartment() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getCompanyDepartment().getDepartamentRuName());
+                if (projectOwner.getCompanyDepartment().getCompanyName() != null) {
+                    sb.append(" / ")
+                            .append(projectOwner.getCompanyDepartment().getCompanyName().getComanyName());
+                }
+            }
+
+            if (projectOwner.getCityOfResidence() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getCityOfResidence().getCityRuName());
+            }
+
+            if (projectOwner.getFileImageFace() != null) {
+                retImage
+                        .setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(projectOwner.getFileImageFace());
+                retImage.setVisible(true);
+            }
         }
 
         return retImage;

@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.hrmasters.suggestjobcandidates;
 
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
@@ -59,6 +60,8 @@ public class Suggestjobcandidate extends Screen {
     private RichTextArea candidateCVRichTextArea;
     @Inject
     private UserSession userSession;
+    @Inject
+    private InteractionService interactionService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -227,7 +230,7 @@ public class Suggestjobcandidate extends Screen {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         Label retLabel = uiComponents.create(Label.class);
 
-        retLabel.setValue(sdf.format(getLastIteraction(candidateCV.getCandidate()).getDateIteraction()));
+        retLabel.setValue(sdf.format(interactionService.getLastIteraction(candidateCV.getCandidate()).getDateIteraction()));
         retLabel.setDescription(getLatInteractionDesciption(candidateCV));
         retLabel.setStyleName(setLastInteractionStyleName(candidateCV));
 
@@ -243,7 +246,7 @@ public class Suggestjobcandidate extends Screen {
         }
     }
 
-    private IteractionList getLastIteraction(JobCandidate jobCandidate) {
+    /* private IteractionList getLastIteraction(JobCandidate jobCandidate) {
         if (jobCandidate.getIteractionList() != null) {
             IteractionList maxIteraction = null;
 
@@ -269,7 +272,7 @@ public class Suggestjobcandidate extends Screen {
             return maxIteraction;
         } else
             return null;
-    }
+    } */
 
     @Subscribe("useLocationCheckBox")
     public void onUseLocationCheckBoxValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
@@ -291,7 +294,7 @@ public class Suggestjobcandidate extends Screen {
     }
 
     private String setLastInteractionRowStyleName(JobCandidate jobCandidate) {
-        IteractionList iteractionList = getLastIteraction(jobCandidate);
+        IteractionList iteractionList = interactionService.getLastIteraction(jobCandidate);
 
         String date = null;
 
@@ -327,7 +330,7 @@ public class Suggestjobcandidate extends Screen {
     }
 
     private String setLastInteractionStyleName(JobCandidate jobCandidate) {
-        IteractionList iteractionList = getLastIteraction(jobCandidate);
+        IteractionList iteractionList = interactionService.getLastIteraction(jobCandidate);
 
         String date = null;
 
@@ -401,7 +404,7 @@ public class Suggestjobcandidate extends Screen {
     }
 
     private String getLatInteractionDesciption(CandidateCV candidateCV) {
-        IteractionList iteractionList = getLastIteraction(candidateCV.getCandidate());
+        IteractionList iteractionList = interactionService.getLastIteraction(candidateCV.getCandidate());
         String recrutierName = "";
 
         if (iteractionList != null) {

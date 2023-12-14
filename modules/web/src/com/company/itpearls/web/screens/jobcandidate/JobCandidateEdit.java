@@ -257,6 +257,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LookupPickerField vacancyFilterLookupPickerField;
     @Inject
     private ResumeRecognitionService resumeRecognitionService;
+    @Inject
+    private OpenPositionService openPositionService;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -699,7 +701,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         checkTelegramName();
         setIteractionListVacancyFilter();
 
-        lastIteraction = getLastIteraction();
+        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
 
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
@@ -1011,11 +1013,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
             try {
-                openPosition = dataManager.load(OpenPosition.class)
+                openPosition = openPositionService.getOpenPositionDefault();
+/*                openPosition = dataManager.load(OpenPosition.class)
                         .query("select e from itpearls_OpenPosition e where e.vacansyName like :vacansyDefaultName")
                         .view("openPosition-view")
                         .parameter("vacansyDefaultName", "Default%")
-                        .one();
+                        .one(); */
             } catch (Exception e) {
                 notifications.create(Notifications.NotificationType.ERROR)
                         .withCaption("SQL ERROR")
@@ -1712,7 +1715,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .show();
     }
 
-    private IteractionList getLastIteraction() {
+    /* private IteractionList getLastIteraction() {
         try {
             lastIteraction = dataManager.load(IteractionList.class)
                     .query(QUERY_GET_LAST_ITERACTION)
@@ -1727,7 +1730,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return lastIteraction;
-    }
+    } */
 
 
     public void copyIteractionJobCandidate() {
@@ -3349,6 +3352,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (vacancyPopupPickerField.getValue() != null) {
                 comment.setVacancy(vacancyPopupPickerField.getValue());
             } else {
+                comment.setVacancy(openPositionService.getOpenPositionDefault());
+
+                /*
                 try {
                     comment.setVacancy(dataManager
                             .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'",
@@ -3361,7 +3367,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .withDescription(messageBundle.getMessage("msgNotFindDefaultOpenPosition"))
                             .withHideDelayMs(15000)
                             .show();
-                }
+                } */
             }
 
             jobCandidateDc.getItem().getIteractionList().add(comment);

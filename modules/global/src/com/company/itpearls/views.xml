@@ -539,7 +539,18 @@
         <property name="fileType" view="_local"/>
     </view>
     <view entity="itpearls_SomeFilesCandidateCV" name="someFilesCandidateCV-view" extends="_local">
-        <property name="candidateCV" view="_local"/>
+        <property name="candidateCV" view="_local">
+            <property name="candidate" view="_local"/>
+            <property name="resumePosition" view="_local"/>
+            <property name="toVacancy" view="_local"/>
+            <property name="owner" view="_local"/>
+            <property name="lintToCloudFile"/>
+            <property name="fileCV" view="_local"/>
+            <property name="originalFileCV" view="_local"/>
+            <property name="someFiles" view="_local"/>
+            <property name="skillTree" view="_local"/>
+            <property name="fileImageFace" view="_local"/>
+        </property>
         <property name="fileDescriptor" view="_local"/>
         <property name="fileOwner" view="_local"/>
         <property name="fileType" view="_local"/>
@@ -547,7 +558,9 @@
     <view entity="itpearls_SomeFilesOpenPosition" name="someFilesOpenPosition-view" extends="_local">
         <property name="openPosition" view="_local"/>
         <property name="fileDescriptor" view="_local"/>
-        <property name="fileOwner" view="_local"/>
+        <property name="fileOwner" view="_local">
+            <property name="fileImageFace" view="_local"/>
+        </property>
         <property name="fileType" view="_local"/>
     </view>
     <view entity="itpearls_Employee" name="employee-view" extends="_base">

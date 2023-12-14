@@ -412,7 +412,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             "select e from itpearls_Iteraction e where e.signPersonalReservePut = true";
 
 
-    private BigDecimal getCountIteraction() {
+    /* private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load(IteractionList.class)
                 .query("select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)")
                 .view("iteractionList-view")
@@ -420,7 +420,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .one();
 
         return e.getNumberIteraction().add(BigDecimal.ONE);
-    }
+    } */
 
     private void addPersonalReserveInteraction(JobCandidate jobCandidate,
                                                OpenPosition openPosition) {
@@ -472,7 +472,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
             iteractionList.setRecrutierName(userSession.getUser().getName());
             iteractionList.setRecrutier((ExtUser) userSession.getUser());
-            iteractionList.setNumberIteraction(getCountIteraction());
+            iteractionList.setNumberIteraction(interactionService.getCountInteraction().add(BigDecimal.ONE));
             iteractionList.setIteractionType(interactionType);
 
             dataManager.commit(iteractionList);

@@ -1,9 +1,6 @@
 package com.company.itpearls.core;
 
-import com.company.itpearls.entity.ExtUser;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.OpenPositionNews;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
@@ -19,6 +16,8 @@ public class OpenPositionServiceBean implements OpenPositionService {
     private Metadata metadata;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private ProjectService projectService;
 
     @Override
     public void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
@@ -66,5 +65,43 @@ public class OpenPositionServiceBean implements OpenPositionService {
         CommitContext commitContext = new CommitContext();
         commitContext.addInstanceToCommit(openPositionNews);
         dataManager.commit(commitContext);
+    }
+
+    @Override
+    public OpenPosition createOpenPositionDefault() {
+        OpenPosition openPosition = metadata.create(OpenPosition.class);
+
+        openPosition.setVacansyName(DEFAULT_OPEN_POSITION);
+        openPosition.setPriority(0);
+        openPosition.setOpenClose(true);
+        openPosition.setRemoteWork(0);
+        openPosition.setCommandCandidate(0);
+        openPosition.setProjectName(projectService.getProjectDefault());;
+        openPosition.setWorkExperience(0);
+
+        dataManager.commit(openPosition);
+
+        return openPosition;
+    }
+
+    final static String DEFAULT_OPEN_POSITION = "Default";
+
+    @Override
+    public OpenPosition getOpenPositionDefault() {
+        OpenPosition openPosition = null;
+
+        try {
+            openPosition = dataManager
+                    .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'"
+                                    + DEFAULT_OPEN_POSITION
+                                    + "\'",
+                            OpenPosition.class)
+                    .one();
+        } catch (Exception e) {
+            e.printStackTrace();
+            openPosition = createOpenPositionDefault();
+        } finally {
+            return openPosition;
+        }
     }
 }

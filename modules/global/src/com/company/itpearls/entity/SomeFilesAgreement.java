@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
@@ -11,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity(name = "itpearls_SomeFilesAgreement")
+@NamePattern("%s %s|laborAgreement,fileDescription")
 public class SomeFilesAgreement extends SomeFiles {
     private static final long serialVersionUID = 3264636031316601463L;
 

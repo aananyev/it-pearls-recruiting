@@ -723,7 +723,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
             iteractionList.setRecrutierName(userSession.getUser().getName());
             iteractionList.setRecrutier((ExtUser) userSession.getUser());
-            iteractionList.setNumberIteraction(getCountIteraction());
+            iteractionList.setNumberIteraction(interactionService.getCountInteraction().add(BigDecimal.ONE));
             iteractionList.setIteractionType(interactionType);
 
             dataManager.commit(iteractionList);
@@ -756,7 +756,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
         }
     }
 
-    private BigDecimal getCountIteraction() {
+    /* private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load(IteractionList.class)
                 .query(QUERY_GET_COUNT_INTERACTION)
                 .view("iteractionList-view")
@@ -764,7 +764,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
                 .one();
 
         return e.getNumberIteraction().add(BigDecimal.ONE);
-    }
+    } */
 
     private Label getSignIconLabel(Label retLabel, JobCandidate jobCandidate) {
 

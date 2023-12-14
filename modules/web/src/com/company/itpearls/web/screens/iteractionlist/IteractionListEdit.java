@@ -442,18 +442,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         return r == null ? false : r;
     }
 
-    /* private BigDecimal getCountIteraction() {
-        IteractionList e = dataManager.load(IteractionList.class)
-                .query("select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)")
-                .view("iteractionList-view")
-                .cacheable(true)
-                .one();
-
-        return e.getNumberIteraction().add(BigDecimal.ONE);
-    } */
-
     protected void setIteractionNumber() {
-        numberIteractionField.setValue(interactionService.getCountInteraction().add(BigDecimal.ONE));
+        BigDecimal count = interactionService.getCountInteraction();
+        numberIteractionField.setValue(count.add(BigDecimal.ONE));
     }
 
     protected void setCurrentDate() {
@@ -1118,7 +1109,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private void setMostPopularIteraction() {
         int maxCount = 5;
 
-        mostPopular = getMostPolularIteraction(userSession.getUser(), maxCount);
+        mostPopular = interactionService.getMostPolularIteraction(userSession.getUser(), maxCount);
 
         if (maxCount > mostPopular.size())
             maxCount = mostPopular.size();
@@ -1171,7 +1162,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     private static final String QUERY_MOST_POPULAR = "select e.iteractionType, count(e.iteractionType) from itpearls_IteractionList e where (e.dateIteraction between :endDate and :startDate) and e.iteractionType is not null and e.recrutier = :user group by e.iteractionType order by count(e.iteractionType) desc";
 
-    public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
+    /* public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.setTime(new Date());
@@ -1197,7 +1188,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         }
 
         return retIteraction;
-    }
+    }*/
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {

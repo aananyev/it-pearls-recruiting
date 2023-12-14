@@ -211,26 +211,6 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     private Image setProjectOwnerImage(Person projectOwner) {
         StringBuilder sb = new StringBuilder();
-        sb.append(projectOwner.getFirstName())
-                .append(" ")
-                .append(projectOwner.getSecondName());
-        if (projectOwner.getPersonPosition() != null) {
-            sb.append(" / ")
-                    .append(projectOwner.getPersonPosition().getPositionRuName());
-        }
-        if (projectOwner.getCompanyDepartment() != null) {
-            sb.append(" / ")
-                    .append(projectOwner.getCompanyDepartment().getDepartamentRuName());
-            if (projectOwner.getCompanyDepartment().getCompanyName() != null) {
-                sb.append(" / ")
-                        .append(projectOwner.getCompanyDepartment().getCompanyName().getComanyName());
-            }
-        }
-
-        if (projectOwner.getCityOfResidence() != null) {
-            sb.append(" / ")
-                    .append(projectOwner.getCityOfResidence().getCityRuName());
-        }
 
         Image retImage = uiComponents.create(Image.class);
         retImage.setWidth(width_30px);
@@ -238,12 +218,38 @@ public class ProjectBrowse extends StandardLookup<Project> {
         retImage.setStyleName(style_circle_30px);
         retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         retImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
-        retImage.setDescription(sb.toString());
 
-        if (projectOwner.getFileImageFace() != null) {
-            retImage
-                    .setSource(FileDescriptorResource.class)
-                    .setFileDescriptor(projectOwner.getFileImageFace());
+        if (projectOwner != null) {
+            sb.append(projectOwner.getFirstName())
+                    .append(" ")
+                    .append(projectOwner.getSecondName());
+            if (projectOwner.getPersonPosition() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getPersonPosition().getPositionRuName());
+            }
+            if (projectOwner.getCompanyDepartment() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getCompanyDepartment().getDepartamentRuName());
+                if (projectOwner.getCompanyDepartment().getCompanyName() != null) {
+                    sb.append(" / ")
+                            .append(projectOwner.getCompanyDepartment().getCompanyName().getComanyName());
+                }
+            }
+
+            if (projectOwner.getCityOfResidence() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getCityOfResidence().getCityRuName());
+            }
+
+            retImage.setDescription(sb.toString());
+
+            if (projectOwner.getFileImageFace() != null) {
+                retImage
+                        .setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(projectOwner.getFileImageFace());
+            } else {
+                retImage.setVisible(false);
+            }
         } else {
             retImage.setVisible(false);
         }

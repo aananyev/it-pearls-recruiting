@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.hrmasters.skillsfilterjobcandidate;
 
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.core.PdfParserService;
 import com.company.itpearls.entity.*;
@@ -188,6 +189,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private PopupButton menuButton;
     @Inject
     private OpenPositionService openPositionService;
+    @Inject
+    private InteractionService interactionService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -281,7 +284,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         });
 
         jobCandidatesTable.getColumn("lastIteraction").setStyleProvider(e -> {
-            IteractionList iteractionList = getLastIteraction(e);
+            IteractionList iteractionList = interactionService.getLastIteraction(e);
             String retStr = "";
 
             if (iteractionList != null) {
@@ -321,7 +324,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
 
-    private IteractionList getLastIteraction(JobCandidate jobCandidate) {
+    /* private IteractionList getLastIteraction(JobCandidate jobCandidate) {
         if (jobCandidate.getIteractionList() != null) {
             IteractionList maxIteraction = null;
 
@@ -339,7 +342,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             return maxIteraction;
         } else
             return null;
-    }
+    } */
 
     private GroupBoxLayout setSkillGroupBox(SkillTree skillTree) {
         GroupBoxLayout groupBoxLayout = uiComponents.create(GroupBoxLayout.class);
@@ -1054,7 +1057,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
     private String jobCandidatesTableLastIteractionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        IteractionList iteractionList = getLastIteraction(event.getItem());
+        IteractionList iteractionList = interactionService.getLastIteraction(event.getItem());
 
         String date = null;
 
@@ -1515,7 +1518,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     }
 
 
-    private BigDecimal getCountIteraction() {
+    /* private BigDecimal getCountIteraction() {
         IteractionList e = dataManager.load(IteractionList.class)
                 .query("select e from itpearls_IteractionList e where e.numberIteraction = " +
                         "(select max(f.numberIteraction) from itpearls_IteractionList f)")
@@ -1524,7 +1527,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 .one();
 
         return e.getNumberIteraction().add(BigDecimal.ONE);
-    }
+    } */
 
     private void addPersonalReserveInteraction(JobCandidate jobCandidate,
                                                OpenPosition openPosition) {
@@ -1576,7 +1579,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
             iteractionList.setRecrutierName(userSession.getUser().getName());
             iteractionList.setRecrutier((ExtUser) userSession.getUser());
-            iteractionList.setNumberIteraction(getCountIteraction());
+            iteractionList.setNumberIteraction(interactionService.getCountInteraction().add(BigDecimal.ONE));
             iteractionList.setIteractionType(interactionType);
 
             dataManager.commit(iteractionList);
