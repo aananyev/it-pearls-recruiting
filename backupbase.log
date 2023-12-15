@@ -5532,3 +5532,5 @@ waiting for server to start....2023-12-14 19:59:13.992 +04 [56863] LOG:  listeni
 2023-12-14 19:59:14.669 +04 [56863] LOG:  database system is ready to accept connections
  done
 server started
+2023-12-15 11:23:39.289 +04 [61064] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2023-12-15 11:23:39.350 +04 [61066] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

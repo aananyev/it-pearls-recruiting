@@ -951,7 +951,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                     ? "Необходимо выполнение тестового задания"
                                     : "Тестовое задание не нужно"),
                             (exerciseRichTextArea.getValue() != null
-                                    ? Jsoup.parse(exerciseRichTextArea.getValue()).text()
+                                    ? Jsoup.parse(exerciseRichTextArea.getValue()).wholeText()
                                     : ""),
                             new Date(),
                             (ExtUser) userSession.getUser());
@@ -1053,13 +1053,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (openPositionRichTextArea.getValue() != null) {
                 if (openPositionText != null) {
-                    if (!openPositionText.equals(Jsoup.parse(openPositionRichTextArea.getValue()).text())) {
+                    if (!openPositionText.equals(Jsoup.parse(openPositionRichTextArea.getValue()).wholeText())) {
                         openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                                 "Изменено описание вакансии",
-                                Jsoup.parse(openPositionRichTextArea.getValue()).text(),
+                                Jsoup.parse(openPositionRichTextArea.getValue()).wholeText(),
                                 new Date(),
                                 (ExtUser) userSession.getUser());
-                        openPositionText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
+                        openPositionText = Jsoup.parse(openPositionRichTextArea.getValue()).wholeText();
                     }
                 }
             }
@@ -1072,14 +1072,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onTemplateLetterRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
         if (templateLetterRichTextArea.getValue() != null) {
             if (startLetterText != null) {
-                if (!startLetterText.equals(Jsoup.parse(templateLetterRichTextArea.getValue()).text())) {
+                if (!startLetterText.equals(Jsoup.parse(templateLetterRichTextArea.getValue()).wholeText())) {
 
                     openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             "Изменен шаблон сопроводительного письма",
-                            Jsoup.parse(templateLetterRichTextArea.getValue()).text(),
+                            Jsoup.parse(templateLetterRichTextArea.getValue()).wholeText(),
                             new Date(),
                             (ExtUser) userSession.getUser());
-                    startLetterText = Jsoup.parse(templateLetterRichTextArea.getValue()).text();
+                    startLetterText = Jsoup.parse(templateLetterRichTextArea.getValue()).wholeText();
                 }
             }
         }
@@ -1252,7 +1252,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             + "Salary MAX: "
                             + openPositionFieldSalaryMax.getValue() + "\n\n"
                             + (shortDescriptionTextArea.getValue() != null ?
-                            Jsoup.parse(shortDescriptionTextArea.getValue()).text() : ""),
+                            Jsoup.parse(shortDescriptionTextArea.getValue()).wholeText() : ""),
                     new Date(),
                     (ExtUser) userSession.getUser());
         }
@@ -1413,8 +1413,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         onNeedExercise = needExerciseCheckBox.getValue();
         startSalaryMinValue = openPositionFieldSalaryMin.getValue();
         startSalaryMaxValue = openPositionFieldSalaryMax.getValue();
-        openPositionText = openPositionRichTextArea.getValue() != null ? Jsoup.parse(openPositionRichTextArea.getValue()).text() : null;
-        startLetterText = templateLetterRichTextArea.getValue() != null ? Jsoup.parse(templateLetterRichTextArea.getValue()).text() : null;
+        openPositionText = openPositionRichTextArea.getValue() != null ?
+                Jsoup.parse(openPositionRichTextArea.getValue()).wholeText() : null;
+        startLetterText = templateLetterRichTextArea.getValue() != null
+                ? Jsoup.parse(templateLetterRichTextArea.getValue()).wholeText() : null;
         startVacansyName = vacansyNameField.getValue();
     }
 
@@ -2681,7 +2683,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     public void rescanJobDescription() {
-        String inputText = Jsoup.parse(openPositionRichTextArea.getValue()).text();
+        String inputText = Jsoup.parse(openPositionRichTextArea.getValue()).wholeText();
         skillTrees = pdfParserService.parseSkillTree(inputText);
         getEditedEntity().setSkillsList(skillTrees);
     }
@@ -2726,12 +2728,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Install(to = "openPositionSkillsListTable", subject = "rowDescriptionProvider")
     private String openPositionSkillsListTableRowDescriptionProvider(SkillTree skillTree) {
-        return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).text() : "";
+        return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).wholeText() : "";
     }
 
     public void addShortDescription() {
         if (openPositionRichTextArea.getValue() != null) {
-            List<SkillTree> skillTrees = pdfParserService.parseSkillTree(Jsoup.parse(openPositionRichTextArea.getValue()).text());
+            List<SkillTree> skillTrees = pdfParserService
+                    .parseSkillTree(Jsoup.parse(openPositionRichTextArea.getValue()).wholeText());
 //            String retStr = "";
             StringBuilder sb = new StringBuilder();
 

@@ -1,6 +1,5 @@
 package com.company.itpearls.core;
 
-import com.jayway.jsonpath.JsonPath;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +38,7 @@ public class TelegramServiceBean implements TelegramService {
 
     @Override
     public void sendMessageToChat(String tgToken, String chatId, String txt) {
-        String urlParameters = "chat_id=" + chatId + "&text=" + Jsoup.parse(txt).text();
+        String urlParameters = "chat_id=" + chatId + "&text=" + Jsoup.parse(txt).wholeText();
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
         String urlToken = "https://api.telegram.org/bot" + tgToken + "/sendMessage";
 
@@ -68,6 +67,7 @@ public class TelegramServiceBean implements TelegramService {
                     content.append(System.lineSeparator());
                 }
             }
+
             System.out.println(content.toString());
 
         } catch (ProtocolException e) {

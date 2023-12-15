@@ -681,7 +681,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.testExserice", subject = "descriptionProvider")
     private String openPositionsTableTestExsericeDescriptionProvider(OpenPosition openPosition) {
         if (openPosition.getExercise() != null)
-            return Jsoup.parse(openPosition.getExercise()).text();
+            return Jsoup.parse(openPosition.getExercise()).wholeText();
         else
             return "";
     }
@@ -707,7 +707,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String retStr = null;
 
         if (openPosition.getComment() != null) {
-            retStr = Jsoup.parse(openPosition.getComment()).text();
+            retStr = Jsoup.parse(openPosition.getComment()).wholeText();
         }
 
         return retStr != null ? retStr : "";
@@ -865,7 +865,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             returnData = sb.toString().substring(0, sb.toString().length() - 1);
         }
 
-        returnData = returnData != null ? Jsoup.parse(returnData).text() : "";
+        returnData = returnData != null ? Jsoup.parse(returnData).wholeText() : "";
 
         return openPosition.getVacansyName() + "\n" + returnData;
     }
@@ -873,7 +873,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.projectName", subject = "descriptionProvider")
     private String openPositionsTableProjectNameDescriptionProvider(OpenPosition openPosition) {
         String textReturn = openPosition.getProjectName().getProjectDescription();
-        String a = textReturn != null ? Jsoup.parse(textReturn).text() : "";
+        String a = textReturn != null ? Jsoup.parse(textReturn).wholeText() : "";
         String projectOwner = "";
         StringBuilder sb = new StringBuilder();
         StringBuilder sb1 = new StringBuilder();
@@ -1509,8 +1509,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return sb.append((openPosition.getSalaryComment() != null ?
-                        "\n\n" + openPosition.getSalaryComment()
-                        : ""))
+                "\n\n" + openPosition.getSalaryComment()
+                : ""))
                 .toString();
     }
 
@@ -1594,7 +1594,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     sb.toString()));
 
             telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                    Jsoup.parse(sb.toString()).text());
+                    Jsoup.parse(sb.toString()).wholeText());
 
             if (flagPriority) {
                 openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,
@@ -1801,7 +1801,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         for (Map.Entry entry : priorityMap.entrySet()) {
             openCloseButton.addAction(
                     new BaseAction(new StringBuilder().append(
-                                    entry.getKey().toString())
+                            entry.getKey().toString())
                             .append(actionStr)
                             .toString())
                             .withHandler(e -> {
@@ -2307,7 +2307,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (openPosition.getTemplateLetter() != null &&
                 openPosition.getTemplateLetter() != "") {
             sb.append("Требования к вакансии: ")
-                    .append(Jsoup.parse(openPosition.getTemplateLetter()).text())
+                    .append(Jsoup.parse(openPosition.getTemplateLetter()).wholeText())
                     .append("\n\n").toString();
         }
 
@@ -2315,7 +2315,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             if (openPosition.getProjectName().getTemplateLetter() != null &&
                     openPosition.getProjectName().getTemplateLetter() != "") {
                 sb.append("Требования проекта: ")
-                        .append(Jsoup.parse(openPosition.getProjectName().getTemplateLetter()).text())
+                        .append(Jsoup.parse(openPosition.getProjectName().getTemplateLetter()).wholeText())
                         .append("\n\n");
             }
         }
@@ -2325,7 +2325,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 if (openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != null &&
                         openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != "") {
                     sb.append("Требования департамента: ")
-                            .append(Jsoup.parse(openPosition.getProjectName().getProjectDepartment().getTemplateLetter()).text());
+                            .append(Jsoup.parse(openPosition
+                                    .getProjectName().getProjectDepartment().getTemplateLetter())
+                                    .wholeText());
                 }
             }
         }
@@ -2366,7 +2368,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "descriptionProvider")
     private String openPositionsTableMemoForCandidateColumnDescriptionProvider(OpenPosition openPosition) {
         if (openPosition.getMemoForInterview() != null)
-            return Jsoup.parse(openPosition.getMemoForInterview()).text();
+            return Jsoup.parse(openPosition.getMemoForInterview()).wholeText();
         else
             return null;
     }

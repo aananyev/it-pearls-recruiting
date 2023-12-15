@@ -1,15 +1,14 @@
 package com.company.itpearls.entity;
 
 import com.haulmont.cuba.core.entity.StandardEntity;
-import com.haulmont.cuba.core.entity.annotation.Lookup;
-import com.haulmont.cuba.core.entity.annotation.LookupType;
-import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
+import com.haulmont.cuba.core.entity.annotation.*;
 import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
+@PublishEntityChangedEvents
 @Table(name = "ITPEARLS_OPEN_POSITION_COMMENT")
 @Entity(name = "itpearls_OpenPositionComment")
 public class OpenPositionComment extends StandardEntity {
