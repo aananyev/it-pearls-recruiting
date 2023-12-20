@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
@@ -7,11 +8,15 @@ import javax.persistence.*;
 
 @Table(name = "ITPEARLS_APPLICATION_SETUP")
 @Entity(name = "itpearls_ApplicationSetup")
+@NamePattern("%s|name")
 public class ApplicationSetup extends StandardEntity {
     private static final long serialVersionUID = -7930326523040472631L;
 
-    @Column(name = "ACTIVE_SETUP", unique = true)
+    @Column(name = "ACTIVE_SETUP")
     private Boolean activeSetup;
+
+    @Column(name = "NAME", length = 128)
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APPLICATION_LOGO_ID")
@@ -29,6 +34,14 @@ public class ApplicationSetup extends StandardEntity {
 
     @Column(name = "TELEGRAM_CHAT_JOB_CANDIDATE", length = 128)
     private String telegramChatJobCandidate;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getTelegramChatJobCandidate() {
         return telegramChatJobCandidate;

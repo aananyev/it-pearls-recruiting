@@ -1279,6 +1279,7 @@ create table ITPEARLS_APPLICATION_SETUP (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
+    NAME varchar(128),
     ACTIVE_SETUP boolean,
     APPLICATION_LOGO_ID uuid,
     APPLICATION_ICON_ID uuid,

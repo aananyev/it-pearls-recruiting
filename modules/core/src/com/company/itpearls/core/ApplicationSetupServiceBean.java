@@ -1,10 +1,12 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.ApplicationSetup;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.util.List;
 
 @Service(ApplicationSetupService.NAME)
 public class ApplicationSetupServiceBean implements ApplicationSetupService {
@@ -30,7 +32,7 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         ApplicationSetup applicationSetup = getActiveApplicationSetup();
 
         if (applicationSetup != null) {
-                return getActiveApplicationSetup().getTelegramChatOpenPosition();
+            return getActiveApplicationSetup().getTelegramChatOpenPosition();
         } else {
             return null;
         }
@@ -52,4 +54,33 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         }
     }
 
+    @Override
+    public void clearActiveApplicationSetup() {
+        List<ApplicationSetup> applicationSetups = dataManager.load(ApplicationSetup.class)
+                .view("applicationSetup-view")
+                .list();
+
+        for (ApplicationSetup applicationSetup : applicationSetups) {
+            applicationSetup.setActiveSetup(false);
+        }
+
+        CommitContext commitContext = new CommitContext(applicationSetups);
+        dataManager.commit(commitContext);
+    }
+
+    @Override
+    public void clearActiveApplicationSetup(ApplicationSetup current) {
+        List<ApplicationSetup> applicationSetups = dataManager.load(ApplicationSetup.class)
+                .view("applicationSetup-view")
+                .list();
+
+        for (ApplicationSetup applicationSetup : applicationSetups) {
+            if (!applicationSetup.equals(current)) {
+                applicationSetup.setActiveSetup(false);
+            }
+        }
+
+        CommitContext commitContext = new CommitContext(applicationSetups);
+        dataManager.commit(commitContext);
+    }
 }

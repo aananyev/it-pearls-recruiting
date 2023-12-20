@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
+    <layout>
+        <image id="companyLogo"
+               height="100%"
+               width="100%"
+               scaleMode="SCALE_DOWN">
+        </image>
+    </layout>
+</fragment>

@@ -10,7 +10,7 @@
                 <property name="applicationLogo" view="_local"/>
                 <property name="applicationIcon" view="_local"/>
             </view>
-            <loader/>
+            <loader id="applicationSetupDl"/>
         </instance>
     </data>
     <dialogMode height="600"
@@ -18,6 +18,10 @@
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="applicationSetupDc">
             <column width="350px">
+                <textField id="nameField"
+                           dataContainer="applicationSetupDc"
+                           property="name"
+                           width="100%"/>
                 <checkBox id="activeSetupField" property="activeSetup"/>
                 <upload id="applicationLogoField"
                         fileStoragePutMode="IMMEDIATE"

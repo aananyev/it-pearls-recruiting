@@ -18,12 +18,15 @@ public class WebLoadServiceBean implements WebLoadService {
 
         String inputLine;
         String retStr = "";
+        StringBuilder sb = new StringBuilder(retStr);
+
         while ((inputLine = in.readLine()) != null) {
-            retStr += inputLine;
+            sb.append(inputLine);
+//            retStr += inputLine;
         } //Можно   накапливать в StringBuilder а потом присвоить перемной String результат накопления
 
         in.close();
 
-        return retStr;
+        return sb.toString();
     }
 }

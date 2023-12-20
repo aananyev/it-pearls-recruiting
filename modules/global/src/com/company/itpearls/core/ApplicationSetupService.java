@@ -10,4 +10,8 @@ public interface ApplicationSetupService {
     String getTelegramChatOpenPosition();
 
     ApplicationSetup getActiveApplicationSetup();
+
+    void clearActiveApplicationSetup();
+
+    void clearActiveApplicationSetup(ApplicationSetup current);
 }

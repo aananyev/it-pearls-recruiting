@@ -21,7 +21,9 @@
                 <property name="recrutier" view="_local"/>
                 <property name="vacancy" view="_local">
                     <property name="grade" view="_local"/>
-                    <property name="projectName" view="_local"/>
+                    <property name="projectName" view="_local">
+                        <property name="projectDepartment" view="_local"/>
+                    </property>
                 </property>
                 <property name="comment"/>
             </view>

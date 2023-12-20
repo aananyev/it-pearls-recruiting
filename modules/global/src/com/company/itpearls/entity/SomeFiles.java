@@ -12,9 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamePattern("%s|fileDescription")
-@Table(name = "ITPEARLS_SOME_FILES", indexes = {
-        @Index(name = "IDX_ITPEARLS_SOME_FILES_DESCRIPTION", columnList = "FILE_DESCRIPTION")
-})
+@Table(name = "ITPEARLS_SOME_FILES")
 @Entity(name = "itpearls_SomeFiles")
 public class SomeFiles extends StandardEntity {
     private static final long serialVersionUID = 5350354177979238926L;

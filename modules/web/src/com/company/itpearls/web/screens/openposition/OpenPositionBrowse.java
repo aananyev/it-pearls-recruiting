@@ -3517,7 +3517,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     openPositionsDl.load();
                     openPositionsTable.repaint();
                     openPositionsTable.setSelected(selected);
-                    openPositionsTable.scrollTo(selected);
+
+                    try {
+                        if (selected != null)
+                            openPositionsTable.scrollTo(selected);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
                 })
                 .withOpenMode(OpenMode.DIALOG)
                 .newEntity()
@@ -3584,9 +3590,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         actionPopupButton.setIconFromSet(CubaIcon.BARS);
         actionPopupButton.setShowActionIcons(true);
         actionPopupButton.addPopupVisibilityListener(e -> {
-//            openPositionsTable.setSelectionMode(DataGrid.SelectionMode.SINGLE);
             openPositionsTable.setSelected(event.getItem());
-            openPositionsTable.scrollTo(event.getItem());
+
+            try {
+                openPositionsTable.scrollTo(event.getItem());
+            } catch (IllegalArgumentException ex) {
+                ex.printStackTrace();
+            }
         });
 
         initActionButton(actionPopupButton, event);

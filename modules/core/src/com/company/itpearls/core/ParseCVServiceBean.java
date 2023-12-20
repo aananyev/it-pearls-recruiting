@@ -132,7 +132,7 @@ public class ParseCVServiceBean implements ParseCVService {
         String skypePattern = contactPattern;
 
         Pattern skype = Pattern.compile(skypePattern + "\\s*" + ".*?\\s");
-        Matcher skypeMatcher = skype.matcher(Jsoup.parse(cv).text());
+        Matcher skypeMatcher = skype.matcher(Jsoup.parse(cv).wholeText());
 
         if (skypeMatcher.find()) {
             StringBuffer skypeBuffer = new StringBuffer(skypeMatcher.group());
@@ -407,7 +407,7 @@ public class ParseCVServiceBean implements ParseCVService {
 
         for (String fn : secondName) {
             if (!fn.equals("")) {
-                StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).text().toLowerCase());
+                StringBuffer cvLoverCase = new StringBuffer(Jsoup.parse(cv).wholeText().toLowerCase());
 
                 if (fn.length() >= MIN_NAME_LENGTH) {
                     // с начала строки и до пробела
@@ -464,7 +464,7 @@ public class ParseCVServiceBean implements ParseCVService {
     public String parsePhone(String cv) {
         String outStr;
         if (cv != null) {
-            outStr = Jsoup.parse(deleteSystemChar(cv)).text();
+            outStr = Jsoup.parse(deleteSystemChar(cv)).wholeText();
             String parsePhone = getDataModel(outStr,
                     phonePtrn);
 
@@ -477,7 +477,7 @@ public class ParseCVServiceBean implements ParseCVService {
     private String getDataModel(String onStr, String pattern) {
         if (onStr != null) {
             Pattern patt = Pattern.compile(pattern);
-            Matcher matcher = patt.matcher(Jsoup.parse(onStr).text());
+            Matcher matcher = patt.matcher(Jsoup.parse(onStr).wholeText());
 
             if (matcher.find()) {
                 return matcher.group();

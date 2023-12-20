@@ -93,6 +93,9 @@
             <property name="fileCV" view="_minimal"/>
             <property name="someFiles" view="_local">
                 <property name="candidateCV" view="_local"/>
+                <property name="fileDescriptor" view="_local"/>
+                <property name="fileOwner" view="_local"/>
+                <property name="fileType" view="_local"/>
             </property>
             <property name="fileImageFace" view="_minimal"/>
         </property>

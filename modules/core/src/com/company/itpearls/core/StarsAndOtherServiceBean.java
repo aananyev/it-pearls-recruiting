@@ -58,7 +58,6 @@ public class StarsAndOtherServiceBean implements StarsAndOtherService {
 
     @Override
     public String cyrillicToLatin(String inputString) {
-            String st = "привет мир";
             Transliterator toLatinTrans = Transliterator.getInstance(CYRILLIC_TO_LATIN);
             String result = toLatinTrans.transliterate(inputString);
             return result;

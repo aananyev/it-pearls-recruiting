@@ -137,7 +137,7 @@ public class OpenPositionServiceBean implements OpenPositionService {
     public String getOpenPositionOpenLongMessage(OpenPosition entity, User user) {
         StringBuilder sb = new StringBuilder(getOpenPositionOpenShortMessage(entity, user));
 
-        return new StringBuilder(Jsoup.parse(sb.toString()).text())
+        return new StringBuilder(Jsoup.parse(sb.toString()).wholeText())
                .append("\n\n")
                .append(entity.getComment())
                .append("\n\n")
@@ -160,7 +160,7 @@ public class OpenPositionServiceBean implements OpenPositionService {
     public String getOpenPositionCloseLongMessage(OpenPosition entity, User user) {
         StringBuilder sb = new StringBuilder(getOpenPositionOpenShortMessage(entity, user));
 
-        return new StringBuilder(Jsoup.parse(sb.toString()).text())
+        return new StringBuilder(Jsoup.parse(sb.toString()).wholeText())
                 .append("\n\n")
                 .append(entity.getComment())
                 .append("\n\n")

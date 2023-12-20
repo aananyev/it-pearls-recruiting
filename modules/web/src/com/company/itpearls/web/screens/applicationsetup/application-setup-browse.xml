@@ -31,14 +31,20 @@
                     width="100%"
                     dataContainer="applicationSetupsDc">
             <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
+                <action id="create" type="create"
+                        invoke="createActionHandler"
+                        caption="mainMsg://msgCreate"
+                        icon="CREATE_ACTION"/>
+                <action id="edit" type="edit" invoke="editActionHandler"
+                        caption="mainMsg://msgEdit"
+                        icon="EDIT_ACTION"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="activeSetup"/>
-                <column id="applicationLogo"/>
-                <column id="applicationIcon"/>
+                <column id="activeSetup" caption="msg://msgActive" width="50px"/>
+                <column id="name"/>
+                <column id="applicationLogo" generator="applicationLogoGenerator"/>
+                <column id="applicationIcon" generator="applicationIconGenerator"/>
                 <column id="telegramToken"/>
                 <column id="telegramChatOpenPosition"/>
             </columns>
