@@ -15,22 +15,94 @@
     </data>
     <dialogMode height="600"
                 width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="applicationSetupDc">
+    <layout expand="editActions"
+            spacing="true"
+            width="100%">
+        <form id="form"
+              dataContainer="applicationSetupDc"
+              width="100%">
             <column width="350px">
                 <textField id="nameField"
                            dataContainer="applicationSetupDc"
                            property="name"
                            width="100%"/>
                 <checkBox id="activeSetupField" property="activeSetup"/>
-                <upload id="applicationLogoField"
-                        fileStoragePutMode="IMMEDIATE"
-                        property="applicationLogo"
-                        showFileName="true"/>
-                <upload id="applicationIconField"
-                        fileStoragePutMode="IMMEDIATE"
-                        property="applicationIcon"
-                        showFileName="true"/>
+                <hbox spacing="true" width="100%">
+                    <vbox id="dropZone"
+                          spacing="true"
+                          width="200px"
+                          height="266px"
+                          align="TOP_CENTER"
+                          caption="msg://msgApplicationImage"
+                          expand="picVBox"
+                          stylename="dropzone-container">
+                        <vbox id="picVBox">
+                            <image id="applicationLogoFileImage"
+                                   dataContainer="applicationSetupDc"
+                                   property="applicationLogo"
+                                   width="100%"
+                                   visible="true"
+                                   align="TOP_CENTER"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <image id="applicationDefaultLogoFileImage"
+                                   width="100%"
+                                   visible="false"
+                                   align="TOP_CENTER"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL">
+                                <theme path="icons/no-company.png"/>
+                            </image>
+                        </vbox>
+                        <upload id="applicationLogoField"
+                                fileStoragePutMode="IMMEDIATE"
+                                property="applicationLogo"
+                                dataContainer="applicationSetupDc"
+                                align="BOTTOM_CENTER"
+                                showFileName="false"
+                                dropZone="dropZone"
+                                showClearButton="true"/>
+                    </vbox>
+                    <vbox id="dropIconZone"
+                          spacing="true"
+                          width="200px"
+                          height="266px"
+                          align="TOP_CENTER"
+                          caption="msg://msgApplicationIcon"
+                          expand="picIconVBox"
+                          stylename="dropzone-container">
+                        <vbox id="picIconVBox">
+                            <image id="applicationIconFileImage"
+                                   dataContainer="applicationSetupDc"
+                                   property="applicationIcon"
+                                   width="100%"
+                                   visible="true"
+                                   align="TOP_CENTER"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL"/>
+                            <image id="applicationDefaultIconFileImage"
+                                   width="100%"
+                                   visible="false"
+                                   align="TOP_CENTER"
+                                   height="100%"
+                                   stylename="widget-border"
+                                   scaleMode="FILL">
+                                <theme path="icons/no-company.png"/>
+                            </image>
+                        </vbox>
+                        <upload id="applicationIconField"
+                                fileStoragePutMode="IMMEDIATE"
+                                property="applicationIcon"
+                                dataContainer="applicationSetupDc"
+                                align="BOTTOM_CENTER"
+                                showFileName="false"
+                                dropZone="dropIconZone"
+                                showClearButton="true"/>
+                    </vbox>
+                </hbox>
                 <textField id="telegramTokenField"
                            property="telegramToken"/>
                 <textField id="telegramChatOpenPositionField"

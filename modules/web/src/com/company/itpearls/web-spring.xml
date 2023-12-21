@@ -36,6 +36,8 @@
                        value="com.company.itpearls.core.ApplicationSetupService"/>
                 <entry key="itpearls_OpenPositionCommentService"
                        value="com.company.itpearls.core.OpenPositionCommentService"/>
+                <entry key="itpearls_TextManipulationService"
+                       value="com.company.itpearls.core.TextManipulationService"/>
             </map>
         </property>
     </bean>

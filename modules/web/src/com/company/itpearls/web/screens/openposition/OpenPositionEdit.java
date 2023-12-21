@@ -54,6 +54,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TelegramService telegramService;
     @Inject
     private ApplicationSetupService applicationSetupService;
+    @Inject
+    private TextManipulationService textManipulationService;
 
     @Subscribe("closedVacancyTimer")
     public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
@@ -1274,45 +1276,32 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            telegramService.sendMessageToChat("6474655052:AAH59HeXfs7H6yxsWdpAoiJ91oXrvchDZ0s",
-                    applicationSetupService.getTelegramChatOpenPosition(),
-//                    "-1001546344456",
-                    "Новая вакансия: " +
-                            vacansyNameField.getValue()
-                            + "\n\n"
-                            + openPositionRichTextArea.getValue()
-                            + "\n\nЗарплатное предложение: от " + openPositionFieldSalaryMin.getValue()
-                            + " до "
-                            + openPositionFieldSalaryMax.getValue()
-                            + " (" + salaryCommentTextFiels.getValue() + ")");
+            StringBuilder sb = new StringBuilder()
+                    .append("Новая вакансия: ")
+                    .append(vacansyNameField.getValue())
+                    .append("\n\n")
+                    .append(openPositionRichTextArea.getValue())
+                    .append("\n\nЗарплатное предложение: от ")
+                    .append(openPositionFieldSalaryMin.getValue())
+                    .append(" до ")
+                    .append(openPositionFieldSalaryMax.getValue())
+                    .append("\n\n(")
+                    .append(salaryCommentTextFiels.getValue())
+                    .append(")");
+            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
+                    textManipulationService.formattedHtml2text(sb.toString()));
         } else {
-            telegramService.sendMessageToChat("6474655052:AAH59HeXfs7H6yxsWdpAoiJ91oXrvchDZ0s",
-                    applicationSetupService.getTelegramChatOpenPosition(),
-//                    "-1001546344456",
-                    "Изменена вакансия: " +
-                            vacansyNameField.getValue());
+
+            Boolean flag = getEditedEntity().getOpenClose() != null ? getEditedEntity().getOpenClose() : false;
+
+            if (!flag) {
+                telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
+                        textManipulationService
+                                .formattedHtml2text(new StringBuilder("Изменена вакансия: ")
+                                        .append(vacansyNameField.getValue()).toString()));
+            }
         }
     }
-
-    /* private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
-                                                     String subject,
-                                                     String comment,
-                                                     Date date,
-                                                     User user) {
-
-        OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
-
-        openPositionNews.setOpenPosition(editedEntity);
-        openPositionNews.setAuthor(user);
-        openPositionNews.setDateNews(date);
-        openPositionNews.setSubject(subject);
-        openPositionNews.setComment(comment);
-        openPositionNews.setPriorityNews(true);
-
-        CommitContext commitContext = new CommitContext();
-        commitContext.addInstanceToCommit(openPositionNews);
-        dataManager.commit(commitContext);
-    } */
 
     @Subscribe("priorityNewsCheckBox")
     public void onPriorityNewsCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {

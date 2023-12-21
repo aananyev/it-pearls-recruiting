@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <item screen="itpearls_ApplicationSetup.browse" caption="mainMsg://menu_config.itpearls_ApplicationSetup.browse"
-          insertBefore="sec$User.browse"/>
+          insertBefore="sec$User.browse" icon="ADJUST"/>
     <separator insertBefore="sec$User.browse"/>
     <menu id="application-calendars" icon="CALENDAR" insertBefore="application-hunting">
         <item screen="itpearls_Interviewcalendar" icon="CALENDAR"/>
@@ -28,15 +28,6 @@
                   icon="ENVELOPE_SQUARE"/>
         </menu>
     </menu>
-    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
-        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
-              icon="font-icon:ADDRESS_BOOK_O"/>
-        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
-              icon="GROUP"/>
-        <item screen="itpearls_ApplicationRecruitment.browse"
-              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
-        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
-    </menu>
     <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
         <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
               icon="COMPASS"/>
@@ -51,6 +42,15 @@
     <menu id="application-recruiting" icon="COMPASS" insertAfter="application-outstaffing">
         <item screen="itpearls_OpenPositionRecruiting.browse" caption="mainMsg://msgOpenPositionRecruiting"
               icon="COMPASS" openType="NEW_TAB"/>
+    </menu>
+    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
+        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
+              icon="font-icon:ADDRESS_BOOK_O"/>
+        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
+              icon="GROUP"/>
+        <item screen="itpearls_ApplicationRecruitment.browse"
+              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
+        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
     </menu>
     <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>

@@ -20,6 +20,8 @@ public class TelegramServiceBean implements TelegramService {
     private static HttpURLConnection con;
     @Inject
     private ApplicationSetupService applicationSetupService;
+    @Inject
+    private TextManipulationService textManipulationService;
 
     @Override
     public void sendMessageToChat(String tgToken, int chatId, String txt) {
@@ -38,7 +40,8 @@ public class TelegramServiceBean implements TelegramService {
 
     @Override
     public void sendMessageToChat(String tgToken, String chatId, String txt) {
-        String urlParameters = "chat_id=" + chatId + "&text=" + Jsoup.parse(txt).wholeText();
+        String urlParameters = "chat_id=" + chatId + "&text="
+                + textManipulationService.formattedHtml2text(txt);
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
         String urlToken = "https://api.telegram.org/bot" + tgToken + "/sendMessage";
 
@@ -50,6 +53,7 @@ public class TelegramServiceBean implements TelegramService {
             con.setRequestMethod("POST");
             con.setRequestProperty("User-Agent", "Java upread.ru client");
             con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//            con.setRequestProperty("Content-Type", "application/xhtml+xml");
 
             try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
                 wr.write(postData);

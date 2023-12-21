@@ -20,6 +20,8 @@ public class OpenPositionServiceBean implements OpenPositionService {
     private DataManager dataManager;
     @Inject
     private ProjectService projectService;
+    @Inject
+    private TextManipulationService textManipulationService;
 
     @Override
     public void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
@@ -50,10 +52,10 @@ public class OpenPositionServiceBean implements OpenPositionService {
 
     @Override
     public void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
-                                                     String subject,
-                                                     String comment,
-                                                     Date date,
-                                                     ExtUser user) {
+                                                    String subject,
+                                                    String comment,
+                                                    Date date,
+                                                    ExtUser user) {
 
         OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
 
@@ -78,7 +80,8 @@ public class OpenPositionServiceBean implements OpenPositionService {
         openPosition.setOpenClose(true);
         openPosition.setRemoteWork(0);
         openPosition.setCommandCandidate(0);
-        openPosition.setProjectName(projectService.getProjectDefault());;
+        openPosition.setProjectName(projectService.getProjectDefault());
+        ;
         openPosition.setWorkExperience(0);
 
         dataManager.commit(openPosition);
@@ -120,12 +123,20 @@ public class OpenPositionServiceBean implements OpenPositionService {
         return sb.toString();
     }
 
+    private final static String CLOSE_VACANCY = "ЗАКРЫТА ВАКАНСИЯ: ";
+    private final static String OPEN_VACANCY = "ОТКРЫТА ВАКАНСИЯ: ";
+
     @Override
     public String getOpenPositionOpenShortMessage(OpenPosition entity, User user) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("Открыта вакансия: ")
-                .append(entity.getVacansyName())
+        if (entity.getOpenClose() != null) {
+            sb.append(entity.getOpenClose() ? CLOSE_VACANCY : OPEN_VACANCY);
+        } else {
+            sb.append(OPEN_VACANCY);
+        }
+
+        sb.append(entity.getVacansyName())
                 .append("<br><svg align=\"right\" width=\"100%\"><i>")
                 .append(user.getName())
                 .append("</i></svg>");
@@ -133,34 +144,10 @@ public class OpenPositionServiceBean implements OpenPositionService {
         return sb.toString();
 
     }
+
     @Override
     public String getOpenPositionOpenLongMessage(OpenPosition entity, User user) {
-        StringBuilder sb = new StringBuilder(getOpenPositionOpenShortMessage(entity, user));
-
-        return new StringBuilder(Jsoup.parse(sb.toString()).wholeText())
-               .append("\n\n")
-               .append(entity.getComment())
-               .append("\n\n")
-               .append("Salary")
-               .append(" ")
-               .append("from")
-               .append(" ")
-               .append(entity.getSalaryMin() != null ? entity.getSalaryMin() : "???")
-               .append(" ")
-               .append("to")
-               .append(" ")
-               .append(entity.getSalaryMax() != null ? entity.getSalaryMax() : "???")
-               .append(entity.getSalaryComment() != null ? " (" : "")
-               .append(entity.getSalaryComment() != null ? entity.getSalaryComment() : "")
-               .append(entity.getSalaryComment() != null ? ")" : "")
-               .toString();
-    }
-
-    @Override
-    public String getOpenPositionCloseLongMessage(OpenPosition entity, User user) {
-        StringBuilder sb = new StringBuilder(getOpenPositionOpenShortMessage(entity, user));
-
-        return new StringBuilder(Jsoup.parse(sb.toString()).wholeText())
+        return new StringBuilder(getOpenPositionOpenShortMessage(entity, user))
                 .append("\n\n")
                 .append(entity.getComment())
                 .append("\n\n")
@@ -177,5 +164,27 @@ public class OpenPositionServiceBean implements OpenPositionService {
                 .append(entity.getSalaryComment() != null ? entity.getSalaryComment() : "")
                 .append(entity.getSalaryComment() != null ? ")" : "")
                 .toString();
+    }
+
+    @Override
+    public String getOpenPositionCloseLongMessage(OpenPosition entity, User user) {
+        return textManipulationService
+                .formattedHtml2text(new StringBuilder(getOpenPositionOpenShortMessage(entity, user))
+                        .append("\n\n")
+                        .append(entity.getComment())
+                        .append("\n\n")
+                        .append("Salary")
+                        .append(" ")
+                        .append("from")
+                        .append(" ")
+                        .append(entity.getSalaryMin() != null ? entity.getSalaryMin() : "???")
+                        .append(" ")
+                        .append("to")
+                        .append(" ")
+                        .append(entity.getSalaryMax() != null ? entity.getSalaryMax() : "???")
+                        .append(entity.getSalaryComment() != null ? " (" : "")
+                        .append(entity.getSalaryComment() != null ? entity.getSalaryComment() : "")
+                        .append(entity.getSalaryComment() != null ? ")" : "")
+                        .toString());
     }
 }

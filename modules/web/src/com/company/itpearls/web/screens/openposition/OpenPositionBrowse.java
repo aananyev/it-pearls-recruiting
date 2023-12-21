@@ -1276,7 +1276,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             telegramService.sendMessageToChat(applicationSetupService
                             .getTelegramChatOpenPosition(),
                     openPositionService
-                            .getOpenPositionOpenLongMessage(entity, userSession.getUser()));
+                                    .getOpenPositionOpenLongMessage(entity, userSession.getUser()));
 
             entity.setOwner((ExtUser) userSession.getUser());
             entity.setLastOpenDate(new Date());
@@ -1509,8 +1509,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return sb.append((openPosition.getSalaryComment() != null ?
-                "\n\n" + openPosition.getSalaryComment()
-                : ""))
+                        "\n\n" + openPosition.getSalaryComment()
+                        : ""))
                 .toString();
     }
 
@@ -1594,7 +1594,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     sb.toString()));
 
             telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                    Jsoup.parse(sb.toString()).wholeText());
+                    sb.toString());
 
             if (flagPriority) {
                 openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,
@@ -1801,7 +1801,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         for (Map.Entry entry : priorityMap.entrySet()) {
             openCloseButton.addAction(
                     new BaseAction(new StringBuilder().append(
-                            entry.getKey().toString())
+                                    entry.getKey().toString())
                             .append(actionStr)
                             .toString())
                             .withHandler(e -> {
@@ -2326,7 +2326,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != "") {
                     sb.append("Требования департамента: ")
                             .append(Jsoup.parse(openPosition
-                                    .getProjectName().getProjectDepartment().getTemplateLetter())
+                                            .getProjectName().getProjectDepartment().getTemplateLetter())
                                     .wholeText());
                 }
             }
@@ -3516,7 +3516,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     OpenPosition selected = openPositionsTable.getSingleSelected();
                     openPositionsDl.load();
                     openPositionsTable.repaint();
-                    openPositionsTable.setSelected(selected);
+
+                    if (selected != null)
+                        openPositionsTable.setSelected(selected);
 
                     try {
                         if (selected != null)

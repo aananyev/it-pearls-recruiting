@@ -25,7 +25,7 @@ public class CompanyLogoWidget extends ScreenFragment {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        FileDescriptor fileDescriptor = applicationSetupService.getActiveApplicationSetup().getApplicationLogo();
+        FileDescriptor fileDescriptor = applicationSetupService.getCompanyImage();
 
         if (fileDescriptor != null) {
             companyLogo.setSource(StreamResource.class)

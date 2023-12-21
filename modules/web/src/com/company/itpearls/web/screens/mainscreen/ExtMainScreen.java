@@ -2,14 +2,22 @@ package com.company.itpearls.web.screens.mainscreen;
 
 import com.company.itpearls.BeanNotificationEvent;
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.ApplicationSetupService;
 import com.company.itpearls.core.SignIconService;
 import com.company.itpearls.entity.ExtUser;
-import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.PersonelReserve;
+import com.company.itpearls.web.extension.ChangeFaviconExtension;
+import com.haulmont.cuba.core.app.ConfigStorageService;
+import com.haulmont.cuba.core.config.AppPropertiesLocator;
+import com.haulmont.cuba.core.config.AppPropertyEntity;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -18,15 +26,16 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.app.main.MainScreen;
-import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+import com.vaadin.ui.AbstractOrderedLayout;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
-import com.haulmont.cuba.gui.components.ContentMode;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.management.Notification;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.*;
+import java.util.Calendar;
 
 
 @UiController("extMainScreen")
@@ -65,12 +74,32 @@ public class ExtMainScreen extends MainScreen {
     private MessageBundle messageBundle;
     @Inject
     private SignIconService signIconService;
+    @Inject
+    private ApplicationSetupService applicationSetupService;
+    @Inject
+    private VBoxLayout mainVBox;
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private Image logoImage;
+    @Inject
+    private ConfigStorageService configStorageService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         signIconsChecksAndGenerate();
+        setApplicationLogo();
+        setFavicon();
     }
 
+    private void setFavicon() {
+        ChangeFaviconExtension extension = new ChangeFaviconExtension();
+        extension.extend(mainVBox.unwrap(AbstractOrderedLayout.class),
+                applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName());
+    }
+
+    private void setApplicationLogo() {
+    }
 
     private void createDefaultIcons() {
         final String icon[] = {CubaIcon.STAR.source(), CubaIcon.STAR.source(), CubaIcon.STAR.source(),
@@ -365,5 +394,23 @@ public class ExtMainScreen extends MainScreen {
     @EventListener
     public void onBeanNotificationEvent(BeanNotificationEvent event) {
         throw new IllegalStateException("Received " + event);
+    }
+
+    @Override
+    protected void initLogoImage() {
+        FileDescriptor fileDescriptor = applicationSetupService.getCompanyImage();
+
+        if (fileDescriptor != null) {
+            logoImage.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(fileDescriptor);
+        } else {
+            logoImage.setSource(ThemeResource.class)
+                    .setPath("./VAADIN/themes/hover/icons/no-company.png");
+        }
+    }
+
+    @Override
+    protected void initTitleBar() {
+        super.initTitleBar();
     }
 }

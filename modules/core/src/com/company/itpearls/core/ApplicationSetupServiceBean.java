@@ -1,8 +1,13 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.ApplicationSetup;
-import com.haulmont.cuba.core.global.CommitContext;
-import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.EntityManager;
+import com.haulmont.cuba.core.Persistence;
+import com.haulmont.cuba.core.Query;
+import com.haulmont.cuba.core.Transaction;
+import com.haulmont.cuba.core.app.FileStorageAPI;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.*;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -15,6 +20,16 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
             = "select e from itpearls_ApplicationSetup e where e.activeSetup = true";
     @Inject
     private DataManager dataManager;
+    @Inject
+    private Persistence persistence;
+    @Inject
+    private FileLoader fileLoader;
+    @Inject
+    private FileStorageAPI fileStorageAPI;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private TimeSource timeSource;
 
     @Override
     public String getTelegramToken() {
@@ -39,6 +54,60 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
     }
 
     @Override
+    public FileDescriptor getCompanyImage() {
+        ApplicationSetup applicationSetup = getActiveApplicationSetup();
+
+        if (applicationSetup != null) {
+            return getActiveApplicationSetup().getApplicationLogo();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public FileDescriptor getActiveCompanyIcon() {
+        ApplicationSetup applicationSetup;
+
+        try (Transaction tx = persistence.createTransaction()) {
+            EntityManager em = persistence.getEntityManager();
+
+            Query query = em.createQuery(QUERY_GET_ACTIVE_SETUP);
+            applicationSetup = (ApplicationSetup) query.getFirstResult();
+            tx.commit();
+        }
+
+        return applicationSetup.getApplicationLogo();
+    }
+
+    @Override
+    public FileDescriptor getActiveCompanyLogo() {
+        ApplicationSetup applicationSetup;
+
+        try (Transaction tx = persistence.createTransaction()) {
+            EntityManager em = persistence.getEntityManager();
+
+            Query query = em.createQuery(QUERY_GET_ACTIVE_SETUP).addView(ApplicationSetup.class,
+                    "applicationSetup-view");
+            applicationSetup = (ApplicationSetup) query.getFirstResult();
+            tx.commit();
+        }
+
+        return applicationSetup.getApplicationIcon();
+    }
+
+
+    @Override
+    public FileDescriptor getCompanyIcon() {
+        ApplicationSetup applicationSetup = getActiveApplicationSetup();
+
+        if (applicationSetup != null) {
+            return getActiveApplicationSetup().getApplicationIcon();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public ApplicationSetup getActiveApplicationSetup() {
         ApplicationSetup applicationSetup = null;
 
@@ -46,6 +115,7 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
             applicationSetup = dataManager.load(ApplicationSetup.class)
                     .query(QUERY_GET_ACTIVE_SETUP)
                     .cacheable(true)
+                    .view("applicationSetup-view")
                     .one();
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,5 +152,10 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
 
         CommitContext commitContext = new CommitContext(applicationSetups);
         dataManager.commit(commitContext);
+    }
+
+    @Override
+    public String getActiveConfigName() {
+        return getActiveApplicationSetup().getName();
     }
 }

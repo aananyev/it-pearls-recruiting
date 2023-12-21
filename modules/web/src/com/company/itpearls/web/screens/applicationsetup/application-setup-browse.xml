@@ -35,7 +35,8 @@
                         invoke="createActionHandler"
                         caption="mainMsg://msgCreate"
                         icon="CREATE_ACTION"/>
-                <action id="edit" type="edit" invoke="editActionHandler"
+                <action id="edit" type="edit"
+                        invoke="editActionHandler"
                         caption="mainMsg://msgEdit"
                         icon="EDIT_ACTION"/>
                 <action id="remove" type="remove"/>
