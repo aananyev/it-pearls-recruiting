@@ -9,7 +9,8 @@ public class TextManipulationServiceBean implements TextManipulationService {
 
     @Override
     public String formattedHtml2text(String inputHtml) {
-        return String.valueOf(Jsoup.parse(inputHtml.replace("<br>", "\n")
+        return String.valueOf(Jsoup.parse(inputHtml
+                        .replace("<br>", "\n")
                         .replace("<ol>", "<ul>")
                         .replace("</ol>", "</ul>")
                         .replace("<li>", "- ")

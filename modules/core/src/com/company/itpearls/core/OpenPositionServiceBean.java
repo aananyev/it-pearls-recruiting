@@ -1,9 +1,7 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.*;
-import com.haulmont.cuba.core.global.CommitContext;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.security.entity.User;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
@@ -22,6 +20,10 @@ public class OpenPositionServiceBean implements OpenPositionService {
     private ProjectService projectService;
     @Inject
     private TextManipulationService textManipulationService;
+    @Inject
+    private MessageTools messageTools;
+    @Inject
+    private Messages messages;
 
     @Override
     public void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
@@ -145,46 +147,99 @@ public class OpenPositionServiceBean implements OpenPositionService {
 
     }
 
+    final static String MESSAGES_OPEN_POSITION_CLASS = "com.company.itpearls.web";
+
     @Override
     public String getOpenPositionOpenLongMessage(OpenPosition entity, User user) {
+        StringBuilder salarySB = new StringBuilder("Зарплатное предложение")
+//                messageTools.loadString("msgSalaryMinMax"))
+                .append(": ");
+
+        if (entity.getSalaryCandidateRequest() != null ? entity.getSalaryCandidateRequest() : false) {
+            salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryCandidateRequest"));
+        } else {
+            if (entity.getSalaryMin() != null) {
+                salarySB.append("от")
+//                        .append(messageTools.loadString("msgSalaryFrom"))
+                        .append(" ")
+                        .append(entity.getSalaryMin().toString()
+                        .substring(0, entity.getSalaryMin().toString().length() - 3));
+            } else {
+//                salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryUndefined"));
+                salarySB.append("неопределена");
+            }
+
+            if (entity.getSalaryMax() != null) {
+                salarySB.append(" ")
+                        .append("до")
+//                        .append(messageTools.loadString("msgSalaryTo"))
+                        .append(" ")
+                        .append(entity.getSalaryMax().toString()
+                                .substring(0, entity.getSalaryMax().toString().length() - 3));
+            } else {
+//                salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryUndefined"));
+                salarySB.append("неопределена");
+            }
+        }
+
+        if (entity.getSalaryComment() != null) {
+            salarySB.append("\n")
+                    .append("Комментарий")
+//                    .append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryComment"))
+                    .append(": ")
+                    .append(entity.getSalaryComment());
+        }
+
         return new StringBuilder(getOpenPositionOpenShortMessage(entity, user))
                 .append("\n\n")
                 .append(entity.getComment())
                 .append("\n\n")
-                .append("Salary")
-                .append(" ")
-                .append("from")
-                .append(" ")
-                .append(entity.getSalaryMin() != null ? entity.getSalaryMin() : "???")
-                .append(" ")
-                .append("to")
-                .append(" ")
-                .append(entity.getSalaryMax() != null ? entity.getSalaryMax() : "???")
-                .append(entity.getSalaryComment() != null ? " (" : "")
-                .append(entity.getSalaryComment() != null ? entity.getSalaryComment() : "")
-                .append(entity.getSalaryComment() != null ? ")" : "")
+                .append(salarySB)
                 .toString();
     }
 
     @Override
     public String getOpenPositionCloseLongMessage(OpenPosition entity, User user) {
+        StringBuilder salarySB = new StringBuilder(
+                messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryMinMax"))
+                .append(": ");
+
+        if (entity.getSalaryCandidateRequest() != null ? entity.getSalaryCandidateRequest() : false) {
+            salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryCandidateRequest"));
+        } else {
+            if (entity.getSalaryMin() != null) {
+                salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryFrom"))
+                        .append(" ")
+                        .append(entity.getSalaryMin().toString()
+                                .substring(0, entity.getSalaryMin().toString().length() - 3));
+            } else {
+                salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryUndefined"));
+            }
+
+            if (entity.getSalaryMax() != null) {
+                salarySB.append(" ")
+                        .append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryTo"))
+                        .append(" ")
+                        .append(entity.getSalaryMax().toString()
+                                .substring(0, entity.getSalaryMax().toString().length() - 3));
+            } else {
+                salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryUndefined"));
+            }
+        }
+
+        if (entity.getSalaryComment() != null) {
+            salarySB.append("\n")
+                    .append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryComment"))
+                    .append(": ")
+                    .append(entity.getSalaryComment());
+        }
+
         return textManipulationService
                 .formattedHtml2text(new StringBuilder(getOpenPositionOpenShortMessage(entity, user))
                         .append("\n\n")
                         .append(entity.getComment())
                         .append("\n\n")
-                        .append("Salary")
-                        .append(" ")
-                        .append("from")
-                        .append(" ")
-                        .append(entity.getSalaryMin() != null ? entity.getSalaryMin() : "???")
-                        .append(" ")
-                        .append("to")
-                        .append(" ")
-                        .append(entity.getSalaryMax() != null ? entity.getSalaryMax() : "???")
-                        .append(entity.getSalaryComment() != null ? " (" : "")
-                        .append(entity.getSalaryComment() != null ? entity.getSalaryComment() : "")
-                        .append(entity.getSalaryComment() != null ? ")" : "")
+                        .append(salarySB)
                         .toString());
     }
 }
