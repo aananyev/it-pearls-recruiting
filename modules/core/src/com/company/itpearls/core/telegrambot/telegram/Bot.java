@@ -29,14 +29,26 @@ public final class Bot extends TelegramLongPollingCommandBot {
     private final String BOT_NAME;
     private final String BOT_TOKEN;
 
-//    @Getter
-//    private static final Settings defaultSettings = new Settings();
+    private static final Settings defaultSettings = new Settings(3, true);
     private final NonCommand nonCommand;
+
+    private final static String helloMessage = "\"Бот IT Pearls ОТКРЫТЫЕ ВАКАНСИИ\\n\\n\" +\n" +
+            "                        \"Описание команд:\\n\" +\n" +
+            "                        \"/help - получение помощи\\n";
+
+    public static String getHelloMessage() {
+        return "\"Бот IT Pearls ОТКРЫТЫЕ ВАКАНСИИ\\n\\n\" +\n" +
+                "                        \"Описание команд:\\n\" +\n" +
+                "                        \"/help - получение помощи\\n";
+    }
+
+    public static Settings getDefaultSettings() {
+        return new Settings(3, true);
+    }
 
     /**
      * Настройки файла для разных пользователей. Ключ - уникальный id чата
      */
-    @Getter
     private static Map<Long, Settings> userSettings;
 
     public Bot(String botName, String botToken) {
@@ -60,6 +72,16 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
         userSettings = new HashMap<>();
         logger.info("Бот создан!");
+
+/*        try {
+            setAnswer(getMe().getId(), getBotUsername(), getHelloMessage());
+        } catch (TelegramApiException e) {
+            logger.debug(String.format("Ошибка создания бота **%s**.", getBotUsername()));
+        } */
+    }
+
+    public static Map<Long, Settings> getUserSettings() {
+        return userSettings;
     }
 
     @Override
@@ -89,14 +111,14 @@ public final class Bot extends TelegramLongPollingCommandBot {
      * Получение настроек по id чата. Если ранее для этого чата в ходе сеанса работы бота настройки не были установлены,
      * используются настройки по умолчанию
      */
-/*    public static Settings getUserSettings(Long chatId) {
+    public static Settings getUserSettings(Long chatId) {
         Map<Long, Settings> userSettings = Bot.getUserSettings();
         Settings settings = userSettings.get(chatId);
         if (settings == null) {
             return defaultSettings;
         }
         return settings;
-    } */
+    }
 
     /**
      * Отправка ответа
@@ -111,8 +133,8 @@ public final class Bot extends TelegramLongPollingCommandBot {
         try {
             execute(answer);
         } catch (TelegramApiException e) {
-            logger.error(String.format("Ошибка %s. Сообщение, не являющееся командой. Пользователь: %s", e.getMessage(),
-                    userName));
+            logger.error(String.format("*ОШИБКА* %s.\nСообщение %s, не являющееся командой.\nПользователь: **%s**",
+                    e.getMessage(), userName));
             e.printStackTrace();
         }
     }

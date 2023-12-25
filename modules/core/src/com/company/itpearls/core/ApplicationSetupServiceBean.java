@@ -1,6 +1,8 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.ApplicationSetup;
+import com.haulmont.bali.db.QueryRunner;
+import com.haulmont.bali.db.ResultSetHandler;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
@@ -11,7 +13,10 @@ import com.haulmont.cuba.core.global.*;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 @Service(ApplicationSetupService.NAME)
 public class ApplicationSetupServiceBean implements ApplicationSetupService {
@@ -32,25 +37,78 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
     private TimeSource timeSource;
 
     @Override
+    public String getTelegramBotName() {
+        QueryRunner runner = new QueryRunner(persistence.getDataSource());
+
+        try {
+            String scripts =
+                    runner.query(
+                            "select TELEGRAM_BOT_NAME from ITPEARLS_APPLICATION_SETUP where ACTIVE_SETUP = true",
+                            rs -> rs.next() ? rs.getString(1) : null);
+
+            return scripts;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+
+/*        ApplicationSetup applicationSetup = getActiveApplicationSetup();
+
+        if (applicationSetup != null) {
+            return getActiveApplicationSetup().getTelegramBotName();
+        } else {
+            return null;
+        } */
+    }
+
+    @Override
     public String getTelegramToken() {
+        QueryRunner runner = new QueryRunner(persistence.getDataSource());
+
+        try {
+            String scripts =
+                    runner.query(
+                            "select TELEGRAM_TOKEN from ITPEARLS_APPLICATION_SETUP where ACTIVE_SETUP = true",
+                            rs -> rs.next() ? rs.getString(1) : null);
+
+            return scripts;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        /*
         ApplicationSetup applicationSetup = getActiveApplicationSetup();
 
         if (applicationSetup != null) {
             return getActiveApplicationSetup().getTelegramToken();
         } else {
             return null;
-        }
+        } */
     }
 
     @Override
     public String getTelegramChatOpenPosition() {
-        ApplicationSetup applicationSetup = getActiveApplicationSetup();
+        QueryRunner runner = new QueryRunner(persistence.getDataSource());
+
+        try {
+            String scripts =
+                    runner.query(
+                            "select TELEGRAM_CHAT_OPEN_POSITION from ITPEARLS_APPLICATION_SETUP where ACTIVE_SETUP = true",
+                            rs -> rs.next() ? rs.getString(1) : null);
+
+
+            return scripts;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+/*        ApplicationSetup applicationSetup = getActiveApplicationSetup();
 
         if (applicationSetup != null) {
             return getActiveApplicationSetup().getTelegramChatOpenPosition();
         } else {
             return null;
-        }
+        } */
     }
 
     @Override

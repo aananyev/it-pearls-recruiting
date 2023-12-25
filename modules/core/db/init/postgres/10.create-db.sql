@@ -1279,10 +1279,11 @@ create table ITPEARLS_APPLICATION_SETUP (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    NAME varchar(128),
     ACTIVE_SETUP boolean,
+    NAME varchar(128),
     APPLICATION_LOGO_ID uuid,
     APPLICATION_ICON_ID uuid,
+    TELEGRAM_BOT_NAME varchar(128),
     TELEGRAM_TOKEN varchar(128),
     TELEGRAM_CHAT_OPEN_POSITION varchar(128),
     TELEGRAM_CHAT_JOB_CANDIDATE varchar(128),

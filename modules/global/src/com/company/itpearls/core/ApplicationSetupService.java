@@ -6,6 +6,8 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 public interface ApplicationSetupService {
     String NAME = "itpearls_ApplicationSetupService";
 
+    String getTelegramBotName();
+
     String getTelegramToken();
 
     String getTelegramChatOpenPosition();

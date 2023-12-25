@@ -1,8 +1,8 @@
 package com.company.itpearls.core.telegrambot.telegram.nonCommand;
 
+import com.company.itpearls.core.telegrambot.telegram.Bot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.company.itpearls.core.telegrambot.telegram.Bot;
 import com.company.itpearls.core.telegrambot.exeptions.IllegalSettingsException;
 
 /**
@@ -24,8 +24,7 @@ public class NonCommand {
             saveUserSettings(chatId, settings);
             logger.debug(String.format("Пользователь %s. Объект настроек из сообщения \"%s\" создан и сохранён",
                     userName, text));
-            answer = String.format("Настройки обновлены. Вы всегда можете их посмотреть с помощью /settings%s",
-                    createSettingWarning(settings));
+            answer = String.format("Настройки обновлены. Вы всегда можете их посмотреть с помощью /settings.");
         } catch (IllegalSettingsException e) {
             logger.debug(String.format("Пользователь %s. Не удалось создать объект настроек из сообщения \"%s\". " +
                     "%s", userName, text, e.getMessage()));
@@ -53,14 +52,33 @@ public class NonCommand {
         if (text == null) {
             throw new IllegalArgumentException("Сообщение не является текстом");
         }
-        validateSettings();
-        return new Settings();
+
+        text = text.replaceAll(", ", ",")//меняем ошибочный разделитель "запятая+пробел" на запятую
+                .replaceAll(" ", ",");
+        String[] parameters = text.split(",");
+
+        if (parameters.length != 2) {
+            throw new IllegalArgumentException(String.format("Не удалось разбить сообщение \"%s\" на 2 составляющих",
+                    text));
+        }
+
+        int priority = Integer.parseInt(parameters[0]);
+        Boolean publichNewVacancies = parameters[1].toLowerCase().equals("true")
+                ? true : (parameters[1].toLowerCase().equals("false") ? false : null);
+
+
+        validateSettings(publichNewVacancies, parameters);
+        return new Settings(priority, publichNewVacancies);
     }
 
     /**
      * Валидация настроек
      */
-    private void validateSettings() {
+    private void validateSettings(Boolean publichNewVacancies, String[] parameters) {
+        if (publichNewVacancies == null)
+            throw new IllegalArgumentException(
+                    String.format("Значение второго параметра %s, а должно быть либо **true**, либо **false**",
+                            parameters[1]));
     }
 
     /**
@@ -70,11 +88,11 @@ public class NonCommand {
      * @param settings настройки
      */
     private void saveUserSettings(Long chatId, Settings settings) {
-/*        if (!settings.equals(Bot.getDefaultSettings())) {
+        if (!settings.equals(Bot.getDefaultSettings())) {
             Bot.getUserSettings().put(chatId, settings);
         } else {
             Bot.getUserSettings().remove(chatId);
-        } */
+        }
     }
 
     /**

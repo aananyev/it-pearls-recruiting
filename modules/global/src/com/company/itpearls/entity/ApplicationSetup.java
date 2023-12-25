@@ -26,6 +26,9 @@ public class ApplicationSetup extends StandardEntity {
     @JoinColumn(name = "APPLICATION_ICON_ID")
     private FileDescriptor applicationIcon;
 
+    @Column(name = "TELEGRAM_BOT_NAME", length = 128)
+    private String telegramBotName;
+
     @Column(name = "TELEGRAM_TOKEN", length = 128)
     private String telegramToken;
 
@@ -34,6 +37,14 @@ public class ApplicationSetup extends StandardEntity {
 
     @Column(name = "TELEGRAM_CHAT_JOB_CANDIDATE", length = 128)
     private String telegramChatJobCandidate;
+
+    public String getTelegramBotName() {
+        return telegramBotName;
+    }
+
+    public void setTelegramBotName(String telegramBotName) {
+        this.telegramBotName = telegramBotName;
+    }
 
     public String getName() {
         return name;

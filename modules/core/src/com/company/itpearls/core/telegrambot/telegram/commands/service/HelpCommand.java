@@ -2,6 +2,7 @@ package com.company.itpearls.core.telegrambot.telegram.commands.service;
 
 
 import com.company.itpearls.core.telegrambot.Utils;
+import com.company.itpearls.core.telegrambot.telegram.Bot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -24,10 +25,7 @@ public class HelpCommand extends ServiceCommand {
 
         logger.debug(String.format("Пользователь %s. Начато выполнение команды %s", userName,
                 this.getCommandIdentifier()));
-        sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
-                "Бот IT Pearls ОТКРЫТЫЕ ВАКАНСИИ\n\n" +
-                        "Описание команд:\n" +
-                        "/help - получение помощи\n");
+        sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, Bot.getHelloMessage());
         logger.debug(String.format("Пользователь %s. Завершено выполнение команды %s", userName,
                 this.getCommandIdentifier()));
     }

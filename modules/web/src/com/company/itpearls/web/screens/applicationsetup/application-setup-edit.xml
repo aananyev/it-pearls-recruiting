@@ -103,6 +103,8 @@
                                 showClearButton="true"/>
                     </vbox>
                 </hbox>
+                <textField id="telegramBotNameField"
+                           property="telegramBotName"/>
                 <textField id="telegramTokenField"
                            property="telegramToken"/>
                 <textField id="telegramChatOpenPositionField"

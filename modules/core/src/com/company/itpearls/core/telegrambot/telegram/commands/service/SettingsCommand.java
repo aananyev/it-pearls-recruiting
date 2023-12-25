@@ -21,16 +21,20 @@ public class SettingsCommand extends ServiceCommand {
     }
 
     @Override
+
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
         String userName = Utils.getUserName(user);
 
-        logger.debug(String.format("Пользователь %s. Начато выполнение команды %s", userName,
+            logger.debug(String.format("Пользователь %s. Начато выполнение команды %s", userName,
                 this.getCommandIdentifier()));
 
-        Long chatId = chat.getId();
-//        Settings settings = Bot.getUserSettings(chatId);
-        sendAnswer(absSender, chatId, this.getCommandIdentifier(), userName,
-                String.format("*Текущие настройки*\n"));
+        Settings settings = Bot.getUserSettings(chat.getId());
+        sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
+                String.format("*Текущие настройки*\n"
+                 + " - приоритет вакансии не ниже *%s*\n"
+                        + " - публикация новых вакансий *%s*\n",
+                        settings.getPriorityNotLower(),
+                        settings.getPublishNewVacancies()));
 
         logger.debug(String.format("Пользователь %s. Завершено выполнение команды %s", userName,
                 this.getCommandIdentifier()));
