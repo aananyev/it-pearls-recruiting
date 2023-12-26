@@ -2,21 +2,17 @@ package com.company.itpearls.core;
 
 import com.company.itpearls.entity.ApplicationSetup;
 import com.haulmont.bali.db.QueryRunner;
-import com.haulmont.bali.db.ResultSetHandler;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.Transaction;
-import com.haulmont.cuba.core.app.FileStorageAPI;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
 
 @Service(ApplicationSetupService.NAME)
 public class ApplicationSetupServiceBean implements ApplicationSetupService {
@@ -27,14 +23,6 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
     private DataManager dataManager;
     @Inject
     private Persistence persistence;
-    @Inject
-    private FileLoader fileLoader;
-    @Inject
-    private FileStorageAPI fileStorageAPI;
-    @Inject
-    private Metadata metadata;
-    @Inject
-    private TimeSource timeSource;
 
     @Override
     public String getTelegramBotName() {
@@ -50,15 +38,22 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    @Override
+    public Boolean getTelegramBotStart() {
+        QueryRunner runner = new QueryRunner(persistence.getDataSource());
 
-/*        ApplicationSetup applicationSetup = getActiveApplicationSetup();
+        try {
+            Boolean scripts =
+                    runner.query(
+                            "select TELEGRAM_BOT_START from ITPEARLS_APPLICATION_SETUP where ACTIVE_SETUP = true",
+                            rs -> rs.next() ? rs.getBoolean(1) : null);
 
-        if (applicationSetup != null) {
-            return getActiveApplicationSetup().getTelegramBotName();
-        } else {
-            return null;
-        } */
+            return scripts;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -75,15 +70,6 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        /*
-        ApplicationSetup applicationSetup = getActiveApplicationSetup();
-
-        if (applicationSetup != null) {
-            return getActiveApplicationSetup().getTelegramToken();
-        } else {
-            return null;
-        } */
     }
 
     @Override
@@ -101,14 +87,6 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-/*        ApplicationSetup applicationSetup = getActiveApplicationSetup();
-
-        if (applicationSetup != null) {
-            return getActiveApplicationSetup().getTelegramChatOpenPosition();
-        } else {
-            return null;
-        } */
     }
 
     @Override

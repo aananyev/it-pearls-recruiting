@@ -1,0 +1,1 @@
+alter table ITPEARLS_APPLICATION_SETUP add column TELEGRAM_BOT_START boolean ;

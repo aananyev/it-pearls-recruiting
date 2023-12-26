@@ -38,6 +38,7 @@
                        value="com.company.itpearls.core.OpenPositionCommentService"/>
                 <entry key="itpearls_TextManipulationService"
                        value="com.company.itpearls.core.TextManipulationService"/>
+                <entry key="itpearls_TelegramBotService" value="com.company.itpearls.core.TelegramBotService"/>
             </map>
         </property>
     </bean>

@@ -1,13 +1,18 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.*;
+import com.haulmont.bali.db.QueryRunner;
+import com.haulmont.bali.db.ResultSetHandler;
+import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.security.app.Authentication;
 import com.haulmont.cuba.security.entity.User;
-import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Service(OpenPositionService.NAME)
 public class OpenPositionServiceBean implements OpenPositionService {
@@ -21,9 +26,52 @@ public class OpenPositionServiceBean implements OpenPositionService {
     @Inject
     private TextManipulationService textManipulationService;
     @Inject
-    private MessageTools messageTools;
-    @Inject
     private Messages messages;
+    @Inject
+    protected Authentication authentication;
+    @Inject
+    private Persistence persistence;
+
+
+    @Override
+    public Set<String> getOpenPositionSet() {
+        Set<String> openPositionSet = new HashSet<>();
+        authentication.begin();
+
+        QueryRunner runner = new QueryRunner(persistence.getDataSource());
+
+        try {
+            openPositionSet = runner.query("select VACANSY_NAME from ITPEARLS_OPEN_POSITION where not OPEN_CLOSE = true",
+                    new ResultSetHandler<Set<String>>() {
+                        public Set<String> handle(ResultSet rs) throws SQLException {
+                            Set<String> rows = new HashSet<String>();
+                            while (rs.next()) {
+                                rows.add(rs.getString(1));
+                            }
+                            return rows;
+                        }
+                    });
+        } finally {
+            authentication.end();
+            return openPositionSet;
+        }
+    }
+
+    @Override
+    public List<OpenPosition> getOpenPositionList() {
+        authentication.begin();
+        List<OpenPosition> openPositions = new ArrayList<>();
+
+        try {
+            openPositions = dataManager.load(OpenPosition.class)
+                    .query("select e from itpearls_OpenPosition e where not (e.openClose = true)")
+                    .view("openPosition-view")
+                    .list();
+        } finally {
+            authentication.end();
+            return openPositions;
+        }
+    }
 
     @Override
     public void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
@@ -163,7 +211,7 @@ public class OpenPositionServiceBean implements OpenPositionService {
 //                        .append(messageTools.loadString("msgSalaryFrom"))
                         .append(" ")
                         .append(entity.getSalaryMin().toString()
-                        .substring(0, entity.getSalaryMin().toString().length() - 3));
+                                .substring(0, entity.getSalaryMin().toString().length() - 3));
             } else {
 //                salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryUndefined"));
                 salarySB.append("неопределена");

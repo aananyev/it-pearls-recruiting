@@ -1,7 +1,7 @@
 
 package com.company.itpearls.core.telegrambot.telegram;
 
-import lombok.Getter;
+import com.company.itpearls.core.telegrambot.telegram.commands.operations.VacancyListCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
@@ -32,14 +32,12 @@ public final class Bot extends TelegramLongPollingCommandBot {
     private static final Settings defaultSettings = new Settings(3, true);
     private final NonCommand nonCommand;
 
-    private final static String helloMessage = "\"Бот IT Pearls ОТКРЫТЫЕ ВАКАНСИИ\\n\\n\" +\n" +
-            "                        \"Описание команд:\\n\" +\n" +
-            "                        \"/help - получение помощи\\n";
-
     public static String getHelloMessage() {
-        return "\"Бот IT Pearls ОТКРЫТЫЕ ВАКАНСИИ\\n\\n\" +\n" +
-                "                        \"Описание команд:\\n\" +\n" +
-                "                        \"/help - получение помощи\\n";
+        return "Бот *IT Pearls ОТКРЫТЫЕ ВАКАНСИИ*\n\n" +
+                "Описание команд:\n" +
+                "*/vacancylist* - список открытых вакансий\n" +
+                "*/settings* - настройки\n" +
+                "*/help* - получение помощи\n\n";
     }
 
     public static Settings getDefaultSettings() {
@@ -60,6 +58,8 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
         this.nonCommand = new NonCommand();
         logger.debug("Класс обработки сообщения, не являющегося командой, создан");
+
+        register(new VacancyListCommand("vacancylist", "Все вакансии"));
 
         register(new StartCommand("start", "Старт"));
         logger.debug("Команда start создана");

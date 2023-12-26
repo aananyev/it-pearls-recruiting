@@ -1,9 +1,13 @@
 package com.company.itpearls.web.screens.applicationsetup;
 
 import com.company.itpearls.core.ApplicationSetupService;
+import com.company.itpearls.core.TelegramBotService;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.ApplicationSetup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
 
 import javax.inject.Inject;
 
@@ -29,6 +33,13 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
     private FileUploadField applicationLogoField;
     @Inject
     private FileUploadField applicationIconField;
+    @Inject
+    private Button telegramBotRestartButton;
+    @Inject
+    private MessageBundle messageBundle;
+    @Inject
+    private TelegramBotService telegramBotService;
+    private Logger logger = LoggerFactory.getLogger(ApplicationSetupEdit.class);
 
     @Subscribe("applicationLogoField")
     public void onApplicationLogoFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
@@ -99,6 +110,25 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
     public void onBeforeShow(BeforeShowEvent event) {
         setApplicationIconImage();
         setApplicationLogoImage();
+        setTelegramBotRestartButton();
+    }
 
+    TelegramBotsApi botApi = telegramBotService.restoreTelegramBotApi();
+    Boolean isBotStarted = telegramBotService.isBotStarted();
+
+    private void setTelegramBotRestartButton() {
+        if (isBotStarted) {
+            telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStopButton"));
+        } else {
+            if (botApi != null) {
+                telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStartButton"));
+            }
+        }
+    }
+
+
+    public void telegramBotRestartButtonInvoke() {
+        telegramBotService.telegramBotRestart();
+        setTelegramBotRestartButton();
     }
 }

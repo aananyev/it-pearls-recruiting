@@ -6,9 +6,15 @@ import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.security.entity.User;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public interface OpenPositionService {
     String NAME = "itpearls_OpenPositionService";
+
+    Set<String> getOpenPositionSet();
+
+    List<OpenPosition> getOpenPositionList();
 
     void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
                                              String subject,

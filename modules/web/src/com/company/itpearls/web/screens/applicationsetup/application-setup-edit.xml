@@ -103,6 +103,8 @@
                                 showClearButton="true"/>
                     </vbox>
                 </hbox>
+                <checkBox id="telegramBotStartCheckBox"
+                          property="telegramBotStart"/>
                 <textField id="telegramBotNameField"
                            property="telegramBotName"/>
                 <textField id="telegramTokenField"
@@ -114,6 +116,9 @@
             </column>
         </form>
         <hbox id="editActions" spacing="true">
+            <button id="telegramBotRestartButton"
+                    caption="msg://msgTelegramBotRestartButton"
+                    invoke="telegramBotRestartButtonInvoke"/>
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>
         </hbox>

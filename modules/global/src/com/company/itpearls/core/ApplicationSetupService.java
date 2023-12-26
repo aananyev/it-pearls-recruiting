@@ -8,6 +8,8 @@ public interface ApplicationSetupService {
 
     String getTelegramBotName();
 
+    Boolean getTelegramBotStart();
+
     String getTelegramToken();
 
     String getTelegramChatOpenPosition();
