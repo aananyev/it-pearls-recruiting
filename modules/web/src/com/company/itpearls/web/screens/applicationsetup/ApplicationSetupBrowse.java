@@ -45,16 +45,17 @@ public class ApplicationSetupBrowse extends StandardLookup<ApplicationSetup> {
             applicationSetupsTable.repaint();
         }
     }
-
     public void editActionHandler() {
         applicationSetup = applicationSetupsTable.getSingleSelected();
         screenBuilders.editor(applicationSetupsTable)
+                .withScreenClass(ApplicationSetupEdit.class)
+                .editEntity(applicationSetup)
                 .build()
                 .show();
 
+        applicationSetupsDl.load();
         applicationSetupsTable.scrollTo(applicationSetup);
         applicationSetupsTable.setSelected(applicationSetup);
-        applicationSetupsDl.load();
 
         flag = true;
     }

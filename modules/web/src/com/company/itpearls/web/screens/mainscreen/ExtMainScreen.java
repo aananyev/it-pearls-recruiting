@@ -94,8 +94,14 @@ public class ExtMainScreen extends MainScreen {
 
     private void setFavicon() {
         ChangeFaviconExtension extension = new ChangeFaviconExtension();
-        extension.extend(mainVBox.unwrap(AbstractOrderedLayout.class),
-                applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName());
+        if (applicationSetupService.getActiveApplicationSetup() != null) {
+            if (applicationSetupService.getActiveApplicationSetup().getApplicationIcon() != null) {
+                if (applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName() != null) {
+                    extension.extend(mainVBox.unwrap(AbstractOrderedLayout.class),
+                            applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName());
+                }
+            }
+        }
     }
 
     private void setApplicationLogo() {

@@ -21,7 +21,6 @@ public class SettingsCommand extends ServiceCommand {
     }
 
     @Override
-
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
         String userName = Utils.getUserName(user);
 

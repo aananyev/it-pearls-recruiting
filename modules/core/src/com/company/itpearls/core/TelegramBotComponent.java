@@ -1,17 +1,21 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.core.telegrambot.TelegramBotStatus;
+import com.company.itpearls.core.telegrambot.telegram.Bot;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.security.app.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.Map;
 
 @Component
 public class TelegramBotComponent {
@@ -23,18 +27,15 @@ public class TelegramBotComponent {
     protected Authentication authentication;
     @Inject
     private TelegramBotService telegramBotService;
+    @Inject
+    private ApplicationSetupService applicationSetupService;
 
     @PostConstruct
-    protected void init() throws IOException { /*
+    protected void init() throws IOException {
         authentication.begin();
-        try {
-//            telegramBotService.telegramBotRestart();
-        } finally {
-            authentication.end();
-        } */
-/*        String NAME = BOT_NAME;
-        String TOKEN = BOT_TOKEN;
-        authentication.begin();
+
+        String NAME = applicationSetupService.getTelegramBotName();
+        String TOKEN = applicationSetupService.getTelegramToken();
         //инициализируйте конфигурацию здесь
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
@@ -55,6 +56,7 @@ public class TelegramBotComponent {
                         applicationSetupService.getTelegramBotName()));
 
                 telegramBotService.setBotStarted();
+                TelegramBotStatus.setBot(bot);
             } else {
                 logger.debug(String.format(messages.getMainMessage("mainmsgTelegramBotNotStarted")));
                 telegramBotService.setBotStopped();
@@ -64,7 +66,7 @@ public class TelegramBotComponent {
             telegramBotService.setBotStopped();
         } finally {
             authentication.end();
-        } */
+        }
     }
 
     @PreDestroy

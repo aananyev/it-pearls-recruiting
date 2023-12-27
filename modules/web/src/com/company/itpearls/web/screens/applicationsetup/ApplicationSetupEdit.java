@@ -113,19 +113,15 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
         setTelegramBotRestartButton();
     }
 
-    TelegramBotsApi botApi = telegramBotService.restoreTelegramBotApi();
-    Boolean isBotStarted = telegramBotService.isBotStarted();
-
     private void setTelegramBotRestartButton() {
-        if (isBotStarted) {
+        if (telegramBotService.isBotStarted()) {
             telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStopButton"));
         } else {
-            if (botApi != null) {
+            if (telegramBotService.restoreTelegramBotApi() != null) {
                 telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStartButton"));
             }
         }
     }
-
 
     public void telegramBotRestartButtonInvoke() {
         telegramBotService.telegramBotRestart();

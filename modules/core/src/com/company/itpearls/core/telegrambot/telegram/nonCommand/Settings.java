@@ -1,6 +1,5 @@
 package com.company.itpearls.core.telegrambot.telegram.nonCommand;
 
-import com.company.itpearls.core.telegrambot.telegram.Bot;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -11,9 +10,7 @@ import lombok.Getter;
 @EqualsAndHashCode
 public class Settings {
 
-    @Getter
     private int priorityNotLower;
-    @Getter
     private Boolean publishNewVacancies;
 
     public int getPriorityNotLower() {

@@ -51,7 +51,7 @@ public class TelegramBotServiceBean implements TelegramBotService {
         String TOKEN = TelegramBotStatus.getDefaultBotToken();
         TelegramBotsApi botsApi = restoreTelegramBotApi();
 
-        if (isBotStarted()) {
+        if (!isBotStarted()) {
             if (applicationSetupService.getTelegramBotStart() != null
                     ? applicationSetupService.getTelegramBotStart() : false) {
                 if (applicationSetupService.getTelegramBotName() != null

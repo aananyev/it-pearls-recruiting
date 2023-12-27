@@ -13,9 +13,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NamePattern("%s %s|departamentRuName,companyName")
-@Table(name = "ITPEARLS_COMPANY_DEPARTAMENT", indexes = {
-        @Index(name = "IDX_ITPEARLS_COMPANY_DEPARTAMENT_RU_NAME", columnList = "DEPARTAMENT_RU_NAME")
-})
+@Table(name = "ITPEARLS_COMPANY_DEPARTAMENT")
 @Entity(name = "itpearls_CompanyDepartament")
 public class CompanyDepartament extends StandardEntity {
     private static final long serialVersionUID = 2921897445702773073L;
