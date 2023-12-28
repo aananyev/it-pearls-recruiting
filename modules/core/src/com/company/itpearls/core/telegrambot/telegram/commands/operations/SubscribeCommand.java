@@ -9,11 +9,12 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class MySubscribeCommand extends OperationCommand{
+public class SubscribeCommand extends OperationCommand{
     private Logger logger = LoggerFactory.getLogger(SettingsCommand.class);
-    public MySubscribeCommand(String identifier, String description) {
+    public SubscribeCommand(String identifier, String description) {
         super(identifier, description);
     }
 
@@ -37,16 +38,18 @@ public class MySubscribeCommand extends OperationCommand{
             for (RecrutiesTasks recrutiesTask : recrutiesTasks) {
                 StringBuilder sb = new StringBuilder();
 
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
                 sb.append(counter++)
                         .append(". ")
                         .append(recrutiesTask.getOpenPosition().getVacansyName())
-                        .append("\nC ")
-                        .append(recrutiesTask.getStartDate())
-                        .append(" по ")
-                        .append(recrutiesTask.getEndDate())
-                        .append(" Рекрутер: ")
-                        .append(recrutiesTask.getRecrutierName())
-                        .append("\n");
+                        .append("\nC **")
+                        .append(simpleDateFormat.format(recrutiesTask.getStartDate()))
+                        .append("** по **")
+                        .append(simpleDateFormat.format(recrutiesTask.getEndDate()))
+                        .append("\n** Рекрутер: **")
+                        .append(recrutiesTask.getReacrutier().getName())
+                        .append("**\n");
 
                 sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), Utils.getUserName(user), sb.toString());
             }

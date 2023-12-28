@@ -1,7 +1,7 @@
 
 package com.company.itpearls.core.telegrambot.telegram;
 
-import com.company.itpearls.core.telegrambot.telegram.commands.operations.MySubscribeCommand;
+import com.company.itpearls.core.telegrambot.telegram.commands.operations.SubscribeCommand;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.VacancyListCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +55,8 @@ public final class Bot extends TelegramLongPollingCommandBot {
         register(new VacancyListCommand("allvacancy", "Все вакансии"));
         logger.debug("Команда allvacancy создана");
 
-        register(new MySubscribeCommand("mysubscribe", "мои подписки на вакансии"));
-        logger.debug("Команда mysubscribe создана");
+        register(new SubscribeCommand("subscribe", "Подписки на вакансии"));
+        logger.debug("Команда subscribe создана");
 
         register(new StartCommand("start", "Старт"));
         logger.debug("Команда start создана");
