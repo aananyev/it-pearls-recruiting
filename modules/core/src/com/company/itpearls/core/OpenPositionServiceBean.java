@@ -3,7 +3,10 @@ package com.company.itpearls.core;
 import com.company.itpearls.entity.*;
 import com.haulmont.bali.db.QueryRunner;
 import com.haulmont.bali.db.ResultSetHandler;
+import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
+import com.haulmont.cuba.core.Query;
+import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.security.app.Authentication;
 import com.haulmont.cuba.security.entity.User;
@@ -34,23 +37,20 @@ public class OpenPositionServiceBean implements OpenPositionService {
 
 
     @Override
-    public Set<String> getOpenPositionSet() {
-        Set<String> openPositionSet = new HashSet<>();
+    public List<String> getOpenPositionSet() {
+       List<String> openPositionSet = null;
         authentication.begin();
-
-        QueryRunner runner = new QueryRunner(persistence.getDataSource());
-
         try {
-            openPositionSet = runner.query("select VACANSY_NAME from ITPEARLS_OPEN_POSITION where not OPEN_CLOSE = true",
-                    new ResultSetHandler<Set<String>>() {
-                        public Set<String> handle(ResultSet rs) throws SQLException {
-                            Set<String> rows = new HashSet<String>();
-                            while (rs.next()) {
-                                rows.add(rs.getString(1));
-                            }
-                            return rows;
-                        }
-                    });
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery("select e from itpearls_OpenPosition e where not e.openClose = true");
+
+                openPositionSet = query.getResultList();
+                tx.commit();
+            }
+
         } finally {
             authentication.end();
             return openPositionSet;

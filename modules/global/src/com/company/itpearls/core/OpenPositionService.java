@@ -12,7 +12,7 @@ import java.util.Set;
 public interface OpenPositionService {
     String NAME = "itpearls_OpenPositionService";
 
-    Set<String> getOpenPositionSet();
+    List<String> getOpenPositionSet();
 
     List<OpenPosition> getOpenPositionList();
 
