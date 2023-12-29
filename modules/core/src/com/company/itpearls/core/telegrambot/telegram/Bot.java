@@ -1,24 +1,26 @@
 
 package com.company.itpearls.core.telegrambot.telegram;
 
-import com.company.itpearls.core.telegrambot.telegram.commands.operations.SubscribeCommand;
-import com.company.itpearls.core.telegrambot.telegram.commands.service.VacancyListCommand;
+import com.company.itpearls.core.telegrambot.telegram.commands.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.NonCommand;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
-import com.company.itpearls.core.telegrambot.telegram.commands.service.StartCommand;
-import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
-import com.company.itpearls.core.telegrambot.telegram.commands.service.HelpCommand;
-//import com.company.itpearls.core.telegrambot.telegram.commands.operations.*;
+import com.company.itpearls.core.telegrambot.telegram.commands.operations.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +59,9 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
         register(new SubscribeCommand("subscribe", "Подписки на вакансии"));
         logger.debug("Команда subscribe создана");
+
+        register(new UserSessionTg("usersession", "Пользователи в системе"));
+        logger.debug("Команда usersession создана");
 
         register(new StartCommand("start", "Старт"));
         logger.debug("Команда start создана");
@@ -127,6 +132,10 @@ public final class Bot extends TelegramLongPollingCommandBot {
         SendMessage answer = new SendMessage();
         answer.setText(text);
         answer.setChatId(chatId.toString());
+        answer.setParseMode(ParseMode.HTML);
+
+        Utils.setButtons(answer);
+
         try {
             execute(answer);
         } catch (TelegramApiException e) {
