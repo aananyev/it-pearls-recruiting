@@ -170,7 +170,7 @@ public class Utils {
     public static String getOpenPositionEditorURL(OpenPosition openPosition, String text) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("<a href=\"http://localhost:8080/app/open?screen=itpearls_OpenPosition.edit-")
+        sb.append("<a href=\"http://hr.it-pearls.ru:8080/app/open?screen=itpearls_OpenPosition.edit-")
                 .append(openPosition.getId().toString())
                 .append("\">")
                 .append(text)
@@ -179,11 +179,22 @@ public class Utils {
         return sb.toString();
     }
 
+    /**
+     *
+     * @param openPosition
+     * @return
+     */
+
     public static String getOpenPositionEditorURL(OpenPosition openPosition) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("http://localhost:8080/app/open?screen=itpearls_OpenPosition.edit&item=OpenPosition-")
-                .append(openPosition.getId().toString());
+        sb.append("http://hr.it-pearls.ru:8080/app/open?screen=")
+                .append("itpearls_OpenPosition.edit")
+                .append("&item=")
+                .append("itpearls_OpenPosition-")
+                .append(openPosition.getId().toString())
+                .append("-openPosition-view")
+        ;
 
         return sb.toString();
     }

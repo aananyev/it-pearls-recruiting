@@ -47,7 +47,7 @@ abstract class OperationCommand extends BotCommand {
         message.setParseMode(ParseMode.HTML);
         message.setChatId(chatId.toString());
         message.setText(text);
-//        message.setReplyMarkup(keyboardMarkup);
+        message.setReplyMarkup(keyboardMarkup);
 
 //        Utils.setButtons(message);
         try {

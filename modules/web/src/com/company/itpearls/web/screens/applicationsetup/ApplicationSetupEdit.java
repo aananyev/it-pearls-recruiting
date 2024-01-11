@@ -117,9 +117,9 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
         if (telegramBotService.isBotStarted()) {
             telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStopButton"));
         } else {
-            if (telegramBotService.restoreTelegramBotApi() != null) {
+//            if (telegramBotService.restoreTelegramBotApi() != null) {
                 telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStartButton"));
-            }
+//            }
         }
     }
 

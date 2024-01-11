@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import javax.inject.Inject;
+import java.io.Serializable;
 
 @Service(TelegramBotService.NAME)
-public class TelegramBotServiceBean implements TelegramBotService {
+public class TelegramBotServiceBean implements TelegramBotService, Serializable {
     private Logger logger = LoggerFactory.getLogger(TelegramBotsApi.class);
     @Inject
     private ApplicationSetupService applicationSetupService;

@@ -83,10 +83,10 @@ public class VacancyListCommand extends OperationCommand {
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-//        inlineKeyboardButton.setSwitchInlineQueryCurrentChat(" ");
         inlineKeyboardButton.setText("View");
-        inlineKeyboardButton.setUrl(Utils.getOpenPositionEditorURL(openPosition));
-//        inlineKeyboardButton.setCallbackData(" ");
+        String urlButton = Utils.getOpenPositionEditorURL(openPosition);
+        inlineKeyboardButton.setUrl(urlButton);
+//        inlineKeyboardButton.setUrl("http://hr.it-pearls.ru:8080/app");
 
         rowInline.add(inlineKeyboardButton);
         buttons.add(rowInline);

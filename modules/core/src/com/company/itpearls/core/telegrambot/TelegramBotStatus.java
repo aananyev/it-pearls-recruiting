@@ -3,7 +3,9 @@ package com.company.itpearls.core.telegrambot;
 import com.company.itpearls.core.telegrambot.telegram.Bot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 
-public class TelegramBotStatus {
+import java.io.Serializable;
+
+public class TelegramBotStatus implements Serializable {
     private static TelegramBotsApi botsApi = null;
     private static Boolean botStarted = false;
     private static Bot bot = null;
