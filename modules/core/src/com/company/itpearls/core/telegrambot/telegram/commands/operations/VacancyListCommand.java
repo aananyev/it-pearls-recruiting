@@ -80,16 +80,24 @@ public class VacancyListCommand extends OperationCommand {
     private InlineKeyboardMarkup setInline(OpenPosition openPosition) {
         InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<>();
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        List<InlineKeyboardButton> viewFromHuntTech = new ArrayList<>();
+        List<InlineKeyboardButton> viewCVComment = new ArrayList<>();
 
-        inlineKeyboardButton.setText("View");
+        // Просмотр вакансии в базе
+        InlineKeyboardButton viewOpenPositionKeyboardButton = new InlineKeyboardButton();
+        viewOpenPositionKeyboardButton.setText("View from HuntTech");
         String urlButton = Utils.getOpenPositionEditorURL(openPosition);
-        inlineKeyboardButton.setUrl(urlButton);
-//        inlineKeyboardButton.setUrl("http://hr.it-pearls.ru:8080/app");
+        viewOpenPositionKeyboardButton.setUrl(urlButton);
 
-        rowInline.add(inlineKeyboardButton);
-        buttons.add(rowInline);
+        // Просмотр описания вакансии
+        InlineKeyboardButton postCVCommentKeyboardButton = new InlineKeyboardButton();
+        postCVCommentKeyboardButton.setText("View Job Decription");
+        postCVCommentKeyboardButton.setCallbackData("ViewJobDescription");
+
+        viewFromHuntTech.add(viewOpenPositionKeyboardButton);
+        viewFromHuntTech.add(postCVCommentKeyboardButton);
+
+        buttons.add(viewFromHuntTech);
 
         markupKeyboard.setKeyboard(buttons);
 
@@ -102,10 +110,8 @@ public class VacancyListCommand extends OperationCommand {
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-//        inlineKeyboardButton.setSwitchInlineQueryCurrentChat(" ");
         inlineKeyboardButton.setText("View");
         inlineKeyboardButton.setUrl(Utils.getOpenPositionEditorURL(openPosition));
-//        inlineKeyboardButton.setCallbackData(" ");
 
         rowInline.add(inlineKeyboardButton);
         buttons.add(rowInline);
@@ -114,4 +120,5 @@ public class VacancyListCommand extends OperationCommand {
 
         return markupKeyboard;
     }
+
 }

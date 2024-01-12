@@ -9,18 +9,13 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.NonCommand;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
 import com.company.itpearls.core.telegrambot.telegram.commands.operations.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,6 +29,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
     private static final Settings defaultSettings = new Settings(3, true);
     private final NonCommand nonCommand;
+    private Update update;
 
     public static Settings getDefaultSettings() {
         return new Settings(3, true);
@@ -144,4 +140,29 @@ public final class Bot extends TelegramLongPollingCommandBot {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void onUpdateReceived(Update update) {
+        this.update = update;
+        onUpdateReceived(update);
+
+/*        if(update.hasMessage()){
+            if(update.getMessage().hasText()){
+                if(update.getMessage().getText().equals("Hello")){
+//                    try {
+//                        execute(sendInlineKeyBoardMessage(update.getMessage().getChatId()));
+//                    } catch (TelegramApiException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+            }
+        }else if(update.hasCallbackQuery()){
+//            try {
+//                execute(new SendMessage().setText(
+//                                update.getCallbackQuery().getData())
+//                        .setChatId(update.getCallbackQuery().getMessage().getChatId()));
+//            } catch (TelegramApiException e) {
+//                e.printStackTrace();
+           } */
+        }
 }

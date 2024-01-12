@@ -258,6 +258,10 @@ public class Utils {
                                 .addProperty("positionRuName")));
     }
 
+    /**
+     *
+     * @return
+     */
     public static String getBotName() {
         return queryOneResult("select e.telegramBotName from itpearls_ApplicationSetup e " +
                 "where e.activeSetup = true");
@@ -270,7 +274,7 @@ public class Utils {
     public static String getHelloMessage() {
         return new StringBuilder()
                 .append("Бот *")
-                .append(getBotName())
+                .append(TelegramBotStatus.getDefaultBotName())
                 .append("*\n\n")
                 .append("Описание команд:\n")
                 .append("*/allvacancy* - список открытых вакансий\n")
