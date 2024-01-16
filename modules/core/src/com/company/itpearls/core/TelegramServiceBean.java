@@ -4,14 +4,11 @@ import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.HttpURLConnection;
-import java.io.DataOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 @Service(TelegramService.NAME)
@@ -53,13 +50,12 @@ public class TelegramServiceBean implements TelegramService {
             con.setRequestMethod("POST");
             con.setRequestProperty("User-Agent", "Java upread.ru client");
             con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//            con.setRequestProperty("Content-Type", "application/xhtml+xml");
 
             try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
                 wr.write(postData);
             }
 
-            StringBuilder content;
+            StringBuilder content = new StringBuilder();
 
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(con.getInputStream()))) {
@@ -70,10 +66,14 @@ public class TelegramServiceBean implements TelegramService {
                     content.append(line);
                     content.append(System.lineSeparator());
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                System.out.println(content.toString());
             }
 
-            System.out.println(content.toString());
-
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         } catch (ProtocolException e) {
             throw new RuntimeException(e);
         } catch (MalformedURLException e) {

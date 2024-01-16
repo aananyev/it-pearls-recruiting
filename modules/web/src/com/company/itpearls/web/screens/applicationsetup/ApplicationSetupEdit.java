@@ -2,6 +2,7 @@ package com.company.itpearls.web.screens.applicationsetup;
 
 import com.company.itpearls.core.ApplicationSetupService;
 import com.company.itpearls.core.TelegramBotService;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.ApplicationSetup;
@@ -40,6 +41,8 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
     @Inject
     private TelegramBotService telegramBotService;
     private Logger logger = LoggerFactory.getLogger(ApplicationSetupEdit.class);
+    @Inject
+    private Notifications notifications;
 
     @Subscribe("applicationLogoField")
     public void onApplicationLogoFieldFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
@@ -117,14 +120,28 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
         if (telegramBotService.isBotStarted()) {
             telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStopButton"));
         } else {
-//            if (telegramBotService.restoreTelegramBotApi() != null) {
-                telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStartButton"));
-//            }
+            telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStartButton"));
         }
     }
 
     public void telegramBotRestartButtonInvoke() {
-        telegramBotService.telegramBotRestart();
+//        telegramBotService.telegramBotRestart();
+        if (telegramBotService.isBotStarted()) {
+            telegramBotService.telegramBotStop();
+
+            notifications.create(Notifications.NotificationType.SYSTEM)
+                    .withHideDelayMs(15000)
+                    .withCaption("Telegram bot stopped")
+                    .show();
+        } else {
+            telegramBotService.telegramBotStart();
+
+            notifications.create(Notifications.NotificationType.SYSTEM)
+                    .withHideDelayMs(15000)
+                    .withCaption("Telegram bot started")
+                    .show();
+        }
+
         setTelegramBotRestartButton();
     }
 }

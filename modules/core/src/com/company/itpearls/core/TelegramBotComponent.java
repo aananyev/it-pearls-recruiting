@@ -32,6 +32,11 @@ public class TelegramBotComponent {
 
     @PostConstruct
     protected void init() throws IOException {
+        if (applicationSetupService.getTelegramBotStart() != null
+                ? applicationSetupService.getTelegramBotStart() : false) {
+            telegramBotService.telegramBotStart();
+        }
+        /*
         authentication.begin();
 
         String NAME = applicationSetupService.getTelegramBotName();
@@ -66,7 +71,7 @@ public class TelegramBotComponent {
             telegramBotService.setBotStopped();
         } finally {
             authentication.end();
-        }
+        } */
     }
 
     @PreDestroy
