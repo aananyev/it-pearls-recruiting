@@ -50,6 +50,10 @@
                 <column id="telegramBotStarted" generator="telegramBotStartedColumnGenerator"/>
                 <column id="telegramBotStart"/>
                 <column id="telegramChatOpenPosition"/>
+                <column id="telegramActionColumn"
+                        width="100px"
+                        generator="telegramActionColumnGenerator"
+                        caption="msg://msgActionColumn"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

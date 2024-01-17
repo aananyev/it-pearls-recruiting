@@ -123,8 +123,12 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
             telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStartButton"));
         }
 
-        if (telegramBotService.getApplicationSetup() != null)
-            telegramBotRestartButton.setEnabled(telegramBotService.getApplicationSetup().equals(getEditedEntity()));
+        if (telegramBotService.getApplicationSetup() != null) {
+            if (telegramBotService.isBotStarted())
+                telegramBotRestartButton.setEnabled(telegramBotService.getApplicationSetup().equals(getEditedEntity()));
+            else
+                telegramBotRestartButton.setEnabled(true);
+        }
     }
 
     public void telegramBotRestartButtonInvoke() {
@@ -132,7 +136,7 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
             telegramBotService.telegramBotStop();
             getEditedEntity().setTelegramBotStarted(false);
 
-            notifications.create(Notifications.NotificationType.SYSTEM)
+            notifications.create(Notifications.NotificationType.TRAY)
                     .withHideDelayMs(15000)
                     .withCaption("Telegram bot stopped")
                     .show();
@@ -140,7 +144,7 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
             telegramBotService.telegramBotStart(getEditedEntity());
             getEditedEntity().setTelegramBotStarted(true);
 
-            notifications.create(Notifications.NotificationType.SYSTEM)
+            notifications.create(Notifications.NotificationType.TRAY)
                     .withHideDelayMs(15000)
                     .withCaption("Telegram bot started")
                     .show();
