@@ -1253,8 +1253,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     new Date(),
                     (ExtUser) userSession.getUser());
 
-            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                    openPositionService.getOpenPositionCloseLongMessage(entity, userSession.getUser()));
+            telegramService.sendMessageToChat(openPositionService
+                    .getOpenPositionOpenShortMessage(entity, userSession.getUser()));
 
             entity.setOwner(null);
             entity.setLastOpenDate(null);
@@ -1273,10 +1273,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     new Date(),
                     (ExtUser) userSession.getUser());
 
-            telegramService.sendMessageToChat(applicationSetupService
-                            .getTelegramChatOpenPosition(),
-                    openPositionService
-                                    .getOpenPositionOpenLongMessage(entity, userSession.getUser()));
+            telegramService.sendMessageToChat(openPositionService
+                                    .getOpenPositionOpenShortMessage(entity, userSession.getUser()));
 
             entity.setOwner((ExtUser) userSession.getUser());
             entity.setLastOpenDate(new Date());
@@ -1593,8 +1591,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             events.publish(new UiNotificationEvent(this,
                     sb.toString()));
 
-            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                    sb.toString());
+            telegramService.sendMessageToChat(sb.toString());
 
             if (flagPriority) {
                 openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,

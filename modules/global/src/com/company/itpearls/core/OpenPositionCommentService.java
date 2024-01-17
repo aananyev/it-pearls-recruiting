@@ -7,4 +7,8 @@ public interface OpenPositionCommentService {
     String NAME = "itpearls_OpenPositionCommentService";
 
     String getOpenPositionCommentMessage(OpenPositionComment entity, User user);
+
+    void publishOpenPositionComment(OpenPositionComment openPositionComment);
+
+    void publishOpenPositionComment(OpenPositionComment openPositionComment, String message);
 }

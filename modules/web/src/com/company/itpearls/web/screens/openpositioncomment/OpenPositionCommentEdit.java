@@ -116,7 +116,7 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
     }
 
     @Subscribe
-    public void onAfterCommitChanges(AfterCommitChangesEvent event) {
+    public void onAfterCommitChanges(AfterCommitChangesEvent event) { /*
         events.publish(new UiNotificationEvent(this,
                 messageBundle.getMessage("msgPublishOpenPositionComment")
                         + ":"
@@ -124,14 +124,15 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
 
         if (applicationSetupService.getTelegramBotStart() != null ? applicationSetupService.getTelegramBotStart() : false) {
             telegramService.sendMessageToChat(telegramBotService.getApplicationSetup().getTelegramChatOpenPosition(),
-                    new StringBuilder(messageBundle.getMessage("msgPublishOpenPositionComment"))
+                    new StringBuilder("*")
+                            .append(messageBundle.getMessage("msgPublishOpenPositionComment"))
                             .append(": ")
                             .append(getEditedEntity().getOpenPosition().getVacansyName())
-                            .append("\n\n")
-                            .append(getEditedEntity().getComment())
+                            .append("*\n")
+                            .append(getEditedEntity().getComment() != null ? getEditedEntity().getComment() : "")
                             .append("\n")
                             .append(getEditedEntity().getUser().getName())
                             .toString());
-        }
+        }*/
     }
 }

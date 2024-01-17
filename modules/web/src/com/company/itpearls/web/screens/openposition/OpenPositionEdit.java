@@ -53,8 +53,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private TelegramService telegramService;
     @Inject
-    private ApplicationSetupService applicationSetupService;
-    @Inject
     private TextManipulationService textManipulationService;
 
     @Subscribe("closedVacancyTimer")
@@ -100,7 +98,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return "";
     }
 
-    private static final String QUERY_OUTSTAFF_RATES = "select e from itpearls_OutstaffingRates e where e.rate = :rate";
     @Inject
     private LookupPickerField<City> cityOpenPositionField;
     @Inject
@@ -134,9 +131,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Boolean entityIsChanged = false;
     private String emails = "";
     private Boolean setOK;
-    private static final String MANAGEMENT_GROUP = "Менеджмент";
-    private static final String HUNTING_GROUP = "Хантинг";
-
     @Inject
     private Dialogs dialogs;
     private boolean r;
@@ -239,7 +233,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     static String RECRUITER = "Recruiter";
     static String MANAGER = "Manager";
     static String ADMINISTRATOR = "Administrators";
-    static String QUERY_SELECT_COMMAND = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
+    private static final String QUERY_OUTSTAFF_RATES = "select e from itpearls_OutstaffingRates e where e.rate = :rate";
+    private final static String QUERY_SELECT_COMMAND =
+            "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
+    private final static String QUERY_OPEN_POSITION_INTERACTIONS =
+            "select e from itpearls_IteractionList e where e.vacancy = :vacancy and e.iteractionType.signFeedback = true";
+    private final static String QUERY_CHECK_VACANCY_ID =
+            "select e from itpearls_OpenPosition e where e.vacansyID like :vacancyID";
+    private final static String QUERY_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.positionType = :positionType and e.vacansyName like :vacansyName and e.projectName = :projectName and e.parentOpenPosition = :parentOpenPosition and e.vacansyName = :vacansyName and e.remoteWork = :remoteWork and e.cityPosition = :cityPosition";
     private OpenPosition beforeEdit = null;
     List<SkillTree> skillTrees;
     protected Boolean openCloseStartStatus = false;
@@ -391,9 +392,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setCommentOpenPositionScrollIteractionList(OpenPosition editedEntity, ScrollBoxLayout commentsScrollBox) {
-        final String QUERY_OPEN_POSITION_INTERACTIONS =
-                "select e from itpearls_IteractionList e " +
-                        "where e.vacancy = :vacancy and e.iteractionType.signFeedback = true";
+
         List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
                 .query(QUERY_OPEN_POSITION_INTERACTIONS)
                 .view("iteractionList-view")
@@ -553,10 +552,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             if (closeEvent
                                     .getCloseAction()
                                     .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
-                                replyButtonInvoke(e, "("
-                                        + name.getValue()
-                                        + ") Re:"
-                                        + (String) closeEvent.getValue("comment"));
+                                replyButtonInvoke(e, new StringBuilder()
+                                        .append("(")
+                                        .append(name.getValue())
+                                        .append(") Re:")
+                                        .append((String) closeEvent.getValue("comment"))
+                                        .toString());
                             }
                         })
                         .show();
@@ -701,10 +702,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             if (closeEvent
                                     .getCloseAction()
                                     .equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
-                                replyButtonInvoke(e, "("
-                                        + name.getValue()
-                                        + ") Re:"
-                                        + (String) closeEvent.getValue("comment"));
+                                replyButtonInvoke(e, new StringBuilder()
+                                        .append("(")
+                                        .append(name.getValue())
+                                        .append(") Re:")
+                                        .append((String) closeEvent.getValue("comment"))
+                                        .toString());
                             }
                         })
                         .show();
@@ -757,11 +760,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         createComment(replyStr);
 
         events.publish(new UiNotificationEvent(this,
-                messageBundle.getMessage("msgPublishOpenPositionComment")
-                        + ":"
-                        + getEditedEntity().getVacansyName()));
+                new StringBuilder()
+                        .append(messageBundle.getMessage("msgPublishOpenPositionComment"))
+                        .append(":")
+                        .append(getEditedEntity().getVacansyName())
+                        .toString()));
     }
-
 
     private void createComment(String commentStr) {
 
@@ -789,10 +793,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void setCommentToVacancy() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            String defComment = "<i>" +
-                    "<!-- НЕ ДЛЯ КАНДИДАТА:<br><br>" +
-                    "-->" +
-                    "</i>";
+            String defComment = new StringBuilder()
+                    .append("<i>")
+                    .append("<!-- НЕ ДЛЯ КАНДИДАТА:<br><br>")
+                    .append("-->")
+                    .append("</i>")
+                    .toString();
 
             openPositionRichTextArea.setValue(defComment);
         }
@@ -1288,17 +1294,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .append("\n\n(")
                     .append(salaryCommentTextFiels.getValue())
                     .append(")");
-            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                    textManipulationService.formattedHtml2text(sb.toString()));
+            telegramService.sendMessageToChat(textManipulationService.formattedHtml2text(sb.toString()));
         } else {
 
             Boolean flag = getEditedEntity().getOpenClose() != null ? getEditedEntity().getOpenClose() : false;
 
             if (!flag) {
-                telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                        textManipulationService
-                                .formattedHtml2text(new StringBuilder("Изменена вакансия: ")
-                                        .append(vacansyNameField.getValue()).toString()));
+                telegramService.sendMessageToChat(textManipulationService
+                        .formattedHtml2text(new StringBuilder("Изменена вакансия: ")
+                                .append(vacansyNameField.getValue()).toString()));
             }
         }
     }
@@ -1520,8 +1524,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private boolean checkDublicatePositionID() {
-        final String QUERY_CHECK_VACANCY_ID
-                = "select e from itpearls_OpenPosition e where e.vacansyID like :vacancyID";
+
 
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY_CHECK_VACANCY_ID)
@@ -1594,14 +1597,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         try {
             openPositions = dataManager.load(OpenPosition.class)
-                    .query("select e from itpearls_OpenPosition e " +
+                    .query(QUERY_OPEN_POSITION)
+/*                            "select e from itpearls_OpenPosition e " +
                             "where e.positionType = :positionType " +
                             "and e.vacansyName like :vacansyName " +
                             "and e.projectName = :projectName " +
                             "and e.parentOpenPosition = :parentOpenPosition " +
                             "and e.vacansyName = :vacansyName " +
                             "and e.remoteWork = :remoteWork " +
-                            "and e.cityPosition = :cityPosition")
+                            "and e.cityPosition = :cityPosition") */
                     .parameter("vacansyName", vacansyNameField.getValue())
                     .parameter("positionType", positionTypeField.getValue())
                     .parameter("projectName", projectNameField.getValue())
@@ -2215,12 +2219,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                 if (projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName() != null) {
                                     String comanyName = projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName();
 
-                                    labelOpenPosition.setValue(vacansyNameField.getValue() +
-                                            " (" +
-                                            (comanyName != null ? comanyName : "") +
-                                            " : " +
-                                            projectNameField.getValue().getProjectName() +
-                                            ")");
+                                    labelOpenPosition.setValue(
+                                            new StringBuilder(vacansyNameField.getValue())
+                                                    .append(" (")
+                                                    .append(comanyName != null ? comanyName : "")
+                                                    .append(" : ")
+                                                    .append(projectNameField.getValue().getProjectName())
+                                                    .append(")").toString());
                                     labelOpenPosition.addStyleName("h3");
                                 }
 

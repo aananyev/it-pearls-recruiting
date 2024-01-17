@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.haulmont.cuba.core.TransactionalDataManager;
 import com.haulmont.cuba.core.app.events.EntityChangedEvent;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import org.springframework.stereotype.Component;
 import org.springframework.context.event.EventListener;
@@ -30,6 +31,8 @@ public class OpenPositionCommentChangedListener {
     private UserSessionSource userSessionSource;
     @Inject
     private TransactionalDataManager txDm;
+    @Inject
+    private Messages messages;
 
     @EventListener
     public void beforeCommit(EntityChangedEvent<OpenPositionComment, UUID> event) {
@@ -39,11 +42,8 @@ public class OpenPositionCommentChangedListener {
             openPositionComment = txDm.load(event.getEntityId())
                     .view("openPositionComment-view")
                     .one();
-
-            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                    openPositionCommentService
-                            .getOpenPositionCommentMessage(openPositionComment,
-                                    userSessionSource.getUserSession().getUser()));
+            openPositionCommentService.publishOpenPositionComment(openPositionComment,
+                    messages.getMainMessage("mainmsgPublishOpenPositionComment"));
         }
     }
 }
