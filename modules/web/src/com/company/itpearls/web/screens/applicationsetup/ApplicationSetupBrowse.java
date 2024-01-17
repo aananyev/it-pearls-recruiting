@@ -159,9 +159,7 @@ public class ApplicationSetupBrowse extends StandardLookup<ApplicationSetup> {
                     } else {
                         notifications.create(Notifications.NotificationType.TRAY)
                                 .withHideDelayMs(5000)
-                                .withCaption(messageBundle.getMessage("msgTelegramBotNotStartedOnlyStart")
-                                        + ": "
-                                        + telegramBotService.getApplicationSetup().getTelegramBotName())
+                                .withCaption(messageBundle.getMessage("msgTelegramBotNotStartedOnlyStart"))
                                 .show();
                     }
 

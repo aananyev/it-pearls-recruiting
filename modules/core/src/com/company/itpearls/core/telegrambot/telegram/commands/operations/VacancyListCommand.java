@@ -74,7 +74,6 @@ public class VacancyListCommand extends OperationCommand {
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     "Нет открытых вакансий");
         }
-
     }
 
     private InlineKeyboardMarkup setInline(OpenPosition openPosition) {

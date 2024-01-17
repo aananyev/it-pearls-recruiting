@@ -31,4 +31,6 @@ public interface ApplicationSetupService {
     void clearActiveApplicationSetup(ApplicationSetup current);
 
     String getActiveConfigName();
+
+    void setBotStartedConfig(ApplicationSetup applicationSetup, boolean b);
 }

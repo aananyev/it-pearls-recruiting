@@ -1,7 +1,10 @@
 package com.company.itpearls.web.screens.openpositioncomment;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.ApplicationSetupService;
 import com.company.itpearls.core.StarsAndOtherService;
+import com.company.itpearls.core.TelegramBotService;
+import com.company.itpearls.core.TelegramService;
 import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.PersistenceHelper;
@@ -36,6 +39,12 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
     private Events events;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private TelegramService telegramService;
+    @Inject
+    private TelegramBotService telegramBotService;
+    @Inject
+    private ApplicationSetupService applicationSetupService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -102,7 +111,6 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
             String rating_style = "rating_" + rating_color + "_"
                     + String.valueOf(ratingField.getValue() != null ? ((int) ratingField.getValue()) + 1 : 1);
 
-//            ratingField.setStyleName(rating_style);
             ratingLabel.setStyleName(rating_style);
         });
     }
@@ -113,5 +121,17 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
                 messageBundle.getMessage("msgPublishOpenPositionComment")
                         + ":"
                         + getEditedEntity().getOpenPosition().getVacansyName()));
+
+        if (applicationSetupService.getTelegramBotStart() != null ? applicationSetupService.getTelegramBotStart() : false) {
+            telegramService.sendMessageToChat(telegramBotService.getApplicationSetup().getTelegramChatOpenPosition(),
+                    new StringBuilder(messageBundle.getMessage("msgPublishOpenPositionComment"))
+                            .append(": ")
+                            .append(getEditedEntity().getOpenPosition().getVacansyName())
+                            .append("\n\n")
+                            .append(getEditedEntity().getComment())
+                            .append("\n")
+                            .append(getEditedEntity().getUser().getName())
+                            .toString());
+        }
     }
 }

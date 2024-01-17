@@ -1,6 +1,7 @@
 package com.company.itpearls.core.telegrambot.telegram.commands.service;
 
 import com.company.itpearls.core.telegrambot.Utils;
+import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.security.app.UserSessionsAPI;
 import com.haulmont.cuba.security.global.UserSession;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -20,18 +21,20 @@ public class UserSessionTg extends ServiceCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
 
-        Stream<UserSession> userSessionsStream = userSessionsAPI.getUserSessionsStream(); // TO-DO возвращает инжектирование нулл
+        UserSessionsAPI userSessionsApi = AppBeans.get(UserSessionsAPI.NAME);
+
+        Stream<UserSession> userSessionsStream = userSessionsApi.getUserSessionsStream(); // TO-DO возвращает инжектирование нулл
         UserSession userSessions[] = userSessionsStream.distinct().toArray(UserSession[]::new);
-        StringBuilder sb = new StringBuilder("<b>Список пользователей в системе</b>\n");
+        StringBuilder sb = new StringBuilder("*Список пользователей в системе:*\n");
         String userName = Utils.getUserName(user);
 
         int count = 1;
 
         for (UserSession userSession : userSessions) {
             sb.append(count++)
-                    .append(". <i>")
+                    .append(". ")
                     .append(userSession.getUser().getName())
-                    .append("</i>\n");
+                    .append("\n");
         }
 
         sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, sb.toString());

@@ -5,7 +5,10 @@ import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.Transaction;
+import com.haulmont.cuba.core.app.ServerConfig;
 import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.cuba.core.global.Configuration;
+import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.View;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -170,6 +173,10 @@ public class Utils {
     public static String getOpenPositionEditorURL(OpenPosition openPosition, String text) {
         StringBuilder sb = new StringBuilder();
 
+        String appUrl = AppBeans.get(Configuration.class)
+                .getConfig(ServerConfig.class)
+                .getUserSessionProviderUrl();
+
         sb.append("<a href=\"http://hr.it-pearls.ru:8080/app/open?screen=itpearls_OpenPosition.edit-")
                 .append(openPosition.getId().toString())
                 .append("\">")
@@ -188,7 +195,12 @@ public class Utils {
     public static String getOpenPositionEditorURL(OpenPosition openPosition) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("http://hr.it-pearls.ru:8080/app/open?screen=")
+        String appUrl = AppBeans.get(Configuration.class)
+                .getConfig(GlobalConfig.class)
+                .getWebAppUrl();
+
+        sb.append(appUrl.replace("http:/", "http://"))
+                .append("/open?screen=")
                 .append("itpearls_OpenPosition.edit")
                 .append("&item=")
                 .append("itpearls_OpenPosition-")

@@ -149,39 +149,48 @@ public class TelegramBotServiceBean implements TelegramBotService, Serializable 
 
     @Override
     public void telegramBotStart() {
-        authentication.begin();
 
-        String NAME = applicationSetupService.getTelegramBotName();
-        String TOKEN = applicationSetupService.getTelegramToken();
+        if (applicationSetupService.getActiveApplicationSetup() != null) {
+            authentication.begin();
 
-        if (NAME == null || TOKEN == null) {
-            NAME = new StringBuilder(TelegramBotStatus.getDefaultBotName()).toString();
-            TOKEN = new StringBuilder(TelegramBotStatus.getDefaultBotToken()).toString();
-        }
-        //инициализируйте конфигурацию здесь
-        try {
-            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+            String NAME = applicationSetupService.getTelegramBotName();
+            String TOKEN = applicationSetupService.getTelegramToken();
 
-            Bot bot = new Bot(NAME, TOKEN);
+            if (NAME == null || TOKEN == null) {
+                NAME = new StringBuilder(TelegramBotStatus.getDefaultBotName()).toString();
+                TOKEN = new StringBuilder(TelegramBotStatus.getDefaultBotToken()).toString();
+            }
+            //инициализируйте конфигурацию здесь
+            try {
+                TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
 
-            BotSession session = botsApi.registerBot(bot);
-            logger.debug(String.format(messages.getMainMessage("mainmsgTelegramBotInitialised"),
-                    applicationSetupService.getTelegramBotName()));
+                Bot bot = new Bot(NAME, TOKEN);
 
-            telegramBotService.setBotStarted();
+                BotSession session = botsApi.registerBot(bot);
+                logger.debug(String.format(messages.getMainMessage("mainmsgTelegramBotInitialised"),
+                        NAME));
 
-            telegramBotService.saveTelegramBotApi(botsApi);
-            telegramBotService.saveBotSession(session);
-            telegramBotService.saveApplicationSetup(applicationSetupService.getActiveApplicationSetup());
+                telegramBotService.setBotStarted();
 
-            TelegramBotStatus.setBot(bot);
-        } catch (TelegramApiException e) {
-            logger.debug(String.format(messages.getMainMessage("mainmsgTelegramBotNotInitialised")));
-            telegramBotService.setBotStopped();
-            telegramBotService.saveBotSession(null);
-            telegramBotService.saveApplicationSetup(null);
-        } finally {
-            authentication.end();
+                telegramBotService.saveTelegramBotApi(botsApi);
+                telegramBotService.saveBotSession(session);
+                telegramBotService.saveApplicationSetup(applicationSetupService.getActiveApplicationSetup());
+
+                TelegramBotStatus.setBot(bot);
+
+                applicationSetupService.setBotStartedConfig(applicationSetupService.getApplicationSetup(), true);
+            } catch (TelegramApiException e) {
+                logger.debug(String.format(messages.getMainMessage("mainmsgTelegramBotNotInitialised")));
+                telegramBotService.setBotStopped();
+                telegramBotService.saveBotSession(null);
+                telegramBotService.saveApplicationSetup(null);
+
+                applicationSetupService.setBotStartedConfig(applicationSetupService.getApplicationSetup(), false);
+            } finally {
+                authentication.end();
+            }
+        } else {
+            logger.debug("WARNING: TelegramBot NOT started because not found active configuraton setup!");
         }
     }
 

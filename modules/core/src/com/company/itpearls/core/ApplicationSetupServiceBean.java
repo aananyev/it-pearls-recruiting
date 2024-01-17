@@ -2,10 +2,7 @@ package com.company.itpearls.core;
 
 import com.company.itpearls.entity.ApplicationSetup;
 import com.haulmont.bali.db.QueryRunner;
-import com.haulmont.cuba.core.EntityManager;
-import com.haulmont.cuba.core.Persistence;
-import com.haulmont.cuba.core.Query;
-import com.haulmont.cuba.core.Transaction;
+import com.haulmont.cuba.core.*;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import org.springframework.stereotype.Service;
@@ -54,6 +51,26 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void setBotStartedConfig(ApplicationSetup applicationSetup, boolean b) {
+        QueryRunner runner = new QueryRunner(persistence.getDataSource());
+
+        try {
+            runner.query("update ITPEARLS_APPLICATION_SETUP set TELEGRAM_BOT_STARTED = false", null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            runner.query(String.format("update ITPEARLS_APPLICATION_SETUP set TELEGRAM_BOT_STARTED = true where NAME = %s",
+                            applicationSetup.getName()),
+                    null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
@@ -174,6 +191,14 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         } finally {
             return applicationSetup;
         }
+/*        EntityManager em = persistence.getEntityManager();
+
+        TypedQuery<ApplicationSetup> query = em.createNativeQuery(QUERY_GET_ACTIVE_SETUP,
+                ApplicationSetup.class);
+        List<ApplicationSetup> list = query.getResultList();
+        applicationSetup = list.get(0);
+
+        return applicationSetup; */
     }
 
     @Override
