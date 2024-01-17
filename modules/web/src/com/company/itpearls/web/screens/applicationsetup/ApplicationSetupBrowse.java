@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.applicationsetup;
 
 import com.company.itpearls.core.ApplicationSetupService;
+import com.company.itpearls.core.TelegramBotService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -8,6 +9,7 @@ import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.export.FileDataProvider;
+import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -36,6 +38,8 @@ public class ApplicationSetupBrowse extends StandardLookup<ApplicationSetup> {
     ApplicationSetup applicationSetup = null;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private TelegramBotService telegramBotService;
 
     @Subscribe(id = "applicationSetupsDc", target = Target.DATA_CONTAINER)
     public void onApplicationSetupsDcItemChange(InstanceContainer.ItemChangeEvent<ApplicationSetup> event) {
@@ -101,5 +105,28 @@ public class ApplicationSetupBrowse extends StandardLookup<ApplicationSetup> {
 
     public Component applicationIconGenerator(ApplicationSetup entity) {
         return retColumnGeneratorImage(entity.getApplicationIcon());
+    }
+
+    public Component telegramBotStartedColumnGenerator(ApplicationSetup entity) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+
+        Label retLabel = uiComponents.create(Label.class);
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        ApplicationSetup as = telegramBotService.restoreApplicationSetup();
+
+        if (telegramBotService.isBotStarted() && entity.equals(telegramBotService.restoreApplicationSetup())) {
+            retLabel.setIcon(CubaIcon.OK.source());
+            retLabel.setStyleName("h1-green");
+        } else {
+            retLabel.setIcon(CubaIcon.CANCEL.source());
+            retLabel.setStyleName("h1-red");
+        }
+
+        retHBox.add(retLabel);
+
+        return retHBox;
     }
 }

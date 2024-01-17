@@ -1,6 +1,7 @@
 package com.company.itpearls.core.telegrambot;
 
 import com.company.itpearls.core.telegrambot.telegram.Bot;
+import com.company.itpearls.entity.ApplicationSetup;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.generics.BotSession;
 
@@ -13,6 +14,7 @@ public class TelegramBotStatus implements Serializable {
     private final static String defaultBotToken = "6433663497:AAGvl9NRSddfNC78PQ0JUzXywWIuO5EsCd8";
     private final static String defaultBotName = "ITPearlsTestBot";
     private static BotSession botSession = null;
+    private static ApplicationSetup applicationSetup = null;
 
     public static TelegramBotsApi getBotsApi() {
         return TelegramBotStatus.botsApi;
@@ -47,10 +49,18 @@ public class TelegramBotStatus implements Serializable {
     }
 
     public static void setBotSession(BotSession session) {
-        botSession = session;
+        TelegramBotStatus.botSession = session;
     }
 
     public static BotSession getBotSession() {
-        return botSession;
+        return TelegramBotStatus.botSession;
+    }
+
+    public static void setApplicationSetup(ApplicationSetup applicationSetup) {
+        TelegramBotStatus.applicationSetup = applicationSetup;
+    }
+
+    public static ApplicationSetup getApplicationSetup() {
+        return TelegramBotStatus.applicationSetup;
     }
 }

@@ -16,6 +16,8 @@ public interface ApplicationSetupService {
 
     FileDescriptor getCompanyImage();
 
+    ApplicationSetup getApplicationSetup();
+
     FileDescriptor getActiveCompanyIcon();
 
     FileDescriptor getActiveCompanyLogo();

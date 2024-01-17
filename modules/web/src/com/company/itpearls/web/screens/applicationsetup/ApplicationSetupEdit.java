@@ -122,19 +122,23 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
         } else {
             telegramBotRestartButton.setCaption(messageBundle.getMessage("msgTelegramBotStartButton"));
         }
+
+        if (telegramBotService.getApplicationSetup() != null)
+            telegramBotRestartButton.setEnabled(telegramBotService.getApplicationSetup().equals(getEditedEntity()));
     }
 
     public void telegramBotRestartButtonInvoke() {
-//        telegramBotService.telegramBotRestart();
         if (telegramBotService.isBotStarted()) {
             telegramBotService.telegramBotStop();
+            getEditedEntity().setTelegramBotStarted(false);
 
             notifications.create(Notifications.NotificationType.SYSTEM)
                     .withHideDelayMs(15000)
                     .withCaption("Telegram bot stopped")
                     .show();
         } else {
-            telegramBotService.telegramBotStart();
+            telegramBotService.telegramBotStart(getEditedEntity());
+            getEditedEntity().setTelegramBotStarted(true);
 
             notifications.create(Notifications.NotificationType.SYSTEM)
                     .withHideDelayMs(15000)
@@ -143,5 +147,14 @@ public class ApplicationSetupEdit extends StandardEditor<ApplicationSetup> {
         }
 
         setTelegramBotRestartButton();
+    }
+
+    @Subscribe("activeSetupField")
+    public void onActiveSetupFieldValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue() != null ? event.getValue() : false) {
+            telegramBotService.setApplicationSetup(getEditedEntity());
+        } else {
+            telegramBotService.setApplicationSetup(null);
+        }
     }
 }

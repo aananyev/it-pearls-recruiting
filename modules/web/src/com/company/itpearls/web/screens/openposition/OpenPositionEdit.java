@@ -1329,7 +1329,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void disableEnableFields(HasValue.ValueChangeEvent<Boolean> event) {
-        if (getEditedEntity().getOpenClose()) {
+/*        if (getEditedEntity().getOpenClose()) {
             cityOpenPositionField.setEditable(false);
             companyDepartamentField.setEditable(false);
             companyNameField.setEditable(false);
@@ -1347,7 +1347,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             projectNameField.setEditable(true);
             vacansyNameField.setEditable(true);
             companyDepartamentField.setEditable(true);
-        }
+        } */
     }
 
     @Subscribe

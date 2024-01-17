@@ -47,6 +47,7 @@
                 <column id="applicationLogo" generator="applicationLogoGenerator"/>
                 <column id="applicationIcon" generator="applicationIconGenerator"/>
                 <column id="telegramBotName"/>
+                <column id="telegramBotStarted" generator="telegramBotStartedColumnGenerator"/>
                 <column id="telegramBotStart"/>
                 <column id="telegramChatOpenPosition"/>
             </columns>

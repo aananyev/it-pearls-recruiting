@@ -32,6 +32,9 @@ public class ApplicationSetup extends StandardEntity {
     @Column(name = "TELEGRAM_BOT_START")
     private Boolean telegramBotStart;
 
+    @Column(name = "TELEGRAM_BOT_STARTED")
+    private Boolean telegramBotStarted;
+
     @Column(name = "TELEGRAM_TOKEN", length = 128)
     private String telegramToken;
 
@@ -40,6 +43,14 @@ public class ApplicationSetup extends StandardEntity {
 
     @Column(name = "TELEGRAM_CHAT_JOB_CANDIDATE", length = 128)
     private String telegramChatJobCandidate;
+
+    public Boolean getTelegramBotStarted() {
+        return telegramBotStarted;
+    }
+
+    public void setTelegramBotStarted(Boolean telegramBotStarted) {
+        this.telegramBotStarted = telegramBotStarted;
+    }
 
     public Boolean getTelegramBotStart() {
         return telegramBotStart;

@@ -101,6 +101,22 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
     }
 
     @Override
+    public ApplicationSetup getApplicationSetup() {
+        ApplicationSetup applicationSetup;
+
+        try (Transaction tx = persistence.createTransaction()) {
+            EntityManager em = persistence.getEntityManager();
+
+            Query query = em.createQuery(QUERY_GET_ACTIVE_SETUP);
+            applicationSetup = (ApplicationSetup) query.getFirstResult();
+            tx.commit();
+        }
+
+        return applicationSetup;
+
+    }
+
+    @Override
     public FileDescriptor getActiveCompanyIcon() {
         ApplicationSetup applicationSetup;
 
