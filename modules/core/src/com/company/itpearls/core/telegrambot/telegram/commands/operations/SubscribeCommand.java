@@ -25,7 +25,9 @@ public class SubscribeCommand extends OperationCommand{
 
             int counter = 1;
 
-            sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), Utils.getUserName(user),
+            sendAnswer(absSender, chat.getId(),
+                    this.getCommandIdentifier(),
+                    Utils.getUserName(user),
                     new StringBuilder()
                             .append("*")
                             .append(Utils.getBotName())

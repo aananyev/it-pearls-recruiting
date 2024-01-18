@@ -1,5 +1,7 @@
 package com.company.itpearls.core.telegrambot;
 
+import com.company.itpearls.core.telegrambot.telegram.Bot;
+import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
@@ -11,6 +13,7 @@ import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.View;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -43,11 +46,10 @@ public class Utils {
     }
 
     /**
-     *
      * @param queryStr - запрос
-     * @param view - вьюшка
-     * @param field - поле
-     * @param date - дата в запросе
+     * @param view     - вьюшка
+     * @param field    - поле
+     * @param date     - дата в запросе
      */
     private static <T> T queryListResult(String queryStr, View view, String field, Date date) {
         Object retObj = null;
@@ -187,7 +189,6 @@ public class Utils {
     }
 
     /**
-     *
      * @param openPosition
      * @return
      */
@@ -212,11 +213,10 @@ public class Utils {
     }
 
     /**
-     *
      * @param queryStr
      * @param view
-     * @return
      * @param <T>
+     * @return
      */
     private static <T> T queryListResult(String queryStr, View view) {
         List<Object> retObj = null;
@@ -254,20 +254,46 @@ public class Utils {
                 "date", new Date());
     }
 
-    public static List<OpenPosition> getOpenPosition() {
-        return queryListResult("select e from itpearls_OpenPosition e " +
-                "where not e.openClose = true", new View(OpenPosition.class)
-                .addProperty("projectName",
-                        new View(Project.class)
-                                .addProperty("projectName")
-                                .addProperty("projectOwner",
-                                        new View(Person.class)
-                                                .addProperty("firstName")
-                                                .addProperty("secondName")))
-                .addProperty("positionType",
-                        new View(Position.class)
-                                .addProperty("positionEnName")
-                                .addProperty("positionRuName")));
+    public static int getPriority() {
+        int priority = 3;
+        long chatid = Long.parseLong(TelegramBotStatus.getApplicationSetup().getTelegramChatOpenPosition());
+        Settings settings = Bot.getUserSettings(chatid);
+        priority = settings.getPriorityNotLower();
+
+        return priority;
+    }
+
+    public static int getPriority(Chat chat) {
+        int priority = 3;
+        Settings settings = Bot.getUserSettings(chat.getId());
+        priority = settings.getPriorityNotLower();
+
+        return priority;
+    }
+
+    private static final String QUERY_LIST_OPEN_POSITION =
+            "select e from itpearls_OpenPosition e " +
+                    "where (e.priority >= %s) and (not e.openClose = true)";
+
+    public static List<OpenPosition> getOpenPosition(Chat chat) {
+        int priority = Utils.getPriority(chat);
+        String q = String.format(QUERY_LIST_OPEN_POSITION, priority);
+
+        List<OpenPosition> result = queryListResult(String.format(QUERY_LIST_OPEN_POSITION, priority),
+                new View(OpenPosition.class)
+                        .addProperty("projectName",
+                                new View(Project.class)
+                                        .addProperty("projectName")
+                                        .addProperty("projectOwner",
+                                                new View(Person.class)
+                                                        .addProperty("firstName")
+                                                        .addProperty("secondName")))
+                        .addProperty("positionType",
+                                new View(Position.class)
+                                        .addProperty("positionEnName")
+                                        .addProperty("positionRuName")));
+
+        return result;
     }
 
     public static String getBotName() {
@@ -304,7 +330,9 @@ public class Utils {
 
         KeyboardRow keyboardSecondRow = new KeyboardRow();
         KeyboardButton helpButton = new KeyboardButton("/help");
+        KeyboardButton setupButton = new KeyboardButton("/settings");
         keyboardSecondRow.add(helpButton);
+        keyboardSecondRow.add(setupButton);
 
         keyboard.add(keyboardSecondRow);
         replyKeyboardMarkup.setKeyboard(keyboard);

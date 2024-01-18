@@ -1,8 +1,12 @@
 package com.company.itpearls.core.telegrambot.telegram.commands.operations;
 
+import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import com.company.itpearls.core.telegrambot.Utils;
+import com.company.itpearls.core.telegrambot.telegram.Bot;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
+import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.OpenPositionPriority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -29,7 +33,7 @@ public class VacancyListCommand extends OperationCommand {
         String userName = Utils.getUserName(user);
 
         try {
-            List<OpenPosition> openPositions = Utils.getOpenPosition();
+            List<OpenPosition> openPositions = Utils.getOpenPosition(chat);
 
             int counter = 1;
 
@@ -37,7 +41,10 @@ public class VacancyListCommand extends OperationCommand {
                     new StringBuilder()
                             .append("<b><u>")
                             .append(Utils.getBotName())
-                            .append("</u><b>\n")
+                            .append("</u></b>\n")
+                            .append("<b>Приоритет не ниже:</b> ")
+                            .append(OpenPositionPriority.fromId(Utils.getPriority(chat)))
+                            .append("\n")
                             .append("<b>Всего открыто вакансий:</b> ")
                             .append(openPositions.size())
                             .append("\n\n")
@@ -54,6 +61,9 @@ public class VacancyListCommand extends OperationCommand {
                                 .append("\n"))
                         .append("<b>Проект:</b> <i>")
                         .append(openPosition.getProjectName().getProjectName())
+                        .append("</i>\n")
+                        .append("<b>Приоритет:</b> <i>")
+                        .append(OpenPositionPriority.fromId(openPosition.getPriority()))
                         .append("</i>\n")
                         .append("<b>Аккаунт\\HR на стороне заказчика: </b><i>")
                         .append(openPosition.getProjectName().getProjectOwner().getSecondName())
@@ -80,14 +90,24 @@ public class VacancyListCommand extends OperationCommand {
         InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-        inlineKeyboardButton.setText("View");
+        InlineKeyboardButton viewInHuntTechButton = new InlineKeyboardButton();
+        viewInHuntTechButton.setText("View");
         String urlButton = Utils.getOpenPositionEditorURL(openPosition);
-        inlineKeyboardButton.setUrl(urlButton);
-//        inlineKeyboardButton.setUrl("http://hr.it-pearls.ru:8080/app");
+        viewInHuntTechButton.setUrl(urlButton);
 
-        rowInline.add(inlineKeyboardButton);
+        InlineKeyboardButton viewDetailsButton = new InlineKeyboardButton();
+        viewDetailsButton.setText("Details");
+        viewDetailsButton.setCallbackData("viewDetailsButton");
+
+        InlineKeyboardButton subscribeButton = new InlineKeyboardButton();
+        subscribeButton.setText("Subscribe");
+        subscribeButton.setCallbackData("subscribeButton");
+
+        rowInline.add(viewInHuntTechButton);
+        rowInline.add(viewDetailsButton);
+        rowInline.add(subscribeButton);
+
         buttons.add(rowInline);
 
         markupKeyboard.setKeyboard(buttons);

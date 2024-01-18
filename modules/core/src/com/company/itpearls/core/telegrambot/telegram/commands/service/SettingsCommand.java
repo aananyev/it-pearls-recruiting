@@ -1,6 +1,7 @@
 package com.company.itpearls.core.telegrambot.telegram.commands.service;
 
 
+import com.company.itpearls.entity.OpenPositionPriority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -29,9 +30,10 @@ public class SettingsCommand extends ServiceCommand {
 
         Settings settings = Bot.getUserSettings(chat.getId());
         sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
-                String.format("*Текущие настройки*\n"
-                 + " - приоритет вакансии не ниже *%s*\n"
+                String.format("*ТЕКУЩИЕ НАСТРОЙКИ*\n"
+                 + " - приоритет вакансии не ниже *%s (%s)*\n"
                         + " - публикация новых вакансий *%s*\n",
+                        OpenPositionPriority.fromId(settings.getPriorityNotLower()),
                         settings.getPriorityNotLower(),
                         settings.getPublishNewVacancies()));
 
