@@ -283,6 +283,11 @@ public class Utils {
 
         List<OpenPosition> result = queryListResult(String.format(QUERY_LIST_OPEN_POSITION, priority),
                 new View(OpenPosition.class)
+                        .addProperty("openPositionComments",
+                                new View(OpenPositionComment.class)
+                                        .addProperty("user",
+                                                new View(ExtUser.class)
+                                                        .addProperty("name")))
                         .addProperty("projectName",
                                 new View(Project.class)
                                         .addProperty("projectName")
@@ -339,6 +344,37 @@ public class Utils {
 
         keyboard.add(keyboardSecondRow);
         replyKeyboardMarkup.setKeyboard(keyboard);
+    }
+
+    public static String getOpenPositionComments(String openPosition, String key) {
+        String openPositionId = openPosition.replace(key, "");
+
+        String QUERY_GET_COMMENT = String.format("select e from itpearls_OpenPositionComment e where e.openPosition.id = '%s'",
+                openPositionId.substring(1, openPositionId.length()));
+
+        List<OpenPositionComment> openPositionComments = queryListResult(QUERY_GET_COMMENT,
+                new View(OpenPositionComment.class)
+                        .addProperty("openPosition", new View(OpenPosition.class)
+                                .addProperty("vacansyName"))
+                        .addProperty("user", new View(ExtUser.class)
+                                .addProperty("name")));
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("ВАКАНСИЯ: ")
+                .append(openPositionComments.get(0).getOpenPosition().getVacansyName())
+                .append("\n\n");
+
+        for (OpenPositionComment openPositionComment : openPositionComments) {
+            stringBuilder.append(openPositionComment.getComment())
+                    .append("\n")
+                    .append("Автор: ")
+                    .append(openPositionComment.getUser().getName())
+                    .append("\n\n");
+        }
+
+        return stringBuilder.toString();
+
     }
 
     public static String getOpenPositionJobDescription(String openPosition, String key) {
@@ -400,5 +436,9 @@ public class Utils {
                         .replace("<li>", "- ")
                         .replace("</li>", "\n"))
                 .body().wholeText());
+    }
+
+    public static int countComments(OpenPosition openPosition) {
+        return openPosition.getOpenPositionComments().size();
     }
 }

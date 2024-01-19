@@ -100,11 +100,15 @@ public class VacancyListCommand extends OperationCommand {
                 + CallbackData.CALLBACK_SEPARATOV
                 + openPosition.getId().toString());
 
+        int count_comments = Utils.countComments(openPosition);
         InlineKeyboardButton commentButton = new InlineKeyboardButton();
-        commentButton.setText("Comment");
-        commentButton.setCallbackData(CallbackData.COMMENT_VIEW_BUTTON
-                + CallbackData.CALLBACK_SEPARATOV
-                + openPosition.getId().toString());
+
+        if (count_comments > 0) {
+            commentButton.setText("Comment (" + Utils.countComments(openPosition) + ")");
+            commentButton.setCallbackData(CallbackData.COMMENT_VIEW_BUTTON
+                    + CallbackData.CALLBACK_SEPARATOV
+                    + openPosition.getId().toString());
+        }
 
         InlineKeyboardButton subscribeButton = new InlineKeyboardButton();
         subscribeButton.setText("Subscribe");
@@ -114,7 +118,8 @@ public class VacancyListCommand extends OperationCommand {
 
         rowInline.add(viewInHuntTechButton);
         rowInline.add(viewDetailsButton);
-        rowInline.add(commentButton);
+        if (count_comments > 0)
+            rowInline.add(commentButton);
         rowInline.add(subscribeButton);
 
         buttons.add(rowInline);

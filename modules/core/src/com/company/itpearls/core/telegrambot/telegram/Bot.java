@@ -120,14 +120,17 @@ public final class Bot extends TelegramLongPollingCommandBot {
             setAnswer(chatId, userName, answer);
         } else {
             String openPositionId = update.getCallbackQuery().getData();
-            setAnswer(chatId, null, openPositionId);
+//            setAnswer(chatId, null, openPositionId);
             String openPositionKey = openPositionId.substring(0, openPositionId.indexOf(CallbackData.CALLBACK_SEPARATOV));
 
             switch (openPositionKey) {
                 case CallbackData.VIEW_DETAIL_BUTTON:
-                    setAnswer(chatId, null, Utils.getOpenPositionJobDescription(openPositionId, CallbackData.VIEW_DETAIL_BUTTON));
+                    setAnswer(chatId, null, Utils.getOpenPositionJobDescription(openPositionId,
+                            CallbackData.VIEW_DETAIL_BUTTON));
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
+                    setAnswer(chatId, null, Utils.getOpenPositionComments(openPositionId,
+                            CallbackData.COMMENT_VIEW_BUTTON));
                     break;
                 case CallbackData.SUBSCRIBE_BUTTON:
                     break;
