@@ -1,23 +1,28 @@
 
 package com.company.itpearls.core.telegrambot.telegram;
 
+import com.company.itpearls.core.telegrambot.exeptions.UserException;
+import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.NonCommand;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
 import com.company.itpearls.core.telegrambot.telegram.commands.operations.*;
+import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +39,8 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
     private static final Settings defaultSettings = new Settings(3, true);
     private final NonCommand nonCommand;
+    private List<String> registeredCommands = new ArrayList<>();
+
 
     public static Settings getDefaultSettings() {
         return new Settings(3, true);
@@ -75,6 +82,8 @@ public final class Bot extends TelegramLongPollingCommandBot {
         userSettings = new HashMap<>();
         logger.info("Бот создан!");
 
+        setRegisteredCommands();
+
 /*        try {
             setAnswer(getMe().getId(), getBotUsername(), getHelloMessage());
         } catch (TelegramApiException e) {
@@ -102,11 +111,60 @@ public final class Bot extends TelegramLongPollingCommandBot {
     @Override
     public void processNonCommandUpdate(Update update) {
         Message msg = update.getMessage();
-        Long chatId = msg.getChatId();
-        String userName = Utils.getUserName(msg);
+        Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-        String answer = nonCommand.nonCommandExecute(chatId, userName, msg.getText());
-        setAnswer(chatId, userName, answer);
+        if (!update.hasCallbackQuery()) {
+            String userName = Utils.getUserName(msg);
+
+            String answer = nonCommand.nonCommandExecute(chatId, userName, msg.getText());
+            setAnswer(chatId, userName, answer);
+        } else {
+            String openPositionId = update.getCallbackQuery().getData();
+            setAnswer(chatId, null, openPositionId);
+            String openPositionKey = openPositionId.substring(0, openPositionId.indexOf(CallbackData.CALLBACK_SEPARATOV));
+
+            switch (openPositionKey) {
+                case CallbackData.VIEW_DETAIL_BUTTON:
+                    setAnswer(chatId, null, Utils.getOpenPositionJobDescription(openPositionId, CallbackData.VIEW_DETAIL_BUTTON));
+                    break;
+                case CallbackData.COMMENT_VIEW_BUTTON:
+                    break;
+                case CallbackData.SUBSCRIBE_BUTTON:
+                    break;
+                default:
+                    setAnswer(chatId, null, "ОШИБКА: Нет действия");
+                    break;
+            }
+        }
+    }
+
+    public void sendImage(Long chatId, String path) throws UserException {
+        try {
+            SendPhoto photo = new SendPhoto();
+            photo.setPhoto(new InputFile(new File(path)));
+            photo.setChatId(chatId.toString());
+            execute(photo);
+        } catch (TelegramApiException e) {
+            logger.error(String.format("Sending image error: %s", e.getMessage()));
+            throw new UserException("Ошибка отправки изображения");
+        }
+    }
+
+    private void setRegisteredCommands() {
+        registeredCommands = getRegisteredCommands()
+                .stream()
+                .map(IBotCommand::getCommandIdentifier)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected void processInvalidCommandUpdate(Update update) {
+        String command = update.getMessage().getText().substring(1);
+        setAnswer(update.getMessage().getChatId(),
+                Utils.getUserName(update.getMessage()),
+                String.format("Некорректная команда [%s], доступные команды: %s"
+                        , command
+                        , registeredCommands.toString()));
     }
 
     /**

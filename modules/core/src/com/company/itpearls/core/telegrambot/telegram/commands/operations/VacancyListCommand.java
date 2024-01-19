@@ -1,10 +1,8 @@
 package com.company.itpearls.core.telegrambot.telegram.commands.operations;
 
-import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import com.company.itpearls.core.telegrambot.Utils;
-import com.company.itpearls.core.telegrambot.telegram.Bot;
+import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
-import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.OpenPositionPriority;
 import org.slf4j.Logger;
@@ -98,14 +96,25 @@ public class VacancyListCommand extends OperationCommand {
 
         InlineKeyboardButton viewDetailsButton = new InlineKeyboardButton();
         viewDetailsButton.setText("Details");
-        viewDetailsButton.setCallbackData("viewDetailsButton");
+        viewDetailsButton.setCallbackData(CallbackData.VIEW_DETAIL_BUTTON
+                + CallbackData.CALLBACK_SEPARATOV
+                + openPosition.getId().toString());
+
+        InlineKeyboardButton commentButton = new InlineKeyboardButton();
+        commentButton.setText("Comment");
+        commentButton.setCallbackData(CallbackData.COMMENT_VIEW_BUTTON
+                + CallbackData.CALLBACK_SEPARATOV
+                + openPosition.getId().toString());
 
         InlineKeyboardButton subscribeButton = new InlineKeyboardButton();
         subscribeButton.setText("Subscribe");
-        subscribeButton.setCallbackData("subscribeButton");
+        subscribeButton.setCallbackData(CallbackData.SUBSCRIBE_BUTTON
+                + CallbackData.CALLBACK_SEPARATOV
+                + openPosition.getId().toString());
 
         rowInline.add(viewInHuntTechButton);
         rowInline.add(viewDetailsButton);
+        rowInline.add(commentButton);
         rowInline.add(subscribeButton);
 
         buttons.add(rowInline);
@@ -121,10 +130,8 @@ public class VacancyListCommand extends OperationCommand {
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-//        inlineKeyboardButton.setSwitchInlineQueryCurrentChat(" ");
         inlineKeyboardButton.setText("View");
         inlineKeyboardButton.setUrl(Utils.getOpenPositionEditorURL(openPosition));
-//        inlineKeyboardButton.setCallbackData(" ");
 
         rowInline.add(inlineKeyboardButton);
         buttons.add(rowInline);

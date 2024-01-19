@@ -12,6 +12,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.View;
+import org.jsoup.Jsoup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -25,6 +26,8 @@ import java.util.Date;
 import java.util.List;
 
 public class Utils {
+
+    private static final int MAX_TELEGRAM_MESSAGE_LENGTH = 4096;
 
     /**
      * Формирование имени пользователя
@@ -71,7 +74,6 @@ public class Utils {
             return (T) retObj;
         }
     }
-
 
     /**
      * @param queryStr - запрос
@@ -297,7 +299,8 @@ public class Utils {
     }
 
     public static String getBotName() {
-        return queryOneResult("select e.telegramBotName from itpearls_ApplicationSetup e " +
+        return queryOneResult("select e.telegramBotName " +
+                "from itpearls_ApplicationSetup e " +
                 "where e.activeSetup = true");
     }
 
@@ -336,5 +339,66 @@ public class Utils {
 
         keyboard.add(keyboardSecondRow);
         replyKeyboardMarkup.setKeyboard(keyboard);
+    }
+
+    public static String getOpenPositionJobDescription(String openPosition, String key) {
+        String openPositionId = openPosition.replace(key, "");
+        String QUERY_GET_COMMENT = String.format("select e from itpearls_OpenPosition e where e.id = '%s'",
+                openPositionId.substring(1, openPositionId.length()));
+
+        List<OpenPosition> openPositionList = queryListResult(QUERY_GET_COMMENT,
+                new View(OpenPosition.class));
+        OpenPosition op = (OpenPosition) openPositionList.get(0);
+
+        StringBuilder salary = new StringBuilder();
+        Boolean salaryFlag = false;
+
+        if (op.getSalaryCandidateRequest() != null ? op.getSalaryCandidateRequest() : false) {
+            salary.append("ориентируемся на ожидания кандидатов\n");
+            salaryFlag = true;
+        }
+
+        if (op.getSalaryMin() != null) {
+            salary.append("мин ")
+                    .append(op.getSalaryMin());
+        }
+
+        if (op.getSalaryMax() != null) {
+            salary.append(" макс ")
+                    .append(op.getSalaryMax())
+                    .append("\n");
+        }
+
+        if (op.getSalaryComment() != null) {
+            salary.append("Комментарии по заработной плате: ")
+                    .append(op.getSalaryComment())
+                    .append("\n");
+            salaryFlag = true;
+        }
+
+        String ret = formattedHtml2text(String.format("<b>НАИМЕНОВАНИЕ ВАКАНСИИ:</b>\n" +
+                        "%s\n\n" +
+                        "<b>СРОЧНОСТЬ:</b> %s\n" +
+                        "<b>ОПИСАНИЕ ВАКАНСИИ:</b>\n%s\n\n" +
+                        "<b>ЗАРПЛАТА:</b> %s",
+                op.getVacansyName(),
+                OpenPositionPriority.fromId(op.getPriority()),
+                (op.getComment() != null ?
+                        (op.getComment().length() < MAX_TELEGRAM_MESSAGE_LENGTH ?
+                                op.getComment() : op.getComment().substring(0, MAX_TELEGRAM_MESSAGE_LENGTH))
+                        : ""),
+                salary.toString()));
+
+        return ret;
+    }
+
+    static public String formattedHtml2text(String inputHtml) {
+        return String.valueOf(Jsoup.parse(inputHtml
+                        .replace("<br>", "\n")
+                        .replace("<ol>", "<ul>")
+                        .replace("</ol>", "</ul>")
+                        .replace("<li>", "- ")
+                        .replace("</li>", "\n"))
+                .body().wholeText());
     }
 }
