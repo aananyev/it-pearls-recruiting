@@ -1283,7 +1283,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             StringBuilder sb = new StringBuilder()
-                    .append("Новая вакансия: ")
+                    .append("❗\uFE0F❗\uFE0F❗\uFE0FНовая вакансия: ")
                     .append(vacansyNameField.getValue())
                     .append("\n\n")
                     .append(openPositionRichTextArea.getValue())
@@ -1293,7 +1293,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .append(openPositionFieldSalaryMax.getValue())
                     .append("\n\n(")
                     .append(salaryCommentTextFiels.getValue())
-                    .append(")");
+                    .append(")\n")
+                    .append(userSession.getUser().getName());
             telegramService.sendMessageToChat(textManipulationService.formattedHtml2text(sb.toString()));
         } else {
 
@@ -1301,8 +1302,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             if (!flag) {
                 telegramService.sendMessageToChat(textManipulationService
-                        .formattedHtml2text(new StringBuilder("Изменена вакансия: ")
-                                .append(vacansyNameField.getValue()).toString()));
+                        .formattedHtml2text(new StringBuilder("❗\uFE0F❗\uFE0F❗\uFE0FИзменена вакансия: ")
+                                .append(vacansyNameField.getValue())
+                                .append(userSession.getUser().getName())
+                                .toString()));
             }
         }
     }

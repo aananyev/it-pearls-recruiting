@@ -813,6 +813,7 @@ alter table SEC_USER add column IMAP_USER varchar(64) ^
 alter table SEC_USER add column IMAP_PASSWORD varchar(128) ^
 alter table SEC_USER add column STATISTICS_ boolean ^
 alter table SEC_USER add column DASHBOARDS boolean ^
+alter table SEC_USER add column TELEGRAM varchar(32) ^
 alter table SEC_USER add column DTYPE varchar(31) ^
 update SEC_USER set DTYPE = 'itpearls_ExtUser' where DTYPE is null ^
 -- end SEC_USER

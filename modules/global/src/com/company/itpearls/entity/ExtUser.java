@@ -68,6 +68,17 @@ public class ExtUser extends User {
     @Column(name = "DASHBOARDS")
     private Boolean dashboards;
 
+    @Column(name = "TELEGRAM", length = 32)
+    private String telegram;
+
+    public String getTelegram() {
+        return telegram;
+    }
+
+    public void setTelegram(String telegram) {
+        this.telegram = telegram;
+    }
+
     public Boolean getDashboards() {
         return dashboards;
     }

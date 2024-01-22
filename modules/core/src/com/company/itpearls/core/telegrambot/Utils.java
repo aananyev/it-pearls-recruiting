@@ -155,7 +155,7 @@ public class Utils {
     /**
      * @param queryStr
      */
-    private static <T> T queryListResult(String queryStr) {
+    public static <T> T queryListResult(String queryStr) {
         List<Object> retObj = null;
 
         try {
@@ -361,12 +361,15 @@ public class Utils {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("ВАКАНСИЯ: ")
+        stringBuilder.append("❗\uFE0F❗\uFE0F❗\uFE0FВАКАНСИЯ: ")
                 .append(openPositionComments.get(0).getOpenPosition().getVacansyName())
                 .append("\n\n");
 
+        int counter = 1;
+
         for (OpenPositionComment openPositionComment : openPositionComments) {
-            stringBuilder.append(openPositionComment.getComment())
+            stringBuilder.append(counter).append(". ")
+                    .append(openPositionComment.getComment())
                     .append("\n")
                     .append("Автор: ")
                     .append(openPositionComment.getUser().getName())
@@ -425,7 +428,7 @@ public class Utils {
                         : ""),
                 salary.toString()));
 
-        return ret;
+        return "❗\uFE0F❗\uFE0F❗\uFE0F" + ret;
     }
 
     static public String formattedHtml2text(String inputHtml) {

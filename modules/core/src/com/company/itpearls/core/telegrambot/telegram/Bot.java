@@ -10,9 +10,7 @@ import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingC
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.NonCommand;
@@ -21,7 +19,6 @@ import com.company.itpearls.core.telegrambot.telegram.commands.operations.*;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,12 +130,17 @@ public final class Bot extends TelegramLongPollingCommandBot {
                             CallbackData.COMMENT_VIEW_BUTTON));
                     break;
                 case CallbackData.SUBSCRIBE_BUTTON:
+                    openPositionSubscribe(chatId, update.getCallbackQuery().getFrom());
                     break;
                 default:
                     setAnswer(chatId, null, "ОШИБКА: Нет действия");
                     break;
             }
         }
+    }
+
+    private void openPositionSubscribe(Long chatId, User user) {
+        setAnswer(chatId, null, "User: " + user.getUserName());
     }
 
     public void sendImage(Long chatId, String path) throws UserException {

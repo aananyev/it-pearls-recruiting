@@ -43,6 +43,7 @@
                                                         class="com.haulmont.cuba.gui.components.validators.EmailValidator"
                                                         message="msg://email.alert"/>
                                             </field>
+                                            <field id="telegram"/>
                                         </column>
                                     </fieldGroup>
                                     <fieldGroup id="fieldGroupRight" datasource="userDs" width="AUTO">

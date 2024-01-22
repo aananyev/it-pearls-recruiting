@@ -3,6 +3,7 @@ package com.company.itpearls.core.telegrambot.telegram.commands.operations;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
+import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.OpenPositionPriority;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ public class VacancyListCommand extends OperationCommand {
             List<OpenPosition> openPositions = Utils.getOpenPosition(chat);
 
             int counter = 1;
+            Boolean subscribeFlag = isInternalUser(user);
 
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     new StringBuilder()
@@ -74,7 +76,7 @@ public class VacancyListCommand extends OperationCommand {
                         this.getCommandIdentifier(),
                         userName,
                         sb.toString(),
-                        setInline(openPosition));
+                        setInline(openPosition, subscribeFlag));
             }
 
         } catch (NullPointerException e) {
@@ -84,7 +86,18 @@ public class VacancyListCommand extends OperationCommand {
         }
     }
 
-    private InlineKeyboardMarkup setInline(OpenPosition openPosition) {
+    private Boolean isInternalUser(User user) {
+        String query = String.format("select e from itpearls_ExtUser e where e.telegram = '%s'", user.getUserName());
+
+        List<ExtUser> extUsers = Utils.queryListResult(query);
+
+        if (extUsers != null)
+            return extUsers.size() > 0;
+        else
+            return false;
+    }
+
+    private InlineKeyboardMarkup setInline(OpenPosition openPosition, Boolean subscribeFlag) {
         InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
@@ -120,7 +133,9 @@ public class VacancyListCommand extends OperationCommand {
         rowInline.add(viewDetailsButton);
         if (count_comments > 0)
             rowInline.add(commentButton);
-        rowInline.add(subscribeButton);
+
+        if (subscribeFlag)
+            rowInline.add(subscribeButton);
 
         buttons.add(rowInline);
 

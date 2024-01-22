@@ -92,6 +92,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private TelegramService telegramService;
     @Inject
     private ApplicationSetupService applicationSetupService;
+    @Inject
+    private TextManipulationService textManipulationService;
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -3614,10 +3616,42 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         initActionButtonSeparator(actionPopupButton, "separator2Action");
 
         initActionButtonReports(actionPopupButton, event);
+        initActionButtonTelegram(actionPopupButton, event);
 
         initActionButtonSeparator(actionPopupButton, "separator3Action");
 
         initActionButtonComments(actionPopupButton, event);
+    }
+
+    private void initActionButtonTelegram(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        actionPopupButton.addAction(new BaseAction("sendToTelegram")
+                .withIcon(CubaIcon.TELEGRAM.source())
+                .withCaption(messageBundle.getMessage("msgSendToTelegram"))
+                .withHandler(event1 -> {
+                    getSendTelegramJobDescription();
+                }));
+    }
+
+    private void getSendTelegramJobDescription() {
+        OpenPosition openPosition = openPositionsTable.getSingleSelected();
+
+        if (openPosition != null) {
+            StringBuilder sb = new StringBuilder()
+                    .append("❗\uFE0F❗\uFE0F❗\uFE0FВакансия: ")
+                    .append(openPosition.getVacansyName())
+                    .append("\n\n")
+                    .append(openPosition.getSalaryComment())
+                    .append("\n\nЗарплатное предложение: от ")
+                    .append(openPosition.getSalaryMin())
+                    .append(" до ")
+                    .append(openPosition.getSalaryMax())
+                    .append("\n\n(")
+                    .append(openPosition.getSalaryComment())
+                    .append(")\n")
+                    .append(userSession.getUser().getName());
+            telegramService.sendMessageToChat(textManipulationService
+                    .formattedHtml2text(sb.toString()));
+        }
     }
 
     private void initActionButtonComments(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
