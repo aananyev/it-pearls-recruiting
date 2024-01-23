@@ -32,7 +32,7 @@ public class TelegramBotComponent {
 
     @PostConstruct
     protected void init() throws IOException {
-/*        if (applicationSetupService.getTelegramBotStart() != null
+        /* if (applicationSetupService.getTelegramBotStart() != null
                 ? applicationSetupService.getTelegramBotStart() : false) {
             telegramBotService.telegramBotStart();
         } */

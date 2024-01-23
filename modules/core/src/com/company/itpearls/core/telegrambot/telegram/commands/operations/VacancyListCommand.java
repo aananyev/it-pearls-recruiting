@@ -3,7 +3,6 @@ package com.company.itpearls.core.telegrambot.telegram.commands.operations;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
-import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.OpenPositionPriority;
 import org.slf4j.Logger;
@@ -35,7 +34,7 @@ public class VacancyListCommand extends OperationCommand {
             List<OpenPosition> openPositions = Utils.getOpenPosition(chat);
 
             int counter = 1;
-            Boolean subscribeFlag = isInternalUser(user);
+            Boolean subscribeFlag = Utils.isInternalUser(user);
 
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     new StringBuilder()
@@ -64,13 +63,16 @@ public class VacancyListCommand extends OperationCommand {
                         .append("</i>\n")
                         .append("<b>Приоритет:</b> <i>")
                         .append(OpenPositionPriority.fromId(openPosition.getPriority()))
-                        .append("</i>\n")
-                        .append("<b>Аккаунт\\HR на стороне заказчика: </b><i>")
-                        .append(openPosition.getProjectName().getProjectOwner().getSecondName())
-                        .append(" ")
-                        .append(openPosition.getProjectName().getProjectOwner().getFirstName())
-                        .append("</i>")
-                        .append("\n");
+                        .append("</i>\n");
+
+                if (subscribeFlag) {
+                    sb.append("<b>Аккаунт\\HR на стороне заказчика: </b><i>")
+                            .append(openPosition.getProjectName().getProjectOwner().getSecondName())
+                            .append(" ")
+                            .append(openPosition.getProjectName().getProjectOwner().getFirstName())
+                            .append("</i>")
+                            .append("\n");
+                }
 
                 sendAnswer(absSender, chat.getId(),
                         this.getCommandIdentifier(),
@@ -86,17 +88,6 @@ public class VacancyListCommand extends OperationCommand {
         }
     }
 
-    private Boolean isInternalUser(User user) {
-        String query = String.format("select e from itpearls_ExtUser e where e.telegram = '%s'", user.getUserName());
-
-        List<ExtUser> extUsers = Utils.queryListResult(query);
-
-        if (extUsers != null)
-            return extUsers.size() > 0;
-        else
-            return false;
-    }
-
     private InlineKeyboardMarkup setInline(OpenPosition openPosition, Boolean subscribeFlag) {
         InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
@@ -110,7 +101,7 @@ public class VacancyListCommand extends OperationCommand {
         InlineKeyboardButton viewDetailsButton = new InlineKeyboardButton();
         viewDetailsButton.setText("Details");
         viewDetailsButton.setCallbackData(CallbackData.VIEW_DETAIL_BUTTON
-                + CallbackData.CALLBACK_SEPARATOV
+                + CallbackData.CALLBACK_SEPARATOR
                 + openPosition.getId().toString());
 
         int count_comments = Utils.countComments(openPosition);
@@ -119,14 +110,19 @@ public class VacancyListCommand extends OperationCommand {
         if (count_comments > 0) {
             commentButton.setText("Comment (" + Utils.countComments(openPosition) + ")");
             commentButton.setCallbackData(CallbackData.COMMENT_VIEW_BUTTON
-                    + CallbackData.CALLBACK_SEPARATOV
+                    + CallbackData.CALLBACK_SEPARATOR
                     + openPosition.getId().toString());
         }
 
         InlineKeyboardButton subscribeButton = new InlineKeyboardButton();
         subscribeButton.setText("Subscribe");
         subscribeButton.setCallbackData(CallbackData.SUBSCRIBE_BUTTON
-                + CallbackData.CALLBACK_SEPARATOV
+                + CallbackData.CALLBACK_SEPARATOR
+                + openPosition.getId().toString());
+
+        InlineKeyboardButton subscribersRecruterButton = new InlineKeyboardButton();
+        subscribersRecruterButton.setCallbackData(CallbackData.SUBSCRIBERS_BUTTON
+                + CallbackData.CALLBACK_SEPARATOR
                 + openPosition.getId().toString());
 
         rowInline.add(viewInHuntTechButton);
@@ -136,6 +132,20 @@ public class VacancyListCommand extends OperationCommand {
 
         if (subscribeFlag)
             rowInline.add(subscribeButton);
+        else {
+            int subscribers_count = Utils.isOpenPositionSubscribers(CallbackData.SUBSCRIBERS_BUTTON,
+                    CallbackData.SUBSCRIBERS_BUTTON
+                            + CallbackData.CALLBACK_SEPARATOR
+                            + openPosition.getId().toString()).size();
+
+            if (subscribers_count > 0) {
+                subscribersRecruterButton.setText(new StringBuilder("Subscribers (")
+                        .append(subscribers_count)
+                        .append(")")
+                        .toString());
+                rowInline.add(subscribersRecruterButton);
+            }
+        }
 
         buttons.add(rowInline);
 

@@ -4,6 +4,7 @@ package com.company.itpearls.core.telegrambot.telegram;
 import com.company.itpearls.core.telegrambot.exeptions.UserException;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.*;
+import com.company.itpearls.entity.RecrutiesTasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
@@ -19,11 +20,9 @@ import com.company.itpearls.core.telegrambot.telegram.commands.operations.*;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Собственно, бот
@@ -70,7 +69,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
         register(new StartCommand("start", "Старт"));
         logger.debug("Команда start создана");
 
-        register(new HelpCommand("help","Помощь"));
+        register(new HelpCommand("help", "Помощь"));
         logger.debug("Команда help создана");
 
         register(new SettingsCommand("settings", "Мои настройки"));
@@ -117,25 +116,72 @@ public final class Bot extends TelegramLongPollingCommandBot {
             setAnswer(chatId, userName, answer);
         } else {
             String openPositionId = update.getCallbackQuery().getData();
-//            setAnswer(chatId, null, openPositionId);
-            String openPositionKey = openPositionId.substring(0, openPositionId.indexOf(CallbackData.CALLBACK_SEPARATOV));
+            String openPositionKey = openPositionId.substring(0,
+                    openPositionId.indexOf(CallbackData.CALLBACK_SEPARATOR));
 
             switch (openPositionKey) {
                 case CallbackData.VIEW_DETAIL_BUTTON:
-                    setAnswer(chatId, null, Utils.getOpenPositionJobDescription(openPositionId,
-                            CallbackData.VIEW_DETAIL_BUTTON));
+                    setAnswer(chatId, null,
+                            Utils.getOpenPositionJobDescription(openPositionId,
+                                    CallbackData.VIEW_DETAIL_BUTTON));
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
-                    setAnswer(chatId, null, Utils.getOpenPositionComments(openPositionId,
-                            CallbackData.COMMENT_VIEW_BUTTON));
+                    setAnswer(chatId, null,
+                            Utils.getOpenPositionComments(openPositionId,
+                                    CallbackData.COMMENT_VIEW_BUTTON));
                     break;
                 case CallbackData.SUBSCRIBE_BUTTON:
-                    openPositionSubscribe(chatId, update.getCallbackQuery().getFrom());
+                    openPositionSubscribe(chatId,
+                            update.getCallbackQuery().getFrom());
+                    break;
+
+                case CallbackData.SUBSCRIBERS_BUTTON:
+                    openPositionSubscribersRecruter(chatId, openPositionKey, openPositionId);
                     break;
                 default:
                     setAnswer(chatId, null, "ОШИБКА: Нет действия");
                     break;
             }
+        }
+    }
+
+    /**
+     * @param chatId
+     * @param openPositionKey
+     * @param openPositionCallBack
+     */
+    private void openPositionSubscribersRecruter(Long chatId,
+                                                 String openPositionKey,
+                                                 String openPositionCallBack) {
+        List<RecrutiesTasks> recrutiesTasks = Utils.isOpenPositionSubscribers(openPositionKey, openPositionCallBack);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+        StringBuilder sb = new StringBuilder()
+                .append(String.format("\nРекрутеры подписанные на вакансию (%s): ",
+                        recrutiesTasks.get(0).getOpenPosition().getVacansyName()))
+                .append("\n\n");
+
+        if (recrutiesTasks.size() > 0) {
+            for (RecrutiesTasks rt : recrutiesTasks) {
+                sb.append(rt.getReacrutier().getName())
+                        .append(" c ")
+                        .append(sdf.format(rt.getStartDate()))
+                        .append(" по ")
+                        .append(sdf.format(rt.getEndDate()))
+                        .append(". Отправить резюме:");
+                if (rt.getReacrutier().getEmail() != null)
+                    sb.append(" ")
+                            .append(rt.getReacrutier().getEmail());
+                if (rt.getReacrutier().getTelegram() != null)
+                    sb.append(" ")
+                            .append(rt.getReacrutier().getTelegram().substring(0, 1).equals("@") ?
+                                    rt.getReacrutier().getTelegram() :
+                                    "@" + rt.getReacrutier().getTelegram());
+
+                sb.append("\n");
+            }
+
+            setAnswer(chatId, null, sb.toString());
         }
     }
 
@@ -187,9 +233,10 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
     /**
      * Отправка ответа
-     * @param chatId id чата
+     *
+     * @param chatId   id чата
      * @param userName имя пользователя
-     * @param text текст ответа
+     * @param text     текст ответа
      */
     private void setAnswer(Long chatId, String userName, String text) {
         SendMessage answer = new SendMessage();

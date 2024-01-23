@@ -121,7 +121,9 @@
         </collection>
         <collection id="suggestOpenPositionDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local"/>
+            <view extends="_local">
+                <property name="positionType" view="_local"/>
+            </view>
             <loader id="suggestOpenPositionDl"
                     cacheable="true">
                 <query>
@@ -170,7 +172,11 @@
         </collection>
         <collection id="interactionCommentDc"
                     class="com.company.itpearls.entity.IteractionList">
-            <view extends="_local"/>
+            <view extends="_local">
+                <property name="vacancy" view="_local">
+                    <property name="positionType" view="_local"/>
+                </property>
+            </view>
             <loader id="interactionCommentDl" cacheable="true">
                 <query>
                     <![CDATA[select e

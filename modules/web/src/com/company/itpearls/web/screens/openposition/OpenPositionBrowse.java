@@ -1276,7 +1276,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     (ExtUser) userSession.getUser());
 
             telegramService.sendMessageToChat(openPositionService
-                                    .getOpenPositionOpenShortMessage(entity, userSession.getUser()));
+                    .getOpenPositionOpenShortMessage(entity, userSession.getUser()));
 
             entity.setOwner((ExtUser) userSession.getUser());
             entity.setLastOpenDate(new Date());
@@ -2731,7 +2731,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         VBoxLayout retHbox = uiComponents.create(VBoxLayout.NAME);
         Label retLabel = uiComponents.create(Label.NAME);
 
-
         if (dataManager.load(OpenPosition.class)
                 .query(QUERY_PARENT_OPENPOSITION)
                 .parameter("parentOpenPosition", columnGeneratorEvent.getItem())
@@ -2799,15 +2798,21 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retLabel.setHeightAuto();
         retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
-        retHbox.setWidth("100px");
-        retHbox.setHeight("60px");
+//        retHbox.setWidth("100px");
+//        retHbox.setHeight("60px");
+        retHbox.setWidthFull();
+        retHbox.setHeightFull();
+        retHbox.setSpacing(false);
+        retHbox.setMargin(false);
         retHbox.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
         HBoxLayout signsHBox = uiComponents.create(HBoxLayout.class);
         signsHBox.setSpacing(false);
-        signsHBox.setMargin(true);
-        signsHBox.setWidthAuto();
+        signsHBox.setMargin(false);
         signsHBox.setHeightAuto();
+        signsHBox.setWidthFull();
+
+        ProgressBar progressBar = getOpenPositionTimerProgressBar(columnGeneratorEvent);
 
         signsHBox.add(setSignClosingVecency(columnGeneratorEvent));
         signsHBox.add(setSignAttachments(columnGeneratorEvent));
@@ -2819,7 +2824,42 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retHbox.add(retLabel);
         retHbox.add(signsHBox);
+        if (progressBar != null) {
+            retHbox.add(progressBar);
+        }
+
         return retHbox;
+    }
+
+    private ProgressBar getOpenPositionTimerProgressBar(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
+        StringBuilder sb = new StringBuilder();
+
+        ProgressBar progressBar = uiComponents.create(ProgressBar.class);
+        progressBar.setWidth("100px");
+
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.add(1, Calendar.MONTH);
+
+        if (columnGeneratorEvent.getItem().getClosingDate() != null) {
+            if (columnGeneratorEvent.getItem().getLastOpenDate() != null) {
+                long a1 = columnGeneratorEvent.getItem().getClosingDate().getTime() - columnGeneratorEvent.getItem().getLastOpenDate().getTime();
+                long a2 = new Date().getTime() - columnGeneratorEvent.getItem().getLastOpenDate().getTime();
+
+                if (a1 == 0)
+                    return null;
+
+                double progress = (double) a2 / (double) a1;
+
+                progressBar.setValue(progress);
+
+                return progressBar;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     private String getTimerClosingVacancyValue(Date closingDate) {
@@ -2858,15 +2898,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setWidth(width_20px);
         retLabel.setHeight(width_20px);
-        retLabel.setStyleName("open_position_sign_label_black");
+        retLabel.setStyleName("icon-no-border-20px");
 
         if (columnGeneratorEvent.getItem().getClosingDate() != null) {
             if (columnGeneratorEvent.getItem().getClosingDate().after(new Date())) {
                 retLabel.setIcon(CubaIcon.CLOCK_O.source());
                 retLabel.setDescription(getTimerClosingVacancyValue(columnGeneratorEvent.getItem().getClosingDate()));
+                retLabel.addStyleName("h4-gray");
             } else {
                 retLabel.setIcon(CubaIcon.STOP_CIRCLE.source());
                 retLabel.setDescription(messageBundle.getMessage("msgVacancyExpired"));
+                retLabel.addStyleName("h4-red");
             }
 
             retLabel.setVisible(true);

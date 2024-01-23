@@ -66,7 +66,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
-    private String getTimerClosingVacancyValue(Date closingDate) {
+    public String getTimerClosingVacancyValue(Date closingDate) {
         StringBuilder sb = new StringBuilder();
 
         if (closingDate != null) {
@@ -2047,10 +2047,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                         BigDecimal percent = new BigDecimal(10);
 
-                        textSalaryMessage = "От " +
-                                minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN) +
-                                " до " +
-                                maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN);
+                        textSalaryMessage = new StringBuilder("От ")
+                                .append(minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN))
+                                .append(" до ")
+                                .append(maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN))
+                                .toString();
 
                         textFieldRecrutierSalary.setValue(textSalaryMessage);
                     }
@@ -2071,12 +2072,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                             BigDecimal percent = new BigDecimal(textFieldResearcherSalaryPercentOrSum.getValue());
 
-                            textSalaryMessage = "От " +
-                                    minSalary.multiply(percent).divide(hungred)
-                                            .setScale(0, RoundingMode.HALF_EVEN) +
-                                    " до " +
-                                    maxSalary.multiply(percent).divide(hungred)
-                                            .setScale(0, RoundingMode.HALF_EVEN);
+                            textSalaryMessage = new StringBuilder("От ")
+                                    .append(minSalary.multiply(percent).divide(hungred)
+                                            .setScale(0, RoundingMode.HALF_EVEN))
+                                    .append(" до ")
+                                    .append(maxSalary.multiply(percent).divide(hungred)
+                                            .setScale(0, RoundingMode.HALF_EVEN))
+                                    .toString();
 
                             textFieldRecrutierSalary.setValue(textSalaryMessage);
                         } else {
@@ -2534,29 +2536,35 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private String generatePositionNameInProject() {
-        String retValue = vacansyNameField.getValue();
+        StringBuilder retValue = new StringBuilder(vacansyNameField.getValue());
 
         if (vacansyNameField.getValue() != null) {
-            if (generatePositionName().equals(retValue)) {
+            if (generatePositionName().equals(retValue.toString())) {
                 if (projectNameField.getValue() != null) {
                     if (projectNameField.getValue().getProjectName() != null) {
-                        retValue = retValue + " (" + projectNameField.getValue().getProjectName() + ")";
+                        retValue.append(" (")
+                                .append(projectNameField.getValue().getProjectName())
+                                .append(")");
                     }
                 }
             }
         }
 
-        return retValue;
+        return retValue.toString();
     }
 
     private String generatePositionNameCity() {
-        String retValue = vacansyNameField.getValue();
+        StringBuilder retValue = new StringBuilder(vacansyNameField.getValue());
+//        String retValue = vacansyNameField.getValue();
 
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (cityOpenPositionField.getValue() != null) {
                 if (retValue != null) {
-                    if (generatePositionNameInProject().equals(retValue)) {
-                        retValue = retValue.substring(0, retValue.length() - 1) + ", " + cityOpenPositionField.getValue().getCityRuName() + ")";
+                    if (generatePositionNameInProject().equals(retValue.toString())) {
+                        retValue = new StringBuilder(retValue.substring(0, retValue.length() - 1))
+                                .append(", ")
+                                .append(cityOpenPositionField.getValue().getCityRuName())
+                                .append(")");
                     }
                 } else {
                     retValue = null;
@@ -2564,7 +2572,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
         }
 
-        return retValue;
+        return retValue != null ? retValue.toString() : null;
     }
 
     @Subscribe("cityOpenPositionField")

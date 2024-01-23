@@ -13,6 +13,8 @@ import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.View;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -24,8 +26,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class Utils {
+    private static Logger logger = LoggerFactory.getLogger(Bot.class);
 
     private static final int MAX_TELEGRAM_MESSAGE_LENGTH = 4096;
 
@@ -443,5 +447,48 @@ public class Utils {
 
     public static int countComments(OpenPosition openPosition) {
         return openPosition.getOpenPositionComments().size();
+    }
+
+    public static List<RecrutiesTasks> isOpenPositionSubscribers(String openPositionKey, String openPositionCallBack) {
+        String queryStr = "select e from itpearls_RecrutiesTasks e where e.openPosition.id = :openPositionId and :currentDate between e.startDate and e.endDate";
+        List<RecrutiesTasks> recrutiesTasks = new ArrayList<>();
+        String openPositionId = openPositionCallBack.substring(openPositionKey.length() + 1);
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(queryStr);
+                query.addView(new View(RecrutiesTasks.class)
+                        .addProperty("reacrutier", new View(ExtUser.class)
+                                .addProperty("name")
+                                .addProperty("telegram")
+                                .addProperty("email"))
+                        .addProperty("openPosition", new View(OpenPosition.class)
+                                .addProperty("id")
+                                .addProperty("vacansyName")));
+                query.setParameter("currentDate", new Date());
+                query.setParameter("openPositionId", UUID.fromString(openPositionId));
+
+                recrutiesTasks = (List<RecrutiesTasks>) query.getResultList();
+                tx.commit();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("SQL error: %s", e.getMessage()));
+        } finally {
+            return recrutiesTasks;
+        }
+    }
+
+    public static Boolean isInternalUser(User user) {
+        String query = String.format("select e from itpearls_ExtUser e where e.telegram = '%s'", user.getUserName());
+
+        List<ExtUser> extUsers = Utils.queryListResult(query);
+
+        if (extUsers != null)
+            return extUsers.size() > 0;
+        else
+            return false;
     }
 }
