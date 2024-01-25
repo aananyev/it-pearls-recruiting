@@ -1283,11 +1283,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             StringBuilder sb = new StringBuilder()
-                    .append("❗\uFE0F❗\uFE0F❗\uFE0FНовая вакансия: ")
+                    .append("❗\uFE0F<b>НОВАЯ ВАКАНСИЯ:</b> ")
+                    .append(numberPositionField.getValue() != null ? "№" + numberPositionField.getValue() + " " : "")
                     .append(vacansyNameField.getValue())
                     .append("\n\n")
                     .append(openPositionRichTextArea.getValue())
-                    .append("\n\nЗарплатное предложение: от ")
+                    .append("\n\n<b>Зарплатное предложение:</b> от ")
                     .append(openPositionFieldSalaryMin.getValue())
                     .append(" до ")
                     .append(openPositionFieldSalaryMax.getValue())
@@ -1300,9 +1301,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             Boolean flag = getEditedEntity().getOpenClose() != null ? getEditedEntity().getOpenClose() : false;
 
-            if (!flag) {
+            if (false) {
+//                if (!flag) {
                 telegramService.sendMessageToChat(textManipulationService
-                        .formattedHtml2text(new StringBuilder("❗\uFE0F❗\uFE0F❗\uFE0FИзменена вакансия: ")
+                        .formattedHtml2text(new StringBuilder("❗\uFE0F<B>ИЗМЕНЕНА ВАКАНСИЯ:</b> ")
                                 .append(vacansyNameField.getValue())
                                 .append(userSession.getUser().getName())
                                 .toString()));

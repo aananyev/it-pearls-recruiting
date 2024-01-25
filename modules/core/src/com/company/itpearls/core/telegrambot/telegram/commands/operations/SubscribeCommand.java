@@ -29,10 +29,10 @@ public class SubscribeCommand extends OperationCommand{
                     this.getCommandIdentifier(),
                     Utils.getUserName(user),
                     new StringBuilder()
-                            .append("*")
+                            .append("<b><u>")
                             .append(Utils.getBotName())
-                            .append("*\n")
-                            .append("**Всего подписок на вакансии: **")
+                            .append("</u></b>\n")
+                            .append("<b>ВСЕГО ПОДПИСОК НА ВАКАНСИИ:</b> **")
                             .append(recrutiesTasks.size())
                             .append("\n\n")
                             .toString());
@@ -45,13 +45,13 @@ public class SubscribeCommand extends OperationCommand{
                 sb.append(counter++)
                         .append(". ")
                         .append(recrutiesTask.getOpenPosition().getVacansyName())
-                        .append("\nC **")
+                        .append("\nC <i>")
                         .append(simpleDateFormat.format(recrutiesTask.getStartDate()))
-                        .append("** по **")
+                        .append("</i> по <i>")
                         .append(simpleDateFormat.format(recrutiesTask.getEndDate()))
-                        .append("\n** Рекрутер: **")
+                        .append("\n</i><b> Рекрутер: </b><i>")
                         .append(recrutiesTask.getReacrutier().getName())
-                        .append("**\n");
+                        .append("</i>\n");
 
                 sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), Utils.getUserName(user), sb.toString());
             }

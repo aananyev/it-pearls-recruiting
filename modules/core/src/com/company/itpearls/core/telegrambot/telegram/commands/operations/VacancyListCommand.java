@@ -18,14 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VacancyListCommand extends OperationCommand {
-
     private Logger logger = LoggerFactory.getLogger(SettingsCommand.class);
-
-
     public VacancyListCommand(String identifier, String description) {
         super(identifier, description);
     }
-
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
         String userName = Utils.getUserName(user);
@@ -107,11 +103,11 @@ public class VacancyListCommand extends OperationCommand {
         int count_comments = Utils.countComments(openPosition);
         InlineKeyboardButton commentButton = new InlineKeyboardButton();
 
-        if (count_comments > 0) {
-            commentButton.setText("Comment (" + Utils.countComments(openPosition) + ")");
-            commentButton.setCallbackData(CallbackData.COMMENT_VIEW_BUTTON
-                    + CallbackData.CALLBACK_SEPARATOR
-                    + openPosition.getId().toString());
+            if (count_comments > 0) {
+                commentButton.setText("Comment (" + Utils.countComments(openPosition) + ")");
+                commentButton.setCallbackData(CallbackData.COMMENT_VIEW_BUTTON
+                        + CallbackData.CALLBACK_SEPARATOR
+                        + openPosition.getId().toString());
         }
 
         InlineKeyboardButton subscribeButton = new InlineKeyboardButton();
@@ -127,12 +123,14 @@ public class VacancyListCommand extends OperationCommand {
 
         rowInline.add(viewInHuntTechButton);
         rowInline.add(viewDetailsButton);
-        if (count_comments > 0)
-            rowInline.add(commentButton);
 
-        if (subscribeFlag)
+
+        if (subscribeFlag) {
+            if (count_comments > 0) {
+                rowInline.add(commentButton);
+            }
             rowInline.add(subscribeButton);
-        else {
+        } else {
             int subscribers_count = Utils.isOpenPositionSubscribers(CallbackData.SUBSCRIBERS_BUTTON,
                     CallbackData.SUBSCRIBERS_BUTTON
                             + CallbackData.CALLBACK_SEPARATOR

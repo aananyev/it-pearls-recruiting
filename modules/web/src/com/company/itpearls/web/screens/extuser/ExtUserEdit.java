@@ -4,6 +4,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 @UiController("itpearls_ExtUserEdit")
 @UiDescriptor("ext-user-edit.xml")
@@ -16,12 +17,10 @@ public class ExtUserEdit extends Screen {
     private FileUploadField fileImageFaceUpload;
     @Inject
     private Image userPic;
-
     @Install(to = "emailFieldPasswordRequired.smtpPasswordRequired", subject = "validator")
     private void emailFieldPasswordRequiredSmtpPasswordRequiredValidator(Boolean aBoolean) {
         smtpPassword.setRequired(aBoolean);
     }
-
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
         try {
@@ -38,8 +37,6 @@ public class ExtUserEdit extends Screen {
             e.printStackTrace();
         }
     }
-
-
     @Subscribe("userPic")
     public void onUserPicSourceChange(ResourceView.SourceChangeEvent event) {
         setCandidatePicImage();

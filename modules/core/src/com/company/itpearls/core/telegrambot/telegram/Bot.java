@@ -5,6 +5,11 @@ import com.company.itpearls.core.telegrambot.exeptions.UserException;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.*;
 import com.company.itpearls.entity.RecrutiesTasks;
+import com.haulmont.cuba.core.EntityManager;
+import com.haulmont.cuba.core.Persistence;
+import com.haulmont.cuba.core.Query;
+import com.haulmont.cuba.core.Transaction;
+import com.haulmont.cuba.core.global.AppBeans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
@@ -28,6 +33,7 @@ import java.util.stream.Collectors;
  * Собственно, бот
  */
 public final class Bot extends TelegramLongPollingCommandBot {
+    private static final String QUERY_UPDATE = "update ";
     private Logger logger = LoggerFactory.getLogger(Bot.class);
 
     private final String BOT_NAME;
@@ -111,7 +117,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
         if (!update.hasCallbackQuery()) {
             String userName = Utils.getUserName(msg);
-
             String answer = nonCommand.nonCommandExecute(chatId, userName, msg.getText());
             setAnswer(chatId, userName, answer);
         } else {
@@ -131,15 +136,15 @@ public final class Bot extends TelegramLongPollingCommandBot {
                                     CallbackData.COMMENT_VIEW_BUTTON));
                     break;
                 case CallbackData.SUBSCRIBE_BUTTON:
-                    openPositionSubscribe(chatId,
-                            update.getCallbackQuery().getFrom());
+                    openPositionSubscribe(chatId, update.getCallbackQuery().getFrom().getUserName(),
+                            update.getCallbackQuery().getFrom(), openPositionKey, openPositionId);
                     break;
 
                 case CallbackData.SUBSCRIBERS_BUTTON:
                     openPositionSubscribersRecruter(chatId, openPositionKey, openPositionId);
                     break;
                 default:
-                    setAnswer(chatId, null, "ОШИБКА: Нет действия");
+                    setAnswer(chatId, null, "❌ОШИБКА: Нет действия");
                     break;
             }
         }
@@ -185,8 +190,43 @@ public final class Bot extends TelegramLongPollingCommandBot {
         }
     }
 
-    private void openPositionSubscribe(Long chatId, User user) {
-        setAnswer(chatId, null, "User: " + user.getUserName());
+    private void openPositionSubscribe(Long chatId, String userName, User user, String openPositionKey,
+                                       String openPositionCallBack) {
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.add(7, GregorianCalendar.DAY_OF_MONTH);
+
+        RecrutiesTasks recrutiesTasks = new RecrutiesTasks();
+        recrutiesTasks.setSubscribe(false);
+        recrutiesTasks.setOpenPosition(Utils.getOpenPosition(openPositionCallBack, openPositionKey).get(0));
+        recrutiesTasks.setClosed(false);
+        recrutiesTasks.setRecrutierName(user.getUserName());
+        recrutiesTasks.setReacrutier(Utils.getInternalUser(userName));
+        recrutiesTasks.setStartDate(new Date());
+        recrutiesTasks.setEndDate(gregorianCalendar.getTime());
+        recrutiesTasks.setCreatedBy(user.getUserName());
+        recrutiesTasks.setCreateTs(new Date());
+        recrutiesTasks.setId(UUID.randomUUID());
+
+        if (!Utils.isRecrutiesTaskValide(recrutiesTasks,user)) {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                EntityManager em = persistence.getEntityManager();
+                em.merge(recrutiesTasks);
+                tx.commit();
+            } catch (Exception e) {
+                logger.error(String.format("Error: ошибка добавления сущности RecrutiesTask% %s", e.getMessage()));
+            }
+
+            setAnswer(chatId, null, String.format("✅User: %s (%s) подписан на вакансию %s", user.getUserName(),
+                    Utils.getInternalUser(userName).getName(),
+                    Utils.getOpenPosition(openPositionCallBack, openPositionKey).get(0).getVacansyName()));
+        } else {
+            setAnswer(chatId, null, String.format("\uD83D\uDED1User: %s (%s) не удалось подписаться на вакансию: %s.",
+                    user.getUserName(),
+                    Utils.getInternalUser(userName).getName(),
+                    Utils.getOpenPosition(openPositionCallBack, openPositionKey).get(0).getVacansyName()));
+        }
     }
 
     public void sendImage(Long chatId, String path) throws UserException {
@@ -213,7 +253,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
         String command = update.getMessage().getText().substring(1);
         setAnswer(update.getMessage().getChatId(),
                 Utils.getUserName(update.getMessage()),
-                String.format("Некорректная команда [%s], доступные команды: %s"
+                String.format("❌Некорректная команда [%s], доступные команды: %s"
                         , command
                         , registeredCommands.toString()));
     }

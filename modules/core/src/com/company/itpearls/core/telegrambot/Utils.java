@@ -23,6 +23,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,6 +70,27 @@ public class Utils {
                 Query query = em.createQuery(queryStr);
                 query.addView(view);
                 query.setParameter(field, date);
+
+                retObj = (T) query.getResultList();
+                tx.commit();
+            }
+
+        } finally {
+            return (T) retObj;
+        }
+    }
+
+    private static <T> T queryListResult(String queryStr, View view, UUID uuid) {
+        Object retObj = null;
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(queryStr);
+                query.addView(view);
+                query.setParameter("uuid", uuid);
 
                 retObj = (T) query.getResultList();
                 tx.commit();
@@ -260,6 +282,33 @@ public class Utils {
                 "date", new Date());
     }
 
+    public static List<RecrutiesTasks> getRecrutiesTasks(ExtUser user) {
+        List<RecrutiesTasks> recrutiesTasksUser = new ArrayList<>();
+        List<RecrutiesTasks> recrutiesTasks = queryListResult("select e from itpearls_RecrutiesTasks e " +
+                        "where :date between e.startDate and e.endDate",
+                new View(RecrutiesTasks.class)
+                        .addProperty("startDate")
+                        .addProperty("endDate")
+                        .addProperty("recrutierName")
+                        .addProperty("reacrutier",
+                                new View(ExtUser.class)
+                                        .addProperty("name"))
+                        .addProperty("openPosition",
+                                new View(OpenPosition.class)
+                                        .addProperty("vacansyName")),
+                "date", new Date());
+
+        if (recrutiesTasks.size() > 0) {
+            for (RecrutiesTasks rt : recrutiesTasks) {
+                if (rt.getReacrutier().equals(user)) {
+                    recrutiesTasksUser.add(rt);
+                }
+            }
+        }
+
+        return recrutiesTasksUser;
+    }
+
     public static int getPriority() {
         int priority = 3;
         long chatid = Long.parseLong(TelegramBotStatus.getApplicationSetup().getTelegramChatOpenPosition());
@@ -280,6 +329,9 @@ public class Utils {
     private static final String QUERY_LIST_OPEN_POSITION =
             "select e from itpearls_OpenPosition e " +
                     "where (e.priority >= %s) and (not e.openClose = true)";
+    private static final String QUERY_LIST_OPEN_POSITION_ID =
+            "select e from itpearls_OpenPosition e " +
+                    "where e.id = :uuid";
 
     public static List<OpenPosition> getOpenPosition(Chat chat) {
         int priority = Utils.getPriority(chat);
@@ -303,6 +355,31 @@ public class Utils {
                                 new View(Position.class)
                                         .addProperty("positionEnName")
                                         .addProperty("positionRuName")));
+
+        return result;
+    }
+
+    public static UUID getUUID(String callBack, String key) {
+        return UUID.fromString(callBack.substring(key.length() + 1));
+    }
+
+    public static List<OpenPosition> getOpenPosition(String openPositionCallBack, String openPositionKey) {
+
+        List<OpenPosition> result = queryListResult(QUERY_LIST_OPEN_POSITION_ID,
+                new View(OpenPosition.class)
+                        .addProperty("vacansyName")
+                        .addProperty("projectName",
+                                new View(Project.class)
+                                        .addProperty("projectName")
+                                        .addProperty("projectOwner",
+                                                new View(Person.class)
+                                                        .addProperty("firstName")
+                                                        .addProperty("secondName")))
+                        .addProperty("positionType",
+                                new View(Position.class)
+                                        .addProperty("positionEnName")
+                                        .addProperty("positionRuName")),
+                Utils.getUUID(openPositionCallBack, openPositionKey));
 
         return result;
     }
@@ -352,12 +429,14 @@ public class Utils {
 
     public static String getOpenPositionComments(String openPosition, String key) {
         String openPositionId = openPosition.replace(key, "");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd EEEE yyyy H:m");
 
         String QUERY_GET_COMMENT = String.format("select e from itpearls_OpenPositionComment e where e.openPosition.id = '%s'",
                 openPositionId.substring(1, openPositionId.length()));
 
         List<OpenPositionComment> openPositionComments = queryListResult(QUERY_GET_COMMENT,
                 new View(OpenPositionComment.class)
+                        .addProperty("dateComment")
                         .addProperty("openPosition", new View(OpenPosition.class)
                                 .addProperty("vacansyName"))
                         .addProperty("user", new View(ExtUser.class)
@@ -372,10 +451,13 @@ public class Utils {
         int counter = 1;
 
         for (OpenPositionComment openPositionComment : openPositionComments) {
-            stringBuilder.append(counter).append(". ")
+            stringBuilder.append(counter++)
+                    .append(". <b>Дата:</b> ")
+                    .append(sdf.format(openPositionComment.getDateComment()))
+                    .append("\n<i>")
                     .append(openPositionComment.getComment())
-                    .append("\n")
-                    .append("Автор: ")
+                    .append("</i>\n")
+                    .append("<b>Автор:</b> ")
                     .append(openPositionComment.getUser().getName())
                     .append("\n\n");
         }
@@ -482,7 +564,7 @@ public class Utils {
     }
 
     public static Boolean isInternalUser(User user) {
-        String query = String.format("select e from itpearls_ExtUser e where e.telegram = '%s'", user.getUserName());
+        String query = String.format("select e from itpearls_ExtUser e where e.telegram like '%%%s'", user.getUserName());
 
         List<ExtUser> extUsers = Utils.queryListResult(query);
 
@@ -490,5 +572,46 @@ public class Utils {
             return extUsers.size() > 0;
         else
             return false;
+    }
+
+    public static ExtUser getInternalUser(String userName) {
+        String query = String.format("select e from itpearls_ExtUser e where e.telegram like '%%%s'", userName);
+
+        List<ExtUser> extUsers = Utils.queryListResult(query);
+
+        if (extUsers != null)
+            return extUsers.get(0);
+        else
+            return null;
+    }
+
+    public static boolean isRecrutiesTaskValide(RecrutiesTasks recrutiesTasks, User user) {
+        List<RecrutiesTasks> retObj = null;
+        String QUERY_RECTUTIERS_TASKS_IS = "select e from itpearls_RecrutiesTasks e " +
+                "where (:currentDate between e.startDate and e.endDate) " +
+                "and e.reacrutier = :reacrutier " +
+                "and e.openPosition = :openPosition";
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(QUERY_RECTUTIERS_TASKS_IS)
+                        .setParameter("openPosition", recrutiesTasks.getOpenPosition())
+                        .setParameter("reacrutier", recrutiesTasks.getReacrutier())
+                        .setParameter("currentDate", new Date());
+
+                retObj = (List<RecrutiesTasks>) query.getResultList();
+                tx.commit();
+            }
+
+        } finally {
+            if (retObj != null) {
+                return retObj.size() > 0 ? true : false;
+            } else {
+                return false;
+            }
+        }
     }
 }
