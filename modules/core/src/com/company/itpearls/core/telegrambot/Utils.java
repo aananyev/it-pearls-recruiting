@@ -200,6 +200,14 @@ public class Utils {
         }
     }
 
+    public static String getAppURL() {
+        String appUrl = AppBeans.get(Configuration.class)
+                .getConfig(ServerConfig.class)
+                .getUserSessionProviderUrl();
+
+        return appUrl;
+    }
+
     public static String getOpenPositionEditorURL(OpenPosition openPosition, String text) {
         StringBuilder sb = new StringBuilder();
 
@@ -270,6 +278,8 @@ public class Utils {
         return queryListResult("select e from itpearls_RecrutiesTasks e " +
                         "where :date between e.startDate and e.endDate",
                 new View(RecrutiesTasks.class)
+                        .addProperty("email")
+                        .addProperty("telegram")
                         .addProperty("startDate")
                         .addProperty("endDate")
                         .addProperty("recrutierName")
@@ -282,31 +292,42 @@ public class Utils {
                 "date", new Date());
     }
 
+    public static List<RecrutiesTasks> getMyRecrutiesTasks(ExtUser user) {
+        return Utils.getRecrutiesTasks(user);
+    }
+
     public static List<RecrutiesTasks> getRecrutiesTasks(ExtUser user) {
         List<RecrutiesTasks> recrutiesTasksUser = new ArrayList<>();
-        List<RecrutiesTasks> recrutiesTasks = queryListResult("select e from itpearls_RecrutiesTasks e " +
-                        "where :date between e.startDate and e.endDate",
-                new View(RecrutiesTasks.class)
-                        .addProperty("startDate")
-                        .addProperty("endDate")
-                        .addProperty("recrutierName")
-                        .addProperty("reacrutier",
-                                new View(ExtUser.class)
-                                        .addProperty("name"))
-                        .addProperty("openPosition",
-                                new View(OpenPosition.class)
-                                        .addProperty("vacansyName")),
-                "date", new Date());
+        String QUERY_GETRECRUTIES_TASK_USER = "select e from itpearls_RecrutiesTasks e " +
+                "where (:date between e.startDate and e.endDate) and e.reacrutier = :reacrutier";
 
-        if (recrutiesTasks.size() > 0) {
-            for (RecrutiesTasks rt : recrutiesTasks) {
-                if (rt.getReacrutier().equals(user)) {
-                    recrutiesTasksUser.add(rt);
-                }
-            }
+        Persistence persistence = AppBeans.get(Persistence.class);
+        try (Transaction tx = persistence.createTransaction()) {
+            View view = new View(RecrutiesTasks.class)
+                    .addProperty("startDate")
+                    .addProperty("endDate")
+                    .addProperty("recrutierName")
+                    .addProperty("reacrutier",
+                            new View(ExtUser.class)
+                                    .addProperty("name"))
+                    .addProperty("openPosition",
+                            new View(OpenPosition.class)
+                                    .addProperty("vacansyName"));
+
+            // get EntityManager for the current transaction
+            EntityManager em = persistence.getEntityManager();
+            Query query = em.createQuery(QUERY_GETRECRUTIES_TASK_USER)
+                    .setParameter("date", new Date())
+                    .setParameter("reacrutier", user);
+            query.addView(view);
+
+            recrutiesTasksUser = query.getResultList();
+            tx.commit();
+        } catch (Exception e) {
+            logger.error("Ошибка получения списка заданий рекрутеру RecriturTasks");
+        } finally {
+            return recrutiesTasksUser;
         }
-
-        return recrutiesTasksUser;
     }
 
     public static int getPriority() {
@@ -399,11 +420,12 @@ public class Utils {
                 .append("Бот *")
                 .append(getBotName())
                 .append("*\n\n")
-                .append("Описание команд:\n")
-                .append("*/allvacancy* - список открытых вакансий\n")
-                .append("*/subscribe* - мои подписки на вакансии\n")
-                .append("*/settings* - настройки\n")
-                .append("*/help* - получение помощи\n\n")
+                .append("ОПИСАНИЕ КОМАНД БОТА:\n")
+                .append("/allvacancy - список открытых вакансий\n")
+                .append("/mysubscribe - мои подписки на вакансии\n")
+                .append("/subscribers - подписчики на вакансии\n")
+//                .append("/settings - настройки\n")
+                .append("/help - получение помощи\n\n")
                 .toString();
     }
 

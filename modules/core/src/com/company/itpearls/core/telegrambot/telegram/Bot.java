@@ -7,7 +7,6 @@ import com.company.itpearls.core.telegrambot.telegram.commands.service.*;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
-import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.global.AppBeans;
 import org.slf4j.Logger;
@@ -66,7 +65,10 @@ public final class Bot extends TelegramLongPollingCommandBot {
         register(new VacancyListCommand("allvacancy", "Все вакансии"));
         logger.debug("Команда allvacancy создана");
 
-        register(new SubscribeCommand("subscribe", "Подписки на вакансии"));
+        register(new SubscribeCommand("subscribers", "Подписки на вакансии"));
+        logger.debug("Команда subscribe создана");
+
+        register(new MySubscribeCommand("mysubscribe", "Мои подписки на вакансии"));
         logger.debug("Команда subscribe создана");
 
         register(new UserSessionTg("usersession", "Пользователи в системе"));
@@ -242,10 +244,16 @@ public final class Bot extends TelegramLongPollingCommandBot {
     }
 
     private void setRegisteredCommands() {
-        registeredCommands = getRegisteredCommands()
+        List<String> commands = new ArrayList<>();
+
+        commands = getRegisteredCommands()
                 .stream()
                 .map(IBotCommand::getCommandIdentifier)
                 .collect(Collectors.toList());
+
+        for(String command : commands) {
+            registeredCommands.add(new StringBuilder("/").append(command).toString());
+        }
     }
 
     @Override

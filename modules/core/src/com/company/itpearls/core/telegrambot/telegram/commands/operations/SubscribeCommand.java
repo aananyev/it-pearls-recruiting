@@ -12,8 +12,9 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class SubscribeCommand extends OperationCommand{
+public class SubscribeCommand extends OperationCommand {
     private Logger logger = LoggerFactory.getLogger(SettingsCommand.class);
+
     public SubscribeCommand(String identifier, String description) {
         super(identifier, description);
     }
@@ -32,6 +33,7 @@ public class SubscribeCommand extends OperationCommand{
                             .append("<b><u>")
                             .append(Utils.getBotName())
                             .append("</u></b>\n")
+                            .append("<b>ПОДПИСЧИКОВ НА ВАКАНСИИ</b>\n")
                             .append("<b>ВСЕГО ПОДПИСОК НА ВАКАНСИИ:</b> **")
                             .append(recrutiesTasks.size())
                             .append("\n\n")
@@ -51,7 +53,14 @@ public class SubscribeCommand extends OperationCommand{
                         .append(simpleDateFormat.format(recrutiesTask.getEndDate()))
                         .append("\n</i><b> Рекрутер: </b><i>")
                         .append(recrutiesTask.getReacrutier().getName())
-                        .append("</i>\n");
+                        .append("</i> Связаться: ")
+                        .append(recrutiesTask.getReacrutier().getEmail() != null ? recrutiesTask.getReacrutier().getEmail() : "");
+
+                if (recrutiesTask.getReacrutier().getEmail() != null && recrutiesTask.getReacrutier().getTelegram() != null) {
+                    sb.append(", ");
+                }
+
+                sb.append(recrutiesTask.getReacrutier().getTelegram() != null ? recrutiesTask.getReacrutier().getTelegram() : "");
 
                 sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), Utils.getUserName(user), sb.toString());
             }

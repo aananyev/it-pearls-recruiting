@@ -1284,7 +1284,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             StringBuilder sb = new StringBuilder()
                     .append("❗\uFE0F<b>НОВАЯ ВАКАНСИЯ:</b> ")
-                    .append(numberPositionField.getValue() != null ? "№" + numberPositionField.getValue() + " " : "")
+                    .append(numberPositionField.getValue() != null ? "(" + numberPositionField.getValue() + ") " : "")
                     .append(vacansyNameField.getValue())
                     .append("\n\n")
                     .append(openPositionRichTextArea.getValue())
@@ -1305,6 +1305,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 //                if (!flag) {
                 telegramService.sendMessageToChat(textManipulationService
                         .formattedHtml2text(new StringBuilder("❗\uFE0F<B>ИЗМЕНЕНА ВАКАНСИЯ:</b> ")
+                                .append(vacansyIDTextField.getValue() != null
+                                        ? "(" + vacansyIDTextField.getValue() + ")" : "")
+                                .append(" ")
                                 .append(vacansyNameField.getValue())
                                 .append(userSession.getUser().getName())
                                 .toString()));
