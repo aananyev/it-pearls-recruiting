@@ -36,7 +36,6 @@ public class SignIconServiceBean implements SignIconService {
 
             signIcons.setTitleRu(iconRu[i]);
             signIcons.setTitleEnd(iconEnd[i]);
-//            signIcons.setIconName(icon[i]);
             signIcons.setIconColor(iconColor[i]);
             signIcons.setUser((ExtUser) userSessionSource.getUserSession().getUser());
 

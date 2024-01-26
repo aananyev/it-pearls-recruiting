@@ -121,11 +121,11 @@ public class VacancyListCommand extends OperationCommand {
                 + CallbackData.CALLBACK_SEPARATOR
                 + openPosition.getId().toString());
 
-        rowInline.add(viewInHuntTechButton);
         rowInline.add(viewDetailsButton);
 
 
         if (subscribeFlag) {
+            rowInline.add(viewInHuntTechButton);
             if (count_comments > 0) {
                 rowInline.add(commentButton);
             }

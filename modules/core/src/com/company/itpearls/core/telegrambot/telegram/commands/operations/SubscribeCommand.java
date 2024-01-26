@@ -34,7 +34,7 @@ public class SubscribeCommand extends OperationCommand {
                             .append(Utils.getBotName())
                             .append("</u></b>\n")
                             .append("<b>ПОДПИСЧИКОВ НА ВАКАНСИИ</b>\n")
-                            .append("<b>ВСЕГО ПОДПИСОК НА ВАКАНСИИ:</b> **")
+                            .append("<b>ВСЕГО ПОДПИСОК НА ВАКАНСИИ:</b> ")
                             .append(recrutiesTasks.size())
                             .append("\n\n")
                             .toString());
@@ -51,9 +51,9 @@ public class SubscribeCommand extends OperationCommand {
                         .append(simpleDateFormat.format(recrutiesTask.getStartDate()))
                         .append("</i> по <i>")
                         .append(simpleDateFormat.format(recrutiesTask.getEndDate()))
-                        .append("\n</i><b> Рекрутер: </b><i>")
+                        .append("\n</i><b>Рекрутер: </b><i>")
                         .append(recrutiesTask.getReacrutier().getName())
-                        .append("</i> Связаться: ")
+                        .append("</i>\n<b>Связаться:</b> ")
                         .append(recrutiesTask.getReacrutier().getEmail() != null ? recrutiesTask.getReacrutier().getEmail() : "");
 
                 if (recrutiesTask.getReacrutier().getEmail() != null && recrutiesTask.getReacrutier().getTelegram() != null) {

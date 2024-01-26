@@ -58,6 +58,7 @@
                                width="100%"
                                editable="false"/>
                     <suggestionPickerField id="toEmailField"
+                                           asyncSearchDelayMs="1000"
                                            required="true"
                                            caption="msg://msgToEmail"
                                            dataContainer="emailerDc"

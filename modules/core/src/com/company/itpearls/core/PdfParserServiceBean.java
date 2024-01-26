@@ -61,9 +61,7 @@ public class PdfParserServiceBean implements PdfParserService {
     }
 
     private final static String QUERY_SKILL_TREE =
-            "select e " +
-                    "from itpearls_SkillTree e " +
-                    "order by e.skillName";
+            "select e from itpearls_SkillTree e order by e.skillName";
 
     @Override
     public List<SkillTree> parseSkillTree(String inputText) {
@@ -128,13 +126,6 @@ public class PdfParserServiceBean implements PdfParserService {
 
             return parsedText;
         } else {
-/*            PDFParser parser = new PDFParser(new RandomAccessFile(new File(fileName), "r"));
-            parser.parse();
-
-            COSDocument cosDoc = parser.getDocument();
-            PDFTextStripper pdfStripper = new PDFTextStripper();
-            PDDocument pdDoc = new PDDocument(cosDoc);
-            parsedText = pdfStripper.getText(pdDoc); */
             return null;
         }
     }
@@ -148,7 +139,6 @@ public class PdfParserServiceBean implements PdfParserService {
 
         PDFParser parser = new PDFParser(rad);
         PDDocument document = parser.parse();
-//        PDDocument document = PDDocument.load(file);
 
         //Instantiating the PDFRenderer class
         PDFRenderer renderer = new PDFRenderer(document);
@@ -173,7 +163,6 @@ public class PdfParserServiceBean implements PdfParserService {
         RandomAccessRead rad = new RandomAccessReadMemoryMappedFile(file);
         PDFParser parser = new PDFParser(rad);
         PDDocument document = parser.parse();
-//        PDDocument document = PDDocument.load(file);
 
         //Instantiating the PDFRenderer class
         PDFRenderer renderer = new PDFRenderer(document);

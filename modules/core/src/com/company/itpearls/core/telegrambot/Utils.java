@@ -74,7 +74,8 @@ public class Utils {
                 retObj = (T) query.getResultList();
                 tx.commit();
             }
-
+        } catch (Exception e) {
+            logger.error(new StringBuilder("Ошибка запроса \'").append(queryStr).append("\'").toString());
         } finally {
             return (T) retObj;
         }
@@ -278,14 +279,13 @@ public class Utils {
         return queryListResult("select e from itpearls_RecrutiesTasks e " +
                         "where :date between e.startDate and e.endDate",
                 new View(RecrutiesTasks.class)
-                        .addProperty("email")
-                        .addProperty("telegram")
+                        .addProperty("reacrutier", new View(ExtUser.class)
+                                .addProperty("name")
+                                .addProperty("email")
+                                .addProperty("telegram"))
                         .addProperty("startDate")
                         .addProperty("endDate")
                         .addProperty("recrutierName")
-                        .addProperty("reacrutier",
-                                new View(ExtUser.class)
-                                        .addProperty("name"))
                         .addProperty("openPosition",
                                 new View(OpenPosition.class)
                                         .addProperty("vacansyName")),

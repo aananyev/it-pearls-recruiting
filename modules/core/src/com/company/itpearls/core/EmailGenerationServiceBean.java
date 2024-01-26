@@ -87,11 +87,7 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                         sb.append("<font color=\"red\">")
                                 .append(emailKeys.get(EmailKeys.DATE.getId()))
                                 .append("</font>");
-/*                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.DATE.getId()),
-                                "<font color=\"red\">"
-                                        + emailKeys.get(EmailKeys.DATE.getId())
-                                        + "</font>"); */
+
                         retStr = strSimpleService.replaceAll(retStr,
                                 emailKeys.get(EmailKeys.DATE.getId()), sb.toString());
                     }
@@ -107,11 +103,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                     .append(emailKeys.get(EmailKeys.FIRST_NAME.getId()))
                                     .append("</font>");
                             
-/*                            retStr = strSimpleService.replaceAll(retStr,
-                                    emailKeys.get(EmailKeys.FIRST_NAME.getId()),
-                                    "<font color=\"red\">"
-                                            + emailKeys.get(EmailKeys.FIRST_NAME.getId())
-                                            + "</font>"); */
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.FIRST_NAME.getId()),
                                     sb.toString());
@@ -126,11 +117,7 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                             sb.append("<font color=\"red\">")
                                     .append(emailKeys.get(EmailKeys.MIDDLE_NAME.getId()))
                                     .append("</font>");
-/*                            retStr = strSimpleService.replaceAll(retStr,
-                                    emailKeys.get(EmailKeys.MIDDLE_NAME.getId()),
-                                    "<font color=\"red\">"
-                                            + emailKeys.get(EmailKeys.MIDDLE_NAME.getId())
-                                            + "</font>"); */
+
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.MIDDLE_NAME.getId()),
                                     sb.toString());
@@ -146,11 +133,7 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                             sb.append("<font color=\"red\">")
                                     .append(emailKeys.get(EmailKeys.SECOND_NAME.getId()))
                                     .append("</font>");
-                            /* retStr = strSimpleService.replaceAll(retStr,
-                                    emailKeys.get(EmailKeys.SECOND_NAME.getId()),
-                                    "<font color=\"red\">"
-                                            + emailKeys.get(EmailKeys.SECOND_NAME.getId())
-                                            + "</font>");*/
+
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.SECOND_NAME.getId()),
                                     sb.toString());
@@ -183,11 +166,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                 retStr = strSimpleService.replaceAll(retStr,
                                         emailKeys.get(EmailKeys.POSITION.getId()),
                                         sb.toString());
-/*                                retStr = strSimpleService.replaceAll(retStr,
-                                        emailKeys.get(EmailKeys.POSITION.getId()),
-                                        "<font color=\"red\">"
-                                                + emailKeys.get(EmailKeys.POSITION.getId())
-                                                + "</font>"); */
                             }
                         } else {
                             StringBuilder sb = new StringBuilder();
@@ -197,11 +175,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.POSITION.getId()),
                                     sb.toString());
-/*                            retStr = strSimpleService.replaceAll(retStr,
-                                    emailKeys.get(EmailKeys.POSITION.getId()),
-                                    "<font color=\"red\">"
-                                            + emailKeys.get(EmailKeys.POSITION.getId())
-                                            + "</font>"); */
                         }
 
                         if (openPosition.getProjectName() != null) {
@@ -217,11 +190,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                 retStr = strSimpleService.replaceAll(retStr,
                                         emailKeys.get(EmailKeys.PROJECT.getId()),
                                         sb.toString());
-/*                                retStr = strSimpleService.replaceAll(retStr,
-                                        emailKeys.get(EmailKeys.PROJECT.getId()),
-                                        "<font color=\"red\">"
-                                                + emailKeys.get(EmailKeys.PROJECT.getId())
-                                                + "</font>"); */
                             }
 
                             if (openPosition.getProjectName().getProjectDepartment() != null) {
@@ -238,12 +206,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                         retStr = strSimpleService.replaceAll(retStr,
                                                 emailKeys.get(EmailKeys.COMPANY.getId()),
                                                 sb.toString());
-                                        
-/*                                        retStr = strSimpleService.replaceAll(retStr,
-                                                emailKeys.get(EmailKeys.COMPANY.getId()),
-                                                "<font color=\"red\">"
-                                                        + emailKeys.get(EmailKeys.COMPANY.getId())
-                                                        + "</font>"); */
                                     }
                                 } else {
                                     StringBuilder sb = new StringBuilder();
@@ -253,12 +215,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                     retStr = strSimpleService.replaceAll(retStr,
                                             emailKeys.get(EmailKeys.COMPANY.getId()),
                                             sb.toString());
-                                    
-/*                                    retStr = strSimpleService.replaceAll(retStr,
-                                            emailKeys.get(EmailKeys.COMPANY.getId()),
-                                            "<font color=\"red\">"
-                                                    + emailKeys.get(EmailKeys.COMPANY.getId())
-                                                    + "</font>"); */
                                 }
 
                                 if (openPosition.getProjectName().getProjectDepartment().getDepartamentRuName() != null) {
@@ -273,12 +229,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                     retStr = strSimpleService.replaceAll(retStr,
                                             emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
                                             sb.toString());
-                                    
-/*                                    retStr = strSimpleService.replaceAll(retStr,
-                                            emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
-                                            "<font color=\"red\">"
-                                                    + emailKeys.get(EmailKeys.DEPARTAMENT.getId())
-                                                    + "</font>"); */
                                 }
                             } else {
                                 StringBuilder sb = new StringBuilder();
@@ -288,12 +238,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                 retStr = strSimpleService.replaceAll(retStr,
                                         emailKeys.get(EmailKeys.COMPANY.getId()),
                                         sb.toString());
-                                
-/*                                retStr = strSimpleService.replaceAll(retStr,
-                                        emailKeys.get(EmailKeys.COMPANY.getId()),
-                                        "<font color=\"red\">"
-                                                + emailKeys.get(EmailKeys.COMPANY.getId())
-                                                + "</font>"); */
                             }
                         } else {
                             StringBuilder sb = new StringBuilder();
@@ -303,12 +247,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.COMPANY.getId()),
                                     sb.toString());
-                            
-/*                            retStr = strSimpleService.replaceAll(retStr,
-                                    emailKeys.get(EmailKeys.COMPANY.getId()),
-                                    "<font color=\"red\">"
-                                            + emailKeys.get(EmailKeys.COMPANY.getId())
-                                            + "</font>"); */
 
                             StringBuilder sb1 = new StringBuilder();
                             sb.append("<font color=\"red\">")
@@ -318,12 +256,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                     emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
                                     sb1.toString());
 
-/*                            retStr = strSimpleService.replaceAll(retStr,
-                                    emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
-                                    "<font color=\"red\">"
-                                            + emailKeys.get(EmailKeys.DEPARTAMENT.getId())
-                                            + "</font>"); */
-
                             StringBuilder sb2 = new StringBuilder();
                             sb.append("<font color=\"red\">")
                                     .append(emailKeys.get(EmailKeys.PROJECT.getId()))
@@ -331,13 +263,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                             retStr = strSimpleService.replaceAll(retStr,
                                     emailKeys.get(EmailKeys.PROJECT.getId()),
                                     sb2.toString());
-
-/*                            retStr = strSimpleService.replaceAll(retStr,
-                                    emailKeys.get(EmailKeys.PROJECT.getId()),
-                                    "<font color=\"red\">"
-                                            + emailKeys.get(EmailKeys.PROJECT.getId())
-                                            + "</font>"); */
-
                         }
                     } else {
                         StringBuilder sb = new StringBuilder();
@@ -347,12 +272,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                         retStr = strSimpleService.replaceAll(retStr,
                                 emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()),
                                 sb.toString());
-                        
-/*                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()),
-                                "<font color=\"red\">"
-                                        + emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId())
-                                        + "</font>"); */
 
                         StringBuilder sb1 = new StringBuilder();
                         sb.append("<font color=\"red\">")
@@ -362,12 +281,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                 emailKeys.get(EmailKeys.SALARY_MIN.getId()),
                                 sb1.toString());
 
-/*                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.SALARY_MIN.getId()),
-                                "<font color=\"red\">"
-                                        + emailKeys.get(EmailKeys.SALARY_MIN.getId())
-                                        + "</font>"); */
-
                         StringBuilder sb2 = new StringBuilder();
                         sb.append("<font color=\"red\">")
                                 .append(emailKeys.get(EmailKeys.SALARY_MAX.getId()))
@@ -375,12 +288,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                         retStr = strSimpleService.replaceAll(retStr,
                                 emailKeys.get(EmailKeys.SALARY_MAX.getId()),
                                 sb2.toString());
-
-/*                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.SALARY_MAX.getId()),
-                                "<font color=\"red\">"
-                                        + emailKeys.get(EmailKeys.SALARY_MAX.getId())
-                                        + "</font>");*/
 
                         StringBuilder sb3 = new StringBuilder();
                         sb.append("<font color=\"red\">")
@@ -390,12 +297,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                                 emailKeys.get(EmailKeys.COMPANY.getId()),
                                 sb3.toString());
 
-/*                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.COMPANY.getId()),
-                                "<font color=\"red\">"
-                                        + emailKeys.get(EmailKeys.COMPANY.getId())
-                                        + "</font>");*/
-
                         StringBuilder sb4 = new StringBuilder();
                         sb.append("<font color=\"red\">")
                                 .append(emailKeys.get(EmailKeys.DEPARTAMENT.getId()))
@@ -403,12 +304,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                         retStr = strSimpleService.replaceAll(retStr,
                                 emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
                                 sb4.toString());
-                        
-/*                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.DEPARTAMENT.getId()),
-                                "<font color=\"red\">"
-                                        + emailKeys.get(EmailKeys.DEPARTAMENT.getId())
-                                        + "</font>"); */
 
                         StringBuilder sb5 = new StringBuilder();
                         sb.append("<font color=\"red\">")
@@ -417,13 +312,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                         retStr = strSimpleService.replaceAll(retStr,
                                 emailKeys.get(EmailKeys.POSITION.getId()),
                                 sb5.toString());
-
-/*                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.POSITION.getId()),
-                                "<font color=\"red\">"
-                                        + emailKeys.get(EmailKeys.POSITION.getId())
-                                        + "</font>"); */
-
                     }
 
                     if (user != null) {
@@ -438,12 +326,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
                         retStr = strSimpleService.replaceAll(retStr,
                                 emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()),
                                 sb.toString());
-                        
-/*                        retStr = strSimpleService.replaceAll(retStr,
-                                emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()),
-                                "<font color=\"red\">"
-                                        + emailKeys.get(EmailKeys.RESEARCHER_NAME.getId())
-                                        + "</font>"); */
                     }
                 } catch (NullPointerException e) {
                     log.error("Error", e);
@@ -526,33 +408,6 @@ public class EmailGenerationServiceBean implements EmailGenerationService {
             retStr = strSimpleService.replaceAll(retStr,
                     emailKeys.get(EmailKeys.SALARY_MAX.getId()),
                     newsItem.getVacancy().getSalaryMax().toString());
-
-/*            if (newsItem.getVacancy() != null)
-                if (newsItem.getVacancy().getProjectName() != null)
-                    if (newsItem.getVacancy().getProjectName().getProjectDepartment() != null)
-                        if (newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName() != null)
-                            if (newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName() != null)
-                                retStr = retStr.replaceAll(emailKeys.get(EmailKeys.COMPANY.getId()), newsItem.getVacancy().getProjectName().getProjectDepartment().getCompanyName().getComanyName()); */
-/*            if (newsItem.getVacancy().getProjectName() != null)
-                if (newsItem.getVacancy().getProjectName().getProjectName() != null)
-                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.DEPARTAMENT.getId()), newsItem.getVacancy().getProjectName().getProjectName()); */
-/*            if (newsItem.getRecrutier() != null)
-                if (newsItem.getRecrutier().getName() != null)
-                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()), newsItem.getRecrutier().getName()); */
-/*            if (newsItem.getVacancy() != null)
-                if (newsItem.getVacancy().getComment() != null)
-                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()), newsItem.getVacancy().getComment()); */
-/*            if (newsItem.getVacancy().getPositionType() != null)
-                if (newsItem.getVacancy().getPositionType().getPositionEnName() != null)
-                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.POSITION.getId()),
-                            newsItem.getVacancy().getPositionType().getPositionEnName()); */
-/*            if (newsItem.getVacancy().getSalaryMin() != null)
-                retStr = retStr.replaceAll(emailKeys.get(EmailKeys.SALARY_MIN.getId()),
-                        newsItem.getVacancy().getSalaryMin().toString()); */
-/*            if (newsItem.getVacancy().getSalaryMax() != null)
-                retStr = retStr.replaceAll(emailKeys.get(EmailKeys.SALARY_MAX.getId()),
-                        newsItem.getVacancy().getSalaryMax().toString()); */
-
         } catch (NullPointerException e) {
             log.error("Error", e);
         } finally {

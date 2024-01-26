@@ -54,7 +54,7 @@ public class MySubscribeCommand extends OperationCommand{
                                 .append(simpleDateFormat.format(recrutiesTask.getStartDate()))
                                 .append("</i> по <i>")
                                 .append(simpleDateFormat.format(recrutiesTask.getEndDate()))
-                                .append("\n");
+                                .append("</i>\n");
 
                         sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), Utils.getUserName(user), sb.toString());
                     }

@@ -1582,9 +1582,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
 
             StringBuilder sb = new StringBuilder()
-                    .append("Изменен приоритет вакансии <b>")
+                    .append("⚡ <b>ИЗМЕНЕН ПРИОРИТЕТ ВАКАНСИИ</b> <i>")
                     .append(openPosition.getVacansyName())
-                    .append("</b> на <b>")
+                    .append("</i> на <b>")
                     .append(result.get())
                     .append("</b><br><svg align=\"right\" width=\"100%\"><i>")
                     .append(userSession.getUser().getName())
@@ -3679,11 +3679,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (openPosition != null) {
             StringBuilder sb = new StringBuilder()
-                    .append("❗\uFE0F❗\uFE0F❗\uFE0FВакансия: ")
+                    .append("❗\uFE0F<b>ВАКАНСИЯ:</b> ")
                     .append(openPosition.getVacansyName())
                     .append("\n\n")
                     .append(openPosition.getSalaryComment())
-                    .append("\n\nЗарплатное предложение: от ")
+                    .append("\n\n<b>Зарплатное предложение:</b> от ")
                     .append(openPosition.getSalaryMin())
                     .append(" до ")
                     .append(openPosition.getSalaryMax())

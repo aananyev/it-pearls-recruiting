@@ -200,7 +200,6 @@ public class OpenPositionServiceBean implements OpenPositionService {
     @Override
     public String getOpenPositionOpenLongMessage(OpenPosition entity, User user) {
         StringBuilder salarySB = new StringBuilder("Зарплатное предложение")
-//                messageTools.loadString("msgSalaryMinMax"))
                 .append(": ");
 
         if (entity.getSalaryCandidateRequest() != null ? entity.getSalaryCandidateRequest() : false) {
@@ -208,24 +207,20 @@ public class OpenPositionServiceBean implements OpenPositionService {
         } else {
             if (entity.getSalaryMin() != null) {
                 salarySB.append("от")
-//                        .append(messageTools.loadString("msgSalaryFrom"))
                         .append(" ")
                         .append(entity.getSalaryMin().toString()
                                 .substring(0, entity.getSalaryMin().toString().length() - 3));
             } else {
-//                salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryUndefined"));
                 salarySB.append("неопределена");
             }
 
             if (entity.getSalaryMax() != null) {
                 salarySB.append(" ")
                         .append("до")
-//                        .append(messageTools.loadString("msgSalaryTo"))
                         .append(" ")
                         .append(entity.getSalaryMax().toString()
                                 .substring(0, entity.getSalaryMax().toString().length() - 3));
             } else {
-//                salarySB.append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryUndefined"));
                 salarySB.append("неопределена");
             }
         }
@@ -233,7 +228,6 @@ public class OpenPositionServiceBean implements OpenPositionService {
         if (entity.getSalaryComment() != null) {
             salarySB.append("\n")
                     .append("\uD83D\uDCAC Комментарий")
-//                    .append(messages.getMessage(MESSAGES_OPEN_POSITION_CLASS, "msgSalaryComment"))
                     .append(": ")
                     .append(entity.getSalaryComment());
         }

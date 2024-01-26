@@ -131,7 +131,11 @@ public class ParseCVServiceBean implements ParseCVService {
         String retStr = null;
         String skypePattern = contactPattern;
 
-        Pattern skype = Pattern.compile(skypePattern + "\\s*" + ".*?\\s");
+//        Pattern skype = Pattern.compile(skypePattern + "\\s*" + ".*?\\s");
+        Pattern skype = Pattern.compile(new StringBuilder(skypePattern)
+                .append("\\s*")
+                .append(".*?\\s")
+                .toString());
         Matcher skypeMatcher = skype.matcher(Jsoup.parse(cv).wholeText());
 
         if (skypeMatcher.find()) {
@@ -186,9 +190,6 @@ public class ParseCVServiceBean implements ParseCVService {
                                         .append("[<&]").toString(),
                                 Pattern.CASE_INSENSITIVE);
 
-//                        Pattern endHTMLSymbol = Pattern.compile("[\\s>;\"]"
-//                                        + parseString.toString() + "[<&]",
-//                                Pattern.CASE_INSENSITIVE);
                         Matcher endHTMLSymbolMatcher = endHTMLSymbol.matcher(cv);
 
                         if (endHTMLSymbolMatcher.find()) {
