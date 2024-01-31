@@ -54,6 +54,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TelegramService telegramService;
     @Inject
     private TextManipulationService textManipulationService;
+    @Inject
+    private StandartMapsService standartMapsService;
 
     @Subscribe("closedVacancyTimer")
     public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
@@ -485,9 +487,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             starsAndCommentHBox.setSpacing(true);
             Label candidateName = uiComponents.create(Label.class);
             candidateName.addStyleName("table-wordwrap");
-            candidateName.setValue(iteractionList.getCandidate().getFullName()
-                    + " / "
-                    + iteractionList.getCandidate().getPersonPosition().getPositionRuName());
+            candidateName.setValue(new StringBuilder(iteractionList.getCandidate().getFullName())
+                    .append(" / ")
+                    .append(iteractionList.getCandidate().getPersonPosition().getPositionRuName())
+                    .toString());
 
             Label stars = uiComponents.create(Label.class);
             stars.addStyleName("table-wordwrap");
@@ -914,27 +917,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setCommandExperienceRadioButton() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("Нет требований", 0);
-        map.put("Без опыта", 1);
-        map.put("1 год", 2);
-        map.put("3 года", 3);
-        map.put("5 лет и более", 4);
-        map.put("Управление командой", 5);
-
-        commanExperienceRadioButton.setOptionsMap(map);
+        commanExperienceRadioButton.setOptionsMap(openPositionService.setCommandExperienceMap());
     }
 
     private void setWorkExperienceRadioButton() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("Нет требований", 0);
-        map.put("Без опыта", 1);
-        map.put("1 год", 2);
-        map.put("2 года", 3);
-        map.put("3 года", 4);
-        map.put("5 лет и более", 5);
-
-        workExperienceRadioButton.setOptionsMap(map);
+        workExperienceRadioButton.setOptionsMap(openPositionService.setWorkExperienceMap());
     }
 
     Boolean onNeedExercise;
@@ -1034,18 +1021,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 if (!startSalaryMaxValue.equals(openPositionFieldSalaryMax.getValue())) {
 
                     openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                            "Изменены зарплатные предложение (MAX): старое "
-                                    + (startSalaryMaxValue.toString().length() >= 3
+                            new StringBuilder("Изменены зарплатные предложение (MAX): старое ")
+                                    .append(startSalaryMaxValue.toString().length() >= 3
                                     ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
                                     : "НЕ ОПРЕДЕЛЕНО")
-                                    + " на новое "
-                                    + openPositionFieldSalaryMax.getValue(),
-                            "Изменены зарплатные предложение (MAX): старое "
-                                    + (startSalaryMaxValue.toString().length() >= 3
+                                    .append(" на новое ")
+                                    .append(openPositionFieldSalaryMax.getValue())
+                                    .toString(),
+                            new StringBuilder("Изменены зарплатные предложение (MAX): старое ")
+                                    .append(startSalaryMaxValue.toString().length() >= 3
                                     ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
                                     : "НЕ ОПРЕДЕЛЕНО")
-                                    + " на новое "
-                                    + openPositionFieldSalaryMax.getValue(),
+                                    .append(" на новое ")
+                                    .append(openPositionFieldSalaryMax.getValue())
+                                    .toString(),
                             new Date(),
                             (ExtUser) userSession.getUser());
                     startSalaryMaxValue = openPositionFieldSalaryMin.getValue();
@@ -1251,16 +1240,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
         } else {
             openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                    "Открыта новая вакансия",
-                    vacansyNameField.getValue() + "\n"
-                            + positionTypeField.getValue().getPositionEnName() + " \\ "
-                            + positionTypeField.getValue().getPositionRuName() + "\n\n"
-                            + "Salary MIN: "
-                            + openPositionFieldSalaryMin.getValue() + "\n"
-                            + "Salary MAX: "
-                            + openPositionFieldSalaryMax.getValue() + "\n\n"
-                            + (shortDescriptionTextArea.getValue() != null ?
-                            Jsoup.parse(shortDescriptionTextArea.getValue()).wholeText() : ""),
+                    "Открыта новая вакансия", new StringBuilder(vacansyNameField.getValue())
+                            .append("\n")
+                            .append(positionTypeField.getValue().getPositionEnName())
+                            .append(" \\ ")
+                            .append(positionTypeField.getValue().getPositionRuName())
+                            .append("\n\n")
+                            .append("Salary MIN: ")
+                            .append(openPositionFieldSalaryMin.getValue())
+                            .append("\n")
+                            .append("Salary MAX: ")
+                            .append(openPositionFieldSalaryMax.getValue())
+                            .append("\n\n")
+                            .append(shortDescriptionTextArea.getValue() != null ?
+                            Jsoup.parse(shortDescriptionTextArea.getValue()).wholeText() : "")
+                            .toString(),
                     new Date(),
                     (ExtUser) userSession.getUser());
         }
@@ -1268,11 +1262,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (!vacansyNameField.getValue().equals(startVacansyName)) {
                 openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                        userSession.getUser().getName()
-                                + " изменил наименование вакансии",
-                        "Старое: " + startVacansyName
-                                + "<br>Новое: "
-                                + vacansyNameField.getValue(),
+                        new StringBuilder(userSession.getUser().getName())
+                                .append(" изменил наименование вакансии")
+                                .toString(),
+                        new StringBuilder("Старое: ")
+                                .append(startVacansyName)
+                                .append("<br>Новое: ")
+                                .append(vacansyNameField.getValue())
+                                .toString(),
                         new Date(),
                         (ExtUser) userSession.getUser());
             }
@@ -1287,15 +1284,28 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .append(numberPositionField.getValue() != null ? "(" + numberPositionField.getValue() + ") " : "")
                     .append(vacansyNameField.getValue())
                     .append("\n\n")
-                    .append(openPositionRichTextArea.getValue())
-                    .append("\n\n<b>Зарплатное предложение:</b> от ")
-                    .append(openPositionFieldSalaryMin.getValue())
-                    .append(" до ")
-                    .append(openPositionFieldSalaryMax.getValue())
+                    .append(openPositionRichTextArea.getValue());
+
+            if (openPositionFieldSalaryMax.getValue() != null
+                    && openPositionFieldSalaryMin.getValue() != null) {
+
+                sb.append("\n\n<b>Зарплатное предложение:</b>");
+
+                if (openPositionFieldSalaryMin.getValue() != null) {
+                    sb.append(" от ")
+                            .append(openPositionFieldSalaryMin.getValue());
+                }
+
+                if (openPositionFieldSalaryMax.getValue() != null) {
+                    sb.append(" до ")
+                            .append(openPositionFieldSalaryMax.getValue());
+                }
+            }
+            /* не надо выводить коммент с предельной ставкой - это не для внешнего использования
                     .append("\n\n(")
                     .append(salaryCommentTextFiels.getValue())
                     .append(")\n")
-                    .append(userSession.getUser().getName());
+                    .append(userSession.getUser().getName()); */
             telegramService.sendMessageToChat(textManipulationService.formattedHtml2text(sb.toString()));
         } else {
 
@@ -1374,11 +1384,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .parameter("parentOpenPosition", getEditedEntity())
                 .list();
 
-        String magPos = "";
+        StringBuilder magPos = new StringBuilder();
 
         if (openPositions.size() != 0) {
             for (OpenPosition a : openPositions) {
-                magPos = magPos + "<li><i>" + a.getVacansyName() + "</i></li>";
+                magPos.append("<li><i>")
+                        .append(a.getVacansyName())
+                        .append("</i></li>")
+                        .toString();
             }
 
             dialogs.createOptionDialog()
@@ -1423,9 +1436,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private String showKeyCompetition(String value) {
         for (SkillTree skillTree : skillTrees) {
-            String keyWithStyle = "<b><font color=\"brown>\" face=\"serif\">"
-                    + skillTree.getSkillName()
-                    + "</font></b>";
+            String keyWithStyle = new StringBuilder("<b><font color=\"brown>\" face=\"serif\">")
+                    .append(skillTree.getSkillName())
+                    .append("</font></b>")
+                    .toString();
             if (!value.contains(keyWithStyle)) {
                 value = value.replaceAll("(?i)" + skillTree.getSkillName(), keyWithStyle);
             }
@@ -1606,14 +1620,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         try {
             openPositions = dataManager.load(OpenPosition.class)
                     .query(QUERY_OPEN_POSITION)
-/*                            "select e from itpearls_OpenPosition e " +
-                            "where e.positionType = :positionType " +
-                            "and e.vacansyName like :vacansyName " +
-                            "and e.projectName = :projectName " +
-                            "and e.parentOpenPosition = :parentOpenPosition " +
-                            "and e.vacansyName = :vacansyName " +
-                            "and e.remoteWork = :remoteWork " +
-                            "and e.cityPosition = :cityPosition") */
                     .parameter("vacansyName", vacansyNameField.getValue())
                     .parameter("positionType", positionTypeField.getValue())
                     .parameter("projectName", projectNameField.getValue())
@@ -1640,14 +1646,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         List<User> listManagers = dataManager.loadList(loadContext);
 
-        String maillist = "";
+        StringBuilder maillist = new StringBuilder();
 
         for (User user : listManagers) {
             if (user.getEmail() != null && user.getActive())
-                maillist = maillist + user.getEmail() + ";";
+                maillist.append(user.getEmail()).append(";");
         }
 
-        return maillist;
+        return maillist.toString();
     }
 
     private String getSubscriberMaillist(Entity entity) {
@@ -1662,7 +1668,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .list();
 
 
-        String maillist = "";
+        StringBuilder maillist = new StringBuilder();
         Boolean subs = false;
 
         for (RecrutiesTasks address : listResearchers) {
@@ -1671,10 +1677,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             if (address.getSubscribe() == null ? false : address.getSubscribe())
                 // if( address.getSubscribe() )
                 if (email != null)
-                    maillist = maillist + email + ";";
+                    maillist.append(email)
+                            .append(";");
         }
 
-        return maillist;
+        return maillist.toString();
     }
 
     private String getRecrutiersMaillist() {
@@ -1703,7 +1710,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                         if (event.getValue() >= 0) {
                             openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                                    "Изменен приоритет вакансии на " + result.get(),
+                                    new StringBuilder("Изменен приоритет вакансии на ").append(result.get()).toString(),
                                     "Закрыта вакансия",
                                     new Date(),
                                     (ExtUser) userSession.getUser());
@@ -1757,42 +1764,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         registrationForWorkField.setOptionsMap(rwMap);
 
-        priorityMap.put("Draft", OpenPositionPriority.DRAFT.getId());
-        priorityMap.put("Paused", OpenPositionPriority.PAUSED.getId());
-        priorityMap.put("Low", OpenPositionPriority.LOW.getId());
-        priorityMap.put("Normal", OpenPositionPriority.NORMAL.getId());
-        priorityMap.put("High", OpenPositionPriority.HIGH.getId());
-        priorityMap.put("Critical", OpenPositionPriority.CRITICAL.getId());
-
-        priorityField.setOptionsMap(priorityMap);
-
-        Map<String, Integer> paymentsType = new LinkedHashMap<>();
-        paymentsType.put("Фиксированная оплата", 0);
-        paymentsType.put("Процент от годового оклада", 1);
-        paymentsType.put("Процент от месячной зарплаты", 2);
-
-        radioButtonGroupPaymentsType.setOptionsMap(paymentsType);
-
-        Map<String, Integer> researcherSalary = new LinkedHashMap<>();
-        researcherSalary.put("Фиксированная комиссия", 0);
-        researcherSalary.put("Процент комиссии компании, 20%", 1);
-        researcherSalary.put("Процент комиссии компании", 2);
-
-        radioButtonGroupResearcherSalary.setOptionsMap(researcherSalary);
-
-        Map<String, Integer> recrutierSalary = new LinkedHashMap<>();
-        recrutierSalary.put("Фиксированная комиссия", 0);
-        recrutierSalary.put("Процент комиссии компании, 10%", 1);
-        recrutierSalary.put("Процент комиссии компании", 2);
-
-        radioButtonGroupRecrutierSalary.setOptionsMap(recrutierSalary);
-
-        Map<String, Integer> remoteWork = new LinkedHashMap<>();
-        remoteWork.put("Нет", 0);
-        remoteWork.put("Удаленная работа", 1);
-        remoteWork.put("Частично 50/50", 2);
-
-        remoteWorkField.setOptionsMap(remoteWork);
+        priorityField.setOptionsMap(standartMapsService.setPriorityMap());
+        radioButtonGroupPaymentsType.setOptionsMap(standartMapsService.setPaymentsTypeMap());
+        radioButtonGroupResearcherSalary.setOptionsMap(standartMapsService.setResearcherSalaryMap());
+        radioButtonGroupRecrutierSalary.setOptionsMap(standartMapsService.setRecruterSalaryMap());
+        remoteWorkField.setOptionsMap(standartMapsService.setRemoteWorkMap());
     }
 
     private void setHiddeField() {
@@ -1908,10 +1884,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 minSalary = minSalary.setScale(0, RoundingMode.HALF_EVEN);
                 maxSalary = maxSalary.setScale(0, RoundingMode.HALF_EVEN);
 
-                retValue = "От " +
-                        minSalary.toString() +
-                        " до " +
-                        maxSalary.toString();
+                retValue = new StringBuilder("От ")
+                        .append(minSalary)
+                        .append(" до ")
+                        .append(maxSalary)
+                        .toString();
                 break;
             case 2:
                 minSalary = minSalary.multiply(p).multiply(ndflFlag ? ndfl : BigDecimal.ONE).divide(hungred);
@@ -1920,10 +1897,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 minSalary = minSalary.setScale(0, RoundingMode.HALF_EVEN);
                 maxSalary = maxSalary.setScale(0, RoundingMode.HALF_EVEN);
 
-                retValue = "От " +
-                        minSalary.toString() +
-                        " до " +
-                        maxSalary.toString();
+                retValue = new StringBuilder("От ")
+                        .append(minSalary)
+                        .append(" до ")
+                        .append(maxSalary)
+                        .toString();
                 break;
         }
 
@@ -1976,10 +1954,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                         BigDecimal percent = new BigDecimal(20);
 
-                        textSalaryMessage = "От " +
-                                minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN) +
-                                " до " +
-                                maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN);
+                        textSalaryMessage = new StringBuilder("От ")
+                                .append(minSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN))
+                                .append(" до ")
+                                .append(maxSalary.multiply(percent).divide(hungred).setScale(0, RoundingMode.HALF_EVEN))
+                                .toString();
 
                         textFieldResearcherSalary.setValue(textSalaryMessage);
                     }
@@ -2001,12 +1980,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
                             BigDecimal percent = new BigDecimal(textFieldResearcherSalaryPercentOrSum.getValue());
 
-                            textSalaryMessage = "От " +
-                                    minSalary.multiply(percent).divide(hungred)
-                                            .setScale(0, RoundingMode.HALF_EVEN) +
-                                    " до " +
-                                    maxSalary.multiply(percent).divide(hungred)
-                                            .setScale(0, RoundingMode.HALF_EVEN);
+                            textSalaryMessage = new StringBuilder("От ")
+                                    .append(minSalary.multiply(percent).divide(hungred)
+                                            .setScale(0, RoundingMode.HALF_EVEN))
+                                    .append(" до ")
+                                    .append(maxSalary.multiply(percent).divide(hungred)
+                                            .setScale(0, RoundingMode.HALF_EVEN))
+                                    .toString();
 
                             textFieldResearcherSalary.setValue(textSalaryMessage);
                         } else {
@@ -2036,7 +2016,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     textFieldRecrutierPercentOrSum.setVisible(true);
                     textFieldRecrutierSalary.setEditable(true);
 
-                    textSalaryMessage = textFieldRecrutierPercentOrSum.getValue() + " рублей.";
+                    textSalaryMessage = new StringBuilder(textFieldRecrutierPercentOrSum.getValue())
+                            .append(" рублей.")
+                            .toString();
                     textFieldRecrutierSalary.setValue(textSalaryMessage);
 
                     break;
@@ -2127,18 +2109,24 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (radioButtonGroupResearcherSalary.getValue() != null) {
             if ((int) radioButtonGroupResearcherSalary.getValue() == 0) {
                 if (textFieldResearcherSalary.getValue() != null) {
-                    labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
-                            vacansyNameField.getValue() + "</i>\" составит " +
-                            textFieldResearcherSalary.getValue() + " рублей.");
+                    labelResearcherSalary.setValue(new StringBuilder("Зарплата ресерчера после закрытия вакансии \"<i>")
+                            .append(vacansyNameField.getValue())
+                            .append("</i>\" составит ")
+                            .append(textFieldResearcherSalary.getValue())
+                            .append(" рублей.")
+                            .toString());
 
                     groupBoxPaymentsResearcher.setVisible(true);
                 } else
                     groupBoxPaymentsResearcher.setVisible(false);
             } else {
                 if (textFieldResearcherSalary.getValue() != null) {
-                    labelResearcherSalary.setValue("Зарплата ресерчера после закрытия вакансии \"<i>" +
-                            vacansyNameField.getValue() + "</i>\" составит " +
-                            textFieldResearcherSalary.getValue() + " рублей.");
+                    labelResearcherSalary.setValue(new StringBuilder("Зарплата ресерчера после закрытия вакансии \"<i>")
+                            .append(vacansyNameField.getValue())
+                            .append("</i>\" составит ")
+                            .append(textFieldResearcherSalary.getValue())
+                            .append(" рублей.")
+                            .toString());
                     groupBoxPaymentsResearcher.setVisible(true);
                     groupBoxPaymentsResearcher.setVisible(true);
                 } else
@@ -2151,15 +2139,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (radioButtonGroupRecrutierSalary.getValue() != null) {
             if ((int) radioButtonGroupRecrutierSalary.getValue() == 0) {
                 if (textFieldRecrutierSalary.getValue() != null) {
-                    labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
-                            vacansyNameField.getValue() + "</i>\" составит " +
-                            textFieldRecrutierSalary.getValue() + " рублей.");
+                    labelRecrutierSalary.setValue(new StringBuilder("Зарплата рекрутера после закрытия вакансии \"<i>")
+                            .append(vacansyNameField.getValue())
+                            .append("</i>\" составит ")
+                            .append(textFieldRecrutierSalary.getValue())
+                            .append(" рублей.")
+                            .toString());
                 }
             } else {
                 if (textFieldRecrutierSalary.getValue() != null) {
-                    labelRecrutierSalary.setValue("Зарплата рекрутера после закрытия вакансии \"<i>" +
-                            vacansyNameField.getValue() + "</i>\" составит " +
-                            textFieldRecrutierSalary.getValue() + " рублей.");
+                    labelRecrutierSalary.setValue(new StringBuilder("Зарплата рекрутера после закрытия вакансии \"<i>")
+                            .append(vacansyNameField.getValue())
+                            .append("</i>\" составит ")
+                            .append(textFieldRecrutierSalary.getValue())
+                            .append(" рублей.")
+                            .toString());
                 }
             }
         }
@@ -2314,8 +2308,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             if (event.getValue().getProjectIsClosed()) {
                 dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
                         .withContentMode(ContentMode.HTML)
-                        .withMessage("Вы пытаетесь открыть позицию по закрытому проекту.<br>" +
-                                "Открыть проект заново?")
+                        .withMessage("Вы пытаетесь открыть позицию по закрытому проекту.<br>Открыть проект заново?")
                         .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
                             event.getValue().setEndProjectDate(null);
                             event.getValue().setProjectIsClosed(false);
@@ -2608,9 +2601,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
 
             retPosName =
-                    (positionTypeField.getValue().getPositionRuName() != null ? positionTypeField.getValue().getPositionRuName() : "")
-                            + " \\ "
-                            + (positionTypeField.getValue().getPositionEnName() != null ? positionTypeField.getValue().getPositionEnName() : "");
+                    (new StringBuilder(positionTypeField.getValue().getPositionRuName() != null ? positionTypeField.getValue().getPositionRuName() : ""))
+                            .append(" \\ ")
+                            .append(positionTypeField.getValue().getPositionEnName() != null ? positionTypeField.getValue().getPositionEnName() : "")
+                            .toString();
         }
 
         return retPosName;
@@ -2625,8 +2619,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             message = "Открыть";
 
         dialogs.createOptionDialog()
-                .withMessage(message + " позицию \"" + vacansyNameField.getValue() + "\"?")
-                .withCaption("ВНИМАНИЕ!")
+                .withMessage(new StringBuilder(message)
+                        .append(" позицию \"")
+                        .append(vacansyNameField.getValue())
+                        .append("\"?")
+                        .toString())
+                .withCaption(messageBundle.getMessage("msgWarning"))
                 .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
 
                     if (this.openClosePositionCheckBox.getValue())
@@ -2670,25 +2668,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void changeCityListsLabel() {
-        String outStr = "";
-        String description = "";
+        StringBuilder outStr = new StringBuilder();
+        StringBuilder description = new StringBuilder();
 
         if (getEditedEntity().getCities() != null) {
             for (City s : getEditedEntity().getCities()) {
                 if (!outStr.equals("")) {
-                    outStr = outStr + ",";
-                    description = description + "\n";
+                    outStr.append(",");
+                    description.append("\n");
                 }
 
-                outStr = outStr + s.getCityRuName();
-                description = description + s.getCityRuName();
+                outStr.append(s.getCityRuName());
+                description.append(s.getCityRuName());
             }
 
         }
 
         if (!outStr.equals("")) {
-            citiesLabel.setValue(outStr);
-            citiesLabel.setDescription(description);
+            citiesLabel.setValue(outStr.toString());
+            citiesLabel.setDescription(description.toString());
         }
     }
 
@@ -2745,13 +2743,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (openPositionRichTextArea.getValue() != null) {
             List<SkillTree> skillTrees = pdfParserService
                     .parseSkillTree(Jsoup.parse(openPositionRichTextArea.getValue()).wholeText());
-//            String retStr = "";
             StringBuilder sb = new StringBuilder();
 
             for (SkillTree skillTree : skillTrees) {
                 if (skillTree.getSkillTree() != null) {
                     sb.insert(0, skillTree.getSkillName()).append(";");
-//                    retStr = skillTree.getSkillName() + ";" + retStr;
                 }
             }
 
@@ -2833,9 +2829,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         for (Grade grade : gradeDc.getItems()) {
             if (vacansyNameField.getValue() != null) {
                 if (vacansyNameField.getValue().startsWith(grade.getGradeName())) {
-                    vacansyNameField.setValue(event.getValue().getGradeName()
-                            + vacansyNameField.getValue()
-                            .substring(grade.getGradeName().length()));
+                    vacansyNameField.setValue(new StringBuilder(event.getValue().getGradeName())
+                            .append(vacansyNameField.getValue()
+                                    .substring(grade.getGradeName().length()))
+                            .toString());
                     flag = true;
                     break;
                 }
@@ -2851,7 +2848,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         if (!flag) {
-            vacansyNameField.setValue(event.getValue().getGradeName() + " " + vacansyNameField.getValue());
+            vacansyNameField.setValue(new StringBuilder(event.getValue().getGradeName())
+                    .append(" ")
+                    .append(vacansyNameField.getValue())
+                    .toString());
         }
     }
 
@@ -2876,16 +2876,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (gradeLookupPickerField.getValue() != null) {
             sb.append(gradeLookupPickerField.getValue().getGradeName())
                     .append(" ");
-//            retStr = gradeLookupPickerField.getValue().getGradeName() + " ";
         } else {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .withContentMode(ContentMode.HTML)
                     .withType(Notifications.NotificationType.HUMANIZED)
                     .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withDescription(messageBundle.getMessage("msgGenerateError")
-                            + ": "
-                            + messageBundle.getMessage("msgNotGrade"))
+                    .withDescription(new StringBuilder(messageBundle.getMessage("msgGenerateError"))
+                            .append(": ")
+                            .append(messageBundle.getMessage("msgNotGrade"))
+                            .toString())
                     .show();
         }
 
@@ -2893,18 +2893,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             sb.append(positionTypeField.getValue().getPositionRuName())
                     .append(" / ")
                     .append(positionTypeField.getValue().getPositionEnName());
-/*            retStr += positionTypeField.getValue().getPositionRuName()
-                    + " / "
-                    + positionTypeField.getValue().getPositionEnName(); */
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .withContentMode(ContentMode.HTML)
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
-                    .withDescription(messageBundle.getMessage("msgGenerateError")
-                            + ": "
-                            + messageBundle.getMessage("msgNotPositionName"))
+                    .withDescription(new StringBuilder(messageBundle.getMessage("msgGenerateError"))
+                            .append(": ")
+                            .append(messageBundle.getMessage("msgNotPositionName"))
+                            .toString())
                     .show();
 
             return "";
@@ -2913,16 +2911,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (projectNameField.getValue() != null) {
             sb.append(" (")
                     .append(projectNameField.getValue().getProjectName());
-//            retStr += " (" + projectNameField.getValue().getProjectName();
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withPosition(Notifications.Position.BOTTOM_RIGHT)
                     .withContentMode(ContentMode.HTML)
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
-                    .withDescription(messageBundle.getMessage("msgGenerateError")
-                            + ": "
-                            + messageBundle.getMessage("msgNotProjectName"))
+                    .withDescription(new StringBuilder(messageBundle.getMessage("msgGenerateError"))
+                            .append(": ")
+                            .append(messageBundle.getMessage("msgNotProjectName")).toString())
                     .show();
 
             return "";
@@ -2937,9 +2934,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .withContentMode(ContentMode.HTML)
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
-                    .withDescription(messageBundle.getMessage("msgGenerateError")
-                            + ": "
-                            + messageBundle.getMessage("msgNotCity"))
+                    .withDescription(new StringBuilder(messageBundle.getMessage("msgGenerateError"))
+                            .append(": ")
+                            .append(messageBundle.getMessage("msgNotCity"))
+                            .toString())
                     .show();
 
             return "";
@@ -2975,21 +2973,27 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withType(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
-                    .withDescription(messageBundle.getMessage("msgErrorNotCostForSalary")
-                            + " "
-                            + outstaffingCostTextField.getValue())
+                    .withDescription(new StringBuilder(messageBundle.getMessage("msgErrorNotCostForSalary"))
+                            .append(" ")
+                            .append(outstaffingCostTextField.getValue())
+                            .toString())
                     .show();
         }
 
         if (outstaffingRates != null) {
-            String commentSalary = messageBundle.getMessage("msgMarginalRate")
-                    + outstaffingCostTextField.getValue() + " \n"
-                    + messageBundle.getMessage("msgMinSalary")
-                    + outstaffingRates.getMinSalary() + " \n"
-                    + messageBundle.getMessage("msgMaxSalary")
-                    + outstaffingRates.getMaxSalary() + " \n"
-                    + messageBundle.getMessage("msgSalaryIE") + ": "
-                    + outstaffingRates.getMaxIESalary();
+            String commentSalary = new StringBuilder(messageBundle.getMessage("msgMarginalRate"))
+                    .append(outstaffingCostTextField.getValue())
+                    .append(" \n")
+                    .append(messageBundle.getMessage("msgMinSalary"))
+                    .append(outstaffingRates.getMinSalary())
+                    .append(" \n")
+                    .append(messageBundle.getMessage("msgMaxSalary"))
+                    .append(outstaffingRates.getMaxSalary())
+                    .append(" \n")
+                    .append(messageBundle.getMessage("msgSalaryIE"))
+                    .append(": ")
+                    .append(outstaffingRates.getMaxIESalary())
+                    .toString();
 
             openPositionFieldSalaryMin.setValue(outstaffingRates.getMinSalary());
             openPositionFieldSalaryMax.setValue(outstaffingRates.getMaxSalary());
@@ -2998,9 +3002,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             notifications.create(Notifications.NotificationType.SYSTEM)
                     .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withDescription(messageBundle.getMessage("msgSetSalaryToForm")
-                            + " "
-                            + commentSalary)
+                    .withDescription(new StringBuilder(messageBundle.getMessage("msgSetSalaryToForm"))
+                            .append(" ")
+                            .append(commentSalary)
+                            .toString())
                     .show();
 
         } else {

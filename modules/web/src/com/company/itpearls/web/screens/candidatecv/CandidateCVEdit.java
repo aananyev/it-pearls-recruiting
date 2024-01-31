@@ -478,11 +478,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             if (candidateCVRichTextArea.getValue() != null) {
                 StringBuffer newTextResume = new StringBuffer(candidateCVRichTextArea.getValue());
 
-                if (textResumeStringBuffer.compareTo(newTextResume) != 0) {
-                    getEditedEntity().setContactInfoChecked(false);
+                if (newTextResume != null) {
+                    if (textResumeStringBuffer.compareTo(newTextResume) != 0) {
+                        getEditedEntity().setContactInfoChecked(false);
 
-                    if (candidateCVRichTextArea.getValue() != null) {
-                        getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+                        if (candidateCVRichTextArea.getValue() != null) {
+                            getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+                        }
                     }
                 }
             } else {
@@ -631,7 +633,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             rescanResume();
         setColorHighlightingCompetencies();
     }
-
 
 
     private void setTemplateLetter() {

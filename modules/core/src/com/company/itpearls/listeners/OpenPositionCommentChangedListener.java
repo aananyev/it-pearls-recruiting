@@ -20,15 +20,8 @@ import javax.inject.Inject;
 
 @Component("itpearls_OpenPositionCommentChangedListener")
 public class OpenPositionCommentChangedListener {
-
-    @Inject
-    private TelegramService telegramService;
-    @Inject
-    private ApplicationSetupService applicationSetupService;
     @Inject
     private OpenPositionCommentService openPositionCommentService;
-    @Inject
-    private UserSessionSource userSessionSource;
     @Inject
     private TransactionalDataManager txDm;
     @Inject

@@ -73,7 +73,8 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
             e.printStackTrace();
         }
 
-        skillPic.setSource(UrlResource.class).setUrl(url);
+        if (url != null)
+            skillPic.setSource(UrlResource.class).setUrl(url);
     }
 
     private String getPicFromWiki() {

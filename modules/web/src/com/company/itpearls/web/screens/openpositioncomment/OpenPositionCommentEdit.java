@@ -1,12 +1,7 @@
 package com.company.itpearls.web.screens.openpositioncomment;
 
-import com.company.itpearls.UiNotificationEvent;
-import com.company.itpearls.core.ApplicationSetupService;
 import com.company.itpearls.core.StarsAndOtherService;
-import com.company.itpearls.core.TelegramBotService;
-import com.company.itpearls.core.TelegramService;
 import com.company.itpearls.entity.OpenPosition;
-import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -15,8 +10,6 @@ import com.haulmont.cuba.security.entity.User;
 
 import javax.inject.Inject;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @UiController("itpearls_OpenPositionComment.edit")
 @UiDescriptor("open-position-comment-edit.xml")
@@ -35,16 +28,6 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
     private PickerField<User> userField;
     @Inject
     private DateField<Date> dateCommentField;
-    @Inject
-    private Events events;
-    @Inject
-    private MessageBundle messageBundle;
-    @Inject
-    private TelegramService telegramService;
-    @Inject
-    private TelegramBotService telegramBotService;
-    @Inject
-    private ApplicationSetupService applicationSetupService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -71,13 +54,7 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
     }
 
     private void setRatingField() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
-        map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
-        map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
-        map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
-        map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
-        ratingField.setOptionsMap(map);
+        ratingField.setOptionsMap(starsAndOtherService.setStarMap());
 
         ratingField.addValueChangeListener(e -> {
             ratingLabel.setValue(String.valueOf(ratingField.getValue() != null ?
@@ -113,26 +90,5 @@ public class OpenPositionCommentEdit extends StandardEditor<OpenPositionComment>
 
             ratingLabel.setStyleName(rating_style);
         });
-    }
-
-    @Subscribe
-    public void onAfterCommitChanges(AfterCommitChangesEvent event) { /*
-        events.publish(new UiNotificationEvent(this,
-                messageBundle.getMessage("msgPublishOpenPositionComment")
-                        + ":"
-                        + getEditedEntity().getOpenPosition().getVacansyName()));
-
-        if (applicationSetupService.getTelegramBotStart() != null ? applicationSetupService.getTelegramBotStart() : false) {
-            telegramService.sendMessageToChat(telegramBotService.getApplicationSetup().getTelegramChatOpenPosition(),
-                    new StringBuilder("*")
-                            .append(messageBundle.getMessage("msgPublishOpenPositionComment"))
-                            .append(": ")
-                            .append(getEditedEntity().getOpenPosition().getVacansyName())
-                            .append("*\n")
-                            .append(getEditedEntity().getComment() != null ? getEditedEntity().getComment() : "")
-                            .append("\n")
-                            .append(getEditedEntity().getUser().getName())
-                            .toString());
-        }*/
     }
 }

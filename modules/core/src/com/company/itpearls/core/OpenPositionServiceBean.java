@@ -1,8 +1,6 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.*;
-import com.haulmont.bali.db.QueryRunner;
-import com.haulmont.bali.db.ResultSetHandler;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
@@ -13,8 +11,6 @@ import com.haulmont.cuba.security.entity.User;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @Service(OpenPositionService.NAME)
@@ -283,5 +279,31 @@ public class OpenPositionServiceBean implements OpenPositionService {
                         .append("\n\n")
                         .append(salarySB)
                         .toString());
+    }
+
+    @Override
+    public Map<String, Integer> setCommandExperienceMap() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("Нет требований", 0);
+        map.put("Без опыта", 1);
+        map.put("1 год", 2);
+        map.put("3 года", 3);
+        map.put("5 лет и более", 4);
+        map.put("Управление командой", 5);
+
+        return map;
+    }
+
+    @Override
+    public Map<String, Integer> setWorkExperienceMap() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("Нет требований", 0);
+        map.put("Без опыта", 1);
+        map.put("1 год", 2);
+        map.put("2 года", 3);
+        map.put("3 года", 4);
+        map.put("5 лет и более", 5);
+
+        return map;
     }
 }

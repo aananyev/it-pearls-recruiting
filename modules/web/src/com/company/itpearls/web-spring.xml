@@ -39,6 +39,8 @@
                 <entry key="itpearls_TextManipulationService"
                        value="com.company.itpearls.core.TextManipulationService"/>
                 <entry key="itpearls_TelegramBotService" value="com.company.itpearls.core.TelegramBotService"/>
+                <entry key="itpearls_InteractionListService" value="com.company.itpearls.core.InteractionListService"/>
+                <entry key="itpearls_StandartMapsService" value="com.company.itpearls.core.StandartMapsService"/>
             </map>
         </property>
     </bean>

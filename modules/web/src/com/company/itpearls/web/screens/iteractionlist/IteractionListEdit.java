@@ -76,8 +76,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private DateField<Date> dateIteractionField;
     @Inject
     private SubscribeDateService subscribeDateService;
-    @Inject
-    private TextField<BigDecimal> numberIteractionField;
+//    @Inject
+//    private TextField<BigDecimal> numberIteractionField;
     @Inject
     private Label<String> companyLabel;
     @Inject
@@ -152,6 +152,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> closingDateVacancyLabel;
     @Inject
     private InteractionService interactionService;
+    @Inject
+    private InteractionListService interactionListService;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -328,12 +330,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (!isClosedVacancy()) {
             BigDecimal a = new BigDecimal("0.0");
 
+            BigDecimal countIteraction = interactionListService.getCountIteraction(getEditedEntity());
             // проверка на наличие записей по этой вакансии
-            BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) from itpearls_IteractionList e where e.candidate = :candidate and e.vacancy = :vacancy",
+/*            BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) from itpearls_IteractionList e where e.candidate = :candidate and e.vacancy = :vacancy",
                             BigDecimal.class)
                     .parameter("candidate", getEditedEntity().getCandidate())
                     .parameter("vacancy", getEditedEntity().getVacancy())
-                    .one();
+                    .one(); */
 
             // есть
             // взаимодействия с кандидатом по этой позиции
@@ -443,8 +446,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     protected void setIteractionNumber() {
-        BigDecimal count = interactionService.getCountInteraction();
-        numberIteractionField.setValue(count.add(BigDecimal.ONE));
+//        BigDecimal count = interactionListService.getCountInteraction();
+//        numberIteractionField.setValue(count.add(BigDecimal.ONE));
     }
 
     protected void setCurrentDate() {
@@ -1393,28 +1396,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setRatingField() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(1))
-                .append(" Полный негатив")
-                .toString(), 0);
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(2))
-                .append(" Сомнительно")
-                .toString(), 1);
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(3))
-                .append(" Нейтрально")
-                .toString(), 2);
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(4))
-                .append(" Положительно")
-                .toString(), 3);
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(5))
-                .append(" Отлично!")
-                .toString(), 4);
-        ratingField.setOptionsMap(map);
+        ratingField.setOptionsMap(starsAndOtherService.setStarMap());
 
         ratingField.addValueChangeListener(e -> {
             ratingLabel.setValue(String.valueOf(ratingField.getValue() != null ?
@@ -1505,85 +1487,90 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setClosingDateLabel() {
-        if (vacancyFiels.getValue().getClosingDate() != null) {
-            Date current = new Date();
-            closingDateVacancyLabel.addStyleName("table-textwrap");
+        try {
+            if (vacancyFiels.getValue().getClosingDate() != null) {
+                Date current = new Date();
+                closingDateVacancyLabel.addStyleName("table-textwrap");
 
-            if (current.after(vacancyFiels.getValue().getClosingDate())) {
-                closingDateVacancyLabel.addStyleName("h4-red");
+                if (current.after(vacancyFiels.getValue().getClosingDate())) {
+                    closingDateVacancyLabel.addStyleName("h4-red");
 
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
-                closingDateVacancyLabel.setValue(new StringBuilder()
-                        .append(messageBundle.getMessage("msgClosingDate"))
-                        .append(": ")
-                        .append(sdf.format(vacancyFiels.getValue().getClosingDate()))
-                        .append(" ")
-                        .append(messageBundle.getMessage("msgOverdue"))
-                        .toString());
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+                    closingDateVacancyLabel.setValue(new StringBuilder()
+                            .append(messageBundle.getMessage("msgClosingDate"))
+                            .append(": ")
+                            .append(sdf.format(vacancyFiels.getValue().getClosingDate()))
+                            .append(" ")
+                            .append(messageBundle.getMessage("msgOverdue"))
+                            .toString());
+                } else {
+                    closingDateVacancyLabel.addStyleName("h4-green");
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+                    closingDateVacancyLabel.setValue(new StringBuilder()
+                            .append(messageBundle.getMessage("msgClosingDate"))
+                            .append(": ")
+                            .append(sdf.format(vacancyFiels.getValue().getClosingDate()))
+                            .toString());
+                }
+
+                closingDateVacancyLabel.setVisible(true);
             } else {
-                closingDateVacancyLabel.addStyleName("h4-green");
-
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
-                closingDateVacancyLabel.setValue(new StringBuilder()
-                        .append(messageBundle.getMessage("msgClosingDate"))
-                        .append(": ")
-                        .append(sdf.format(vacancyFiels.getValue().getClosingDate()))
-                        .toString());
+                closingDateVacancyLabel.setVisible(false);
             }
-
-
-            closingDateVacancyLabel.setVisible(true);
-        } else {
-            closingDateVacancyLabel.setVisible(false);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
+
 
     final String QUERY_STATUS_OF_VACANCY
             = "select v from itpearls_OpenPosition v where not (v.openClose = true) and v.positionType = :positionType";
 
     private void setStatusOfVacancyLabel(HasValue.ValueChangeEvent<OpenPosition> event) {
-        if (event.getValue() != null) {
-            if (event.getValue().getOpenClose()) {
-                statusOfVacansyLabel.setValue("ЗАКРЫТА");
-                statusOfVacansyLabel.setStyleName("h3-red");
+                if (event.getValue() != null) {
+                    if (event.getValue().getOpenClose()) {
+                        statusOfVacansyLabel.setValue("ЗАКРЫТА");
+                        statusOfVacansyLabel.setStyleName("h3-red");
 
 
-                List<OpenPosition> alternatives = dataManager
-                        .load(OpenPosition.class)
-                        .query(QUERY_STATUS_OF_VACANCY)
-                        .view("openPosition-view")
-                        .parameter("positionType", event.getValue().getPositionType())
-                        .list();
+                        List<OpenPosition> alternatives = dataManager
+                                .load(OpenPosition.class)
+                                .query(QUERY_STATUS_OF_VACANCY)
+                                .view("openPosition-view")
+                                .parameter("positionType", event.getValue().getPositionType())
+                                .list();
 
-                if (alternatives.size() > 0) {
-                    alternativeVacancyLinkButton.setVisible(true);
-                    alternativeVacancyLinkButton.addStyleName("transition-red");
+                        if (alternatives.size() > 0) {
+                            alternativeVacancyLinkButton.setVisible(true);
+                            alternativeVacancyLinkButton.addStyleName("transition-red");
 
 //                    String description = "<b>Альтернативные вакансии для кандидата:</b></br><ul>";
-                    StringBuilder descriptionSB = new StringBuilder("<b>Альтернативные вакансии для кандидата:</b></br><ul>");
-                    for (OpenPosition openPosition : alternatives) {
+                            StringBuilder descriptionSB = new StringBuilder("<b>Альтернативные вакансии для кандидата:</b></br><ul>");
+                            for (OpenPosition openPosition : alternatives) {
 //                        description += "<li>" + openPosition.getVacansyName();
-                        descriptionSB.append("<li>")
-                                .append(openPosition.getVacansyName());
-                    }
+                                descriptionSB.append("<li>")
+                                        .append(openPosition.getVacansyName());
+                            }
 
 //                    description += "</ul>";
-                    descriptionSB.append("</ul>");
+                            descriptionSB.append("</ul>");
 
-                    alternativeVacancyLinkButton.setDescription(descriptionSB.toString());
+                            alternativeVacancyLinkButton.setDescription(descriptionSB.toString());
+                        } else {
+                            alternativeVacancyLinkButton.setVisible(false);
+                        }
+                    } else {
+                        statusOfVacansyLabel.setValue("ОТКРЫТА");
+                        statusOfVacansyLabel.setStyleName("h3-green");
+
+                        alternativeVacancyLinkButton.setVisible(false);
+                    }
                 } else {
+                    statusOfVacansyLabel.setValue("");
                     alternativeVacancyLinkButton.setVisible(false);
                 }
-            } else {
-                statusOfVacansyLabel.setValue("ОТКРЫТА");
-                statusOfVacansyLabel.setStyleName("h3-green");
 
-                alternativeVacancyLinkButton.setVisible(false);
-            }
-        } else {
-            statusOfVacansyLabel.setValue("");
-            alternativeVacancyLinkButton.setVisible(false);
-        }
     }
 
     private void setPriorityMap() {

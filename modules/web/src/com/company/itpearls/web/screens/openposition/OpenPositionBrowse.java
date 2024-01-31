@@ -94,6 +94,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private ApplicationSetupService applicationSetupService;
     @Inject
     private TextManipulationService textManipulationService;
+    @Inject
+    private StandartMapsService standartMapsService;
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -220,13 +222,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private final static String QUERY_RECRUTIER_TASK
             = "select e from itpearls_RecrutiesTasks e where e.endDate > current_date and e.closed = false and e.openPosition = :openPosition";
 
-    public final static int PRIORITY_NONE = -2;
-    public final static int PRIORITY_DRAFT = -1;
-    public final static int PRIORITY_PAUSED = 0;
-    public final static int PRIORITY_LOW = 1;
-    public final static int PRIORITY_NORMAL = 2;
-    public final static int PRIORITY_HIGH = 3;
-    public final static int PRIORITY_CRITICAL = 4;
+//    public final static int PRIORITY_NONE = -2;
+//    public final static int PRIORITY_DRAFT = -1;
+//    public final static int PRIORITY_PAUSED = 0;
+//    public final static int PRIORITY_LOW = 1;
+//    public final static int PRIORITY_NORMAL = 2;
+//    public final static int PRIORITY_HIGH = 3;
+//    public final static int PRIORITY_CRITICAL = 4;
 
     private final static String parameter_subscriber = "subscriber";
     private final static String parameter_notsubscriber = "notsubscriber";
@@ -355,18 +357,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void initCheckBoxOnlyOpenedPosition() {
-        Map<String, Integer> onlyOpenedPositionMap = new LinkedHashMap<>();
-
-        onlyOpenedPositionMap.put("Все вакансии", 2);
-        onlyOpenedPositionMap.put("В подписке", 1);
-        onlyOpenedPositionMap.put("Не в подписке", 0);
-        onlyOpenedPositionMap.put("Свободные", 3);
-        onlyOpenedPositionMap.put("Открытые за 3 дня", 4);
-        onlyOpenedPositionMap.put("Открытые за неделю", 5);
-        onlyOpenedPositionMap.put("Открытые за месяц", 6);
-        onlyOpenedPositionMap.put("На паузе", 7);
-
-        subscribeRadioButtonGroup.setOptionsMap(onlyOpenedPositionMap);
+        subscribeRadioButtonGroup.setOptionsMap(standartMapsService.setOnlyOpenedPositionMap());
 
         subscribeRadioButtonGroup.addValueChangeListener(e -> {
             setOpenPositionBrowseFilter();
@@ -481,25 +472,25 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String icon = null;
 
         switch (priority) {
-            case PRIORITY_NONE:
+            case StdPriority.PRIORITY_NONE:
                 icon = CubaIcon.CANCEL.source();
                 break;
-            case PRIORITY_DRAFT:
+            case StdPriority.PRIORITY_DRAFT:
                 icon = icons_traffic_lights_gray_png;
                 break;
-            case PRIORITY_PAUSED: //"Paused"
+            case StdPriority.PRIORITY_PAUSED: //"Paused"
                 icon = icons_remove_png;
                 break;
-            case PRIORITY_LOW: //"Low"
+            case StdPriority.PRIORITY_LOW: //"Low"
                 icon = icons_traffic_lights_blue_png;
                 break;
-            case PRIORITY_NORMAL: //"Normal"
+            case StdPriority.PRIORITY_NORMAL: //"Normal"
                 icon = icons_traffic_lights_green_png;
                 break;
-            case PRIORITY_HIGH: //"High"
+            case StdPriority.PRIORITY_HIGH: //"High"
                 icon = icons_traffic_lights_yellow_png;
                 break;
-            case PRIORITY_CRITICAL: //"Critical"
+            case StdPriority.PRIORITY_CRITICAL: //"Critical"
                 icon = icons_traffic_lights_red_png;
                 break;
             default:
@@ -514,25 +505,25 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String icon = null;
 
         switch ((int) object) {
-            case PRIORITY_NONE:
+            case StdPriority.PRIORITY_NONE:
                 icon = CubaIcon.CANCEL.source();
                 break;
-            case PRIORITY_DRAFT:
+            case StdPriority.PRIORITY_DRAFT:
                 icon = icons_traffic_lights_gray_png;
                 break;
-            case PRIORITY_PAUSED: //"Paused"
+            case StdPriority.PRIORITY_PAUSED: //"Paused"
                 icon = icons_remove_png;
                 break;
-            case PRIORITY_LOW: //"Low"
+            case StdPriority.PRIORITY_LOW: //"Low"
                 icon = icons_traffic_lights_blue_png;
                 break;
-            case PRIORITY_NORMAL: //"Normal"
+            case StdPriority.PRIORITY_NORMAL: //"Normal"
                 icon = icons_traffic_lights_green_png;
                 break;
-            case PRIORITY_HIGH: //"High"
+            case StdPriority.PRIORITY_HIGH: //"High"
                 icon = icons_traffic_lights_yellow_png;
                 break;
-            case PRIORITY_CRITICAL: //"Critical"
+            case StdPriority.PRIORITY_CRITICAL: //"Critical"
                 icon = icons_traffic_lights_red_png;
                 break;
             default:
@@ -610,10 +601,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void initRemoteWorkMap() {
-        remoteWork.put(messageBundle.getMessage("msgUndefined"), -1);
-        remoteWork.put(messageBundle.getMessage("msgWorkInOffice"), 0);
-        remoteWork.put(messageBundle.getMessage("msgRemoteWork"), 1);
-        remoteWork.put(messageBundle.getMessage("msgHybridWork"), 2);
+        remoteWork = standartMapsService.setRemoteWorkMap();
     }
 
     @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
@@ -1280,7 +1268,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             entity.setOwner((ExtUser) userSession.getUser());
             entity.setLastOpenDate(new Date());
-            entity.setPriority(PRIORITY_NORMAL);
+            entity.setPriority(StdPriority.PRIORITY_NORMAL);
 
             if (entity.getParentOpenPosition() != null) {
                 if (entity.getParentOpenPosition().getOpenClose()) {
@@ -1620,17 +1608,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retField.setOptionIconProvider(g -> {
             switch (g.hashCode()) {
-                case PRIORITY_DRAFT:
+                case StdPriority.PRIORITY_DRAFT:
                     return icons_traffic_lights_gray_png;
-                case PRIORITY_PAUSED: //"Paused"
+                case StdPriority.PRIORITY_PAUSED: //"Paused"
                     return icons_remove_png;
-                case PRIORITY_LOW: //"Low"
+                case StdPriority.PRIORITY_LOW: //"Low"
                     return icons_traffic_lights_blue_png;
-                case PRIORITY_NORMAL: //"Normal"
+                case StdPriority.PRIORITY_NORMAL: //"Normal"
                     return icons_traffic_lights_green_png;
-                case PRIORITY_HIGH: //"High"
+                case StdPriority.PRIORITY_HIGH: //"High"
                     return icons_traffic_lights_yellow_png;
-                case PRIORITY_CRITICAL: //"Critical"
+                case StdPriority.PRIORITY_CRITICAL: //"Critical"
                     return icons_traffic_lights_red_png;
                 default:
                     return null;
@@ -1770,7 +1758,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         setStatusRemoteWork();
 
         if (!getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER)) {
-            notLowerRatingLookupField.setValue(PRIORITY_NORMAL);
+            notLowerRatingLookupField.setValue(StdPriority.PRIORITY_NORMAL);
         }
 
         setUrgentlyPositios(3);
@@ -1904,8 +1892,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         removeUrgentlyLists();
 
         if (notLowerRatingLookupField.getValue() != null) {
-            if (((int) notLowerRatingLookupField.getValue()) != PRIORITY_DRAFT) {
-                if (((int) notLowerRatingLookupField.getValue()) != PRIORITY_NONE) {
+            if (((int) notLowerRatingLookupField.getValue()) != StdPriority.PRIORITY_DRAFT) {
+                if (((int) notLowerRatingLookupField.getValue()) != StdPriority.PRIORITY_NONE) {
                     setUrgentlyPositios(notLowerRatingLookupField.getValue() == null ? 0 : (int) notLowerRatingLookupField.getValue());
                 } else {
                     openPositionsDl.removeParameter("rating");
@@ -2050,13 +2038,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setMapOfPriority() {
-        priorityMap.put("None", PRIORITY_NONE);
-        priorityMap.put("Draft", PRIORITY_DRAFT);
-        priorityMap.put("Paused", PRIORITY_PAUSED);
-        priorityMap.put("Low", PRIORITY_LOW);
-        priorityMap.put("Normal", PRIORITY_NORMAL);
-        priorityMap.put("High", PRIORITY_HIGH);
-        priorityMap.put("Critical", PRIORITY_CRITICAL);
+        priorityMap = standartMapsService.setPriorityMap();
     }
 
     private void setStatusNotLower() {
@@ -2170,25 +2152,25 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (priority != null) {
             switch (priority) {
-                case PRIORITY_NONE:
+                case StdPriority.PRIORITY_NONE:
                     icon = CubaIcon.MINUS.source();
                     break;
-                case PRIORITY_DRAFT:
+                case StdPriority.PRIORITY_DRAFT:
                     icon = "icons/traffic-lights_gray.png";
                     break;
-                case PRIORITY_PAUSED: //"Paused"
+                case StdPriority.PRIORITY_PAUSED: //"Paused"
                     icon = "icons/traffic-lights_gray.png";
                     break;
-                case PRIORITY_LOW: //"Low"
+                case StdPriority.PRIORITY_LOW: //"Low"
                     icon = "icons/traffic-lights_blue.png";
                     break;
-                case PRIORITY_NORMAL: //"Normal"
+                case StdPriority.PRIORITY_NORMAL: //"Normal"
                     icon = "icons/traffic-lights_green.png";
                     break;
-                case PRIORITY_HIGH: //"High"
+                case StdPriority.PRIORITY_HIGH: //"High"
                     icon = "icons/traffic-lights_yellow.png";
                     break;
-                case PRIORITY_CRITICAL: //"Critical"
+                case StdPriority.PRIORITY_CRITICAL: //"Critical"
                     icon = "icons/traffic-lights_red.png";
                     break;
             }
@@ -2696,13 +2678,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private void setWorkExperienceMap() {
-        mapWorkExperience.put("Нет требований", 0);
-        mapWorkExperience.put("Без опыта", 1);
-        mapWorkExperience.put("1 год", 2);
-        mapWorkExperience.put("2 года", 3);
-        mapWorkExperience.put("3 года", 4);
-        mapWorkExperience.put("4 года", 6);
-        mapWorkExperience.put("5 лет и более", 5);
+        mapWorkExperience = openPositionService.setWorkExperienceMap();
     }
 
     @Subscribe
@@ -2748,32 +2724,32 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 if (!positionIsClosed) {
                     if (columnGeneratorEvent.getItem().getPriority() != null) {
                         switch (columnGeneratorEvent.getItem().getPriority()) {
-                            case PRIORITY_DRAFT:
+                            case StdPriority.PRIORITY_DRAFT:
                                 retStr = "REFRESH_ACTION";
                                 descriptionRetLabel = messageBundle.getMessage("msgDraftPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-gray";
                                 break;
-                            case PRIORITY_PAUSED:
+                            case StdPriority.PRIORITY_PAUSED:
                                 retStr = "PAUSE_CIRCLE";
                                 descriptionRetLabel = messageBundle.getMessage("msgPausePriority");
                                 styleRetLabel = "open-position-pic-center-x-large-gray";
                                 break;
-                            case PRIORITY_LOW:
+                            case StdPriority.PRIORITY_LOW:
                                 retStr = "ARROW_CIRCLE_DOWN";
                                 descriptionRetLabel = messageBundle.getMessage("msgLowPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-blue";
                                 break;
-                            case PRIORITY_NORMAL:
+                            case StdPriority.PRIORITY_NORMAL:
                                 retStr = "LOOKUP_OK";
                                 descriptionRetLabel = messageBundle.getMessage("msgNormalPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-green";
                                 break;
-                            case PRIORITY_HIGH:
+                            case StdPriority.PRIORITY_HIGH:
                                 retStr = "ARROW_CIRCLE_UP";
                                 descriptionRetLabel = messageBundle.getMessage("msgHighPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-orange";
                                 break;
-                            case PRIORITY_CRITICAL:
+                            case StdPriority.PRIORITY_CRITICAL:
                                 retStr = "EXCLAMATION_CIRCLE";
                                 descriptionRetLabel = messageBundle.getMessage("msgCriticalPriority");
                                 styleRetLabel = "open-position-pic-center-x-large-red";
@@ -3554,17 +3530,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     e.setUser((ExtUser) userSession.getUser());
                 })
                 .withAfterCloseListener(e1 -> {
-                    OpenPosition selected = openPositionsTable.getSingleSelected();
-                    openPositionsDl.load();
-                    openPositionsTable.repaint();
-
-                    if (selected != null)
-                        openPositionsTable.setSelected(selected);
-
                     try {
+                        OpenPosition selected = openPositionsTable.getSingleSelected();
+                        openPositionsDl.load();
+                        openPositionsTable.repaint();
+
+                        if (selected != null)
+                            openPositionsTable.setSelected(selected);
+
                         if (selected != null)
                             openPositionsTable.scrollTo(selected);
-                    } catch (IllegalArgumentException e) {
+                    } catch (IllegalArgumentException | IllegalStateException e) {
                         e.printStackTrace();
                     }
                 })

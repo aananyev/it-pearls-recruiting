@@ -7,6 +7,7 @@ import com.haulmont.cuba.security.entity.User;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface OpenPositionService {
@@ -41,4 +42,8 @@ public interface OpenPositionService {
     String getOpenPositionOpenLongMessage(OpenPosition entity, User user);
 
     String getOpenPositionCloseLongMessage(OpenPosition entity, User user);
+
+    Map<String, Integer> setCommandExperienceMap();
+
+    Map<String, Integer> setWorkExperienceMap();
 }

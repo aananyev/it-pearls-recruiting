@@ -75,8 +75,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
-    private GetRoleService getRoleService;
-    @Inject
     private Button buttonExcel;
     @Inject
     private DataGrid<JobCandidate> jobCandidatesTable;
@@ -160,6 +158,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private WebBrowserTools webBrowserTools;
     @Inject
     private OpenPositionService openPositionService;
+    @Inject
+    private InteractionListService interactionListService;
 
     @Subscribe
     public void onInit1(InitEvent event) {
@@ -472,7 +472,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
             iteractionList.setRecrutierName(userSession.getUser().getName());
             iteractionList.setRecrutier((ExtUser) userSession.getUser());
-            iteractionList.setNumberIteraction(interactionService.getCountInteraction().add(BigDecimal.ONE));
+            iteractionList.setNumberIteraction(interactionListService.getCountInteraction().add(BigDecimal.ONE));
             iteractionList.setIteractionType(interactionType);
 
             dataManager.commit(iteractionList);
@@ -2283,28 +2283,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private void setRatingField() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(1))
-                .append(" Полный негатив")
-                .toString(), 0);
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(2))
-                .append(" Сомнительно")
-                .toString(), 1);
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(3))
-                .append(" Нейтрально")
-                .toString(), 2);
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(4))
-                .append(" Положительно")
-                .toString(), 3);
-        map.put(new StringBuilder()
-                .append(starsAndOtherService.setStars(5))
-                .append(" Отлично!")
-                .toString(), 4);
-        ratingFieldNotLower.setOptionsMap(map);
+        ratingFieldNotLower.setOptionsMap(starsAndOtherService.setStarMap());
 
         ratingFieldNotLower.addValueChangeListener(e -> {
             if (ratingFieldNotLower.getValue() != null) {

@@ -4,6 +4,7 @@ import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.PublishEntityChangedEvents;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -16,6 +17,7 @@ import java.util.Date;
 })
 @Entity(name = "itpearls_IteractionList")
 @NamePattern("%s|candidate")
+@PublishEntityChangedEvents
 public class IteractionList extends StandardEntity {
     private static final long serialVersionUID = -1889183300534377752L;
 

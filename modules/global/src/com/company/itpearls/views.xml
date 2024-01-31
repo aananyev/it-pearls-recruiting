@@ -80,6 +80,11 @@
         </property>
         <property name="positionList" view="_minimal"/>
         <property name="personPosition" view="_local"/>
+        <property name="candidateCv" view="_local">
+            <property name="toVacancy" view="_local">
+                <property name="positionType" view="_local"/>
+            </property>
+        </property>
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true"
           overwrite="true">
@@ -88,7 +93,9 @@
         <property name="candidateCv" view="_local">
             <property name="candidate" view="_minimal"/>
             <property name="resumePosition" view="_minimal"/>
-            <property name="toVacancy" view="_minimal"/>
+            <property name="toVacancy" view="_local">
+                <property name="positionType" view="_local"/>
+            </property>
             <property name="owner" view="_minimal"/>
             <property name="fileCV" view="_minimal"/>
             <property name="someFiles" view="_local">
@@ -109,6 +116,7 @@
         <property name="cityOfResidence" view="_local"/>
         <property name="iteractionList" view="_local">
             <property name="vacancy" view="_local">
+                <property name="positionType" view="_local"/>
                 <property name="owner" view="_local"/>
                 <property name="grade" view="_minimal"/>
                 <property name="projectName" view="_local">
@@ -315,7 +323,9 @@
         <property name="cityOfResidence" view="_minimal"/>
         <property name="iteractionList" view="_minimal">
             <property name="dateIteraction"/>
-            <property name="vacancy" view="_minimal"/>
+            <property name="vacancy" view="_minimal">
+                <property name="positionType" view="_local"/>
+            </property>
             <property name="iteractionType" view="_minimal"/>
             <property name="recrutier" view="_minimal"/>
             <property name="recrutierName"/>
@@ -382,9 +392,10 @@
     <view entity="itpearls_JobCandidate" name="jobCandidate-view-iteraction-list" extends="_minimal">
         <property name="candidateCv" view="_local"/>
         <property name="fullName"/>
-        <property name="iteractionList" view="_minimal">
-            <property name="vacancy" view="_minimal">
-                <property name="projectName" view="_minimal"/>
+        <property name="iteractionList" view="_local">
+            <property name="vacancy" view="_local">
+                <property name="projectName" view="_local"/>
+                <property name="positionType" view="_local"/>
             </property>
         </property>
     </view>

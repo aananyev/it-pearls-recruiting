@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.internalemailer;
 
+import com.company.itpearls.core.InteractionListService;
 import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.core.StrSimpleService;
@@ -97,6 +98,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private InteractionService interactionService;
     @Inject
     private OpenPositionService openPositionService;
+    @Inject
+    private InteractionListService interactionListService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -723,7 +726,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
             iteractionList.setRecrutierName(userSession.getUser().getName());
             iteractionList.setRecrutier((ExtUser) userSession.getUser());
-            iteractionList.setNumberIteraction(interactionService.getCountInteraction().add(BigDecimal.ONE));
+            iteractionList.setNumberIteraction(interactionListService.getCountInteraction().add(BigDecimal.ONE));
             iteractionList.setIteractionType(interactionType);
 
             dataManager.commit(iteractionList);

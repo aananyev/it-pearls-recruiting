@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.hrmasters.skillsfilterjobcandidate;
 
+import com.company.itpearls.core.InteractionListService;
 import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.core.PdfParserService;
@@ -191,6 +192,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private OpenPositionService openPositionService;
     @Inject
     private InteractionService interactionService;
+    @Inject
+    private InteractionListService interactionListService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -1579,7 +1582,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
             iteractionList.setRecrutierName(userSession.getUser().getName());
             iteractionList.setRecrutier((ExtUser) userSession.getUser());
-            iteractionList.setNumberIteraction(interactionService.getCountInteraction().add(BigDecimal.ONE));
+            iteractionList.setNumberIteraction(interactionListService.getCountInteraction().add(BigDecimal.ONE));
             iteractionList.setIteractionType(interactionType);
 
             dataManager.commit(iteractionList);
